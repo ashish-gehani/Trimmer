@@ -8,6 +8,7 @@ Email: hsharif3@illinois.edu
 
 #include "llvm/Pass.h"
 #include "llvm/IR/Function.h"
+#include "llvm/Transforms/Utils/BasicBlockUtils.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Analysis/CallGraph.h"
 #include "llvm/IR/Instruction.h"	
@@ -31,6 +32,13 @@ Email: hsharif3@illinois.edu
 using namespace llvm;
 using namespace std;
 
+struct FileNode{
+
+	string fileName;
+	int fileSize;
+	int filePosition;
+	GlobalVariable * globalString;
+};
 
 struct FileIOPass : public ModulePass {
 
@@ -39,7 +47,8 @@ struct FileIOPass : public ModulePass {
 
     FileIOPass() : ModulePass(ID) { }
 		
-    map<Instruction*, GlobalVariable*> dataMappings;
+    map<Instruction*, FileNode*> dataMappings;
+    map<Instruction*, Instruction*> replaceInstructions;
 
 
     bool getConstantStringInfo(const Value *V, StringRef &Str) {
@@ -141,8 +150,15 @@ struct FileIOPass : public ModulePass {
 				GlobalVariable * globalString = new GlobalVariable(M, stringConstant->getType(), true, GlobalValue::ExternalLinkage,
                         stringConstant, "");
 
+				// Initializing a FileNode for the file open instance
+				FileNode * fileNode = new FileNode();
+				fileNode->fileName = fileName;
+				fileNode->fileSize = fileContents.length();
+				fileNode->filePosition = 0;
+				fileNode->globalString = globalString;
+
 				errs()<<"global String "<<*globalString<<"\n";
-				dataMappings[callInst] = globalString;
+				dataMappings[callInst] = fileNode;
 
 			}
 			else{
@@ -155,7 +171,7 @@ struct FileIOPass : public ModulePass {
 
 
 
-    void resolveReadCalls(CallInst * callInst){
+    void resolveReadCalls(CallInst * callInst, Module & M){
 
 		Function * f = callInst->getCalledFunction();
 		string functionName = f->getName().str();
@@ -166,20 +182,109 @@ struct FileIOPass : public ModulePass {
 			errs()<<"fd "<<*fd <<"\n";
 			Instruction * openInst = dyn_cast<Instruction>(&*fd);
 
+			GlobalVariable * globalString;
+			FileNode * fileNode;
+
 			if(dataMappings.find(openInst) != dataMappings.end()){
 
-				GlobalVariable * gv = dataMappings[openInst];
-				errs()<<*gv<<"\n";
+				fileNode = dataMappings[openInst];
+				globalString = fileNode -> globalString;
+				errs()<< *globalString <<"\n";
 			}
 			else{
-				cout<<"open call not found \n";
+				errs()<<"open call not found \n";
+				return;
 			}
+
+			Value * destBuffer = callInst->getOperand(1);
+			Value * byteCount = callInst->getOperand(2);
+			errs()<<*destBuffer->getType()<<"\n";
+
+			if(ConstantInt * constInst = dyn_cast<ConstantInt>(&*byteCount)){
+				errs()<<"constant Int "<< constInst->getZExtValue() <<"\n";
+			}
+
+			vector<Type*> argumentTypes;
+			argumentTypes.push_back(Type::getInt8PtrTy(M.getContext()));
+			argumentTypes.push_back(Type::getInt8PtrTy(M.getContext()));
+			argumentTypes.push_back(Type::getInt64Ty(M.getContext()));
+
+			FunctionType *FT = FunctionType::get(Type::getVoidTy(M.getContext()), argumentTypes, false);
+			Function * llvmMemcpy = Function::Create(FT, GlobalValue::ExternalLinkage,
+			"llvm.memcpy", &M);
+
+			IntegerType * intTy = IntegerType::get(M.getContext(), 64);
+			ConstantInt * index1 = ConstantInt::get(intTy, 0);
+			ConstantInt * index2 = ConstantInt::get(intTy, fileNode->filePosition);
+
+			vector<Value *> indxList;
+			indxList.push_back(index1);
+			indxList.push_back(index2);
+
+			GetElementPtrInst * stringPtr = GetElementPtrInst::Create(globalString, indxList, Twine(""), callInst);
+
+			//Instruction * nextInst = stringPtr->getNextNode();
+			std::vector<Value*> functionArgs;
+			functionArgs.push_back(stringPtr);
+			functionArgs.push_back(destBuffer);
+			functionArgs.push_back(byteCount);
+
+			CallInst * retVal = CallInst::Create((Value*) llvmMemcpy, ArrayRef<Value*>(functionArgs), Twine(""), callInst);
+			errs()<<" CALL INST "<<*retVal<<"\n";
+
+			AllocaInst * allocaOperand = new AllocaInst(intTy, Twine(""), callInst);
+			StoreInst * storeOperand = new StoreInst(index1, allocaOperand, callInst);
+			errs()<<""<<*allocaOperand <<"\n";
+			errs()<<""<<*storeOperand <<"\n";
+
+			LoadInst * loadInst = new LoadInst(allocaOperand, Twine(""), false, callInst);
+
+			errs()<<""<< *loadInst<<"\n";
+			errs()<<"type"<<*loadInst->getType()<<"\n";
+			errs()<<"type"<<*callInst<<"\n";
+
+			replaceInstructions[callInst] = loadInst;
+
+	//		ReplaceInstWithInst(dyn_cast<Instruction>(&*callInst), loadInst);
+
+		//	errs()<<*loadInst;
+
+
+			//prunedInstructions.push_back(callInst);
+			//callInst->removeFromParent();
+
+			/*Function * llvmMemcpy = M.getFunction(StringRef("open"));
+			if(llvmMemcpy != NULL){
+				errs()<<"we have llvm memcpy \n";
+			}*/
+
+			//FIXIT: Use getModule for Function, Inst etc
+			//Function* realFunction = Function::Create(ft, GlobalValue::ExternalLinkage, "memcpy" , &M);
+
+			/*std::vector<Value*> functionArgs;
+
+			for (Function::arg_iterator arg = F->arg_begin(), endArg = F->arg_end(); arg != endArg; ++arg) {
+				 functionArgs.push_back(arg);-
+			}
+
+			CallInst * retVal = CallInst::Create((Value*) realFunction, ArrayRef<Value*>(functionArgs), Twine(""), entryBlock);
+	*/
 
 			/*Value * fileNameOperands = callInst->getOperand(0);
 			if(ConstantDataArray * constArray = dyn_cast<ConstantDataArray>(&*fileNameOperand)){
 				cout<<"the file name is a constant \n";
 			}*/
 		}
+
+    }
+
+
+    void replaceReadCalls(){
+
+    	for (auto & e : replaceInstructions){
+
+    		ReplaceInstWithInst(e.first, e.second);
+    	}
 
     }
 
@@ -192,14 +297,22 @@ struct FileIOPass : public ModulePass {
 
 			 	   	for(inst_iterator inst = inst_begin(F), e = inst_end(F); inst != e; ++inst) {
 
+			 	   		errs()<<"instruction iteration \n";
+
 			 	   		if(CallInst * callInst = dyn_cast<CallInst>(&*inst)){
 
+			 	   			errs()<<"call casted \n";
 			 	   			resolveOpenCalls(callInst, M);
-			 	   			resolveReadCalls(callInst);
+			 	   			resolveReadCalls(callInst, M);
+
+			 	   			errs()<<"call Resolution \n";
 			 	   		}
 
 			 	   	}
 		}
+
+		replaceReadCalls();
+
 
 		return true;
 
