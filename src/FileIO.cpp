@@ -32,6 +32,18 @@ Email: hsharif3@illinois.edu
 using namespace llvm;
 using namespace std;
 
+
+#define debugPrint 1
+
+
+/* author : Hashim Sharif
+ * FIXIT: replace memcpy with llvm memcpy. test if llvm understands intrinsic
+ * FIXIT: Add debug printing with macros
+ * FIXIT: Add test cases to git
+ * FIXIT: Fix environment dependency on opt-3.6. set aliases in a script
+ */
+
+
 struct FileNode{
 
 	string fileName;
@@ -118,10 +130,13 @@ struct FileIOPass : public ModulePass {
     }
 
 
+
+
     void resolveOpenCalls(CallInst * callInst, Module & M){
 
 		Function * f = callInst->getCalledFunction();
 		string functionName = f->getName().str();
+
 
 		if(functionName == "open"){
 
@@ -145,6 +160,7 @@ struct FileIOPass : public ModulePass {
 				stringstream strStream;
 				strStream << inFile.rdbuf();//read the file
 				string fileContents = strStream.str();//str holds the content of the file
+				errs()<<"fileContents "<<strStream.str();
 
 				Constant * stringConstant = ConstantDataArray::getString(M.getContext(), StringRef(fileContents), true);
 				GlobalVariable * globalString = new GlobalVariable(M, stringConstant->getType(), true, GlobalValue::ExternalLinkage,
@@ -210,12 +226,13 @@ struct FileIOPass : public ModulePass {
 			argumentTypes.push_back(Type::getInt64Ty(M.getContext()));
 
 			FunctionType *FT = FunctionType::get(Type::getVoidTy(M.getContext()), argumentTypes, false);
-			Function * llvmMemcpy = Function::Create(FT, GlobalValue::ExternalLinkage,
-			"llvm.memcpy", &M);
+			// FIXIT: need to use llvm memcpy intrinsic
+			Function * llvmMemcpy = Function::Create(FT, GlobalValue::ExternalLinkage, "memcpy", &M);
 
 			IntegerType * intTy = IntegerType::get(M.getContext(), 64);
 			ConstantInt * index1 = ConstantInt::get(intTy, 0);
 			ConstantInt * index2 = ConstantInt::get(intTy, fileNode->filePosition);
+
 
 			vector<Value *> indxList;
 			indxList.push_back(index1);
@@ -223,17 +240,17 @@ struct FileIOPass : public ModulePass {
 
 			GetElementPtrInst * stringPtr = GetElementPtrInst::Create(globalString, indxList, Twine(""), callInst);
 
-			//Instruction * nextInst = stringPtr->getNextNode();
 			std::vector<Value*> functionArgs;
-			functionArgs.push_back(stringPtr);
 			functionArgs.push_back(destBuffer);
+			functionArgs.push_back(stringPtr);
 			functionArgs.push_back(byteCount);
 
 			CallInst * retVal = CallInst::Create((Value*) llvmMemcpy, ArrayRef<Value*>(functionArgs), Twine(""), callInst);
 			errs()<<" CALL INST "<<*retVal<<"\n";
 
 			AllocaInst * allocaOperand = new AllocaInst(intTy, Twine(""), callInst);
-			StoreInst * storeOperand = new StoreInst(index1, allocaOperand, callInst);
+			//ConstantInt * returnCount = ConstantInt::get(intTy, byteCount);
+			StoreInst * storeOperand = new StoreInst(byteCount, allocaOperand, callInst);
 			errs()<<""<<*allocaOperand <<"\n";
 			errs()<<""<<*storeOperand <<"\n";
 
@@ -245,10 +262,9 @@ struct FileIOPass : public ModulePass {
 
 			replaceInstructions[callInst] = loadInst;
 
-	//		ReplaceInstWithInst(dyn_cast<Instruction>(&*callInst), loadInst);
 
-		//	errs()<<*loadInst;
-
+		   //	ReplaceInstWithInst(dyn_cast<Instruction>(&*callInst), loadInst);
+		   //	errs()<<*loadInst;
 
 			//prunedInstructions.push_back(callInst);
 			//callInst->removeFromParent();
@@ -282,29 +298,30 @@ struct FileIOPass : public ModulePass {
     void replaceReadCalls(){
 
     	for (auto & e : replaceInstructions){
-
     		ReplaceInstWithInst(e.first, e.second);
     	}
 
     }
 
 
-	virtual bool runOnModule(Module & M) {
 
+	virtual bool runOnModule(Module & M) {
 
 		// Find all bitcast instructions within stores, calls etc. These must be bitcasting from globals to type*
 		for (Module::iterator F = M.begin(), Fend = M.end(); F != Fend; ++F) {
 
-			 	   	for(inst_iterator inst = inst_begin(F), e = inst_end(F); inst != e; ++inst) {
+			 	   	for(inst_iterator inst = inst_begin(F), e = inst_end(F); inst != e;) {
 
-			 	   		errs()<<"instruction iteration \n";
+			 	   		Instruction * I = &(*inst++);
+			 	   		if(debugPrint == 1){
+			 	   			errs()<<*I<<"\n";
+			 	   		}
 
-			 	   		if(CallInst * callInst = dyn_cast<CallInst>(&*inst)){
+			 	   		if(CallInst * callInst = dyn_cast<CallInst>(&*I)){
 
 			 	   			errs()<<"call casted \n";
 			 	   			resolveOpenCalls(callInst, M);
 			 	   			resolveReadCalls(callInst, M);
-
 			 	   			errs()<<"call Resolution \n";
 			 	   		}
 
@@ -312,8 +329,6 @@ struct FileIOPass : public ModulePass {
 		}
 
 		replaceReadCalls();
-
-
 		return true;
 
     }
