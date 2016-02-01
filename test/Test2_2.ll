@@ -1,4 +1,4 @@
-; ModuleID = 'FileIO_test2.bc'
+; ModuleID = 'Test2_2.bc'
 target datalayout = "e-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-pc-linux-gnu"
 
@@ -17,7 +17,7 @@ define i32 @main(i32 %argc, i8** %argv) #0 {
 
 ; <label>:3                                       ; preds = %0
   call void @perror(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str1, i32 0, i32 0))
-  br label %13
+  br label %20
 
 ; <label>:4                                       ; preds = %0
   %5 = bitcast [15 x i8]* %buffer to i8*
@@ -29,10 +29,19 @@ define i32 @main(i32 %argc, i8** %argv) #0 {
   %9 = getelementptr inbounds [15 x i8], [15 x i8]* %buffer, i32 0, i32 0
   %10 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([18 x i8], [18 x i8]* @.str2, i32 0, i32 0), i8* %9)
   %11 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([20 x i8], [20 x i8]* @.str3, i32 0, i32 0), i64 %8)
-  %12 = call i32 @close(i32 %1)
-  br label %13
+  %12 = bitcast [15 x i8]* %buffer to i8*
+  %13 = getelementptr [85 x i8], [85 x i8]* @0, i64 0, i64 0
+  call void @memcpy(i8* %12, i8* %13, i64 10)
+  %14 = alloca i64
+  store i64 10, i64* %14
+  %15 = load i64, i64* %14
+  %16 = getelementptr inbounds [15 x i8], [15 x i8]* %buffer, i32 0, i32 0
+  %17 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([18 x i8], [18 x i8]* @.str2, i32 0, i32 0), i8* %16)
+  %18 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([20 x i8], [20 x i8]* @.str3, i32 0, i32 0), i64 %15)
+  %19 = call i32 @close(i32 %1)
+  br label %20
 
-; <label>:13                                      ; preds = %4, %3
+; <label>:20                                      ; preds = %4, %3
   %.0 = phi i32 [ 2, %3 ], [ 0, %4 ]
   ret i32 %.0
 }

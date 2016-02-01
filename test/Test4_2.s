@@ -1,5 +1,5 @@
 	.text
-	.file	"test/FileIO_test2.bc"
+	.file	"test/Test4_2.bc"
 	.globl	main
 	.align	16, 0x90
 	.type	main,@function
@@ -35,6 +35,25 @@ main:                                   # @main
 # BB#2:
 	leaq	-39(%rbp), %r15
 	movl	$__unnamed_1, %esi
+	movl	$10, %edx
+	movq	%r15, %rdi
+	callq	memcpy
+	movq	%rsp, %rax
+	leaq	-16(%rax), %rsp
+	movq	$10, -16(%rax)
+	movl	$.L.str2, %edi
+	xorl	%eax, %eax
+	movq	%r15, %rsi
+	callq	printf
+	movl	$.L.str3, %edi
+	movl	$10, %esi
+	xorl	%eax, %eax
+	callq	printf
+	movl	$10, %esi
+	movl	$1, %edx
+	movl	%ebx, %edi
+	callq	lseek
+	movl	$__unnamed_1+20, %esi
 	movl	$10, %edx
 	movq	%r15, %rdi
 	callq	memcpy

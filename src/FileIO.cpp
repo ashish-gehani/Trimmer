@@ -4,6 +4,18 @@
 Author: Hashim Sharif
 Email: hsharif3@illinois.edu
 
+
+TODO:
+- Add test for the case where a non static index has been used to index the file - DONE
+- Must preserve the file handler for some cases - DONE - already done
+- Test on a number of examples - Look for Chris smowton has in his paper
+- lseek - DONE
+- add an lseek call for each read call to keep the file pointer up to date for non static index reads 
+
+
+TODO V2:
+- add an lseek call for each read call to keep the file pointer up to date for non static index reads 	
+
 */
 
 #include "llvm/Pass.h"
@@ -49,12 +61,14 @@ struct FileNode{
 	string fileName;
 	int fileSize;
 	int filePosition;
+	bool staticIndices;
 	GlobalVariable * globalString;
 };
 
 struct FileIOPass : public ModulePass {
 
 	static char ID;
+	bool hasMemCpyRoutine;
 	//Module module;
 
     FileIOPass() : ModulePass(ID) { }
@@ -171,6 +185,7 @@ struct FileIOPass : public ModulePass {
 				fileNode->fileName = fileName;
 				fileNode->fileSize = fileContents.length();
 				fileNode->filePosition = 0;
+				fileNode->staticIndices = true; // Initially the file is "specializable"
 				fileNode->globalString = globalString;
 
 				errs()<<"global String "<<*globalString<<"\n";
@@ -212,12 +227,26 @@ struct FileIOPass : public ModulePass {
 				return;
 			}
 
+
+			/* If a non constant index has been used to read from the file the reads are no longer "specializable"  */
+			if(fileNode->staticIndices == false){
+				return;
+			}
+
 			Value * destBuffer = callInst->getOperand(1);
 			Value * byteCount = callInst->getOperand(2);
 			errs()<<*destBuffer->getType()<<"\n";
+			int intByteCount = 0;	
 
 			if(ConstantInt * constInst = dyn_cast<ConstantInt>(&*byteCount)){
 				errs()<<"constant Int "<< constInst->getZExtValue() <<"\n";
+				intByteCount = constInst->getZExtValue();
+			}
+			else{     /* A non constant index returns the reads not "specializable"  */
+
+				/*FIXIT: Add a lseek call to set the file position pointer of the file descriptor to its correct value */			
+				fileNode->staticIndices = false;
+				return;
 			}
 
 			vector<Type*> argumentTypes;
@@ -227,11 +256,22 @@ struct FileIOPass : public ModulePass {
 
 			FunctionType *FT = FunctionType::get(Type::getVoidTy(M.getContext()), argumentTypes, false);
 			// FIXIT: need to use llvm memcpy intrinsic
-			Function * llvmMemcpy = Function::Create(FT, GlobalValue::ExternalLinkage, "memcpy", &M);
+
+			/* FIXIT: Variable not required. getFunction and a check on NULL should have sufficed */
+			Function * llvmMemcpy;
+			if(!hasMemCpyRoutine){
+				llvmMemcpy = Function::Create(FT, GlobalValue::ExternalLinkage, "memcpy", &M);
+				hasMemCpyRoutine = true;
+			}
+			else{
+				llvmMemcpy = M.getFunction(StringRef("memcpy"));
+			}
 
 			IntegerType * intTy = IntegerType::get(M.getContext(), 64);
 			ConstantInt * index1 = ConstantInt::get(intTy, 0);
 			ConstantInt * index2 = ConstantInt::get(intTy, fileNode->filePosition);
+
+			fileNode->filePosition += intByteCount;
 
 
 			vector<Value *> indxList;
@@ -261,38 +301,84 @@ struct FileIOPass : public ModulePass {
 			errs()<<"type"<<*callInst<<"\n";
 
 			replaceInstructions[callInst] = loadInst;
-
-
-		   //	ReplaceInstWithInst(dyn_cast<Instruction>(&*callInst), loadInst);
-		   //	errs()<<*loadInst;
-
-			//prunedInstructions.push_back(callInst);
-			//callInst->removeFromParent();
-
-			/*Function * llvmMemcpy = M.getFunction(StringRef("open"));
-			if(llvmMemcpy != NULL){
-				errs()<<"we have llvm memcpy \n";
-			}*/
-
-			//FIXIT: Use getModule for Function, Inst etc
-			//Function* realFunction = Function::Create(ft, GlobalValue::ExternalLinkage, "memcpy" , &M);
-
-			/*std::vector<Value*> functionArgs;
-
-			for (Function::arg_iterator arg = F->arg_begin(), endArg = F->arg_end(); arg != endArg; ++arg) {
-				 functionArgs.push_back(arg);-
-			}
-
-			CallInst * retVal = CallInst::Create((Value*) realFunction, ArrayRef<Value*>(functionArgs), Twine(""), entryBlock);
-	*/
-
-			/*Value * fileNameOperands = callInst->getOperand(0);
-			if(ConstantDataArray * constArray = dyn_cast<ConstantDataArray>(&*fileNameOperand)){
-				cout<<"the file name is a constant \n";
-			}*/
+		  
 		}
 
     }
+
+
+
+	void resolveSeekCalls(CallInst * callInst, Module & M){
+
+
+		Function * f = callInst->getCalledFunction();
+		string functionName = f->getName().str();
+
+		if(functionName == "lseek"){
+
+			Value * fd = callInst->getOperand(0);
+			errs()<<"fd (seek call) "<<*fd <<"\n";
+			Instruction * openInst = dyn_cast<Instruction>(&*fd);
+
+			FileNode * fileNode;
+			if(dataMappings.find(openInst) != dataMappings.end()){
+
+				fileNode = dataMappings[openInst];
+			}
+			else{
+
+				errs()<<"open call not corresponding to descriptor used in seek call \n";
+				return;
+			}
+
+			Value * offset = callInst->getOperand(1);
+			Value * whence = callInst->getOperand(2);
+			int intByteOffset = 0;	
+
+			if(ConstantInt * constInst = dyn_cast<ConstantInt>(&*offset)){
+
+				errs()<<"constant OFFSET "<< constInst->getZExtValue() <<"\n";
+				intByteOffset = constInst->getZExtValue();
+				errs()<<"******* OFFSET ******* "<<intByteOffset;
+			}
+			else{     /* A non constant index returns the reads not "specializable"  */
+
+				/*FIXIT: Add a lseek call to set the file position pointer of the file descriptor to its correct value */
+				fileNode->staticIndices = false;
+				return;
+			}
+
+
+			int intWhence;
+			if(ConstantInt * constInst = dyn_cast<ConstantInt>(&*whence)){
+
+				errs()<<"******** WHENCE ***********"<< constInst->getZExtValue() <<"\n";
+				intWhence = constInst->getZExtValue();
+			}
+			else{     /* A non constant index returns the reads not "specializable"  */
+
+				errs()<<"UNSUPPORTED Value for whence \n";
+				abort();
+				return;
+			}
+
+
+			switch(intWhence){
+			
+				case SEEK_SET: fileNode->filePosition = intByteOffset; fileNode->staticIndices = true; break;
+
+				case SEEK_CUR: fileNode->filePosition += intByteOffset; break;
+
+				case SEEK_END: fileNode->filePosition = fileNode->fileSize + intByteOffset; break; 
+			}
+
+
+		  
+		}
+
+    }
+
+
 
 
     void replaceReadCalls(){
@@ -304,8 +390,18 @@ struct FileIOPass : public ModulePass {
     }
 
 
+    /* Initialization routine */
+    void initialization(){
+    	hasMemCpyRoutine = false;
+
+    }
+
+
+
 
 	virtual bool runOnModule(Module & M) {
+
+		initialization();
 
 		// Find all bitcast instructions within stores, calls etc. These must be bitcasting from globals to type*
 		for (Module::iterator F = M.begin(), Fend = M.end(); F != Fend; ++F) {
@@ -322,6 +418,7 @@ struct FileIOPass : public ModulePass {
 			 	   			errs()<<"call casted \n";
 			 	   			resolveOpenCalls(callInst, M);
 			 	   			resolveReadCalls(callInst, M);
+			 	   			resolveSeekCalls(callInst, M);
 			 	   			errs()<<"call Resolution \n";
 			 	   		}
 
@@ -358,3 +455,34 @@ static RegisterPass<FileIOPass> X("file", "Specialising FILE System operations",
      }
      return true;
    */
+
+
+
+
+ //	ReplaceInstWithInst(dyn_cast<Instruction>(&*callInst), loadInst);
+		   //	errs()<<*loadInst;
+
+			//prunedInstructions.push_back(callInst);
+			//callInst->removeFromParent();
+
+			/*Function * llvmMemcpy = M.getFunction(StringRef("open"));
+			if(llvmMemcpy != NULL){
+				errs()<<"we have llvm memcpy \n";
+			}*/
+
+			//FIXIT: Use getModule for Function, Inst etc
+			//Function* realFunction = Function::Create(ft, GlobalValue::ExternalLinkage, "memcpy" , &M);
+
+			/*std::vector<Value*> functionArgs;
+
+			for (Function::arg_iterator arg = F->arg_begin(), endArg = F->arg_end(); arg != endArg; ++arg) {
+				 functionArgs.push_back(arg);-
+			}
+
+			CallInst * retVal = CallInst::Create((Value*) realFunction, ArrayRef<Value*>(functionArgs), Twine(""), entryBlock);
+	*/
+
+			/*Value * fileNameOperands = callInst->getOperand(0);
+			if(ConstantDataArray * constArray = dyn_cast<ConstantDataArray>(&*fileNameOperand)){
+				cout<<"the file name is a constant \n";
+			}*/
