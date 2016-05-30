@@ -22,6 +22,7 @@
  * FIXIT: Fix environment dependency on opt-3.6. set aliases in a script
  * FIXIT: Check and fix seek calls
  * FIXIT: llvm.memcpy does not return a value. need to replace lhs
+ * FIXIT: The "source" array to hold the file contents is static allocation
 
 */
 
@@ -140,7 +141,6 @@ struct FileIOPass : public ModulePass {
     return true;
   }
 
-
   char source[500000000];
 
   void resolveOpenCalls(CallInst * callInst, Module & M){
@@ -162,10 +162,7 @@ struct FileIOPass : public ModulePass {
 
 	StringRef fileNameStr;
 	getConstantStringInfo(fileNameOperand, fileNameStr);
-
 	string fileName = fileNameStr.str();
-	//ifstream inFile;
-	//inFile.open(fileName);//open the input file
 
 	int i = 0;
 	FILE *fp = fopen(fileName.c_str(), "r");
@@ -181,10 +178,6 @@ struct FileIOPass : public ModulePass {
 	    source[i] = '\0';
 	    fclose(fp);
 	}
-
-	//strStream << inFile.rdbuf();//read the file
-	//string fileContents = strStream.str();//str holds the content of the file
-			
 
       	Constant * stringConstant = ConstantDataArray::getString(M.getContext(), StringRef(source), true);
 	GlobalVariable * globalString = new GlobalVariable(M, stringConstant->getType(), true, GlobalValue::ExternalLinkage,
