@@ -5,16 +5,23 @@
   Email: hsharif3@illinois.edu
 
 
-  TODO:
+## TODO:
   - Add test for the case where a non static index has been used to index the file - DONE
   - Must preserve the file handler for some cases - DONE - already done
   - Test on a number of examples - Look for Chris smowton has in his paper
-  - lseek - DONE
   - add an lseek call for each read call to keep the file pointer up to date for non static index reads 
 
 
-  TODO V2:
+## TODO V2:
   - add an lseek call for each read call to keep the file pointer up to date for non static index reads 	
+
+ 
+ * FIXIT: replace memcpy with llvm memcpy. test if llvm understands intrinsic
+ * FIXIT: Add debug printing with macros
+ * FIXIT: Add test cases to git
+ * FIXIT: Fix environment dependency on opt-3.6. set aliases in a script
+ * FIXIT: Check and fix seek calls
+ * FIXIT: llvm.memcpy does not return a value. need to replace lhs
 
 */
 
@@ -48,14 +55,6 @@ using namespace std;
 #define debugPrint 1
 
 
-/* author : Hashim Sharif
- * FIXIT: replace memcpy with llvm memcpy. test if llvm understands intrinsic
- * FIXIT: Add debug printing with macros
- * FIXIT: Add test cases to git
- * FIXIT: Fix environment dependency on opt-3.6. set aliases in a script
- */
-
-
 struct FileNode{
 
   Instruction * fd;
@@ -70,22 +69,18 @@ struct FileIOPass : public ModulePass {
 
   static char ID;
   bool hasMemCpyRoutine;
-  //Module module;
-
+  
   FileIOPass() : ModulePass(ID) { }
 		
   map<Instruction*, FileNode*> dataMappings;
   map<Instruction*, Instruction*> replaceInstructions;
   map<Instruction*, Instruction*> addInstructions;
 
-
   bool getConstantStringInfo(const Value *V, StringRef &Str) {
 
     // Look through bitcast instructions and geps.
     V = V->stripPointerCasts();
-
-    // If the value is a GEP instruction or constant expression, treat it as an
-    // offset.
+    // If the value is a GEP instruction or constant expression, treat it as an offset.
     if (const GEPOperator *GEP = dyn_cast<GEPOperator>(V)) {
 
       // Make sure the GEP has exactly three arguments.
@@ -146,7 +141,6 @@ struct FileIOPass : public ModulePass {
   }
 
 
-
   char source[500000000];
 
   void resolveOpenCalls(CallInst * callInst, Module & M){
@@ -158,10 +152,10 @@ struct FileIOPass : public ModulePass {
 
       Value * openMode = callInst->getOperand(1);
       if(ConstantInt * mode = dyn_cast<ConstantInt>(&*openMode))
-	{
+      {
 	  if(mode->getZExtValue() != 0)
 	    return;
-	}
+      }
 
       Value * fileNameOperand = callInst->getOperand(0);
       if(Constant * constString = dyn_cast<Constant>(&*fileNameOperand)){
@@ -176,7 +170,7 @@ struct FileIOPass : public ModulePass {
 	int i = 0;
 	FILE *fp = fopen(fileName.c_str(), "r");
 	if(fp != NULL)
-	  {
+	{
 	    char symbol;
 	    while((symbol = getc(fp)) != EOF)
 	      {
@@ -186,16 +180,13 @@ struct FileIOPass : public ModulePass {
 
 	    source[i] = '\0';
 	    fclose(fp);
-	  }
+	}
 
-	//stringstream strStream;
 	//strStream << inFile.rdbuf();//read the file
 	//string fileContents = strStream.str();//str holds the content of the file
 			
 
-	//errs()<<"fileContents "<<source;
-
-	Constant * stringConstant = ConstantDataArray::getString(M.getContext(), StringRef(source), true);
+      	Constant * stringConstant = ConstantDataArray::getString(M.getContext(), StringRef(source), true);
 	GlobalVariable * globalString = new GlobalVariable(M, stringConstant->getType(), true, GlobalValue::ExternalLinkage,
 							   stringConstant, "");
 
@@ -256,13 +247,11 @@ struct FileIOPass : public ModulePass {
 
 	fileNode = dataMappings[openInst];
 	globalString = fileNode -> globalString;
-	//errs()<< *globalString <<"\n";
       }
       else{
 	errs()<<"open call not found \n";
 	return;
       }
-
 
       /* If a non constant index has been used to read from the file the reads are no longer "specializable"  */
       if(fileNode->staticIndices == false){
@@ -290,26 +279,33 @@ struct FileIOPass : public ModulePass {
       argumentTypes.push_back(Type::getInt8PtrTy(M.getContext()));
       argumentTypes.push_back(Type::getInt8PtrTy(M.getContext()));
       argumentTypes.push_back(Type::getInt64Ty(M.getContext()));
-
+      argumentTypes.push_back(Type::getInt32Ty(M.getContext()));
+      argumentTypes.push_back(Type::getInt1Ty(M.getContext()));
+      
       FunctionType *FT = FunctionType::get(Type::getVoidTy(M.getContext()), argumentTypes, false);
-      // FIXIT: need to use llvm memcpy intrinsic
-
+    
       /* FIXIT: Variable not required. getFunction and a check on NULL should have sufficed */
       Function * llvmMemcpy;
       if(!hasMemCpyRoutine){
-	llvmMemcpy = Function::Create(FT, GlobalValue::ExternalLinkage, "memcpy", &M);
+	llvmMemcpy = Function::Create(FT, GlobalValue::ExternalLinkage, "llvm.memcpy.p0i8.p0i8.i64", &M);
 	hasMemCpyRoutine = true;
       }
       else{
-	llvmMemcpy = M.getFunction(StringRef("memcpy"));
+	llvmMemcpy = M.getFunction(StringRef("llvm.memcpy.p0i8.p0i8.i64"));
       }
 
+      // FIXIT: These type definitions are redundant
       IntegerType * intTy = IntegerType::get(M.getContext(), 64);
+      IntegerType * intTy32 = IntegerType::get(M.getContext(), 32);
+      IntegerType * intTy1 = IntegerType::get(M.getContext(), 1);
+         
       ConstantInt * index1 = ConstantInt::get(intTy, 0);
       ConstantInt * index2 = ConstantInt::get(intTy, fileNode->filePosition);
+      // Alignment should be 0 or 1 (no alignment) if arguments are not allowed to a boundary 
+      ConstantInt * align = ConstantInt::get(intTy32, 0);
+      ConstantInt * isvolatile = ConstantInt::get(intTy1, 0);
 
       fileNode->filePosition += intByteCount;
-
 
       vector<Value *> indxList;
       indxList.push_back(index1);
@@ -321,12 +317,13 @@ struct FileIOPass : public ModulePass {
       functionArgs.push_back(destBuffer);
       functionArgs.push_back(stringPtr);
       functionArgs.push_back(byteCount);
+      functionArgs.push_back(align);
+      functionArgs.push_back(isvolatile);
 
       CallInst * retVal = CallInst::Create((Value*) llvmMemcpy, ArrayRef<Value*>(functionArgs), Twine(""), callInst);
       errs()<<" CALL INST "<<*retVal<<"\n";
 
       AllocaInst * allocaOperand = new AllocaInst(intTy, Twine(""), callInst);
-      //ConstantInt * returnCount = ConstantInt::get(intTy, byteCount);
       StoreInst * storeOperand = new StoreInst(byteCount, allocaOperand, callInst);
       errs()<<""<<*allocaOperand <<"\n";
       errs()<<""<<*storeOperand <<"\n";
@@ -337,8 +334,7 @@ struct FileIOPass : public ModulePass {
       errs()<<"type"<<*loadInst->getType()<<"\n";
       errs()<<"type"<<*callInst<<"\n";
 
-      replaceInstructions[callInst] = loadInst;
-		  
+      replaceInstructions[callInst] = loadInst;		  
     }
 
   }
@@ -347,10 +343,8 @@ struct FileIOPass : public ModulePass {
 
   void resolveSeekCalls(CallInst * callInst, Module & M){
 
-
     Function * f = callInst->getCalledFunction();
     string functionName = f->getName().str();
-
 
     if(functionName == "lseek"){
 
@@ -401,23 +395,17 @@ struct FileIOPass : public ModulePass {
 	return;
       }
 
-
       switch(intWhence){
 			
-      case SEEK_SET: fileNode->filePosition = intByteOffset; fileNode->staticIndices = true; break;
+        case SEEK_SET: fileNode->filePosition = intByteOffset; fileNode->staticIndices = true; break;
 
-      case SEEK_CUR: fileNode->filePosition += intByteOffset; break;
+        case SEEK_CUR: fileNode->filePosition += intByteOffset; break;
 
-      case SEEK_END: fileNode->filePosition = fileNode->fileSize + intByteOffset; break; 
+        case SEEK_END: fileNode->filePosition = fileNode->fileSize + intByteOffset; break; 
       }
-
-
 		  
     }
-
   }
-
-
 
 
   void replaceReadCalls(){
