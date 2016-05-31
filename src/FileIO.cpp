@@ -252,8 +252,7 @@ struct FileIOPass : public ModulePass {
       }
 
       Value * destBuffer = callInst->getOperand(1);
-      Value * byteCount = callInst->getOperand(2);
-      errs()<<*destBuffer->getType()<<"\n";
+      Value * byteCount = callInst->getOperand(2);     
       int intByteCount = 0;	
 
       if(ConstantInt * constInst = dyn_cast<ConstantInt>(&*byteCount)){
@@ -261,7 +260,7 @@ struct FileIOPass : public ModulePass {
 	intByteCount = constInst->getZExtValue();
       }
       else{     /* A non constant index returns the reads not "specializable"  */
-
+        // FIXIT: Do we still need this lseek?
 	addSeekCall(callInst, fileNode, M);
 	/*FIXIT: Add a lseek call to set the file position pointer of the file descriptor to its correct value */			
 	fileNode->staticIndices = false;
@@ -291,6 +290,7 @@ struct FileIOPass : public ModulePass {
       IntegerType * intTy = IntegerType::get(M.getContext(), 64);
       IntegerType * intTy32 = IntegerType::get(M.getContext(), 32);
       IntegerType * intTy1 = IntegerType::get(M.getContext(), 1);
+      IntegerType * intTy8 = IntegerType::get(M.getContext(), 8);
          
       ConstantInt * index1 = ConstantInt::get(intTy, 0);
       ConstantInt * index2 = ConstantInt::get(intTy, fileNode->filePosition);
@@ -298,26 +298,50 @@ struct FileIOPass : public ModulePass {
       ConstantInt * align = ConstantInt::get(intTy32, 0);
       ConstantInt * isvolatile = ConstantInt::get(intTy1, 0);
 
-      fileNode->filePosition += intByteCount;
+      Value * numBytes = NULL;
+      bool callMemcpy = true;
+      if(fileNode->filePosition + intByteCount <= fileNode->fileSize)
+      {
+        fileNode->filePosition += intByteCount;
+        numBytes = byteCount;
+      }
+      else{
+        int truncatedBytes = fileNode->fileSize - fileNode->filePosition;
+        fileNode->filePosition = fileNode->fileSize;     
+        numBytes = ConstantInt::get(intTy, truncatedBytes);
+        if(truncatedBytes == 0) callMemcpy = false;
+      }
 
       vector<Value *> indxList;
       indxList.push_back(index1);
       indxList.push_back(index2);
 
-      GetElementPtrInst * stringPtr = GetElementPtrInst::Create(NULL, globalString, indxList, Twine(""), callInst);
+      if(callMemcpy){
+      
+        GetElementPtrInst * stringPtr = GetElementPtrInst::Create(NULL, globalString, indxList, Twine(""), callInst);
 
-      std::vector<Value*> functionArgs;
-      functionArgs.push_back(destBuffer);
-      functionArgs.push_back(stringPtr);
-      functionArgs.push_back(byteCount);
-      functionArgs.push_back(align);
-      functionArgs.push_back(isvolatile);
+        std::vector<Value*> functionArgs;
+        functionArgs.push_back(destBuffer);
+	functionArgs.push_back(stringPtr);
+	functionArgs.push_back(numBytes);
+	functionArgs.push_back(align);
+	functionArgs.push_back(isvolatile);
 
-      CallInst * retVal = CallInst::Create((Value*) llvmMemcpy, ArrayRef<Value*>(functionArgs), Twine(""), callInst);
-      errs()<<" CALL INST "<<*retVal<<"\n";
+	CallInst * retVal = CallInst::Create((Value*) llvmMemcpy, ArrayRef<Value*>(functionArgs), Twine(""), callInst); 
+
+        Value * index3 = numBytes;
+        indxList.clear();
+        //indxList.push_back(index1);
+        indxList.push_back(index3);
+
+	GetElementPtrInst * destEndPtr = GetElementPtrInst::Create(NULL, destBuffer, indxList, Twine(""), callInst);
+
+        ConstantInt * null_char = ConstantInt::get(intTy8, 0);
+        StoreInst * storeNULLChar = new StoreInst(null_char, destEndPtr, callInst); 
+      }
 
       AllocaInst * allocaOperand = new AllocaInst(intTy, Twine(""), callInst);
-      StoreInst * storeOperand = new StoreInst(byteCount, allocaOperand, callInst);
+      StoreInst * storeOperand = new StoreInst(numBytes, allocaOperand, callInst);
       errs()<<""<<*allocaOperand <<"\n";
       errs()<<""<<*storeOperand <<"\n";
 
@@ -329,9 +353,7 @@ struct FileIOPass : public ModulePass {
 
       replaceInstructions[callInst] = loadInst;		  
     }
-
   }
-
 
 
   void resolveSeekCalls(CallInst * callInst, Module & M){
