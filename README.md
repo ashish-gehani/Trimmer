@@ -11,6 +11,5 @@
    
      Under ./bin run.sh executes the File IO pass. It takes two arguments 
 
-     a) Name of input bitcode file
-     b) Name of output bitcode file
-
+     a) Input bitcode (.bc)
+     b) Output bitcode (.bc)
