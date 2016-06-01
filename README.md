@@ -2,10 +2,11 @@
 
 #### Installation:
       
-     The installation requires llvm-3.8. 
-
-     set the llvm include directory in the Makefile and run "make"
-
+     1) Install llvm-3.8.
+     2) Install clang-3.8
+     3) Update include directory in Makefile
+     4) make
+ 
 
 #### Runing the FileIO Pass
    
