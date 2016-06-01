@@ -15,7 +15,7 @@
  * FIXIT: Fix environment dependency on opt-3.6. set aliases in a script
  * FIXIT: Test seek calls
  * FIXIT: The "source" array to hold the file contents is statically allocated
-
+ * FIXIT: 6 warnings need to be fixed
 */
 
 #include "llvm/Pass.h"
@@ -343,21 +343,18 @@ struct FileIOPass : public ModulePass {
       }
 
       AllocaInst * allocaOperand = new AllocaInst(intTy, Twine(""), callInst);
-      StoreInst * storeOperand = new StoreInst(numBytes, allocaOperand, callInst);
-      errs()<<""<<*allocaOperand <<"\n";
-      errs()<<""<<*storeOperand <<"\n";
-
+      StoreInst * storeOperand = new StoreInst(numBytes, allocaOperand, callInst);      
       LoadInst * loadInst = new LoadInst(allocaOperand, Twine(""), false, callInst);
-
-      errs()<<""<< *loadInst<<"\n";
-      errs()<<"type"<<*loadInst->getType()<<"\n";
-      errs()<<"type"<<*callInst<<"\n";
-
+      
       replaceInstructions[callInst] = loadInst;		  
     }
   }
 
-
+  
+  /* The seek calls need to be properly handled.
+     Specifically the file position pointer in the "FileNode"
+     object for the corresponding file needs to be updated 
+  */
   void resolveSeekCalls(CallInst * callInst, Module & M){
 
     Function * f = callInst->getCalledFunction();
@@ -366,7 +363,7 @@ struct FileIOPass : public ModulePass {
     if(functionName == "lseek"){
 
       Value * fd = callInst->getOperand(0);
-      errs()<<"fd (seek call) "<<*fd <<"\n";
+      if(debugPrint) errs()<<"fd (seek call) "<<*fd <<"\n";
       Instruction * openInst = dyn_cast<Instruction>(&*fd);
 
       FileNode * fileNode;
@@ -383,10 +380,10 @@ struct FileIOPass : public ModulePass {
       int intByteOffset = 0;	
 
       if(ConstantInt * constInst = dyn_cast<ConstantInt>(&*offset)){
-
-	errs()<<"constant OFFSET "<< constInst->getZExtValue() <<"\n";
+  
+	if(debugPrint) errs()<<"constant OFFSET "<< constInst->getZExtValue() <<"\n";
 	intByteOffset = constInst->getZExtValue();
-	errs()<<"******* OFFSET ******* "<<intByteOffset;
+	if(debugPrint) errs()<<"******* OFFSET ******* "<<intByteOffset;
       }
       else{     /* A non constant index returns the reads not "specializable"  */
 
@@ -396,15 +393,11 @@ struct FileIOPass : public ModulePass {
 	return;
       }
 
-
       int intWhence;
       if(ConstantInt * constInst = dyn_cast<ConstantInt>(&*whence)){
-
-	errs()<<"******** WHENCE ***********"<< constInst->getZExtValue() <<"\n";
 	intWhence = constInst->getZExtValue();
       }
       else{     /* A non constant index returns the reads not "specializable"  */
-
 	errs()<<"UNSUPPORTED Value for whence \n";
 	abort();
 	return;
@@ -417,27 +410,22 @@ struct FileIOPass : public ModulePass {
         case SEEK_CUR: fileNode->filePosition += intByteOffset; break;
 
         case SEEK_END: fileNode->filePosition = fileNode->fileSize + intByteOffset; break; 
-      }
-		  
+      }		  
     }
   }
-
 
   void replaceReadCalls(){
 
     for (auto & e : replaceInstructions){
       ReplaceInstWithInst(e.first, e.second);
     }
-
   }
-
 
   /* FIXIT : Cleaup intialization */
   /* Initialization routine */
   void initialization(Module & M){
     	
     hasMemCpyRoutine = false;
-
     // If the lseek function doesnt exist, create a prototype
     if(M.getFunction(StringRef("lseek")) == NULL){
 
@@ -465,16 +453,14 @@ struct FileIOPass : public ModulePass {
       Function * func = &*F;
       for(inst_iterator inst = inst_begin(func), e = inst_end(func); inst != e;) {
 	Instruction * I = &(*inst++);
-	if(debugPrint == 1){
+	if(debugPrint){
 	  errs()<<*I<<"\n";
 	}
 
 	if(CallInst * callInst = dyn_cast<CallInst>(&*I)){
-	  errs()<<"call casted \n";
 	  resolveOpenCalls(callInst, M);
 	  resolveReadCalls(callInst, M);
 	  resolveSeekCalls(callInst, M);
-	  errs()<<"call Resolution \n";
 	}
       }
     }
@@ -482,7 +468,6 @@ struct FileIOPass : public ModulePass {
     replaceReadCalls();
     return true;
   }
-
 
 };
 
