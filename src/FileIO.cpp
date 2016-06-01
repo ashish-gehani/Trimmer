@@ -1,28 +1,20 @@
 /*
 
-
   Author: Hashim Sharif
   Email: hsharif3@illinois.edu
+  LLVM_version: 3.8.0
 
 
 ## TODO:
-  - Add test for the case where a non static index has been used to index the file - DONE
-  - Must preserve the file handler for some cases - DONE - already done
   - Test on a number of examples - Look for Chris smowton has in his paper
-  - add an lseek call for each read call to keep the file pointer up to date for non static index reads 
+  - Add an lseek call for each read call to keep the file pointer up to date for non static index reads - DONE - Needs more testing
 
 
-## TODO V2:
-  - add an lseek call for each read call to keep the file pointer up to date for non static index reads 	
-
- 
- * FIXIT: replace memcpy with llvm memcpy. test if llvm understands intrinsic
+ * FIXIT: Test if llvm.memcpy is optimized by llvm passes
  * FIXIT: Add debug printing with macros
- * FIXIT: Add test cases to git
  * FIXIT: Fix environment dependency on opt-3.6. set aliases in a script
- * FIXIT: Check and fix seek calls
- * FIXIT: llvm.memcpy does not return a value. need to replace lhs
- * FIXIT: The "source" array to hold the file contents is static allocation
+ * FIXIT: Test seek calls
+ * FIXIT: The "source" array to hold the file contents is statically allocated
 
 */
 
@@ -38,10 +30,8 @@
 #include "llvm/IR/InstIterator.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/Operator.h"
-
 #include<map>
 #include<set>
-
 #include<iostream>
 #include<vector>
 #include<map>
@@ -52,18 +42,18 @@
 using namespace llvm;
 using namespace std;
 
-
 #define debugPrint 1
 
-
+/* The FileNode structure retains per file specialization data.
+ */
 struct FileNode{
 
-  Instruction * fd;
-  string fileName;
-  int fileSize;
-  int filePosition;
-  bool staticIndices;
-  GlobalVariable * globalString;
+  Instruction * fd;   // Pointer to the llvm "CallInst" invoking "open"
+  string fileName;    // Name of the specialised file 
+  int fileSize;       // Length of file contents
+  int filePosition;   // Tracks position of the file pointer
+  bool isSpecializable; // Tracks specialization at various program points 
+  GlobalVariable * globalString; // Link to the llvm string holding file contents
 };
 
 struct FileIOPass : public ModulePass {
@@ -77,13 +67,15 @@ struct FileIOPass : public ModulePass {
   map<Instruction*, Instruction*> replaceInstructions;
   map<Instruction*, Instruction*> addInstructions;
 
+  /* This routine extracts the filename of the file input to the open call
+     This function has been borrowed from the LLPE toolchain by Smowton.
+   */ 
   bool getConstantStringInfo(const Value *V, StringRef &Str) {
 
     // Look through bitcast instructions and geps.
     V = V->stripPointerCasts();
     // If the value is a GEP instruction or constant expression, treat it as an offset.
     if (const GEPOperator *GEP = dyn_cast<GEPOperator>(V)) {
-
       // Make sure the GEP has exactly three arguments.
       if (GEP->getNumOperands() != 3)
 	return false;
@@ -143,6 +135,9 @@ struct FileIOPass : public ModulePass {
 
   char source[500000000];
 
+  /* This function promotes all read only files to a global constant string.
+     Subsequent read calls with "constant" offsets will be replaced with llvm memcpy instrinsics
+   */
   void resolveOpenCalls(CallInst * callInst, Module & M){
 
     Function * f = callInst->getCalledFunction();
@@ -189,10 +184,8 @@ struct FileIOPass : public ModulePass {
 	fileNode->fileName = fileName;
 	fileNode->fileSize = strlen(source);
 	fileNode->filePosition = 0;
-	fileNode->staticIndices = true; // Initially the file is "specializable"
+	fileNode->isSpecializable = true; // Initially the file is "specializable"
 	fileNode->globalString = globalString;
-
-	//errs()<<"global String "<<*globalString<<"\n";
 	dataMappings[callInst] = fileNode;
 
       }
@@ -205,6 +198,10 @@ struct FileIOPass : public ModulePass {
   }
 
 
+  /* The addSeekCall function inserts a seek call to set the file descriptor to the correct position
+     This is required when a read call encounters a non-constant offset and subsequent read calls
+     cannot be specialised
+  */
   void addSeekCall(Instruction * inst, FileNode * fileNode, Module & M){
 
     std::vector<Value*> functionArgs;	
@@ -221,6 +218,13 @@ struct FileIOPass : public ModulePass {
 
     CallInst * retBytes = CallInst::Create((Value*) lseek, ArrayRef<Value*>(functionArgs), Twine(""), inst);				    			    
   }
+
+  /* resolveReadCalls attempts at replacing the read calls with constant offsets.
+     Read calls with constant offsets are replaced with "llvm.memcpy" instructions
+     to copy the string contents from the file string to the user specified destination
+     buffer. It is important to note that once a non constant offset is seen, the 
+     file is marked as non-specializable. 
+  */
 
   void resolveReadCalls(CallInst * callInst, Module & M){
 
@@ -247,7 +251,7 @@ struct FileIOPass : public ModulePass {
       }
 
       /* If a non constant index has been used to read from the file the reads are no longer "specializable"  */
-      if(fileNode->staticIndices == false){
+      if(fileNode->isSpecializable == false){
 	return;
       }
 
@@ -260,10 +264,9 @@ struct FileIOPass : public ModulePass {
 	intByteCount = constInst->getZExtValue();
       }
       else{     /* A non constant index returns the reads not "specializable"  */
-        // FIXIT: Do we still need this lseek?
 	addSeekCall(callInst, fileNode, M);
 	/*FIXIT: Add a lseek call to set the file position pointer of the file descriptor to its correct value */			
-	fileNode->staticIndices = false;
+	fileNode->isSpecializable = false;
 	return;
       }
 
@@ -330,8 +333,7 @@ struct FileIOPass : public ModulePass {
 	CallInst * retVal = CallInst::Create((Value*) llvmMemcpy, ArrayRef<Value*>(functionArgs), Twine(""), callInst); 
 
         Value * index3 = numBytes;
-        indxList.clear();
-        //indxList.push_back(index1);
+        indxList.clear();      
         indxList.push_back(index3);
 
 	GetElementPtrInst * destEndPtr = GetElementPtrInst::Create(NULL, destBuffer, indxList, Twine(""), callInst);
@@ -369,11 +371,9 @@ struct FileIOPass : public ModulePass {
 
       FileNode * fileNode;
       if(dataMappings.find(openInst) != dataMappings.end()){
-
 	fileNode = dataMappings[openInst];
       }
       else{
-
 	errs()<<"open call not corresponding to descriptor used in seek call \n";
 	return;
       }
@@ -392,7 +392,7 @@ struct FileIOPass : public ModulePass {
 
 	addSeekCall(callInst, fileNode, M);
 	/*FIXIT: Add a lseek call to set the file position pointer of the file descriptor to its correct value */
-	fileNode->staticIndices = false;
+	fileNode->isSpecializable = false;
 	return;
       }
 
@@ -412,7 +412,7 @@ struct FileIOPass : public ModulePass {
 
       switch(intWhence){
 			
-        case SEEK_SET: fileNode->filePosition = intByteOffset; fileNode->staticIndices = true; break;
+        case SEEK_SET: fileNode->filePosition = intByteOffset; fileNode->isSpecializable = true; break;
 
         case SEEK_CUR: fileNode->filePosition += intByteOffset; break;
 
@@ -476,13 +476,11 @@ struct FileIOPass : public ModulePass {
 	  resolveSeekCalls(callInst, M);
 	  errs()<<"call Resolution \n";
 	}
-
       }
     }
 
     replaceReadCalls();
     return true;
-
   }
 
 
@@ -491,5 +489,3 @@ struct FileIOPass : public ModulePass {
 
 char FileIOPass::ID = 0;
 static RegisterPass<FileIOPass> X("fileIO", "Specialising FILE System operations", false, false);
-
-
