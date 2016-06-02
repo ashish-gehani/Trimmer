@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
   char buffer[BUF_SIZE];      /* Character buffer */
   
   /* Create input file descriptor */
-  input_fd = open ("staticFile", O_RDONLY);
+  input_fd = open ("test/staticFile", O_RDONLY);
   if (input_fd == -1) {
     perror ("open");
     return 2;
