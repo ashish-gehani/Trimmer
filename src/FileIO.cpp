@@ -1,18 +1,13 @@
 /*
-
   Author: Hashim Sharif
   Email: hsharif3@illinois.edu
   LLVM_version: 3.8.0
-
 
 ## TODO:
   - Test on a number of examples - Look for Chris smowton has in his paper
   - Add an lseek call for each read call to keep the file pointer up to date for non static index reads - DONE - Needs more testing
 
-
- * FIXIT: Test if llvm.memcpy is optimized by llvm passes
  * FIXIT: Add debug printing with macros
- * FIXIT: Fix environment dependency on opt-3.6. set aliases in a script
  * FIXIT: Test seek calls
  * FIXIT: The "source" array to hold the file contents is statically allocated
  * FIXIT: 6 warnings need to be fixed
@@ -30,19 +25,19 @@
 #include "llvm/IR/InstIterator.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/Operator.h"
-#include<map>
-#include<set>
-#include<iostream>
-#include<vector>
-#include<map>
-#include<fstream>
-#include<string.h>
-#include<sstream>
+#include <map>
+#include <set>
+#include <iostream>
+#include <vector>
+#include <map>
+#include <fstream>
+#include <string.h>
+#include <sstream>
 
 using namespace llvm;
 using namespace std;
 
-#define debugPrint 1
+#define debugPrint 0
 
 /* The FileNode structure retains per file specialization data.
  */
@@ -125,9 +120,6 @@ struct FileIOPass : public ModulePass {
     if (Array == 0 || !Array->isString())
       return false;
 
-    // Get the number of elements in the array
-    uint64_t NumElts = Array->getType()->getArrayNumElements();
-
     // Start out with the entire array in the StringRef.
     Str = Array->getAsString();
     return true;
@@ -155,6 +147,7 @@ struct FileIOPass : public ModulePass {
       Value * fileNameOperand = callInst->getOperand(0);
       if(Constant * constString = dyn_cast<Constant>(&*fileNameOperand)){
 
+        if(debugPrint) errs()<<"File name : "<<*constString<<"\n";
 	StringRef fileNameStr;
 	getConstantStringInfo(fileNameOperand, fileNameStr);
 	string fileName = fileNameStr.str();
@@ -165,10 +158,10 @@ struct FileIOPass : public ModulePass {
 	{
 	    char symbol;
 	    while((symbol = getc(fp)) != EOF)
-	      {
-		source[i] = symbol;
-		i++;
-	      }
+	    {
+	      source[i] = symbol;
+	      i++;
+	    }
 
 	    source[i] = '\0';
 	    fclose(fp);
@@ -216,7 +209,7 @@ struct FileIOPass : public ModulePass {
 
     Function * lseek = M.getFunction(StringRef("lseek"));
 
-    CallInst * retBytes = CallInst::Create((Value*) lseek, ArrayRef<Value*>(functionArgs), Twine(""), inst);				    			    
+    CallInst::Create((Value*) lseek, ArrayRef<Value*>(functionArgs), Twine(""), inst);				    			    
   }
 
   /* resolveReadCalls attempts at replacing the read calls with constant offsets.
@@ -234,7 +227,6 @@ struct FileIOPass : public ModulePass {
     if(functionName == "read"){
 
       Value * fd = callInst->getOperand(0);
-      errs()<<"fd "<<*fd <<"\n";
       Instruction * openInst = dyn_cast<Instruction>(&*fd);
 
       GlobalVariable * globalString;
@@ -260,7 +252,7 @@ struct FileIOPass : public ModulePass {
       int intByteCount = 0;	
 
       if(ConstantInt * constInst = dyn_cast<ConstantInt>(&*byteCount)){
-	errs()<<"constant Int "<< constInst->getZExtValue() <<"\n";
+	if(debugPrint) errs()<<"constant Int "<< constInst->getZExtValue() <<"\n";
 	intByteCount = constInst->getZExtValue();
       }
       else{     /* A non constant index returns the reads not "specializable"  */
@@ -330,7 +322,7 @@ struct FileIOPass : public ModulePass {
 	functionArgs.push_back(align);
 	functionArgs.push_back(isvolatile);
 
-	CallInst * retVal = CallInst::Create((Value*) llvmMemcpy, ArrayRef<Value*>(functionArgs), Twine(""), callInst); 
+	CallInst::Create((Value*) llvmMemcpy, ArrayRef<Value*>(functionArgs), Twine(""), callInst); 
 
         Value * index3 = numBytes;
         indxList.clear();      
@@ -340,12 +332,15 @@ struct FileIOPass : public ModulePass {
 
         ConstantInt * null_char = ConstantInt::get(intTy8, 0);
         StoreInst * storeNULLChar = new StoreInst(null_char, destEndPtr, callInst); 
+        if(debugPrint) errs() <<"Store NULL character: "<<*storeNULLChar<<"\n";        
       }
 
       AllocaInst * allocaOperand = new AllocaInst(intTy, Twine(""), callInst);
       StoreInst * storeOperand = new StoreInst(numBytes, allocaOperand, callInst);      
       LoadInst * loadInst = new LoadInst(allocaOperand, Twine(""), false, callInst);
       
+      if(debugPrint) errs() <<"Store Operand :"<<*storeOperand<<"\n";
+
       replaceInstructions[callInst] = loadInst;		  
     }
   }
