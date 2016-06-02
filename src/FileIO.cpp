@@ -6,11 +6,10 @@
 ## TODO:
   - Test on a number of examples - Look for Chris smowton has in his paper
   - Add an lseek call for each read call to keep the file pointer up to date for non static index reads - DONE - Needs more testing
-
- * FIXIT: Add debug printing with macros
- * FIXIT: Test seek calls
+   - Test Seek Calls
+  
  * FIXIT: The "source" array to hold the file contents is statically allocated
- * FIXIT: 6 warnings need to be fixed
+
 */
 
 #include "llvm/Pass.h"
