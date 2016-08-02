@@ -10,6 +10,7 @@
   
  * FIXIT: The "source" array to hold the file contents is statically allocated
 
+ * FIXIT: Add EOF for fgetc
 */
 
 #include "llvm/Pass.h"
