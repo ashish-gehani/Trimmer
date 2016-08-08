@@ -10,7 +10,10 @@
   
  * FIXIT: The "source" array to hold the file contents is statically allocated
 
- * FIXIT: Add EOF for fgetc
+ * FIXIT: Do comprehensive regression testing
+
+ * FIXIT: Fix EOF case for fgetc
+
 */
 
 #include "llvm/Pass.h"
@@ -202,6 +205,7 @@ struct FileIOPass : public ModulePass {
         fileNode->fileData = source;
 	fileNode->globalString = globalString;
 	dataMappings[callInst] = fileNode;
+        errs()<<"Mappping added : "<<*callInst<<"\n";
 
       }
       else{
@@ -254,21 +258,25 @@ struct FileIOPass : public ModulePass {
 
       if(functionName == "read"){
 
-        fd = callInst->getOperand(0);     
-        destBuffer = callInst->getOperand(1);
-        byteCount = callInst->getOperand(2);  
+        fd = callInst -> getOperand(0);     
+        destBuffer = callInst -> getOperand(1);
+        byteCount = callInst -> getOperand(2);  
       }
       if(functionName == "fread"){
 
-        fd = callInst->getOperand(3); 
-        destBuffer = callInst->getOperand(0);
-        byteCount = callInst->getOperand(2); 
+        fd = callInst -> getOperand(3); 
+        destBuffer = callInst -> getOperand(0);
+        byteCount = callInst -> getOperand(2); 
+      }
+      else if (functionName == "fgetc"){
+        fd = callInst -> getOperand(0);
       }
 
       Instruction * openInst = dyn_cast<Instruction>(&*fd);
       GlobalVariable * globalString;
       FileNode * fileNode;
-
+      errs()<<"open Inst "<<*openInst<<"\n"; 
+      
       if(dataMappings.find(openInst) != dataMappings.end()){
 
 	fileNode = dataMappings[openInst];
@@ -286,7 +294,12 @@ struct FileIOPass : public ModulePass {
       }
  
       int intByteCount;	
+        // FIXIT: These type definitions are redundant
+      IntegerType * intTy = IntegerType::get(M.getContext(), 64);
+      IntegerType * intTy32 = IntegerType::get(M.getContext(), 32);
       IntegerType * intTy8 = IntegerType::get(M.getContext(), 8);
+      IntegerType * intTy1 = IntegerType::get(M.getContext(), 1);
+    
 
       if(functionName == "fread" || functionName == "read"){
         if(ConstantInt * constInst = dyn_cast<ConstantInt>(&*byteCount)){
@@ -294,6 +307,7 @@ struct FileIOPass : public ModulePass {
 	  intByteCount = constInst->getZExtValue();
         }
         else{     /* A non constant index returns the reads not "specializable"  */
+          /* Partially constant file reads are supported */
 	  addSeekCall(callInst, fileNode, M);
 	  /*FIXIT: Add a lseek call to set the file position pointer of the file descriptor to its correct value */  		
 	  fileNode->isSpecializable = false;
@@ -302,13 +316,18 @@ struct FileIOPass : public ModulePass {
       }
       else if(functionName == "fgetc"){
         
-        printf("Got fgetc \n");
+        printf("fgetc function call \n");
         /*****************/
         intByteCount = 1;
-        char outChar = fileNode->fileData[fileNode->filePosition];
-        fileNode->filePosition += 1;
-        ConstantInt * returnChar = ConstantInt::get(intTy8, outChar);
-        AllocaInst * allocaOperand = new AllocaInst(intTy8, Twine(""), callInst);
+        char outChar;
+        if(fileNode -> filePosition  < fileNode -> fileSize)
+          outChar = fileNode->fileData[fileNode -> filePosition++];
+        else
+          outChar = EOF; 
+          
+	//fileNode->filePosition += 1;
+        ConstantInt * returnChar = ConstantInt::get(intTy32, outChar);
+        AllocaInst * allocaOperand = new AllocaInst(intTy32, Twine(""), callInst);
         StoreInst * storeOperand = new StoreInst(returnChar, allocaOperand, callInst);      
         LoadInst * loadInst = new LoadInst(allocaOperand, Twine(""), false, callInst);      
         if(debugPrint) errs() <<"Store Operand2 :"<<*storeOperand<<"\n";
@@ -334,11 +353,6 @@ struct FileIOPass : public ModulePass {
       else{
 	llvmMemcpy = M.getFunction(StringRef("llvm.memcpy.p0i8.p0i8.i64"));
       }
-
-      // FIXIT: These type definitions are redundant
-      IntegerType * intTy = IntegerType::get(M.getContext(), 64);
-      IntegerType * intTy32 = IntegerType::get(M.getContext(), 32);
-      IntegerType * intTy1 = IntegerType::get(M.getContext(), 1);
                
       ConstantInt * index1 = ConstantInt::get(intTy, 0);
       ConstantInt * index2 = ConstantInt::get(intTy, fileNode->filePosition);
