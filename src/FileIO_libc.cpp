@@ -7,12 +7,10 @@
   - Test on a number of examples - Look for Chris smowton has in his paper
   - Add an lseek call for each read call to keep the file pointer up to date for non static index reads - DONE - Needs more testing
    - Test Seek Calls
-  
- * FIXIT: The "source" array to hold the file contents is statically allocated
 
  * FIXIT: Do comprehensive regression testing
 
- * FIXIT: Fix EOF case for fgetc
+ * FIXIT  EOF very platform specific. returns -1 
 
 */
 
@@ -326,7 +324,6 @@ struct FileIOPass : public ModulePass {
         else
           outChar = EOF; 
           
-	//fileNode->filePosition += 1;
         ConstantInt * returnChar;
         if(outChar != EOF)
           returnChar = ConstantInt::get(intTy32, outChar);
