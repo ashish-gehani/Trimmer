@@ -9,7 +9,8 @@
    - Test Seek Calls
 
  * FIXIT: Do comprehensive regression testing
-
+ * FIXIT: Assumption for chunk size of 1 with fread calls
+ * FIXIT: TEST partially constant file reads - i.e constant offset reads followed by constant offset reads.
  * FIXIT  EOF very platform specific. returns -1 
 
 */
@@ -99,7 +100,6 @@ struct FileIOPass : public ModulePass {
 	StartIdx = CI->getZExtValue();
       else
 	return false;
-
     }
 
     // The GEP instruction, constant or instruction, must reference a global
@@ -129,10 +129,9 @@ struct FileIOPass : public ModulePass {
     return true;
   }
 
-
   /* This function promotes all read only files to a global constant string.
      Subsequent read calls with "constant" offsets will be replaced with llvm memcpy instrinsics
-   */
+  */
   void resolveOpenCalls(CallInst * callInst, Module & M){
 
     Function * f = callInst->getCalledFunction();
@@ -142,7 +141,6 @@ struct FileIOPass : public ModulePass {
 
       Value * openMode = callInst->getOperand(1);
       if(functionName == "open"){
-
         if(ConstantInt * mode = dyn_cast<ConstantInt>(&*openMode)){
 	  if(mode->getZExtValue() != 0)
 	    return;
@@ -190,9 +188,16 @@ struct FileIOPass : public ModulePass {
 	    fclose(fp);
 	}
 
+        errs()<<"value of source "<<source<<"\n"; 
+        errs()<<"open Call Inst "<<*callInst<<"\n";
+        if(source == NULL || fp == NULL){
+          errs()<<"source is NULL or file pointer is NULL ";
+          //return;
+          abort();
+	}
+
       	Constant * stringConstant = ConstantDataArray::getString(M.getContext(), StringRef(source), true);
-	GlobalVariable * globalString = new GlobalVariable(M, stringConstant->getType(), true, GlobalValue::ExternalLinkage,
-							   stringConstant, "");
+	GlobalVariable * globalString = new GlobalVariable(M, stringConstant->getType(), true, GlobalValue::ExternalLinkage, stringConstant, "");
 
 	// Initializing a FileNode for the file open instance
 	FileNode * fileNode = new FileNode();
@@ -205,7 +210,6 @@ struct FileIOPass : public ModulePass {
 	fileNode->globalString = globalString;
 	dataMappings[callInst] = fileNode;
         errs()<<"Mappping added : "<<*callInst<<"\n";
-
       }
       else{
 	// Call cannot be resolved; File name is not constant
@@ -237,6 +241,53 @@ struct FileIOPass : public ModulePass {
     CallInst::Create((Value*) lseek, ArrayRef<Value*>(functionArgs), Twine(""), inst);				    			    
   }
 
+
+  void resolveGetcCalls(CallInst *callInst, Module & M){
+   
+    Function * f = callInst->getCalledFunction();
+    string functionName = f->getName().str();
+
+    if(functionName == "fgetc" || functionName == "getc"){
+
+      if(debugPrint) errs()<<"fgetc is being resolved ";   
+      Value * fd;
+      fd = callInst -> getOperand(0); // Only argument to fgetc is the file descriptor
+      Instruction * openInst = dyn_cast<Instruction>(&*fd);
+      GlobalVariable * globalString;
+      FileNode * fileNode;
+      if(debugPrint) errs()<<"open Inst "<<*openInst<<"\n"; 
+      
+      if(dataMappings.find(openInst) != dataMappings.end()){
+	fileNode = dataMappings[openInst];
+	globalString = fileNode -> globalString;
+      }
+      else{
+	errs()<<"open call not found \n";
+	return;
+      }
+        
+      char outChar;     
+      if(fileNode->filePosition  < fileNode->fileSize)
+        outChar = fileNode->fileData[fileNode->filePosition++];
+      else
+        outChar = EOF; 
+     
+      IntegerType * intTy32 = IntegerType::get(M.getContext(), 32);     
+      ConstantInt * returnChar;
+      if(outChar != EOF)
+        returnChar = ConstantInt::get(intTy32, outChar);
+      else
+        returnChar = ConstantInt::get(intTy32, -1); 
+   
+      AllocaInst * allocaOperand = new AllocaInst(intTy32, Twine(""), callInst);
+      StoreInst * storeOperand = new StoreInst(returnChar, allocaOperand, callInst);      
+      LoadInst * loadInst = new LoadInst(allocaOperand, Twine(""), false, callInst);      
+      if(debugPrint) errs() <<"Store Operand2 :"<<*storeOperand<<"\n";
+      replaceInstructions[callInst] = loadInst;
+    }  
+  }
+
+
   /* resolveReadCalls attempts at replacing the read calls with constant offsets.
      Read calls with constant offsets are replaced with "llvm.memcpy" instructions
      to copy the string contents from the file string to the user specified destination
@@ -249,7 +300,7 @@ struct FileIOPass : public ModulePass {
     Function * f = callInst->getCalledFunction();
     string functionName = f->getName().str();
 
-    if(functionName == "read" || functionName == "fread" || functionName == "fgetc"){
+    if(functionName == "read" || functionName == "fread_unlocked"){
 
       Value * destBuffer;
       Value * byteCount;
@@ -261,28 +312,22 @@ struct FileIOPass : public ModulePass {
         destBuffer = callInst -> getOperand(1);
         byteCount = callInst -> getOperand(2);  
       }
-      if(functionName == "fread"){
-
+      if(functionName == "fread" || functionName == "fread_unlocked"){
+	// FIXIT: Assuming chunk size of 1 byte. 
         fd = callInst -> getOperand(3); 
         destBuffer = callInst -> getOperand(0);
         byteCount = callInst -> getOperand(2); 
       }
-      else if (functionName == "fgetc"){
-        fd = callInst -> getOperand(0);
-      }
-
+    
       Instruction * openInst = dyn_cast<Instruction>(&*fd);
       GlobalVariable * globalString;
-      FileNode * fileNode;
-      errs()<<"open Inst "<<*openInst<<"\n"; 
+      FileNode * fileNode;   
       
       if(dataMappings.find(openInst) != dataMappings.end()){
-
 	fileNode = dataMappings[openInst];
 	globalString = fileNode -> globalString;
       }
       else{
-
 	errs()<<"open call not found \n";
 	return;
       }
@@ -298,46 +343,20 @@ struct FileIOPass : public ModulePass {
       IntegerType * intTy32 = IntegerType::get(M.getContext(), 32);
       IntegerType * intTy8 = IntegerType::get(M.getContext(), 8);
       IntegerType * intTy1 = IntegerType::get(M.getContext(), 1);
-    
-
-      if(functionName == "fread" || functionName == "read"){
-        if(ConstantInt * constInst = dyn_cast<ConstantInt>(&*byteCount)){
-	  if(debugPrint) errs()<<"constant Int "<< constInst->getZExtValue() <<"\n";
-	  intByteCount = constInst->getZExtValue();
-        }
-        else{     /* A non constant index returns the reads not "specializable"  */
-          /* Partially constant file reads are supported */
-	  addSeekCall(callInst, fileNode, M);
-	  /*FIXIT: Add a lseek call to set the file position pointer of the file descriptor to its correct value */  		
-	  fileNode->isSpecializable = false;
-	  return;
-        }
+         
+      if(ConstantInt * constInst = dyn_cast<ConstantInt>(&*byteCount)){
+	if(debugPrint) errs()<<"constant Int "<< constInst->getZExtValue() <<"\n";
+	intByteCount = constInst->getZExtValue();
       }
-      else if(functionName == "fgetc"){
-        
-        printf("fgetc function call \n");
-        /*****************/
-        intByteCount = 1;
-        char outChar;
-        if(fileNode -> filePosition  < fileNode -> fileSize)
-          outChar = fileNode->fileData[fileNode -> filePosition++];
-        else
-          outChar = EOF; 
-          
-        ConstantInt * returnChar;
-        if(outChar != EOF)
-          returnChar = ConstantInt::get(intTy32, outChar);
-        else
-          returnChar = ConstantInt::get(intTy32, -1); 
-   
-        AllocaInst * allocaOperand = new AllocaInst(intTy32, Twine(""), callInst);
-        StoreInst * storeOperand = new StoreInst(returnChar, allocaOperand, callInst);      
-        LoadInst * loadInst = new LoadInst(allocaOperand, Twine(""), false, callInst);      
-        if(debugPrint) errs() <<"Store Operand2 :"<<*storeOperand<<"\n";
-        replaceInstructions[callInst] = loadInst;
-        return;                   
+      else{     /* A non constant index returns the reads not "specializable"  */
+        /* Partially constant file reads are supported */
+	addSeekCall(callInst, fileNode, M);
+	/*FIXIT: Add a lseek call to set the file position pointer of the file descriptor to its correct value */  		  fileNode->isSpecializable = false;
+	return;
       }
-
+  
+      errs()<<"open Inst corresponding to fread being specialized : \n\n"<<*openInst<<"\n"; 
+      
       vector<Type*> argumentTypes;
       argumentTypes.push_back(Type::getInt8PtrTy(M.getContext()));
       argumentTypes.push_back(Type::getInt8PtrTy(M.getContext()));
@@ -346,17 +365,16 @@ struct FileIOPass : public ModulePass {
       argumentTypes.push_back(Type::getInt1Ty(M.getContext()));
       
       FunctionType *FT = FunctionType::get(Type::getVoidTy(M.getContext()), argumentTypes, false);
-    
+      
       /* FIXIT: Variable not required. getFunction and a check on NULL should have sufficed */
       Function * llvmMemcpy;
-      if(!hasMemCpyRoutine){
+      llvmMemcpy = M.getFunction(StringRef("llvm.memcpy.p0i8.p0i8.i64"));
+
+      if(llvmMemcpy == NULL){
 	llvmMemcpy = Function::Create(FT, GlobalValue::ExternalLinkage, "llvm.memcpy.p0i8.p0i8.i64", &M);
-	hasMemCpyRoutine = true;
+	//hasMemCpyRoutine = true;
       }
-      else{
-	llvmMemcpy = M.getFunction(StringRef("llvm.memcpy.p0i8.p0i8.i64"));
-      }
-               
+	       
       ConstantInt * index1 = ConstantInt::get(intTy, 0);
       ConstantInt * index2 = ConstantInt::get(intTy, fileNode->filePosition);
       // Alignment should be 0 or 1 (no alignment) if arguments are not allowed to a boundary 
@@ -365,7 +383,6 @@ struct FileIOPass : public ModulePass {
 
       Value * numBytes = NULL;
       bool callMemcpy = true;
-
       if(fileNode->filePosition + intByteCount <= fileNode->fileSize)
       {
         fileNode->filePosition += intByteCount;
@@ -385,7 +402,6 @@ struct FileIOPass : public ModulePass {
       if(callMemcpy){
       
         GetElementPtrInst * stringPtr = GetElementPtrInst::Create(NULL, globalString, indxList, Twine(""), callInst);
-
         std::vector<Value*> functionArgs;
         functionArgs.push_back(destBuffer);
 	functionArgs.push_back(stringPtr);
@@ -408,10 +424,8 @@ struct FileIOPass : public ModulePass {
 
       AllocaInst * allocaOperand = new AllocaInst(intTy, Twine(""), callInst);
       StoreInst * storeOperand = new StoreInst(numBytes, allocaOperand, callInst);      
-      LoadInst * loadInst = new LoadInst(allocaOperand, Twine(""), false, callInst);
-      
+      LoadInst * loadInst = new LoadInst(allocaOperand, Twine(""), false, callInst); 
       if(debugPrint) errs() <<"Store Operand :"<<*storeOperand<<"\n";
-
       replaceInstructions[callInst] = loadInst;		  
     }
   }
@@ -524,9 +538,15 @@ struct FileIOPass : public ModulePass {
 	}
 
 	if(CallInst * callInst = dyn_cast<CallInst>(&*I)){
-	  resolveOpenCalls(callInst, M);
-	  resolveReadCalls(callInst, M);
-	  resolveSeekCalls(callInst, M);
+	 
+          if(callInst != NULL && callInst->getCalledFunction() != NULL && !callInst->getCalledFunction()->isIntrinsic())
+	  {
+	    resolveOpenCalls(callInst, M);
+	    resolveReadCalls(callInst, M);
+            resolveGetcCalls(callInst, M);
+	    resolveSeekCalls(callInst, M);
+	  }
+
 	}
       }
     }
