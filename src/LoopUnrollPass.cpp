@@ -776,7 +776,7 @@ static bool tryToUnrollLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
       if(CallInst * callInst = dyn_cast<CallInst>(&*it)){
         if(callInst != NULL && callInst->getCalledFunction() != NULL && !callInst->getCalledFunction()->isIntrinsic()){
           Function * callee = callInst->getCalledFunction();
-	  if(callee->getName().str() == "fread" || callee->getName().str() == "read" || callee->getName().str() == "fgetc" || callee->getName().str() == "getc"){
+	  if(callee->getName().str() == "fread" || callee->getName().str() == "fread_unlocked" || callee->getName().str() == "read" || callee->getName().str() == "fgetc" || callee->getName().str() == "getc"){
            errs()<<"instruction : "<<*it<<"\n\n";
            FileIOCalls = true; // If the loop contains a call to a libc File IO routine we are interested in unrolling the loop
 	  }
