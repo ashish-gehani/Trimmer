@@ -33,6 +33,7 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Transforms/Utils/UnrollLoop.h"
 #include <climits>
+#include <sys/stat.h>
 
 using namespace llvm;
 
@@ -758,6 +759,173 @@ static bool canUnrollCompletely(Loop *L, unsigned Threshold,
   return false;
 }
 
+  
+
+  bool getConstantStringInfo(const Value *V, StringRef &Str) {
+
+    // Look through bitcast instructions and geps.
+    V = V->stripPointerCasts();
+    // If the value is a GEP instruction or constant expression, treat it as an offset.
+    if (const GEPOperator *GEP = dyn_cast<GEPOperator>(V)) {
+      // Make sure the GEP has exactly three arguments.
+      if (GEP->getNumOperands() != 3)
+	return false;
+
+      // Make sure the index-ee is a pointer to array of i8.
+      PointerType *PT = cast<PointerType>(GEP->getOperand(0)->getType());
+      ArrayType *AT = dyn_cast<ArrayType>(PT->getElementType());
+      if (AT == 0 || !AT->getElementType()->isIntegerTy(8))
+	return false;
+
+      // Check to make sure that the first operand of the GEP is an integer and
+      // has value 0 so that we are sure we're indexing into the initializer.
+      const ConstantInt *FirstIdx = dyn_cast<ConstantInt>(GEP->getOperand(1));
+      if (FirstIdx == 0 || !FirstIdx->isZero())
+	return false;
+
+      // If the second index isn't a ConstantInt, then this is a variable index
+      // into the array.  If this occurs, we can't say anything meaningful about
+      // the string.
+      uint64_t StartIdx = 0;
+      if (const ConstantInt *CI = dyn_cast<ConstantInt>(GEP->getOperand(2)))
+	StartIdx = CI->getZExtValue();
+      else
+	return false;
+    }
+
+    // The GEP instruction, constant or instruction, must reference a global
+    // variable that is a constant and is initialized. The referenced constant
+    // initializer is the array that we'll use for optimization.
+    const GlobalVariable *GV = dyn_cast<GlobalVariable>(V);
+    if (!GV || !GV->isConstant() || !GV->hasDefinitiveInitializer())
+      return false;
+
+    // Handle the all-zeros case
+    if (GV->getInitializer()->isNullValue()) {
+      // This is a degenerate case. The initializer is constant zero so the
+      // length of the string must be zero.
+      Str = "";
+      return true;
+    }
+
+    // Must be a Constant Array
+    const ConstantDataArray *Array =
+      dyn_cast<ConstantDataArray>(GV->getInitializer());
+
+    if (Array == 0 || !Array->isString())
+      return false;
+
+    // Start out with the entire array in the StringRef.
+    Str = Array->getAsString();
+    return true;
+  }
+
+
+  std::string resolveOpenCalls(Value * fd){
+
+    CallInst * callInst = dyn_cast<CallInst>(&*fd);
+    if(callInst == NULL)
+      return "";
+
+    Function * f = callInst->getCalledFunction();
+    std::string functionName = f->getName().str();
+    if(functionName == "open" || functionName == "fopen"){
+      Value * openMode = callInst->getOperand(1);
+      if(functionName == "open"){
+        if(ConstantInt * mode = dyn_cast<ConstantInt>(&*openMode)){
+	  if(mode->getZExtValue() != 0)
+	    return "";
+        }
+      }
+      else if (functionName == "fopen"){
+        StringRef modeStr;
+        getConstantStringInfo(openMode, modeStr);
+	std::string mode = modeStr.str();        
+        if(strcmp(mode.c_str(), "r") != 0){
+          errs()<<"File mode not READ-ONLY \n";
+          return "";
+	}
+        else{
+          errs()<<"File is READ-ONLY \n";
+	}
+      }
+
+      Value * fileNameOperand = callInst->getOperand(0);
+      if(Constant * constString = dyn_cast<Constant>(&*fileNameOperand)){
+        errs()<<"File name : "<<*constString<<"\n";
+	StringRef fileNameStr;
+	getConstantStringInfo(fileNameOperand, fileNameStr);
+	std::string fileName = fileNameStr.str();
+        return fileName;
+      }
+      else{
+        return ""; // fileName is not a constant
+      }
+    }
+
+    return "";
+  }
+
+
+  static std::string getOpenFileName(CallInst * callInst){
+
+    Function * f = callInst->getCalledFunction();
+    std::string functionName = f->getName().str();
+    Value * fd;
+
+    if(functionName == "read"){
+      fd = callInst->getOperand(0);
+      return resolveOpenCalls(fd);     
+    }
+    else if(functionName == "fread" || functionName == "fread_unlocked"){
+      // FIXIT: Assuming chunk size of 1 byte. 
+      fd = callInst->getOperand(3);
+      return resolveOpenCalls(fd);
+    } 
+    else if(functionName == "fgetc" || functionName == "getc"){
+      fd = callInst->getOperand(0);
+      return resolveOpenCalls(fd);
+    }
+   
+    return "";
+  }
+
+
+static int extractByteCount(CallInst * callInst){
+  
+    Function * f = callInst->getCalledFunction();
+    std::string functionName = f->getName().str();
+
+    if(functionName == "read" || functionName == "fread" || functionName == "fread_unlocked"){
+
+      Value * byteCount;  
+      if(functionName == "read"){
+        byteCount = callInst->getOperand(2);  
+      }
+      if(functionName == "fread" || functionName == "fread_unlocked"){
+	// FIXIT: Assuming chunk size of 1 byte. 
+        byteCount = callInst->getOperand(2); 
+      }
+
+      if(ConstantInt * constInst = dyn_cast<ConstantInt>(&*byteCount)){
+	errs()<<"constant Int **** "<< constInst->getZExtValue() <<"\n";
+	int intByteCount = constInst->getZExtValue();
+        return intByteCount;
+      }
+      else{
+        return -1;
+      }
+
+    }
+    else if(functionName == "fgetc" || functionName == "getc"){
+      return 1; // These two functions only read one character at a time
+    }
+
+    return -1; // this should be unreachable given the outer condition is only true for FileIO functions
+}
+
+
+
 static bool tryToUnrollLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
                             ScalarEvolution *SE, const TargetTransformInfo &TTI,
                             AssumptionCache &AC, bool PreserveLCSSA,
@@ -768,7 +936,9 @@ static bool tryToUnrollLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
   
   BasicBlock *Header = L->getHeader();
 
-  bool FileIOCalls = false; 
+  std::string lastFileName;
+  int numFileCalls = 0; 
+  int bytesRead = 0; // number of constant bytes read in one loop iteration
   std::vector<BasicBlock*> basicBlocks = L->getBlocks();
   for(unsigned long i = 0; i < basicBlocks.size(); i++){    
     BasicBlock * BB = basicBlocks.at(i);
@@ -777,18 +947,45 @@ static bool tryToUnrollLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
         if(callInst != NULL && callInst->getCalledFunction() != NULL && !callInst->getCalledFunction()->isIntrinsic()){
           Function * callee = callInst->getCalledFunction();
 	  if(callee->getName().str() == "fread" || callee->getName().str() == "fread_unlocked" || callee->getName().str() == "read" || callee->getName().str() == "fgetc" || callee->getName().str() == "getc"){
-           errs()<<"instruction : "<<*it<<"\n\n";
-           FileIOCalls = true; // If the loop contains a call to a libc File IO routine we are interested in unrolling the loop
+     
+            // Huge assumption is that all read calls read from the same file (common case).
+            // FIXIT: Add check for single file
+            // FIXIT: Add check for read only files
+	    std::string fileName = getOpenFileName(callInst);
+            errs()<<"***----*** FileName use in open call "<<fileName <<" ***---***\n";
+            if(fileName == "" || (numFileCalls > 1 && fileName != lastFileName)) {
+              errs()<<"FileName could not be resolved **** \n";
+              return false;
+	    }    
+   
+            lastFileName = fileName;
+            int bytes = extractByteCount(callInst);
+            if(bytes != -1)
+              bytesRead += bytes;
+            else{
+	        errs()<<"*** non constant indexes *** \n";            
+                return false; // the file is indexed using non constant indexes so unrolling doesnt reap anything
+	    }
+            
+            numFileCalls += 1; 	    
 	  }
 	}
       }
     } 
   }
 
-  if(!FileIOCalls){
+  if(numFileCalls == 0){
     return false; // Did not unroll loop as the loop did not have any calls to libc file IO routines
   }
 
+  FILE * fp = fopen(lastFileName.c_str(), "r");
+  struct stat st;
+  stat(lastFileName.c_str(), &st);
+  int fileSize = st.st_size;
+  errs()<<"Size of the file is @ "<<fileSize <<" \n";
+
+  errs()<<"\n~~~~ Unrolling LOOP . Total Bytes "<< bytesRead <<"~~~~~~~~~ \n";
+  
   DEBUG(dbgs() << "Loop Unroll: F[" << Header->getParent()->getName()
         << "] Loop %" << Header->getName() << "\n");
 
@@ -820,6 +1017,8 @@ static bool tryToUnrollLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
       TripCount);
 
   unsigned Count = UP.Count;
+  errs()<<"Count value -------- "<<Count<<"\n\n";
+
   bool CountSetExplicitly = Count != 0;
   // Use a heuristic count if we didn't set anything explicitly.
   if (!CountSetExplicitly)
@@ -982,13 +1181,13 @@ public:
   Optional<bool> ProvidedAllowPartial;
   Optional<bool> ProvidedRuntime;
 
+  
+  
   bool runOnLoop(Loop *L, LPPassManager &) override {
     if (skipOptnoneFunction(L))
       return false;
-
-    errs()<<"THIS IS MY CUSTOM LOOP UNROLL PASS \n\n";
+ 
     Function &F = *L->getHeader()->getParent();
-
     auto &DT = getAnalysis<DominatorTreeWrapperPass>().getDomTree();
     LoopInfo *LI = &getAnalysis<LoopInfoWrapperPass>().getLoopInfo();
     ScalarEvolution *SE = &getAnalysis<ScalarEvolutionWrapperPass>().getSE();
