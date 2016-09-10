@@ -954,7 +954,7 @@ static bool tryToUnrollLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
 	    std::string fileName = getOpenFileName(callInst);
             errs()<<"***----*** FileName use in open call "<<fileName <<" ***---***\n";
             if(fileName == "" || (numFileCalls > 1 && fileName != lastFileName)) {
-              errs()<<"FileName could not be resolved **** \n";
+              errs()<<"FileName could not be resolved or two files are being read in the loop body **** \n";
               return false;
 	    }    
    
@@ -1017,8 +1017,8 @@ static bool tryToUnrollLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
       TripCount);
 
   unsigned Count = UP.Count;
-  errs()<<"Count value -------- "<<Count<<"\n\n";
-
+  Count = (fileSize / bytesRead) + 1;
+  errs()<<"Unrolled *Calculated* count value -------- "<<Count<<"\n\n";
   bool CountSetExplicitly = Count != 0;
   // Use a heuristic count if we didn't set anything explicitly.
   if (!CountSetExplicitly)
