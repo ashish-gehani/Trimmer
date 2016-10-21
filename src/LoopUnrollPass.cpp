@@ -1017,7 +1017,7 @@ static bool tryToUnrollLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
       TripCount);
 
   unsigned Count = UP.Count;
-  Count = (fileSize / bytesRead) + 1;
+  Count = (fileSize / bytesRead) + 2;
   errs()<<"Unrolled *Calculated* count value -------- "<<Count<<"\n\n";
   bool CountSetExplicitly = Count != 0;
   // Use a heuristic count if we didn't set anything explicitly.
