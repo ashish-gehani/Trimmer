@@ -40,7 +40,7 @@
 using namespace llvm;
 using namespace std;
 
-#define debugPrint 0
+#define debugPrint 1
 
 /* The FileNode structure retains per file specialization data.
  */
@@ -65,6 +65,7 @@ struct FileIOPass : public ModulePass {
 		
   map<Instruction*, FileNode*> dataMappings;
   map<Instruction*, Instruction*> replaceInstructions;
+  map<Instruction*, Value*> replaceValues;
   map<Instruction*, Instruction*> addInstructions;
 
   /* This routine extracts the filename of the file input to the open call
@@ -151,7 +152,7 @@ struct FileIOPass : public ModulePass {
         StringRef modeStr;
         getConstantStringInfo(openMode, modeStr);
         string mode = modeStr.str();
-        printf("mode %s \n", mode.c_str());
+        
         if(strcmp(mode.c_str(), "r") != 0){
           errs()<<"File mode not READ-ONLY \n";
           return;
@@ -169,6 +170,7 @@ struct FileIOPass : public ModulePass {
 	getConstantStringInfo(fileNameOperand, fileNameStr);
 	string fileName = fileNameStr.str();
 
+        errs()<<"^^^^^^^^^^^^^^ file NAME ^^^^^^^^^^^^^^^^^^^^ "<<fileName<<"\n\n";
 	int i = 0;
 	FILE * fp = fopen(fileName.c_str(), "r");
         struct stat st;
@@ -189,10 +191,8 @@ struct FileIOPass : public ModulePass {
 	}
 
         errs()<<"value of source "<<source<<"\n"; 
-        errs()<<"open Call Inst "<<*callInst<<"\n";
         if(source == NULL || fp == NULL){
-          errs()<<"source is NULL or file pointer is NULL ";
-          //return;
+          errs()<<"source is NULL or file pointer is NULL "; 
           abort();
 	}
 
@@ -209,7 +209,6 @@ struct FileIOPass : public ModulePass {
         fileNode->fileData = source;
 	fileNode->globalString = globalString;
 	dataMappings[callInst] = fileNode;
-        errs()<<"Mappping added : "<<*callInst<<"\n";
       }
       else{
 	// Call cannot be resolved; File name is not constant
@@ -237,8 +236,7 @@ struct FileIOPass : public ModulePass {
     functionArgs.push_back(seekWhence);
 
     Function * lseek = M.getFunction(StringRef("lseek"));
-
-    CallInst::Create((Value*) lseek, ArrayRef<Value*>(functionArgs), Twine(""), inst);				    			    
+    CallInst::Create((Value*) lseek, ArrayRef<Value*>(functionArgs), Twine(""), inst); 
   }
 
 
@@ -284,6 +282,7 @@ struct FileIOPass : public ModulePass {
       LoadInst * loadInst = new LoadInst(allocaOperand, Twine(""), false, callInst);      
       if(debugPrint) errs() <<"Store Operand2 :"<<*storeOperand<<"\n";
       replaceInstructions[callInst] = loadInst;
+      errs()<<"\n*** fgetc Specialized *** \n";
     }  
   }
 
@@ -300,30 +299,32 @@ struct FileIOPass : public ModulePass {
     Function * f = callInst->getCalledFunction();
     string functionName = f->getName().str();
 
-    if(functionName == "read" || functionName == "fread_unlocked"){
+    if (functionName == "read" || functionName == "fread" ||  functionName == "fgets" || functionName == "fread_unlocked"){
 
       Value * destBuffer;
       Value * byteCount;
       Value * fd;
-
-      if(functionName == "read"){
-
+      if (functionName == "read"){
         fd = callInst -> getOperand(0);     
         destBuffer = callInst -> getOperand(1);
         byteCount = callInst -> getOperand(2);  
       }
-      if(functionName == "fread" || functionName == "fread_unlocked"){
+      if (functionName == "fread" || functionName == "fread_unlocked"){
 	// FIXIT: Assuming chunk size of 1 byte. 
         fd = callInst -> getOperand(3); 
         destBuffer = callInst -> getOperand(0);
         byteCount = callInst -> getOperand(2); 
       }
+      if (functionName == "fgets"){
+        fd = callInst -> getOperand(2); 
+        destBuffer = callInst -> getOperand(0);
+        byteCount = callInst -> getOperand(1); 
+      }
     
       Instruction * openInst = dyn_cast<Instruction>(&*fd);
       GlobalVariable * globalString;
       FileNode * fileNode;   
-      
-      if(dataMappings.find(openInst) != dataMappings.end()){
+      if (dataMappings.find(openInst) != dataMappings.end()){
 	fileNode = dataMappings[openInst];
 	globalString = fileNode -> globalString;
       }
@@ -333,30 +334,48 @@ struct FileIOPass : public ModulePass {
       }
 
       /* If a non constant index has been used to read from the file the reads are no longer "specializable"  */
-      if(fileNode->isSpecializable == false){
+      if (fileNode->isSpecializable == false){
 	return;
       }
  
       int intByteCount;	
-        // FIXIT: These type definitions are redundant
+      // FIXIT: These type definitions are redundant
       IntegerType * intTy = IntegerType::get(M.getContext(), 64);
       IntegerType * intTy32 = IntegerType::get(M.getContext(), 32);
       IntegerType * intTy8 = IntegerType::get(M.getContext(), 8);
       IntegerType * intTy1 = IntegerType::get(M.getContext(), 1);
+      PointerType * charPtrType = Type::getInt8PtrTy(M.getContext());
+      ConstantPointerNull * nullPtr = ConstantPointerNull::get(charPtrType);
          
-      if(ConstantInt * constInst = dyn_cast<ConstantInt>(&*byteCount)){
-	if(debugPrint) errs()<<"constant Int "<< constInst->getZExtValue() <<"\n";
+      if (ConstantInt * constInst = dyn_cast<ConstantInt>(&*byteCount)){
+	if (debugPrint) errs()<<"constant Int "<< constInst->getZExtValue() <<"\n";
 	intByteCount = constInst->getZExtValue();
+        if (functionName == "fgets"){
+          string dataStr = string(fileNode->fileData); // FIXIT: reusing full string - inefficient
+          int pos = dataStr.find('\n', fileNode->filePosition);
+          int lineBytes;
+          if(pos != -1)
+            lineBytes = pos - fileNode->filePosition;
+          else
+            lineBytes = fileNode->fileSize - fileNode->filePosition;
+
+          cout<<"STRING POS "<<pos<<"\n";
+          cout<<"FILE POSITION "<<fileNode->filePosition<<"\n";
+          cout<<"********* ALERT ********** "<< lineBytes << "\n";
+          if (lineBytes < intByteCount) {
+            intByteCount = lineBytes + 1;  // +1 includes the '\n'
+          }
+        }        
       }
-      else{     /* A non constant index returns the reads not "specializable"  */
+      else{     
+        /* A non constant index returns the reads not "specializable"  */
         /* Partially constant file reads are supported */
 	addSeekCall(callInst, fileNode, M);
 	/*FIXIT: Add a lseek call to set the file position pointer of the file descriptor to its correct value */  		  fileNode->isSpecializable = false;
 	return;
       }
   
-      errs()<<"open Inst corresponding to fread being specialized : \n\n"<<*openInst<<"\n"; 
-      
+      errs()<<"open Inst corresponding to fread being specialized : \n\n"<<*openInst<<"\n";       
       vector<Type*> argumentTypes;
       argumentTypes.push_back(Type::getInt8PtrTy(M.getContext()));
       argumentTypes.push_back(Type::getInt8PtrTy(M.getContext()));
@@ -364,8 +383,7 @@ struct FileIOPass : public ModulePass {
       argumentTypes.push_back(Type::getInt32Ty(M.getContext()));
       argumentTypes.push_back(Type::getInt1Ty(M.getContext()));
       
-      FunctionType *FT = FunctionType::get(Type::getVoidTy(M.getContext()), argumentTypes, false);
-      
+      FunctionType *FT = FunctionType::get(Type::getVoidTy(M.getContext()), argumentTypes, false);      
       /* FIXIT: Variable not required. getFunction and a check on NULL should have sufficed */
       Function * llvmMemcpy;
       llvmMemcpy = M.getFunction(StringRef("llvm.memcpy.p0i8.p0i8.i64"));
@@ -380,13 +398,16 @@ struct FileIOPass : public ModulePass {
       // Alignment should be 0 or 1 (no alignment) if arguments are not allowed to a boundary 
       ConstantInt * align = ConstantInt::get(intTy32, 0);
       ConstantInt * isvolatile = ConstantInt::get(intTy1, 0);
-
       Value * numBytes = NULL;
       bool callMemcpy = true;
+
       if(fileNode->filePosition + intByteCount <= fileNode->fileSize)
       {
         fileNode->filePosition += intByteCount;
         numBytes = byteCount;
+        if (functionName == "fgets"){
+          numBytes = ConstantInt::get(intTy, intByteCount); // Exclude '\n' character copy  
+        }
       }
       else{
         int truncatedBytes = fileNode->fileSize - fileNode->filePosition;
@@ -408,25 +429,31 @@ struct FileIOPass : public ModulePass {
 	functionArgs.push_back(numBytes);
 	functionArgs.push_back(align);
 	functionArgs.push_back(isvolatile);
-
 	CallInst::Create((Value*) llvmMemcpy, ArrayRef<Value*>(functionArgs), Twine(""), callInst); 
 
         Value * index3 = numBytes;
         indxList.clear();      
         indxList.push_back(index3);
-
 	GetElementPtrInst * destEndPtr = GetElementPtrInst::Create(NULL, destBuffer, indxList, Twine(""), callInst);
-
         ConstantInt * null_char = ConstantInt::get(intTy8, 0);
         StoreInst * storeNULLChar = new StoreInst(null_char, destEndPtr, callInst); 
         if(debugPrint) errs() <<"Store NULL character: "<<*storeNULLChar<<"\n";        
       }
 
-      AllocaInst * allocaOperand = new AllocaInst(intTy, Twine(""), callInst);
-      StoreInst * storeOperand = new StoreInst(numBytes, allocaOperand, callInst);      
-      LoadInst * loadInst = new LoadInst(allocaOperand, Twine(""), false, callInst); 
-      if(debugPrint) errs() <<"Store Operand :"<<*storeOperand<<"\n";
-      replaceInstructions[callInst] = loadInst;		  
+      if (functionName == "fgets"){
+        if (callMemcpy)
+	  replaceValues[callInst] = destBuffer;
+	else
+          replaceValues[callInst] = nullPtr;   
+      }
+      else{
+        AllocaInst * allocaOperand = new AllocaInst(intTy, Twine(""), callInst);
+        StoreInst * storeOperand = new StoreInst(numBytes, allocaOperand, callInst);      
+        LoadInst * loadInst = new LoadInst(allocaOperand, Twine(""), false, callInst); 
+        if(debugPrint) errs() <<"Store Operand :"<<*storeOperand<<"\n";
+        replaceInstructions[callInst] = loadInst;
+      }
+      errs()<<"\n**** read Specialized ****\n";	  
     }
   }
 
@@ -445,7 +472,6 @@ struct FileIOPass : public ModulePass {
       Value * fd = callInst->getOperand(0);
       if(debugPrint) errs()<<"fd (seek call) "<<*fd <<"\n";
       Instruction * openInst = dyn_cast<Instruction>(&*fd);
-
       FileNode * fileNode;
       if(dataMappings.find(openInst) != dataMappings.end()){
 	fileNode = dataMappings[openInst];
@@ -495,10 +521,17 @@ struct FileIOPass : public ModulePass {
   }
 
   void replaceReadCalls(){
-
     for (auto & e : replaceInstructions){
       ReplaceInstWithInst(e.first, e.second);
     }
+  }
+
+  void replaceUses(){
+    for (auto & e : replaceValues){
+      e.first -> replaceAllUsesWith(e.second);
+      e.first->dropAllReferences();
+      e.first->removeFromParent();
+    }  
   }
 
   /* FIXIT : Cleaup intialization */
@@ -515,7 +548,6 @@ struct FileIOPass : public ModulePass {
       argumentTypes.push_back(Type::getInt64Ty(M.getContext()));
 
       FunctionType *FT = FunctionType::get(Type::getInt64Ty(M.getContext()), argumentTypes, false);
-
       Function * lseek;
       lseek = Function::Create(FT, GlobalValue::ExternalLinkage, "lseek", &M);
     }
@@ -546,12 +578,12 @@ struct FileIOPass : public ModulePass {
             resolveGetcCalls(callInst, M);
 	    resolveSeekCalls(callInst, M);
 	  }
-
 	}
       }
     }
 
     replaceReadCalls();
+    replaceUses();
     return true;
   }
 

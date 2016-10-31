@@ -886,6 +886,10 @@ static bool canUnrollCompletely(Loop *L, unsigned Threshold,
       fd = callInst->getOperand(0);
       return resolveOpenCalls(fd);
     }
+    else if(functionName == "fgets"){
+      fd = callInst->getOperand(2);
+      return resolveOpenCalls(fd);
+    }
    
     return "";
   }
@@ -896,7 +900,7 @@ static int extractByteCount(CallInst * callInst){
     Function * f = callInst->getCalledFunction();
     std::string functionName = f->getName().str();
 
-    if(functionName == "read" || functionName == "fread" || functionName == "fread_unlocked"){
+    if(functionName == "read" || functionName == "fread" || functionName == "fgets" || functionName == "fread_unlocked"){
 
       Value * byteCount;  
       if(functionName == "read"){
@@ -905,6 +909,9 @@ static int extractByteCount(CallInst * callInst){
       if(functionName == "fread" || functionName == "fread_unlocked"){
 	// FIXIT: Assuming chunk size of 1 byte. 
         byteCount = callInst->getOperand(2); 
+      }
+      if(functionName == "fgets"){
+        byteCount = callInst->getOperand(1);  
       }
 
       if(ConstantInt * constInst = dyn_cast<ConstantInt>(&*byteCount)){
@@ -925,6 +932,16 @@ static int extractByteCount(CallInst * callInst){
 }
 
 
+int countNewLine(FILE * fp){
+  // ASSUMPTION: line count < 100000
+  int newLineCount = 0;
+  char line[100000];
+  while(fgets(line, 100000, fp)){
+    newLineCount += 1;
+  } 
+  return newLineCount;
+}
+
 
 static bool tryToUnrollLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
                             ScalarEvolution *SE, const TargetTransformInfo &TTI,
@@ -935,18 +952,19 @@ static bool tryToUnrollLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
                             Optional<bool> ProvidedRuntime) {
   
   BasicBlock *Header = L->getHeader();
-
   std::string lastFileName;
   int numFileCalls = 0; 
   int bytesRead = 0; // number of constant bytes read in one loop iteration
+  bool fgetsCall = false; 
   std::vector<BasicBlock*> basicBlocks = L->getBlocks();
+
   for(unsigned long i = 0; i < basicBlocks.size(); i++){    
     BasicBlock * BB = basicBlocks.at(i);
     for(BasicBlock::iterator it = BB->begin(), it2 = BB->end(); it != it2; it++){
       if(CallInst * callInst = dyn_cast<CallInst>(&*it)){
         if(callInst != NULL && callInst->getCalledFunction() != NULL && !callInst->getCalledFunction()->isIntrinsic()){
           Function * callee = callInst->getCalledFunction();
-	  if(callee->getName().str() == "fread" || callee->getName().str() == "fread_unlocked" || callee->getName().str() == "read" || callee->getName().str() == "fgetc" || callee->getName().str() == "getc"){
+	  if(callee->getName().str() == "fread" || callee->getName().str() == "fread_unlocked" || callee->getName().str() == "read" || callee->getName().str() == "fgetc" || callee->getName().str() == "getc" || callee->getName().str() == "fgets"){
      
             // Huge assumption is that all read calls read from the same file (common case).
             // FIXIT: Add check for single file
@@ -963,12 +981,16 @@ static bool tryToUnrollLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
             if(bytes != -1)
               bytesRead += bytes;
             else{
-	        errs()<<"*** non constant indexes *** \n";            
-                return false; // the file is indexed using non constant indexes so unrolling doesnt reap anything
+	      errs()<<"*** non constant indexes *** \n";            
+              return false; // the file is indexed using non constant indexes so unrolling doesnt reap anything
 	    }
             
+            if(callee->getName().str() == "fgets"){
+              fgetsCall = true;
+	    }           
             numFileCalls += 1; 	    
 	  }
+          
 	}
       }
     } 
@@ -982,10 +1004,14 @@ static bool tryToUnrollLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
   struct stat st;
   stat(lastFileName.c_str(), &st);
   int fileSize = st.st_size;
-  errs()<<"Size of the file is @ "<<fileSize <<" \n";
 
-  errs()<<"\n~~~~ Unrolling LOOP . Total Bytes "<< bytesRead <<"~~~~~~~~~ \n";
-  
+  // If fgets called in the loop, extract the number of New Line characters
+  int newLineCount;
+  if (fgetsCall){
+    newLineCount = countNewLine(fp);  
+  }
+ 
+  errs()<<"Size of the file is @ "<<fileSize <<" \n";  
   DEBUG(dbgs() << "Loop Unroll: F[" << Header->getParent()->getName()
         << "] Loop %" << Header->getName() << "\n");
 
@@ -1016,9 +1042,16 @@ static bool tryToUnrollLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
       ProvidedRuntime, PragmaCount, PragmaFullUnroll, PragmaEnableUnroll,
       TripCount);
 
-  unsigned Count = UP.Count;
-  Count = (fileSize / bytesRead) + 2;
-  errs()<<"Unrolled *Calculated* count value -------- "<<Count<<"\n\n";
+  unsigned Count = UP.Count;  
+  if (fgetsCall){
+    // ASSUMPTION: Buffer sizes to fgets are larger than line size (till New Line) 
+    Count = newLineCount + 2;
+  }
+  else{
+    Count = (fileSize / bytesRead) + 2;
+  }
+
+  errs()<<"** Unrolled *Calculated* count value -------- "<<Count<<"\n\n";
   bool CountSetExplicitly = Count != 0;
   // Use a heuristic count if we didn't set anything explicitly.
   if (!CountSetExplicitly)
