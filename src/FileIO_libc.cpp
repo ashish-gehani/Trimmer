@@ -164,12 +164,10 @@ struct FileIOPass : public ModulePass {
 
       Value * fileNameOperand = callInst->getOperand(0);
       if(Constant * constString = dyn_cast<Constant>(&*fileNameOperand)){
-
         if(debugPrint) errs()<<"File name : "<<*constString<<"\n";
 	StringRef fileNameStr;
 	getConstantStringInfo(fileNameOperand, fileNameStr);
 	string fileName = fileNameStr.str();
-
         errs()<<"^^^^^^^^^^^^^^ file NAME ^^^^^^^^^^^^^^^^^^^^ "<<fileName<<"\n\n";
 	int i = 0;
 	FILE * fp = fopen(fileName.c_str(), "r");
@@ -185,7 +183,6 @@ struct FileIOPass : public ModulePass {
 	      source[i] = symbol;
 	      i++;
 	    }
-
 	    source[i] = '\0';
 	    fclose(fp);
 	}
@@ -300,7 +297,6 @@ struct FileIOPass : public ModulePass {
     string functionName = f->getName().str();
 
     if (functionName == "read" || functionName == "fread" ||  functionName == "fgets" || functionName == "fread_unlocked"){
-
       Value * destBuffer;
       Value * byteCount;
       Value * fd;
@@ -342,7 +338,7 @@ struct FileIOPass : public ModulePass {
       // FIXIT: These type definitions are redundant
       IntegerType * intTy = IntegerType::get(M.getContext(), 64);
       IntegerType * intTy32 = IntegerType::get(M.getContext(), 32);
-      IntegerType * intTy8 = IntegerType::get(M.getContext(), 8);
+      // IntegerType * intTy8 = IntegerType::get(M.getContext(), 8);
       IntegerType * intTy1 = IntegerType::get(M.getContext(), 1);
       PointerType * charPtrType = Type::getInt8PtrTy(M.getContext());
       ConstantPointerNull * nullPtr = ConstantPointerNull::get(charPtrType);
@@ -400,9 +396,8 @@ struct FileIOPass : public ModulePass {
       ConstantInt * isvolatile = ConstantInt::get(intTy1, 0);
       Value * numBytes = NULL;
       bool callMemcpy = true;
-
-      if(fileNode->filePosition + intByteCount <= fileNode->fileSize)
-      {
+      int originalFilePtr = fileNode->filePosition;
+      if(fileNode->filePosition + intByteCount <= fileNode->fileSize){
         fileNode->filePosition += intByteCount;
         numBytes = byteCount;
         if (functionName == "fgets"){
@@ -418,26 +413,34 @@ struct FileIOPass : public ModulePass {
 
       vector<Value *> indxList;
       indxList.push_back(index1);
-      indxList.push_back(index2);
+      // -- Each read is replaced by a constant global string - indices are {0,0}
+      indxList.push_back(index1);
 
-      if(callMemcpy){
-      
-        GetElementPtrInst * stringPtr = GetElementPtrInst::Create(NULL, globalString, indxList, Twine(""), callInst);
+      if(callMemcpy){ 
+        char readStr[65536];
+        memcpy(readStr, &fileNode->fileData[originalFilePtr], intByteCount);
+        readStr[intByteCount] = '\0'; 
+        Constant * stringConstant = ConstantDataArray::getString(M.getContext(), StringRef(readStr), true);
+	GlobalVariable * globalReadString = new GlobalVariable(M, stringConstant->getType(), true, GlobalValue::ExternalLinkage, stringConstant, "");
+        GetElementPtrInst * stringPtr = GetElementPtrInst::Create(NULL, globalReadString, indxList, Twine(""), callInst);
+        ConstantInt * copyBytes = ConstantInt::get(intTy, intByteCount + 1);
         std::vector<Value*> functionArgs;
         functionArgs.push_back(destBuffer);
 	functionArgs.push_back(stringPtr);
-	functionArgs.push_back(numBytes);
+	functionArgs.push_back(copyBytes);
 	functionArgs.push_back(align);
 	functionArgs.push_back(isvolatile);
 	CallInst::Create((Value*) llvmMemcpy, ArrayRef<Value*>(functionArgs), Twine(""), callInst); 
 
-        Value * index3 = numBytes;
-        indxList.clear();      
-        indxList.push_back(index3);
-	GetElementPtrInst * destEndPtr = GetElementPtrInst::Create(NULL, destBuffer, indxList, Twine(""), callInst);
-        ConstantInt * null_char = ConstantInt::get(intTy8, 0);
-        StoreInst * storeNULLChar = new StoreInst(null_char, destEndPtr, callInst); 
-        if(debugPrint) errs() <<"Store NULL character: "<<*storeNULLChar<<"\n";        
+       /* --- No need to store null character ---
+           Value * index3 = numBytes;
+           indxList.clear();      
+           indxList.push_back(index3);
+	   GetElementPtrInst * destEndPtr = GetElementPtrInst::Create(NULL, destBuffer, indxList, Twine(""), callInst); 
+           ConstantInt * null_char = ConstantInt::get(intTy8, 0);  
+           StoreInst * storeNULLChar = new StoreInst(null_char, destEndPtr, callInst);
+           if(debugPrint) errs() <<"Store NULL character: "<<*storeNULLChar<<"\n";    
+	*/     
       }
 
       if (functionName == "fgets"){
