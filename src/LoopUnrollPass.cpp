@@ -38,6 +38,7 @@
 using namespace llvm;
 
 #define DEBUG_TYPE "loop-unroll2"
+#define debugPrint 1 // This macro enables/disables debug print messages
 
 static cl::opt<unsigned>
     UnrollThreshold("unroll-threshold2", cl::Hidden,
@@ -75,7 +76,7 @@ UnrollRuntime("unroll-runtime2", cl::ZeroOrMore, cl::Hidden,
 
 static cl::opt<unsigned>
 PragmaUnrollThreshold("pragma-unroll-threshold2", cl::init(16 * 1024), cl::Hidden,
-  cl::desc("Unrolled size limit for loops with an unroll(full) or "
+  cl::desc("Unrolled size limit for loop with an unroll(full) or "
            "unroll_count pragma."));
 
 
@@ -840,13 +841,14 @@ static bool canUnrollCompletely(Loop *L, unsigned Threshold,
       else if (functionName == "fopen"){
         StringRef modeStr;
         getConstantStringInfo(openMode, modeStr);
-	std::string mode = modeStr.str();        
+	std::string mode = modeStr.str(); 
+       
         if(strcmp(mode.c_str(), "r") != 0){
-          errs()<<"File mode not READ-ONLY \n";
+          if(debugPrint) errs()<<"!error: File mode not READ-ONLY \n";
           return "";
 	}
         else{
-          errs()<<"File is READ-ONLY \n";
+          if(debugPrint) errs()<<"File is READ-ONLY \n";
 	}
       }
 
@@ -901,7 +903,6 @@ static int extractByteCount(CallInst * callInst){
     std::string functionName = f->getName().str();
 
     if(functionName == "read" || functionName == "fread" || functionName == "fgets" || functionName == "fread_unlocked"){
-
       Value * byteCount;  
       if(functionName == "read"){
         byteCount = callInst->getOperand(2);  
@@ -915,7 +916,7 @@ static int extractByteCount(CallInst * callInst){
       }
 
       if(ConstantInt * constInst = dyn_cast<ConstantInt>(&*byteCount)){
-	errs()<<"constant Int **** "<< constInst->getZExtValue() <<"\n";
+	if(debugPrint) errs()<<"constant Int : "<< constInst->getZExtValue() <<"\n";
 	int intByteCount = constInst->getZExtValue();
         return intByteCount;
       }
@@ -964,15 +965,14 @@ static bool tryToUnrollLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
       if(CallInst * callInst = dyn_cast<CallInst>(&*it)){
         if(callInst != NULL && callInst->getCalledFunction() != NULL && !callInst->getCalledFunction()->isIntrinsic()){
           Function * callee = callInst->getCalledFunction();
-	  if(callee->getName().str() == "fread" || callee->getName().str() == "fread_unlocked" || callee->getName().str() == "read" || callee->getName().str() == "fgetc" || callee->getName().str() == "getc" || callee->getName().str() == "fgets"){
-     
-            // Huge assumption is that all read calls read from the same file (common case).
+	  if(callee->getName().str() == "fread" || callee->getName().str() == "fread_unlocked" || callee->getName().str() == "read" || callee->getName().str() == "fgetc" || callee->getName().str() == "getc" || callee->getName().str() == "fgets"){     
+            // FIXIT: Huge assumption, all read calls read from the same file (common case).
             // FIXIT: Add check for single file
             // FIXIT: Add check for read only files
 	    std::string fileName = getOpenFileName(callInst);
-            errs()<<"***----*** FileName use in open call "<<fileName <<" ***---***\n";
+            if(debugPrint) errs()<<"FileName : "<<fileName <<"\n";
             if(fileName == "" || (numFileCalls > 1 && fileName != lastFileName)) {
-              errs()<<"FileName could not be resolved or two files are being read in the loop body **** \n";
+              errs()<<"!error: FileName could not be resolved or two files are being read in the loop body \n";
               return false;
 	    }    
    
@@ -981,7 +981,7 @@ static bool tryToUnrollLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
             if(bytes != -1)
               bytesRead += bytes;
             else{
-	      errs()<<"*** non constant indexes *** \n";            
+	      if(debugPrint) errs()<<"!error: non-constant indexes \n";            
               return false; // the file is indexed using non constant indexes so unrolling doesnt reap anything
 	    }
             
@@ -989,8 +989,7 @@ static bool tryToUnrollLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
               fgetsCall = true;
 	    }           
             numFileCalls += 1; 	    
-	  }
-          
+	  }         
 	}
       }
     } 
@@ -1011,7 +1010,7 @@ static bool tryToUnrollLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
     newLineCount = countNewLine(fp);  
   }
  
-  errs()<<"Size of the file is @ "<<fileSize <<" \n";  
+  if(debugPrint) errs()<<"FileSize : "<<fileSize <<" \n";  
   DEBUG(dbgs() << "Loop Unroll: F[" << Header->getParent()->getName()
         << "] Loop %" << Header->getName() << "\n");
 
@@ -1051,7 +1050,7 @@ static bool tryToUnrollLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
     Count = (fileSize / bytesRead) + 2;
   }
 
-  errs()<<"** Unrolled *Calculated* count value -------- "<<Count<<"\n\n";
+  if(debugPrint) errs()<<" unroll count (calculated) : "<<Count<<"\n\n";
   bool CountSetExplicitly = Count != 0;
   // Use a heuristic count if we didn't set anything explicitly.
   if (!CountSetExplicitly)

@@ -1,19 +1,45 @@
-/*
-  Author: Hashim Sharif
-  Email: hsharif3@illinois.edu
-  LLVM_version: 3.8.0
+//
+// OCCAM
+//
+// Copyright (c) 2011-2016, SRI International
+//
+//  All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// * Redistributions of source code must retain the above copyright notice, this
+//   list of conditions and the following disclaimer.
+//
+// * Redistributions in binary form must reproduce the above copyright notice,
+//   this list of conditions and the following disclaimer in the documentation
+//   and/or other materials provided with the distribution.
+//
+// * Neither the name of SRI International nor the names of its contributors may
+//   be used to endorse or promote products derived from this software without
+//   specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
 
-## TODO:
-  - Test on a number of examples - Look for Chris smowton has in his paper
-  - Add an lseek call for each read call to keep the file pointer up to date for non static index reads - DONE - Needs more testing
-   - Test Seek Calls
+//  Author: Hashim Sharif
+//  Email: hsharif3@illinois.edu
+//  LLVM_version: 3.8.0
 
- * FIXIT: Do comprehensive regression testing
- * FIXIT: Assumption for chunk size of 1 with fread calls
- * FIXIT: TEST partially constant file reads - i.e constant offset reads followed by constant offset reads.
- * FIXIT  EOF very platform specific. returns -1 
+// * FIXIT: Do comprehensive regression testing
+// * FIXIT: Assumption for chunk size of 1 with fread calls
+// * FIXIT: TEST partially constant file reads - i.e constant offset reads followed by constant offset reads.
+// * FIXIT  EOF very platform specific. returns -1 
 
-*/
 
 #include "llvm/Pass.h"
 #include "llvm/IR/Function.h"
@@ -46,7 +72,6 @@ using namespace std;
  */
 
 struct FileNode{
-
   Instruction * fd;   // Pointer to the llvm "CallInst" invoking "open"
   string fileName;    // Name of the specialised file 
   int fileSize;       // Length of file contents
@@ -67,6 +92,7 @@ struct FileIOPass : public ModulePass {
   map<Instruction*, Instruction*> replaceInstructions;
   map<Instruction*, Value*> replaceValues;
   map<Instruction*, Instruction*> addInstructions;
+
 
   /* This routine extracts the filename of the file input to the open call
      This function has been borrowed from the LLPE toolchain by Smowton.
@@ -130,6 +156,7 @@ struct FileIOPass : public ModulePass {
     return true;
   }
 
+
   /* This function promotes all read only files to a global constant string.
      Subsequent read calls with "constant" offsets will be replaced with llvm memcpy instrinsics
   */
@@ -139,7 +166,6 @@ struct FileIOPass : public ModulePass {
     string functionName = f->getName().str();
 
     if(functionName == "open" || functionName == "fopen"){
-
       Value * openMode = callInst->getOperand(1);
       if(functionName == "open"){
         if(ConstantInt * mode = dyn_cast<ConstantInt>(&*openMode)){
@@ -148,48 +174,47 @@ struct FileIOPass : public ModulePass {
         }
       }
       else if (functionName == "fopen"){
-
         StringRef modeStr;
         getConstantStringInfo(openMode, modeStr);
-        string mode = modeStr.str();
-        
+        string mode = modeStr.str(); 
         if(strcmp(mode.c_str(), "r") != 0){
-          errs()<<"File mode not READ-ONLY \n";
+          if(debugPrint) errs()<<"Note: File mode not READ-ONLY \n";
           return;
 	}
         else{
-          errs()<<"File is READ-ONLY \n";
+          if(debugPrint) errs()<<"File is READ-ONLY \n";
 	}
       }
 
       Value * fileNameOperand = callInst->getOperand(0);
-      if(Constant * constString = dyn_cast<Constant>(&*fileNameOperand)){
-        if(debugPrint) errs()<<"File name : "<<*constString<<"\n";
+      if(Constant * constString = dyn_cast<Constant>(&*fileNameOperand)){     
 	StringRef fileNameStr;
 	getConstantStringInfo(fileNameOperand, fileNameStr);
 	string fileName = fileNameStr.str();
-        errs()<<"^^^^^^^^^^^^^^ file NAME ^^^^^^^^^^^^^^^^^^^^ "<<fileName<<"\n\n";
+        if(debugPrint) errs()<<"FileName : "<<*constString<<"\n\n";
+
 	int i = 0;
 	FILE * fp = fopen(fileName.c_str(), "r");
         struct stat st;
         stat(fileName.c_str(), &st);
         int fileSize = st.st_size;
-        char * source = (char*) malloc(fileSize + 1);       
-	if (fp != NULL)
-	{
-	    char symbol;
-	    while ((symbol = getc(fp)) != EOF)
-	    {
-	      source[i] = symbol;
-	      i++;
-	    }
-	    source[i] = '\0';
-	    fclose(fp);
+        char * source = (char*) malloc(fileSize + 1);      
+ 
+	if (fp != NULL){
+	  char symbol;
+	  while ((symbol = getc(fp)) != EOF)
+	  {
+	    source[i] = symbol;
+	    i++;
+	  }
+	  source[i] = '\0';
+	  fclose(fp);
 	}
 
-        errs()<<"value of source "<<source<<"\n"; 
+        if(debugPrint) errs()<<"Value of source : "<<source<<"\n";
+ 
         if(source == NULL || fp == NULL){
-          errs()<<"source is NULL or file pointer is NULL "; 
+          errs()<<"source == NULL or file pointer == NULL "; 
           abort();
 	}
 
@@ -211,7 +236,6 @@ struct FileIOPass : public ModulePass {
 	// Call cannot be resolved; File name is not constant
 	return;
       }
-
     }
   }
 
@@ -243,21 +267,21 @@ struct FileIOPass : public ModulePass {
     string functionName = f->getName().str();
 
     if(functionName == "fgetc" || functionName == "getc"){
-
       if(debugPrint) errs()<<"fgetc is being resolved ";   
       Value * fd;
       fd = callInst -> getOperand(0); // Only argument to fgetc is the file descriptor
       Instruction * openInst = dyn_cast<Instruction>(&*fd);
       GlobalVariable * globalString;
       FileNode * fileNode;
-      if(debugPrint) errs()<<"open Inst "<<*openInst<<"\n"; 
+
+      if(debugPrint) errs()<<"open call : "<<*openInst<<"\n"; 
       
       if(dataMappings.find(openInst) != dataMappings.end()){
 	fileNode = dataMappings[openInst];
 	globalString = fileNode -> globalString;
       }
       else{
-	errs()<<"open call not found \n";
+	if(debugPrint) errs()<<"!error: open call not found \n";
 	return;
       }
         
@@ -277,9 +301,9 @@ struct FileIOPass : public ModulePass {
       AllocaInst * allocaOperand = new AllocaInst(intTy32, Twine(""), callInst);
       StoreInst * storeOperand = new StoreInst(returnChar, allocaOperand, callInst);      
       LoadInst * loadInst = new LoadInst(allocaOperand, Twine(""), false, callInst);      
-      if(debugPrint) errs() <<"Store Operand2 :"<<*storeOperand<<"\n";
+      if(debugPrint) errs() <<"Store Operand :"<<*storeOperand<<"\n";
       replaceInstructions[callInst] = loadInst;
-      errs()<<"\n*** fgetc Specialized *** \n";
+      if(debugPrint) errs()<<"\n*** Fgetc Specialized *** \n";
     }  
   }
 
@@ -290,7 +314,6 @@ struct FileIOPass : public ModulePass {
      buffer. It is important to note that once a non constant offset is seen, the 
      file is marked as non-specializable. 
   */
-
   void resolveReadCalls(CallInst * callInst, Module & M){
 
     Function * f = callInst->getCalledFunction();
@@ -300,6 +323,7 @@ struct FileIOPass : public ModulePass {
       Value * destBuffer;
       Value * byteCount;
       Value * fd;
+
       if (functionName == "read"){
         fd = callInst -> getOperand(0);     
         destBuffer = callInst -> getOperand(1);
@@ -344,20 +368,22 @@ struct FileIOPass : public ModulePass {
       ConstantPointerNull * nullPtr = ConstantPointerNull::get(charPtrType);
          
       if (ConstantInt * constInst = dyn_cast<ConstantInt>(&*byteCount)){
-	if (debugPrint) errs()<<"constant Int "<< constInst->getZExtValue() <<"\n";
+	if (debugPrint) errs()<<"Constant Int : "<< constInst->getZExtValue() <<"\n";
 	intByteCount = constInst->getZExtValue();
+
         if (functionName == "fgets"){
           string dataStr = string(fileNode->fileData); // FIXIT: reusing full string - inefficient
           int pos = dataStr.find('\n', fileNode->filePosition);
           int lineBytes;
+
           if(pos != -1)
             lineBytes = pos - fileNode->filePosition;
           else
             lineBytes = fileNode->fileSize - fileNode->filePosition;
 
-          cout<<"STRING POS "<<pos<<"\n";
-          cout<<"FILE POSITION "<<fileNode->filePosition<<"\n";
-          cout<<"********* ALERT ********** "<< lineBytes << "\n";
+          if(debugPrint) errs()<<"String position: "<<pos<<"\n";
+          if(debugPrint) errs()<<"File position: "<<fileNode->filePosition<<"\n";
+
           if (lineBytes < intByteCount) {
             intByteCount = lineBytes + 1;  // +1 includes the '\n'
           }
@@ -390,13 +416,13 @@ struct FileIOPass : public ModulePass {
       }
 	       
       ConstantInt * index1 = ConstantInt::get(intTy, 0);
-      ConstantInt * index2 = ConstantInt::get(intTy, fileNode->filePosition);
       // Alignment should be 0 or 1 (no alignment) if arguments are not allowed to a boundary 
       ConstantInt * align = ConstantInt::get(intTy32, 0);
       ConstantInt * isvolatile = ConstantInt::get(intTy1, 0);
       Value * numBytes = NULL;
       bool callMemcpy = true;
       int originalFilePtr = fileNode->filePosition;
+
       if(fileNode->filePosition + intByteCount <= fileNode->fileSize){
         fileNode->filePosition += intByteCount;
         numBytes = byteCount;
@@ -431,16 +457,6 @@ struct FileIOPass : public ModulePass {
 	functionArgs.push_back(align);
 	functionArgs.push_back(isvolatile);
 	CallInst::Create((Value*) llvmMemcpy, ArrayRef<Value*>(functionArgs), Twine(""), callInst); 
-
-       /* --- No need to store null character ---
-           Value * index3 = numBytes;
-           indxList.clear();      
-           indxList.push_back(index3);
-	   GetElementPtrInst * destEndPtr = GetElementPtrInst::Create(NULL, destBuffer, indxList, Twine(""), callInst); 
-           ConstantInt * null_char = ConstantInt::get(intTy8, 0);  
-           StoreInst * storeNULLChar = new StoreInst(null_char, destEndPtr, callInst);
-           if(debugPrint) errs() <<"Store NULL character: "<<*storeNULLChar<<"\n";    
-	*/     
       }
 
       if (functionName == "fgets"){
@@ -456,7 +472,7 @@ struct FileIOPass : public ModulePass {
         if(debugPrint) errs() <<"Store Operand :"<<*storeOperand<<"\n";
         replaceInstructions[callInst] = loadInst;
       }
-      errs()<<"\n**** read Specialized ****\n";	  
+      errs()<<"\n**** read call Specialized ****\n";	  
     }
   }
 
@@ -471,16 +487,15 @@ struct FileIOPass : public ModulePass {
     string functionName = f->getName().str();
 
     if(functionName == "lseek"){
-
       Value * fd = callInst->getOperand(0);
-      if(debugPrint) errs()<<"fd (seek call) "<<*fd <<"\n";
+      if(debugPrint) errs()<<"Seek call : "<<*fd <<"\n";
       Instruction * openInst = dyn_cast<Instruction>(&*fd);
       FileNode * fileNode;
       if(dataMappings.find(openInst) != dataMappings.end()){
 	fileNode = dataMappings[openInst];
       }
       else{
-	errs()<<"open call not corresponding to descriptor used in seek call \n";
+	if(debugPrint) errs()<<"!error: No open call corresponding to descriptor used in seek call \n";
 	return;
       }
 
@@ -489,13 +504,10 @@ struct FileIOPass : public ModulePass {
       int intByteOffset = 0;	
 
       if(ConstantInt * constInst = dyn_cast<ConstantInt>(&*offset)){
-  
-	if(debugPrint) errs()<<"constant OFFSET "<< constInst->getZExtValue() <<"\n";
+	if(debugPrint) errs()<<"Constant offset : "<< constInst->getZExtValue() <<"\n";
 	intByteOffset = constInst->getZExtValue();
-	if(debugPrint) errs()<<"******* OFFSET ******* "<<intByteOffset;
       }
       else{     /* A non constant index returns the reads not "specializable"  */
-
 	addSeekCall(callInst, fileNode, M);
 	/*FIXIT: Add a lseek call to set the file position pointer of the file descriptor to its correct value */
 	fileNode->isSpecializable = false;
@@ -503,21 +515,19 @@ struct FileIOPass : public ModulePass {
       }
 
       int intWhence;
+
       if(ConstantInt * constInst = dyn_cast<ConstantInt>(&*whence)){
 	intWhence = constInst->getZExtValue();
       }
       else{     /* A non constant index returns the reads not "specializable"  */
-	errs()<<"UNSUPPORTED Value for whence \n";
+	errs()<<"!error: Unsupported Value for whence \n";
 	abort();
 	return;
       }
 
-      switch(intWhence){
-			
+      switch(intWhence){			
         case SEEK_SET: fileNode->filePosition = intByteOffset; fileNode->isSpecializable = true; break;
-
         case SEEK_CUR: fileNode->filePosition += intByteOffset; break;
-
         case SEEK_END: fileNode->filePosition = fileNode->fileSize + intByteOffset; break; 
       }		  
     }
@@ -529,6 +539,7 @@ struct FileIOPass : public ModulePass {
     }
   }
 
+
   void replaceUses(){
     for (auto & e : replaceValues){
       e.first -> replaceAllUsesWith(e.second);
@@ -536,6 +547,7 @@ struct FileIOPass : public ModulePass {
       e.first->removeFromParent();
     }  
   }
+
 
   /* FIXIT : Cleaup intialization */
   /* Initialization routine */
@@ -557,23 +569,18 @@ struct FileIOPass : public ModulePass {
   }
 
 
-
   virtual bool runOnModule(Module & M) {
 
     initialization(M);
 
     // Find all bitcast instructions within stores, calls etc. These must be bitcasting from globals to type*
     for (Module::iterator F = M.begin(), Fend = M.end(); F != Fend; ++F) {
-   
       Function * func = &*F;
       for(inst_iterator inst = inst_begin(func), e = inst_end(func); inst != e;) {
 	Instruction * I = &(*inst++);
-	if(debugPrint){
-	  errs()<<*I<<"\n";
-	}
+	if(debugPrint) errs()<<*I<<"\n";
 
-	if(CallInst * callInst = dyn_cast<CallInst>(&*I)){
-	 
+	if(CallInst * callInst = dyn_cast<CallInst>(&*I)){	 
           if(callInst != NULL && callInst->getCalledFunction() != NULL && !callInst->getCalledFunction()->isIntrinsic())
 	  {
 	    resolveOpenCalls(callInst, M);
