@@ -1,5 +1,6 @@
 
 #include<string.h>
+#include<stdio.h>
 
 __attribute__((always_inline)) int strcmp2(const char* s1, const char* s2)
 {  
@@ -17,7 +18,7 @@ __attribute__((always_inline)) int strcmp2(const char* s1, const char* s2)
 
 __attribute__((always_inline)) char * strchr2(const char * source, char character){  
   // Peeling the loop rather manually
-  int count = 20; // loop peel count
+  int count = 50; // loop peel count
   char sourceChar;
   int i;
 
@@ -34,5 +35,64 @@ __attribute__((always_inline)) char * strchr2(const char * source, char characte
     return source;
 
   return strchr(source, character);  // call original strchr
+}
+
+
+__attribute__((always_inline)) size_t strspn2(const char* cs, const char* ct) {
+  size_t n;
+  const char* p;
+  int ctSize = strlen(ct);
+  int count = 50;
+  for(n = 0; n < count; n++) {
+    p = ct;
+    for(int j = 0; j < ctSize; j++){
+      if(*p == *cs)
+        break;
+      p++;  
+    }
+
+    if (!*p)
+      break;
+    cs++;
+  }
+
+  if(*p){
+    printf("\nbranch 2 taken \n");
+    return n + strspn(cs, ct);
+  }
+  else{
+    return n;
+  }
+}
+
+
+__attribute__((always_inline)) size_t strcspn2(const char* cs, const char* ct) {
+  size_t n;
+  const char* p;
+  int ctSize = strlen(ct);
+  int count = 50;
+  for(n = 0; n < count; n++) {
+    p = ct;
+    for(int j = 0; j < ctSize; j++){
+      if(*p == *cs)
+        break;
+      p++;  
+    }
+
+    // if any one character in the string was matched break
+    if(*p)
+      break;
+    cs++;
+  }
+
+  printf("check value is %d \n", n);
+  // nothing from the reject set matched any character in the source string 
+  if(!*p){
+    printf("\nbranch 2-1 taken \n");
+    return n + strcspn(cs, ct);
+  }
+  else{
+    return n;
+  }
 }
 
