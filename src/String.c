@@ -3,6 +3,24 @@
 #include<stdio.h>
 
 
+__attribute__((always_inline)) size_t strlen2(const char* str){
+  
+  int count = 50;
+  int n;
+  for(n = 0 ; n < count; n++){
+    if(!*str)  // reached null character
+      break;
+    else
+      str++;
+  }
+
+  if(!*str)
+    return n;
+  else
+    return n + strlen(str); 
+}
+
+
 __attribute__((always_inline)) int strncmp2(const char* s1, const char* s2, size_t n){
   for(int i = n; i > 0; i--)
     if(*s1++!=*s2++)
@@ -12,7 +30,7 @@ __attribute__((always_inline)) int strncmp2(const char* s1, const char* s2, size
 
 
 __attribute__((always_inline)) int strcmp2(const char* s1, const char* s2){  
-  int length2 = strlen(s2);
+  int length2 = strlen2(s2);
   for(int i = 0; i < length2; i++){
     if(*s1 && (*s1==*s2)){
       s1++,s2++;
@@ -49,7 +67,7 @@ __attribute__((always_inline)) char * strchr2(const char * source, char characte
 __attribute__((always_inline)) size_t strspn2(const char* cs, const char* ct) {
   size_t n;
   const char* p;
-  int ctSize = strlen(ct);
+  int ctSize = strlen2(ct);
   int count = 50;
   for(n = 0; n < count; n++) {
     p = ct;
@@ -76,7 +94,7 @@ __attribute__((always_inline)) size_t strspn2(const char* cs, const char* ct) {
 __attribute__((always_inline)) size_t strcspn2(const char* cs, const char* ct) {
   size_t n;
   const char* p;
-  int ctSize = strlen(ct);
+  int ctSize = strlen2(ct);
   int count = 50;
 
   for(n = 0; n < count; n++) {
