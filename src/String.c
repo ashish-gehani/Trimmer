@@ -2,8 +2,16 @@
 #include<string.h>
 #include<stdio.h>
 
-__attribute__((always_inline)) int strcmp2(const char* s1, const char* s2)
-{  
+
+__attribute__((always_inline)) int strncmp2(const char* s1, const char* s2, size_t n){
+  for(int i = n; i > 0; i--)
+    if(*s1++!=*s2++)
+      return *(unsigned char*)(s1 - 1) - *(unsigned char*)(s2 - 1);
+  return 0;
+}
+
+
+__attribute__((always_inline)) int strcmp2(const char* s1, const char* s2){  
   int length2 = strlen(s2);
   for(int i = 0; i < length2; i++){
     if(*s1 && (*s1==*s2)){
@@ -57,7 +65,6 @@ __attribute__((always_inline)) size_t strspn2(const char* cs, const char* ct) {
   }
 
   if(*p){
-    printf("\nbranch 2 taken \n");
     return n + strspn(cs, ct);
   }
   else{
@@ -71,8 +78,12 @@ __attribute__((always_inline)) size_t strcspn2(const char* cs, const char* ct) {
   const char* p;
   int ctSize = strlen(ct);
   int count = 50;
+
   for(n = 0; n < count; n++) {
     p = ct;
+    if(!*cs)  // if reached end of string
+      break;
+
     for(int j = 0; j < ctSize; j++){
       if(*p == *cs)
         break;
@@ -85,10 +96,11 @@ __attribute__((always_inline)) size_t strcspn2(const char* cs, const char* ct) {
     cs++;
   }
 
-  printf("check value is %d \n", n);
+  if(!*cs)
+    return n;
+
   // nothing from the reject set matched any character in the source string 
   if(!*p){
-    printf("\nbranch 2-1 taken \n");
     return n + strcspn(cs, ct);
   }
   else{
