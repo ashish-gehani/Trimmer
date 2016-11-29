@@ -577,8 +577,7 @@ struct FileIOPass : public ModulePass {
     for (Module::iterator F = M.begin(), Fend = M.end(); F != Fend; ++F) {
       Function * func = &*F;
       for(inst_iterator inst = inst_begin(func), e = inst_end(func); inst != e;) {
-	Instruction * I = &(*inst++);
-	if(debugPrint) errs()<<*I<<"\n";
+	Instruction * I = &(*inst++);	
 
 	if(CallInst * callInst = dyn_cast<CallInst>(&*I)){	 
           if(callInst != NULL && callInst->getCalledFunction() != NULL && !callInst->getCalledFunction()->isIntrinsic())
