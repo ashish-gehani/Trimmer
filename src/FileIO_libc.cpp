@@ -191,7 +191,7 @@ struct FileIOPass : public ModulePass {
 	StringRef fileNameStr;
 	getConstantStringInfo(fileNameOperand, fileNameStr);
 	string fileName = fileNameStr.str();
-        if(debugPrint) errs()<<"FileName : "<<*constString<<"\n\n";
+        if(debugPrint) errs()<<"FileName : "<<fileName<<"\n\n";
 
 	int i = 0;
 	FILE * fp = fopen(fileName.c_str(), "r");
@@ -211,7 +211,7 @@ struct FileIOPass : public ModulePass {
 	  fclose(fp);
 	}
 
-        if(debugPrint) errs()<<"Value of source : "<<source<<"\n";
+        if(debugPrint) errs()<<"Value of File Data : \n ----\n "<<source<<"\n --------- \n";
  
         if(source == NULL || fp == NULL){
           errs()<<"source == NULL or file pointer == NULL "; 
@@ -281,7 +281,7 @@ struct FileIOPass : public ModulePass {
 	globalString = fileNode -> globalString;
       }
       else{
-	if(debugPrint) errs()<<"!error: open call not found \n";
+	if(debugPrint) errs()<<"!error: open call not found \n"<<*openInst<<"\n";
 	return;
       }
         
@@ -368,7 +368,7 @@ struct FileIOPass : public ModulePass {
       ConstantPointerNull * nullPtr = ConstantPointerNull::get(charPtrType);
          
       if (ConstantInt * constInst = dyn_cast<ConstantInt>(&*byteCount)){
-	if (debugPrint) errs()<<"Constant Int : "<< constInst->getZExtValue() <<"\n";
+	if (debugPrint) errs()<<"Bytes read by call : "<< constInst->getZExtValue() <<"\n";
 	intByteCount = constInst->getZExtValue();
 
         if (functionName == "fgets"){
@@ -381,8 +381,7 @@ struct FileIOPass : public ModulePass {
           else
             lineBytes = fileNode->fileSize - fileNode->filePosition;
 
-          if(debugPrint) errs()<<"String position: "<<pos<<"\n";
-          if(debugPrint) errs()<<"File position: "<<fileNode->filePosition<<"\n";
+          /// if(debugPrint) errs()<<"File position: "<<fileNode->filePosition<<"\n";
 
           if (lineBytes < intByteCount) {
             intByteCount = lineBytes + 1;  // +1 includes the '\n'
@@ -445,7 +444,9 @@ struct FileIOPass : public ModulePass {
       if(callMemcpy){ 
         char readStr[65536];
         memcpy(readStr, &fileNode->fileData[originalFilePtr], intByteCount);
-        readStr[intByteCount] = '\0'; 
+        readStr[intByteCount] = '\0';
+        if(debugPrint) errs()<<"readStr = "<<readStr<<"\n";
+
         Constant * stringConstant = ConstantDataArray::getString(M.getContext(), StringRef(readStr), true);
 	GlobalVariable * globalReadString = new GlobalVariable(M, stringConstant->getType(), true, GlobalValue::ExternalLinkage, stringConstant, "");
         GetElementPtrInst * stringPtr = GetElementPtrInst::Create(NULL, globalReadString, indxList, Twine(""), callInst);
@@ -571,6 +572,7 @@ struct FileIOPass : public ModulePass {
 
   virtual bool runOnModule(Module & M) {
 
+    if(debugPrint) errs()<<"\n\n ----------- File IO Spec --------- \n\n";
     initialization(M);
 
     // Find all bitcast instructions within stores, calls etc. These must be bitcasting from globals to type*
@@ -593,6 +595,8 @@ struct FileIOPass : public ModulePass {
 
     replaceReadCalls();
     replaceUses();
+
+    if(debugPrint) errs()<<"\n----- End of File IO pass ---- \n";
     return true;
   }
 

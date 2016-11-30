@@ -916,7 +916,7 @@ static int extractByteCount(CallInst * callInst){
       }
 
       if(ConstantInt * constInst = dyn_cast<ConstantInt>(&*byteCount)){
-	if(debugPrint) errs()<<"constant Int : "<< constInst->getZExtValue() <<"\n";
+	/// if(debugPrint) errs()<<"Max bytes read : "<< constInst->getZExtValue() <<"\n";
 	int intByteCount = constInst->getZExtValue();
         return intByteCount;
       }
@@ -999,6 +999,7 @@ static bool tryToUnrollLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
     return false; // Did not unroll loop as the loop did not have any calls to libc file IO routines
   }
 
+  errs()<<"\n ----- LoopUnroll Pass ----  \n";
   FILE * fp = fopen(lastFileName.c_str(), "r");
   struct stat st;
   stat(lastFileName.c_str(), &st);
@@ -1050,7 +1051,7 @@ static bool tryToUnrollLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
     Count = (fileSize / bytesRead) + 2;
   }
 
-  if(debugPrint) errs()<<" unroll count (calculated) : "<<Count<<"\n\n";
+  if(debugPrint) errs()<<" unroll count (calculated) : "<<Count<<"\n --- Unrolling --- \n";
   bool CountSetExplicitly = Count != 0;
   // Use a heuristic count if we didn't set anything explicitly.
   if (!CountSetExplicitly)
@@ -1215,7 +1216,8 @@ public:
 
   
   
-  bool runOnLoop(Loop *L, LPPassManager &) override {
+  bool runOnLoop(Loop *L, LPPassManager &) override {   
+
     if (skipOptnoneFunction(L))
       return false;
  
