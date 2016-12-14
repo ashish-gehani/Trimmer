@@ -59,13 +59,19 @@ struct PointerData{
   StringData* stringData;
 };
 
+struct CallOperand{
+  Value * newOperand;
+  int index; // For indexing into the call instruction argument list
+};
+
 
 struct StringDepPass : public ModulePass {
 
   static char ID;
   map<Value*, StringData*> memcpyStrings;     
   map<Value*, PointerData*> stringPointers;
-
+  map<Instruction*, CallOperand*> replaceOperands;
+ 
   StringDepPass(): ModulePass(ID){}
 
   // Adding llvm::MemoryDependenceAnalysis as a required PrePass                                                         
@@ -73,6 +79,15 @@ struct StringDepPass : public ModulePass {
     //AU.addRequired<MemoryDependenceAnalysis>();
   }
 
+  
+  void replaceCallOperands(){
+    for (auto & e : replaceOperands){
+      CallOperand * callInfo = e.second;
+      e.first->setOperand(callInfo->index, callInfo->newOperand);
+    }  
+    replaceOperands.clear();    
+  }
+ 
 
   bool getConstantStringInfo(const Value *V, StringRef &Str,
 			     uint64_t Offset, bool TrimAtNul) {
@@ -209,7 +224,6 @@ struct StringDepPass : public ModulePass {
           int length = strlen(constantString);   
           memcpy(sourceBuffer, constantString, length + 1); 
          
-          if(debugPrint) errs()<<"length = "<<length<<"\n";
           if(debugPrint) errs()<<"constantString = "<<constantString<<"\n";                      
 	}	
         else if(StoreInst * storeInst = dyn_cast<StoreInst>(&*I)){
@@ -222,19 +236,60 @@ struct StringDepPass : public ModulePass {
             continue;
 
           if(debugPrint) errs()<<"\nFunction called = "<<calledFunction->getName() <<"\n";
+          int index = 0;
           for(auto arg = calledFunction->arg_begin(), argEnd = calledFunction->arg_end(); arg != argEnd; arg++){
-            if(!arg->getType()->isPointerTy())
+            if(!arg->getType()->isPointerTy() || !arg->getType()->getPointerElementType()->isIntegerTy(8)){
+              errs()<<"note: Type not supported \n";
               continue;
-            if(debugPrint) errs()<<"function arg = "<<*arg->getType()->getPointerElementType()<<" \n";
-            if(debugPrint) errs()<<"readonly = "<<arg->onlyReadsMemory()<<"\n";             
+	    }
+   
+            // Check for constant pointers
+            // All arguments in a 'readonly' function are assumed readonly
+            if(!arg->onlyReadsMemory() && !calledFunction->onlyReadsMemory()){
+              errs()<<"note: Argument type not readonly \n";
+              continue;
+	    }                           
+  
+            Value * pointerArg = callInst->getOperand(index);
+            PointerData * basePointer;
+            if(stringPointers.find(pointerArg) == stringPointers.end())
+              continue;
+            else
+              basePointer = stringPointers[pointerArg];
+
+            if(debugPrint) errs()<<"Data *= "<<basePointer->stringData->data<<"\n";
+            char * baseStringData = basePointer->stringData->data;
+            int strLen = strlen(baseStringData);
+            int offset = basePointer->position;
+            int numElements = strLen - offset + 1;
+            char * newStr = (char*) malloc(numElements);
+            memcpy(newStr, baseStringData + offset, numElements);     
+
+            IntegerType * intTy = IntegerType::get(M.getContext(), 64);
+            ConstantInt * index1 = ConstantInt::get(intTy, 0);
+            vector<Value *> indxList;
+            indxList.push_back(index1); 
+            indxList.push_back(index1);
+
+            Constant * stringConstant = ConstantDataArray::getString(M.getContext(), StringRef(newStr), true);
+ 	    GlobalVariable * globalReadString = new GlobalVariable(M, stringConstant->getType(), true,
+                                                                   GlobalValue::ExternalLinkage, stringConstant, "");
+            GetElementPtrInst * stringPtr = GetElementPtrInst::Create(NULL, globalReadString, 
+                                                                      indxList, Twine(""), callInst);
+            
+            // The GEP will replace the original argument
+            CallOperand * callOperand = new CallOperand;
+            callOperand->index = index;
+            callOperand->newOperand = stringPtr; 
+            replaceOperands[callInst] = callOperand;
+
+            index++;             
 	  }
-          if(debugPrint) errs()<<"---- end function call --- \n";
 	}
         else if(GetElementPtrInst * GEPInst = dyn_cast<GetElementPtrInst>(&*I)){
 
           Value * ptr = GEPInst->getOperand(0);
           Type * ptrType = ptr->getType();
-
           // FIXIT: Need check for type ?
           /*if(ptrType->isArrayTy() && ptrType->getContainedType(0)->isIntegerTy(8)){
             if(debugPrint) errs()<<"Note: i8* Type \n";  
@@ -263,10 +318,10 @@ struct StringDepPass : public ModulePass {
           stringPointers[I] = pointerData;
           errs()<<"index = "<<stringPointers[I]->position << " , data = "<<stringPointers[I]->stringData->data<<"\n"; 
 	}
-
       }
     }
 
+    replaceCallOperands();
     return true;
   }   
   
