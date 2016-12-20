@@ -47,29 +47,50 @@ using namespace std;
 /* The FileNode structure retains per file specialization data.
  */
 
+struct SplitString;
+struct StringAlloca;
+struct StringPointer;
+struct CallOperand;
+struct Indices;
 
-struct StringData{
+
+struct Indices{
+  int start;
+  int end;
+};
+
+struct StringAlloca{
   char * data;
   int size;
   bool initialized;
+  bool constant;
+  bool split; // If string is split
+  list<SplitString> splitStrings;
 };
 
-struct PointerData{
+struct SplitString{
+  Indices indices;
+  StringAlloca* splitAlloca;
+};
+
+struct StringPointer{
   int position;
-  StringData* stringData;
+  StringAlloca* alloca; // pointer to the alloca for the string
 };
 
 struct CallOperand{
   Value * newOperand;
-  int index; // For indexing into the call instruction argument list
+  int index; // index into the CallInst argument
 };
 
 
 struct StringDepPass : public ModulePass {
 
   static char ID;
-  map<Value*, StringData*> memcpyStrings;     
-  map<Value*, PointerData*> stringPointers;
+   
+  map<Value*, StringAlloca*> stringAllocas;  
+  // stringPointers is a map of constant pointers - string pointers with constant index into alloca   
+  map<Value*, StringPointer*> stringPointers;
   map<Instruction*, CallOperand*> replaceOperands;
  
   StringDepPass(): ModulePass(ID){}
@@ -193,15 +214,17 @@ struct StringDepPass : public ModulePass {
             int numElements = arType->getNumElements();
             if(debugPrint) errs()<<"numElements = "<<numElements<<"\n";
             
-            StringData * stringData = new StringData;     
-            stringData->size = numElements;
-            stringData->data = new char[numElements];
-            memcpyStrings[I] = stringData;
+            StringAlloca * stringAlloca = new StringAlloca;     
+            stringAlloca->size = numElements;
+            stringAlloca->data = new char[numElements];
+            stringAlloca->constant = true;  // string is initialized as constant
+            stringAlloca->initialized = false; // string not yet initialized
+            stringAllocas[I] = stringAlloca;
 
-            PointerData * pointerData = new PointerData;
-            pointerData->position = 0; // Pointing to the very start of the allocated buffer
-            pointerData->stringData = stringData;
-            stringPointers[I] = pointerData;
+            StringPointer * stringPointer = new StringPointer;
+            stringPointer->position = 0; // Pointing to the very start of the allocated buffer
+            stringPointer->alloca = stringAlloca;
+            stringPointers[I] = stringPointer;
 	  }
           else
             if(debugPrint) errs()<<"note: unsupported alloca type "<<*allocatedType;  
@@ -210,32 +233,78 @@ struct StringDepPass : public ModulePass {
  	
           if(debugPrint) errs()<<"Memcpy Inst = "<<*I<<"\n";
           Value * bufferPtr = memcpyInst->getOperand(0);
-          PointerData * basePointer;
+          StringPointer * basePointer;
           if(stringPointers.find(bufferPtr) == stringPointers.end())
             continue;
           else
             basePointer = stringPointers[bufferPtr];
                    
           int offset = basePointer->position;
-          char * sourceBuffer = basePointer->stringData->data + offset;
+          char * sourceBuffer = basePointer->alloca->data + offset;
           StringRef stringRef;
-          getConstantStringInfo(memcpyInst->getOperand(1), stringRef, 0, false);
+          
+          if(!getConstantStringInfo(memcpyInst->getOperand(1), stringRef, 0, false)){
+            if(debugPrint) errs()<<"non-constant string operand to memcpy - skipping ...";
+            continue; 
+	  }
+
           const char * constantString = stringRef.str().c_str();
           int length = strlen(constantString);   
-          memcpy(sourceBuffer, constantString, length + 1); 
-         
+          memcpy(sourceBuffer, constantString, length + 1);
+          basePointer->alloca->initialized = true; // mark string initialized          
           if(debugPrint) errs()<<"constantString = "<<constantString<<"\n";                      
 	}	
         else if(StoreInst * storeInst = dyn_cast<StoreInst>(&*I)){
-          if(debugPrint) errs()<<"Store Operand = "<<*storeInst->getOperand(1)<<"\n";
+
+          Value * ptr = storeInst->getOperand(1);
+          Type * operandType = storeInst->getOperand(0)->getType();
+          if(!operandType->isIntegerTy(8)){
+            if(debugPrint) errs()<<"non-char operand - Skipping .."; 	    
+            continue;
+	  }
+
+          StringPointer * basePointer;
+          // Search for the pointer in map of constant pointers - pointers with constant offsets
+          if(stringPointers.find(ptr) == stringPointers.end())
+            continue;
+          else
+            basePointer = stringPointers[ptr];
+
+          if(!basePointer->alloca->constant){
+            if(debugPrint) errs()<<".. Skipping non constant alloca string ... \n";
+            continue;
+	  }        
+       
+          Value * storeOperand = storeInst->getOperand(0);
+          int constantValue;
+          if(ConstantInt * constOp = dyn_cast<ConstantInt>(storeOperand)){
+            constantValue = constOp->getZExtValue();
+	  }
+          else{
+            if(debugPrint) errs()<<"--- Marking alloca as non-const \n";
+            basePointer->alloca->constant = false;
+            continue;
+	  }
+          
+          char storeChar = (char) constantValue;
+          if(storeChar == '\0'){
+            if(debugPrint) errs()<<"NULL CHARACTER \n";
+	  }
+  
+          char * stringData = basePointer->alloca->data;
+          int offset = basePointer->position;
+          // Storing constant character at constant offset
+          stringData[offset] = storeChar;
+          if(debugPrint) errs()<<"*** stringData = "<<stringData<<" offset = "<<offset<<"\n";                   
 	}
         else if(CallInst * callInst = dyn_cast<CallInst>(&*I)){
+
           Function * calledFunction = callInst->getCalledFunction();
           // Skip indirect function calls
           if(calledFunction == NULL)
             continue;
 
-          if(debugPrint) errs()<<"\nFunction called = "<<calledFunction->getName() <<"\n";
+          ///--- if(debugPrint) errs()<<"\nFunction called = "<<calledFunction->getName() <<"\n";
           int index = 0;
           for(auto arg = calledFunction->arg_begin(), argEnd = calledFunction->arg_end(); arg != argEnd; arg++){
             if(!arg->getType()->isPointerTy() || !arg->getType()->getPointerElementType()->isIntegerTy(8)){
@@ -251,14 +320,13 @@ struct StringDepPass : public ModulePass {
 	    }                           
   
             Value * pointerArg = callInst->getOperand(index);
-            PointerData * basePointer;
+            StringPointer * basePointer;
             if(stringPointers.find(pointerArg) == stringPointers.end())
               continue;
             else
               basePointer = stringPointers[pointerArg];
 
-            if(debugPrint) errs()<<"Data *= "<<basePointer->stringData->data<<"\n";
-            char * baseStringData = basePointer->stringData->data;
+            char * baseStringData = basePointer->alloca->data;
             int strLen = strlen(baseStringData);
             int offset = basePointer->position;
             int numElements = strLen - offset + 1;
@@ -282,7 +350,6 @@ struct StringDepPass : public ModulePass {
             callOperand->index = index;
             callOperand->newOperand = stringPtr; 
             replaceOperands[callInst] = callOperand;
-
             index++;             
 	  }
 	}
@@ -290,33 +357,46 @@ struct StringDepPass : public ModulePass {
 
           Value * ptr = GEPInst->getOperand(0);
           Type * ptrType = ptr->getType();
-          // FIXIT: Need check for type ?
-          /*if(ptrType->isArrayTy() && ptrType->getContainedType(0)->isIntegerTy(8)){
-            if(debugPrint) errs()<<"Note: i8* Type \n";  
-            continue;
-	  }
-          else
-            if(debugPrint) errs()<<"Skipped "<<*ptrType->getContainedType(0) <<"\n";
-	  */
-          PointerData * basePointer;
+          StringPointer * basePointer;
           if(stringPointers.find(ptr) == stringPointers.end())
             continue;
           else
             basePointer = stringPointers[ptr];
-           
-          errs()<<"ptr = "<<*ptr<<"\n";
-	  const ConstantInt *FirstIdx = dyn_cast<ConstantInt>(GEPInst->getOperand(1));
-          if (!FirstIdx || !FirstIdx->isZero())
-	    continue;          
-          uint64_t startIdx = 0;
-          if (const ConstantInt *CI = dyn_cast<ConstantInt>(GEPInst->getOperand(2)))
-	    startIdx = CI->getZExtValue();
-         
-          PointerData * pointerData = new PointerData;
-          pointerData->position = basePointer->position + startIdx;
-          pointerData->stringData = basePointer->stringData;
-          stringPointers[I] = pointerData;
-          errs()<<"index = "<<stringPointers[I]->position << " , data = "<<stringPointers[I]->stringData->data<<"\n"; 
+              
+	  // TODO: more comprehensive test for '0' indices into string      
+          if(!basePointer->alloca->constant){
+            if(debugPrint) errs()<<"..... Skipping non-constant string ... "<<*GEPInst<<"\n";
+            continue;              
+	  }
+
+          Value * indexValue;
+          bool nonConstantIndices = false;
+          int lastIndex;
+          for(auto index = GEPInst->idx_begin(), end = GEPInst->idx_end(); index != end; index++){
+            
+            indexValue = *index;            
+            if(ConstantInt *Idx = dyn_cast<ConstantInt>(indexValue)){
+              lastIndex = Idx->getZExtValue();     
+	    }
+	    else{
+              nonConstantIndices = true;
+              break;
+	    }
+	  } 
+
+          if(nonConstantIndices){
+            if(debugPrint) errs() <<"Non-constant indices - Skipping ...";
+            continue;
+	  }
+
+          if(debugPrint) errs()<<"last Index = "<<lastIndex<<"\n";
+
+          StringPointer * stringPointer = new StringPointer;
+          stringPointer->position = basePointer->position + lastIndex;
+          stringPointer->alloca = basePointer->alloca;
+          stringPointers[I] = stringPointer;
+          if(debugPrint) errs()<<"index = "<<stringPointers[I]->position 
+                               << " , data = "<<stringPointers[I]->alloca->data<<"\n"; 
 	}
       }
     }
@@ -330,3 +410,35 @@ struct StringDepPass : public ModulePass {
 
 char StringDepPass::ID = 0;
 static RegisterPass<StringDepPass> X("stringdep", "specialising string functions using alias analysis", false, false);
+
+
+
+// Unused code
+
+
+          // FIXIT: Need check for type ?
+          /*if(ptrType->isArrayTy() && ptrType->getContainedType(0)->isIntegerTy(8)){
+            if(debugPrint) errs()<<"Note: i8* Type \n";  
+            continue;
+	  }
+          else
+            if(debugPrint) errs()<<"Skipped "<<*ptrType->getContainedType(0) <<"\n";
+	  */
+
+
+	  /* const ConstantInt *FirstIdx = dyn_cast<ConstantInt>(GEPInst->getOperand(1));
+          if (!FirstIdx || !FirstIdx->isZero()){
+	    basePointer->alloca->constant = false; // mark string as non-constant 
+            if(debugPrint) errs()<<"marked non-constant = "<<*GEPInst<<"\n";   
+            continue;          
+	  }
+
+          uint64_t startIdx = 0;
+          if (const ConstantInt *CI = dyn_cast<ConstantInt>(GEPInst->getOperand(2)))
+	    startIdx = CI->getZExtValue();
+	  else{
+            basePointer->alloca->constant = false; // mark string as non-constant
+            if(debugPrint) errs()<<"marked non-constant = "<<*GEPInst<<"\n";  
+	    continue;
+	  }
+          */
