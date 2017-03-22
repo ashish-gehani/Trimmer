@@ -300,6 +300,7 @@ struct StringDepPass : public ModulePass {
         else if(CallInst * callInst = dyn_cast<CallInst>(&*I)){
 
           Function * calledFunction = callInst->getCalledFunction();
+          errs()<<"called function = "<<*calledFunction<<"\n"; 
           // Skip indirect function calls
           if(calledFunction == NULL)
             continue;
@@ -307,6 +308,7 @@ struct StringDepPass : public ModulePass {
           ///--- if(debugPrint) errs()<<"\nFunction called = "<<calledFunction->getName() <<"\n";
           int index = 0;
           for(auto arg = calledFunction->arg_begin(), argEnd = calledFunction->arg_end(); arg != argEnd; arg++){
+            errs()<<"!!!! arg"<<*arg<<"\n";
             if(!arg->getType()->isPointerTy() || !arg->getType()->getPointerElementType()->isIntegerTy(8)){
               errs()<<"note: Type not supported \n";
               continue;
@@ -316,23 +318,30 @@ struct StringDepPass : public ModulePass {
             // All arguments in a 'readonly' function are assumed readonly
             if(!arg->onlyReadsMemory() && !calledFunction->onlyReadsMemory()){
               errs()<<"note: Argument type not readonly \n";
-              continue;
+              //continue;
 	    }                           
   
             Value * pointerArg = callInst->getOperand(index);
             StringPointer * basePointer;
             if(stringPointers.find(pointerArg) == stringPointers.end())
+	    { 
+              if(debugPrint) errs()<<"!pointer not found = "<<*pointerArg <<"\n"; 
               continue;
+	    } 
             else
               basePointer = stringPointers[pointerArg];
 
             char * baseStringData = basePointer->alloca->data;
             int strLen = strlen(baseStringData);
             int offset = basePointer->position;
+            errs()<<"******* offset = "<<offset<<"\n";
             int numElements = strLen - offset + 1;
-            char * newStr = (char*) malloc(numElements);
+            /*char * newStr = (char*) malloc(numElements);
             memcpy(newStr, baseStringData + offset, numElements);     
-
+            errs()<<"**newStr = "<<baseStringData + offset<<"\n";
+            */
+         
+            char * newStr = baseStringData + offset;
             IntegerType * intTy = IntegerType::get(M.getContext(), 64);
             ConstantInt * index1 = ConstantInt::get(intTy, 0);
             vector<Value *> indxList;
@@ -342,6 +351,8 @@ struct StringDepPass : public ModulePass {
             Constant * stringConstant = ConstantDataArray::getString(M.getContext(), StringRef(newStr), true);
  	    GlobalVariable * globalReadString = new GlobalVariable(M, stringConstant->getType(), true,
                                                                    GlobalValue::ExternalLinkage, stringConstant, "");
+
+            if(debugPrint) errs()<<"globalReadString = "<<*globalReadString<<"\n";
             GetElementPtrInst * stringPtr = GetElementPtrInst::Create(NULL, globalReadString, 
                                                                       indxList, Twine(""), callInst);
             
@@ -396,7 +407,16 @@ struct StringDepPass : public ModulePass {
           stringPointer->alloca = basePointer->alloca;
           stringPointers[I] = stringPointer;
           if(debugPrint) errs()<<"index = "<<stringPointers[I]->position 
-                               << " , data = "<<stringPointers[I]->alloca->data<<"\n"; 
+                               << " , data = "<<stringPointers[I]->alloca->data<<"\n";
+
+           
+	/*if(debugPrint) errs()<<"creating new global string \n";
+          char * newStr = stringPointers[I]->alloca->data + stringPointer->position;             
+          Constant * stringConstant = ConstantDataArray::getString(M.getContext(), StringRef(newStr), true);
+ 	  GlobalVariable * globalReadString = new GlobalVariable(M, stringConstant->getType(), true,
+                                                                 GlobalValue::ExternalLinkage, stringConstant, "");
+          errs()<<"globalReadString = "<<*globalReadString<<"\n";          
+          */
 	}
       }
     }
