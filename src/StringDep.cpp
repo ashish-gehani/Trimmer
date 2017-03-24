@@ -17,6 +17,7 @@ ASSUMPTIONS
 #include "llvm/Pass.h"
 #include "llvm/IR/Function.h"
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
+#include "llvm/Analysis/InstructionSimplify.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Analysis/CallGraph.h"
 #include "llvm/IR/Instruction.h"	
@@ -29,6 +30,10 @@ ASSUMPTIONS
 #include "llvm/Analysis/MemoryDependenceAnalysis.h"
 #include "llvm/IR/IntrinsicInst.h"
 #include "llvm/ADT/SmallVector.h"
+#include "llvm/Transforms/Utils/SimplifyLibCalls.h"
+#include "llvm/Analysis/TargetLibraryInfo.h"
+#include "llvm/Transforms/Utils/BasicBlockUtils.h"
+#include "llvm/IR/IRBuilder.h"
 #include <sys/stat.h>
 #include <map>
 #include <set>
@@ -98,6 +103,7 @@ struct StringDepPass : public ModulePass {
   // Adding llvm::MemoryDependenceAnalysis as a required PrePass                                                         
   void getAnalysisUsage(AnalysisUsage &AU) const override { 
     //AU.addRequired<MemoryDependenceAnalysis>();
+    AU.addRequired<TargetLibraryInfoWrapperPass>();
   }
 
   
@@ -191,28 +197,46 @@ struct StringDepPass : public ModulePass {
   }
    
 
+  bool isStringFunction(Function * calledFunction){
+
+    if(calledFunction == NULL){
+      if(debugPrint) errs()<<"indirect function call skipped \n";
+      return false;
+    }
+
+    string funcName = calledFunction->getName();
+    if(funcName == "strcmp" || funcName == "strcasecmp" || funcName == "strcspn" || funcName == "strspn")
+      return true;
+    else
+      return false;
+  }
 
   virtual bool runOnModule(Module & M) {
 
+    const TargetLibraryInfo *TLI = &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI();
+    DataLayout * DL = new DataLayout(&M);
+	   
     // Find all bitcast instructions within stores, calls etc. These must be bitcasting from globals to type*
-    for (Module::iterator F = M.begin(), Fend = M.end(); F != Fend; ++F) {  
+    for (Module::iterator F = M.begin(), Fend = M.end(); F != Fend; ++F) { 
+ 
       Function * func = &*F;
       if (F->isDeclaration()) continue; // FIXIT
       MemCpyInst * lastMemcpy = NULL;
       Value * lastBufferPtr = NULL;
-      for(inst_iterator inst = inst_begin(func), e = inst_end(func); inst != e;) {        
-        Instruction * I = &(*inst++);
+      for(inst_iterator inst = inst_begin(func), e = inst_end(func); inst != e;) {
+     
+        Instruction * I = &(*inst);
         // Only considering allocas for string specialisation
         if(AllocaInst * allocaInst = dyn_cast<AllocaInst>(&*I)){  
           Type * allocatedType = allocaInst->getAllocatedType();
           // Only considering allocas of char arrays e.g char buffer[100]       
           if(allocatedType->isArrayTy() && allocatedType->getContainedType(0)->isIntegerTy(8)) {
 
-            if(debugPrint) errs()<<"ContainedType = "<<*allocatedType->getContainedType(0)<<"\n";
-	    if(debugPrint) errs()<<"Alloca Inst = "<<*allocaInst<<"\n";
+            // if(debugPrint) errs()<<"ContainedType = "<<*allocatedType->getContainedType(0)<<"\n";
+	    // if(debugPrint) errs()<<"Alloca Inst = "<<*allocaInst<<"\n";
             ArrayType * arType = dyn_cast<ArrayType>(&*allocatedType);
             int numElements = arType->getNumElements();
-            if(debugPrint) errs()<<"numElements = "<<numElements<<"\n";
+            // if(debugPrint) errs()<<"numElements = "<<numElements<<"\n";
             
             StringAlloca * stringAlloca = new StringAlloca;     
             stringAlloca->size = numElements;
@@ -231,11 +255,13 @@ struct StringDepPass : public ModulePass {
 	}
 	else if(MemCpyInst * memcpyInst = dyn_cast<MemCpyInst>(&*I)){
  	
-          if(debugPrint) errs()<<"Memcpy Inst = "<<*I<<"\n";
+          // if(debugPrint) errs()<<"Memcpy Inst = "<<*I<<"\n";
           Value * bufferPtr = memcpyInst->getOperand(0);
           StringPointer * basePointer;
-          if(stringPointers.find(bufferPtr) == stringPointers.end())
+          if(stringPointers.find(bufferPtr) == stringPointers.end()){
+            inst++;
             continue;
+	  }
           else
             basePointer = stringPointers[bufferPtr];
                    
@@ -245,13 +271,15 @@ struct StringDepPass : public ModulePass {
           
           if(!getConstantStringInfo(memcpyInst->getOperand(1), stringRef, 0, false)){
             if(debugPrint) errs()<<"non-constant string operand to memcpy - skipping ...";
+            inst++;
             continue; 
 	  }
 
           const char * constantString = stringRef.str().c_str();
           int length = strlen(constantString);   
           memcpy(sourceBuffer, constantString, length + 1);
-          basePointer->alloca->initialized = true; // mark string initialized          
+          basePointer->alloca->initialized = true; // mark string initialized
+          basePointer->alloca->constant = true; // String is now constant          
           if(debugPrint) errs()<<"constantString = "<<constantString<<"\n";                      
 	}	
         else if(StoreInst * storeInst = dyn_cast<StoreInst>(&*I)){
@@ -259,19 +287,23 @@ struct StringDepPass : public ModulePass {
           Value * ptr = storeInst->getOperand(1);
           Type * operandType = storeInst->getOperand(0)->getType();
           if(!operandType->isIntegerTy(8)){
-            if(debugPrint) errs()<<"non-char operand - Skipping .."; 	    
+            if(debugPrint) errs()<<"non-char operand - Skipping .."; 
+            inst++;	    
             continue;
 	  }
 
           StringPointer * basePointer;
           // Search for the pointer in map of constant pointers - pointers with constant offsets
-          if(stringPointers.find(ptr) == stringPointers.end())
+          if(stringPointers.find(ptr) == stringPointers.end()){
+            inst++;
             continue;
+	  }
           else
             basePointer = stringPointers[ptr];
 
           if(!basePointer->alloca->constant){
             if(debugPrint) errs()<<".. Skipping non constant alloca string ... \n";
+            inst++;
             continue;
 	  }        
        
@@ -283,6 +315,7 @@ struct StringDepPass : public ModulePass {
           else{
             if(debugPrint) errs()<<"--- Marking alloca as non-const \n";
             basePointer->alloca->constant = false;
+            inst++;
             continue;
 	  }
           
@@ -299,70 +332,103 @@ struct StringDepPass : public ModulePass {
 	}
         else if(CallInst * callInst = dyn_cast<CallInst>(&*I)){
 
-          Function * calledFunction = callInst->getCalledFunction();
-          errs()<<"called function = "<<*calledFunction<<"\n"; 
-          // Skip indirect function calls
-          if(calledFunction == NULL)
-            continue;
+          Function * calledFunction = callInst->getCalledFunction();          
+          /* specialize for functions defined in string.h e.g strcmp, strchr */
+ 	  if(isStringFunction(calledFunction)){
 
-          ///--- if(debugPrint) errs()<<"\nFunction called = "<<calledFunction->getName() <<"\n";
-          int index = 0;
-          for(auto arg = calledFunction->arg_begin(), argEnd = calledFunction->arg_end(); arg != argEnd; arg++){
-            errs()<<"!!!! arg"<<*arg<<"\n";
-            if(!arg->getType()->isPointerTy() || !arg->getType()->getPointerElementType()->isIntegerTy(8)){
-              errs()<<"note: Type not supported \n";
-              continue;
-	    }
-   
-            // Check for constant pointers
-            // All arguments in a 'readonly' function are assumed readonly
-            if(!arg->onlyReadsMemory() && !calledFunction->onlyReadsMemory()){
-              errs()<<"note: Argument type not readonly \n";
-              //continue;
-	    }                           
-  
-            Value * pointerArg = callInst->getOperand(index);
-            StringPointer * basePointer;
-            if(stringPointers.find(pointerArg) == stringPointers.end())
-	    { 
-              if(debugPrint) errs()<<"!pointer not found = "<<*pointerArg <<"\n"; 
-              continue;
-	    } 
-            else
-              basePointer = stringPointers[pointerArg];
+            if(debugPrint) errs()<<"\n**** Specializing String function =  "<<calledFunction->getName()<<"\n";
+	    for(unsigned int index = 0; index < callInst->getNumArgOperands(); index++){
+              Value * pointerArg = callInst->getArgOperand(index);
+	      StringPointer * basePointer;
+	      if(stringPointers.find(pointerArg) == stringPointers.end()){ 
+		  if(debugPrint) errs()<<"!pointer not found = "<<*pointerArg <<"\n"; 
+		  continue;
+	      } 
+	      else
+		basePointer = stringPointers[pointerArg];
 
-            char * baseStringData = basePointer->alloca->data;
-            int strLen = strlen(baseStringData);
-            int offset = basePointer->position;
-            errs()<<"******* offset = "<<offset<<"\n";
-            int numElements = strLen - offset + 1;
-            /*char * newStr = (char*) malloc(numElements);
-            memcpy(newStr, baseStringData + offset, numElements);     
-            errs()<<"**newStr = "<<baseStringData + offset<<"\n";
-            */
-         
-            char * newStr = baseStringData + offset;
-            IntegerType * intTy = IntegerType::get(M.getContext(), 64);
-            ConstantInt * index1 = ConstantInt::get(intTy, 0);
-            vector<Value *> indxList;
-            indxList.push_back(index1); 
-            indxList.push_back(index1);
+              if(basePointer->alloca->constant == false){
+                errs()<<"non-constant string context \n";
+	        continue;
+	      }
 
-            Constant * stringConstant = ConstantDataArray::getString(M.getContext(), StringRef(newStr), true);
- 	    GlobalVariable * globalReadString = new GlobalVariable(M, stringConstant->getType(), true,
-                                                                   GlobalValue::ExternalLinkage, stringConstant, "");
+	      char * baseStringData = basePointer->alloca->data;
+	      int strLen = strlen(baseStringData);
+	      int offset = basePointer->position;
+	      int numElements = strLen - offset + 1;
+	      
+	      char * newStr = baseStringData + offset;
+	      IntegerType * intTy = IntegerType::get(M.getContext(), 64);
+	      ConstantInt * index1 = ConstantInt::get(intTy, 0);
+	      vector<Value *> indxList;
+	      indxList.push_back(index1); 
+	      indxList.push_back(index1);
 
-            if(debugPrint) errs()<<"globalReadString = "<<*globalReadString<<"\n";
-            GetElementPtrInst * stringPtr = GetElementPtrInst::Create(NULL, globalReadString, 
-                                                                      indxList, Twine(""), callInst);
+	      Constant * stringConstant = ConstantDataArray::getString(M.getContext(), StringRef(newStr), true);
+	      GlobalVariable * globalReadString = new GlobalVariable(M, stringConstant->getType(), true,
+								     GlobalValue::ExternalLinkage, stringConstant, "");
+
+	      if(debugPrint) errs()<<"globalReadString = "<<*globalReadString<<"\n";
+	      GetElementPtrInst * stringPtr = GetElementPtrInst::Create(NULL, globalReadString, 
+									indxList, Twine(""), callInst);
             
-            // The GEP will replace the original argument
-            CallOperand * callOperand = new CallOperand;
-            callOperand->index = index;
-            callOperand->newOperand = stringPtr; 
-            replaceOperands[callInst] = callOperand;
-            index++;             
+	      // The GEP will replace the original argument
+	      CallOperand * callOperand = new CallOperand;
+	      callOperand->index = index;
+	      callOperand->newOperand = stringPtr; 
+	      replaceOperands[callInst] = callOperand;
+
+              replaceCallOperands();
+ 
+              auto InstCombineRAUW = [this](Instruction *From, Value *With) {
+		From->replaceAllUsesWith(With);
+	      };
+
+	      LibCallSimplifier Simplifier(*DL, TLI, InstCombineRAUW);
+              errs()<<"-------------------trying to simplify call \n";
+	      if (Value *With = Simplifier.optimizeCall(callInst)) {
+                if(With == NULL) errs()<<"NULL VALUE \n\n\n\n";
+                errs()<<"value to replace = "<<*With<<"\n";
+		if(!callInst->use_empty())
+                  callInst->replaceAllUsesWith(With);
+	      }
+           
+	    } 
 	  }
+
+          /* for functions other than string functions look for memory side effects */ 
+          else if(!isStringFunction(calledFunction)){
+
+            int index = 0;
+	    for(auto arg = calledFunction->arg_begin(), argEnd = calledFunction->arg_end(); arg != argEnd; arg++){
+	      if(!arg->getType()->isPointerTy() || !arg->getType()->getPointerElementType()->isIntegerTy(8)){
+		errs()<<"note: Type not supported \n";                
+		continue;
+	      }
+	      // Check for constant pointers
+	      // All arguments in a 'readonly' function are assumed readonly
+              // FIXIT: Do I need to check for aliasing?
+	      if(arg->onlyReadsMemory() || calledFunction->onlyReadsMemory()){
+		if(debugPrint) errs()<<"note: Argument/Function is readonly - no side effects \n";
+		continue;
+	      }                           
+  
+	      Value * pointerArg = callInst->getOperand(index);
+	      StringPointer * basePointer;
+	      if(stringPointers.find(pointerArg) == stringPointers.end()){ 
+		if(debugPrint) errs()<<"!pointer not found = "<<*pointerArg <<"\n"; 
+             	continue;
+	      } 
+	      else
+		basePointer = stringPointers[pointerArg];
+
+              /* Mark the string as non-constant */
+              StringAlloca * stringAlloca = basePointer->alloca;
+              stringAlloca->constant = false;
+	      index++;             
+	    }
+          }
+
 	}
         else if(GetElementPtrInst * GEPInst = dyn_cast<GetElementPtrInst>(&*I)){
 
@@ -370,13 +436,17 @@ struct StringDepPass : public ModulePass {
           Type * ptrType = ptr->getType();
           StringPointer * basePointer;
           if(stringPointers.find(ptr) == stringPointers.end())
+	  {
+	    inst++; 
             continue;
+	  }
           else
             basePointer = stringPointers[ptr];
               
 	  // TODO: more comprehensive test for '0' indices into string      
           if(!basePointer->alloca->constant){
             if(debugPrint) errs()<<"..... Skipping non-constant string ... "<<*GEPInst<<"\n";
+            inst++;
             continue;              
 	  }
 
@@ -396,28 +466,22 @@ struct StringDepPass : public ModulePass {
 	  } 
 
           if(nonConstantIndices){
-            if(debugPrint) errs() <<"Non-constant indices - Skipping ...";
+            if(debugPrint) errs() <<"Non-constant indices - skipping  ...";
+            basePointer->alloca->constant = false;
+            inst++;
             continue;
 	  }
-
-          if(debugPrint) errs()<<"last Index = "<<lastIndex<<"\n";
 
           StringPointer * stringPointer = new StringPointer;
           stringPointer->position = basePointer->position + lastIndex;
           stringPointer->alloca = basePointer->alloca;
           stringPointers[I] = stringPointer;
-          if(debugPrint) errs()<<"index = "<<stringPointers[I]->position 
-                               << " , data = "<<stringPointers[I]->alloca->data<<"\n";
-
+          //if(debugPrint) errs()<<"index = "<<stringPointers[I]->position 
+	  //                   << " , data = "<<stringPointers[I]->alloca->data<<"\n";
            
-	/*if(debugPrint) errs()<<"creating new global string \n";
-          char * newStr = stringPointers[I]->alloca->data + stringPointer->position;             
-          Constant * stringConstant = ConstantDataArray::getString(M.getContext(), StringRef(newStr), true);
- 	  GlobalVariable * globalReadString = new GlobalVariable(M, stringConstant->getType(), true,
-                                                                 GlobalValue::ExternalLinkage, stringConstant, "");
-          errs()<<"globalReadString = "<<*globalReadString<<"\n";          
-          */
 	}
+
+	inst++;
       }
     }
 
