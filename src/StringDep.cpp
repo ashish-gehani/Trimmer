@@ -4,10 +4,10 @@
   LLVM_version: 3.8.0
 
 TODO:
- 1) Consider control flow
- 2) Consider pointer aliasing 
- 3) Checking for bounds of array accesses is possible with strings?
- 4) Need to consider multiple arguments that may access same memory (argument aliasing)
+ 1) Consider pointer aliasing - currenly extra conservative 
+ 2) Need to consider multiple arguments that may access same memory (argument aliasing)
+ 3) Add specialization for more libc routines e.g strdup
+ 4) Test on more examples - currently tested with mini_httpd
 
 ASSUMPTIONS
  1) catering only i8* arrays
@@ -42,6 +42,8 @@ ASSUMPTIONS
 #include <map>
 #include <fstream>
 #include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include <sstream>
 
 using namespace llvm;
@@ -51,6 +53,8 @@ using namespace std;
 
 /* The FileNode structure retains per file specialization data.
  */
+
+
 
 struct SplitString;
 struct StringAlloca;
@@ -195,23 +199,43 @@ struct StringDepPass : public ModulePass {
     }
     return true;
   }
-   
 
-  bool isStringFunction(Function * calledFunction){
-
-    if(calledFunction == NULL){
-      if(debugPrint) errs()<<"indirect function call skipped \n";
+  
+  /* This function specializes calls to library functions that take constant arguments */
+  bool isSpecializable(Function * calledFunction){
+    
+    string funcName = calledFunction->getName();
+    if(funcName == "atoi")
+      return true;
+    else
       return false;
-    }
+  }   
+
+  bool hasNoSideEffects(Function * calledFunction){
 
     string funcName = calledFunction->getName();
-    if(funcName == "strcmp" || funcName == "strcasecmp" || funcName == "strcspn" || funcName == "strspn")
+    if(funcName == "atoi" || funcName == "strdup")
       return true;
     else
       return false;
   }
 
-  virtual bool runOnModule(Module & M) {
+  bool isStringFunction(Function * calledFunction){
+
+    if(calledFunction == NULL){
+      //--- if(debugPrint) errs()<<"indirect function call skipped \n";
+      return false;
+    }
+
+    string funcName = calledFunction->getName();
+    if(funcName == "strcmp" || funcName == "strcasecmp" || funcName == "strcspn" || funcName == "strspn" 
+       || funcName == "atoi" || funcName == "strdup")
+      return true;
+    else
+      return false;
+  }
+
+  virtual bool runOnModule(Module & M) override {
 
     const TargetLibraryInfo *TLI = &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI();
     DataLayout * DL = new DataLayout(&M);
@@ -221,8 +245,6 @@ struct StringDepPass : public ModulePass {
  
       Function * func = &*F;
       if (F->isDeclaration()) continue; // FIXIT
-      MemCpyInst * lastMemcpy = NULL;
-      Value * lastBufferPtr = NULL;
       for(inst_iterator inst = inst_begin(func), e = inst_end(func); inst != e;) {
      
         Instruction * I = &(*inst);
@@ -232,11 +254,8 @@ struct StringDepPass : public ModulePass {
           // Only considering allocas of char arrays e.g char buffer[100]       
           if(allocatedType->isArrayTy() && allocatedType->getContainedType(0)->isIntegerTy(8)) {
 
-            // if(debugPrint) errs()<<"ContainedType = "<<*allocatedType->getContainedType(0)<<"\n";
-	    // if(debugPrint) errs()<<"Alloca Inst = "<<*allocaInst<<"\n";
             ArrayType * arType = dyn_cast<ArrayType>(&*allocatedType);
             int numElements = arType->getNumElements();
-            // if(debugPrint) errs()<<"numElements = "<<numElements<<"\n";
             
             StringAlloca * stringAlloca = new StringAlloca;     
             stringAlloca->size = numElements;
@@ -251,11 +270,10 @@ struct StringDepPass : public ModulePass {
             stringPointers[I] = stringPointer;
 	  }
           else
-            if(debugPrint) errs()<<"note: unsupported alloca type "<<*allocatedType;  
+            if(debugPrint) errs()<<"note: unsupported alloca type "<<*allocatedType<<"\n";  
 	}
 	else if(MemCpyInst * memcpyInst = dyn_cast<MemCpyInst>(&*I)){
  	
-          // if(debugPrint) errs()<<"Memcpy Inst = "<<*I<<"\n";
           Value * bufferPtr = memcpyInst->getOperand(0);
           StringPointer * basePointer;
           if(stringPointers.find(bufferPtr) == stringPointers.end()){
@@ -270,7 +288,7 @@ struct StringDepPass : public ModulePass {
           StringRef stringRef;
           
           if(!getConstantStringInfo(memcpyInst->getOperand(1), stringRef, 0, false)){
-            if(debugPrint) errs()<<"non-constant string operand to memcpy - skipping ...";
+            //-- if(debugPrint) errs()<<"non-constant string operand to memcpy - skipping ...";
             inst++;
             continue; 
 	  }
@@ -287,7 +305,7 @@ struct StringDepPass : public ModulePass {
           Value * ptr = storeInst->getOperand(1);
           Type * operandType = storeInst->getOperand(0)->getType();
           if(!operandType->isIntegerTy(8)){
-            if(debugPrint) errs()<<"non-char operand - Skipping .."; 
+            //-- if(debugPrint) errs()<<"non-char operand - Skipping .."; 
             inst++;	    
             continue;
 	  }
@@ -333,6 +351,29 @@ struct StringDepPass : public ModulePass {
         else if(CallInst * callInst = dyn_cast<CallInst>(&*I)){
 
           Function * calledFunction = callInst->getCalledFunction();          
+	  // Indirect function calls need special handling
+          if(calledFunction == NULL){
+
+            for(unsigned int index = 0; index < callInst->getNumArgOperands(); index++){
+              Value * pointerArg = callInst->getArgOperand(index);
+	      StringPointer * basePointer;
+	      if(stringPointers.find(pointerArg) == stringPointers.end()){ 
+		  //-- if(debugPrint) errs()<<"!pointer not found = "<<*pointerArg <<"\n"; 
+		  continue;
+	      } 
+	      else
+		basePointer = stringPointers[pointerArg];
+               
+              // "conservatively" mark each argument as modified 
+	      basePointer->alloca->constant = false;
+	    }
+
+            inst++;
+            continue;
+	  }
+ 
+        
+
           /* specialize for functions defined in string.h e.g strcmp, strchr */
  	  if(isStringFunction(calledFunction)){
 
@@ -341,7 +382,7 @@ struct StringDepPass : public ModulePass {
               Value * pointerArg = callInst->getArgOperand(index);
 	      StringPointer * basePointer;
 	      if(stringPointers.find(pointerArg) == stringPointers.end()){ 
-		  if(debugPrint) errs()<<"!pointer not found = "<<*pointerArg <<"\n"; 
+		  //-- if(debugPrint) errs()<<"!pointer not found = "<<*pointerArg <<"\n"; 
 		  continue;
 	      } 
 	      else
@@ -353,9 +394,7 @@ struct StringDepPass : public ModulePass {
 	      }
 
 	      char * baseStringData = basePointer->alloca->data;
-	      int strLen = strlen(baseStringData);
 	      int offset = basePointer->position;
-	      int numElements = strLen - offset + 1;
 	      
 	      char * newStr = baseStringData + offset;
 	      IntegerType * intTy = IntegerType::get(M.getContext(), 64);
@@ -385,38 +424,61 @@ struct StringDepPass : public ModulePass {
 	      };
 
 	      LibCallSimplifier Simplifier(*DL, TLI, InstCombineRAUW);
-              errs()<<"-------------------trying to simplify call \n";
 	      if (Value *With = Simplifier.optimizeCall(callInst)) {
                 if(With == NULL) errs()<<"NULL VALUE \n\n\n\n";
                 errs()<<"value to replace = "<<*With<<"\n";
 		if(!callInst->use_empty())
                   callInst->replaceAllUsesWith(With);
 	      }
-           
+
+
+	      /* optimize functions that are not in string.h */
+	      if(isSpecializable(calledFunction)){
+		string functionName = calledFunction->getName();
+		/* optimizing atoi calls with constant strings with corresponding constant int */
+		if(functionName == "atoi"){             
+		  StringRef stringRef;
+		  if(getConstantStringInfo(callInst->getOperand(0), stringRef, 0, false)){
+		    const char * constantString = stringRef.str().c_str();
+		    if(debugPrint) errs()<<"constant string = "<<constantString<<"\n";
+		    int val = atoi(constantString);
+		    IntegerType * int32Ty = IntegerType::get(M.getContext(), 32);
+		    ConstantInt * constVal = ConstantInt::get(int32Ty, val);
+		    callInst->replaceAllUsesWith(constVal);  
+		  }
+		}            
+	      }
+                         
 	    } 
 	  }
 
-          /* for functions other than string functions look for memory side effects */ 
-          else if(!isStringFunction(calledFunction)){
+          if(hasNoSideEffects(calledFunction)){
+            inst++;
+            continue;
+	  }
 
+          /* for functions other than string functions look for memory side effects */ 
+          if(!isStringFunction(calledFunction)){
+                             
             int index = 0;
-	    for(auto arg = calledFunction->arg_begin(), argEnd = calledFunction->arg_end(); arg != argEnd; arg++){
-	      if(!arg->getType()->isPointerTy() || !arg->getType()->getPointerElementType()->isIntegerTy(8)){
-		errs()<<"note: Type not supported \n";                
+	    for(auto arg = calledFunction->arg_begin(), argEnd = calledFunction->arg_end(); arg != argEnd; arg++){	
+              if(!arg->getType()->isPointerTy() || !arg->getType()->getPointerElementType()->isIntegerTy(8)){
+		// errs()<<"note: Type not supported \n";                
 		continue;
 	      }
+
 	      // Check for constant pointers
 	      // All arguments in a 'readonly' function are assumed readonly
               // FIXIT: Do I need to check for aliasing?
 	      if(arg->onlyReadsMemory() || calledFunction->onlyReadsMemory()){
-		if(debugPrint) errs()<<"note: Argument/Function is readonly - no side effects \n";
+		//--- if(debugPrint) errs()<<"note: Argument/Function is readonly - no side effects \n";
 		continue;
 	      }                           
   
 	      Value * pointerArg = callInst->getOperand(index);
 	      StringPointer * basePointer;
 	      if(stringPointers.find(pointerArg) == stringPointers.end()){ 
-		if(debugPrint) errs()<<"!pointer not found = "<<*pointerArg <<"\n"; 
+		//--- if(debugPrint) errs()<<"!pointer not found = "<<*pointerArg <<"\n"; 
              	continue;
 	      } 
 	      else
@@ -433,7 +495,7 @@ struct StringDepPass : public ModulePass {
         else if(GetElementPtrInst * GEPInst = dyn_cast<GetElementPtrInst>(&*I)){
 
           Value * ptr = GEPInst->getOperand(0);
-          Type * ptrType = ptr->getType();
+          //-- Type * ptrType = ptr->getType();
           StringPointer * basePointer;
           if(stringPointers.find(ptr) == stringPointers.end())
 	  {
@@ -445,7 +507,7 @@ struct StringDepPass : public ModulePass {
               
 	  // TODO: more comprehensive test for '0' indices into string      
           if(!basePointer->alloca->constant){
-            if(debugPrint) errs()<<"..... Skipping non-constant string ... "<<*GEPInst<<"\n";
+            //-- if(debugPrint) errs()<<"..... Skipping non-constant string ... "<<*GEPInst<<"\n";
             inst++;
             continue;              
 	  }
@@ -466,7 +528,7 @@ struct StringDepPass : public ModulePass {
 	  } 
 
           if(nonConstantIndices){
-            if(debugPrint) errs() <<"Non-constant indices - skipping  ...";
+            //-- if(debugPrint) errs() <<"Non-constant indices - skipping  ...";
             basePointer->alloca->constant = false;
             inst++;
             continue;
@@ -496,33 +558,3 @@ char StringDepPass::ID = 0;
 static RegisterPass<StringDepPass> X("stringdep", "specialising string functions using alias analysis", false, false);
 
 
-
-// Unused code
-
-
-          // FIXIT: Need check for type ?
-          /*if(ptrType->isArrayTy() && ptrType->getContainedType(0)->isIntegerTy(8)){
-            if(debugPrint) errs()<<"Note: i8* Type \n";  
-            continue;
-	  }
-          else
-            if(debugPrint) errs()<<"Skipped "<<*ptrType->getContainedType(0) <<"\n";
-	  */
-
-
-	  /* const ConstantInt *FirstIdx = dyn_cast<ConstantInt>(GEPInst->getOperand(1));
-          if (!FirstIdx || !FirstIdx->isZero()){
-	    basePointer->alloca->constant = false; // mark string as non-constant 
-            if(debugPrint) errs()<<"marked non-constant = "<<*GEPInst<<"\n";   
-            continue;          
-	  }
-
-          uint64_t startIdx = 0;
-          if (const ConstantInt *CI = dyn_cast<ConstantInt>(GEPInst->getOperand(2)))
-	    startIdx = CI->getZExtValue();
-	  else{
-            basePointer->alloca->constant = false; // mark string as non-constant
-            if(debugPrint) errs()<<"marked non-constant = "<<*GEPInst<<"\n";  
-	    continue;
-	  }
-          */
