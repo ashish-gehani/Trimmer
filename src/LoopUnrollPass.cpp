@@ -853,6 +853,7 @@ static bool canUnrollCompletely(Loop *L, unsigned Threshold,
       }
 
       Value * fileNameOperand = callInst->getOperand(0);
+      errs()<<"fileNameOperand = "<<*fileNameOperand<<"\n";
       if(Constant * constString = dyn_cast<Constant>(&*fileNameOperand)){
         errs()<<"File name : "<<*constString<<"\n";
 	StringRef fileNameStr;
@@ -890,6 +891,7 @@ static bool canUnrollCompletely(Loop *L, unsigned Threshold,
     }
     else if(functionName == "fgets"){
       fd = callInst->getOperand(2);
+      errs()<<"resolving fgets "<<*fd<<"\n";
       return resolveOpenCalls(fd);
     }
    
@@ -957,6 +959,9 @@ static bool tryToUnrollLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
   int numFileCalls = 0; 
   int bytesRead = 0; // number of constant bytes read in one loop iteration
   bool fgetsCall = false; 
+  //-- bool fopenInLoop = false;
+  bool unrollHint = false;
+
   std::vector<BasicBlock*> basicBlocks = L->getBlocks();
 
   for(unsigned long i = 0; i < basicBlocks.size(); i++){    
@@ -964,7 +969,14 @@ static bool tryToUnrollLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
     for(BasicBlock::iterator it = BB->begin(), it2 = BB->end(); it != it2; it++){
       if(CallInst * callInst = dyn_cast<CallInst>(&*it)){
         if(callInst != NULL && callInst->getCalledFunction() != NULL && !callInst->getCalledFunction()->isIntrinsic()){
-          Function * callee = callInst->getCalledFunction();
+     
+          Function * callee = callInst->getCalledFunction();   	  
+          if(callee->getName().str() == "unroll_loop"){
+            callInst->eraseFromParent();
+            unrollHint = true;
+            break;
+	  }
+
 	  if(callee->getName().str() == "fread" || callee->getName().str() == "fread_unlocked" || callee->getName().str() == "read" || callee->getName().str() == "fgetc" || callee->getName().str() == "getc" || callee->getName().str() == "fgets"){     
             // FIXIT: Huge assumption, all read calls read from the same file (common case).
             // FIXIT: Add check for single file
@@ -995,29 +1007,37 @@ static bool tryToUnrollLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
     } 
   }
 
-  if(numFileCalls == 0){
+  // FIXIT: Check if the loop is a nested loop with an fopen
+  if(numFileCalls == 0 && !unrollHint){
+    //errs()<<"numFileCalls = "<<numFileCalls<<" , fopenLoop  = "<<fopenInLoop<<"\n";
     return false; // Did not unroll loop as the loop did not have any calls to libc file IO routines
   }
 
-  errs()<<"\n ----- LoopUnroll Pass ----  \n";
-  FILE * fp = fopen(lastFileName.c_str(), "r");
-  struct stat st;
-  stat(lastFileName.c_str(), &st);
-  int fileSize = st.st_size;
 
-  // If fgets called in the loop, extract the number of New Line characters
+  int fileSize;
   int newLineCount;
-  if (fgetsCall){
-    newLineCount = countNewLine(fp);  
-  }
+  if (numFileCalls > 0){
+
+    errs()<<"\n ----- Starting LoopUnroll ----  \n";
+    FILE * fp = fopen(lastFileName.c_str(), "r");
+    struct stat st;
+    stat(lastFileName.c_str(), &st);
+    fileSize = st.st_size;
+    // If fgets called in the loop, extract the number of New Line characters
+    if (fgetsCall){
+      newLineCount = countNewLine(fp);  
+    }
+    errs()<<"-------newLineCount = "<<newLineCount<<"\n";
  
-  if(debugPrint) errs()<<"FileSize : "<<fileSize <<" \n";  
-  DEBUG(dbgs() << "Loop Unroll: F[" << Header->getParent()->getName()
-        << "] Loop %" << Header->getName() << "\n");
+    if(debugPrint) errs()<<"FileSize : "<<fileSize <<" \n";  
+    DEBUG(dbgs() << "Loop Unroll: F[" << Header->getParent()->getName()
+	  << "] Loop %" << Header->getName() << "\n");
+  }
 
   if (HasUnrollDisablePragma(L)) {
     return false;
   }
+
   bool PragmaFullUnroll = HasUnrollFullPragma(L);
   bool PragmaEnableUnroll = HasUnrollEnablePragma(L);
   unsigned PragmaCount = UnrollCountPragmaValue(L);
@@ -1037,6 +1057,7 @@ static bool tryToUnrollLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
     TripMultiple = SE->getSmallConstantTripMultiple(L, ExitingBlock);
   }
 
+
   TargetTransformInfo::UnrollingPreferences UP = gatherUnrollingPreferences(
       L, TTI, ProvidedThreshold, ProvidedCount, ProvidedAllowPartial,
       ProvidedRuntime, PragmaCount, PragmaFullUnroll, PragmaEnableUnroll,
@@ -1048,9 +1069,16 @@ static bool tryToUnrollLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
     Count = newLineCount + 2;
   }
   else{
-    Count = (fileSize / bytesRead) + 2;
+    if(!unrollHint)
+      Count = (fileSize / bytesRead) + 2;
   }
 
+  // FIXIT: replace with value passed to unroll hint
+  if(unrollHint){
+    TripCount = Count;
+  }
+
+  if(debugPrint) errs()<<"Loop Trip Count = "<<TripCount<<"\n";
   if(debugPrint) errs()<<" unroll count (calculated) : "<<Count<<"\n --- Unrolling --- \n";
   bool CountSetExplicitly = Count != 0;
   // Use a heuristic count if we didn't set anything explicitly.
@@ -1074,11 +1102,7 @@ static bool tryToUnrollLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
                  << " instructions.\n");
     return false;
   }
-  if (NumInlineCandidates != 0) {
-    DEBUG(dbgs() << "  Not unrolling loop with inlinable calls.\n");
-    return false;
-  }
-
+ 
   // Given Count, TripCount and thresholds determine the type of
   // unrolling which is to be performed.
   enum { Full = 0, Partial = 1, Runtime = 2 };
@@ -1188,6 +1212,7 @@ static bool tryToUnrollLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
     return false;
   }
 
+  if(debugPrint) errs()<<"unrolling Loop ****** \n";
   // Unroll the loop.
   if (!UnrollLoop(L, Count, TripCount, AllowRuntime, UP.AllowExpensiveTripCount,
                   TripMultiple, LI, SE, &DT, &AC, PreserveLCSSA))
