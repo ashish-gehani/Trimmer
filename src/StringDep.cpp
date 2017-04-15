@@ -8,6 +8,7 @@ TODO:
  2) Need to consider multiple arguments that may access same memory (argument aliasing)
  3) Add specialization for more libc routines e.g strdup
  4) Test on more examples - currently tested with mini_httpd
+ 5) FIXIT: Make this a function pass 
 
 ASSUMPTIONS
  1) catering only i8* arrays
@@ -34,6 +35,7 @@ ASSUMPTIONS
 #include "llvm/Analysis/TargetLibraryInfo.h"
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
 #include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/Dominators.h"
 #include <sys/stat.h>
 #include <map>
 #include <set>
@@ -101,12 +103,17 @@ struct StringDepPass : public ModulePass {
   // stringPointers is a map of constant pointers - string pointers with constant index into alloca   
   map<Value*, StringPointer*> stringPointers;
   map<Instruction*, CallOperand*> replaceOperands;
+  Module * M;  
+  const TargetLibraryInfo *TLI;
+  DataLayout * DL;
+  DominatorTree * DT;
  
   StringDepPass(): ModulePass(ID){}
 
   // Adding llvm::MemoryDependenceAnalysis as a required PrePass                                                         
   void getAnalysisUsage(AnalysisUsage &AU) const override { 
     //AU.addRequired<MemoryDependenceAnalysis>();
+    AU.addRequired<DominatorTreeWrapperPass>();
     AU.addRequired<TargetLibraryInfoWrapperPass>();
   }
 
@@ -235,18 +242,13 @@ struct StringDepPass : public ModulePass {
       return false;
   }
 
-  virtual bool runOnModule(Module & M) override {
 
-    const TargetLibraryInfo *TLI = &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI();
-    DataLayout * DL = new DataLayout(&M);
-	   
-    // Find all bitcast instructions within stores, calls etc. These must be bitcasting from globals to type*
-    for (Module::iterator F = M.begin(), Fend = M.end(); F != Fend; ++F) { 
- 
-      Function * func = &*F;
-      if (F->isDeclaration()) continue; // FIXIT
-      for(inst_iterator inst = inst_begin(func), e = inst_end(func); inst != e;) {
-     
+  
+  void runOnBB(BasicBlock * BB, map<Value*, StringAlloca*> stringAllocas, map<Value*, StringPointer*> stringPointers){
+   
+    BasicBlock& b = *BB;
+    for (BasicBlock::iterator inst = b.begin(), ie = b.end(); inst != ie; ) {
+
         Instruction * I = &(*inst);
         // Only considering allocas for string specialisation
         if(AllocaInst * allocaInst = dyn_cast<AllocaInst>(&*I)){  
@@ -255,8 +257,7 @@ struct StringDepPass : public ModulePass {
           if(allocatedType->isArrayTy() && allocatedType->getContainedType(0)->isIntegerTy(8)) {
 
             ArrayType * arType = dyn_cast<ArrayType>(&*allocatedType);
-            int numElements = arType->getNumElements();
-            
+            int numElements = arType->getNumElements();            
             StringAlloca * stringAlloca = new StringAlloca;     
             stringAlloca->size = numElements;
             stringAlloca->data = new char[numElements];
@@ -305,7 +306,6 @@ struct StringDepPass : public ModulePass {
           Value * ptr = storeInst->getOperand(1);
           Type * operandType = storeInst->getOperand(0)->getType();
           if(!operandType->isIntegerTy(8)){
-            //-- if(debugPrint) errs()<<"non-char operand - Skipping .."; 
             inst++;	    
             continue;
 	  }
@@ -371,8 +371,7 @@ struct StringDepPass : public ModulePass {
             inst++;
             continue;
 	  }
- 
-        
+         
 
           /* specialize for functions defined in string.h e.g strcmp, strchr */
  	  if(isStringFunction(calledFunction)){
@@ -397,14 +396,14 @@ struct StringDepPass : public ModulePass {
 	      int offset = basePointer->position;
 	      
 	      char * newStr = baseStringData + offset;
-	      IntegerType * intTy = IntegerType::get(M.getContext(), 64);
+	      IntegerType * intTy = IntegerType::get(M->getContext(), 64);
 	      ConstantInt * index1 = ConstantInt::get(intTy, 0);
 	      vector<Value *> indxList;
 	      indxList.push_back(index1); 
 	      indxList.push_back(index1);
 
-	      Constant * stringConstant = ConstantDataArray::getString(M.getContext(), StringRef(newStr), true);
-	      GlobalVariable * globalReadString = new GlobalVariable(M, stringConstant->getType(), true,
+	      Constant * stringConstant = ConstantDataArray::getString(M->getContext(), StringRef(newStr), true);
+	      GlobalVariable * globalReadString = new GlobalVariable(*M, stringConstant->getType(), true,
 								     GlobalValue::ExternalLinkage, stringConstant, "");
 
 	      if(debugPrint) errs()<<"globalReadString = "<<*globalReadString<<"\n";
@@ -442,7 +441,7 @@ struct StringDepPass : public ModulePass {
 		    const char * constantString = stringRef.str().c_str();
 		    if(debugPrint) errs()<<"constant string = "<<constantString<<"\n";
 		    int val = atoi(constantString);
-		    IntegerType * int32Ty = IntegerType::get(M.getContext(), 32);
+		    IntegerType * int32Ty = IntegerType::get(M->getContext(), 32);
 		    ConstantInt * constVal = ConstantInt::get(int32Ty, val);
 		    callInst->replaceAllUsesWith(constVal);  
 		  }
@@ -528,7 +527,7 @@ struct StringDepPass : public ModulePass {
 	  } 
 
           if(nonConstantIndices){
-            //-- if(debugPrint) errs() <<"Non-constant indices - skipping  ...";
+
             basePointer->alloca->constant = false;
             inst++;
             continue;
@@ -537,14 +536,49 @@ struct StringDepPass : public ModulePass {
           StringPointer * stringPointer = new StringPointer;
           stringPointer->position = basePointer->position + lastIndex;
           stringPointer->alloca = basePointer->alloca;
-          stringPointers[I] = stringPointer;
-          //if(debugPrint) errs()<<"index = "<<stringPointers[I]->position 
-	  //                   << " , data = "<<stringPointers[I]->alloca->data<<"\n";
-           
+          stringPointers[I] = stringPointer;           
+	}
+        else if(BranchInst * branchInst = dyn_cast<BranchInst>(&*I)){
+        
+          for(unsigned int index = 0; index < branchInst->getNumSuccessors(); index++){
+            BasicBlock * successor = branchInst->getSuccessor(index);
+            BasicBlockEdge * edge = new BasicBlockEdge(BB, successor);
+            if(DT->dominates(*edge, successor)) { 
+              errs()<<"Edge dominates ********* \n";
+              runOnBB(successor, stringAllocas, stringPointers);
+	    }    
+            else{
+              errs()<<"does not dominate \n";
+	    }             
+	  }         
 	}
 
-	inst++;
-      }
+	inst++; 
+    }
+
+  } 
+
+
+
+  virtual bool runOnModule(Module & module) override {
+
+    TLI = &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI();
+    DL = new DataLayout(&module);    
+    M = &module;
+	   
+    // Find all bitcast instructions within stores, calls etc. These must be bitcasting from globals to type*
+    for (Module::iterator F = module.begin(), Fend = module.end(); F != Fend; ++F) { 
+ 
+      Function * func = &*F;       
+      if (F->isDeclaration()) continue; // FIXIT
+
+      map<Value*, StringAlloca*> stringAllocas;  
+      // stringPointers is a map of constant pointers - string pointers with constant index into alloca   
+      map<Value*, StringPointer*> stringPointers;
+ 
+      DT = &getAnalysis<DominatorTreeWrapperPass>(*func).getDomTree();
+      BasicBlock * entry = &(func->getEntryBlock());
+      runOnBB(entry, stringAllocas, stringPointers);       
     }
 
     replaceCallOperands();
