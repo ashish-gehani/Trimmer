@@ -12,6 +12,14 @@
 // counts of loops easily.
 //===----------------------------------------------------------------------===//
 
+
+// FIXITs:
+// 1) Fix all hacks
+// 2) Ensure full unrolling of loops - no conditional looping required 
+
+
+
+
 #include "llvm/Transforms/Scalar.h"
 #include "llvm/ADT/SetVector.h"
 #include "llvm/Analysis/GlobalsModRef.h"
@@ -1066,11 +1074,11 @@ static bool tryToUnrollLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
   unsigned Count = UP.Count;  
   if (fgetsCall){
     // ASSUMPTION: Buffer sizes to fgets are larger than line size (till New Line) 
-    Count = newLineCount + 2;
+    Count = newLineCount + 1;
   }
   else{
     if(!unrollHint)
-      Count = (fileSize / bytesRead) + 2;
+      Count = (fileSize / bytesRead) + 1;
   }
 
   // FIXIT: replace with value passed to unroll hint
@@ -1080,6 +1088,14 @@ static bool tryToUnrollLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
 
   if(debugPrint) errs()<<"Loop Trip Count = "<<TripCount<<"\n";
   if(debugPrint) errs()<<" unroll count (calculated) : "<<Count<<"\n --- Unrolling --- \n";
+
+  if (!UnrollLoop(L, Count, Count, false, UP.AllowExpensiveTripCount,
+                  TripMultiple, LI, SE, &DT, &AC, PreserveLCSSA))
+    return false;
+
+  return true;
+
+
   bool CountSetExplicitly = Count != 0;
   // Use a heuristic count if we didn't set anything explicitly.
   if (!CountSetExplicitly)
@@ -1125,10 +1141,12 @@ static bool tryToUnrollLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
                                 UP.DynamicCostSavingsDiscount,
                                 Cost->UnrolledCost, Cost->RolledDynamicCost)) {
           Unrolling = Full;
+          errs()<<"Fully unrolling loop \n";
         }
     }
   } else if (TripCount && Count < TripCount) {
     Unrolling = Partial;
+    errs()<<"!error: partial unroll --------- \n";
   } else {
     Unrolling = Runtime;
   }
