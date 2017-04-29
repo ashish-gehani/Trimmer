@@ -1,35 +1,3 @@
-//
-// OCCAM
-//
-// Copyright (c) 2011-2016, SRI International
-//
-//  All rights reserved.
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met:
-//
-// * Redistributions of source code must retain the above copyright notice, this
-//   list of conditions and the following disclaimer.
-//
-// * Redistributions in binary form must reproduce the above copyright notice,
-//   this list of conditions and the following disclaimer in the documentation
-//   and/or other materials provided with the distribution.
-//
-// * Neither the name of SRI International nor the names of its contributors may
-//   be used to endorse or promote products derived from this software without
-//   specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
 
 //  Author: Hashim Sharif
 //  Email: hsharif3@illinois.edu
@@ -88,11 +56,11 @@ struct FileIOPass : public ModulePass {
   
   FileIOPass() : ModulePass(ID) { }
 		
-  map<Instruction*, FileNode*> dataMappings;
   map<Instruction*, Instruction*> replaceInstructions;
   map<Instruction*, Value*> replaceValues;
   map<Instruction*, Instruction*> addInstructions;
-
+  Module *M;
+  LLVMContext * context;
 
   /* This routine extracts the filename of the file input to the open call
      This function has been borrowed from the LLPE toolchain by Smowton.
@@ -160,7 +128,7 @@ struct FileIOPass : public ModulePass {
   /* This function promotes all read only files to a global constant string.
      Subsequent read calls with "constant" offsets will be replaced with llvm memcpy instrinsics
   */
-  void resolveOpenCalls(CallInst * callInst, Module & M){
+  void resolveOpenCalls(CallInst * callInst, map<Instruction*, FileNode*> & fileDescriptors){
 
     Function * f = callInst->getCalledFunction();
     string functionName = f->getName().str();
@@ -187,7 +155,7 @@ struct FileIOPass : public ModulePass {
       }
 
       Value * fileNameOperand = callInst->getOperand(0);
-      if(Constant * constString = dyn_cast<Constant>(&*fileNameOperand)){     
+      if(dyn_cast<Constant>(&*fileNameOperand)){     
 	StringRef fileNameStr;
 	getConstantStringInfo(fileNameOperand, fileNameStr);
 	string fileName = fileNameStr.str();
@@ -218,8 +186,8 @@ struct FileIOPass : public ModulePass {
           abort();
 	}
 
-      	Constant * stringConstant = ConstantDataArray::getString(M.getContext(), StringRef(source), true);
-	GlobalVariable * globalString = new GlobalVariable(M, stringConstant->getType(), true, GlobalValue::ExternalLinkage, stringConstant, "");
+      	Constant * stringConstant = ConstantDataArray::getString(*context, StringRef(source), true);
+	GlobalVariable * globalString = new GlobalVariable(*M, stringConstant->getType(), true, GlobalValue::ExternalLinkage, stringConstant, "");
 
 	// Initializing a FileNode for the file open instance
 	FileNode * fileNode = new FileNode();
@@ -230,7 +198,7 @@ struct FileIOPass : public ModulePass {
 	fileNode->isSpecializable = true; // Initially the file is "specializable"
         fileNode->fileData = source;
 	fileNode->globalString = globalString;
-	dataMappings[callInst] = fileNode;
+	fileDescriptors[callInst] = fileNode;
       }
       else{
 	// Call cannot be resolved; File name is not constant
@@ -244,11 +212,11 @@ struct FileIOPass : public ModulePass {
      This is required when a read call encounters a non-constant offset and subsequent read calls
      cannot be specialised
   */
-  void addSeekCall(Instruction * inst, FileNode * fileNode, Module & M){
+  void addSeekCall(Instruction * inst, FileNode * fileNode){
 
     std::vector<Value*> functionArgs;	
-    IntegerType * int64Ty = IntegerType::get(M.getContext(), 64);
-    IntegerType * int32Ty = IntegerType::get(M.getContext(), 32);	
+    IntegerType * int64Ty = IntegerType::get(*context, 64);
+    IntegerType * int32Ty = IntegerType::get(*context, 32);	
     ConstantInt * byteOffset = ConstantInt::get(int64Ty, fileNode->filePosition);
     ConstantInt * seekWhence = ConstantInt::get(int32Ty, 0);
 
@@ -256,12 +224,12 @@ struct FileIOPass : public ModulePass {
     functionArgs.push_back(byteOffset);
     functionArgs.push_back(seekWhence);
 
-    Function * lseek = M.getFunction(StringRef("lseek"));
+    Function * lseek = M->getFunction(StringRef("lseek"));
     CallInst::Create((Value*) lseek, ArrayRef<Value*>(functionArgs), Twine(""), inst); 
   }
 
 
-  void resolveGetcCalls(CallInst *callInst, Module & M){
+  void resolveGetcCalls(CallInst *callInst, map<Instruction*, FileNode*> & fileDescriptors){
    
     Function * f = callInst->getCalledFunction();
     string functionName = f->getName().str();
@@ -276,8 +244,8 @@ struct FileIOPass : public ModulePass {
 
       if(debugPrint) errs()<<"open call : "<<*openInst<<"\n"; 
       
-      if(dataMappings.find(openInst) != dataMappings.end()){
-	fileNode = dataMappings[openInst];
+      if(fileDescriptors.find(openInst) != fileDescriptors.end()){
+	fileNode = fileDescriptors[openInst];
 	globalString = fileNode -> globalString;
       }
       else{
@@ -291,7 +259,7 @@ struct FileIOPass : public ModulePass {
       else
         outChar = EOF; 
      
-      IntegerType * intTy32 = IntegerType::get(M.getContext(), 32);     
+      IntegerType * intTy32 = IntegerType::get(*context, 32);     
       ConstantInt * returnChar;
       if(outChar != EOF)
         returnChar = ConstantInt::get(intTy32, outChar);
@@ -314,12 +282,14 @@ struct FileIOPass : public ModulePass {
      buffer. It is important to note that once a non constant offset is seen, the 
      file is marked as non-specializable. 
   */
-  void resolveReadCalls(CallInst * callInst, Module & M){
+  void resolveReadCalls(CallInst * callInst, map<Instruction*, FileNode*> & fileDescriptors){
 
     Function * f = callInst->getCalledFunction();
     string functionName = f->getName().str();
 
-    if (functionName == "read" || functionName == "fread" ||  functionName == "fgets" || functionName == "fread_unlocked"){
+    if (functionName == "read" || functionName == "fread" ||  
+        functionName == "fgets" || functionName == "fread_unlocked"){
+
       Value * destBuffer;
       Value * byteCount;
       Value * fd;
@@ -344,12 +314,12 @@ struct FileIOPass : public ModulePass {
       Instruction * openInst = dyn_cast<Instruction>(&*fd);
       GlobalVariable * globalString;
       FileNode * fileNode;   
-      if (dataMappings.find(openInst) != dataMappings.end()){
-	fileNode = dataMappings[openInst];
+      if (fileDescriptors.find(openInst) != fileDescriptors.end()){
+	fileNode = fileDescriptors[openInst];
 	globalString = fileNode -> globalString;
       }
       else{
-	errs()<<"open call not found \n";
+	errs()<<"open call not found "<<*callInst<<"  \n";
 	return;
       }
 
@@ -358,59 +328,56 @@ struct FileIOPass : public ModulePass {
 	return;
       }
  
+      
       int intByteCount;	
       // FIXIT: These type definitions are redundant
-      IntegerType * intTy = IntegerType::get(M.getContext(), 64);
-      IntegerType * intTy32 = IntegerType::get(M.getContext(), 32);
-      // IntegerType * intTy8 = IntegerType::get(M.getContext(), 8);
-      IntegerType * intTy1 = IntegerType::get(M.getContext(), 1);
-      PointerType * charPtrType = Type::getInt8PtrTy(M.getContext());
+      IntegerType * intTy = IntegerType::get(*context, 64);
+      IntegerType * intTy32 = IntegerType::get(*context, 32);
+      IntegerType * intTy1 = IntegerType::get(*context, 1);
+      PointerType * charPtrType = Type::getInt8PtrTy(*context);
       ConstantPointerNull * nullPtr = ConstantPointerNull::get(charPtrType);
          
       if (ConstantInt * constInst = dyn_cast<ConstantInt>(&*byteCount)){
+
 	if (debugPrint) errs()<<"Bytes read by call : "<< constInst->getZExtValue() <<"\n";
 	intByteCount = constInst->getZExtValue();
-
         if (functionName == "fgets"){
+
           string dataStr = string(fileNode->fileData); // FIXIT: reusing full string - inefficient
           int pos = dataStr.find('\n', fileNode->filePosition);
           int lineBytes;
-
           if(pos != -1)
             lineBytes = pos - fileNode->filePosition;
           else
             lineBytes = fileNode->fileSize - fileNode->filePosition;
-
-          /// if(debugPrint) errs()<<"File position: "<<fileNode->filePosition<<"\n";
-
           if (lineBytes < intByteCount) {
-            intByteCount = lineBytes + 1;  // +1 includes the '\n'
+            intByteCount = lineBytes + 1;  // +1 is added to include the '\n'
           }
         }        
       }
       else{     
         /* A non constant index returns the reads not "specializable"  */
         /* Partially constant file reads are supported */
-	addSeekCall(callInst, fileNode, M);
+	addSeekCall(callInst, fileNode);
 	/*FIXIT: Add a lseek call to set the file position pointer of the file descriptor to its correct value */  		  fileNode->isSpecializable = false;
 	return;
       }
   
       errs()<<"open Inst corresponding to fread being specialized : \n\n"<<*openInst<<"\n";       
       vector<Type*> argumentTypes;
-      argumentTypes.push_back(Type::getInt8PtrTy(M.getContext()));
-      argumentTypes.push_back(Type::getInt8PtrTy(M.getContext()));
-      argumentTypes.push_back(Type::getInt64Ty(M.getContext()));
-      argumentTypes.push_back(Type::getInt32Ty(M.getContext()));
-      argumentTypes.push_back(Type::getInt1Ty(M.getContext()));
+      argumentTypes.push_back(Type::getInt8PtrTy(*context));
+      argumentTypes.push_back(Type::getInt8PtrTy(*context));
+      argumentTypes.push_back(Type::getInt64Ty(*context));
+      argumentTypes.push_back(Type::getInt32Ty(*context));
+      argumentTypes.push_back(Type::getInt1Ty(*context));
       
-      FunctionType *FT = FunctionType::get(Type::getVoidTy(M.getContext()), argumentTypes, false);      
+      FunctionType *FT = FunctionType::get(Type::getVoidTy(*context), argumentTypes, false);      
       /* FIXIT: Variable not required. getFunction and a check on NULL should have sufficed */
       Function * llvmMemcpy;
-      llvmMemcpy = M.getFunction(StringRef("llvm.memcpy.p0i8.p0i8.i64"));
+      llvmMemcpy = M->getFunction(StringRef("llvm.memcpy.p0i8.p0i8.i64"));
 
       if(llvmMemcpy == NULL){
-	llvmMemcpy = Function::Create(FT, GlobalValue::ExternalLinkage, "llvm.memcpy.p0i8.p0i8.i64", &M);
+	llvmMemcpy = Function::Create(FT, GlobalValue::ExternalLinkage, "llvm.memcpy.p0i8.p0i8.i64", M);
 	//hasMemCpyRoutine = true;
       }
 	       
@@ -447,8 +414,9 @@ struct FileIOPass : public ModulePass {
         readStr[intByteCount] = '\0';
         if(debugPrint) errs()<<"readStr = "<<readStr<<"\n";
 
-        Constant * stringConstant = ConstantDataArray::getString(M.getContext(), StringRef(readStr), true);
-	GlobalVariable * globalReadString = new GlobalVariable(M, stringConstant->getType(), true, GlobalValue::ExternalLinkage, stringConstant, "");
+        Constant * stringConstant = ConstantDataArray::getString(*context, StringRef(readStr), true);
+	GlobalVariable * globalReadString = new GlobalVariable(*M, stringConstant->getType(), true, 
+                                                               GlobalValue::ExternalLinkage, stringConstant, "");
         GetElementPtrInst * stringPtr = GetElementPtrInst::Create(NULL, globalReadString, indxList, Twine(""), callInst);
         ConstantInt * copyBytes = ConstantInt::get(intTy, intByteCount + 1);
         std::vector<Value*> functionArgs;
@@ -482,7 +450,7 @@ struct FileIOPass : public ModulePass {
      Specifically the file position pointer in the "FileNode"
      object for the corresponding file needs to be updated 
   */
-  void resolveSeekCalls(CallInst * callInst, Module & M){
+  void resolveSeekCalls(CallInst * callInst, map<Instruction*, FileNode*> & fileDescriptors){
 
     Function * f = callInst->getCalledFunction();
     string functionName = f->getName().str();
@@ -492,8 +460,8 @@ struct FileIOPass : public ModulePass {
       if(debugPrint) errs()<<"Seek call : "<<*fd <<"\n";
       Instruction * openInst = dyn_cast<Instruction>(&*fd);
       FileNode * fileNode;
-      if(dataMappings.find(openInst) != dataMappings.end()){
-	fileNode = dataMappings[openInst];
+      if(fileDescriptors.find(openInst) != fileDescriptors.end()){
+	fileNode = fileDescriptors[openInst];
       }
       else{
 	if(debugPrint) errs()<<"!error: No open call corresponding to descriptor used in seek call \n";
@@ -509,14 +477,13 @@ struct FileIOPass : public ModulePass {
 	intByteOffset = constInst->getZExtValue();
       }
       else{     /* A non constant index returns the reads not "specializable"  */
-	addSeekCall(callInst, fileNode, M);
+	addSeekCall(callInst, fileNode);
 	/*FIXIT: Add a lseek call to set the file position pointer of the file descriptor to its correct value */
 	fileNode->isSpecializable = false;
 	return;
       }
 
       int intWhence;
-
       if(ConstantInt * constInst = dyn_cast<ConstantInt>(&*whence)){
 	intWhence = constInst->getZExtValue();
       }
@@ -552,45 +519,88 @@ struct FileIOPass : public ModulePass {
 
   /* FIXIT : Cleaup intialization */
   /* Initialization routine */
-  void initialization(Module & M){
-    	
+  void initialization(Module & module){
+
+    M = &module;    	
+    context = &M->getContext();
     hasMemCpyRoutine = false;
     // If the lseek function doesnt exist, create a prototype
-    if(M.getFunction(StringRef("lseek")) == NULL){
+    if(M->getFunction(StringRef("lseek")) == NULL){
 
       vector<Type*> argumentTypes;
-      argumentTypes.push_back(Type::getInt64Ty(M.getContext()));
-      argumentTypes.push_back(Type::getInt64Ty(M.getContext()));
-      argumentTypes.push_back(Type::getInt64Ty(M.getContext()));
+      argumentTypes.push_back(Type::getInt64Ty(*context));
+      argumentTypes.push_back(Type::getInt64Ty(*context));
+      argumentTypes.push_back(Type::getInt64Ty(*context));
 
-      FunctionType *FT = FunctionType::get(Type::getInt64Ty(M.getContext()), argumentTypes, false);
+      FunctionType *FT = FunctionType::get(Type::getInt64Ty(*context), argumentTypes, false);
       Function * lseek;
-      lseek = Function::Create(FT, GlobalValue::ExternalLinkage, "lseek", &M);
+      lseek = Function::Create(FT, GlobalValue::ExternalLinkage, "lseek", M);
     }
   }
 
 
-  virtual bool runOnModule(Module & M) {
+  void runOnBB(BasicBlock * BB, map<Instruction*, FileNode*> fileDescriptors, map<BasicBlock*, bool> visited){
+   
+    BasicBlock& b = *BB;
+    for (BasicBlock::iterator inst = b.begin(), ie = b.end(); inst != ie; ) {
 
-    if(debugPrint) errs()<<"\n\n ----------- File IO Spec --------- \n\n";
-    initialization(M);
+      Instruction * I = &(*inst++);
+      if(CallInst * callInst = dyn_cast<CallInst>(&*I)){	 
+	if(callInst != NULL && callInst->getCalledFunction() != NULL 
+	   && !callInst->getCalledFunction()->isIntrinsic()) {
 
-    // Find all bitcast instructions within stores, calls etc. These must be bitcasting from globals to type*
-    for (Module::iterator F = M.begin(), Fend = M.end(); F != Fend; ++F) {
-      Function * func = &*F;
-      for(inst_iterator inst = inst_begin(func), e = inst_end(func); inst != e;) {
-	Instruction * I = &(*inst++);	
-
-	if(CallInst * callInst = dyn_cast<CallInst>(&*I)){	 
-          if(callInst != NULL && callInst->getCalledFunction() != NULL && !callInst->getCalledFunction()->isIntrinsic())
-	  {
-	    resolveOpenCalls(callInst, M);
-	    resolveReadCalls(callInst, M);
-            resolveGetcCalls(callInst, M);
-	    resolveSeekCalls(callInst, M);
-	  }
+	  resolveOpenCalls(callInst, fileDescriptors);
+	  resolveReadCalls(callInst, fileDescriptors);
+	  resolveGetcCalls(callInst, fileDescriptors);
+	  resolveSeekCalls(callInst, fileDescriptors);
 	}
       }
+
+      else if(BranchInst * branchInst = dyn_cast<BranchInst>(&*I)){
+        
+	for(unsigned int index = 0; index < branchInst->getNumSuccessors(); index++){
+	  BasicBlock * successor = branchInst->getSuccessor(index);
+          if(visited.find(successor) != visited.end()){
+            continue; // Skip visited basic block
+	  }
+
+	  // Forward context to successor block if the successor has only a single predecessor & isNotVisited
+	  if(successor->getUniquePredecessor() ) {
+	    visited[successor] = true; 
+	    errs()<<"Successor has single predecessor \n";
+	    runOnBB(successor, fileDescriptors, visited);
+	  }    
+	  else{
+	    errs()<<"block has multiple predecessors - creating new context \n";
+	    // Passing empty context
+	    map<Instruction*, FileNode*> fileDescriptors_new;
+	    runOnBB(successor, fileDescriptors_new, visited);
+	  }             
+	}         	
+      }
+
+
+    }
+  } 
+  
+
+
+  virtual bool runOnModule(Module & module) {
+
+    if(debugPrint) errs()<<"\n\n ----------- File IO Spec --------- \n\n";
+    initialization(module);
+
+    // Find all bitcast instructions within stores, calls etc. These must be bitcasting from globals to type*
+    for (Module::iterator F = M->begin(), Fend = M->end(); F != Fend; ++F) {
+
+      Function * func = &*F;
+      if (F->isDeclaration()) continue; // Skip function declarations
+
+      map<Instruction*, FileNode*> fileDescriptors;
+      map<BasicBlock*, bool> visited; 
+
+      BasicBlock * entry = &(func->getEntryBlock());
+      runOnBB(entry, fileDescriptors, visited);           
     }
 
     replaceReadCalls();

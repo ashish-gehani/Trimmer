@@ -244,7 +244,8 @@ struct StringDepPass : public ModulePass {
 
 
   
-  void runOnBB(BasicBlock * BB, map<Value*, StringAlloca*> stringAllocas, map<Value*, StringPointer*> stringPointers){
+  void runOnBB(BasicBlock * BB, map<Value*, StringAlloca*> stringAllocas, map<Value*, 
+               StringPointer*> stringPointers, map<BasicBlock*, bool> visited){
    
     BasicBlock& b = *BB;
     for (BasicBlock::iterator inst = b.begin(), ie = b.end(); inst != ie; ) {
@@ -542,13 +543,23 @@ struct StringDepPass : public ModulePass {
         
           for(unsigned int index = 0; index < branchInst->getNumSuccessors(); index++){
             BasicBlock * successor = branchInst->getSuccessor(index);
-            BasicBlockEdge * edge = new BasicBlockEdge(BB, successor);
-            if(DT->dominates(*edge, successor)) { 
-              errs()<<"Edge dominates ********* \n";
-              runOnBB(successor, stringAllocas, stringPointers);
+            //BasicBlockEdge * edge = new BasicBlockEdge(BB, successor);
+            if(visited.find(successor) != visited.end()){
+              continue; // Skip visited basic block 
+	    }
+           
+	    // Forward context to successor block if the successor has only a single predecessor & isNotVisited
+            if(successor->getUniquePredecessor() ) {
+              visited[successor] = true; 
+              errs()<<"Successor has single predecessor \n";
+              runOnBB(successor, stringAllocas, stringPointers, visited);
 	    }    
             else{
-              errs()<<"does not dominate \n";
+              errs()<<"block has multiple predecessor \n";
+              // Passing empty context
+              map<Value*, StringAlloca*> stringAllocas2; 
+              map<Value*, StringPointer*> stringPointers2;
+              runOnBB(successor, stringAllocas2, stringPointers2, visited);
 	    }             
 	  }         
 	}
@@ -575,10 +586,11 @@ struct StringDepPass : public ModulePass {
       map<Value*, StringAlloca*> stringAllocas;  
       // stringPointers is a map of constant pointers - string pointers with constant index into alloca   
       map<Value*, StringPointer*> stringPointers;
- 
+      map<BasicBlock*, bool> visited; 
+
       DT = &getAnalysis<DominatorTreeWrapperPass>(*func).getDomTree();
       BasicBlock * entry = &(func->getEntryBlock());
-      runOnBB(entry, stringAllocas, stringPointers);       
+      runOnBB(entry, stringAllocas, stringPointers, visited);       
     }
 
     replaceCallOperands();
