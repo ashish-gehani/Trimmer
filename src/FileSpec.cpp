@@ -559,6 +559,7 @@ struct FileSpec : public ModulePass {
   }
    
 
+  // FIXIT: Urgent: Fix the merging test - compare the fileNode structures for each open file
   bool mergeContext(BasicBlock * BB, map<BasicBlock*, map<Instruction*, FileNode*>> blockContexts,
                     map<Instruction*, FileNode*> & fileDescriptors2){
 
@@ -572,13 +573,28 @@ struct FileSpec : public ModulePass {
       fileDescLists.push_back(blockContexts[predecessor]);
     }
 
-    int i;
+    unsigned int i;
     map<Instruction*, FileNode*> fileDescriptor = fileDescLists[0];   
-    for(i = 1; i < fileDescLists.size(); i++){
-      map<Instruction*, FileNode*> fileDes = fileDescLists[i];      
-      for(std::map<Instruction*, FileNode*>::iterator it = fileDes.begin(); it != fileDes.end(); ++it){
+    for(std::map<Instruction*, FileNode*>::iterator it = fileDescriptor.begin(); 
+        it != fileDescriptor.end(); ++it){
 
-      }        
+      Instruction * fd = it->first;
+      FileNode * fileNode = it->second;
+      bool equal = true;
+
+      for(i = 1; i < fileDescLists.size(); i++){
+        map<Instruction*, FileNode*> fileDes = fileDescLists[i];
+        if(fileDes.find(fd) == fileDes.end()){
+          equal = false;
+          break;
+	}      
+      }
+  
+      // If a certain file description is present in the "intersection" of the predecessor contexts
+      if(equal){
+        fileDescriptors2[fd] = fileNode;
+      }
+              
     }  
 
     return true;
