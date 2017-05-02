@@ -30,6 +30,7 @@
 #include <fstream>
 #include <string.h>
 #include <sstream>
+#include <list>
 
 using namespace llvm;
 using namespace std;
@@ -49,12 +50,12 @@ struct FileNode{
   GlobalVariable * globalString; // Link to the llvm string holding file contents
 };
 
-struct FileIOPass : public ModulePass {
+struct FileSpec : public ModulePass {
 
   static char ID;
   bool hasMemCpyRoutine;
   
-  FileIOPass() : ModulePass(ID) { }
+  FileSpec() : ModulePass(ID) { }
 		
   map<Instruction*, Instruction*> replaceInstructions;
   map<Instruction*, Value*> replaceValues;
@@ -187,7 +188,8 @@ struct FileIOPass : public ModulePass {
 	}
 
       	Constant * stringConstant = ConstantDataArray::getString(*context, StringRef(source), true);
-	GlobalVariable * globalString = new GlobalVariable(*M, stringConstant->getType(), true, GlobalValue::ExternalLinkage, stringConstant, "");
+	GlobalVariable * globalString = new GlobalVariable(*M, stringConstant->getType(), true,
+                                                            GlobalValue::ExternalLinkage, stringConstant, "");
 
 	// Initializing a FileNode for the file open instance
 	FileNode * fileNode = new FileNode();
@@ -350,6 +352,7 @@ struct FileIOPass : public ModulePass {
             lineBytes = pos - fileNode->filePosition;
           else
             lineBytes = fileNode->fileSize - fileNode->filePosition;
+
           if (lineBytes < intByteCount) {
             intByteCount = lineBytes + 1;  // +1 is added to include the '\n'
           }
@@ -393,13 +396,14 @@ struct FileIOPass : public ModulePass {
         fileNode->filePosition += intByteCount;
         numBytes = byteCount;
         if (functionName == "fgets"){
-          numBytes = ConstantInt::get(intTy, intByteCount); // Exclude '\n' character copy  
+          numBytes = ConstantInt::get(intTy, intByteCount); // Include '\n' copy  
         }
       }
       else{
         int truncatedBytes = fileNode->fileSize - fileNode->filePosition;
         fileNode->filePosition = fileNode->fileSize;     
         numBytes = ConstantInt::get(intTy, truncatedBytes);
+        if(debugPrint) errs()<<"!error: Truncating the read call with bytes = "<<truncatedBytes<<" \n";
         if(truncatedBytes == 0) callMemcpy = false;
       }
 
@@ -409,15 +413,17 @@ struct FileIOPass : public ModulePass {
       indxList.push_back(index1);
 
       if(callMemcpy){ 
+
         char readStr[65536];
         memcpy(readStr, &fileNode->fileData[originalFilePtr], intByteCount);
-        readStr[intByteCount] = '\0';
-        if(debugPrint) errs()<<"readStr = "<<readStr<<"\n";
+        readStr[intByteCount] = '\0';  
+        if(debugPrint) errs()<<"readStr = "<<readStr;
 
         Constant * stringConstant = ConstantDataArray::getString(*context, StringRef(readStr), true);
 	GlobalVariable * globalReadString = new GlobalVariable(*M, stringConstant->getType(), true, 
                                                                GlobalValue::ExternalLinkage, stringConstant, "");
-        GetElementPtrInst * stringPtr = GetElementPtrInst::Create(NULL, globalReadString, indxList, Twine(""), callInst);
+        GetElementPtrInst * stringPtr = GetElementPtrInst::Create(NULL, globalReadString, indxList, 
+                                                                  Twine(""), callInst);
         ConstantInt * copyBytes = ConstantInt::get(intTy, intByteCount + 1);
         std::vector<Value*> functionArgs;
         functionArgs.push_back(destBuffer);
@@ -539,7 +545,49 @@ struct FileIOPass : public ModulePass {
   }
 
 
-  void runOnBB(BasicBlock * BB, map<Instruction*, FileNode*> fileDescriptors, map<BasicBlock*, bool> visited){
+  // FIXIT: Allow dominated predecessors to not have executed prior to current basic block
+  bool predecessorsVisited(BasicBlock * BB, map<BasicBlock*, map<Instruction*, FileNode*>> blockContexts){
+   
+    for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++){
+      BasicBlock * predecessor = *it;
+      if(blockContexts.find(predecessor) == blockContexts.end()){
+        return false;
+      }
+    }
+
+    return true;
+  }
+   
+
+  bool mergeContext(BasicBlock * BB, map<BasicBlock*, map<Instruction*, FileNode*>> blockContexts,
+                    map<Instruction*, FileNode*> & fileDescriptors2){
+
+    std::vector<map<Instruction*, FileNode*>> fileDescLists;    
+    for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++){
+      BasicBlock * predecessor = *it;
+      if(blockContexts.find(predecessor) == blockContexts.end()){
+        return false;
+      } 
+
+      fileDescLists.push_back(blockContexts[predecessor]);
+    }
+
+    int i;
+    map<Instruction*, FileNode*> fileDescriptor = fileDescLists[0];   
+    for(i = 1; i < fileDescLists.size(); i++){
+      map<Instruction*, FileNode*> fileDes = fileDescLists[i];      
+      for(std::map<Instruction*, FileNode*>::iterator it = fileDes.begin(); it != fileDes.end(); ++it){
+
+      }        
+    }  
+
+    return true;
+  }
+
+
+  void runOnBB(BasicBlock * BB, map<Instruction*, FileNode*> fileDescriptors,
+               map<BasicBlock*, bool> visited, 
+               map<BasicBlock*, map<Instruction*, FileNode*>> blockContexts){
    
     BasicBlock& b = *BB;
     for (BasicBlock::iterator inst = b.begin(), ie = b.end(); inst != ie; ) {
@@ -558,24 +606,40 @@ struct FileIOPass : public ModulePass {
 
       else if(BranchInst * branchInst = dyn_cast<BranchInst>(&*I)){
         
+        // Save context for the current basic block
+        blockContexts[BB] = fileDescriptors;
+
 	for(unsigned int index = 0; index < branchInst->getNumSuccessors(); index++){
 	  BasicBlock * successor = branchInst->getSuccessor(index);
           if(visited.find(successor) != visited.end()){
             continue; // Skip visited basic block
 	  }
 
+          // Traversing in reverse-post order - ensure that nodes are visited after their predecessors 
+          if(!predecessorsVisited(successor, blockContexts)){
+            continue;
+	  }
+
+          map<Instruction*, FileNode*> fileDescriptors2;
+          mergeContext(successor, blockContexts, fileDescriptors2);
+          visited[successor] = true; 
+	  errs()<<"Successor has single predecessor \n";
+	  runOnBB(successor, fileDescriptors, visited, blockContexts); 
+  
 	  // Forward context to successor block if the successor has only a single predecessor & isNotVisited
-	  if(successor->getUniquePredecessor() ) {
+	  /* if(successor->getUniquePredecessor()) {
 	    visited[successor] = true; 
 	    errs()<<"Successor has single predecessor \n";
-	    runOnBB(successor, fileDescriptors, visited);
+	    runOnBB(successor, fileDescriptors, visited, blockContexts);            
 	  }    
 	  else{
 	    errs()<<"block has multiple predecessors - creating new context \n";
 	    // Passing empty context
 	    map<Instruction*, FileNode*> fileDescriptors_new;
-	    runOnBB(successor, fileDescriptors_new, visited);
-	  }             
+	    runOnBB(successor, fileDescriptors_new, visited, blockContexts);
+	  } 
+          */
+            
 	}         	
       }
 
@@ -598,9 +662,10 @@ struct FileIOPass : public ModulePass {
 
       map<Instruction*, FileNode*> fileDescriptors;
       map<BasicBlock*, bool> visited; 
+      map<BasicBlock*, map<Instruction*, FileNode*>> blockContexts; 
 
       BasicBlock * entry = &(func->getEntryBlock());
-      runOnBB(entry, fileDescriptors, visited);           
+      runOnBB(entry, fileDescriptors, visited, blockContexts);           
     }
 
     replaceReadCalls();
@@ -613,5 +678,5 @@ struct FileIOPass : public ModulePass {
 };
 
 
-char FileIOPass::ID = 0;
-static RegisterPass<FileIOPass> X("fileIO", "Specialising FILE System operations", false, false);
+char FileSpec::ID = 0;
+static RegisterPass<FileSpec> X("file-spec", "Specializing Static File Read Operations", false, false);
