@@ -95,7 +95,7 @@ struct CallOperand{
 };
 
 
-struct StringDepPass : public ModulePass {
+struct ConstantFolding : public ModulePass {
 
   static char ID;
    
@@ -108,7 +108,7 @@ struct StringDepPass : public ModulePass {
   DataLayout * DL;
   DominatorTree * DT;
  
-  StringDepPass(): ModulePass(ID){}
+  ConstantFolding(): ModulePass(ID){}
 
   // Adding llvm::MemoryDependenceAnalysis as a required PrePass                                                         
   void getAnalysisUsage(AnalysisUsage &AU) const override { 
@@ -236,7 +236,7 @@ struct StringDepPass : public ModulePass {
 
     string funcName = calledFunction->getName();
     if(funcName == "strcmp" || funcName == "strcasecmp" || funcName == "strcspn" || funcName == "strspn" 
-       || funcName == "atoi" || funcName == "strdup")
+       || funcName == "atoi" || funcName == "strdup" || funcName == "strchr")
       return true;
     else
       return false;
@@ -272,10 +272,11 @@ struct StringDepPass : public ModulePass {
             stringPointers[I] = stringPointer;
 	  }
           else
-            if(debugPrint) errs()<<"note: unsupported alloca type "<<*allocatedType<<"\n";  
+            if(debugPrint) errs()<<"note: Unsupported alloca type "<<*allocatedType<<"\n";  
 	}
 	else if(MemCpyInst * memcpyInst = dyn_cast<MemCpyInst>(&*I)){
- 	
+
+          if(debugPrint) errs()<<"MemCpy Inst "<<*memcpyInst<<"\n"; 	
           Value * bufferPtr = memcpyInst->getOperand(0);
           StringPointer * basePointer;
           if(stringPointers.find(bufferPtr) == stringPointers.end()){
@@ -600,7 +601,7 @@ struct StringDepPass : public ModulePass {
 };
 
 
-char StringDepPass::ID = 0;
-static RegisterPass<StringDepPass> X("stringdep", "specialising string functions using alias analysis", false, false);
+char ConstantFolding::ID = 0;
+static RegisterPass<ConstantFolding> X("string-prop", "Constant Folding for strings", false, false);
 
 
