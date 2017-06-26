@@ -352,6 +352,7 @@ struct ConstantFolding : public ModulePass {
 	}
         else if(CallInst * callInst = dyn_cast<CallInst>(&*I)){
 
+          if(debugPrint) errs()<<"CHECK = "<<*callInst<<"\n\n";
           Function * calledFunction = callInst->getCalledFunction();          
 	  // Indirect function calls need special handling
           if(calledFunction == NULL){
@@ -454,13 +455,15 @@ struct ConstantFolding : public ModulePass {
             continue;
 	  }
 
-          /* for functions other than string functions look for memory side effects */ 
-          if(!isStringFunction(calledFunction)){
-                             
+          /* NEW: Propagating constants interprocedurally */ 
+          if(!isStringFunction(calledFunction) && !calledFunction->isDeclaration()){
+                      
+            if(debugPrint) errs()<<"----------- Traversing function arguments ---- \n\n";       
             int index = 0;
 	    for(auto arg = calledFunction->arg_begin(), argEnd = calledFunction->arg_end(); arg != argEnd; arg++){	
               if(!arg->getType()->isPointerTy() || !arg->getType()->getPointerElementType()->isIntegerTy(8)){
-		// errs()<<"note: Type not supported \n";                
+		// errs()<<"note: Type not supported \n";
+                errs()<<"!note: not supported "<<*arg<<"\n";                
 		continue;
 	      }
 
@@ -481,12 +484,12 @@ struct ConstantFolding : public ModulePass {
 	      else
 		basePointer = stringPointers[pointerArg];
 
-
               StringPointer * stringPointer = new StringPointer;
               stringPointer->position = basePointer->position;
               stringPointer->alloca = basePointer->alloca;
               Value * pointerVal = &*arg;
-              stringPointers[pointerVal] = stringPointer;             
+              stringPointers[pointerVal] = stringPointer;        
+              if(debugPrint) errs()<<"CHECK = POINTER VAL = "<<*pointerVal<<"\n";     
 
               BasicBlock * successor = &(calledFunction->getEntryBlock());           
               if(visited.find(successor) != visited.end()){
@@ -502,6 +505,13 @@ struct ConstantFolding : public ModulePass {
 	      index++;             
 	    }
           }
+
+          if(!isStringFunction(calledFunction) && calledFunction->isDeclaration()){
+
+            if(debugPrint) errs()<<"--- Declaration: "<<*calledFunction<<"\n";
+	    // TODO-NEW: Check for side effects and mark struct unspecializable
+	  }
+
 	  // End of CallInst
 	}
         else if(GetElementPtrInst * GEPInst = dyn_cast<GetElementPtrInst>(&*I)){
