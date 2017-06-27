@@ -114,7 +114,7 @@ struct ConstantFolding : public ModulePass {
   // stringPointers is a map of constant pointers - string pointers with constant index into alloca   
   map<Value*, StringPointer*> stringPointers;
   map<Instruction*, CallOperand*> replaceOperands;
-  map<Function*, SpecializedCall*> specializedFunctions;
+  map<Function*, SpecializedCall*> specializedCalls;
 
   Module * M;  
   const TargetLibraryInfo *TLI;
@@ -139,6 +139,19 @@ struct ConstantFolding : public ModulePass {
     replaceOperands.clear();    
   }
  
+
+  void replaceCallInsts(){
+    for (auto & e : specializedCalls){
+      SpecializedCall * call = e.second;
+      if(call->used){
+        CallInst * from = call->origCall;
+        CallInst * to = call->specCall;
+        ReplaceInstWithInst(from, to);  
+      }
+    }  
+    specializedCalls.clear();    
+  }
+
 
   bool getConstantStringInfo(const Value *V, StringRef &Str,
 			     uint64_t Offset, bool TrimAtNul) {
@@ -264,6 +277,7 @@ struct ConstantFolding : public ModulePass {
     }
     return NULL;	
   }
+  
 
   
   void runOnBB(BasicBlock * BB, map<Value*, StringAlloca*> stringAllocas, map<Value*, 
@@ -513,18 +527,28 @@ struct ConstantFolding : public ModulePass {
               clonedFunc->setName(StringRef("random"));
               errs()<<"Function ****** \n\n"<<*clonedFunc<<"\n\n";                   
               calledFunction->getParent()->getFunctionList().push_back(clonedFunc);
+              
+	      std::vector<Value *> args(callInst->arg_begin(), callInst->arg_end());
+              CallInst * specCallInst = CallInst::Create(clonedFunc, args);
+              errs()<<"newCallSite = "<<*specCallInst<<"\n";
+              SpecializedCall * call = new SpecializedCall;
+              call->origCall = callInst;
+              call->specCall = specCallInst;
+              call->used = true;
+              specializedCalls[clonedFunc] = call;
  
+
               StringPointer * stringPointer = new StringPointer;
               stringPointer->position = basePointer->position;
               stringPointer->alloca = basePointer->alloca;
               //-- Value * pointerVal = &*arg;
               Value * pointerVal = getArg(clonedFunc, index);
               stringPointers[pointerVal] = stringPointer;        
-              if(debugPrint) errs()<<"CHECK = POINTER VAL = "<<*pointerVal<<"\n";     
+              if(debugPrint) errs()<<" POINTER VAL = "<<*pointerVal<<"\n";     
            
               BasicBlock * successor = &(clonedFunc->getEntryBlock());           
 
-              // NEW: CANNOT prevent a function from being traversed twice.
+              // NEW: CANNOT prevent a function from being traversed twice
               // TODO-NEW: Need to restrict RECURSIVE functions - including mutually recursive
               /*
               if(visited.find(successor) != visited.end()){
@@ -663,6 +687,7 @@ struct ConstantFolding : public ModulePass {
 
 
     replaceCallOperands();
+    replaceCallInsts();
     return true;
   }   
   
