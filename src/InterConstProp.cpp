@@ -36,6 +36,8 @@ ASSUMPTIONS
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Dominators.h"
+#include "llvm/IR/ValueMap.h"
+#include "llvm/Transforms/Utils/Cloning.h"
 #include <sys/stat.h>
 #include <map>
 #include <set>
@@ -95,6 +97,15 @@ struct CallOperand{
 };
 
 
+struct SpecializedCall{
+
+  CallInst * origCall;
+  CallInst * specCall;
+  bool used;
+};
+
+
+
 struct ConstantFolding : public ModulePass {
 
   static char ID;
@@ -103,6 +114,8 @@ struct ConstantFolding : public ModulePass {
   // stringPointers is a map of constant pointers - string pointers with constant index into alloca   
   map<Value*, StringPointer*> stringPointers;
   map<Instruction*, CallOperand*> replaceOperands;
+  map<Function*, SpecializedCall*> specializedFunctions;
+
   Module * M;  
   const TargetLibraryInfo *TLI;
   DataLayout * DL;
@@ -242,6 +255,15 @@ struct ConstantFolding : public ModulePass {
       return false;
   }
 
+  Value * getArg(Function * func, int index){
+    int i = 0;
+    for(auto arg = func->arg_begin(), argEnd = func->arg_end(); arg != argEnd; arg++){
+      if(i == index) 
+        return &*arg;
+      i++;
+    }
+    return NULL;	
+  }
 
   
   void runOnBB(BasicBlock * BB, map<Value*, StringAlloca*> stringAllocas, map<Value*, 
@@ -483,20 +505,35 @@ struct ConstantFolding : public ModulePass {
 	      } 
 	      else
 		basePointer = stringPointers[pointerArg];
-
+           
+              // Cloning routines before attempting constant propagation
+              ClonedCodeInfo info;
+              ValueToValueMapTy vmap;
+              Function * clonedFunc = llvm::CloneFunction(calledFunction, vmap, true, &info);
+              clonedFunc->setName(StringRef("random"));
+              errs()<<"Function ****** \n\n"<<*clonedFunc<<"\n\n";                   
+              calledFunction->getParent()->getFunctionList().push_back(clonedFunc);
+ 
               StringPointer * stringPointer = new StringPointer;
               stringPointer->position = basePointer->position;
               stringPointer->alloca = basePointer->alloca;
-              Value * pointerVal = &*arg;
+              //-- Value * pointerVal = &*arg;
+              Value * pointerVal = getArg(clonedFunc, index);
               stringPointers[pointerVal] = stringPointer;        
               if(debugPrint) errs()<<"CHECK = POINTER VAL = "<<*pointerVal<<"\n";     
+           
+              BasicBlock * successor = &(clonedFunc->getEntryBlock());           
 
-              BasicBlock * successor = &(calledFunction->getEntryBlock());           
+              // NEW: CANNOT prevent a function from being traversed twice.
+              // TODO-NEW: Need to restrict RECURSIVE functions - including mutually recursive
+              /*
               if(visited.find(successor) != visited.end()){
                 continue; // Skip visited basic block 
 	      }
-	    
+	                               
 	      visited[successor] = true; // Mark basic block as being visited
+              */
+
               runOnBB(successor, stringAllocas, stringPointers, visited);         
               
               /* Mark the string as non-constant */
