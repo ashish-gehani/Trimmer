@@ -110,11 +110,12 @@ struct ConstantFolding : public ModulePass {
 
   static char ID;
    
-  map<Value*, StringAlloca*> stringAllocas;  
+  // map<Value*, StringAlloca*> stringAllocas;  
   // stringPointers is a map of constant pointers - string pointers with constant index into alloca   
-  map<Value*, StringPointer*> stringPointers;
+  //map<Value*, StringPointer*> stringPointers;
   map<Instruction*, CallOperand*> replaceOperands;
   map<Function*, SpecializedCall*> specializedCalls;
+  map<BasicBlock*, map<Value*, StringAlloca*>> blockContexts; 
 
   Module * M;  
   const TargetLibraryInfo *TLI;
@@ -143,10 +144,13 @@ struct ConstantFolding : public ModulePass {
   void replaceCallInsts(){
     for (auto & e : specializedCalls){
       SpecializedCall * call = e.second;
-      if(call->used){
-        CallInst * from = call->origCall;
-        CallInst * to = call->specCall;
+      CallInst * from = call->origCall;
+      CallInst * to = call->specCall;
+      if(call->used){   
         ReplaceInstWithInst(from, to);  
+      }
+      else{
+        delete to;
       }
     }  
     specializedCalls.clear();    
@@ -256,13 +260,13 @@ struct ConstantFolding : public ModulePass {
   bool isStringFunction(Function * calledFunction){
 
     if(calledFunction == NULL){
-      //--- if(debugPrint) errs()<<"indirect function call skipped \n";
+      // Indirect function call skipped
       return false;
     }
 
     string funcName = calledFunction->getName();
-    if(funcName == "strcmp" || funcName == "strcasecmp" || funcName == "strcspn" || funcName == "strspn" 
-       || funcName == "atoi" || funcName == "strdup" || funcName == "strchr")
+    if(funcName == "strcmp" || funcName == "strcasecmp" || funcName == "strcspn" 
+       || funcName == "strspn")
       return true;
     else
       return false;
@@ -278,8 +282,31 @@ struct ConstantFolding : public ModulePass {
     return NULL;	
   }
   
+   
+  /* This routine marks a cloned call context as specialized */
+  void markSpecialized(BasicBlock * BB){
 
-  
+    Function * func = BB->getParent();  // Get containing function
+    if(specializedCalls.find(func) != specializedCalls.end()){ // If function is a cloned function
+      SpecializedCall * call = specializedCalls[func];
+      call->used = true;  // Marking the cloned call as specialized - replaces original call
+    }  
+  }
+
+   // FIXIT: Allow dominated predecessors to not have executed prior to current basic block
+  bool predecessorsVisited(BasicBlock * BB, map<BasicBlock*, map<Value*, StringAlloca*>> blockContexts){
+   
+    for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++){
+      BasicBlock * predecessor = *it;
+      if(blockContexts.find(predecessor) == blockContexts.end()){
+        return false;
+      }
+    }
+
+    return true;
+  }
+   
+
   void runOnBB(BasicBlock * BB, map<Value*, StringAlloca*> stringAllocas, map<Value*, 
                StringPointer*> stringPointers, map<BasicBlock*, bool> visited){
    
@@ -411,14 +438,20 @@ struct ConstantFolding : public ModulePass {
 
           /* specialize for functions defined in string.h e.g strcmp, strchr */
  	  if(isStringFunction(calledFunction)){
+  
+            if(callInst->use_empty()){
+	      inst++;
+	      continue; // Skip simplifying functions with unused results
+	    }
 
+            bool skip = false;
             if(debugPrint) errs()<<"\n**** Specializing String function =  "<<calledFunction->getName()<<"\n";
 	    for(unsigned int index = 0; index < callInst->getNumArgOperands(); index++){
               Value * pointerArg = callInst->getArgOperand(index);
 	      StringPointer * basePointer;
 	      if(stringPointers.find(pointerArg) == stringPointers.end()){ 
-		  //-- if(debugPrint) errs()<<"!pointer not found = "<<*pointerArg <<"\n"; 
-		  continue;
+	        //-- if(debugPrint) errs()<<"!pointer not found = "<<*pointerArg <<"\n"; 
+                continue;
 	      } 
 	      else
 		basePointer = stringPointers[pointerArg];
@@ -438,16 +471,18 @@ struct ConstantFolding : public ModulePass {
 	      indxList.push_back(index1); 
 	      indxList.push_back(index1);
 
-	      Constant * stringConstant = ConstantDataArray::getString(M->getContext(), StringRef(newStr), true);
+	      Constant * stringConstant = ConstantDataArray::getString(M->getContext(), 
+                                                                       StringRef(newStr), true);
 	      GlobalVariable * globalReadString = new GlobalVariable(*M, stringConstant->getType(), true,
-								     GlobalValue::ExternalLinkage, stringConstant, "");
+								     GlobalValue::ExternalLinkage, 
+                                                                     stringConstant, "");
 
 	      if(debugPrint) errs()<<"globalReadString = "<<*globalReadString<<"\n";
 	      GetElementPtrInst * stringPtr = GetElementPtrInst::Create(NULL, globalReadString, 
 									indxList, Twine(""), callInst);
             
 	      // The GEP will replace the original argument
-	      CallOperand * callOperand = new CallOperand;
+	      CallOperand * callOperand = new CallOperand; 
 	      callOperand->index = index;
 	      callOperand->newOperand = stringPtr; 
 	      replaceOperands[callInst] = callOperand;
@@ -460,11 +495,17 @@ struct ConstantFolding : public ModulePass {
 
 	      LibCallSimplifier Simplifier(*DL, TLI, InstCombineRAUW);
 	      if (Value *With = Simplifier.optimizeCall(callInst)) {
-                if(With == NULL) errs()<<"NULL VALUE \n\n\n\n";
-                errs()<<"value to replace = "<<*With<<"\n";
-		if(!callInst->use_empty())
-                  callInst->replaceAllUsesWith(With);
-	      }
+                if(With == NULL) errs()<<"NULL VALUE \n\n";
+                if(debugPrint) errs()<<"Value to replace = "<<*With<<"\n";
+		if(!callInst->use_empty()){             
+                  callInst->replaceAllUsesWith(With);              
+                  inst = BasicBlock::iterator(stringPtr);
+                  if(debugPrint) errs()<<"Replaced uses of = "<<*callInst<<"\n";
+                  skip = true;
+                  markSpecialized(BB);  // Mark the function as specialized - replaces original function
+                  continue;                  
+		}
+              }
 
 
 	      /* optimize functions that are not in string.h */
@@ -479,11 +520,16 @@ struct ConstantFolding : public ModulePass {
 		    int val = atoi(constantString);
 		    IntegerType * int32Ty = IntegerType::get(M->getContext(), 32);
 		    ConstantInt * constVal = ConstantInt::get(int32Ty, val);
-		    callInst->replaceAllUsesWith(constVal);  
+		    callInst->replaceAllUsesWith(constVal);
+                    callInst->eraseFromParent();
+                    markSpecialized(BB);  // Mark the function as specialized - replaces original function
 		  }
 		}            
 	      }                         
-	    } 
+	    }
+
+            if(skip) continue; // NEW: If iteration must not be incremented
+ 
 	  }
 
           if(hasNoSideEffects(calledFunction)){
@@ -525,7 +571,6 @@ struct ConstantFolding : public ModulePass {
               ValueToValueMapTy vmap;
               Function * clonedFunc = llvm::CloneFunction(calledFunction, vmap, true, &info);
               clonedFunc->setName(StringRef("random"));
-              errs()<<"Function ****** \n\n"<<*clonedFunc<<"\n\n";                   
               calledFunction->getParent()->getFunctionList().push_back(clonedFunc);
               
 	      std::vector<Value *> args(callInst->arg_begin(), callInst->arg_end());
@@ -534,9 +579,8 @@ struct ConstantFolding : public ModulePass {
               SpecializedCall * call = new SpecializedCall;
               call->origCall = callInst;
               call->specCall = specCallInst;
-              call->used = true;
+              call->used = false;
               specializedCalls[clonedFunc] = call;
- 
 
               StringPointer * stringPointer = new StringPointer;
               stringPointer->position = basePointer->position;
@@ -623,33 +667,40 @@ struct ConstantFolding : public ModulePass {
           stringPointers[I] = stringPointer;           
 	}
         else if(BranchInst * branchInst = dyn_cast<BranchInst>(&*I)){
-        
+
+          blockContexts[BB] = stringAllocas;           
           for(unsigned int index = 0; index < branchInst->getNumSuccessors(); index++){
             BasicBlock * successor = branchInst->getSuccessor(index);
             //BasicBlockEdge * edge = new BasicBlockEdge(BB, successor);
             if(visited.find(successor) != visited.end()){
               continue; // Skip visited basic block 
 	    }
-           
+            
+            // Traverse in reverse post-order
+            if(!predecessorsVisited(successor, blockContexts)){
+              continue;
+	    } 
+         
+            //TODO: Add merging contexts             
+         
 	    // Forward context to successor block if the successor has only a single predecessor & isNotVisited
             if(successor->getUniquePredecessor() ) {
               visited[successor] = true; 
-              errs()<<"Successor has single predecessor \n";
+              errs()<<"Successor has a single predecessor \n";
               runOnBB(successor, stringAllocas, stringPointers, visited);
 	    }    
             else{
-              errs()<<"block has multiple predecessor \n";
+              errs()<<"Block has multiple predecessors \n";
               // Passing empty context
               map<Value*, StringAlloca*> stringAllocas2; 
               map<Value*, StringPointer*> stringPointers2;
               runOnBB(successor, stringAllocas2, stringPointers2, visited);
-	    }             
+	    } 
 	  }         
 	}
 
 	inst++; 
     }
-
   } 
 
 
@@ -669,23 +720,6 @@ struct ConstantFolding : public ModulePass {
     BasicBlock * entry = &(func->getEntryBlock());
     runOnBB(entry, stringAllocas, stringPointers, visited); 
     	   
-    // Find all bitcast instructions within stores, calls etc. These must be bitcasting from globals to type*
-    /* for (Module::iterator F = module.begin(), Fend = module.end(); F != Fend; ++F) { 
- 
-      Function * func = &*F;       
-      if (F->isDeclaration()) continue; // FIXIT
-
-      map<Value*, StringAlloca*> stringAllocas;  
-      // stringPointers is a map of constant pointers - string pointers with constant index into alloca   
-      map<Value*, StringPointer*> stringPointers;
-      map<BasicBlock*, bool> visited; 
-
-      DT = &getAnalysis<DominatorTreeWrapperPass>(*func).getDomTree();
-      BasicBlock * entry = &(func->getEntryBlock());
-      runOnBB(entry, stringAllocas, stringPointers, visited);       
-    }*/
-
-
     replaceCallOperands();
     replaceCallInsts();
     return true;
