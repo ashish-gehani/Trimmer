@@ -305,6 +305,51 @@ struct ConstantFolding : public ModulePass {
 
     return true;
   }
+
+
+  //TODO: Check context properly including comparing the alloca CONTENTS
+  //TODO: Fill the stringPointers and stringAllocas correctly - be sound even if imprecise 
+  //TODO: Insert call to merge context and test with examples
+  bool mergeContext(BasicBlock * BB, map<BasicBlock*, map<Value*, StringAlloca*>> blockContexts,
+                    map<Value*, StringAlloca*> & stringAllocas, 
+                    map<Value*, StringPointer*> & stringPointers){
+
+    std::vector<map<Value*, StringAlloca*>> predecessorContexts;    
+    for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++){
+      BasicBlock * predecessor = *it;
+      if(blockContexts.find(predecessor) == blockContexts.end()){
+        return false;
+      } 
+
+      predecessorContexts.push_back(blockContexts[predecessor]);
+    }
+
+    unsigned int i;
+    map<Value*, StringAlloca*> predContext = predecessorContexts[0];   
+    for(auto it = predContext.begin(); 
+        it != predContext.end(); ++it){
+
+      Value * inst = it->first;
+      StringAlloca * alloca = it->second;
+      bool equal = true;
+
+      for(i = 1; i < predecessorContexts.size(); i++){
+        map<Value*, StringAlloca*> predContext2 = predecessorContexts[i];
+        if(predContext2.find(inst) == predContext2.end()){
+          equal = false;
+          break;
+	}      
+      }
+ 
+      // FIXIT: Manage String Pointers as well 
+      if(equal){
+        stringAllocas[inst] = alloca;
+      }
+              
+    }  
+
+    return true;
+  }
    
 
   void runOnBB(BasicBlock * BB, map<Value*, StringAlloca*> stringAllocas, map<Value*, 
@@ -682,7 +727,8 @@ struct ConstantFolding : public ModulePass {
 	    } 
          
             //TODO: Add merging contexts             
-         
+               
+      
 	    // Forward context to successor block if the successor has only a single predecessor & isNotVisited
             if(successor->getUniquePredecessor() ) {
               visited[successor] = true; 
