@@ -145,11 +145,14 @@ struct ConstantFolding : public ModulePass {
     for (auto & e : specializedCalls){
       SpecializedCall * call = e.second;
       CallInst * from = call->origCall;
+      errs()<<"from = "<<*from<<"\n";
       CallInst * to = call->specCall;
       if(call->used){   
+        if(debugPrint) errs()<<"Replacing "<<*from<<" with "<<*to<<"\n";
         ReplaceInstWithInst(from, to);  
       }
       else{
+        if(debugPrint) errs()<<"Delecting Instruction = "<<*to<<"\n";
         delete to;
       }
     }  
@@ -284,6 +287,7 @@ struct ConstantFolding : public ModulePass {
   
    
   /* This routine marks a cloned call context as specialized */
+  /* TODO-IMP: Mark speciliazed whenever any specialization occurs */
   void markSpecialized(BasicBlock * BB){
 
     Function * func = BB->getParent();  // Get containing function
@@ -293,7 +297,7 @@ struct ConstantFolding : public ModulePass {
     }  
   }
 
-   // FIXIT: Allow dominated predecessors to not have executed prior to current basic block
+  // FIXIT: Allow dominated predecessors to not have executed prior to current basic block
   bool predecessorsVisited(BasicBlock * BB, map<BasicBlock*, map<Value*, StringAlloca*>> blockContexts){
    
     for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++){
@@ -302,7 +306,6 @@ struct ConstantFolding : public ModulePass {
         return false;
       }
     }
-
     return true;
   }
 
@@ -325,26 +328,36 @@ struct ConstantFolding : public ModulePass {
     }
 
     unsigned int i;
-    map<Value*, StringAlloca*> predContext = predecessorContexts[0];   
+    map<Value*, StringAlloca*> predContext = predecessorContexts[0];
+   
     for(auto it = predContext.begin(); 
         it != predContext.end(); ++it){
 
       Value * inst = it->first;
       StringAlloca * alloca = it->second;
       bool equal = true;
-
       for(i = 1; i < predecessorContexts.size(); i++){
         map<Value*, StringAlloca*> predContext2 = predecessorContexts[i];
         if(predContext2.find(inst) == predContext2.end()){
           equal = false;
           break;
+	} 
+        else{
+          StringAlloca* alloca1 = predContext[inst];
+          StringAlloca* alloca2 = predContext2[inst];
+          char* data1 = alloca1->data;
+          char* data2 = alloca2->data;          
+          if(strcmp(data1, data2) != 0) 
+            equal = false;  
 	}      
       }
  
       // FIXIT: Manage String Pointers as well 
       if(equal){
         stringAllocas[inst] = alloca;
-      }
+      } else{
+        alloca->constant = false; //FIXIT: A little over-conservative. Imagine reverse post order scenarios
+      } 
               
     }  
 
@@ -587,6 +600,10 @@ struct ConstantFolding : public ModulePass {
                       
             if(debugPrint) errs()<<"----------- Traversing function arguments ---- \n\n";       
             int index = 0;
+            BasicBlock * successor = NULL;
+            bool clonedFlag = false;
+            Function * clonedFunc = NULL;    
+
 	    for(auto arg = calledFunction->arg_begin(), argEnd = calledFunction->arg_end(); arg != argEnd; arg++){	
               if(!arg->getType()->isPointerTy() || !arg->getType()->getPointerElementType()->isIntegerTy(8)){
 		// errs()<<"note: Type not supported \n";
@@ -612,48 +629,49 @@ struct ConstantFolding : public ModulePass {
 		basePointer = stringPointers[pointerArg];
            
               // Cloning routines before attempting constant propagation
-              ClonedCodeInfo info;
-              ValueToValueMapTy vmap;
-              Function * clonedFunc = llvm::CloneFunction(calledFunction, vmap, true, &info);
-              clonedFunc->setName(StringRef("random"));
-              calledFunction->getParent()->getFunctionList().push_back(clonedFunc);
+              if(!clonedFlag){ //IMP: prevent cloning function once per argument
+		ClonedCodeInfo info;
+		ValueToValueMapTy vmap;
+		if(debugPrint) errs()<<"---- cloning function = "<<*calledFunction<<"\n";
+		clonedFunc = llvm::CloneFunction(calledFunction, vmap, true, &info);
+		clonedFunc->setName(StringRef("random"));
+		calledFunction->getParent()->getFunctionList().push_back(clonedFunc);
               
-	      std::vector<Value *> args(callInst->arg_begin(), callInst->arg_end());
-              CallInst * specCallInst = CallInst::Create(clonedFunc, args);
-              errs()<<"newCallSite = "<<*specCallInst<<"\n";
-              SpecializedCall * call = new SpecializedCall;
-              call->origCall = callInst;
-              call->specCall = specCallInst;
-              call->used = false;
-              specializedCalls[clonedFunc] = call;
+		std::vector<Value*> args(callInst->arg_begin(), callInst->arg_end());
+		CallInst * specCallInst = CallInst::Create(clonedFunc, args);
+		errs()<<"newCallSite = "<<*specCallInst<<"\n";
+		SpecializedCall * call = new SpecializedCall;
+		call->origCall = callInst;
+		call->specCall = specCallInst;
+		call->used = false;
+		specializedCalls[clonedFunc] = call;
+		successor = &(clonedFunc->getEntryBlock());     
+                clonedFlag = true; //IMP: prevent cloning function once per argument      
+	      }
 
               StringPointer * stringPointer = new StringPointer;
               stringPointer->position = basePointer->position;
               stringPointer->alloca = basePointer->alloca;
-              //-- Value * pointerVal = &*arg;
               Value * pointerVal = getArg(clonedFunc, index);
               stringPointers[pointerVal] = stringPointer;        
-              if(debugPrint) errs()<<" POINTER VAL = "<<*pointerVal<<"\n";     
-           
-              BasicBlock * successor = &(clonedFunc->getEntryBlock());           
-
+              if(debugPrint) errs()<<" POINTER VAL = "<<*pointerVal<<"\n";                
+              
               // NEW: CANNOT prevent a function from being traversed twice
               // TODO-NEW: Need to restrict RECURSIVE functions - including mutually recursive
+             
               /*
               if(visited.find(successor) != visited.end()){
                 continue; // Skip visited basic block 
 	      }
 	                               
 	      visited[successor] = true; // Mark basic block as being visited
-              */
-
-              runOnBB(successor, stringAllocas, stringPointers, visited);         
-              
-              /* Mark the string as non-constant */
-              StringAlloca * stringAlloca = basePointer->alloca;
-              stringAlloca->constant = false;
-	      index++;             
+	      */
+ 
+              index++;             
 	    }
+    
+            if(clonedFlag)
+              runOnBB(successor, stringAllocas, stringPointers, visited);
           }
 
           if(!isStringFunction(calledFunction) && calledFunction->isDeclaration()){
@@ -724,13 +742,15 @@ struct ConstantFolding : public ModulePass {
             // Traverse in reverse post-order
             if(!predecessorsVisited(successor, blockContexts)){
               continue;
-	    } 
-         
-            //TODO: Add merging contexts             
+	    }          
+
+            //TODO: Add merging contexts            
+            map<Value*, StringAlloca*> stringAllocas2; 
+            runOnBB(successor, stringAllocas2, stringPointers, visited);
                
       
 	    // Forward context to successor block if the successor has only a single predecessor & isNotVisited
-            if(successor->getUniquePredecessor() ) {
+            /* if(successor->getUniquePredecessor() ) {
               visited[successor] = true; 
               errs()<<"Successor has a single predecessor \n";
               runOnBB(successor, stringAllocas, stringPointers, visited);
@@ -741,7 +761,8 @@ struct ConstantFolding : public ModulePass {
               map<Value*, StringAlloca*> stringAllocas2; 
               map<Value*, StringPointer*> stringPointers2;
               runOnBB(successor, stringAllocas2, stringPointers2, visited);
-	    } 
+	      }*/
+ 
 	  }         
 	}
 
@@ -753,6 +774,7 @@ struct ConstantFolding : public ModulePass {
 
   virtual bool runOnModule(Module & module) override {
 
+    errs()<<"\n\n*******---- InterConstProp -----*********\n\n";
     map<Value*, StringAlloca*> stringAllocas;  
     // stringPointers is a map of constant pointers - string pointers with constant index into alloca   
     map<Value*, StringPointer*> stringPointers;
