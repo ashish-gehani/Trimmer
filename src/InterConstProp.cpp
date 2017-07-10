@@ -321,13 +321,13 @@ struct ConstantFolding : public ModulePass {
                     map<Value*, StringAlloca*> & stringAllocas, 
                     map<Value*, StringPointer*> & stringPointers){
 
-    if(debugPrint) errs()<<"Merging context for BB = "<<*BB<<"\n";
+    //-- if(debugPrint) errs()<<"Merging context for BB = "<<*BB<<"\n";
     std::vector<map<Value*, StringAlloca*>> predecessorContexts;    
 
     for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++){
       BasicBlock * predecessor = *it;
-      if(BB->getParent()->getName() == "main")
-        errs()<<"\n\n NOTE: predecessor = "<<*predecessor<<"\n\n";
+      //-- if(BB->getParent()->getName() == "main")
+      //--  errs()<<"\n\n NOTE: predecessor = "<<*predecessor<<"\n\n";
       if(blockContexts.find(predecessor) == blockContexts.end()){
         return false;
       } 
@@ -351,7 +351,6 @@ struct ConstantFolding : public ModulePass {
           break;
 	} 
         else{
-          if(debugPrint) errs()<<"*Comparing alloca->data \n";
           StringAlloca* alloca1 = predContext[inst];
           StringAlloca* alloca2 = predContext2[inst];
           char* data1 = alloca1->data;
@@ -366,8 +365,7 @@ struct ConstantFolding : public ModulePass {
         stringAllocas[inst] = alloca;
       } else{
         alloca->constant = false; //FIXIT: A little over-conservative. Imagine reverse post order scenarios
-      } 
-              
+      }               
     }  
 
     return true;
@@ -375,8 +373,7 @@ struct ConstantFolding : public ModulePass {
    
 
   /* IMP: New policy - visited passed by reference; no basic block visited twice - important to avoid wrongly 
-          duplicating contexts e.g function cloning
-  /* 
+          duplicating contexts e.g function cloning */ 
   void runOnBB(BasicBlock * BB, map<Value*, StringAlloca*> stringAllocas, map<Value*, 
                StringPointer*> stringPointers, map<BasicBlock*, bool> & visited){
    
