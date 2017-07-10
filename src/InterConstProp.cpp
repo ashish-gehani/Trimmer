@@ -141,6 +141,7 @@ struct ConstantFolding : public ModulePass {
   }
  
 
+  // TODO: Make sure cloned functions calling other specialized routines are correctly retained
   void replaceCallInsts(){
     for (auto & e : specializedCalls){
       SpecializedCall * call = e.second;
@@ -303,9 +304,12 @@ struct ConstantFolding : public ModulePass {
     for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++){
       BasicBlock * predecessor = *it;
       if(blockContexts.find(predecessor) == blockContexts.end()){
+        if(debugPrint) errs()<<"NOTE: predecessor not visited \n";
         return false;
       }
     }
+
+    if(debugPrint) errs()<<"NOTE: predecessors visited \n";
     return true;
   }
 
@@ -317,16 +321,20 @@ struct ConstantFolding : public ModulePass {
                     map<Value*, StringAlloca*> & stringAllocas, 
                     map<Value*, StringPointer*> & stringPointers){
 
+    if(debugPrint) errs()<<"Merging context for BB = "<<*BB<<"\n";
     std::vector<map<Value*, StringAlloca*>> predecessorContexts;    
+
     for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++){
       BasicBlock * predecessor = *it;
+      if(BB->getParent()->getName() == "main")
+        errs()<<"\n\n NOTE: predecessor = "<<*predecessor<<"\n\n";
       if(blockContexts.find(predecessor) == blockContexts.end()){
         return false;
       } 
-
       predecessorContexts.push_back(blockContexts[predecessor]);
     }
 
+    if(debugPrint) errs()<<"\n Comparing predecessor contexts = "<<predecessorContexts.size()<<"\n";
     unsigned int i;
     map<Value*, StringAlloca*> predContext = predecessorContexts[0];
    
@@ -343,6 +351,7 @@ struct ConstantFolding : public ModulePass {
           break;
 	} 
         else{
+          if(debugPrint) errs()<<"*Comparing alloca->data \n";
           StringAlloca* alloca1 = predContext[inst];
           StringAlloca* alloca2 = predContext2[inst];
           char* data1 = alloca1->data;
@@ -365,8 +374,11 @@ struct ConstantFolding : public ModulePass {
   }
    
 
+  /* IMP: New policy - visited passed by reference; no basic block visited twice - important to avoid wrongly 
+          duplicating contexts e.g function cloning
+  /* 
   void runOnBB(BasicBlock * BB, map<Value*, StringAlloca*> stringAllocas, map<Value*, 
-               StringPointer*> stringPointers, map<BasicBlock*, bool> visited){
+               StringPointer*> stringPointers, map<BasicBlock*, bool> & visited){
    
     BasicBlock& b = *BB;
     for (BasicBlock::iterator inst = b.begin(), ie = b.end(); inst != ie; ) {
@@ -490,6 +502,7 @@ struct ConstantFolding : public ModulePass {
               // "conservatively" mark each argument as modified 
 	      basePointer->alloca->constant = false;
 	    }
+
             inst++;
             continue;
 	  }         
@@ -586,8 +599,7 @@ struct ConstantFolding : public ModulePass {
 	      }                         
 	    }
 
-            if(skip) continue; // NEW: If iteration must not be incremented
- 
+            if(skip) continue; // NEW: If iteration must not be incremented 
 	  }
 
           if(hasNoSideEffects(calledFunction)){
@@ -604,9 +616,9 @@ struct ConstantFolding : public ModulePass {
             bool clonedFlag = false;
             Function * clonedFunc = NULL;    
 
-	    for(auto arg = calledFunction->arg_begin(), argEnd = calledFunction->arg_end(); arg != argEnd; arg++){	
+	    for(auto arg = calledFunction->arg_begin(), argEnd = calledFunction->arg_end(); arg != argEnd; arg++){
+	
               if(!arg->getType()->isPointerTy() || !arg->getType()->getPointerElementType()->isIntegerTy(8)){
-		// errs()<<"note: Type not supported \n";
                 errs()<<"!note: not supported "<<*arg<<"\n";                
 		continue;
 	      }
@@ -622,7 +634,6 @@ struct ConstantFolding : public ModulePass {
 	      Value * pointerArg = callInst->getOperand(index);
 	      StringPointer * basePointer;
 	      if(stringPointers.find(pointerArg) == stringPointers.end()){ 
-		//--- if(debugPrint) errs()<<"!pointer not found = "<<*pointerArg <<"\n"; 
              	continue;
 	      } 
 	      else
@@ -630,11 +641,12 @@ struct ConstantFolding : public ModulePass {
            
               // Cloning routines before attempting constant propagation
               if(!clonedFlag){ //IMP: prevent cloning function once per argument
+
 		ClonedCodeInfo info;
 		ValueToValueMapTy vmap;
 		if(debugPrint) errs()<<"---- cloning function = "<<*calledFunction<<"\n";
 		clonedFunc = llvm::CloneFunction(calledFunction, vmap, true, &info);
-		clonedFunc->setName(StringRef("random"));
+		clonedFunc->setName(StringRef("random")); // FIXIT: Name appropriately
 		calledFunction->getParent()->getFunctionList().push_back(clonedFunc);
               
 		std::vector<Value*> args(callInst->arg_begin(), callInst->arg_end());
@@ -644,7 +656,7 @@ struct ConstantFolding : public ModulePass {
 		call->origCall = callInst;
 		call->specCall = specCallInst;
 		call->used = false;
-		specializedCalls[clonedFunc] = call;
+		specializedCalls[clonedFunc] = call; // FIXIT: Re-consider current indexing on cloned function
 		successor = &(clonedFunc->getEntryBlock());     
                 clonedFlag = true; //IMP: prevent cloning function once per argument      
 	      }
@@ -654,20 +666,17 @@ struct ConstantFolding : public ModulePass {
               stringPointer->alloca = basePointer->alloca;
               Value * pointerVal = getArg(clonedFunc, index);
               stringPointers[pointerVal] = stringPointer;        
-              if(debugPrint) errs()<<" POINTER VAL = "<<*pointerVal<<"\n";                
-              
+              if(debugPrint) errs()<<" POINTER VAL = "<<*pointerVal<<"\n";
+              index++;              
+
               // NEW: CANNOT prevent a function from being traversed twice
-              // TODO-NEW: Need to restrict RECURSIVE functions - including mutually recursive
-             
+              // TODO-NEW: Need to restrict RECURSIVE functions - including mutually recursive             
               /*
               if(visited.find(successor) != visited.end()){
                 continue; // Skip visited basic block 
-	      }
-	                               
+	      }	                               
 	      visited[successor] = true; // Mark basic block as being visited
-	      */
- 
-              index++;             
+	      */                           
 	    }
     
             if(clonedFlag)
@@ -685,8 +694,8 @@ struct ConstantFolding : public ModulePass {
         else if(GetElementPtrInst * GEPInst = dyn_cast<GetElementPtrInst>(&*I)){
 
           Value * ptr = GEPInst->getOperand(0);
-          //-- Type * ptrType = ptr->getType();
           StringPointer * basePointer;
+
           if(stringPointers.find(ptr) == stringPointers.end())
 	  {
 	    inst++; 
@@ -731,10 +740,12 @@ struct ConstantFolding : public ModulePass {
 	}
         else if(BranchInst * branchInst = dyn_cast<BranchInst>(&*I)){
 
-          blockContexts[BB] = stringAllocas;           
+          blockContexts[BB] = stringAllocas;
           for(unsigned int index = 0; index < branchInst->getNumSuccessors(); index++){
+
             BasicBlock * successor = branchInst->getSuccessor(index);
-            //BasicBlockEdge * edge = new BasicBlockEdge(BB, successor);
+            //FIXIT: The check below needs to be strongly reconsidered
+            //FIXIT: In case we don't clone every routine, this check breaks the algorithm
             if(visited.find(successor) != visited.end()){
               continue; // Skip visited basic block 
 	    }
@@ -744,25 +755,21 @@ struct ConstantFolding : public ModulePass {
               continue;
 	    }          
 
-            //TODO: Add merging contexts            
-            map<Value*, StringAlloca*> stringAllocas2; 
-            runOnBB(successor, stringAllocas2, stringPointers, visited);
-               
-      
-	    // Forward context to successor block if the successor has only a single predecessor & isNotVisited
-            /* if(successor->getUniquePredecessor() ) {
+            // Forward context to successor block if the successor has only a single predecessor & isNotVisited
+            if(successor->getUniquePredecessor()) {
               visited[successor] = true; 
               errs()<<"Successor has a single predecessor \n";
               runOnBB(successor, stringAllocas, stringPointers, visited);
 	    }    
             else{
-              errs()<<"Block has multiple predecessors \n";
-              // Passing empty context
-              map<Value*, StringAlloca*> stringAllocas2; 
-              map<Value*, StringPointer*> stringPointers2;
-              runOnBB(successor, stringAllocas2, stringPointers2, visited);
-	      }*/
- 
+              if(debugPrint) errs()<<"Block has multiple predecessors \n";
+              // Merging contexts
+	      // TODO: more testing required            
+	      map<Value*, StringAlloca*> stringAllocas2;
+	      mergeContext(successor, blockContexts, stringAllocas2, stringPointers);
+	      visited[successor] = true;  //FIXIT: Clear your head on visiting BBs 
+	      runOnBB(successor, stringAllocas2, stringPointers, visited);            
+	    } 
 	  }         
 	}
 
