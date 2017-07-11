@@ -62,6 +62,7 @@ void ConstantFolding::getAnalysisUsage(AnalysisUsage &AU) const {
   //AU.addRequired<MemoryDependenceAnalysis>();
   AU.addRequired<DominatorTreeWrapperPass>();
   AU.addRequired<TargetLibraryInfoWrapperPass>();
+  AU.addRequired<CallGraphWrapperPass>();
 }
 
   
@@ -147,10 +148,14 @@ bool ConstantFolding::runOnModule(Module & module) {
   map<BasicBlock*, bool> visited; 
 
   TLI = &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI();
-  DL = new DataLayout(&module);    
+  DL = new DataLayout(&module);   
+  CG = &getAnalysis<CallGraphWrapperPass>().getCallGraph();
+  //CallGraphWrapperPass * cgPass = new CallGraphWrapperPass;
+  //cgPass->runOnModule(module);
+  //CG = &cgPass->getCallGraph();
+
   M = &module;
   Function * func = M->getFunction(StringRef("main"));
-   
   BasicBlock * entry = &(func->getEntryBlock());
   runOnBB(entry, stringAllocas, stringPointers, visited); 
     	   

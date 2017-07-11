@@ -591,7 +591,17 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
       } 
       else
 	basePointer = stringPointers[pointerArg];
+      
+
+      /* FIXIT: The reference count extracted is incorrect. Needs some investigation */
+      CallGraphNode * CGNode = (*CG)[calledFunction]; 
+      unsigned references = CGNode->getNumReferences();
+     
+      if(debugPrint) errs()<<"!NOTE: ********* Total References for "<<calledFunction->getName()
+                         <<" : "<<references<<"\n";
            
+      // TODO-FIXIT: Only clone if function is called only ONCE 
+
       // Cloning routines before attempting constant propagation
       if(!clonedFlag){ //IMP: prevent cloning function once per argument
 
