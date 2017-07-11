@@ -22,6 +22,7 @@
 #include "llvm/IR/Dominators.h"
 #include "llvm/IR/ValueMap.h"
 #include "llvm/Transforms/Utils/Cloning.h"
+#include "llvm/Analysis/CallGraph.h"
 #include <sys/stat.h>
 #include <map>
 #include <set>
@@ -54,6 +55,7 @@ struct ConstantFolding : public ModulePass {
   const TargetLibraryInfo *TLI;
   DataLayout * DL;
   DominatorTree * DT;
+  CallGraph * CG;
    
   void processAllocaInst(AllocaInst * allocaInst, map<Value*, StringAlloca*> & stringAllocas, 
                          map<Value*, StringPointer*> & stringPointers, map<BasicBlock*, bool> & visited,
