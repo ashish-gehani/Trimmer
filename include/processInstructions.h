@@ -309,7 +309,6 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
       callOperand->newOperand = stringPtr; 
       operands->push_back(callOperand);
 
-
       if(specIndex == 0){
         firstGEPPtr = stringPtr;
         specIndex++;
@@ -369,7 +368,8 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
     bool clonedFlag = false;
     Function * clonedFunc = NULL;    
 
-    for(auto arg = calledFunction->arg_begin(), argEnd = calledFunction->arg_end(); arg != argEnd; arg++){
+    for(auto arg = calledFunction->arg_begin(), argEnd = calledFunction->arg_end(); arg != argEnd;
+        arg++, index++){
 
       //FIXIT: make type checks more general	
       if(!arg->getType()->isPointerTy() || !arg->getType()->getPointerElementType()->isIntegerTy(8)){
@@ -384,8 +384,7 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
       } 
       else
 	basePointer = stringPointers[pointerArg];
-      
-           
+                 
       // TODO-FIXIT: Only clone if function is called only ONCE 
       // Cloning routines before attempting constant propagation
       if(!clonedFlag){ //IMP: prevent cloning function once per argument
@@ -415,7 +414,6 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
       Value * pointerVal = getArg(clonedFunc, index);
       stringPointers[pointerVal] = stringPointer;        
       if(debugPrint) errs()<<" POINTER VAL = "<<*pointerVal<<"\n";
-      index++;             
       
       //FIXIT: Reconsider the below choices
 
@@ -433,6 +431,7 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
       runOnBB(successor, stringAllocas, stringPointers, visited);
   }
   
+  //IMP: The following 'default' cause finds and marks any sideeffects of external calls
   else{
 
     // FIXIT: The call should have a clear purpose
@@ -441,22 +440,32 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
       return;
     }
 
-    if(!isStringFunction(calledFunction) && calledFunction->isDeclaration()){
+    if(calledFunction->isDeclaration()){
 
       if(debugPrint) errs()<<"--- Declaration: "<<*calledFunction<<"\n";
-      // TODO-NEW: Check for side effects and mark struct unspecializable
+      int index = 0;
+      for(auto arg = calledFunction->arg_begin(), argEnd = calledFunction->arg_end(); arg != argEnd; 
+	  arg++, index++){
+        // Check for constant pointers
+        // All arguments in a 'readonly' function are assumed readonly     
+        if(arg->onlyReadsMemory()){
+          if(debugPrint) errs()<<"!note: Argument/Function is readonly - no side effects \n";
+	  continue;
+	}
+     
+	// Searching for the pointer
+	Value * pointerArg = callInst->getOperand(index);
+	StringPointer * basePointer;
+	if(stringPointers.find(pointerArg) == stringPointers.end()){ 
+	  continue;
+	} 
+	else
+	  basePointer = stringPointers[pointerArg];
 
-      // Check for constant pointers
-      // All arguments in a 'readonly' function are assumed readonly
-      // FIXIT: Do I need to check for aliasing?
-      /* if(arg->onlyReadsMemory() || calledFunction->onlyReadsMemory()){
-      //--- if(debugPrint) errs()<<"note: Argument/Function is readonly - no side effects \n";
-      continue;
-      }        
-
-      */ 
+	// If the argument does alias a tracked allocation mark it as non-constant
+	basePointer->alloca->constant = false;  // mark allocation as non-constant    
+      }
     }
-
   }
 
   inst++; // Point to next instruction

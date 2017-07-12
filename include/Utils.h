@@ -136,12 +136,12 @@ bool isSpecializable(Function * calledFunction){
 bool hasNoSideEffects(CallInst * callInst){
   
   Function * calledFunction = callInst->getCalledFunction();
-  // FIXIT: Extend this list to include all read-only functions from libc if require
-  if(callInst->onlyReadsMemory()){
-    if(debugPrint) errs()<<"NOTE: *CallInst only reads memory **\n";
+  if(callInst->onlyReadsMemory() || calledFunction->onlyReadsMemory()){
+    if(debugPrint) errs()<<"NOTE: *CallInst only reads memory "<<*callInst<<" **\n";
     return true;    
   }
 
+  // FIXIT: Extend this list to include all read-only functions from libc if required 
   string funcName = calledFunction->getName();
   if(funcName == "atoi" || funcName == "strdup" || funcName == "printf")
     return true;
