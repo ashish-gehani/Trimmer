@@ -236,7 +236,6 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
 		     BasicBlock::iterator & inst){
 
   Instruction * I = &(*inst); 
-  if(debugPrint) errs()<<"CHECK = "<<*callInst<<"\n\n";
   Function * calledFunction = callInst->getCalledFunction();          
   // Indirect function calls need special handling
   if(calledFunction == NULL){
@@ -462,6 +461,7 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
 	else
 	  basePointer = stringPointers[pointerArg];
 
+        if(debugPrint) errs()<<"Note: Marking allocation as NON-CONSTANT \n";
 	// If the argument does alias a tracked allocation mark it as non-constant
 	basePointer->alloca->constant = false;  // mark allocation as non-constant    
       }
