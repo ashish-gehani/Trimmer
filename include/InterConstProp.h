@@ -47,7 +47,7 @@ struct ConstantFolding : public ModulePass {
   // map<Value*, StringAlloca*> stringAllocas;  
   // stringPointers is a map of constant pointers - string pointers with constant index into alloca   
   //map<Value*, StringPointer*> stringPointers;
-  map<Instruction*, CallOperand*> replaceOperands;
+  map<Instruction*, vector<CallOperand*>> replaceOperands;
   map<Function*, SpecializedCall*> specializedCalls;
   map<BasicBlock*, map<Value*, StringAlloca*>> blockContexts; 
 

@@ -252,10 +252,16 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
       return; // Skip simplifying functions with unused results
     }
    
-    bool skip = false;
-    if(debugPrint) errs()<<"\n**** Specializing String function =  "<<calledFunction->getName()<<"\n";
+    if(debugPrint) errs()<<"\n **** Specializing String function =  "<<calledFunction->getName()<<"\n";
+    // IMP: This pointer has special significance
+    // The next instruction must point to the first GEP replaced inst 
+    // necessary to ensure that GEPs are processed for specialization 
+    GetElementPtrInst * firstGEPPtr; 
+    int specIndex = 0;
+
     // FIXIT: Specializing the call per argument - INCORRECT/BUG
     for(unsigned int index = 0; index < callInst->getNumArgOperands(); index++){
+
       Value * pointerArg = callInst->getArgOperand(index);
       StringPointer * basePointer;
       if(stringPointers.find(pointerArg) == stringPointers.end()){ 
@@ -290,57 +296,68 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
       GetElementPtrInst * stringPtr = GetElementPtrInst::Create(NULL, globalReadString, 
 								indxList, Twine(""), callInst);
             
+      if(specIndex == 0){
+        vector<CallOperand*> operands;
+        replaceOperands[callInst] = operands;       
+      }
+
+      vector<CallOperand*> * operands = &replaceOperands[callInst];
       // The GEP will replace the original argument
       CallOperand * callOperand = new CallOperand; 
       callOperand->index = index;
       callOperand->newOperand = stringPtr; 
-      replaceOperands[callInst] = callOperand;
+      operands->push_back(callOperand);
 
-      replaceCallOperands();
+      //-- replaceOperands[callInst] = callOperand;
+
+      if(specIndex == 0){
+        firstGEPPtr = stringPtr;
+        specIndex++;
+      }  
+    }
+    
+    replaceCallOperands();
  
-      auto InstCombineRAUW = [this](Instruction *From, Value *With) {
-	From->replaceAllUsesWith(With);
-      };
+    auto InstCombineRAUW = [this](Instruction *From, Value *With) {
+      From->replaceAllUsesWith(With);
+    };
 
-      LibCallSimplifier Simplifier(*DL, TLI, InstCombineRAUW);
-      if (Value *With = Simplifier.optimizeCall(callInst)) {
-	if(With == NULL) errs()<<"NULL VALUE \n\n";
-	if(debugPrint) errs()<<"Value to replace = "<<*With<<"\n";
-	if(!callInst->use_empty()){             
-	  callInst->replaceAllUsesWith(With);              
-	  inst = BasicBlock::iterator(stringPtr);
-	  if(debugPrint) errs()<<"Replaced uses of = "<<*callInst<<"\n";
-	  skip = true;
-          BasicBlock * BB = I->getParent();
-	  markSpecialized(BB);  // Mark the function as specialized - replaces original function
-	  continue;                  
-	}
+    LibCallSimplifier Simplifier(*DL, TLI, InstCombineRAUW);
+    if (Value *With = Simplifier.optimizeCall(callInst)) {
+      if(With == NULL) errs()<<"NULL VALUE \n\n";
+      if(debugPrint) errs()<<"Value to replace = "<<*With<<"\n";
+      if(!callInst->use_empty()){             
+	callInst->replaceAllUsesWith(With);              
+	inst = BasicBlock::iterator(firstGEPPtr);
+	if(debugPrint) errs()<<"Replaced uses of = "<<*callInst<<"\n";
+	BasicBlock * BB = I->getParent();
+	markSpecialized(BB);  // Mark the function as specialized - replaces original function
+        return; // already set "inst" to the next instruction
       }
-
-
-      /* optimize functions that are not in string.h */
-      if(isSpecializable(calledFunction)){
-	string functionName = calledFunction->getName();
-	/* optimizing atoi calls with constant strings with corresponding constant int */
-	if(functionName == "atoi"){             
-	  StringRef stringRef;
-	  if(getConstantStringInfo(callInst->getOperand(0), stringRef, 0, false)){
-	    const char * constantString = stringRef.str().c_str();
-	    if(debugPrint) errs()<<"constant string = "<<constantString<<"\n";
-	    int val = atoi(constantString);
-	    IntegerType * int32Ty = IntegerType::get(M->getContext(), 32);
-	    ConstantInt * constVal = ConstantInt::get(int32Ty, val);
-	    callInst->replaceAllUsesWith(constVal);
-	    callInst->eraseFromParent();
-            BasicBlock* BB = I->getParent();
-	    markSpecialized(BB);  // Mark the function as specialized - replaces original function
-	  }
-	}            
-      }                         
     }
 
-    // FIXIT: return from the correct point in the code
-    if(skip) return; // NEW: If next iteration set explicitly skip the increment
+    /* optimize functions that are not in string.h */
+    if(isSpecializable(calledFunction)){
+      string functionName = calledFunction->getName();
+      /* optimizing atoi calls with constant strings with corresponding constant int */
+      if(functionName == "atoi"){             
+	StringRef stringRef;
+	if(getConstantStringInfo(callInst->getOperand(0), stringRef, 0, false)){
+	  const char * constantString = stringRef.str().c_str();
+	  if(debugPrint) errs()<<"constant string = "<<constantString<<"\n";
+	  int val = atoi(constantString);
+	  IntegerType * int32Ty = IntegerType::get(M->getContext(), 32);
+	  ConstantInt * constVal = ConstantInt::get(int32Ty, val);
+	  callInst->replaceAllUsesWith(constVal);
+	  callInst->eraseFromParent();
+	  BasicBlock* BB = I->getParent();
+	  markSpecialized(BB);  // Mark the function as specialized - replaces original function
+	}
+      }            
+    }                         
+
+    inst++;
+    return;  
   }
 
   // FIXIT: The call should have a clear purpose
@@ -383,15 +400,8 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
 	basePointer = stringPointers[pointerArg];
       
 
-      /* FIXIT: The reference count extracted is incorrect. Needs some investigation */
-      CallGraphNode * CGNode = (*CG)[calledFunction]; 
-      unsigned references = CGNode->getNumReferences();
-     
-      if(debugPrint) errs()<<"!NOTE: ********* Total References for "<<calledFunction->getName()
-                         <<" : "<<references<<"\n";
            
       // TODO-FIXIT: Only clone if function is called only ONCE 
-
       // Cloning routines before attempting constant propagation
       if(!clonedFlag){ //IMP: prevent cloning function once per argument
 

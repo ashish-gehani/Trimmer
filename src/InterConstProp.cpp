@@ -67,9 +67,15 @@ void ConstantFolding::getAnalysisUsage(AnalysisUsage &AU) const {
 
   
 void ConstantFolding::replaceCallOperands(){
+
   for (auto & e : replaceOperands){
-    CallOperand * callInfo = e.second;
-    e.first->setOperand(callInfo->index, callInfo->newOperand);
+    if(debugPrint) errs()<<"NOTE: ***** callInst = "<<*e.first<<"\n";
+    vector<CallOperand*> operands = e.second;
+    for(unsigned int i = 0; i < operands.size(); i++){
+      CallOperand * callInfo = operands[i];
+      if(debugPrint) errs()<<"* new Operand = "<<*callInfo->newOperand<<"\n";
+      e.first->setOperand(callInfo->index, callInfo->newOperand);
+    }
   }  
   replaceOperands.clear();    
 }
