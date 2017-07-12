@@ -46,3 +46,7 @@ struct SpecializedCall{
   bool used;
 };
 
+struct FuncInfo {
+  unsigned numCallInsts;
+  bool calledInLoop, AddrTaken;
+};

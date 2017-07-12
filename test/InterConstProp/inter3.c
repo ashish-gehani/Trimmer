@@ -16,7 +16,6 @@ void func(char * buffer){
   if(strcmp(value, "friend") == 0)
     printf("friend\n"); 
 }
- 
 
 int main(){
 
@@ -28,6 +27,6 @@ int main(){
   }
 
   func(buffer);
-
+  func("hell");
   return 0;
 }

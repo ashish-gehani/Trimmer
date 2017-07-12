@@ -37,12 +37,8 @@
 #include "InterConstProp.h"
 
 using namespace llvm;
-using namespace std;
+using namespace std;     
 
-#define debugPrint 1
-
-     
-   
 /* This routine marks a cloned call context as specialized */
 /* TODO-IMP: Mark speciliazed whenever any specialization occurs */
 void ConstantFolding::markSpecialized(BasicBlock * BB){
@@ -245,7 +241,7 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
   }         
 
   /* specialize for functions defined in string.h e.g strcmp, strchr */
-  else if(isStringFunction(calledFunction)){
+  else if(isStringFunction(calledFunction)) {
   
     if(callInst->use_empty()){
       inst++;
@@ -265,15 +261,15 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
       Value * pointerArg = callInst->getArgOperand(index);
       StringPointer * basePointer;
       if(stringPointers.find(pointerArg) == stringPointers.end()){ 
-	//-- if(debugPrint) errs()<<"!pointer not found = "<<*pointerArg <<"\n"; 
-	continue;
+      	//-- if(debugPrint) errs()<<"!pointer not found = "<<*pointerArg <<"\n"; 
+      	continue;
       } 
       else
-	basePointer = stringPointers[pointerArg];
+	      basePointer = stringPointers[pointerArg];
 
       if(basePointer->alloca->constant == false){
-	errs()<<"non-constant string context \n";
-	continue;
+      	errs()<<"non-constant string context \n";
+      	continue;
       }
 
       char * baseStringData = basePointer->alloca->data;
@@ -324,12 +320,12 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
     if (Value *With = Simplifier.optimizeCall(callInst)) {
       if(With == NULL) errs()<<"NULL VALUE \n\n";
       if(debugPrint) errs()<<"Value to replace = "<<*With<<"\n";
-      if(!callInst->use_empty()){             
-	callInst->replaceAllUsesWith(With);              
-	inst = BasicBlock::iterator(firstGEPPtr);
-	if(debugPrint) errs()<<"Replaced uses of = "<<*callInst<<"\n";
-	BasicBlock * BB = I->getParent();
-	markSpecialized(BB);  // Mark the function as specialized - replaces original function
+      if(!callInst->use_empty()) {             
+      	callInst->replaceAllUsesWith(With);              
+      	inst = BasicBlock::iterator(firstGEPPtr);
+      	if(debugPrint) errs()<<"Replaced uses of = "<<*callInst<<"\n";
+      	BasicBlock * BB = I->getParent();
+      	markSpecialized(BB);  // Mark the function as specialized - replaces original function
         return; // already set "inst" to the next instruction
       }
     }
@@ -338,73 +334,77 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
     if(isSpecializable(calledFunction)){
       string functionName = calledFunction->getName();
       /* optimizing atoi calls with constant strings with corresponding constant int */
-      if(functionName == "atoi"){             
-	StringRef stringRef;
-	if(getConstantStringInfo(callInst->getOperand(0), stringRef, 0, false)){
-	  const char * constantString = stringRef.str().c_str();
-	  if(debugPrint) errs()<<"constant string = "<<constantString<<"\n";
-	  int val = atoi(constantString);
-	  IntegerType * int32Ty = IntegerType::get(M->getContext(), 32);
-	  ConstantInt * constVal = ConstantInt::get(int32Ty, val);
-	  callInst->replaceAllUsesWith(constVal);
-	  callInst->eraseFromParent();
-	  BasicBlock* BB = I->getParent();
-	  markSpecialized(BB);  // Mark the function as specialized - replaces original function
-	}
+      if(functionName == "atoi") {             
+      	StringRef stringRef;
+      	if(getConstantStringInfo(callInst->getOperand(0), stringRef, 0, false)) {
+      	  const char * constantString = stringRef.str().c_str();
+      	  if(debugPrint) errs()<<"constant string = "<<constantString<<"\n";
+      	  int val = atoi(constantString);
+      	  IntegerType * int32Ty = IntegerType::get(M->getContext(), 32);
+      	  ConstantInt * constVal = ConstantInt::get(int32Ty, val);
+      	  callInst->replaceAllUsesWith(constVal);
+      	  callInst->eraseFromParent();
+      	  BasicBlock* BB = I->getParent();
+      	  markSpecialized(BB);  // Mark the function as specialized - replaces original function
+      	}
       }            
     }                         
 
     inst++;
     return;  
   }  
-
+  // Why checking for isstring again??
   /* NEW: Propagating constants interprocedurally */ 
-  else if(!isStringFunction(calledFunction) && !calledFunction->isDeclaration()){
+  else if(!isStringFunction(calledFunction) && !calledFunction->isDeclaration()) {
                       
+    if(!satisfyConds(calledFunction)) {
+      markArgsAsNonConst(callInst, stringPointers);
+      inst++;
+      return;
+    }
+
     if(debugPrint) errs()<<"---- Traversing function arguments ---- \n\n";       
     int index = 0;
     BasicBlock * successor = NULL;
     bool clonedFlag = false;
     Function * clonedFunc = NULL;    
-
     for(auto arg = calledFunction->arg_begin(), argEnd = calledFunction->arg_end(); arg != argEnd;
         arg++, index++){
 
       //FIXIT: make type checks more general	
       if(!arg->getType()->isPointerTy() || !arg->getType()->getPointerElementType()->isIntegerTy(8)){
-	errs()<<"!note: not supported "<<*arg<<"\n";                
-	continue;
+      	errs()<<"!note: not supported "<<*arg<<"\n";                
+      	continue;
       }
   
       Value * pointerArg = callInst->getOperand(index);
       StringPointer * basePointer;
       if(stringPointers.find(pointerArg) == stringPointers.end()){ 
-	continue;
+	      continue;
       } 
       else
-	basePointer = stringPointers[pointerArg];
+	      basePointer = stringPointers[pointerArg];
                  
       // TODO-FIXIT: Only clone if function is called only ONCE 
       // Cloning routines before attempting constant propagation
-      if(!clonedFlag){ //IMP: prevent cloning function once per argument
-
-	ClonedCodeInfo info;
-	ValueToValueMapTy vmap;
-	if(debugPrint) errs()<<"---- cloning function = "<<*calledFunction<<"\n";
-	clonedFunc = llvm::CloneFunction(calledFunction, vmap, true, &info);
-	clonedFunc->setName(StringRef("random")); // FIXIT: Name appropriately
-	calledFunction->getParent()->getFunctionList().push_back(clonedFunc);
-              
-	std::vector<Value*> args(callInst->arg_begin(), callInst->arg_end());
-	CallInst * specCallInst = CallInst::Create(clonedFunc, args);
-	errs()<<"newCallSite = "<<*specCallInst<<"\n";
-	SpecializedCall * call = new SpecializedCall;
-	call->origCall = callInst;
-	call->specCall = specCallInst;
-	call->used = false;
-	specializedCalls[clonedFunc] = call; // FIXIT: Re-consider current indexing on cloned function
-	successor = &(clonedFunc->getEntryBlock());     
-	clonedFlag = true; //IMP: prevent cloning function once per argument      
+      if(!clonedFlag) { //IMP: prevent cloning function once per argument
+      	ClonedCodeInfo info;
+      	ValueToValueMapTy vmap;
+      	if(debugPrint) errs()<<"---- cloning function = "<<*calledFunction<<"\n";
+      	clonedFunc = llvm::CloneFunction(calledFunction, vmap, true, &info);
+      	clonedFunc->setName(StringRef("random")); // FIXIT: Name appropriately
+      	calledFunction->getParent()->getFunctionList().push_back(clonedFunc);
+                    
+      	std::vector<Value*> args(callInst->arg_begin(), callInst->arg_end());
+      	CallInst * specCallInst = CallInst::Create(clonedFunc, args);
+      	errs()<<"newCallSite = "<<*specCallInst<<"\n";
+      	SpecializedCall * call = new SpecializedCall;
+      	call->origCall = callInst;
+      	call->specCall = specCallInst;
+      	call->used = false;
+      	specializedCalls[clonedFunc] = call; // FIXIT: Re-consider current indexing on cloned function
+      	successor = &(clonedFunc->getEntryBlock());     
+      	clonedFlag = true; //IMP: prevent cloning function once per argument      
       }
 
       StringPointer * stringPointer = new StringPointer;
@@ -414,24 +414,23 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
       stringPointers[pointerVal] = stringPointer;        
       if(debugPrint) errs()<<" POINTER VAL = "<<*pointerVal<<"\n";
       
-      //FIXIT: Reconsider the below choices
+          //FIXIT: Reconsider the below choices
 
-      // NEW: CANNOT prevent a function from being traversed twice
-      // TODO-NEW: Need to restrict RECURSIVE functions - including mutually recursive             
-      /*
-	if(visited.find(successor) != visited.end()){
-	continue; // Skip visited basic block 
-	}	                               
-	visited[successor] = true; // Mark basic block as being visited
-      */                           
+          // NEW: CANNOT prevent a function from being traversed twice
+          // TODO-NEW: Need to restrict RECURSIVE functions - including mutually recursive             
+          /*
+    	if(visited.find(successor) != visited.end()){
+    	continue; // Skip visited basic block 
+    	}	                               
+    	visited[successor] = true; // Mark basic block as being visited
+          */                           
     }
     
     if(clonedFlag)
       runOnBB(successor, stringAllocas, stringPointers, visited);
   }
-  
   //IMP: The following 'default' cause finds and marks any sideeffects of external calls
-  else{
+  else {
 
     // FIXIT: The call should have a clear purpose
     if(hasNoSideEffects(callInst)){
@@ -439,32 +438,9 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
       return;
     }
 
-    if(calledFunction->isDeclaration()){
-
+    if(calledFunction->isDeclaration()) {
       if(debugPrint) errs()<<"--- Declaration: "<<*calledFunction<<"\n";
-      int index = 0;
-      for(auto arg = calledFunction->arg_begin(), argEnd = calledFunction->arg_end(); arg != argEnd; 
-	  arg++, index++){
-        // Check for constant pointers
-        // All arguments in a 'readonly' function are assumed readonly     
-        if(arg->onlyReadsMemory()){
-          if(debugPrint) errs()<<"!note: Argument/Function is readonly - no side effects \n";
-	  continue;
-	}
-     
-	// Searching for the pointer
-	Value * pointerArg = callInst->getOperand(index);
-	StringPointer * basePointer;
-	if(stringPointers.find(pointerArg) == stringPointers.end()){ 
-	  continue;
-	} 
-	else
-	  basePointer = stringPointers[pointerArg];
-
-        if(debugPrint) errs()<<"Note: Marking allocation as NON-CONSTANT \n";
-	// If the argument does alias a tracked allocation mark it as non-constant
-	basePointer->alloca->constant = false;  // mark allocation as non-constant    
-      }
+      markArgsAsNonConst(callInst, stringPointers);
     }
   }
 
@@ -512,4 +488,44 @@ void ConstantFolding::processBranchInst(BranchInst * branchInst, map<Value*, Str
   }         
 
   inst++;
+}
+
+bool ConstantFolding::satisfyConds(Function* F) {
+  if(FuncInfoMap.find(F) == FuncInfoMap.end())
+    return false; // conservative
+  FuncInfo* fi = FuncInfoMap[F];
+  return !(fi->calledInLoop || fi->AddrTaken || (fi->numCallInsts != 1)); 
+}
+
+void ConstantFolding::gatherFuncInfo(Module& M) {
+  for (Module::iterator mit = M.getFunctionList().begin(); mit != M.getFunctionList().end(); ++mit) {
+    for (Function::iterator f_it = mit->begin(), f_ite = mit->end(); f_it != f_ite; ++f_it) {
+      LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*mit).getLoopInfo();
+      for(BasicBlock::iterator b_it = f_it->begin(), b_ite = f_it->end(); b_it != b_ite; ++b_it) {
+        Instruction* I = &*b_it;
+
+        if(CallInst* ci = dyn_cast<CallInst>(I)) {
+
+          Function* F = ci->getCalledFunction();
+          if(!FuncInfoMap[F])
+            FuncInfoMap[F] = initializeFuncInfo(F);
+
+          if(LI.getLoopFor(&*f_it))
+            FuncInfoMap[F]->calledInLoop = true;
+
+          FuncInfoMap[F]->numCallInsts++;
+        }
+      }
+    }
+  }
+  for(auto ent : FuncInfoMap) {
+    Function* F = ent.first;
+    if(F->isDeclaration())
+      continue;
+    FuncInfo* fi = ent.second;
+    errs() << F->getName().str() << "\n";
+    errs() << "numCallInsts = " << fi->numCallInsts << "\n";
+    errs() << "inside loop = " << fi->calledInLoop << "\n";
+    errs() << "AddrTaken = " << fi->AddrTaken << "\n";
+  }   
 }

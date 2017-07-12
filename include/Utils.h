@@ -245,6 +245,32 @@ bool mergeContext(BasicBlock * BB, map<BasicBlock*, map<Value*, StringAlloca*>> 
   return true;
 }
 
+void markArgsAsNonConst(CallInst* callInst, map<Value*, StringPointer*> stringPointers) {
+  int index = 0;
+  Function* calledFunction = callInst->getCalledFunction();
+  for(auto arg = calledFunction->arg_begin(), argEnd = calledFunction->arg_end(); arg != argEnd; 
+    arg++, index++) {
+    // Check for constant pointers
+    // All arguments in a 'readonly' function are assumed readonly     
+    if(arg->onlyReadsMemory()) {
+      if(debugPrint) errs()<<"!note: Argument/Function is readonly - no side effects \n";
+      continue;
+    }
+ 
+    // Searching for the pointer
+    Value * pointerArg = callInst->getOperand(index);
+    StringPointer * basePointer;
+    if(stringPointers.find(pointerArg) == stringPointers.end()){ 
+      continue;
+    } 
+    else
+      basePointer = stringPointers[pointerArg];
+
+    if(debugPrint) errs()<<"Note: Marking allocation as NON-CONSTANT \n";
+    // If the argument does alias a tracked allocation mark it as non-constant
+    basePointer->alloca->constant = false;  // mark allocation as non-constant    
+  }
+}
 
 void handleIndirectCall(CallInst * callInst, map<Value*, StringPointer*> & stringPointers){
 
@@ -263,3 +289,10 @@ void handleIndirectCall(CallInst * callInst, map<Value*, StringPointer*> & strin
   }
 }
 
+FuncInfo* initializeFuncInfo(Function* F) {
+  FuncInfo* fi = new FuncInfo;
+  fi->numCallInsts = 0;
+  fi->calledInLoop = false;
+  fi->AddrTaken = F->hasAddressTaken();
+  return fi;
+}

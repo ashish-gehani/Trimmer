@@ -56,7 +56,7 @@ struct ConstantFolding : public ModulePass {
   DataLayout * DL;
   DominatorTree * DT;
   CallGraph * CG;
-   
+  map<Function*, FuncInfo*> FuncInfoMap;   
   void processAllocaInst(AllocaInst * allocaInst, map<Value*, StringAlloca*> & stringAllocas, 
                          map<Value*, StringPointer*> & stringPointers, map<BasicBlock*, bool> & visited,
 			 BasicBlock::iterator & inst);
@@ -89,11 +89,15 @@ struct ConstantFolding : public ModulePass {
   
   void replaceCallOperands(); 
 
+  void gatherFuncInfo(Module& M);
+  
   // TODO: Make sure cloned functions calling other specialized routines are correctly retained
   void replaceCallInsts();  
  
   void markSpecialized(BasicBlock * BB);
  
+  bool satisfyConds(Function* F);
+
   /* IMP: New policy - visited passed by reference; no basic block visited twice - important to avoid wrongly 
           duplicating contexts e.g function cloning */ 
   void runOnBB(BasicBlock * BB, map<Value*, StringAlloca*> stringAllocas, 

@@ -33,6 +33,7 @@ ASSUMPTIONS
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/Transforms/Utils/SimplifyLibCalls.h"
 #include "llvm/Analysis/TargetLibraryInfo.h"
+#include <llvm/Analysis/LoopInfo.h>
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Dominators.h"
@@ -54,15 +55,13 @@ ASSUMPTIONS
 using namespace llvm;
 using namespace std;
 
-#define debugPrint 1
-
-
 // Adding llvm::MemoryDependenceAnalysis as a required PrePass                                                         
 void ConstantFolding::getAnalysisUsage(AnalysisUsage &AU) const { 
   //AU.addRequired<MemoryDependenceAnalysis>();
   AU.addRequired<DominatorTreeWrapperPass>();
   AU.addRequired<TargetLibraryInfoWrapperPass>();
   AU.addRequired<CallGraphWrapperPass>();
+  AU.addRequired<LoopInfoWrapperPass>();
 }
 
   
@@ -144,10 +143,10 @@ void ConstantFolding::runOnBB(BasicBlock * BB, map<Value*, StringAlloca*> string
   }
 } 
 
-
 bool ConstantFolding::runOnModule(Module & module) {
 
   errs()<<"\n\n*******---- InterConstProp -----*********\n\n";
+  gatherFuncInfo(module);
   map<Value*, StringAlloca*> stringAllocas;  
   // stringPointers is a map of constant pointers - string pointers with constant index into alloca   
   map<Value*, StringPointer*> stringPointers;

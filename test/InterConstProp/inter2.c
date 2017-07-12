@@ -4,7 +4,7 @@
 #include<stdlib.h>
 
 
-void func(char * buffer){
+void func1(char * buffer){
   
   char * value = strchr(buffer, '=');
   *value++ = '\0';
@@ -17,7 +17,7 @@ int main(){
 
   char buffer[100];
   memcpy(buffer, "my=friend", 100);
-
+  
   func(buffer);
 
   return 0;
