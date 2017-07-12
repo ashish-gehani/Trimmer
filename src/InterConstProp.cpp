@@ -85,7 +85,7 @@ void ConstantFolding::replaceCallInsts(){
   for (auto & e : specializedCalls){
     SpecializedCall * call = e.second;
     CallInst * from = call->origCall;
-    errs()<<"from = "<<*from<<"\n";
+    if(debugPrint) errs()<<"from = "<<*from<<"\n";
     CallInst * to = call->specCall;
     if(call->used){   
       if(debugPrint) errs()<<"Replacing "<<*from<<" with "<<*to<<"\n";
@@ -110,6 +110,10 @@ void ConstantFolding::runOnBB(BasicBlock * BB, map<Value*, StringAlloca*> string
   for (BasicBlock::iterator inst = b.begin(), ie = b.end(); inst != ie; ) {
 
     Instruction * I = &(*inst);
+    errs() << "instruction ";
+    I->print(errs());
+    errs() << "\n";
+ 
     // Only considering allocas for string specialisation
     if(AllocaInst * allocaInst = dyn_cast<AllocaInst>(&*I)){
          
@@ -145,7 +149,7 @@ void ConstantFolding::runOnBB(BasicBlock * BB, map<Value*, StringAlloca*> string
 
 bool ConstantFolding::runOnModule(Module & module) {
 
-  errs()<<"\n\n*******---- InterConstProp -----*********\n\n";
+  if(debugPrint) errs()<<"\n\n*******---- InterConstProp -----*********\n\n";
   gatherFuncInfo(module);
   map<Value*, StringAlloca*> stringAllocas;  
   // stringPointers is a map of constant pointers - string pointers with constant index into alloca   

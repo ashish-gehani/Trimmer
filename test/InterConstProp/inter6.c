@@ -9,12 +9,12 @@ since they are not called once. 'func' is called twice from the 'main' function,
 extern void externalFunc(char * buffer);
 
 
-void func(char * buffer, char * buffer2){  
+void branchPruned(char * buffer, char * buffer2){  
   if(strcmp(buffer, buffer2) == 0)
     printf("Func: Both strings are equal\n"); 
 }
 
-void func2(char * buffer, char * buffer2){  
+void branchNotPruned(char * buffer, char * buffer2){  
   if(strcmp(buffer, buffer2) == 0)
     printf("Func2: Both strings are equal\n"); 
 }
@@ -32,12 +32,12 @@ int main(){
   }
 
   // func called twice - shouldn't specialize
-  func(buffer, buffer2);
-  func(buffer, buffer2);
+  branchPruned(buffer, buffer2);
+  branchPruned(buffer, buffer2);
 
   // func2 called within loop - shouldn't specialize
   for(int i = 0; i < 10; i++){
-    func2(buffer, buffer2);
+    branchNotPruned(buffer, buffer2);
   }
 
   return 0;

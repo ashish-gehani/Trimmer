@@ -4,12 +4,17 @@
 #include<stdlib.h>
 
 
-void func(char * buffer, char * buffer2){
+void branchPruned(char * buffer, char * buffer2){
   
   if(strcmp(buffer, buffer2) == 0)
     printf("Both strings are equal\n"); 
 }
  
+void branchNotPruned(char* buffer) {
+  if(buffer[90] == '\n') {
+    printf("random check for testing node merging \n");
+  }
+}
 
 int main(){
 
@@ -17,12 +22,8 @@ int main(){
   memcpy(buffer, "value=key", 100);
   char buffer2[100];
   memcpy(buffer2, "value=key", 100);
-
-  if(buffer[90] == '\n') {
-    printf("random check for testing node merging \n");
-  }
-
-  func(buffer, buffer2);
+  branchNotPruned(buffer);
+  branchPruned(buffer, buffer2);
 
   return 0;
 }

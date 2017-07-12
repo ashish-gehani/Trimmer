@@ -189,7 +189,7 @@ void ConstantFolding::processGEPInst(GetElementPtrInst * GEPInst, map<Value*, St
     basePointer = stringPointers[ptr];
               
   // TODO: more comprehensive test for '0' indices into string      
-  if(!basePointer->alloca->constant){
+  if(!basePointer->alloca->constant) {
     //-- if(debugPrint) errs()<<"..... Skipping non-constant string ... "<<*GEPInst<<"\n";
     inst++;
     return;              
@@ -268,7 +268,6 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
 	      basePointer = stringPointers[pointerArg];
 
       if(basePointer->alloca->constant == false){
-      	errs()<<"non-constant string context \n";
       	continue;
       }
 
@@ -318,7 +317,7 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
 
     LibCallSimplifier Simplifier(*DL, TLI, InstCombineRAUW);
     if (Value *With = Simplifier.optimizeCall(callInst)) {
-      if(With == NULL) errs()<<"NULL VALUE \n\n";
+      if(With == NULL && debugPrint) errs()<<"NULL VALUE \n\n";
       if(debugPrint) errs()<<"Value to replace = "<<*With<<"\n";
       if(!callInst->use_empty()) {             
       	callInst->replaceAllUsesWith(With);              
@@ -373,7 +372,7 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
 
       //FIXIT: make type checks more general	
       if(!arg->getType()->isPointerTy() || !arg->getType()->getPointerElementType()->isIntegerTy(8)){
-      	errs()<<"!note: not supported "<<*arg<<"\n";                
+      	if(debugPrint) errs()<<"!note: not supported "<<*arg<<"\n";                
       	continue;
       }
   
@@ -390,14 +389,15 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
       if(!clonedFlag) { //IMP: prevent cloning function once per argument
       	ClonedCodeInfo info;
       	ValueToValueMapTy vmap;
-      	if(debugPrint) errs()<<"---- cloning function = "<<*calledFunction<<"\n";
+        string name = calledFunction->getName().str();
+      	if(debugPrint) errs()<<"---- cloning function = "<< name <<"\n";
       	clonedFunc = llvm::CloneFunction(calledFunction, vmap, true, &info);
-      	clonedFunc->setName(StringRef("random")); // FIXIT: Name appropriately
+        clonedFunc->setName(StringRef(name + "_clone")); // FIXIT: Name appropriately
       	calledFunction->getParent()->getFunctionList().push_back(clonedFunc);
                     
       	std::vector<Value*> args(callInst->arg_begin(), callInst->arg_end());
       	CallInst * specCallInst = CallInst::Create(clonedFunc, args);
-      	errs()<<"newCallSite = "<<*specCallInst<<"\n";
+      	if(debugPrint) errs()<<"newCallSite = "<<*specCallInst<<"\n";
       	SpecializedCall * call = new SpecializedCall;
       	call->origCall = callInst;
       	call->specCall = specCallInst;
@@ -473,7 +473,7 @@ void ConstantFolding::processBranchInst(BranchInst * branchInst, map<Value*, Str
     // Forward context to successor block if the successor has only a single predecessor & isNotVisited
     if(successor->getUniquePredecessor()) {
       visited[successor] = true; 
-      errs()<<"Successor has a single predecessor \n";
+      if(debugPrint) errs()<<"Successor has a single predecessor \n";
       runOnBB(successor, stringAllocas, stringPointers, visited);
     }    
     else{
@@ -518,14 +518,4 @@ void ConstantFolding::gatherFuncInfo(Module& M) {
       }
     }
   }
-  for(auto ent : FuncInfoMap) {
-    Function* F = ent.first;
-    if(F->isDeclaration())
-      continue;
-    FuncInfo* fi = ent.second;
-    errs() << F->getName().str() << "\n";
-    errs() << "numCallInsts = " << fi->numCallInsts << "\n";
-    errs() << "inside loop = " << fi->calledInLoop << "\n";
-    errs() << "AddrTaken = " << fi->AddrTaken << "\n";
-  }   
 }

@@ -7,12 +7,17 @@
 extern void externalFunc(char * buffer);
 
 
-void func(char * buffer, char * buffer2){
+void branchNotPruned2(char * buffer, char * buffer2){
   
   if(strcmp(buffer, buffer2) == 0)
     printf("Both strings are equal\n"); 
 }
  
+void branchNotPruned1(char* buffer) {
+  if(buffer[90] == '\n') {
+    printf("random check for testing node merging \n");
+  }
+}
 
 int main(){
 
@@ -24,10 +29,10 @@ int main(){
   if(buffer[90] == '\n') {
     printf("random check for testing node merging \n");
   }
-
-  externalFunc(buffer);
-
-  func(buffer, buffer2);
+  
+  branchNotPruned1(buffer);
+  externalFuncbranch(buffer);
+  branchNotPruned2(buffer, buffer2);
 
   return 0;
 }

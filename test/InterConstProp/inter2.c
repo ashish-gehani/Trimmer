@@ -4,7 +4,7 @@
 #include<stdlib.h>
 
 
-void func1(char * buffer){
+void branchPruned(char * buffer){
   
   char * value = strchr(buffer, '=');
   *value++ = '\0';
@@ -18,7 +18,7 @@ int main(){
   char buffer[100];
   memcpy(buffer, "my=friend", 100);
   
-  func(buffer);
+  branchPruned(buffer);
 
   return 0;
 }

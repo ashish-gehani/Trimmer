@@ -4,7 +4,7 @@
 #include<stdlib.h>
 
 
-void func(char * buffer){
+void branchPruned(char * buffer){
   
   //char * value = strchr(buffer, '=');
   int index = strcspn(buffer, "=");
@@ -17,16 +17,18 @@ void func(char * buffer){
     printf("friend\n"); 
 }
 
+void branchNotPruned(char* buffer) {
+  if(buffer[90] == '\n') {
+    printf("random check for testing node merging \n");
+  }
+}
+
 int main(){
 
   char buffer[100];
   memcpy(buffer, "my=friend", 100);
 
-  if(buffer[90] == '\n') {
-    printf("random check for testing node merging \n");
-  }
-
-  func(buffer);
-  func("hell");
+  branchNotPruned(buffer);
+  branchPruned(buffer);
   return 0;
 }

@@ -256,7 +256,7 @@ void markArgsAsNonConst(CallInst* callInst, map<Value*, StringPointer*> stringPo
       if(debugPrint) errs()<<"!note: Argument/Function is readonly - no side effects \n";
       continue;
     }
- 
+    
     // Searching for the pointer
     Value * pointerArg = callInst->getOperand(index);
     StringPointer * basePointer;
