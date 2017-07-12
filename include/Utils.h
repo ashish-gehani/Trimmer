@@ -132,10 +132,18 @@ bool isSpecializable(Function * calledFunction){
     return false;
 }   
 
-bool hasNoSideEffects(Function * calledFunction){
+// FIXIT: Check if function is readnone or readonly and has no sideeffects
+bool hasNoSideEffects(CallInst * callInst){
+  
+  Function * calledFunction = callInst->getCalledFunction();
+  // FIXIT: Extend this list to include all read-only functions from libc if require
+  if(callInst->onlyReadsMemory()){
+    if(debugPrint) errs()<<"NOTE: *CallInst only reads memory **\n";
+    return true;    
+  }
 
   string funcName = calledFunction->getName();
-  if(funcName == "atoi" || funcName == "strdup")
+  if(funcName == "atoi" || funcName == "strdup" || funcName == "printf")
     return true;
   else
     return false;

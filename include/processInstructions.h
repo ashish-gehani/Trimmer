@@ -202,6 +202,7 @@ void ConstantFolding::processGEPInst(GetElementPtrInst * GEPInst, map<Value*, St
   Value * indexValue;
   bool nonConstantIndices = false;
   int lastIndex;
+
   for(auto index = GEPInst->idx_begin(), end = GEPInst->idx_end(); index != end; index++){
             
     indexValue = *index;            
@@ -245,7 +246,7 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
   }         
 
   /* specialize for functions defined in string.h e.g strcmp, strchr */
-  if(isStringFunction(calledFunction)){
+  else if(isStringFunction(calledFunction)){
   
     if(callInst->use_empty()){
       inst++;
@@ -308,7 +309,6 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
       callOperand->newOperand = stringPtr; 
       operands->push_back(callOperand);
 
-      //-- replaceOperands[callInst] = callOperand;
 
       if(specIndex == 0){
         firstGEPPtr = stringPtr;
@@ -358,16 +358,10 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
 
     inst++;
     return;  
-  }
-
-  // FIXIT: The call should have a clear purpose
-  if(hasNoSideEffects(calledFunction)){
-    inst++;
-    return;
-  }
+  }  
 
   /* NEW: Propagating constants interprocedurally */ 
-  if(!isStringFunction(calledFunction) && !calledFunction->isDeclaration()){
+  else if(!isStringFunction(calledFunction) && !calledFunction->isDeclaration()){
                       
     if(debugPrint) errs()<<"---- Traversing function arguments ---- \n\n";       
     int index = 0;
@@ -382,14 +376,6 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
 	errs()<<"!note: not supported "<<*arg<<"\n";                
 	continue;
       }
-
-      // Check for constant pointers
-      // All arguments in a 'readonly' function are assumed readonly
-      // FIXIT: Do I need to check for aliasing?
-      if(arg->onlyReadsMemory() || calledFunction->onlyReadsMemory()){
-	//--- if(debugPrint) errs()<<"note: Argument/Function is readonly - no side effects \n";
-	continue;
-      }                           
   
       Value * pointerArg = callInst->getOperand(index);
       StringPointer * basePointer;
@@ -399,7 +385,6 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
       else
 	basePointer = stringPointers[pointerArg];
       
-
            
       // TODO-FIXIT: Only clone if function is called only ONCE 
       // Cloning routines before attempting constant propagation
@@ -447,11 +432,31 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
     if(clonedFlag)
       runOnBB(successor, stringAllocas, stringPointers, visited);
   }
+  
+  else{
 
-  if(!isStringFunction(calledFunction) && calledFunction->isDeclaration()){
+    // FIXIT: The call should have a clear purpose
+    if(hasNoSideEffects(callInst)){
+      inst++;
+      return;
+    }
 
-    if(debugPrint) errs()<<"--- Declaration: "<<*calledFunction<<"\n";
-    // TODO-NEW: Check for side effects and mark struct unspecializable
+    if(!isStringFunction(calledFunction) && calledFunction->isDeclaration()){
+
+      if(debugPrint) errs()<<"--- Declaration: "<<*calledFunction<<"\n";
+      // TODO-NEW: Check for side effects and mark struct unspecializable
+
+      // Check for constant pointers
+      // All arguments in a 'readonly' function are assumed readonly
+      // FIXIT: Do I need to check for aliasing?
+      /* if(arg->onlyReadsMemory() || calledFunction->onlyReadsMemory()){
+      //--- if(debugPrint) errs()<<"note: Argument/Function is readonly - no side effects \n";
+      continue;
+      }        
+
+      */ 
+    }
+
   }
 
   inst++; // Point to next instruction
