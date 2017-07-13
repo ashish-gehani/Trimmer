@@ -60,8 +60,7 @@ void ConstantFolding::processAllocaInst(AllocaInst * allocaInst, map<Value*, Str
   Instruction * I = &(*inst);
   Type * allocatedType = allocaInst->getAllocatedType();
   // Only considering allocas of char arrays e.g char buffer[100]       
-  if(allocatedType->isArrayTy() || isa<StructType>(ty))
-    MemNode* mnode = createMemNode(allocatedType);
+
   if(allocatedType->isArrayTy() && allocatedType->getContainedType(0)->isIntegerTy(8)) {
     ArrayType * arType = dyn_cast<ArrayType>(&*allocatedType);
     int numElements = arType->getNumElements();            
