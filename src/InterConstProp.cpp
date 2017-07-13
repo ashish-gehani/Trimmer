@@ -110,10 +110,10 @@ void ConstantFolding::runOnBB(BasicBlock * BB, map<Value*, StringAlloca*> string
   for (BasicBlock::iterator inst = b.begin(), ie = b.end(); inst != ie; ) {
 
     Instruction * I = &(*inst);
- 
     // Only considering allocas for string specialisation
     if(AllocaInst * allocaInst = dyn_cast<AllocaInst>(&*I)){
-         
+      I->print(errs());
+      errs() << "\n";
       processAllocaInst(allocaInst, stringAllocas, stringPointers, visited, inst);  
     }
     else if(MemCpyInst * memcpyInst = dyn_cast<MemCpyInst>(&*I)){

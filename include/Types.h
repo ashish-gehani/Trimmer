@@ -9,6 +9,9 @@ struct StringPointer;
 struct CallOperand;
 struct Indices;
 
+enum BaseType {
+  boolType, charType, intType, longType
+};
 
 struct Indices{
   int start;
@@ -24,7 +27,7 @@ struct StringAlloca{
   list<SplitString> splitStrings;
 };
 
-struct SplitString{
+struct SplitString {
   Indices indices;
   StringAlloca* splitAlloca;
 };
@@ -32,6 +35,22 @@ struct SplitString{
 struct StringPointer{
   int position;
   StringAlloca* alloca; // pointer to the alloca for the string
+};
+
+struct MemObj {
+  void* data; // even if it is not an array e.g. an int or a char, determined by size
+  BaseType btype;
+  int size;
+  bool initialized, constant, isArr;
+};
+
+struct MemNode {
+  MemNode** contained; // if it is a basetype like char or char array then point to a MemObj
+                     //  if it is a structtype then point to a list of MemNodes
+  MemObj* location;
+  bool isStruct, constant;  // true means location is NULL else Children is Null 
+  int position;
+  Type* ty;
 };
 
 struct CallOperand{
@@ -50,5 +69,3 @@ struct FuncInfo {
   unsigned numCallInsts;
   bool calledInLoop, AddrTaken;
 };
-
-FuncInfo* initializeFuncInfo(Function*);
