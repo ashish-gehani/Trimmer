@@ -260,17 +260,20 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
 
       Value * pointerArg = callInst->getArgOperand(index);
       StringPointer * basePointer;
+      errs() << "263\n";
+      errs() << *pointerArg << "\n";
       if(stringPointers.find(pointerArg) == stringPointers.end()){ 
       	//-- if(debugPrint) errs()<<"!pointer not found = "<<*pointerArg <<"\n"; 
       	continue;
       } 
       else
 	      basePointer = stringPointers[pointerArg];
+      errs() << "269\n";
 
       if(basePointer->alloca->constant == false){
       	continue;
       }
-
+      errs() << "273\n";
       char * baseStringData = basePointer->alloca->data;
       int offset = basePointer->position;
 	      
@@ -287,7 +290,7 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
 							     GlobalValue::ExternalLinkage, 
 							     stringConstant, "");
 
-      if(debugPrint) errs()<<"globalReadString = "<<*globalReadString<<"\n";
+      errs()<<"globalReadString = "<<*globalReadString<<"\n";
       GetElementPtrInst * stringPtr = GetElementPtrInst::Create(NULL, globalReadString, 
 								indxList, Twine(""), callInst);
             
