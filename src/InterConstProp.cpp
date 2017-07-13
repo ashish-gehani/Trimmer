@@ -110,9 +110,6 @@ void ConstantFolding::runOnBB(BasicBlock * BB, map<Value*, StringAlloca*> string
   for (BasicBlock::iterator inst = b.begin(), ie = b.end(); inst != ie; ) {
 
     Instruction * I = &(*inst);
-    errs() << "instruction ";
-    I->print(errs());
-    errs() << "\n";
  
     // Only considering allocas for string specialisation
     if(AllocaInst * allocaInst = dyn_cast<AllocaInst>(&*I)){
@@ -151,6 +148,7 @@ bool ConstantFolding::runOnModule(Module & module) {
 
   if(debugPrint) errs()<<"\n\n*******---- InterConstProp -----*********\n\n";
   gatherFuncInfo(module);
+
   map<Value*, StringAlloca*> stringAllocas;  
   // stringPointers is a map of constant pointers - string pointers with constant index into alloca   
   map<Value*, StringPointer*> stringPointers;

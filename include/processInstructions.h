@@ -123,6 +123,7 @@ void ConstantFolding::processStoreInst(StoreInst * storeInst, map<Value*, String
                        map<Value*, StringPointer*> & stringPointers, map<BasicBlock*, bool> & visited,
                        BasicBlock::iterator & inst){
 
+
   Value * ptr = storeInst->getOperand(1);
   Type * operandType = storeInst->getOperand(0)->getType();
   if(!operandType->isIntegerTy(8)){
@@ -150,7 +151,7 @@ void ConstantFolding::processStoreInst(StoreInst * storeInst, map<Value*, String
   if(ConstantInt * constOp = dyn_cast<ConstantInt>(storeOperand)){
     constantValue = constOp->getZExtValue();
   }
-  else{
+  else {
     if(debugPrint) errs()<<"--- Marking alloca as non-const \n";
     basePointer->alloca->constant = false;
     inst++;
@@ -230,9 +231,8 @@ void ConstantFolding::processGEPInst(GetElementPtrInst * GEPInst, map<Value*, St
 void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAlloca*> & stringAllocas, 
 		     map<Value*, StringPointer*> & stringPointers, map<BasicBlock*, bool> & visited,
 		     BasicBlock::iterator & inst){
-
   Instruction * I = &(*inst); 
-  Function * calledFunction = callInst->getCalledFunction();          
+  Function * calledFunction = callInst->getCalledFunction();  
   // Indirect function calls need special handling
   if(calledFunction == NULL){
     handleIndirectCall(callInst, stringPointers);
@@ -242,7 +242,7 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
 
   /* specialize for functions defined in string.h e.g strcmp, strchr */
   else if(isStringFunction(calledFunction)) {
-  
+
     if(callInst->use_empty()){
       inst++;
       return; // Skip simplifying functions with unused results
@@ -257,23 +257,19 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
 
     // FIXIT: Specializing the call per argument - INCORRECT/BUG
     for(unsigned int index = 0; index < callInst->getNumArgOperands(); index++){
-
       Value * pointerArg = callInst->getArgOperand(index);
       StringPointer * basePointer;
-      errs() << "263\n";
-      errs() << *pointerArg << "\n";
+
       if(stringPointers.find(pointerArg) == stringPointers.end()){ 
       	//-- if(debugPrint) errs()<<"!pointer not found = "<<*pointerArg <<"\n"; 
-      	continue;
+        continue;
       } 
       else
 	      basePointer = stringPointers[pointerArg];
-      errs() << "269\n";
 
       if(basePointer->alloca->constant == false){
       	continue;
       }
-      errs() << "273\n";
       char * baseStringData = basePointer->alloca->data;
       int offset = basePointer->position;
 	      
@@ -290,7 +286,6 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
 							     GlobalValue::ExternalLinkage, 
 							     stringConstant, "");
 
-      errs()<<"globalReadString = "<<*globalReadString<<"\n";
       GetElementPtrInst * stringPtr = GetElementPtrInst::Create(NULL, globalReadString, 
 								indxList, Twine(""), callInst);
             
@@ -311,7 +306,6 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
         specIndex++;
       }  
     }
-    
     replaceCallOperands();
  
     auto InstCombineRAUW = [this](Instruction *From, Value *With) {
@@ -322,6 +316,11 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
     if (Value *With = Simplifier.optimizeCall(callInst)) {
       if(With == NULL && debugPrint) errs()<<"NULL VALUE \n\n";
       if(debugPrint) errs()<<"Value to replace = "<<*With<<"\n";
+      /**/
+      // if(allocatedType->isArrayTy() && allocatedType->getContainedType(0)->isIntegerTy(8)) {
+
+      // }      
+      /**/
       if(!callInst->use_empty()) {             
       	callInst->replaceAllUsesWith(With);              
       	inst = BasicBlock::iterator(firstGEPPtr);
@@ -506,16 +505,14 @@ void ConstantFolding::gatherFuncInfo(Module& M) {
       LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*mit).getLoopInfo();
       for(BasicBlock::iterator b_it = f_it->begin(), b_ite = f_it->end(); b_it != b_ite; ++b_it) {
         Instruction* I = &*b_it;
-
         if(CallInst* ci = dyn_cast<CallInst>(I)) {
-
           Function* F = ci->getCalledFunction();
+          if(!F)
+            continue;
           if(!FuncInfoMap[F])
             FuncInfoMap[F] = initializeFuncInfo(F);
-
           if(LI.getLoopFor(&*f_it))
             FuncInfoMap[F]->calledInLoop = true;
-
           FuncInfoMap[F]->numCallInsts++;
         }
       }

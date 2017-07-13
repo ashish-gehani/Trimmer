@@ -39,7 +39,7 @@
 using namespace llvm;
 using namespace std;
 
-#define debugPrint 1
+#define debugPrint 0
 
 
 bool getConstantStringInfo(const Value *V, StringRef &Str, uint64_t Offset, bool TrimAtNul) {
@@ -158,7 +158,7 @@ bool isStringFunction(Function * calledFunction){
 
   string funcName = calledFunction->getName();
   if(funcName == "strcmp" || funcName == "strcasecmp" || funcName == "strcspn" 
-     || funcName == "strspn")
+     || funcName == "strspn" || funcName == "strchr")
     return true;
   else
     return false;

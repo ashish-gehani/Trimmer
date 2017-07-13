@@ -33,33 +33,36 @@ namespace {
     int num;
     testing() : ModulePass(ID) {}
     bool runOnModule(Module& M) {
-      vector<Function*> pruned;
-      vector<Function*> not_pruned;
+      Function* pruned, *not_pruned;
+      unsigned cps = 0;
+      unsigned cnps = 0;
       for (Module::iterator mit = M.getFunctionList().begin(); mit != M.getFunctionList().end(); ++mit) {
         Function* F = &*mit;
         string name = F->getName().str();
-        if(name.substr (0,12) == "branchPruned") 
-          pruned.push_back(F);
-        else if(name.substr (0,15) == "branchNotPruned")
-          not_pruned.push_back(F);
+        if(name.substr (0,12) == "branchPruned" && name.size() > cps) {
+          pruned = F;
+          cps = name.size();
+        }
+        else if(name.substr (0,15) == "branchNotPruned" && name.size() > cnps) {
+          not_pruned = F;
+          cnps = name.size();
+        }
       }
       bool passed = true;
-      for(unsigned i = 0; i < pruned.size(); i++) {
-        Function* F = pruned[i];
-        for (Function::iterator f_it = F->begin(), f_ite = F->end(); f_it != f_ite; ++f_it) {
+      if(pruned) {
+        for (Function::iterator f_it = pruned->begin(), f_ite = pruned->end(); f_it != f_ite; ++f_it) {
           for(BasicBlock::iterator b_it = f_it->begin(), b_ite = f_it->end(); b_it != b_ite; ++b_it) {
             Instruction* I = &*b_it;
             if(isa<BranchInst>(I)) {
-              errs() << "branchInst found in " << F->getName().str() << "\n";
+              errs() << "branchInst found in " << pruned->getName().str() << "\n";
               passed = false;
             }
           }
         }
       }
-      for(unsigned i = 0; i < not_pruned.size(); i++) {
-        Function* F = not_pruned[i];
+      if(not_pruned) {
         bool found = false;
-        for (Function::iterator f_it = F->begin(), f_ite = F->end(); f_it != f_ite; ++f_it) {
+        for (Function::iterator f_it = not_pruned->begin(), f_ite = not_pruned->end(); f_it != f_ite; ++f_it) {
           for(BasicBlock::iterator b_it = f_it->begin(), b_ite = f_it->end(); b_it != b_ite; ++b_it) {
             Instruction* I = &*b_it;
             if(isa<BranchInst>(I)) {
@@ -68,7 +71,7 @@ namespace {
           }
         }
         if(!found) {
-          errs() << "branchInst not found in Function " << F->getName().str() << "\n";
+          errs() << "branchInst not found in Function " << not_pruned->getName().str() << "\n";
           passed = false;
         }
       }
