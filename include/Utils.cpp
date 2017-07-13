@@ -1,5 +1,3 @@
-
-
 #include "llvm/Pass.h"
 #include "llvm/IR/Function.h"
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
@@ -34,13 +32,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sstream>
-#include "Types.h"
+#include "Types.cpp"
 
 using namespace llvm;
 using namespace std;
-
 #define debugPrint 0
-
 
 bool getConstantStringInfo(const Value *V, StringRef &Str, uint64_t Offset, bool TrimAtNul) {
    
@@ -287,12 +283,4 @@ void handleIndirectCall(CallInst * callInst, map<Value*, StringPointer*> & strin
     // "conservatively" mark each argument as modified 
     basePointer->alloca->constant = false;
   }
-}
-
-FuncInfo* initializeFuncInfo(Function* F) {
-  FuncInfo* fi = new FuncInfo;
-  fi->numCallInsts = 0;
-  fi->calledInLoop = false;
-  fi->AddrTaken = F->hasAddressTaken();
-  return fi;
 }

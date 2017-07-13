@@ -1,7 +1,8 @@
 import subprocess
+import sys
 
-lo = 2
-hi = 6
+lo = int(sys.argv[1])
+hi = int(sys.argv[2])
 
 for i in xrange(lo, hi + 1):
 	print 'running test ' + str(i)

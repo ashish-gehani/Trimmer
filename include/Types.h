@@ -50,3 +50,5 @@ struct FuncInfo {
   unsigned numCallInsts;
   bool calledInLoop, AddrTaken;
 };
+
+FuncInfo* initializeFuncInfo(Function*);
