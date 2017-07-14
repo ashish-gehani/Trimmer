@@ -53,30 +53,17 @@ void ConstantFolding::markSpecialized(BasicBlock * BB){
 
 
 
-void ConstantFolding::processAllocaInst(AllocaInst * allocaInst, map<Value*, StringAlloca*> & stringAllocas, 
-                       map<Value*, StringPointer*> & stringPointers, map<BasicBlock*, bool> & visited,
+void ConstantFolding::processAllocaInst(AllocaInst * allocaInst, map<Value*, MemObj*> & ObjMap, 
+                       MemNodeMap & MemMap, map<BasicBlock*, bool> & visited,
                        BasicBlock::iterator & inst){
 
   Instruction * I = &(*inst);
   Type * allocatedType = allocaInst->getAllocatedType();
   // Only considering allocas of char arrays e.g char buffer[100]       
-
-  if(allocatedType->isArrayTy() && allocatedType->getContainedType(0)->isIntegerTy(8)) {
-    ArrayType * arType = dyn_cast<ArrayType>(&*allocatedType);
-    int numElements = arType->getNumElements();            
-    StringAlloca * stringAlloca = new StringAlloca;     
-    stringAlloca->size = numElements;
-    stringAlloca->data = new char[numElements];
-    stringAlloca->constant = true;  // string is initialized as constant
-    stringAlloca->initialized = false; // string not yet initialized
-    stringAllocas[I] = stringAlloca;
-
-    StringPointer * stringPointer = new StringPointer;
-    stringPointer->position = 0; // Pointing to the very start of the allocated buffer
-    stringPointer->alloca = stringAlloca;
-    stringPointers[I] = stringPointer;
-  }
-  else
+  if(allocatedType->isArrayTy() || isa<StructType>(allocatedType)) {
+    MemNode* mnode = createMemNode(allocatedType);
+    MemMap[I] = mnode;
+  } else
     if(debugPrint) errs()<<"note: Unsupported alloca type "<<*allocatedType<<"\n";
 
   inst++; // Point to next instruction in BB
@@ -84,22 +71,23 @@ void ConstantFolding::processAllocaInst(AllocaInst * allocaInst, map<Value*, Str
 
 
 
-void ConstantFolding::processMemcpyInst(MemCpyInst * memcpyInst, map<Value*, StringAlloca*> & stringAllocas, 
-                       map<Value*, StringPointer*> & stringPointers, map<BasicBlock*, bool> & visited,
+void ConstantFolding::processMemcpyInst(MemCpyInst * memcpyInst, map<Value*, MemObj*> & ObjMap, 
+                       MemNodeMap & MemMap, map<BasicBlock*, bool> & visited,
                        BasicBlock::iterator & inst){
 
   if(debugPrint) errs()<<"MemCpy Inst "<<*memcpyInst<<"\n"; 	
   Value * bufferPtr = memcpyInst->getOperand(0);
-  StringPointer * basePointer;
-  if(stringPointers.find(bufferPtr) == stringPointers.end()){
+  MemNode * basePointer;
+  if(MemMap.find(bufferPtr) == MemMap.end()){
     inst++;
     return;
   }
   else
-    basePointer = stringPointers[bufferPtr];
+    basePointer = MemMap[bufferPtr];
                    
   int offset = basePointer->position;
-  char * sourceBuffer = basePointer->alloca->data + offset;
+  char * sourceBuffer = (char*) basePointer->alloca->data;
+  sourceBuffer += offset;
   StringRef stringRef;
           
   if(!getConstantStringInfo(memcpyInst->getOperand(1), stringRef, 0, false)){
@@ -119,8 +107,8 @@ void ConstantFolding::processMemcpyInst(MemCpyInst * memcpyInst, map<Value*, Str
 }
 
 
-void ConstantFolding::processStoreInst(StoreInst * storeInst, map<Value*, StringAlloca*> & stringAllocas, 
-                       map<Value*, StringPointer*> & stringPointers, map<BasicBlock*, bool> & visited,
+void ConstantFolding::processStoreInst(StoreInst * storeInst, map<Value*, MemObj*> & ObjMap, 
+                       MemNodeMap & MemMap, map<BasicBlock*, bool> & visited,
                        BasicBlock::iterator & inst){
 
 
@@ -131,14 +119,14 @@ void ConstantFolding::processStoreInst(StoreInst * storeInst, map<Value*, String
     return;
   }
 
-  StringPointer * basePointer;
+  MemNode * basePointer;
   // Search for the pointer in map of constant pointers - pointers with constant offsets
-  if(stringPointers.find(ptr) == stringPointers.end()){
+  if(MemMap.find(ptr) == MemMap.end()){
     inst++;
     return;
   }
   else
-    basePointer = stringPointers[ptr];
+    basePointer = MemMap[ptr];
 
   if(!basePointer->alloca->constant){
     if(debugPrint) errs()<<".. Skipping non constant alloca string ... \n";
@@ -163,7 +151,7 @@ void ConstantFolding::processStoreInst(StoreInst * storeInst, map<Value*, String
     if(debugPrint) errs()<<"NULL CHARACTER \n";
   }
   
-  char * stringData = basePointer->alloca->data;
+  char * stringData = (char*) basePointer->alloca->data;
   int offset = basePointer->position;
   // Storing constant character at constant offset
   stringData[offset] = storeChar;
@@ -173,21 +161,21 @@ void ConstantFolding::processStoreInst(StoreInst * storeInst, map<Value*, String
 }
 
 
-void ConstantFolding::processGEPInst(GetElementPtrInst * GEPInst, map<Value*, StringAlloca*> & stringAllocas, 
-		    map<Value*, StringPointer*> & stringPointers, map<BasicBlock*, bool> & visited,
+void ConstantFolding::processGEPInst(GetElementPtrInst * GEPInst, map<Value*, MemObj*> & ObjMap, 
+		    MemNodeMap & MemMap, map<BasicBlock*, bool> & visited,
 		    BasicBlock::iterator & inst){
 
 
   Instruction * I = &(*inst);
   Value * ptr = GEPInst->getOperand(0);
-  StringPointer * basePointer;
+  MemNode * basePointer;
 
-  if(stringPointers.find(ptr) == stringPointers.end()){
+  if(MemMap.find(ptr) == MemMap.end()){
       inst++; 
       return;
   }
   else
-    basePointer = stringPointers[ptr];
+    basePointer = MemMap[ptr];
               
   // TODO: more comprehensive test for '0' indices into string      
   if(!basePointer->alloca->constant) {
@@ -219,23 +207,23 @@ void ConstantFolding::processGEPInst(GetElementPtrInst * GEPInst, map<Value*, St
     return;
   }
 
-  StringPointer * stringPointer = new StringPointer;
-  stringPointer->position = basePointer->position + lastIndex;
-  stringPointer->alloca = basePointer->alloca;
-  stringPointers[I] = stringPointer;          
+  MemNode * mnode = new MemNode;
+  mnode->position = basePointer->position + lastIndex;
+  mnode->alloca = basePointer->alloca;
+  MemMap[I] = mnode;          
  
   inst++; // Point to next instruction in BB
 }
 
 
-void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAlloca*> & stringAllocas, 
-		     map<Value*, StringPointer*> & stringPointers, map<BasicBlock*, bool> & visited,
+void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, MemObj*> & ObjMap, 
+		     MemNodeMap & MemMap, map<BasicBlock*, bool> & visited,
 		     BasicBlock::iterator & inst){
   Instruction * I = &(*inst); 
   Function * calledFunction = callInst->getCalledFunction();  
   // Indirect function calls need special handling
   if(calledFunction == NULL){
-    handleIndirectCall(callInst, stringPointers);
+    handleIndirectCall(callInst, MemMap);
     inst++;
     return;
   }         
@@ -258,19 +246,19 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
     // FIXIT: Specializing the call per argument - INCORRECT/BUG
     for(unsigned int index = 0; index < callInst->getNumArgOperands(); index++){
       Value * pointerArg = callInst->getArgOperand(index);
-      StringPointer * basePointer;
+      MemNode * basePointer;
 
-      if(stringPointers.find(pointerArg) == stringPointers.end()){ 
+      if(MemMap.find(pointerArg) == MemMap.end()){ 
       	//-- if(debugPrint) errs()<<"!pointer not found = "<<*pointerArg <<"\n"; 
         continue;
       } 
       else
-	      basePointer = stringPointers[pointerArg];
+	      basePointer = MemMap[pointerArg];
 
       if(basePointer->alloca->constant == false){
       	continue;
       }
-      char * baseStringData = basePointer->alloca->data;
+      char * baseStringData = (char*) basePointer->alloca->data;
       int offset = basePointer->position;
 	      
       char * newStr = baseStringData + offset;
@@ -359,7 +347,7 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
   else if(!isStringFunction(calledFunction) && !calledFunction->isDeclaration()) {
                       
     if(!satisfyConds(calledFunction)) {
-      markArgsAsNonConst(callInst, stringPointers);
+      markArgsAsNonConst(callInst, MemMap);
       inst++;
       return;
     }
@@ -379,12 +367,12 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
       }
   
       Value * pointerArg = callInst->getOperand(index);
-      StringPointer * basePointer;
-      if(stringPointers.find(pointerArg) == stringPointers.end()){ 
+      MemNode * basePointer;
+      if(MemMap.find(pointerArg) == MemMap.end()){ 
 	      continue;
       } 
       else
-	      basePointer = stringPointers[pointerArg];
+	      basePointer = MemMap[pointerArg];
                  
       // TODO-FIXIT: Only clone if function is called only ONCE 
       // Cloning routines before attempting constant propagation
@@ -409,11 +397,11 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
       	clonedFlag = true; //IMP: prevent cloning function once per argument      
       }
 
-      StringPointer * stringPointer = new StringPointer;
-      stringPointer->position = basePointer->position;
-      stringPointer->alloca = basePointer->alloca;
+      MemNode * mnode = new MemNode;
+      mnode->position = basePointer->position;
+      mnode->alloca = basePointer->alloca;
       Value * pointerVal = getArg(clonedFunc, index);
-      stringPointers[pointerVal] = stringPointer;        
+      MemMap[pointerVal] = mnode;        
       if(debugPrint) errs()<<" POINTER VAL = "<<*pointerVal<<"\n";
       
           //FIXIT: Reconsider the below choices
@@ -429,7 +417,7 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
     }
     
     if(clonedFlag)
-      runOnBB(successor, stringAllocas, stringPointers, visited);
+      runOnBB(successor, ObjMap, MemMap, visited);
   }
   //IMP: The following 'default' cause finds and marks any sideeffects of external calls
   else {
@@ -442,7 +430,7 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
 
     if(calledFunction->isDeclaration()) {
       if(debugPrint) errs()<<"--- Declaration: "<<*calledFunction<<"\n";
-      markArgsAsNonConst(callInst, stringPointers);
+      markArgsAsNonConst(callInst, MemMap);
     }
   }
 
@@ -452,12 +440,12 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
 
 
 
-void ConstantFolding::processBranchInst(BranchInst * branchInst, map<Value*, StringAlloca*> & stringAllocas, 
-		     map<Value*, StringPointer*> & stringPointers, map<BasicBlock*, bool> & visited,
-		     BasicBlock::iterator & inst){
+void ConstantFolding::processBranchInst(BranchInst * branchInst, map<Value*, MemObj*> & ObjMap, 
+		     MemNodeMap & MemMap, map<BasicBlock*, bool> & visited,
+		     BasicBlock::iterator & inst) {
 
-  BasicBlock* BB= branchInst->getParent();
-  blockContexts[BB] = stringAllocas;
+  BasicBlock* BB = branchInst->getParent();
+  blockContexts[BB] = ObjMap;
   for(unsigned int index = 0; index < branchInst->getNumSuccessors(); index++){
 
     BasicBlock * successor = branchInst->getSuccessor(index);
@@ -476,16 +464,16 @@ void ConstantFolding::processBranchInst(BranchInst * branchInst, map<Value*, Str
     if(successor->getUniquePredecessor()) {
       visited[successor] = true; 
       if(debugPrint) errs()<<"Successor has a single predecessor \n";
-      runOnBB(successor, stringAllocas, stringPointers, visited);
+      runOnBB(successor, ObjMap, MemMap, visited);
     }    
-    else{
+    else {
       if(debugPrint) errs()<<"Block has multiple predecessors \n";
       // Merging contexts
       // TODO: more testing required            
-      map<Value*, StringAlloca*> stringAllocas2;
-      mergeContext(successor, blockContexts, stringAllocas2, stringPointers);
+      map<Value*, MemObj*> ObjMap2;
+      mergeContext(successor, blockContexts, ObjMap2, MemMap);
       visited[successor] = true;  //FIXIT: Clear your head on visiting BBs 
-      runOnBB(successor, stringAllocas2, stringPointers, visited);            
+      runOnBB(successor, ObjMap2, MemMap, visited);            
     } 
   }         
 

@@ -35,7 +35,8 @@ void* createData(Type* ty, int size, BaseType& btype) {
 
 MemObj* createMemObj(Type* ty) {
 	MemObj* mobj = new MemObj;
-	mobj->initialized = false; //check
+	mobj->initialized = false;
+	mobj->constant = true;
 	mobj->size = 1;
 	mobj->isArr = false;
 	if(ArrayType * arType = dyn_cast<ArrayType>(ty)) {
@@ -50,18 +51,27 @@ MemObj* createMemObj(Type* ty) {
 MemNode* createMemNode(Type* ty) {
 	MemNode* mnode = new MemNode;
 	mnode->position = 0;
-	mnode->constant = true;
 	mnode->ty = ty;
 	if(StructType* st = dyn_cast<StructType>(ty)) {
-		mnode->isStruct = true; 
 		unsigned num = st->getNumElements();
 		mnode->contained = new MemNode*[num];
 		for(unsigned i = 0; i < num; i++)
 			mnode->contained[i] = createMemNode(st->getElementType(i));
-	} else {
-		mnode->isStruct = false; 
-		mnode->location = createMemObj(ty);
-		errs() << mnode->location->size << " " << mnode->location->btype << "\n";
-	}
+	} else
+		mnode->alloca = createMemObj(ty);
+	return mnode;
+}
+
+MemNode* createMemNode(Type* ty, MemObj* alloca) {
+	MemNode* mnode = new MemNode;
+	mnode->position = 0;
+	mnode->ty = ty;
+	if(StructType* st = dyn_cast<StructType>(ty)) {
+		unsigned num = st->getNumElements();
+		mnode->contained = new MemNode*[num];
+		for(unsigned i = 0; i < num; i++)
+			mnode->contained[i] = createMemNode(st->getElementType(i));
+	} else
+		mnode->alloca = alloca;
 	return mnode;
 }

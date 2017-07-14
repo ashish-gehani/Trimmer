@@ -47,8 +47,7 @@ struct MemObj {
 struct MemNode {
   MemNode** contained; // if it is a basetype like char or char array then point to a MemObj
                      //  if it is a structtype then point to a list of MemNodes
-  MemObj* location;
-  bool isStruct, constant;  // true means location is NULL else Children is Null 
+  MemObj* alloca;
   int position;
   Type* ty;
 };
@@ -69,3 +68,6 @@ struct FuncInfo {
   unsigned numCallInsts;
   bool calledInLoop, AddrTaken;
 };
+
+typedef map<Value*, MemNode*> MemNodeMap;
+typedef map<Value*, MemObj*> MemObjMap;

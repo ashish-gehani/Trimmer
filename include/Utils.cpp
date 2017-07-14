@@ -171,7 +171,7 @@ Value * getArg(Function * func, int index){
 }
 
 // FIXIT: Allow dominated predecessors to not have executed prior to current basic block
-bool predecessorsVisited(BasicBlock * BB, map<BasicBlock*, map<Value*, StringAlloca*>> blockContexts){
+bool predecessorsVisited(BasicBlock * BB, map<BasicBlock*, map<Value*, MemObj*>> blockContexts){
    
   for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++){
     BasicBlock * predecessor = *it;
@@ -189,12 +189,11 @@ bool predecessorsVisited(BasicBlock * BB, map<BasicBlock*, map<Value*, StringAll
 //TODO: Check context properly including comparing the alloca CONTENTS
 //TODO: Fill the stringPointers and stringAllocas correctly - be sound even if imprecise 
 //TODO: Insert call to merge context and test with examples
-bool mergeContext(BasicBlock * BB, map<BasicBlock*, map<Value*, StringAlloca*>> blockContexts,
-		  map<Value*, StringAlloca*> & stringAllocas, 
-		  map<Value*, StringPointer*> & stringPointers){
+bool mergeContext(BasicBlock * BB, map<BasicBlock*, map<Value*, MemObj*>> blockContexts,
+		  map<Value*, MemObj*> & stringAllocas, MemNodeMap & MemMap) {
 
   //-- if(debugPrint) errs()<<"Merging context for BB = "<<*BB<<"\n";
-  std::vector<map<Value*, StringAlloca*>> predecessorContexts;    
+  std::vector<map<Value*, MemObj*>> predecessorContexts;    
 
   for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++){
     BasicBlock * predecessor = *it;
@@ -206,42 +205,42 @@ bool mergeContext(BasicBlock * BB, map<BasicBlock*, map<Value*, StringAlloca*>> 
 
   if(debugPrint) errs()<<"\n Comparing predecessor contexts = "<<predecessorContexts.size()<<"\n";
   unsigned int i;
-  map<Value*, StringAlloca*> predContext = predecessorContexts[0];
+  map<Value*, MemObj*> predContext = predecessorContexts[0];
    
   for(auto it = predContext.begin(); 
       it != predContext.end(); ++it){
 
     Value * inst = it->first;
-    StringAlloca * alloca = it->second;
+    MemObj * alloca = it->second;
     bool equal = true;
     for(i = 1; i < predecessorContexts.size(); i++){
-      map<Value*, StringAlloca*> predContext2 = predecessorContexts[i];
+      map<Value*, MemObj*> predContext2 = predecessorContexts[i];
       if(predContext2.find(inst) == predContext2.end()){
-	equal = false;
-	break;
+      	equal = false;
+      	break;
       } 
-      else{
-	StringAlloca* alloca1 = predContext[inst];
-	StringAlloca* alloca2 = predContext2[inst];
-	char* data1 = alloca1->data;
-	char* data2 = alloca2->data;          
-	if(strcmp(data1, data2) != 0) 
-	  equal = false;  
+      else {
+      	MemObj* alloca1 = predContext[inst];
+      	MemObj* alloca2 = predContext2[inst];
+      	char* data1 = (char*) alloca1->data;
+      	char* data2 = (char*) alloca2->data;          
+      	if(strcmp(data1, data2) != 0) 
+      	  equal = false;  
       }      
     }
  
     // FIXIT: Manage String Pointers as well 
-    if(equal){
+    if(equal) {
       stringAllocas[inst] = alloca;
-    } else{
+    } else {
       alloca->constant = false; //FIXIT: A little over-conservative. Imagine reverse post order scenarios
     }               
   }  
 
   return true;
 }
-
-void markArgsAsNonConst(CallInst* callInst, map<Value*, StringPointer*> stringPointers) {
+/*Note :: over here check for structures*/
+void markArgsAsNonConst(CallInst* callInst, MemNodeMap MemMap) {
   int index = 0;
   Function* calledFunction = callInst->getCalledFunction();
   for(auto arg = calledFunction->arg_begin(), argEnd = calledFunction->arg_end(); arg != argEnd; 
@@ -255,12 +254,12 @@ void markArgsAsNonConst(CallInst* callInst, map<Value*, StringPointer*> stringPo
     
     // Searching for the pointer
     Value * pointerArg = callInst->getOperand(index);
-    StringPointer * basePointer;
-    if(stringPointers.find(pointerArg) == stringPointers.end()){ 
+    MemNode * basePointer;
+    if(MemMap.find(pointerArg) == MemMap.end()){ 
       continue;
     } 
     else
-      basePointer = stringPointers[pointerArg];
+      basePointer = MemMap[pointerArg];
 
     if(debugPrint) errs()<<"Note: Marking allocation as NON-CONSTANT \n";
     // If the argument does alias a tracked allocation mark it as non-constant
@@ -268,18 +267,18 @@ void markArgsAsNonConst(CallInst* callInst, map<Value*, StringPointer*> stringPo
   }
 }
 
-void handleIndirectCall(CallInst * callInst, map<Value*, StringPointer*> & stringPointers){
+void handleIndirectCall(CallInst * callInst, MemNodeMap & MemMap){
 
   // For any argument to the indirect call that aliases any of the allocated memory 
   // mark the side effects i.e mark allocation as non-constant
   for(unsigned int index = 0; index < callInst->getNumArgOperands(); index++){
     Value * pointerArg = callInst->getArgOperand(index);
-    StringPointer * basePointer;
-    if(stringPointers.find(pointerArg) == stringPointers.end()){ 
+    MemNode * basePointer;
+    if(MemMap.find(pointerArg) == MemMap.end()){ 
       continue;
     } 
     else
-      basePointer = stringPointers[pointerArg];               
+      basePointer = MemMap[pointerArg];               
     // "conservatively" mark each argument as modified 
     basePointer->alloca->constant = false;
   }
