@@ -354,10 +354,13 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
     inst++;
     return;  
   }  
-  // Why checking for isstring again??
   /* NEW: Propagating constants interprocedurally */ 
   else if(!isStringFunction(calledFunction) && !calledFunction->isDeclaration()) {
-                      
+
+    /*task1*/
+    // If the function does not satisfy any of the three conditions, mark all arguments
+    // which were previously bieng tracked as non constant
+    // It is the same code which was used for isDeclaration                     
     if(!satisfyConds(calledFunction)) {
       markArgsAsNonConst(callInst, stringPointers);
       inst++;
@@ -439,7 +442,8 @@ void ConstantFolding::processCallInst(CallInst * callInst, map<Value*, StringAll
       inst++;
       return;
     }
-
+    /*task1*/
+    // Code moved to function defined in utils.cpp
     if(calledFunction->isDeclaration()) {
       if(debugPrint) errs()<<"--- Declaration: "<<*calledFunction<<"\n";
       markArgsAsNonConst(callInst, stringPointers);
@@ -490,32 +494,4 @@ void ConstantFolding::processBranchInst(BranchInst * branchInst, map<Value*, Str
   }         
 
   inst++;
-}
-
-bool ConstantFolding::satisfyConds(Function* F) {
-  if(FuncInfoMap.find(F) == FuncInfoMap.end())
-    return false; // conservative
-  FuncInfo* fi = FuncInfoMap[F];
-  return !(fi->calledInLoop || fi->AddrTaken || (fi->numCallInsts != 1)); 
-}
-
-void ConstantFolding::gatherFuncInfo(Module& M) {
-  for (Module::iterator mit = M.getFunctionList().begin(); mit != M.getFunctionList().end(); ++mit) {
-    for (Function::iterator f_it = mit->begin(), f_ite = mit->end(); f_it != f_ite; ++f_it) {
-      LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*mit).getLoopInfo();
-      for(BasicBlock::iterator b_it = f_it->begin(), b_ite = f_it->end(); b_it != b_ite; ++b_it) {
-        Instruction* I = &*b_it;
-        if(CallInst* ci = dyn_cast<CallInst>(I)) {
-          Function* F = ci->getCalledFunction();
-          if(!F)
-            continue;
-          if(!FuncInfoMap[F])
-            FuncInfoMap[F] = initializeFuncInfo(F);
-          if(LI.getLoopFor(&*f_it))
-            FuncInfoMap[F]->calledInLoop = true;
-          FuncInfoMap[F]->numCallInsts++;
-        }
-      }
-    }
-  }
 }

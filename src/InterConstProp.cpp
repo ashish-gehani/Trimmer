@@ -97,8 +97,42 @@ void ConstantFolding::replaceCallInsts(){
     }
   }  
   specializedCalls.clear();    
-}  
-  
+} 
+
+/*task1*/
+bool ConstantFolding::satisfyConds(Function* F) {
+  if(FuncInfoMap.find(F) == FuncInfoMap.end())
+    return false; // conservative
+  FuncInfo* fi = FuncInfoMap[F];
+  return !(fi->calledInLoop || fi->AddrTaken || (fi->numCallInsts != 1)); 
+}
+
+/*task1*/
+// iterate over all functions and gather info for functions
+// called in loop {loop info wrapper pass}
+// AddressTaken {use LLVM built in function}
+// numCallInsts 
+
+void ConstantFolding::gatherFuncInfo(Module& M) {
+  for (Module::iterator mit = M.getFunctionList().begin(); mit != M.getFunctionList().end(); ++mit) {
+    for (Function::iterator f_it = mit->begin(), f_ite = mit->end(); f_it != f_ite; ++f_it) {
+      LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*mit).getLoopInfo();
+      for(BasicBlock::iterator b_it = f_it->begin(), b_ite = f_it->end(); b_it != b_ite; ++b_it) {
+        Instruction* I = &*b_it;
+        if(CallInst* ci = dyn_cast<CallInst>(I)) {
+          Function* F = ci->getCalledFunction();
+          if(!F)
+            continue;
+          if(!FuncInfoMap[F])
+            FuncInfoMap[F] = initializeFuncInfo(F);
+          if(LI.getLoopFor(&*f_it))
+            FuncInfoMap[F]->calledInLoop = true;
+          FuncInfoMap[F]->numCallInsts++;
+        }
+      }
+    }
+  }
+}
 
 
 /* IMP: New policy - visited passed by reference; no basic block visited twice - important to avoid wrongly 
@@ -112,8 +146,6 @@ void ConstantFolding::runOnBB(BasicBlock * BB, map<Value*, StringAlloca*> string
     Instruction * I = &(*inst);
     // Only considering allocas for string specialisation
     if(AllocaInst * allocaInst = dyn_cast<AllocaInst>(&*I)){
-      I->print(errs());
-      errs() << "\n";
       processAllocaInst(allocaInst, stringAllocas, stringPointers, visited, inst);  
     }
     else if(MemCpyInst * memcpyInst = dyn_cast<MemCpyInst>(&*I)){
@@ -147,6 +179,7 @@ void ConstantFolding::runOnBB(BasicBlock * BB, map<Value*, StringAlloca*> string
 bool ConstantFolding::runOnModule(Module & module) {
 
   if(debugPrint) errs()<<"\n\n*******---- InterConstProp -----*********\n\n";
+  // gather funcInfo
   gatherFuncInfo(module);
 
   map<Value*, StringAlloca*> stringAllocas;  

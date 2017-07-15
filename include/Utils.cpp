@@ -240,7 +240,7 @@ bool mergeContext(BasicBlock * BB, map<BasicBlock*, map<Value*, StringAlloca*>> 
 
   return true;
 }
-
+/*task1*/
 void markArgsAsNonConst(CallInst* callInst, map<Value*, StringPointer*> stringPointers) {
   int index = 0;
   Function* calledFunction = callInst->getCalledFunction();
