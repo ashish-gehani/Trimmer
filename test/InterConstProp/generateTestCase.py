@@ -28,41 +28,81 @@ def chooseLowVar():
 	else:
 		return 'y'
 
-def chooseIndex(ls):
-	index = genRand(1000)
-	for x in ls:
-		if(index == x):
-			return chooseIndex(ls)
-	return index
 
 def makeAssign(hvar, lvar, index, val):
 	idxStr = '[' + str(index) + ']'
-	return tab + 'obj->' + hvar + '.' + lvar + idxStr + ' = ' + str(val) + ';\n'
+	return tab + 'obj->' + hvar + '.' + lvar + idxStr + ' = ' + str(val) + ';\n'	
+
+def makeMemCpy(hvar, lvar, index):
+	idxStr = '[' + str(index) + ']'
+	size = genRand(min(5, 1000 - index))
+	val = ""
+	ls = []
+	for i in xrange(size):
+		alph = genRand(26) + 96
+		val += chr(alph)
+		ls.append(alph)
+	tup = (index, size)
+	Str = tab + 'memcpy(&obj->' + hvar + '.' + lvar + idxStr + ', "' + val + '", ' + str(size) + ');\n'
+	return (tup, Str, ls)
 
 def makeCondAssign(hvar, lvar, index, val):
 	idxStr = '[' + str(index) + ']'
 	return tab + 'obj.' + hvar + '.' + lvar + idxStr + ' == ' + str(val) + ' &&\n'
 
+def makeStrcmpCond(hvar, lvar, index, val):
+	idxStr = '[' + str(index) + ']'
+	return tab + '!strcmp(&obj.' + hvar + '.' + lvar + idxStr + ', "' + val + '") &&\n'
+
 def generateFuncs(num_lines):
 	initStr = 'void initialize(struct HighType* obj) {\n'
 	bpStr = 'void branchPruned(struct HighType obj){\n'
-	indices = {}
-	indices['ltix'] = []
-	indices['ltiy'] = []
-	indices['ltsx'] = []
-	indices['ltsy'] = []
 
-	Conds = ''
+	arrays = {}
+	if(num_lines):
+		arrays["ltsx"] = [-1] * 1000
+		arrays["ltsy"] = [-1] * 1000
+		arrays["ltix"] = [-1] * 1000
+		arrays["ltiy"] = [-1] * 1000
+
+	memCpyInds = {}
+	memCpyInds["x"] = []
+	memCpyInds["y"] = []
+	
 	for i in xrange(num_lines):
 		hvar = chooseHighVar()
 		lvar = chooseLowVar()
-		index = chooseIndex(indices[hvar + lvar])
-		indices[hvar + lvar].append(index)
-		val = genRand(128)
-		initStr += makeAssign(hvar, lvar, index, val)		
-		Conds += makeCondAssign(hvar, lvar, index, val)
+		index = genRand(1000)
+		if(hvar == "lti"):
+			val = genRand(26) + 96
+			initStr += makeAssign(hvar, lvar, index, val)
+			arrays[hvar + lvar][index] = val
+		else:
+			(tup, Str, ls) = makeMemCpy(hvar, lvar, index)
+			memCpyInds[lvar].append(tup)
+			initStr += Str
+			for i in range(0, tup[1]):
+				arrays[hvar + lvar][tup[0] + i] = ls[i]
+
+
 	initStr += '}\n'
+	Conds = ''
 	if(num_lines):
+		for key, arr in arrays.iteritems():
+			hvar = key[:3]
+			lvar = key[3]
+			for index, val in enumerate(arr):
+				if(val != -1):
+					Conds += makeCondAssign(hvar, lvar, index, val)
+		for key, indices in memCpyInds.iteritems():
+			hvar = 'lts'
+			lvar = key
+			arr = arrays[hvar + lvar]
+			for tup in indices:
+				index = tup[0]
+				val = ''.join(chr(x) for x in arr[tup[0] : tup[0] + tup[1]])
+				Conds += makeStrcmpCond(hvar, lvar, index, val)
+
 		Conds = tab + 'if(' + Conds[4:-4] + ')\n'
 		Conds += tab + tab + 'printf("*** branchTaken");\n'
 	bpStr += Conds + '}\n'
