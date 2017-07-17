@@ -306,9 +306,11 @@ Value* CreateConstVal(MemPointer* basePointer, int offset) {
   } else if(basePointer->alloca->btype == charType) {
     char * data = (char*) basePointer->alloca->data;
     constVal = ConstantInt::get(ty, data[offset]);
+    // errs() << "char loaded " << data[offset] << "\n";
   }  else if(basePointer->alloca->btype == intType) {
     int * data = (int*) basePointer->alloca->data;
     constVal = ConstantInt::get(ty, data[offset]);
+    // errs() << "int loaded " << data[offset] << "\n";
   }  else if(basePointer->alloca->btype == longType) {
     long * data = (long*) basePointer->alloca->data;
     constVal = ConstantInt::get(ty, data[offset]);

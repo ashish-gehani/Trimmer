@@ -94,10 +94,13 @@ void ConstantFolding::processMemcpyInst(MemCpyInst * memcpyInst, ValMemAllocaMap
     inst++;
     return; 
   }
+
   const char * constantString = stringRef.str().c_str();
-  int length = strlen(constantString);   
+  int length = stringRef.str().size();   
+  errs() << constantString << " is the string " << length << "\n";
   memcpy(sourceBuffer, constantString, length + 1);
-  fill(basePointer->alloca->initialized + offset, basePointer->alloca->initialized + length, true);
+  bool* fillBuff = basePointer->alloca->initialized + offset;
+  fill(fillBuff, fillBuff + length, true);
   basePointer->alloca->constant = true; // String is now constant          
   if(debugPrint) errs()<<"constantString = "<<constantString<<"\n";
 
@@ -181,7 +184,7 @@ void ConstantFolding::processLoadInst(LoadInst * loadInst, ValMemAllocaMap & Mem
   }        
   int offset = basePointer->position; 
   if(!basePointer->alloca->initialized[offset]) {
-    if(debugPrint) errs()<<".. LoadInst : value not initialized ... \n";
+    errs()<<".. LoadInst : value not initialized ... \n";
     inst++;
     return;    
   }
@@ -234,19 +237,23 @@ void ConstantFolding::processGEPInst(GetElementPtrInst * GEPInst, ValMemAllocaMa
     return;
   }
 
-  if(basePointer->ntype == baseDataType)
+  if(basePointer->ntype == baseDataType) {
+    errs() << "BDType\n";
     handleBaseDataTypeGEP(indices, basePointer, I, MemPointers);
+  }
   else if(basePointer->ntype == structType) {
       MemPointer* mnode = basePointer;
       for(unsigned i = 1; i < indices.size(); i++) {
         mnode = mnode->contained[indices[i]];        
         if(mnode->ntype == baseDataType) { // ArrayType
+          errs() << "BDTypeArr\n";          
           vector<unsigned> bdVec(indices.begin() + i + 1, indices.end());
           handleBaseDataTypeGEP(bdVec, mnode, I, MemPointers);          
-          inst++;
+          inst++;       
           return; 
         }
       }
+      errs() << "Other\n";
       MemPointers[I] = deepCopy(mnode);
     }
   inst++; // Point to next instruction in BB

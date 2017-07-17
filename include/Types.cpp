@@ -22,11 +22,11 @@ void* createData(Type* ty, int size, BaseType& btype) {
  	}
 	if(ty->isIntegerTy(32)) {
 		btype = intType;
-		return new char[size];
+		return new int[size];
 	}
 	if(ty->isIntegerTy(64)) {
 		btype = longType;
-		return new char[size];
+		return new long[size];
 	}
 	else
 		return NULL;

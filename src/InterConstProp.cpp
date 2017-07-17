@@ -144,7 +144,7 @@ void ConstantFolding::runOnBB(BasicBlock * BB, ValMemAllocaMap MemAllocas,
   for (BasicBlock::iterator inst = b.begin(), ie = b.end(); inst != ie; ) {
 
     Instruction * I = &(*inst);
-    // errs() << *I << "\n";
+    errs() << *I << "\n";
     // Only considering allocas for string specialisation
     if(AllocaInst * allocaInst = dyn_cast<AllocaInst>(&*I)){
          
@@ -166,7 +166,6 @@ void ConstantFolding::runOnBB(BasicBlock * BB, ValMemAllocaMap MemAllocas,
       processCallInst(callInst, MemAllocas, MemPointers, visited, inst);
     }
     else if(GetElementPtrInst * GEPInst = dyn_cast<GetElementPtrInst>(&*I)){
-
       processGEPInst(GEPInst, MemAllocas, MemPointers, visited, inst);
     }
     else if(BranchInst * branchInst = dyn_cast<BranchInst>(&*I)){
