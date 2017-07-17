@@ -13,6 +13,13 @@ enum BaseType {
   boolType, charType, intType, longType
 };
 
+enum NodeType {
+  baseDataType,
+  structType,
+  structArrType,
+  other // not handled yet... like pointers
+};
+
 struct Indices{
   int start;
   int end;
@@ -37,17 +44,19 @@ struct StringPointer{
   StringAlloca* alloca; // pointer to the alloca for the string
 };
 
-struct MemObj {
+struct MemAlloca {
   void* data; // even if it is not an array e.g. an int or a char, determined by size
+  bool* initialized;
   BaseType btype;
   int size;
-  bool initialized, constant, isArr;
+  bool constant;
 };
 
-struct MemNode {
-  MemNode** contained; // if it is a basetype like char or char array then point to a MemObj
-                     //  if it is a structtype then point to a list of MemNodes
-  MemObj* alloca;
+struct MemPointer {
+  MemPointer** contained; // if it is a basetype like char or char array then point to a MemAlloca
+                     //  if it is a structtype then point to a list of MemPointers
+  NodeType ntype;
+  MemAlloca* alloca;
   int position;
   Type* ty;
 };
@@ -69,5 +78,6 @@ struct FuncInfo {
   bool calledInLoop, AddrTaken;
 };
 
-typedef map<Value*, MemNode*> MemNodeMap;
-typedef map<Value*, MemObj*> MemObjMap;
+typedef map<Value*, MemPointer*> ValMemPointerMap;
+typedef map<Value*, MemAlloca*> ValMemAllocaMap;
+typedef map<BasicBlock*, bool> BBboolMap;

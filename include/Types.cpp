@@ -33,45 +33,55 @@ void* createData(Type* ty, int size, BaseType& btype) {
 
 }
 
-MemObj* createMemObj(Type* ty) {
-	MemObj* mobj = new MemObj;
-	mobj->initialized = false;
+MemAlloca* createMemAlloca(Type* ty) {
+	MemAlloca* mobj = new MemAlloca;
 	mobj->constant = true;
 	mobj->size = 1;
-	mobj->isArr = false;
 	if(ArrayType * arType = dyn_cast<ArrayType>(ty)) {
-		mobj->isArr = true;
 		mobj->size = arType->getNumElements();
 		mobj->data = createData(ty->getContainedType(0), mobj->size, mobj->btype);	
 	} else
 		mobj->data = createData(ty, mobj->size, mobj->btype);		
+	mobj->initialized = new bool[mobj->size];
+	fill(mobj->initialized, mobj->initialized + mobj->size, false);
 	return mobj;
 }
-
-MemNode* createMemNode(Type* ty) {
-	MemNode* mnode = new MemNode;
+MemPointer* createMemPointer(Type* ty) {
+	MemPointer* mnode = new MemPointer;
 	mnode->position = 0;
 	mnode->ty = ty;
 	if(StructType* st = dyn_cast<StructType>(ty)) {
+		mnode->ntype = structType;
 		unsigned num = st->getNumElements();
-		mnode->contained = new MemNode*[num];
+		mnode->contained = new MemPointer*[num];
 		for(unsigned i = 0; i < num; i++)
-			mnode->contained[i] = createMemNode(st->getElementType(i));
-	} else
-		mnode->alloca = createMemObj(ty);
+			mnode->contained[i] = createMemPointer(st->getElementType(i));
+		mnode->alloca = NULL;
+	} else if(ty->getNumContainedTypes() && isa<StructType>(ty->getContainedType(0))) {
+		if(ArrayType * arType = dyn_cast<ArrayType>(ty)) {
+			mnode->ntype = structArrType;			
+			unsigned num = arType->getNumElements();
+			mnode->contained = new MemPointer*[num];
+			for(unsigned i = 0; i < num; i++) {
+				mnode->contained[i] = createMemPointer(ty->getContainedType(0));
+			}				
+		} else {
+			mnode->ntype = other;
+			errs() << "cant handle container type " << *ty << " atm\n";
+		}
+	} else {
+		mnode->ntype = baseDataType;
+		mnode->alloca = createMemAlloca(ty);
+	}
 	return mnode;
 }
 
-MemNode* createMemNode(Type* ty, MemObj* alloca) {
-	MemNode* mnode = new MemNode;
-	mnode->position = 0;
-	mnode->ty = ty;
-	if(StructType* st = dyn_cast<StructType>(ty)) {
-		unsigned num = st->getNumElements();
-		mnode->contained = new MemNode*[num];
-		for(unsigned i = 0; i < num; i++)
-			mnode->contained[i] = createMemNode(st->getElementType(i));
-	} else
-		mnode->alloca = alloca;
-	return mnode;
+MemPointer* deepCopy(MemPointer* mnode) {
+	MemPointer* rnode = new MemPointer;
+	rnode->contained = mnode->contained;
+	rnode->ntype = mnode->ntype;
+	rnode->alloca = mnode->alloca;
+	rnode->position = mnode->position;
+	rnode->ty = mnode->ty;
+	return rnode;
 }

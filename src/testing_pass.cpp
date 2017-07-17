@@ -50,14 +50,23 @@ namespace {
       }
       bool passed = true;
       if(pruned) {
+        bool found = false;
         for (Function::iterator f_it = pruned->begin(), f_ite = pruned->end(); f_it != f_ite; ++f_it) {
           for(BasicBlock::iterator b_it = f_it->begin(), b_ite = f_it->end(); b_it != b_ite; ++b_it) {
             Instruction* I = &*b_it;
             if(isa<BranchInst>(I)) {
               errs() << "branchInst found in " << pruned->getName().str() << "\n";
               passed = false;
+            } else if(CallInst* ci = dyn_cast<CallInst>(I)) {
+              string fname = ci->getCalledFunction()->getName().str();
+              if(fname == "printf" || fname == "puts")
+                found = true;
             }
           }
+        }
+        if(!found) {
+          errs() << "print statement not found in " << pruned->getName().str() << "\n";
+          passed = false;
         }
       }
       if(not_pruned) {

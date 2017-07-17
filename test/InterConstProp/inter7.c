@@ -4,28 +4,44 @@
 #include<string.h>
 #include<stdlib.h>
 
+struct COORD {
+  int x, y;
+};
 struct stType{
-  int a;
-  int b;
-  char * str;
+  struct COORD coord;
+  char str[100];
+  int arr[8];
 };
 
 
-void func(struct stType * obj){  
+void branchPruned(struct stType obj){  
 
-  if(obj->a == 4 && obj->b == 8){
+  if(obj.coord.x == 4 && obj.coord.y == 8 && obj.arr[1] == 12 && 
+    !strcmp(obj.str, "helloWorld") && obj.str[4] == 'o' && obj.str[9] == 'd'){
     printf("*** Branch Taken \n");
   }
 }
- 
+
+void branchNotPruned(struct stType obj) {
+  if(obj.arr[6] == '\0' || obj.str[15] == '\0')
+    printf("found\n");
+}
+
+void initialize(struct stType* obj) {
+  obj->coord.x = 4;
+  obj->coord.y = 8;
+  obj->arr[0] = 12;
+  obj->arr[1] = 12;
+  obj->arr[2] = 12;
+  memcpy(obj->str, "helloWorld\0", 11);
+} 
 
 int main(){
 
-  struct stType obj; 
-  obj.a = 4;
-  obj.b = 8; 
-  
-  func(&obj);
+  struct stType obj;
+  initialize(&obj); 
+  branchNotPruned(obj);
+  branchPruned(obj);
 
   return 0;
 }
