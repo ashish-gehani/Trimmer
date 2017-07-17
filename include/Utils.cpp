@@ -239,7 +239,8 @@ bool mergeContext(BasicBlock * BB, map<BasicBlock*, ValMemAllocaMap> blockContex
 
   return true;
 }
-/*Note :: over here check for structures*/
+/*task1*/
+
 void markArgsAsNonConst(CallInst* callInst, ValMemPointerMap MemMap) {
   int index = 0;
   Function* calledFunction = callInst->getCalledFunction();
