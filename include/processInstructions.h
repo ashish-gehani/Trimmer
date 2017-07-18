@@ -95,10 +95,10 @@ void ConstantFolding::processMemcpyInst(MemCpyInst * memcpyInst, ValMemAllocaMap
     return; 
   }
 
-  const char * constantString = stringRef.str().c_str();
-  int length = stringRef.str().size();   
-  errs() << constantString << " is the string " << length << "\n";
-  memcpy(sourceBuffer, constantString, length + 1);
+  char* constantString = new char[stringRef.str().size()];
+  strcpy(constantString, stringRef.str().c_str());
+  int length = strlen(constantString);   
+  memcpy(sourceBuffer, constantString, length);
   bool* fillBuff = basePointer->alloca->initialized + offset;
   fill(fillBuff, fillBuff + length, true);
   basePointer->alloca->constant = true; // String is now constant          
@@ -142,18 +142,9 @@ void ConstantFolding::processStoreInst(StoreInst * storeInst, ValMemAllocaMap & 
     inst++;
     return;
   }
-
-  unsigned storeVal = (unsigned) constantValue;
-  if(storeVal == '\0'){
-    if(debugPrint) errs()<<"NULL CHARACTER \n";
-  }
-  unsigned * data = (unsigned*) basePointer->alloca->data;
   int offset = basePointer->position;
-  // Storing constant character at constant offset
-  data[offset] = storeVal;
+  StoreConstVal(basePointer, constantValue, offset);
   basePointer->alloca->initialized[offset] = true;
-  if(debugPrint) errs()<<"*** data = "<<data[offset]<<" offset = "<<offset<<"\n";
-
   inst++; // Point to next instruction in BB 
 }
 
@@ -184,7 +175,7 @@ void ConstantFolding::processLoadInst(LoadInst * loadInst, ValMemAllocaMap & Mem
   }        
   int offset = basePointer->position; 
   if(!basePointer->alloca->initialized[offset]) {
-    errs()<<".. LoadInst : value not initialized ... \n";
+    if(debugPrint) errs()<<".. LoadInst : value not initialized ... \n";
     inst++;
     return;    
   }
@@ -238,7 +229,6 @@ void ConstantFolding::processGEPInst(GetElementPtrInst * GEPInst, ValMemAllocaMa
   }
 
   if(basePointer->ntype == baseDataType) {
-    errs() << "BDType\n";
     handleBaseDataTypeGEP(indices, basePointer, I, MemPointers);
   }
   else if(basePointer->ntype == structType) {
@@ -246,14 +236,12 @@ void ConstantFolding::processGEPInst(GetElementPtrInst * GEPInst, ValMemAllocaMa
       for(unsigned i = 1; i < indices.size(); i++) {
         mnode = mnode->contained[indices[i]];        
         if(mnode->ntype == baseDataType) { // ArrayType
-          errs() << "BDTypeArr\n";          
           vector<unsigned> bdVec(indices.begin() + i + 1, indices.end());
           handleBaseDataTypeGEP(bdVec, mnode, I, MemPointers);          
           inst++;       
           return; 
         }
       }
-      errs() << "Other\n";
       MemPointers[I] = deepCopy(mnode);
     }
   inst++; // Point to next instruction in BB
@@ -311,7 +299,6 @@ void ConstantFolding::processCallInst(CallInst * callInst, ValMemAllocaMap & Mem
       vector<Value *> indxList;
       indxList.push_back(index1); 
       indxList.push_back(index1);
-
       Constant * stringConstant = ConstantDataArray::getString(M->getContext(), 
 							       StringRef(newStr), true);
       GlobalVariable * globalReadString = new GlobalVariable(*M, stringConstant->getType(), true,
@@ -348,11 +335,6 @@ void ConstantFolding::processCallInst(CallInst * callInst, ValMemAllocaMap & Mem
     if (Value *With = Simplifier.optimizeCall(callInst)) {
       if(With == NULL && debugPrint) errs()<<"NULL VALUE \n\n";
       if(debugPrint) errs()<<"Value to replace = "<<*With<<"\n";
-      /**/
-      // if(allocatedType->isArrayTy() && allocatedType->getContainedType(0)->isIntegerTy(8)) {
-
-      // }      
-      /**/
       if(!callInst->use_empty()) {             
       	callInst->replaceAllUsesWith(With);              
       	inst = BasicBlock::iterator(firstGEPPtr);

@@ -37,7 +37,7 @@
 using namespace llvm;
 using namespace std;
 #define debugPrint 0
-
+Instruction* debugInst;
 bool getConstantStringInfo(const Value *V, StringRef &Str, uint64_t Offset, bool TrimAtNul) {
    
   assert(V);
@@ -154,7 +154,7 @@ bool isStringFunction(Function * calledFunction){
 
   string funcName = calledFunction->getName();
   if(funcName == "strcmp" || funcName == "strcasecmp" || funcName == "strcspn" 
-     || funcName == "strspn" || funcName == "strchr")
+     || funcName == "strspn" || funcName == "strncmp")
     return true;
   else
     return false;
@@ -316,4 +316,24 @@ Value* CreateConstVal(MemPointer* basePointer, int offset) {
     constVal = ConstantInt::get(ty, data[offset]);
   }
   return constVal;
+}
+
+void StoreConstVal(MemPointer* basePointer, int ConstVal, int offset) {
+  if(basePointer->alloca->btype == boolType) {
+    bool storeVal = (bool) ConstVal;
+    bool * data = (bool*) basePointer->alloca->data;
+    data[offset] = storeVal;
+  } else if(basePointer->alloca->btype == charType) {
+    char storeVal = (char) ConstVal;
+    char * data = (char*) basePointer->alloca->data;
+    data[offset] = storeVal;
+  }  else if(basePointer->alloca->btype == intType) {
+    int storeVal = (int) ConstVal;
+    int * data = (int*) basePointer->alloca->data;
+    data[offset] = storeVal;
+  }  else if(basePointer->alloca->btype == longType) {
+    long storeVal = (long) ConstVal;
+    long * data = (long*) basePointer->alloca->data;
+    data[offset] = storeVal;
+  }
 }

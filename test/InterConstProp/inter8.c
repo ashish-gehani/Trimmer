@@ -5,7 +5,7 @@
  
 struct LowTypeInt {
 	int x[1000];
-	int y[1000]; 
+	int y[1000];
 };
 struct LowTypeString {
 	char x[1000];

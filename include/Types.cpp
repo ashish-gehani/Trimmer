@@ -18,7 +18,9 @@ void* createData(Type* ty, int size, BaseType& btype) {
 	}
 	if(ty->isIntegerTy(8)) {
 		btype = charType;
-		return new char[size];
+		char* arr = new char[size];
+		memset(arr, '\0', size);
+		return arr;
  	}
 	if(ty->isIntegerTy(32)) {
 		btype = intType;

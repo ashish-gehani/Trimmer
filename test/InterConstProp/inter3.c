@@ -10,11 +10,11 @@ void branchPruned(char * buf){
   int index = strcspn(buf, "=");
   char * value = buf + index;
   *value++ = '\0';
-  printf("name = %s\n", buf);
-  printf("value = %s\n", value);
-
-  if(strcmp(value, "friend") == 0)
+  if(strcmp(value, "friend") == 0) {
+    printf("name = %s\n", buf);
+    printf("value = %s\n", value);    
     printf("friend\n"); 
+  }
 }
 
 void branchNotPruned(char* buffer) {

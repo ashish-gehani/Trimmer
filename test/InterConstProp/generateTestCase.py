@@ -35,7 +35,7 @@ def makeAssign(hvar, lvar, index, val):
 
 def makeMemCpy(hvar, lvar, index):
 	idxStr = '[' + str(index) + ']'
-	size = genRand(min(5, 1000 - index))
+	size = genRand(min(50, 1000 - index))
 	val = ""
 	ls = []
 	for i in xrange(size):
@@ -53,6 +53,23 @@ def makeCondAssign(hvar, lvar, index, val):
 def makeStrcmpCond(hvar, lvar, index, val):
 	idxStr = '[' + str(index) + ']'
 	return tab + '!strcmp(&obj.' + hvar + '.' + lvar + idxStr + ', "' + val + '") &&\n'
+
+def mergeMemCpyInds(memCpyInds):
+	for key, indices in memCpyInds.iteritems():
+		for tup1 in indices:
+			for tup2 in indices:
+				if(tup1 == tup2):
+					continue
+				if(tup1[0] < tup2[0] and tup1[0] + tup1[1] > tup2[0]):
+					memCpyInds[key].remove(tup1)
+					memCpyInds[key].remove(tup2)
+					newInd = max(tup1[0] + tup1[1], tup2[0] + tup2[1])
+					tup3 = (tup1[0], newInd - tup1[0])
+					memCpyInds[key].append(tup3)
+	for key, indices in memCpyInds.iteritems():
+		for tup1 in indices:
+			print tup1	
+	return memCpyInds
 
 def generateFuncs(num_lines):
 	initStr = 'void initialize(struct HighType* obj) {\n'
@@ -83,6 +100,7 @@ def generateFuncs(num_lines):
 			initStr += Str
 			for i in range(0, tup[1]):
 				arrays[hvar + lvar][tup[0] + i] = ls[i]
+			pass
 
 
 	initStr += '}\n'
@@ -94,6 +112,7 @@ def generateFuncs(num_lines):
 			for index, val in enumerate(arr):
 				if(val != -1):
 					Conds += makeCondAssign(hvar, lvar, index, val)
+		memCpyInds = mergeMemCpyInds(memCpyInds)
 		for key, indices in memCpyInds.iteritems():
 			hvar = 'lts'
 			lvar = key

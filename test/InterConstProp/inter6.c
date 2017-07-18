@@ -27,10 +27,6 @@ int main(){
   char buffer2[100];
   memcpy(buffer2, "value=key", 100);
 
-  if(buffer[90] == '\n') {
-    printf("random check for testing node merging \n");
-  }
-
   // func called twice - shouldn't specialize
   branchNotPruned(buffer, buffer2);
   branchNotPruned(buffer, buffer2);

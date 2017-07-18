@@ -16,15 +16,11 @@ struct stType{
 
 void branchPruned(struct stType obj){  
 
-  if(obj.coord.x == 4 && obj.coord.y == 8 && obj.arr[1] == 12 && 
-    !strcmp(obj.str, "helloWorld") && obj.str[4] == 'o' && obj.str[9] == 'd'){
+  if(obj.coord.x == 4 && obj.coord.y == 8 && obj.arr[1] == 12
+          && !strcmp(obj.str, "helloWorld")
+          && obj.str[4] == 'o' && obj.str[9] == 'd')
     printf("*** Branch Taken \n");
-  }
-}
 
-void branchNotPruned(struct stType obj) {
-  if(obj.arr[6] == '\0' || obj.str[15] == '\0')
-    printf("found\n");
 }
 
 void initialize(struct stType* obj) {
@@ -40,7 +36,6 @@ int main(){
 
   struct stType obj;
   initialize(&obj); 
-  branchNotPruned(obj);
   branchPruned(obj);
 
   return 0;
