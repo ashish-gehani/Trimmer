@@ -57,31 +57,31 @@ struct ConstantFolding : public ModulePass {
   CallGraph * CG;
   map<Function*, FuncInfo*> FuncInfoMap;   
   void processAllocaInst(AllocaInst * allocaInst, ValMemAllocaMap & MemAllocas, 
-                        ValMemPointerMap& MemPointers , BBboolMap & visited,
+                        ValMemPointerMap& MemPointers , BasicBlockBoolMap & visited,
 			 BasicBlock::iterator & inst);
  
   void processMemcpyInst(MemCpyInst * memcpyInst, ValMemAllocaMap & MemAllocas, 
-                        ValMemPointerMap& MemPointers , BBboolMap & visited,
+                        ValMemPointerMap& MemPointers , BasicBlockBoolMap & visited,
 			 BasicBlock::iterator & inst);
 
   void processStoreInst(StoreInst * storeInst, ValMemAllocaMap & MemAllocas, 
-                      ValMemPointerMap& MemPointers , BBboolMap & visited,
+                      ValMemPointerMap& MemPointers , BasicBlockBoolMap & visited,
 			BasicBlock::iterator & inst);
 
   void processLoadInst(LoadInst * loadInst, ValMemAllocaMap & MemAllocas, 
-                      ValMemPointerMap& MemPointers , BBboolMap & visited,
+                      ValMemPointerMap& MemPointers , BasicBlockBoolMap & visited,
       BasicBlock::iterator & inst);
 
   void processGEPInst(GetElementPtrInst * GEPInst, ValMemAllocaMap & MemAllocas, 
-		     ValMemPointerMap& MemPointers , BBboolMap & visited,
+		     ValMemPointerMap& MemPointers , BasicBlockBoolMap & visited,
 		      BasicBlock::iterator & inst);
 
   void processCallInst(CallInst * callInst, ValMemAllocaMap & MemAllocas, 
-	      	      ValMemPointerMap& MemPointers , BBboolMap & visited,
+	      	      ValMemPointerMap& MemPointers , BasicBlockBoolMap & visited,
 		       BasicBlock::iterator & inst);
 
   void processBranchInst(BranchInst * branchInst, ValMemAllocaMap & MemAllocas, 
-		        ValMemPointerMap& MemPointers , BBboolMap & visited,
+		        ValMemPointerMap& MemPointers , BasicBlockBoolMap & visited,
 		         BasicBlock::iterator & inst);
 
  
@@ -104,7 +104,7 @@ struct ConstantFolding : public ModulePass {
   /* IMP: New policy - visited passed by reference; no basic block visited twice - important to avoid wrongly 
           duplicating contexts e.g function cloning */ 
   void runOnBB(BasicBlock * BB, ValMemAllocaMap MemAllocas, 
-            ValMemPointerMap MemPointers , BBboolMap & visited);
+            ValMemPointerMap MemPointers , BasicBlockBoolMap & visited);
 
   virtual bool runOnModule(Module & module);
 

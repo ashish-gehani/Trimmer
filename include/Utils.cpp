@@ -32,7 +32,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sstream>
-#include "Types.cpp"
+#include "mem.cpp"
+#include "Types.h"
 
 using namespace llvm;
 using namespace std;
@@ -233,7 +234,7 @@ bool mergeContext(BasicBlock * BB, map<BasicBlock*, ValMemAllocaMap> blockContex
     if(equal) {
       MemAllocas[inst] = alloca;
     } else {
-      alloca->constant = false; //FIXIT: A little over-conservative. Imagine reverse post order scenarios
+      alloca->setConstant(false); //FIXIT: A little over-conservative. Imagine reverse post order scenarios
     }               
   }  
 
@@ -264,7 +265,7 @@ void markArgsAsNonConst(CallInst* callInst, ValMemPointerMap MemMap) {
 
     if(debugPrint) errs()<<"Note: Marking allocation as NON-CONSTANT \n";
     // If the argument does alias a tracked allocation mark it as non-constant
-    basePointer->alloca->constant = false;  // mark allocation as non-constant    
+    basePointer->getAlloca()->setConstant(false);  // mark allocation as non-constant    
   }
 }
 
@@ -281,7 +282,7 @@ void handleIndirectCall(CallInst * callInst, ValMemPointerMap & MemMap){
     else
       basePointer = MemMap[pointerArg];               
     // "conservatively" mark each argument as modified 
-    basePointer->alloca->constant = false;
+    basePointer->getAlloca()->setConstant(false);
   }
 }
 
@@ -289,51 +290,17 @@ void handleBaseDataTypeGEP(vector<unsigned> indices, MemPointer* basePointer,
                 Instruction* I, ValMemPointerMap & MemPointers) {
     if(indices.size() > 2) 
       errs() << "GEPINST : case not handled ntype is baseDataType and indices > 2\n";
-    MemPointer * mnode = deepCopy(basePointer);
+    MemPointer * mptr = new MemPointer(*basePointer);
     if(indices.size())
-      mnode->position += indices[indices.size() - 1];
-    MemPointers[I] = mnode;
+      mptr->incrementPosition(indices[indices.size() - 1]);
+    MemPointers[I] = mptr;
 }
 
-Value* CreateConstVal(MemPointer* basePointer, int offset) {
-  Type* ty = basePointer->ty;
-  if(isa<ArrayType>(ty)) // others not possible atm
-    ty = ty->getContainedType(0);
-  Value* constVal;
-  if(basePointer->alloca->btype == boolType) {
-    bool * data = (bool*) basePointer->alloca->data;
-    constVal = ConstantInt::get(ty, data[offset]);
-  } else if(basePointer->alloca->btype == charType) {
-    char * data = (char*) basePointer->alloca->data;
-    constVal = ConstantInt::get(ty, data[offset]);
-    // errs() << "char loaded " << data[offset] << "\n";
-  }  else if(basePointer->alloca->btype == intType) {
-    int * data = (int*) basePointer->alloca->data;
-    constVal = ConstantInt::get(ty, data[offset]);
-    // errs() << "int loaded " << data[offset] << "\n";
-  }  else if(basePointer->alloca->btype == longType) {
-    long * data = (long*) basePointer->alloca->data;
-    constVal = ConstantInt::get(ty, data[offset]);
-  }
-  return constVal;
-}
 
-void StoreConstVal(MemPointer* basePointer, int ConstVal, int offset) {
-  if(basePointer->alloca->btype == boolType) {
-    bool storeVal = (bool) ConstVal;
-    bool * data = (bool*) basePointer->alloca->data;
-    data[offset] = storeVal;
-  } else if(basePointer->alloca->btype == charType) {
-    char storeVal = (char) ConstVal;
-    char * data = (char*) basePointer->alloca->data;
-    data[offset] = storeVal;
-  }  else if(basePointer->alloca->btype == intType) {
-    int storeVal = (int) ConstVal;
-    int * data = (int*) basePointer->alloca->data;
-    data[offset] = storeVal;
-  }  else if(basePointer->alloca->btype == longType) {
-    long storeVal = (long) ConstVal;
-    long * data = (long*) basePointer->alloca->data;
-    data[offset] = storeVal;
-  }
+FuncInfo* initializeFuncInfo(Function* F) {
+  FuncInfo* fi = new FuncInfo;
+  fi->numCallInsts = 0;
+  fi->calledInLoop = false;
+  fi->AddrTaken = F->hasAddressTaken();
+  return fi;
 }

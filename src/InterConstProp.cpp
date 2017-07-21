@@ -138,7 +138,7 @@ void ConstantFolding::gatherFuncInfo(Module& M) {
 /* IMP: New policy - visited passed by reference; no basic block visited twice - important to avoid wrongly 
    duplicating contexts e.g function cloning */ 
 void ConstantFolding::runOnBB(BasicBlock * BB, ValMemAllocaMap MemAllocas, 
-	     ValMemPointerMap MemPointers, BBboolMap & visited){
+	     ValMemPointerMap MemPointers, BasicBlockBoolMap & visited){
    
   BasicBlock& b = *BB;
   for (BasicBlock::iterator inst = b.begin(), ie = b.end(); inst != ie; ) {
@@ -161,7 +161,6 @@ void ConstantFolding::runOnBB(BasicBlock * BB, ValMemAllocaMap MemAllocas,
       processLoadInst(loadInst, MemAllocas, MemPointers, visited, inst);
     }    
     else if(CallInst * callInst = dyn_cast<CallInst>(&*I)){
-
       processCallInst(callInst, MemAllocas, MemPointers, visited, inst);
     }
     else if(GetElementPtrInst * GEPInst = dyn_cast<GetElementPtrInst>(&*I)){
@@ -204,7 +203,7 @@ bool ConstantFolding::runOnModule(Module & module) {
   ValMemAllocaMap MemAllocas;  
   // stringPointers is a map of constant pointers - string pointers with constant index into alloca   
   ValMemPointerMap MemPointers;
-  BBboolMap visited; 
+  BasicBlockBoolMap visited; 
 
   TLI = &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI();
   DL = new DataLayout(&module);   
