@@ -26,7 +26,7 @@ public:
     this->constant = val;
   }
   bool isBaseTypeOf(BaseType Btype) {
-    return this->Btype = Btype;
+    return this->Btype == Btype;
   }
   void setInit(int index, bool val) {
     assert(index < size && "tried to access invalid index for initialized");
