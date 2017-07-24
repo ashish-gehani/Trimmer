@@ -37,8 +37,7 @@
 
 using namespace llvm;
 using namespace std;
-#define debugPrint 0
-Instruction* debugInst;
+
 bool getConstantStringInfo(const Value *V, StringRef &Str, uint64_t Offset, bool TrimAtNul) {
    
   assert(V);
@@ -134,7 +133,7 @@ bool hasNoSideEffects(CallInst * callInst){
   
   Function * calledFunction = callInst->getCalledFunction();
   if(callInst->onlyReadsMemory() || calledFunction->onlyReadsMemory()){
-    if(debugPrint) errs()<<"NOTE: *CallInst only reads memory "<<*callInst<<" **\n";
+    debug(Hashim) << "NOTE: *CallInst only reads memory " << *callInst << " **\n";
     return true;    
   }
 
@@ -177,12 +176,12 @@ bool predecessorsVisited(BasicBlock * BB, map<BasicBlock*, ValMemAllocaMap> bloc
   for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++){
     BasicBlock * predecessor = *it;
     if(blockContexts.find(predecessor) == blockContexts.end()){
-      if(debugPrint) errs()<<"NOTE: predecessor not visited \n";
+      debug(Hashim) << "NOTE: predecessor not visited \n";
       return false;
     }
   }
 
-  if(debugPrint) errs()<<"NOTE: predecessors visited \n";
+  debug(Hashim) << "NOTE: predecessors visited \n";
   return true;
 }
 
@@ -191,9 +190,8 @@ bool predecessorsVisited(BasicBlock * BB, map<BasicBlock*, ValMemAllocaMap> bloc
 //TODO: Fill the stringPointers and MemAllocas correctly - be sound even if imprecise 
 //TODO: Insert call to merge context and test with examples
 bool mergeContext(BasicBlock * BB, map<BasicBlock*, ValMemAllocaMap> blockContexts,
-		  ValMemAllocaMap & MemAllocas, ValMemPointerMap & MemMap) {
+		  ValMemAllocaMap & MemAllocas, ValMemPointerMap & MemPointers) {
 
-  //-- if(debugPrint) errs()<<"Merging context for BB = "<<*BB<<"\n";
   std::vector<ValMemAllocaMap> predecessorContexts;    
 
   for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++){
@@ -204,7 +202,7 @@ bool mergeContext(BasicBlock * BB, map<BasicBlock*, ValMemAllocaMap> blockContex
     predecessorContexts.push_back(blockContexts[predecessor]);
   }
 
-  if(debugPrint) errs()<<"\n Comparing predecessor contexts = "<<predecessorContexts.size()<<"\n";
+  debug(Hashim) << "\n Comparing predecessor contexts = " << predecessorContexts.size() << "\n";
   unsigned int i;
   ValMemAllocaMap predContext = predecessorContexts[0];
    
@@ -242,7 +240,7 @@ bool mergeContext(BasicBlock * BB, map<BasicBlock*, ValMemAllocaMap> blockContex
 }
 /*task1*/
 
-void markArgsAsNonConst(CallInst* callInst, ValMemPointerMap MemMap) {
+void markArgsAsNonConst(CallInst* callInst, ValMemPointerMap MemPointers) {
   int index = 0;
   Function* calledFunction = callInst->getCalledFunction();
   for(auto arg = calledFunction->arg_begin(), argEnd = calledFunction->arg_end(); arg != argEnd; 
@@ -250,39 +248,59 @@ void markArgsAsNonConst(CallInst* callInst, ValMemPointerMap MemMap) {
     // Check for constant pointers
     // All arguments in a 'readonly' function are assumed readonly     
     if(arg->onlyReadsMemory()) {
-      if(debugPrint) errs()<<"!note: Argument/Function is readonly - no side effects \n";
+      debug(Hashim) << "!note: Argument/Function is readonly - no side effects \n";
       continue;
     }
     
     // Searching for the pointer
     Value * pointerArg = callInst->getOperand(index);
     MemPointer * basePointer;
-    if(MemMap.find(pointerArg) == MemMap.end()){ 
+    if(MemPointers.find(pointerArg) == MemPointers.end()){ 
       continue;
     } 
     else
-      basePointer = MemMap[pointerArg];
+      basePointer = MemPointers[pointerArg];
 
-    if(debugPrint) errs()<<"Note: Marking allocation as NON-CONSTANT \n";
+    debug(Hashim) << "Note: Marking allocation as NON-CONSTANT \n";
     // If the argument does alias a tracked allocation mark it as non-constant
-    basePointer->getAlloca()->setConstant(false);  // mark allocation as non-constant    
+    vector<MemPointer*> worklist;
+    worklist.push_back(basePointer);
+    while(worklist.size()) {      
+      MemPointer* curr = worklist[0];
+      if(MemAlloca* alloca = curr->getAlloca())
+        alloca->setConstant(false);
+      else
+        for(unsigned i = 0; i < curr->getNumContained(); i++)
+          worklist.push_back(curr->getContained(i));   
+      worklist.erase(worklist.begin());
+    }
   }
 }
 
-void handleIndirectCall(CallInst * callInst, ValMemPointerMap & MemMap){
+void handleIndirectCall(CallInst * callInst, ValMemPointerMap & MemPointers){
 
   // For any argument to the indirect call that aliases any of the allocated memory 
   // mark the side effects i.e mark allocation as non-constant
   for(unsigned int index = 0; index < callInst->getNumArgOperands(); index++){
     Value * pointerArg = callInst->getArgOperand(index);
     MemPointer * basePointer;
-    if(MemMap.find(pointerArg) == MemMap.end()){ 
+    if(MemPointers.find(pointerArg) == MemPointers.end()){ 
       continue;
     } 
     else
-      basePointer = MemMap[pointerArg];               
+      basePointer = MemPointers[pointerArg];               
     // "conservatively" mark each argument as modified 
-    basePointer->getAlloca()->setConstant(false);
+    vector<MemPointer*> worklist;
+    worklist.push_back(basePointer);
+    while(worklist.size()) {      
+      MemPointer* curr = worklist[0];
+      if(MemAlloca* alloca = curr->getAlloca())
+        alloca->setConstant(false);
+      else
+        for(unsigned i = 0; i < curr->getNumContained(); i++)
+          worklist.push_back(curr->getContained(i));   
+      worklist.erase(worklist.begin());
+    }
   }
 }
 
@@ -303,4 +321,28 @@ FuncInfo* initializeFuncInfo(Function* F) {
   fi->calledInLoop = false;
   fi->AddrTaken = F->hasAddressTaken();
   return fi;
+}
+
+unsigned getSizeOf(Type* ty) {
+  if(ty->getNumContainedTypes()) {
+    if(ArrayType* arType = dyn_cast<ArrayType>(ty)) {
+      unsigned numel = arType->getNumElements();
+      return numel * getSizeOf(ty->getContainedType(0));
+    } else if(StructType* stType = dyn_cast<StructType>(ty)) {
+      unsigned numel = stType->getNumElements();
+      unsigned size = 0;
+      for(unsigned i = 0; i < numel; i++)
+        size += getSizeOf(stType->getContainedType(i));
+      return size;        
+    } else if(isa<PointerType>(ty))
+      return 8;
+  } else {
+    if(ty->isIntegerTy(8))
+      return 1;
+    else if(ty->isIntegerTy(32))    
+      return 4;
+    else if(ty->isIntegerTy(64))
+      return 8;
+  }
+  return -1;
 }

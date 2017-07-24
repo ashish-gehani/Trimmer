@@ -68,11 +68,11 @@ void ConstantFolding::getAnalysisUsage(AnalysisUsage &AU) const {
 void ConstantFolding::replaceCallOperands(){
 
   for (auto & e : replaceOperands){
-    if(debugPrint) errs()<<"NOTE: ***** callInst = "<<*e.first<<"\n";
+    debug(Hashim) << "NOTE: ***** callInst = " << *e.first << "\n";
     vector<CallOperand*> operands = e.second;
     for(unsigned int i = 0; i < operands.size(); i++){
       CallOperand * callInfo = operands[i];
-      if(debugPrint) errs()<<"* new Operand = "<<*callInfo->newOperand<<"\n";
+      debug(Hashim) << "* new Operand = " << *callInfo->newOperand << "\n";
       e.first->setOperand(callInfo->index, callInfo->newOperand);
     }
   }  
@@ -85,14 +85,14 @@ void ConstantFolding::replaceCallInsts(){
   for (auto & e : specializedCalls){
     SpecializedCall * call = e.second;
     CallInst * from = call->origCall;
-    if(debugPrint) errs()<<"from = "<<*from<<"\n";
+    debug(Hashim) << "from = " << *from << "\n";
     CallInst * to = call->specCall;
     if(call->used){   
-      if(debugPrint) errs()<<"Replacing "<<*from<<" with "<<*to<<"\n";
+      debug(Hashim) << "Replacing " << *from << " with " << *to << "\n";
       ReplaceInstWithInst(from, to);  
     }
     else{
-      if(debugPrint) errs()<<"Delecting Instruction = "<<*to<<"\n";
+      debug(Hashim) << "Delecting Instruction = " << *to << "\n";
       delete to;
     }
   }  
@@ -146,15 +146,12 @@ void ConstantFolding::runOnBB(BasicBlock * BB, ValMemAllocaMap MemAllocas,
     Instruction * I = &(*inst);
     // Only considering allocas for string specialisation
     if(AllocaInst * allocaInst = dyn_cast<AllocaInst>(&*I)){
-      debugInst = I;
       processAllocaInst(allocaInst, MemAllocas, MemPointers, visited, inst);  
     }
     else if(MemCpyInst * memcpyInst = dyn_cast<MemCpyInst>(&*I)){
-
       processMemcpyInst(memcpyInst, MemAllocas, MemPointers, visited, inst);
     }	
     else if(StoreInst * storeInst = dyn_cast<StoreInst>(&*I)){
-
       processStoreInst(storeInst, MemAllocas, MemPointers, visited, inst);
     }
     else if(LoadInst * loadInst = dyn_cast<LoadInst>(&*I)){
@@ -173,33 +170,14 @@ void ConstantFolding::runOnBB(BasicBlock * BB, ValMemAllocaMap MemAllocas,
       // Any other instruction - currently skip 
       inst++; 
     }
-    // if(debugInst) {
-    //   errs() << *I << "\n";
-    //   char* mdata = (char*) MemPointers[debugInst]->alloca->data;
-    //   for(unsigned i = 0; i < 100; i++) {
-    //     errs() << mdata[i]<< ",";
-    //   }
-    //   errs() << "\n";
-    // }
   }
 } 
 
 bool ConstantFolding::runOnModule(Module & module) {
 
-  if(debugPrint) errs()<<"\n\n*******---- InterConstProp -----*********\n\n";
-  // gather funcInfo
+  debug(Hashim) << "\n\n*******---- InterConstProp -----*********\n\n";
   gatherFuncInfo(module);
-
-  // for (Module::iterator mit = module.getFunctionList().begin(); mit != module.getFunctionList().end(); ++mit) {
-  //   errs() << (&*mit)->getName().str() << "\n";
-  //   errs() << "--------------\n";
-  //   for (Function::iterator f_it = (&*mit)->begin(), f_ite = (&*mit)->end(); f_it != f_ite; ++f_it) {
-  //     for(BasicBlock::iterator b_it = f_it->begin(), b_ite = f_it->end(); b_it != b_ite; ++b_it) {
-  //       Instruction* I = &*b_it;
-  //       errs() << "instruction " << *I << "\n";
-  //     }
-  //   }
-  // }      
+    
   ValMemAllocaMap MemAllocas;  
   // stringPointers is a map of constant pointers - string pointers with constant index into alloca   
   ValMemPointerMap MemPointers;
@@ -208,9 +186,6 @@ bool ConstantFolding::runOnModule(Module & module) {
   TLI = &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI();
   DL = new DataLayout(&module);   
   CG = &getAnalysis<CallGraphWrapperPass>().getCallGraph();
-  //CallGraphWrapperPass * cgPass = new CallGraphWrapperPass;
-  //cgPass->runOnModule(module);
-  //CG = &cgPass->getCallGraph();
 
   M = &module;
   Function * func = M->getFunction(StringRef("main"));

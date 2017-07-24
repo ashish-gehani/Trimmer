@@ -55,7 +55,8 @@ struct ConstantFolding : public ModulePass {
   DataLayout * DL;
   DominatorTree * DT;
   CallGraph * CG;
-  map<Function*, FuncInfo*> FuncInfoMap;   
+  map<Function*, FuncInfo*> FuncInfoMap;  
+
   void processAllocaInst(AllocaInst * allocaInst, ValMemAllocaMap & MemAllocas, 
                         ValMemPointerMap& MemPointers , BasicBlockBoolMap & visited,
 			 BasicBlock::iterator & inst);
@@ -64,6 +65,10 @@ struct ConstantFolding : public ModulePass {
                         ValMemPointerMap& MemPointers , BasicBlockBoolMap & visited,
 			 BasicBlock::iterator & inst);
 
+  void processMallocInst(CallInst * mallocInst, ValMemAllocaMap & MemAllocas, 
+                        ValMemPointerMap& MemPointers , BasicBlockBoolMap & visited,
+       BasicBlock::iterator & inst);
+ 
   void processStoreInst(StoreInst * storeInst, ValMemAllocaMap & MemAllocas, 
                       ValMemPointerMap& MemPointers , BasicBlockBoolMap & visited,
 			BasicBlock::iterator & inst);

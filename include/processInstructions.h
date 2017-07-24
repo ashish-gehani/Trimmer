@@ -50,9 +50,6 @@ void ConstantFolding::markSpecialized(BasicBlock * BB){
   }  
 }
 
-
-
-
 void ConstantFolding::processAllocaInst(AllocaInst * allocaInst, ValMemAllocaMap & MemAllocas, 
                        ValMemPointerMap & MemPointers, BasicBlockBoolMap & visited,
                        BasicBlock::iterator & inst){
@@ -64,18 +61,37 @@ void ConstantFolding::processAllocaInst(AllocaInst * allocaInst, ValMemAllocaMap
     MemPointer* mptr = new MemPointer(allocatedType);
     MemPointers[I] = mptr;
   } else
-    if(debugPrint) errs()<<"note: Unsupported alloca type "<<*allocatedType<<"\n";
+      errs() << "note: Unsupported alloca type " << *allocatedType << "\n";
 
   inst++; // Point to next instruction in BB
 }
 
+void ConstantFolding::processMallocInst(CallInst * mallocInst, ValMemAllocaMap & MemAllocas, 
+                       ValMemPointerMap & MemPointers, BasicBlockBoolMap & visited,
+                       BasicBlock::iterator & inst) {
+  ConstantInt* sizeVal = dyn_cast<ConstantInt>(mallocInst->getArgOperand(0));
+  if(!sizeVal)
+    return;
 
+  int totalSize = sizeVal->getZExtValue();
+  for (auto& U : mallocInst->uses()) {
+    Instruction* user = dyn_cast<Instruction>(U.getUser());
+    if(isa<BitCastInst>(user)) {
+      Type* baseType = user->getType()->getContainedType(0);
+      unsigned typeSize = getSizeOf(baseType);
+      unsigned numel = totalSize/typeSize;
+      MemPointer* mptr = new MemPointer(user->getType());
+      for(unsigned i = 0; i < numel; i++)
+        mptr->setOrInsert(i, new MemPointer(baseType));   
+      MemPointers[user] = mptr;   
+    }
+  }
+}
 
 void ConstantFolding::processMemcpyInst(MemCpyInst * memcpyInst, ValMemAllocaMap & MemAllocas, 
                        ValMemPointerMap & MemPointers, BasicBlockBoolMap & visited,
-                       BasicBlock::iterator & inst){
+                       BasicBlock::iterator & inst) {
 
-  if(debugPrint) errs()<<"MemCpy Inst "<<*memcpyInst<<"\n"; 	
   Value * bufferPtr = memcpyInst->getOperand(0);
   MemPointer * basePointer;
   if(MemPointers.find(bufferPtr) == MemPointers.end()){
@@ -86,12 +102,12 @@ void ConstantFolding::processMemcpyInst(MemCpyInst * memcpyInst, ValMemAllocaMap
     basePointer = MemPointers[bufferPtr];
   int offset = basePointer->getPosition();
   MemAlloca* alloca = basePointer->getAlloca();
+
   char * sourceBuffer = (char*) alloca->data;
   sourceBuffer += offset;
   StringRef stringRef;
           
   if(!getConstantStringInfo(memcpyInst->getOperand(1), stringRef, 0, false)){
-    //-- if(debugPrint) errs()<<"non-constant string operand to memcpy - skipping ...";
     inst++;
     return; 
   }
@@ -101,8 +117,11 @@ void ConstantFolding::processMemcpyInst(MemCpyInst * memcpyInst, ValMemAllocaMap
   int length = strlen(constantString);   
   memcpy(sourceBuffer, constantString, length);
   alloca->fillInit(offset, length, true);
-  alloca->setConstant(true); // String is now constant          
-  if(debugPrint) errs()<<"constantString = "<<constantString<<"\n";
+
+  //only set the alloca as constant if the memcpy is over the entire length
+  if(offset == 0 && length == alloca->getSize())
+    alloca->setConstant(true);          
+  debug(Hashim)<< "constantString = " << constantString << "\n";
 
   inst++; // Point to next instruction in BB
 }
@@ -114,11 +133,6 @@ void ConstantFolding::processStoreInst(StoreInst * storeInst, ValMemAllocaMap & 
 
 
   Value * ptr = storeInst->getOperand(1);
-  Type * operandType = storeInst->getOperand(0)->getType();
-  if(operandType->getNumContainedTypes()) {
-    inst++;	    
-    return;
-  }
   MemPointer * basePointer;
   // Search for the pointer in map of constant pointers - pointers with constant offsets
   if(MemPointers.find(ptr) == MemPointers.end()) {
@@ -127,38 +141,39 @@ void ConstantFolding::processStoreInst(StoreInst * storeInst, ValMemAllocaMap & 
   }
   else
     basePointer = MemPointers[ptr];
-  MemAlloca* alloca = basePointer->getAlloca();
-  if(!alloca->isConstant()){
-    if(debugPrint) errs()<<".. Skipping non constant alloca string ... \n";
-    inst++;
-    return;
-  }        
-  Value * storeOperand = storeInst->getOperand(0);
-  int constantValue;
-  if(ConstantInt * constOp = dyn_cast<ConstantInt>(storeOperand)){
-    constantValue = constOp->getZExtValue();
-  } else {
-    if(debugPrint) errs()<<"--- Marking alloca as non-const \n";
-    alloca->setConstant(false);
-    inst++;
-    return;
+
+  if(basePointer->isNodeTypeOf(ptrType)) {
+    ptr = storeInst->getOperand(0);
+    if(MemPointers.find(ptr) != MemPointers.end())
+      basePointer->setOrInsert(0, MemPointers[ptr]);
+  } else if(basePointer->isNodeTypeOf(scalarType)) {
+    MemAlloca* alloca = basePointer->getAlloca();
+    if(!alloca->isConstant()) {
+      debug(Hashim) << ".. Skipping non constant alloca string ... \n";
+      inst++;
+      return;
+    }        
+    Value * storeOperand = storeInst->getOperand(0);
+    int constantValue;
+    if(ConstantInt * constOp = dyn_cast<ConstantInt>(storeOperand)){
+      constantValue = constOp->getZExtValue();
+    } else {
+      debug(Hashim) << "--- Marking alloca as non-const \n";
+      alloca->setConstant(false);
+      inst++;
+      return;
+    }
+    int offset = basePointer->getPosition();
+    alloca->storeConstVal(constantValue, offset);
+    alloca->setInit(offset, true);
   }
-  int offset = basePointer->getPosition();
-  alloca->StoreConstVal(constantValue, offset);
-  alloca->setInit(offset, true);
   inst++; // Point to next instruction in BB 
 }
 
 void ConstantFolding::processLoadInst(LoadInst * loadInst, ValMemAllocaMap & MemAllocas, 
               ValMemPointerMap & MemPointers, BasicBlockBoolMap & visited, 
               BasicBlock::iterator & inst) {
-
   Value * ptr = loadInst->getOperand(0);
-  Type * operandType = loadInst->getType();
-  if(operandType->getNumContainedTypes()) {
-    inst++;     
-    return;
-  }
   MemPointer * basePointer;
   // Search for the pointer in map of constant pointers - pointers with constant offsets
   if(MemPointers.find(ptr) == MemPointers.end()) {
@@ -167,26 +182,39 @@ void ConstantFolding::processLoadInst(LoadInst * loadInst, ValMemAllocaMap & Mem
   }
   else
     basePointer = MemPointers[ptr];
-  MemAlloca* alloca = basePointer->getAlloca();
-  if(!alloca->isConstant()){
-    if(debugPrint) errs()<<".. Skipping non constant alloca string ... \n";
-    inst++;
-    return;
-  }        
-  int offset = basePointer->getPosition(); 
-  if(!alloca->getInit(offset)) {
-    if(debugPrint) errs()<<".. LoadInst : value not initialized ... \n";
-    inst++;
-    return;    
+  if(basePointer->isNodeTypeOf(ptrType)) {
+    MemPointer* underlying = basePointer->getContained(0);
+    if(underlying->isNodeTypeOf(ptrType) && underlying->isNullPointer()) {
+      assert(isa<PointerType>(loadInst->getType()) && 
+        "loadInst : NodeType ptrType and loadinst not pointerType");
+      PointerType* loadedType = dyn_cast<PointerType>(loadInst->getType());
+      ConstantPointerNull* nptr = ConstantPointerNull::get(loadedType);
+      loadInst->replaceAllUsesWith(nptr);
+      debug(Abubakar) << "null pointer\n";
+    } else
+      MemPointers[loadInst] = underlying;
+  } else if(basePointer->isNodeTypeOf(scalarType)) {
+    MemAlloca* alloca = basePointer->getAlloca();
+    if(!alloca->isConstant()){
+      debug(Abubakar) << ".. Skipping non constant alloca string ... \n";
+      inst++;
+      return;
+    }        
+    int offset = basePointer->getPosition(); 
+    if(!alloca->getInit(offset)) {
+      debug(Abubakar) << ".. LoadInst : value not initialized ... \n";
+      inst++;
+      return;    
+    }
+    loadInst->replaceAllUsesWith(alloca->createConstVal(offset));
   }
-  loadInst->replaceAllUsesWith(alloca->CreateConstVal(offset));
-
   inst++; // Point to next instruction in BB 
 }
 
 void ConstantFolding::processGEPInst(GetElementPtrInst * GEPInst, ValMemAllocaMap & MemAllocas, 
 		    ValMemPointerMap & MemPointers, BasicBlockBoolMap & visited,
 		    BasicBlock::iterator & inst){
+
   Instruction * I = &(*inst);
   Value * ptr = GEPInst->getOperand(0);
   MemPointer * basePointer;
@@ -200,13 +228,10 @@ void ConstantFolding::processGEPInst(GetElementPtrInst * GEPInst, ValMemAllocaMa
   /*string-struct-change*/
   // TODO: more comprehensive test for '0' indices into string      
   if(alloca && !alloca->isConstant()) {
-    //-- if(debugPrint) errs()<<"..... Skipping non-constant string ... "<<*GEPInst<<"\n";
     inst++;
     return;              
   }
   Value * indexValue;
-  bool nonConstantIndices = false;
-
   vector<unsigned> indices;
   for(auto index = GEPInst->idx_begin(), end = GEPInst->idx_end(); index != end; index++){
             
@@ -215,23 +240,20 @@ void ConstantFolding::processGEPInst(GetElementPtrInst * GEPInst, ValMemAllocaMa
       indices.push_back(Idx->getZExtValue());
     }
     else {
-      nonConstantIndices = true;
-      break;
+      if(alloca)
+        alloca->setConstant(false);
+      inst++;
+      return;
     }
   } 
-  if(nonConstantIndices){
-    if(!alloca)
-      errs() << "case not handled --- non constant indices and NULL alloca\n";
-    alloca->setConstant(false);
-    inst++;
-    return;
-  }
-  if(basePointer->isNodeTypeOf(scalarType)) {
+  if(basePointer->isNodeTypeOf(scalarType))
     handleBaseDataTypeGEP(indices, basePointer, I, MemPointers);
-  }
-  else if(basePointer->isNodeTypeOf(structType)) {
-      MemPointer* mptr = new MemPointer(*basePointer);
-      for(unsigned i = 1; i < indices.size(); i++) {
+  else {
+      /*unsigned startInd = 1;
+      if(isa<PointerType>(basePointer->getType()))
+        startInd = 0;
+      MemPointer* mptr = basePointer;
+      for(unsigned i = startInd; i < indices.size(); i++) {
         mptr = mptr->getContained(indices[i]);        
         if(mptr->isNodeTypeOf(scalarType)) { // ArrayType
           vector<unsigned> bdVec(indices.begin() + i + 1, indices.end());
@@ -239,16 +261,24 @@ void ConstantFolding::processGEPInst(GetElementPtrInst * GEPInst, ValMemAllocaMa
           inst++;       
           return; 
         }
-      }
-      MemPointers[I] = new MemPointer(*mptr);
-    }
+      }*/
+      if(indices.size() == 1) {
+        MemPointer * mptr = new MemPointer(*basePointer);
+        mptr->incrementPosition(indices[0]);
+        MemPointers[I] = mptr;        
+      } else if(isa<PointerType>(basePointer->getType())) {
+        MemPointer* mptr = basePointer->getContained(indices[0])->getContained(indices[1]);
+        MemPointers[I] = new MemPointer(*mptr);
+      } else
+        MemPointers[I] = new MemPointer(*basePointer->getContained(indices[1]));      
+  }
   inst++; // Point to next instruction in BB
 }
 
 
 void ConstantFolding::processCallInst(CallInst * callInst, ValMemAllocaMap & MemAllocas, 
 		     ValMemPointerMap & MemPointers, BasicBlockBoolMap & visited,
-		     BasicBlock::iterator & inst){
+		     BasicBlock::iterator & inst) {
   Instruction * I = &(*inst); 
   Function * calledFunction = callInst->getCalledFunction();  
   // Indirect function calls need special handling
@@ -256,8 +286,7 @@ void ConstantFolding::processCallInst(CallInst * callInst, ValMemAllocaMap & Mem
     handleIndirectCall(callInst, MemPointers);
     inst++;
     return;
-  }         
-
+  }   
   /* specialize for functions defined in string.h e.g strcmp, strchr */
   else if(isStringFunction(calledFunction)) {
 
@@ -266,7 +295,7 @@ void ConstantFolding::processCallInst(CallInst * callInst, ValMemAllocaMap & Mem
       return; // Skip simplifying functions with unused results
     }
    
-    if(debugPrint) errs()<<"\n **** Specializing String function =  "<<calledFunction->getName()<<"\n";
+    debug(Hashim) << "\n **** Specializing String function =  " << calledFunction->getName() << "\n";
     // IMP: This pointer has special significance
     // The next instruction must point to the first GEP replaced inst 
     // necessary to ensure that GEPs are processed for specialization 
@@ -279,7 +308,6 @@ void ConstantFolding::processCallInst(CallInst * callInst, ValMemAllocaMap & Mem
       MemPointer * basePointer;
 
       if(MemPointers.find(pointerArg) == MemPointers.end()){ 
-      	//-- if(debugPrint) errs()<<"!pointer not found = "<<*pointerArg <<"\n"; 
         continue;
       } 
       else
@@ -331,12 +359,12 @@ void ConstantFolding::processCallInst(CallInst * callInst, ValMemAllocaMap & Mem
 
     LibCallSimplifier Simplifier(*DL, TLI, InstCombineRAUW);
     if (Value *With = Simplifier.optimizeCall(callInst)) {
-      if(With == NULL && debugPrint) errs()<<"NULL VALUE \n\n";
-      if(debugPrint) errs()<<"Value to replace = "<<*With<<"\n";
+      if(With == NULL) debug(Hashim) << "NULL VALUE \n\n";
+      debug(Hashim) << "Value to replace = " << *With << "\n";
       if(!callInst->use_empty()) {             
       	callInst->replaceAllUsesWith(With);              
       	inst = BasicBlock::iterator(firstGEPPtr);
-      	if(debugPrint) errs()<<"Replaced uses of = "<<*callInst<<"\n";
+      	debug(Hashim) << "Replaced uses of = " << *callInst << "\n";
       	BasicBlock * BB = I->getParent();
       	markSpecialized(BB);  // Mark the function as specialized - replaces original function
         return; // already set "inst" to the next instruction
@@ -351,7 +379,7 @@ void ConstantFolding::processCallInst(CallInst * callInst, ValMemAllocaMap & Mem
       	StringRef stringRef;
       	if(getConstantStringInfo(callInst->getOperand(0), stringRef, 0, false)) {
       	  const char * constantString = stringRef.str().c_str();
-      	  if(debugPrint) errs()<<"constant string = "<<constantString<<"\n";
+      	  debug(Hashim) << "constant string = " << constantString << "\n";
       	  int val = atoi(constantString);
       	  IntegerType * int32Ty = IntegerType::get(M->getContext(), 32);
       	  ConstantInt * constVal = ConstantInt::get(int32Ty, val);
@@ -365,9 +393,11 @@ void ConstantFolding::processCallInst(CallInst * callInst, ValMemAllocaMap & Mem
 
     inst++;
     return;  
+  } else if(calledFunction->getName().str() == "malloc") {
+    processMallocInst(callInst, MemAllocas, MemPointers, visited, inst);
   }  
   /* NEW: Propagating constants interprocedurally */ 
-  else if(!isStringFunction(calledFunction) && !calledFunction->isDeclaration()) {
+  else if(!calledFunction->isDeclaration()) {
 
     /*task1*/
     // If the function does not satisfy any of the three conditions, mark all arguments
@@ -379,7 +409,7 @@ void ConstantFolding::processCallInst(CallInst * callInst, ValMemAllocaMap & Mem
       return;
     }
 
-    if(debugPrint) errs()<<"---- Traversing function arguments ---- \n\n";       
+    debug(Hashim) << "---- Traversing function arguments ---- \n\n";       
     int index = 0;
     BasicBlock * successor = NULL;
     bool clonedFlag = false;
@@ -389,16 +419,14 @@ void ConstantFolding::processCallInst(CallInst * callInst, ValMemAllocaMap & Mem
 
       //FIXIT: make type checks more general	
       if(!arg->getType()->isPointerTy() && !isa<StructType>(arg->getType())){
-        // if(debugPrint) 
-        errs()<<"!note: not supported "<<*arg<<"\n";                
+        errs() << "!note: not supported " << *arg << "\n";                
       	continue;
       }
   
       Value * pointerArg = callInst->getOperand(index);
       MemPointer * basePointer;
-      if(MemPointers.find(pointerArg) == MemPointers.end()){ 
+      if(MemPointers.find(pointerArg) == MemPointers.end())
 	      continue;
-      } 
       else
 	      basePointer = MemPointers[pointerArg];
                  
@@ -408,14 +436,14 @@ void ConstantFolding::processCallInst(CallInst * callInst, ValMemAllocaMap & Mem
       	ClonedCodeInfo info;
       	ValueToValueMapTy vmap;
         string name = calledFunction->getName().str();
-      	if(debugPrint) errs()<<"---- cloning function = "<< name <<"\n";
+      	debug(Hashim) << "---- cloning function = " << name <<"\n";
       	clonedFunc = llvm::CloneFunction(calledFunction, vmap, true, &info);
         clonedFunc->setName(StringRef(name + "_clone")); // FIXIT: Name appropriately
       	calledFunction->getParent()->getFunctionList().push_back(clonedFunc);
                     
       	std::vector<Value*> args(callInst->arg_begin(), callInst->arg_end());
       	CallInst * specCallInst = CallInst::Create(clonedFunc, args);
-      	if(debugPrint) errs()<<"newCallSite = "<<*specCallInst<<"\n";
+      	debug(Hashim) << "newCallSite = " << *specCallInst << "\n";
       	SpecializedCall * call = new SpecializedCall;
       	call->origCall = callInst;
       	call->specCall = specCallInst;
@@ -428,17 +456,11 @@ void ConstantFolding::processCallInst(CallInst * callInst, ValMemAllocaMap & Mem
       MemPointer * mptr = basePointer;
       Value * pointerVal = getArg(clonedFunc, index);
       MemPointers[pointerVal] = mptr;        
-      if(debugPrint) errs()<<" POINTER VAL = "<<*pointerVal<<"\n";
+      debug(Hashim) << " POINTER VAL = " << *pointerVal << "\n";
           //FIXIT: Reconsider the below choices
 
           // NEW: CANNOT prevent a function from being traversed twice
-          // TODO-NEW: Need to restrict RECURSIVE functions - including mutually recursive             
-          /*
-    	if(visited.find(successor) != visited.end()){
-    	continue; // Skip visited basic block 
-    	}	                               
-    	visited[successor] = true; // Mark basic block as being visited
-          */                           
+          // TODO-NEW: Need to restrict RECURSIVE functions - including mutually recursive                                       
     }
     
     if(clonedFlag)
@@ -455,7 +477,7 @@ void ConstantFolding::processCallInst(CallInst * callInst, ValMemAllocaMap & Mem
     /*task1*/
     // Code moved to function defined in utils.cpp
     if(calledFunction->isDeclaration()) {
-      if(debugPrint) errs()<<"--- Declaration: "<<*calledFunction<<"\n";
+      debug(Hashim) << "--- Declaration: " << *calledFunction << "\n";
       markArgsAsNonConst(callInst, MemPointers);
     }
   }
@@ -489,11 +511,11 @@ void ConstantFolding::processBranchInst(BranchInst * branchInst, ValMemAllocaMap
     // Forward context to successor block if the successor has only a single predecessor & isNotVisited
     if(successor->getUniquePredecessor()) {
       visited[successor] = true; 
-      if(debugPrint) errs()<<"Successor has a single predecessor \n";
+      debug(Hashim) << "Successor has a single predecessor \n";
       runOnBB(successor, MemAllocas, MemPointers, visited);
     }    
     else {
-      if(debugPrint) errs()<<"Block has multiple predecessors \n";
+      debug(Hashim) << "Block has multiple predecessors \n";
       // Merging contexts
       // TODO: more testing required            
       ValMemAllocaMap MemAllocas2;
@@ -502,6 +524,5 @@ void ConstantFolding::processBranchInst(BranchInst * branchInst, ValMemAllocaMap
       runOnBB(successor, MemAllocas2, MemPointers, visited);            
     } 
   }         
-
   inst++;
 }

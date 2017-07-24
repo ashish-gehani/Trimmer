@@ -23,7 +23,7 @@ void MemAlloca::createData(Type* ty) {
 	}
 }
 
-Value* MemAlloca::CreateConstVal(int offset) {
+Value* MemAlloca::createConstVal(int offset) {
   if(isa<ArrayType>(allocatedType)) // others not possible atm
     allocatedType = allocatedType->getContainedType(0);
   Value* constVal;
@@ -33,11 +33,11 @@ Value* MemAlloca::CreateConstVal(int offset) {
   } else if(Btype == charType) {
     char * loadData = (char*) data;
     constVal = ConstantInt::get(allocatedType, loadData[offset]);
-    // errs() << "char loaded " << data[offset] << "\n";
+    // errs() << "char loaded " << loadData[offset] << "\n";
   }  else if(Btype == intType) {
     int * loadData = (int*) data;
     constVal = ConstantInt::get(allocatedType, loadData[offset]);
-    // errs() << "int loaded " << data[offset] << "\n";
+    // errs() << "int loaded " << loadData[offset] << "\n";
   }  else if(Btype == longType) {
     long * loadData = (long*) data;
     constVal = ConstantInt::get(allocatedType, loadData[offset]);
@@ -45,7 +45,7 @@ Value* MemAlloca::CreateConstVal(int offset) {
   return constVal;
 }
 
-void MemAlloca::StoreConstVal(int ConstVal, int offset) {
+void MemAlloca::storeConstVal(int ConstVal, int offset) {
   if(Btype == boolType) {
     bool storeVal = (bool) ConstVal;
     bool * storeData = (bool*) data;
@@ -64,7 +64,6 @@ void MemAlloca::StoreConstVal(int ConstVal, int offset) {
     storeData[offset] = storeVal;
   }
 }
-
 MemAlloca::MemAlloca(Type* ty) {
 	constant = true;
 	size = 1;
@@ -81,28 +80,31 @@ MemAlloca::MemAlloca(Type* ty) {
 MemPointer::MemPointer(Type* ty) {
 	position = 0;
 	allocatedType = ty;
+	containedSize = 0;
+	totalSize = 0;
+	alloca = NULL;
 	if(StructType* st = dyn_cast<StructType>(ty)) {
 		Ntype = structType;
 		unsigned num = st->getNumElements();
+		initContained(num);
 		for(unsigned i = 0; i < num; i++)
-			contained.push_back(new MemPointer(st->getElementType(i)));
-		alloca = NULL;
-	} else if(ty->getNumContainedTypes() && isa<StructType>(ty->getContainedType(0))) {
-		if(ArrayType * arType = dyn_cast<ArrayType>(ty)) {
-			Ntype = structArrType;			
-			unsigned num = arType->getNumElements();
-			for(unsigned i = 0; i < num; i++)
-				contained.push_back(new MemPointer(st->getElementType(i)));
-		} else {
-			Ntype = other;
-			errs() << "cant handle container type " << *ty << " atm\n";
-		}
+			insert(new MemPointer(st->getElementType(i)));
+	} else if(isa<PointerType>(ty))
+		Ntype = ptrType;
+	else if(isa<ArrayType>(ty) && ty->getContainedType(0)->getNumContainedTypes()) { 
+		// Array of an aggregate : array of pointers, array of structs or array of arrays
+		ArrayType * arType = dyn_cast<ArrayType>(ty);
+		Ntype = aggrArrType;			
+		unsigned num = arType->getNumElements();
+		initContained(num);		
+		Type* contTy = ty->getContainedType(0);
+		for(unsigned i = 0; i < num; i++)
+			insert(new MemPointer(contTy));
 	} else {
 		Ntype = scalarType;
 		alloca = new MemAlloca(ty);
 	}
 }
-
 
 MemPointer::MemPointer(const MemPointer& mptr) {
 	contained = mptr.contained;
@@ -110,4 +112,6 @@ MemPointer::MemPointer(const MemPointer& mptr) {
 	alloca = mptr.alloca;
 	position = mptr.position;
 	allocatedType = mptr.allocatedType;
+	containedSize = mptr.containedSize;
+	totalSize = mptr.totalSize;
 }

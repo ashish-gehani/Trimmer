@@ -1,5 +1,6 @@
 using namespace std;
 using namespace llvm;
+#include "debug.h"
 
 enum BaseType {
   boolType,
@@ -11,8 +12,8 @@ enum BaseType {
 enum NodeType {
   scalarType,
   structType,
-  structArrType,
-  other // not handled yet... like pointers
+  ptrType,
+  aggrArrType
 };
 
 class MemAlloca {
@@ -28,22 +29,28 @@ public:
   bool isBaseTypeOf(BaseType Btype) {
     return this->Btype == Btype;
   }
+  int getSize() {
+    return this->size;
+  }
   void setInit(int index, bool val) {
-    assert(index < size && "tried to access invalid index for initialized");
-    initialized[index] = val;
+    assert(index < this->size && "tried to access invalid index for initialized");
+    this->initialized[index] = val;
   }
   bool getInit(int index) {
-    assert(index < size && "tried to access invalid index for initialized");
-    return initialized[index];    
+    assert(index < this->size && "tried to access invalid index for initialized");
+    return this->initialized[index];    
   }
   void fillInit(int offset, int length, bool val) {
     assert(offset < size && offset + length < size && "trying to initialize invalid indices");
     bool* fillBuff = this->initialized + offset;
     fill(fillBuff, fillBuff + length, true);
   }
+  Type* getType() {
+    return this->allocatedType;
+  }  
   void createData(Type* ty);
-  Value* CreateConstVal(int offset);
-  void StoreConstVal(int ConstVal, int offset);
+  Value* createConstVal(int offset);
+  void storeConstVal(int ConstVal, int offset);
 private:
   bool* initialized;
   BaseType Btype;
@@ -59,11 +66,24 @@ public:
   MemPointer(const MemPointer& mptr);
 
   unsigned getNumContained() {
-    return this->contained.size();
+    return this->containedSize;
   }
   MemPointer* getContained(unsigned index) {
-    assert(index < this->contained.size() && "tried to access invalid index");
-    return this->contained[index];
+    unsigned getIndex = index + this->position;
+    assert(getIndex < this->containedSize && "tried to access invalid getIndex");
+    return this->contained[getIndex];
+  }
+  void setOrInsert(unsigned index, MemPointer* mptr) {
+    // if insertIndex is less then contained.size() then we will set as the insertIndex is already present
+    // if insertIndex == contained.size() then we will insert
+    // if insertIndex > contained.size() then even if we insert the insertIndex will not be equal to
+    // insertIndex
+    unsigned insertIndex = index + this->position;
+    assert(insertIndex <= this->containedSize && "tried to insert at an invalid index");
+    if(insertIndex < this->containedSize)
+      this->contained[insertIndex] = mptr;
+    else
+      this->insert(mptr);
   }
   int getPosition() { 
     return this->position;
@@ -81,12 +101,42 @@ public:
     return this->Ntype == Ntype;
   }
   MemAlloca* getAlloca() {
-    return alloca;
+    return this->alloca;
   }
-
+  bool isNullPointer() {
+    assert(isa<PointerType>(allocatedType) && 
+      "isNullPointer : pointer operation on non-pointer Node");
+    return !this->containedSize;
+  } 
 private:
+  void initContained(unsigned size) {
+    this->contained = new MemPointer*[size];
+    this->totalSize = size;
+  }
+  void checkAndResize() {
+    if(this->totalSize == 0) {
+      this->contained = new MemPointer*[100];
+      this->totalSize = 100;
+    }
+    else if(this->containedSize == this->totalSize) {
+      MemPointer** newArr = new MemPointer*[2 * totalSize];
+      for(unsigned i = 0; i < this->totalSize; i++)
+        newArr[i] = contained[i];
+      totalSize *= 2;
+      MemPointer** oldArr = contained;
+      contained = newArr;
+      delete oldArr; 
+    }     
+  }
+  void insert(MemPointer* mptr) {
+    checkAndResize();
+    this->contained[containedSize] = mptr;
+    this->containedSize++;    
+  }
   MemAlloca* alloca;
-  vector<MemPointer*> contained; 
+  MemPointer** contained; 
+  unsigned containedSize;
+  unsigned totalSize;
   int position;
   Type* allocatedType;
   NodeType Ntype;
