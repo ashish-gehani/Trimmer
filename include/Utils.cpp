@@ -171,7 +171,7 @@ Value * getArg(Function * func, int index){
 }
 
 // FIXIT: Allow dominated predecessors to not have executed prior to current basic block
-bool predecessorsVisited(BasicBlock * BB, map<BasicBlock*, ValMemAllocaMap> blockContexts){
+bool predecessorsVisited(BasicBlock * BB, map<BasicBlock*, ValScalarAllocaMap> blockContexts){
    
   for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++){
     BasicBlock * predecessor = *it;
@@ -187,12 +187,12 @@ bool predecessorsVisited(BasicBlock * BB, map<BasicBlock*, ValMemAllocaMap> bloc
 
 
 //TODO: Check context properly including comparing the alloca CONTENTS
-//TODO: Fill the stringPointers and MemAllocas correctly - be sound even if imprecise 
+//TODO: Fill the stringPointers and ScalarAllocas correctly - be sound even if imprecise 
 //TODO: Insert call to merge context and test with examples
-bool mergeContext(BasicBlock * BB, map<BasicBlock*, ValMemAllocaMap> blockContexts,
-		  ValMemAllocaMap & MemAllocas, ValMemPointerMap & MemPointers) {
+bool mergeContext(BasicBlock * BB, map<BasicBlock*, ValScalarAllocaMap> blockContexts,
+		  ValScalarAllocaMap & ScalarAllocas, ValSSAPointerMap & SSAPointers) {
 
-  std::vector<ValMemAllocaMap> predecessorContexts;    
+  std::vector<ValScalarAllocaMap> predecessorContexts;    
 
   for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++){
     BasicBlock * predecessor = *it;
@@ -204,23 +204,23 @@ bool mergeContext(BasicBlock * BB, map<BasicBlock*, ValMemAllocaMap> blockContex
 
   debug(Hashim) << "\n Comparing predecessor contexts = " << predecessorContexts.size() << "\n";
   unsigned int i;
-  ValMemAllocaMap predContext = predecessorContexts[0];
+  ValScalarAllocaMap predContext = predecessorContexts[0];
    
   for(auto it = predContext.begin(); 
       it != predContext.end(); ++it){
 
     Value * inst = it->first;
-    MemAlloca * alloca = it->second;
+    ScalarAlloca * alloca = it->second;
     bool equal = true;
     for(i = 1; i < predecessorContexts.size(); i++){
-      ValMemAllocaMap predContext2 = predecessorContexts[i];
+      ValScalarAllocaMap predContext2 = predecessorContexts[i];
       if(predContext2.find(inst) == predContext2.end()){
       	equal = false;
       	break;
       } 
       else {
-      	MemAlloca* alloca1 = predContext[inst];
-      	MemAlloca* alloca2 = predContext2[inst];
+      	ScalarAlloca* alloca1 = predContext[inst];
+      	ScalarAlloca* alloca2 = predContext2[inst];
       	char* data1 = (char*) alloca1->data;
       	char* data2 = (char*) alloca2->data;          
       	if(strcmp(data1, data2) != 0) 
@@ -230,7 +230,7 @@ bool mergeContext(BasicBlock * BB, map<BasicBlock*, ValMemAllocaMap> blockContex
  
     // FIXIT: Manage String Pointers as well 
     if(equal) {
-      MemAllocas[inst] = alloca;
+      ScalarAllocas[inst] = alloca;
     } else {
       alloca->setConstant(false); //FIXIT: A little over-conservative. Imagine reverse post order scenarios
     }               
@@ -240,7 +240,7 @@ bool mergeContext(BasicBlock * BB, map<BasicBlock*, ValMemAllocaMap> blockContex
 }
 /*task1*/
 
-void markArgsAsNonConst(CallInst* callInst, ValMemPointerMap MemPointers) {
+void markArgsAsNonConst(CallInst* callInst, ValSSAPointerMap SSAPointers) {
   int index = 0;
   Function* calledFunction = callInst->getCalledFunction();
   for(auto arg = calledFunction->arg_begin(), argEnd = calledFunction->arg_end(); arg != argEnd; 
@@ -254,20 +254,20 @@ void markArgsAsNonConst(CallInst* callInst, ValMemPointerMap MemPointers) {
     
     // Searching for the pointer
     Value * pointerArg = callInst->getOperand(index);
-    MemPointer * basePointer;
-    if(MemPointers.find(pointerArg) == MemPointers.end()){ 
+    AggregateAlloca * basePointer;
+    if(SSAPointers.find(pointerArg) == SSAPointers.end()){ 
       continue;
     } 
     else
-      basePointer = MemPointers[pointerArg];
+      basePointer = SSAPointers[pointerArg]->basePointer;
 
     debug(Hashim) << "Note: Marking allocation as NON-CONSTANT \n";
     // If the argument does alias a tracked allocation mark it as non-constant
-    vector<MemPointer*> worklist;
+    vector<AggregateAlloca*> worklist;
     worklist.push_back(basePointer);
     while(worklist.size()) {      
-      MemPointer* curr = worklist[0];
-      if(MemAlloca* alloca = curr->getAlloca())
+      AggregateAlloca* curr = worklist[0];
+      if(ScalarAlloca* alloca = curr->getAlloca())
         alloca->setConstant(false);
       else
         for(unsigned i = 0; i < curr->getNumContained(); i++)
@@ -277,24 +277,24 @@ void markArgsAsNonConst(CallInst* callInst, ValMemPointerMap MemPointers) {
   }
 }
 
-void handleIndirectCall(CallInst * callInst, ValMemPointerMap & MemPointers){
+void handleIndirectCall(CallInst * callInst, ValSSAPointerMap & SSAPointers){
 
   // For any argument to the indirect call that aliases any of the allocated memory 
   // mark the side effects i.e mark allocation as non-constant
   for(unsigned int index = 0; index < callInst->getNumArgOperands(); index++){
     Value * pointerArg = callInst->getArgOperand(index);
-    MemPointer * basePointer;
-    if(MemPointers.find(pointerArg) == MemPointers.end()){ 
+    AggregateAlloca * basePointer;
+    if(SSAPointers.find(pointerArg) == SSAPointers.end()){ 
       continue;
     } 
     else
-      basePointer = MemPointers[pointerArg];               
+      basePointer = SSAPointers[pointerArg]->basePointer;               
     // "conservatively" mark each argument as modified 
-    vector<MemPointer*> worklist;
+    vector<AggregateAlloca*> worklist;
     worklist.push_back(basePointer);
     while(worklist.size()) {      
-      MemPointer* curr = worklist[0];
-      if(MemAlloca* alloca = curr->getAlloca())
+      AggregateAlloca* curr = worklist[0];
+      if(ScalarAlloca* alloca = curr->getAlloca())
         alloca->setConstant(false);
       else
         for(unsigned i = 0; i < curr->getNumContained(); i++)
@@ -304,14 +304,14 @@ void handleIndirectCall(CallInst * callInst, ValMemPointerMap & MemPointers){
   }
 }
 
-void handleBaseDataTypeGEP(vector<unsigned> indices, MemPointer* basePointer,
-                Instruction* I, ValMemPointerMap & MemPointers) {
+void handleBaseDataTypeGEP(vector<unsigned> indices, SSAPointer* bsptr,
+                Instruction* I, ValSSAPointerMap & SSAPointers) {
     if(indices.size() > 2) 
       errs() << "GEPINST : case not handled ntype is baseDataType and indices > 2\n";
-    MemPointer * mptr = new MemPointer(*basePointer);
+    SSAPointer * sptr = new SSAPointer(bsptr);
     if(indices.size())
-      mptr->incrementPosition(indices[indices.size() - 1]);
-    MemPointers[I] = mptr;
+      sptr->position += indices[indices.size() - 1];
+    SSAPointers[I] = sptr;
 }
 
 

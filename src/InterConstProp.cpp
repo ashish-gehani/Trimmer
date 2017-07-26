@@ -137,36 +137,38 @@ void ConstantFolding::gatherFuncInfo(Module& M) {
 
 /* IMP: New policy - visited passed by reference; no basic block visited twice - important to avoid wrongly 
    duplicating contexts e.g function cloning */ 
-void ConstantFolding::runOnBB(BasicBlock * BB, ValMemAllocaMap MemAllocas, 
-	     ValMemPointerMap MemPointers, BasicBlockBoolMap & visited){
+void ConstantFolding::runOnBB(BasicBlock * BB, ValScalarAllocaMap scalarAllocas, 
+	     ValSSAPointerMap SSAPointers, BasicBlockBoolMap & visited){
    
   BasicBlock& b = *BB;
   for (BasicBlock::iterator inst = b.begin(), ie = b.end(); inst != ie; ) {
 
     Instruction * I = &(*inst);
+    // errs() << *I << "\n";
     // Only considering allocas for string specialisation
     if(AllocaInst * allocaInst = dyn_cast<AllocaInst>(&*I)){
-      processAllocaInst(allocaInst, MemAllocas, MemPointers, visited, inst);  
+      processAllocaInst(allocaInst, scalarAllocas, SSAPointers, visited, inst);  
     }
     else if(MemCpyInst * memcpyInst = dyn_cast<MemCpyInst>(&*I)){
-      processMemcpyInst(memcpyInst, MemAllocas, MemPointers, visited, inst);
+      processMemcpyInst(memcpyInst, scalarAllocas, SSAPointers, visited, inst);
     }	
     else if(StoreInst * storeInst = dyn_cast<StoreInst>(&*I)){
-      processStoreInst(storeInst, MemAllocas, MemPointers, visited, inst);
+      processStoreInst(storeInst, scalarAllocas, SSAPointers, visited, inst);
     }
     else if(LoadInst * loadInst = dyn_cast<LoadInst>(&*I)){
-      processLoadInst(loadInst, MemAllocas, MemPointers, visited, inst);
+      processLoadInst(loadInst, scalarAllocas, SSAPointers, visited, inst);
     }    
     else if(CallInst * callInst = dyn_cast<CallInst>(&*I)){
-      processCallInst(callInst, MemAllocas, MemPointers, visited, inst);
+      processCallInst(callInst, scalarAllocas, SSAPointers, visited, inst);
     }
     else if(GetElementPtrInst * GEPInst = dyn_cast<GetElementPtrInst>(&*I)){
-      processGEPInst(GEPInst, MemAllocas, MemPointers, visited, inst);
+      processGEPInst(GEPInst, scalarAllocas, SSAPointers, visited, inst);
     }
     else if(BranchInst * branchInst = dyn_cast<BranchInst>(&*I)){
-      processBranchInst(branchInst, MemAllocas, MemPointers, visited, inst);
-    }
-    else {           
+      processBranchInst(branchInst, scalarAllocas, SSAPointers, visited, inst);
+    } else if(BitCastInst * bitcastInst = dyn_cast<BitCastInst>(I)) {
+       processBitCastInst(bitcastInst, scalarAllocas, SSAPointers, visited, inst);
+    } else {           
       // Any other instruction - currently skip 
       inst++; 
     }
@@ -178,9 +180,9 @@ bool ConstantFolding::runOnModule(Module & module) {
   debug(Hashim) << "\n\n*******---- InterConstProp -----*********\n\n";
   gatherFuncInfo(module);
     
-  ValMemAllocaMap MemAllocas;  
+  ValScalarAllocaMap scalarAllocas;  
   // stringPointers is a map of constant pointers - string pointers with constant index into alloca   
-  ValMemPointerMap MemPointers;
+  ValSSAPointerMap SSAPointers;
   BasicBlockBoolMap visited; 
 
   TLI = &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI();
@@ -190,7 +192,7 @@ bool ConstantFolding::runOnModule(Module & module) {
   M = &module;
   Function * func = M->getFunction(StringRef("main"));
   BasicBlock * entry = &(func->getEntryBlock());
-  runOnBB(entry, MemAllocas, MemPointers, visited); 
+  runOnBB(entry, scalarAllocas, SSAPointers, visited); 
     	   
   replaceCallOperands();
   replaceCallInsts();

@@ -11,16 +11,15 @@ enum BaseType {
 
 enum NodeType {
   scalarType,
-  scalarPtrType,
   structType,
   ptrType,
   aggrArrType
 };
 
-class ScalarAlloca {
+class MemAlloca {
 public:  
   void* data; // even if it is not an array e.g. an int or a char, determined by size
-  ScalarAlloca(Type* ty);
+  MemAlloca(Type* ty);
   bool isConstant() {
     return this->constant;
   }
@@ -60,27 +59,35 @@ private:
   Type* allocatedType;
 };
 
-class AggregateAlloca {
+class MemPointer {
 public:
-  AggregateAlloca(Type* ty);
+  MemPointer(Type* ty);
+
+  MemPointer(const MemPointer& mptr);
+
+  void storeScalar(Value* storeOperand);
+
+  Value* loadScalar();
 
   unsigned getNumContained() {
-    return this->containedSize;
+    return this->containedSize - this->position;
   }
-  AggregateAlloca* getContained(unsigned index) {
-    assert(index < this->containedSize && "tried to access invalid index");
-    return this->contained[index];
+  MemPointer* getContained(unsigned index) {
+    unsigned getIndex = index + this->position;
+    assert(getIndex < this->containedSize && "tried to access invalid getIndex");
+    return this->contained[getIndex];
   }
-  void setOrInsert(unsigned index, AggregateAlloca* aa) {
+  void setOrInsert(unsigned index, MemPointer* mptr) {
     // if insertIndex is less then contained.size() then we will set as the insertIndex is already present
     // if insertIndex == contained.size() then we will insert
     // if insertIndex > contained.size() then even if we insert the insertIndex will not be equal to
     // insertIndex
-    assert(index <= this->containedSize && "tried to insert at an invalid index");
-    if(index < this->containedSize)
-      this->contained[index] = aa;
+    unsigned insertIndex = index + this->position;
+    assert(insertIndex <= this->containedSize && "tried to insert at an invalid index");    
+    if(insertIndex < this->containedSize)
+      this->contained[insertIndex] = mptr;
     else
-      this->insert(aa);
+      this->insert(mptr);
   }
   Type* getType() {
     return this->allocatedType;
@@ -88,64 +95,50 @@ public:
   bool isNodeTypeOf(NodeType Ntype) {
     return this->Ntype == Ntype;
   }
-  ScalarAlloca* getAlloca() {
+  MemAlloca* getAlloca() {
     return this->alloca;
   }
   bool isNullPointer() {
-    assert(this->Ntype == ptrType && 
+    assert(isa<PointerType>(allocatedType) && 
       "isNullPointer : pointer operation on non-pointer Node");
     return !this->containedSize;
-  } 
-  NodeType Ntype;
+  }
 private:
   void initContained(unsigned size) {
-    this->contained = new AggregateAlloca*[size];
+    this->contained = new MemPointer*[size];
     this->totalSize = size;
   }
   void checkAndResize() {
     if(this->totalSize == 0) {
-      this->contained = new AggregateAlloca*[100];
+      this->contained = new MemPointer*[100];
       this->totalSize = 100;
     }
     else if(this->containedSize == this->totalSize) {
-      AggregateAlloca** newArr = new AggregateAlloca*[2 * totalSize];
+      MemPointer** newArr = new MemPointer*[2 * totalSize];
       for(unsigned i = 0; i < this->totalSize; i++)
         newArr[i] = contained[i];
       totalSize *= 2;
-      AggregateAlloca** oldArr = contained;
+      MemPointer** oldArr = contained;
       contained = newArr;
-      delete oldArr; 
+      delete oldArr;
     }     
   }
-  void insert(AggregateAlloca* aa) {
+  void insert(MemPointer* mptr) {
     checkAndResize();
-    this->contained[containedSize] = aa;
+    this->contained[containedSize] = mptr;
     this->containedSize++;    
   }
-  ScalarAlloca* alloca;
-  AggregateAlloca** contained; 
-  unsigned containedSize;
+  MemAlloca* alloca;
+  MemPointer** contained; 
+  unsigned containedSize; 
   unsigned totalSize;
   Type* allocatedType;
+  NodeType Ntype;
 };
 
 struct SSAPointer {
-  AggregateAlloca* basePointer;
-  int position;
-  Type* allocatedType;
-  SSAPointer(Type * ty) {
-    this->basePointer = new AggregateAlloca(ty);
-    this->position = 0;
-    this->allocatedType = ty;
-  }
-  SSAPointer(SSAPointer * sptr) {
-    this->basePointer = sptr->basePointer;
-    this->position = sptr->position;
-    this->allocatedType = sptr->allocatedType;
-  }
-  SSAPointer(AggregateAlloca * aa) {
-    this->basePointer = aa;
-    this->position = 0;
-    this->allocatedType = aa->getType();
-  }
+  unsigned position;
+  AggregateAlloca aggrAlloca; 
+  Type* allocatedType;  
 };
+

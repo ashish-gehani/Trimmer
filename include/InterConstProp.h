@@ -48,7 +48,7 @@ struct ConstantFolding : public ModulePass {
   //map<Value*, StringPointer*> stringPointers;
   map<Instruction*, vector<CallOperand*>> replaceOperands;
   map<Function*, SpecializedCall*> specializedCalls;
-  map<BasicBlock*, ValMemAllocaMap> blockContexts; 
+  map<BasicBlock*, ValScalarAllocaMap> blockContexts; 
 
   Module * M;  
   const TargetLibraryInfo *TLI;
@@ -57,36 +57,38 @@ struct ConstantFolding : public ModulePass {
   CallGraph * CG;
   map<Function*, FuncInfo*> FuncInfoMap;  
 
-  void processAllocaInst(AllocaInst * allocaInst, ValMemAllocaMap & MemAllocas, 
-                        ValMemPointerMap& MemPointers , BasicBlockBoolMap & visited,
-			 BasicBlock::iterator & inst);
- 
-  void processMemcpyInst(MemCpyInst * memcpyInst, ValMemAllocaMap & MemAllocas, 
-                        ValMemPointerMap& MemPointers , BasicBlockBoolMap & visited,
+  void processAllocaInst(AllocaInst * allocaInst, ValScalarAllocaMap & ScalarAllocas, 
+                        ValSSAPointerMap& SSAPointers, BasicBlockBoolMap & visited,
 			 BasicBlock::iterator & inst);
 
-  void processMallocInst(CallInst * mallocInst, ValMemAllocaMap & MemAllocas, 
-                        ValMemPointerMap& MemPointers , BasicBlockBoolMap & visited,
-       BasicBlock::iterator & inst);
+  void processBitCastInst(BitCastInst * bitcastInst, ValScalarAllocaMap & ScalarAllocas,
+                       ValSSAPointerMap & SSAPointers, BasicBlockBoolMap & visited, 
+                       BasicBlock::iterator & inst);
  
-  void processStoreInst(StoreInst * storeInst, ValMemAllocaMap & MemAllocas, 
-                      ValMemPointerMap& MemPointers , BasicBlockBoolMap & visited,
+  void processMemcpyInst(MemCpyInst * memcpyInst, ValScalarAllocaMap & ScalarAllocas, 
+                        ValSSAPointerMap& SSAPointers, BasicBlockBoolMap & visited,
+			 BasicBlock::iterator & inst);
+
+  void processMallocInst(CallInst * mallocInst, Instruction* I, ValSSAPointerMap& SSAPointers);
+ 
+  void processStoreInst(StoreInst * storeInst, ValScalarAllocaMap & ScalarAllocas, 
+                      ValSSAPointerMap& SSAPointers, BasicBlockBoolMap & visited,
 			BasicBlock::iterator & inst);
 
-  void processLoadInst(LoadInst * loadInst, ValMemAllocaMap & MemAllocas, 
-                      ValMemPointerMap& MemPointers , BasicBlockBoolMap & visited,
+  void processLoadInst(LoadInst * loadInst, ValScalarAllocaMap & ScalarAllocas, 
+                      ValSSAPointerMap& SSAPointers, BasicBlockBoolMap & visited,
       BasicBlock::iterator & inst);
 
-  void processGEPInst(GetElementPtrInst * GEPInst, ValMemAllocaMap & MemAllocas, 
-		     ValMemPointerMap& MemPointers , BasicBlockBoolMap & visited,
+  void processGEPInst(GetElementPtrInst * GEPInst, ValScalarAllocaMap & ScalarAllocas, 
+		     ValSSAPointerMap& SSAPointers, BasicBlockBoolMap & visited,
 		      BasicBlock::iterator & inst);
 
-  void processCallInst(CallInst * callInst, ValMemAllocaMap & MemAllocas, 
-	      	      ValMemPointerMap& MemPointers , BasicBlockBoolMap & visited,
+  void processCallInst(CallInst * callInst, ValScalarAllocaMap & ScalarAllocas, 
+	      	      ValSSAPointerMap& SSAPointers, BasicBlockBoolMap & visited,
 		       BasicBlock::iterator & inst);
 
-  void processBranchInst(BranchInst * branchInst, ValMemAllocaMap & MemAllocas, 
-		        ValMemPointerMap& MemPointers , BasicBlockBoolMap & visited,
+  void processBranchInst(BranchInst * branchInst, ValScalarAllocaMap & ScalarAllocas, 
+		        ValSSAPointerMap& SSAPointers, BasicBlockBoolMap & visited,
 		         BasicBlock::iterator & inst);
 
  
@@ -108,8 +110,8 @@ struct ConstantFolding : public ModulePass {
 
   /* IMP: New policy - visited passed by reference; no basic block visited twice - important to avoid wrongly 
           duplicating contexts e.g function cloning */ 
-  void runOnBB(BasicBlock * BB, ValMemAllocaMap MemAllocas, 
-            ValMemPointerMap MemPointers , BasicBlockBoolMap & visited);
+  void runOnBB(BasicBlock * BB, ValScalarAllocaMap ScalarAllocas, 
+            ValSSAPointerMap SSAPointers, BasicBlockBoolMap & visited);
 
   virtual bool runOnModule(Module & module);
 

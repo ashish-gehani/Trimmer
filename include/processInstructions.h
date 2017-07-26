@@ -50,58 +50,79 @@ void ConstantFolding::markSpecialized(BasicBlock * BB){
   }  
 }
 
-void ConstantFolding::processAllocaInst(AllocaInst * allocaInst, ValMemAllocaMap & MemAllocas, 
-                       ValMemPointerMap & MemPointers, BasicBlockBoolMap & visited,
+void ConstantFolding::processAllocaInst(AllocaInst * allocaInst, ValScalarAllocaMap & ScalarAllocas, 
+                       ValSSAPointerMap & SSAPointers, BasicBlockBoolMap & visited,
                        BasicBlock::iterator & inst){
 
   Instruction * I = &(*inst);
   Type * allocatedType = allocaInst->getAllocatedType();
   // Only considering allocas of char arrays e.g char buffer[100]       
-  if(allocatedType->isArrayTy() || isa<StructType>(allocatedType)) {
-    MemPointer* mptr = new MemPointer(allocatedType);
-    MemPointers[I] = mptr;
-  } else
-      errs() << "note: Unsupported alloca type " << *allocatedType << "\n";
+  if(allocatedType->getNumContainedTypes())
+    SSAPointers[I] = new SSAPointer(allocatedType);
+  else
+    errs() << "note: Unsupported alloca type " << *allocatedType << "\n";
 
   inst++; // Point to next instruction in BB
 }
 
-void ConstantFolding::processMallocInst(CallInst * mallocInst, ValMemAllocaMap & MemAllocas, 
-                       ValMemPointerMap & MemPointers, BasicBlockBoolMap & visited,
-                       BasicBlock::iterator & inst) {
+void ConstantFolding::processMallocInst(CallInst * mallocInst, Instruction* I, 
+                       ValSSAPointerMap & SSAPointers) {
+
+  assert(isa<PointerType>(I->getType()) && 
+    "malloc called for non pointer Instruction");
+  
   ConstantInt* sizeVal = dyn_cast<ConstantInt>(mallocInst->getArgOperand(0));
+  
   if(!sizeVal)
     return;
 
   int totalSize = sizeVal->getZExtValue();
-  for (auto& U : mallocInst->uses()) {
-    Instruction* user = dyn_cast<Instruction>(U.getUser());
-    if(isa<BitCastInst>(user)) {
-      Type* baseType = user->getType()->getContainedType(0);
-      unsigned typeSize = getSizeOf(baseType);
-      unsigned numel = totalSize/typeSize;
-      MemPointer* mptr = new MemPointer(user->getType());
-      for(unsigned i = 0; i < numel; i++)
-        mptr->setOrInsert(i, new MemPointer(baseType));   
-      MemPointers[user] = mptr;   
-    }
-  }
+  
+  Type* baseType = I->getType()->getContainedType(0);
+  unsigned typeSize = getSizeOf(baseType);
+  unsigned numel = totalSize/typeSize;
+  SSAPointer* sptr;
+  if(baseType->getNumContainedTypes()) {
+    sptr = new SSAPointer(I->getType());
+    for(unsigned i = 0; i < numel; i++)
+      sptr->basePointer->setOrInsert(i, new AggregateAlloca(baseType));
+  } else {
+    Type * arType = ArrayType::get(baseType, numel);
+    sptr = new SSAPointer(arType); 
+    sptr->basePointer->Ntype = scalarPtrType;
+  }   
+  SSAPointers[I] = sptr;     
 }
 
-void ConstantFolding::processMemcpyInst(MemCpyInst * memcpyInst, ValMemAllocaMap & MemAllocas, 
-                       ValMemPointerMap & MemPointers, BasicBlockBoolMap & visited,
+void ConstantFolding::processBitCastInst(BitCastInst * bitcastInst, 
+                        ValScalarAllocaMap & ScalarAllocas, ValSSAPointerMap & SSAPointers, 
+                       BasicBlockBoolMap & visited, BasicBlock::iterator & inst) {
+
+  Value* first = bitcastInst->getOperand(0);
+  if(Instruction* firstI = dyn_cast<Instruction>(first))
+    if(CallInst* ci = dyn_cast<CallInst>(firstI)) 
+      if(ci->getCalledFunction()->getName().str() == "malloc") {
+        processMallocInst(ci, bitcastInst, SSAPointers);
+        inst++;
+        return;
+      }
+}
+
+void ConstantFolding::processMemcpyInst(MemCpyInst * memcpyInst, ValScalarAllocaMap & ScalarAllocas, 
+                       ValSSAPointerMap & SSAPointers, BasicBlockBoolMap & visited,
                        BasicBlock::iterator & inst) {
 
   Value * bufferPtr = memcpyInst->getOperand(0);
-  MemPointer * basePointer;
-  if(MemPointers.find(bufferPtr) == MemPointers.end()){
+  SSAPointer * sptr;
+  if(SSAPointers.find(bufferPtr) == SSAPointers.end()){
     inst++;
     return;
   }
   else
-    basePointer = MemPointers[bufferPtr];
-  int offset = basePointer->getPosition();
-  MemAlloca* alloca = basePointer->getAlloca();
+    sptr = SSAPointers[bufferPtr];
+  AggregateAlloca * basePointer = sptr->basePointer;
+  int offset = sptr->position;
+  ScalarAlloca * alloca = basePointer->getAlloca();
 
   char * sourceBuffer = (char*) alloca->data;
   sourceBuffer += offset;
@@ -127,29 +148,29 @@ void ConstantFolding::processMemcpyInst(MemCpyInst * memcpyInst, ValMemAllocaMap
 }
 
 
-void ConstantFolding::processStoreInst(StoreInst * storeInst, ValMemAllocaMap & MemAllocas, 
-                       ValMemPointerMap & MemPointers, BasicBlockBoolMap & visited,
+void ConstantFolding::processStoreInst(StoreInst * storeInst, ValScalarAllocaMap & ScalarAllocas, 
+                       ValSSAPointerMap & SSAPointers, BasicBlockBoolMap & visited,
                        BasicBlock::iterator & inst) {
-
-
+  Value* storeOp = storeInst->getOperand(0);
   Value * ptr = storeInst->getOperand(1);
-  MemPointer * basePointer;
+  SSAPointer * sptr;
   // Search for the pointer in map of constant pointers - pointers with constant offsets
-  if(MemPointers.find(ptr) == MemPointers.end()) {
+  if(SSAPointers.find(ptr) == SSAPointers.end()) {
+    debug(Abubakar) << "storeInst : not found in map\n";
     inst++;
     return;
   }
   else
-    basePointer = MemPointers[ptr];
-
+    sptr = SSAPointers[ptr];
+  AggregateAlloca * basePointer = sptr->basePointer;
   if(basePointer->isNodeTypeOf(ptrType)) {
-    ptr = storeInst->getOperand(0);
-    if(MemPointers.find(ptr) != MemPointers.end())
-      basePointer->setOrInsert(0, MemPointers[ptr]);
-  } else if(basePointer->isNodeTypeOf(scalarType)) {
-    MemAlloca* alloca = basePointer->getAlloca();
+    if(SSAPointers.find(ptr) != SSAPointers.end()) {
+      *basePointer = *SSAPointers[storeOp]->basePointer;
+    }
+  } else if(basePointer->isNodeTypeOf(scalarType) || basePointer->isNodeTypeOf(scalarPtrType)) {
+    ScalarAlloca * alloca = basePointer->getAlloca();
     if(!alloca->isConstant()) {
-      debug(Hashim) << ".. Skipping non constant alloca string ... \n";
+      debug(Abubakar) << ".. Skipping non constant alloca string ... \n";
       inst++;
       return;
     }        
@@ -158,49 +179,52 @@ void ConstantFolding::processStoreInst(StoreInst * storeInst, ValMemAllocaMap & 
     if(ConstantInt * constOp = dyn_cast<ConstantInt>(storeOperand)){
       constantValue = constOp->getZExtValue();
     } else {
-      debug(Hashim) << "--- Marking alloca as non-const \n";
+      debug(Abubakar) << "--- Marking alloca as non-const \n";
       alloca->setConstant(false);
       inst++;
       return;
     }
-    int offset = basePointer->getPosition();
+    int offset = sptr->position;
     alloca->storeConstVal(constantValue, offset);
     alloca->setInit(offset, true);
   }
   inst++; // Point to next instruction in BB 
 }
 
-void ConstantFolding::processLoadInst(LoadInst * loadInst, ValMemAllocaMap & MemAllocas, 
-              ValMemPointerMap & MemPointers, BasicBlockBoolMap & visited, 
+void ConstantFolding::processLoadInst(LoadInst * loadInst, ValScalarAllocaMap & ScalarAllocas, 
+              ValSSAPointerMap & SSAPointers, BasicBlockBoolMap & visited, 
               BasicBlock::iterator & inst) {
   Value * ptr = loadInst->getOperand(0);
-  MemPointer * basePointer;
+  SSAPointer * sptr;
   // Search for the pointer in map of constant pointers - pointers with constant offsets
-  if(MemPointers.find(ptr) == MemPointers.end()) {
+  if(SSAPointers.find(ptr) == SSAPointers.end()) {
+    debug(Abubakar) << "loadInst : not found in map\n";
     inst++;
     return;
   }
   else
-    basePointer = MemPointers[ptr];
-  if(basePointer->isNodeTypeOf(ptrType)) {
-    MemPointer* underlying = basePointer->getContained(0);
-    if(underlying->isNodeTypeOf(ptrType) && underlying->isNullPointer()) {
+    sptr = SSAPointers[ptr];
+  AggregateAlloca * basePointer = sptr->basePointer;
+  if(basePointer->isNodeTypeOf(scalarPtrType) && isa<PointerType>(loadInst->getType()))
+      SSAPointers[loadInst] = new SSAPointer(basePointer);
+  else if(basePointer->isNodeTypeOf(ptrType)) {
+    if(basePointer->isNodeTypeOf(ptrType) && basePointer->isNullPointer()) {
       assert(isa<PointerType>(loadInst->getType()) && 
         "loadInst : NodeType ptrType and loadinst not pointerType");
-      PointerType* loadedType = dyn_cast<PointerType>(loadInst->getType());
-      ConstantPointerNull* nptr = ConstantPointerNull::get(loadedType);
+      PointerType * loadedType = dyn_cast<PointerType>(loadInst->getType());
+      ConstantPointerNull * nptr = ConstantPointerNull::get(loadedType);
       loadInst->replaceAllUsesWith(nptr);
       debug(Abubakar) << "null pointer\n";
     } else
-      MemPointers[loadInst] = underlying;
-  } else if(basePointer->isNodeTypeOf(scalarType)) {
-    MemAlloca* alloca = basePointer->getAlloca();
+      SSAPointers[loadInst] = new SSAPointer(basePointer->getContained(0));
+  } else if(basePointer->isNodeTypeOf(scalarType) || basePointer->isNodeTypeOf(scalarPtrType)) {
+    ScalarAlloca * alloca = basePointer->getAlloca();
     if(!alloca->isConstant()){
       debug(Abubakar) << ".. Skipping non constant alloca string ... \n";
       inst++;
       return;
     }        
-    int offset = basePointer->getPosition(); 
+    int offset = sptr->position; 
     if(!alloca->getInit(offset)) {
       debug(Abubakar) << ".. LoadInst : value not initialized ... \n";
       inst++;
@@ -211,20 +235,22 @@ void ConstantFolding::processLoadInst(LoadInst * loadInst, ValMemAllocaMap & Mem
   inst++; // Point to next instruction in BB 
 }
 
-void ConstantFolding::processGEPInst(GetElementPtrInst * GEPInst, ValMemAllocaMap & MemAllocas, 
-		    ValMemPointerMap & MemPointers, BasicBlockBoolMap & visited,
+void ConstantFolding::processGEPInst(GetElementPtrInst * GEPInst, ValScalarAllocaMap & ScalarAllocas, 
+		    ValSSAPointerMap & SSAPointers, BasicBlockBoolMap & visited,
 		    BasicBlock::iterator & inst){
 
-  Instruction * I = &(*inst);
+   Instruction * I = &(*inst);
   Value * ptr = GEPInst->getOperand(0);
-  MemPointer * basePointer;
-  if(MemPointers.find(ptr) == MemPointers.end()){
+  SSAPointer * sptr;
+  if(SSAPointers.find(ptr) == SSAPointers.end()) {
+    debug(Abubakar) << "gepInst : not found in map\n";
     inst++; 
     return;
   }
   else
-    basePointer = MemPointers[ptr];
-  MemAlloca* alloca = basePointer->getAlloca();
+    sptr = SSAPointers[ptr];
+  AggregateAlloca * basePointer = sptr->basePointer;
+  ScalarAlloca * alloca = basePointer->getAlloca();
   /*string-struct-change*/
   // TODO: more comprehensive test for '0' indices into string      
   if(alloca && !alloca->isConstant()) {
@@ -246,44 +272,25 @@ void ConstantFolding::processGEPInst(GetElementPtrInst * GEPInst, ValMemAllocaMa
       return;
     }
   } 
-  if(basePointer->isNodeTypeOf(scalarType))
-    handleBaseDataTypeGEP(indices, basePointer, I, MemPointers);
+  if(basePointer->isNodeTypeOf(scalarType) || basePointer->isNodeTypeOf(scalarPtrType))
+    handleBaseDataTypeGEP(indices, sptr, I, SSAPointers);
   else {
-      /*unsigned startInd = 1;
-      if(isa<PointerType>(basePointer->getType()))
-        startInd = 0;
-      MemPointer* mptr = basePointer;
-      for(unsigned i = startInd; i < indices.size(); i++) {
-        mptr = mptr->getContained(indices[i]);        
-        if(mptr->isNodeTypeOf(scalarType)) { // ArrayType
-          vector<unsigned> bdVec(indices.begin() + i + 1, indices.end());
-          handleBaseDataTypeGEP(bdVec, mptr, I, MemPointers);          
-          inst++;       
-          return; 
-        }
-      }*/
-      if(indices.size() == 1) {
-        MemPointer * mptr = new MemPointer(*basePointer);
-        mptr->incrementPosition(indices[0]);
-        MemPointers[I] = mptr;        
-      } else if(isa<PointerType>(basePointer->getType())) {
-        MemPointer* mptr = basePointer->getContained(indices[0])->getContained(indices[1]);
-        MemPointers[I] = new MemPointer(*mptr);
-      } else
-        MemPointers[I] = new MemPointer(*basePointer->getContained(indices[1]));      
+      if(basePointer->isNodeTypeOf(ptrType) && indices.size() == 2)
+        basePointer = basePointer->getContained(indices[0]);
+      SSAPointers[I] = new SSAPointer(basePointer->getContained(indices[indices.size() - 1]));      
   }
   inst++; // Point to next instruction in BB
 }
 
 
-void ConstantFolding::processCallInst(CallInst * callInst, ValMemAllocaMap & MemAllocas, 
-		     ValMemPointerMap & MemPointers, BasicBlockBoolMap & visited,
+void ConstantFolding::processCallInst(CallInst * callInst, ValScalarAllocaMap & ScalarAllocas, 
+		     ValSSAPointerMap & SSAPointers, BasicBlockBoolMap & visited,
 		     BasicBlock::iterator & inst) {
   Instruction * I = &(*inst); 
   Function * calledFunction = callInst->getCalledFunction();  
   // Indirect function calls need special handling
   if(calledFunction == NULL){
-    handleIndirectCall(callInst, MemPointers);
+    handleIndirectCall(callInst, SSAPointers);
     inst++;
     return;
   }   
@@ -305,19 +312,20 @@ void ConstantFolding::processCallInst(CallInst * callInst, ValMemAllocaMap & Mem
     // FIXIT: Specializing the call per argument - INCORRECT/BUG
     for(unsigned int index = 0; index < callInst->getNumArgOperands(); index++){
       Value * pointerArg = callInst->getArgOperand(index);
-      MemPointer * basePointer;
+      SSAPointer * sptr;
 
-      if(MemPointers.find(pointerArg) == MemPointers.end()){ 
+      if(SSAPointers.find(pointerArg) == SSAPointers.end()){ 
         continue;
       } 
       else
-	      basePointer = MemPointers[pointerArg];
-      MemAlloca* alloca = basePointer->getAlloca();
+	      sptr = SSAPointers[pointerArg];
+      AggregateAlloca * basePointer = sptr->basePointer;
+      ScalarAlloca * alloca = basePointer->getAlloca();
       if(!alloca->isConstant()){
       	continue;
       }
       char * baseStringData = (char*) alloca->data;
-      int offset = basePointer->getPosition();
+      int offset = sptr->position;
 	      
       char * newStr = baseStringData + offset;
       IntegerType * intTy = IntegerType::get(M->getContext(), 64);
@@ -394,7 +402,7 @@ void ConstantFolding::processCallInst(CallInst * callInst, ValMemAllocaMap & Mem
     inst++;
     return;  
   } else if(calledFunction->getName().str() == "malloc") {
-    processMallocInst(callInst, MemAllocas, MemPointers, visited, inst);
+    processMallocInst(callInst, callInst, SSAPointers);
   }  
   /* NEW: Propagating constants interprocedurally */ 
   else if(!calledFunction->isDeclaration()) {
@@ -404,7 +412,7 @@ void ConstantFolding::processCallInst(CallInst * callInst, ValMemAllocaMap & Mem
     // which were previously bieng tracked as non constant
     // It is the same code which was used for isDeclaration                     
     if(!satisfyConds(calledFunction)) {
-      markArgsAsNonConst(callInst, MemPointers);
+      markArgsAsNonConst(callInst, SSAPointers);
       inst++;
       return;
     }
@@ -424,12 +432,11 @@ void ConstantFolding::processCallInst(CallInst * callInst, ValMemAllocaMap & Mem
       }
   
       Value * pointerArg = callInst->getOperand(index);
-      MemPointer * basePointer;
-      if(MemPointers.find(pointerArg) == MemPointers.end())
+      SSAPointer * sptr;
+      if(SSAPointers.find(pointerArg) == SSAPointers.end())
 	      continue;
       else
-	      basePointer = MemPointers[pointerArg];
-                 
+	      sptr = SSAPointers[pointerArg];
       // TODO-FIXIT: Only clone if function is called only ONCE 
       // Cloning routines before attempting constant propagation
       if(!clonedFlag) { //IMP: prevent cloning function once per argument
@@ -453,9 +460,9 @@ void ConstantFolding::processCallInst(CallInst * callInst, ValMemAllocaMap & Mem
       	clonedFlag = true; //IMP: prevent cloning function once per argument      
       }
       /*string-struct-change*/
-      MemPointer * mptr = basePointer;
+      SSAPointer * nsptr = new SSAPointer(sptr);
       Value * pointerVal = getArg(clonedFunc, index);
-      MemPointers[pointerVal] = mptr;        
+      SSAPointers[pointerVal] = nsptr;        
       debug(Hashim) << " POINTER VAL = " << *pointerVal << "\n";
           //FIXIT: Reconsider the below choices
 
@@ -464,7 +471,7 @@ void ConstantFolding::processCallInst(CallInst * callInst, ValMemAllocaMap & Mem
     }
     
     if(clonedFlag)
-      runOnBB(successor, MemAllocas, MemPointers, visited);
+      runOnBB(successor, ScalarAllocas, SSAPointers, visited);
   }
   //IMP: The following 'default' cause finds and marks any sideeffects of external calls
   else {
@@ -478,7 +485,7 @@ void ConstantFolding::processCallInst(CallInst * callInst, ValMemAllocaMap & Mem
     // Code moved to function defined in utils.cpp
     if(calledFunction->isDeclaration()) {
       debug(Hashim) << "--- Declaration: " << *calledFunction << "\n";
-      markArgsAsNonConst(callInst, MemPointers);
+      markArgsAsNonConst(callInst, SSAPointers);
     }
   }
 
@@ -488,12 +495,12 @@ void ConstantFolding::processCallInst(CallInst * callInst, ValMemAllocaMap & Mem
 
 
 
-void ConstantFolding::processBranchInst(BranchInst * branchInst, ValMemAllocaMap & MemAllocas, 
-		     ValMemPointerMap & MemPointers, BasicBlockBoolMap & visited,
+void ConstantFolding::processBranchInst(BranchInst * branchInst, ValScalarAllocaMap & ScalarAllocas, 
+		     ValSSAPointerMap & SSAPointers, BasicBlockBoolMap & visited,
 		     BasicBlock::iterator & inst) {
 
   BasicBlock* BB = branchInst->getParent();
-  blockContexts[BB] = MemAllocas;
+  blockContexts[BB] = ScalarAllocas;
   for(unsigned int index = 0; index < branchInst->getNumSuccessors(); index++){
 
     BasicBlock * successor = branchInst->getSuccessor(index);
@@ -512,16 +519,16 @@ void ConstantFolding::processBranchInst(BranchInst * branchInst, ValMemAllocaMap
     if(successor->getUniquePredecessor()) {
       visited[successor] = true; 
       debug(Hashim) << "Successor has a single predecessor \n";
-      runOnBB(successor, MemAllocas, MemPointers, visited);
+      runOnBB(successor, ScalarAllocas, SSAPointers, visited);
     }    
     else {
       debug(Hashim) << "Block has multiple predecessors \n";
       // Merging contexts
       // TODO: more testing required            
-      ValMemAllocaMap MemAllocas2;
-      mergeContext(successor, blockContexts, MemAllocas2, MemPointers);
+      ValScalarAllocaMap ScalarAllocas2;
+      mergeContext(successor, blockContexts, ScalarAllocas2, SSAPointers);
       visited[successor] = true;  //FIXIT: Clear your head on visiting BBs 
-      runOnBB(successor, MemAllocas2, MemPointers, visited);            
+      runOnBB(successor, ScalarAllocas2, SSAPointers, visited);            
     } 
   }         
   inst++;

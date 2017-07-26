@@ -37,21 +37,29 @@ def setNull():
 		return False
 
 def setExtern():
-	val = genRand(8 * numTests)
-	if(val == 0):
+	val = genRand(4 * numTests)
+	if(val == 1):
 		return True
 	else:
 		return False
 
 def makeMalloc(arrInd):
-	return tab + 'obj[' + str(arrInd) + '] = malloc(sizeof(struct HighType));\n'
+	mStr = tab + 'obj[' + str(arrInd) + '] = malloc(sizeof(struct HighType));\n'
+	mStr += tab + 'obj[' + str(arrInd) + ']->lts = malloc(sizeof(struct LowTypeString));\n'
+	mStr += tab + 'obj[' + str(arrInd) + ']->lti = malloc(sizeof(struct LowTypeInt));\n'
+	mStr += tab + 'obj[' + str(arrInd) + ']->lts->x = malloc(1000 * sizeof(char));\n'
+	mStr += tab + 'obj[' + str(arrInd) + ']->lts->y = malloc(1000 * sizeof(char));\n'
+	mStr += tab + 'obj[' + str(arrInd) + ']->lti->x = malloc(1000 * sizeof(int));\n'
+	mStr += tab + 'obj[' + str(arrInd) + ']->lti->y = malloc(1000 * sizeof(int));\n'
+
+	return mStr
 
 def makeExtern(arrInd):
 	return tab + 'externalFunc(obj[' + str(arrInd) + ']);\n'
 
 def makeAssign(arrInd, hvar, lvar, index, val):
 	idxStr = '[' + str(index) + ']'
-	return tab + 'obj[' + str(arrInd) + ']->' + hvar + '.' + lvar + idxStr + ' = ' + str(val) + ';\n'	
+	return tab + 'obj[' + str(arrInd) + ']->' + hvar + '->' + lvar + idxStr + ' = ' + str(val) + ';\n'	
 
 def makeMemCpy(arrInd, hvar, lvar, index):
 	idxStr = '[' + str(index) + ']'
@@ -63,16 +71,16 @@ def makeMemCpy(arrInd, hvar, lvar, index):
 		val += chr(alph)
 		ls.append(alph)
 	tup = (index, size)
-	Str = tab + 'memcpy(&obj[' + str(arrInd) + ']->' + hvar + '.' + lvar + idxStr + ', "' + val + '", ' + str(size) + ');\n'
+	Str = tab + 'memcpy(&obj[' + str(arrInd) + ']->' + hvar + '->' + lvar + idxStr + ', "' + val + '", ' + str(size) + ');\n'
 	return (tup, Str, ls)
 
 def makeCondAssign(arrInd, hvar, lvar, index, val):
 	idxStr = '[' + str(index) + ']'
-	return tab + 'obj[' + str(arrInd) + ']->' + hvar + '.' + lvar + idxStr + ' == ' + str(val)
+	return tab + 'obj[' + str(arrInd) + ']->' + hvar + '->' + lvar + idxStr + ' == ' + str(val)
 
 def makeStrcmpCond(arrInd, hvar, lvar, index, val):
 	idxStr = '[' + str(index) + ']'
-	return tab + '!strcmp(&obj[' + str(arrInd) + ']->' + hvar + '.' + lvar + idxStr + ', "' + val + '")'
+	return tab + '!strcmp(&obj[' + str(arrInd) + ']->' + hvar + '->' + lvar + idxStr + ', "' + val + '")'
 
 def makeNullCond(arrInd, sign):
 	return tab + 'obj[' + str(arrInd) + '] ' + sign + ' NULL'
@@ -151,14 +159,16 @@ def generateCondFuncs(structArr):
 	bpConds = ""
 	bnpConds = ""
 	for obj in structArr:
-		bpConds += obj.Conds[0] + ' &&\n'
-		
+		startInd = 0
+		if(obj.isNull):
+			bpConds += obj.Conds[0] + ' &&\n'
+			startInd = 1		
 		if(len(obj.Conds) > 1):
 			if(obj.Specialize):
-				bpConds += ' &&\n'.join(obj.Conds[1:]) + ' &&\n'
+				bpConds += ' &&\n'.join(obj.Conds[startInd:]) + ' &&\n'
 
 			else: 
-				bnpConds += ' ||\n'.join(obj.Conds[1:]) + ' ||\n'
+				bnpConds += ' ||\n'.join(obj.Conds[startInd:]) + ' ||\n'
 		
 	bpStr = 'void branchPruned(struct HighType** obj) {\n'
 	bnpStr = 'void branchNotPruned(struct HighType** obj) {\n'
@@ -217,16 +227,16 @@ libStr = '''
 
 structTypeStr = ''' 
 struct LowTypeInt {
-	int x[1000];
-	int y[1000];
+	int * x;
+	int * y;
 };
 struct LowTypeString {
-	char x[1000];
-	char y[1000];
+	char * x;
+	char * y;
 };
 struct HighType {
-	struct LowTypeString lts;
-	struct LowTypeInt lti;
+	struct LowTypeString * lts;
+	struct LowTypeInt * lti;
 };
 '''
 externStr = '''

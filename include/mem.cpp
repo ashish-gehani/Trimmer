@@ -3,7 +3,7 @@
 using namespace llvm;
 using namespace std;
 
-void MemAlloca::createData(Type* ty) {
+void ScalarAlloca::createData(Type* ty) {
 	if(ty->isIntegerTy(1)) {
 		Btype = boolType;
 		data = new bool[size];
@@ -23,7 +23,7 @@ void MemAlloca::createData(Type* ty) {
 	}
 }
 
-Value* MemAlloca::createConstVal(int offset) {
+Value* ScalarAlloca::createConstVal(int offset) {
   if(isa<ArrayType>(allocatedType)) // others not possible atm
     allocatedType = allocatedType->getContainedType(0);
   Value* constVal;
@@ -45,7 +45,7 @@ Value* MemAlloca::createConstVal(int offset) {
   return constVal;
 }
 
-void MemAlloca::storeConstVal(int ConstVal, int offset) {
+void ScalarAlloca::storeConstVal(int ConstVal, int offset) {
   if(Btype == boolType) {
     bool storeVal = (bool) ConstVal;
     bool * storeData = (bool*) data;
@@ -64,7 +64,7 @@ void MemAlloca::storeConstVal(int ConstVal, int offset) {
     storeData[offset] = storeVal;
   }
 }
-MemAlloca::MemAlloca(Type* ty) {
+ScalarAlloca::ScalarAlloca(Type* ty) {
 	constant = true;
 	size = 1;
 	if(ArrayType * arType = dyn_cast<ArrayType>(ty)) {
@@ -77,8 +77,7 @@ MemAlloca::MemAlloca(Type* ty) {
 	allocatedType = ty;
 }
 
-MemPointer::MemPointer(Type* ty) {
-	position = 0;
+AggregateAlloca::AggregateAlloca(Type* ty) {
 	allocatedType = ty;
 	containedSize = 0;
 	totalSize = 0;
@@ -88,7 +87,7 @@ MemPointer::MemPointer(Type* ty) {
 		unsigned num = st->getNumElements();
 		initContained(num);
 		for(unsigned i = 0; i < num; i++)
-			insert(new MemPointer(st->getElementType(i)));
+			insert(new AggregateAlloca(st->getElementType(i)));
 	} else if(isa<PointerType>(ty))
 		Ntype = ptrType;
 	else if(isa<ArrayType>(ty) && ty->getContainedType(0)->getNumContainedTypes()) { 
@@ -99,19 +98,9 @@ MemPointer::MemPointer(Type* ty) {
 		initContained(num);		
 		Type* contTy = ty->getContainedType(0);
 		for(unsigned i = 0; i < num; i++)
-			insert(new MemPointer(contTy));
+			insert(new AggregateAlloca(contTy));
 	} else {
 		Ntype = scalarType;
-		alloca = new MemAlloca(ty);
+		alloca = new ScalarAlloca(ty);
 	}
-}
-
-MemPointer::MemPointer(const MemPointer& mptr) {
-	contained = mptr.contained;
-	Ntype = mptr.Ntype;
-	alloca = mptr.alloca;
-	position = mptr.position;
-	allocatedType = mptr.allocatedType;
-	containedSize = mptr.containedSize;
-	totalSize = mptr.totalSize;
 }

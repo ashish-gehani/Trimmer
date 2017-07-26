@@ -51,6 +51,6 @@ struct FuncInfo {
   bool calledInLoop, AddrTaken;
 };
 
-typedef map<Value*, MemPointer*> ValMemPointerMap;
-typedef map<Value*, MemAlloca*> ValMemAllocaMap;
+typedef map<Value*, SSAPointer*> ValSSAPointerMap;
+typedef map<Value*, ScalarAlloca*> ValScalarAllocaMap;
 typedef map<BasicBlock*, bool> BasicBlockBoolMap;
