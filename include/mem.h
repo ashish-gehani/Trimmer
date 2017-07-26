@@ -42,7 +42,7 @@ public:
     return this->initialized[index];    
   }
   void fillInit(int offset, int length, bool val) {
-    assert(offset < size && offset + length < size && "trying to initialize invalid indices");
+    assert(offset < size && offset + length <= size && "trying to initialize invalid indices");
     bool* fillBuff = this->initialized + offset;
     fill(fillBuff, fillBuff + length, true);
   }

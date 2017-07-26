@@ -10,8 +10,8 @@ void ScalarAlloca::createData(Type* ty) {
 	}
 	if(ty->isIntegerTy(8)) {
 		Btype = charType;
-		data = new char[size];
-		memset(data, '\0', size);
+		data = new char[size + 1];
+		memset(data, '\0', size + 1);
  	}
 	if(ty->isIntegerTy(32)) {
 		Btype = intType;

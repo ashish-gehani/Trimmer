@@ -214,7 +214,7 @@ void ConstantFolding::processLoadInst(LoadInst * loadInst, ValScalarAllocaMap & 
       PointerType * loadedType = dyn_cast<PointerType>(loadInst->getType());
       ConstantPointerNull * nptr = ConstantPointerNull::get(loadedType);
       loadInst->replaceAllUsesWith(nptr);
-      debug(Abubakar) << "null pointer\n";
+      errs() << "null pointer\n";
     } else
       SSAPointers[loadInst] = new SSAPointer(basePointer->getContained(0));
   } else if(basePointer->isNodeTypeOf(scalarType) || basePointer->isNodeTypeOf(scalarPtrType)) {
@@ -328,6 +328,7 @@ void ConstantFolding::processCallInst(CallInst * callInst, ValScalarAllocaMap & 
       int offset = sptr->position;
 	      
       char * newStr = baseStringData + offset;
+      errs() << newStr << "\n";
       IntegerType * intTy = IntegerType::get(M->getContext(), 64);
       ConstantInt * index1 = ConstantInt::get(intTy, 0);
       vector<Value *> indxList;
