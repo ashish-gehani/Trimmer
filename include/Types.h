@@ -51,6 +51,14 @@ struct FuncInfo {
   bool calledInLoop, AddrTaken;
 };
 
-typedef map<Value*, SSAPointer*> ValSSAPointerMap;
-typedef map<Value*, ScalarAlloca*> ValScalarAllocaMap;
+typedef map<Value *, SSAPointer *> ValSSAPointerMap;
+typedef map<Value *, ScalarAlloca *> ValScalarAllocaMap;
+typedef map<Value *, AggregateAlloca *> ValAggrAllocaMap;
 typedef map<BasicBlock*, bool> BasicBlockBoolMap;
+struct ContextInfo {
+  ValSSAPointerMap SSAPointers;
+  set<AggregateAlloca *> AggregateAllocas;
+  ValScalarAllocaMap ScalarAllocas;
+  vector<Value *> InstOrder;
+};
+typedef map<BasicBlock *, ContextInfo *> BasicBlockContInfoMap;

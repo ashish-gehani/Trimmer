@@ -171,11 +171,11 @@ Value * getArg(Function * func, int index){
 }
 
 // FIXIT: Allow dominated predecessors to not have executed prior to current basic block
-bool predecessorsVisited(BasicBlock * BB, map<BasicBlock*, ValScalarAllocaMap> blockContexts){
+bool predecessorsVisited(BasicBlock * BB, BasicBlockBoolMap visited){
    
   for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++){
     BasicBlock * predecessor = *it;
-    if(blockContexts.find(predecessor) == blockContexts.end()){
+    if(visited.find(predecessor) == visited.end()){
       debug(Hashim) << "NOTE: predecessor not visited \n";
       return false;
     }
@@ -185,57 +185,37 @@ bool predecessorsVisited(BasicBlock * BB, map<BasicBlock*, ValScalarAllocaMap> b
   return true;
 }
 
-
 //TODO: Check context properly including comparing the alloca CONTENTS
 //TODO: Fill the stringPointers and ScalarAllocas correctly - be sound even if imprecise 
 //TODO: Insert call to merge context and test with examples
-bool mergeContext(BasicBlock * BB, map<BasicBlock*, ValScalarAllocaMap> blockContexts,
-		  ValScalarAllocaMap & ScalarAllocas, ValSSAPointerMap & SSAPointers) {
+bool mergeContext(BasicBlock * BB, BasicBlockContInfoMap BasicBlockContexts, 
+        ContextInfo * newCi) {
 
-  std::vector<ValScalarAllocaMap> predecessorContexts;    
-
+  vector<ContextInfo *> predecessorContexts;    
   for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++){
     BasicBlock * predecessor = *it;
-    if(blockContexts.find(predecessor) == blockContexts.end()){
-      return false;
+    if(BasicBlockContexts.find(predecessor) == BasicBlockContexts.end()){
+      errs() << "basic block context not found\n";
+      exit(0);
     } 
-    predecessorContexts.push_back(blockContexts[predecessor]);
+    predecessorContexts.push_back(BasicBlockContexts[predecessor]);
   }
-
-  debug(Hashim) << "\n Comparing predecessor contexts = " << predecessorContexts.size() << "\n";
-  unsigned int i;
-  ValScalarAllocaMap predContext = predecessorContexts[0];
-   
-  for(auto it = predContext.begin(); 
-      it != predContext.end(); ++it){
-
-    Value * inst = it->first;
-    ScalarAlloca * alloca = it->second;
-    bool equal = true;
-    for(i = 1; i < predecessorContexts.size(); i++){
-      ValScalarAllocaMap predContext2 = predecessorContexts[i];
-      if(predContext2.find(inst) == predContext2.end()){
-      	equal = false;
-      	break;
-      } 
-      else {
-      	ScalarAlloca* alloca1 = predContext[inst];
-      	ScalarAlloca* alloca2 = predContext2[inst];
-      	char* data1 = (char*) alloca1->data;
-      	char* data2 = (char*) alloca2->data;          
-      	if(strcmp(data1, data2) != 0) 
-      	  equal = false;  
-      }      
+  set<AggregateAlloca *> AggrsVisited; 
+  for(auto &ent1 : newCi->SSAPointers) {
+    Value * I = ent1.first;
+    AggregateAlloca * basePointer = ent1.second->basePointer;
+    // check if its parent is null
+    if(newCi->AggregateAllocas.find(basePointer) == newCi->AggregateAllocas.end())
+      continue;
+    if(AggrsVisited.find(basePointer) != AggrsVisited.end())
+      continue;
+    for(unsigned i = 0; i < predecessorContexts.size(); i++) {
+      AggregateAlloca * aa = predecessorContexts[i]->SSAPointers[I]->basePointer;
+      if(!basePointer->equalsTo(aa))
+        basePointer->setConstant(false);
     }
- 
-    // FIXIT: Manage String Pointers as well 
-    if(equal) {
-      ScalarAllocas[inst] = alloca;
-    } else {
-      alloca->setConstant(false); //FIXIT: A little over-conservative. Imagine reverse post order scenarios
-    }               
-  }  
-
+    AggrsVisited.insert(basePointer);
+  }
   return true;
 }
 /*task1*/
@@ -260,20 +240,12 @@ void markArgsAsNonConst(CallInst* callInst, ValSSAPointerMap SSAPointers) {
     } 
     else
       basePointer = SSAPointers[pointerArg]->basePointer;
-
+    // if(basePointer->isNodeTypeOf(ptrType) ||
+    //   basePointer->isNodeTypeOf(scalarPtrType))
+    //   basePointer->setConstantAnc(false);
+    // else
+    basePointer->setConstant(false);
     debug(Hashim) << "Note: Marking allocation as NON-CONSTANT \n";
-    // If the argument does alias a tracked allocation mark it as non-constant
-    vector<AggregateAlloca*> worklist;
-    worklist.push_back(basePointer);
-    while(worklist.size()) {      
-      AggregateAlloca* curr = worklist[0];
-      if(ScalarAlloca* alloca = curr->getAlloca())
-        alloca->setConstant(false);
-      else
-        for(unsigned i = 0; i < curr->getNumContained(); i++)
-          worklist.push_back(curr->getContained(i));   
-      worklist.erase(worklist.begin());
-    }
   }
 }
 
@@ -288,19 +260,12 @@ void handleIndirectCall(CallInst * callInst, ValSSAPointerMap & SSAPointers){
       continue;
     } 
     else
-      basePointer = SSAPointers[pointerArg]->basePointer;               
-    // "conservatively" mark each argument as modified 
-    vector<AggregateAlloca*> worklist;
-    worklist.push_back(basePointer);
-    while(worklist.size()) {      
-      AggregateAlloca* curr = worklist[0];
-      if(ScalarAlloca* alloca = curr->getAlloca())
-        alloca->setConstant(false);
-      else
-        for(unsigned i = 0; i < curr->getNumContained(); i++)
-          worklist.push_back(curr->getContained(i));   
-      worklist.erase(worklist.begin());
-    }
+      basePointer = SSAPointers[pointerArg]->basePointer;  
+    // if(basePointer->isNodeTypeOf(ptrType) ||
+    //   basePointer->isNodeTypeOf(scalarPtrType))
+    //   basePointer->setConstantAnc(false);
+    // else
+    basePointer->setConstant(false);
   }
 }
 
@@ -323,26 +288,73 @@ FuncInfo* initializeFuncInfo(Function* F) {
   return fi;
 }
 
-unsigned getSizeOf(Type* ty) {
-  if(ty->getNumContainedTypes()) {
-    if(ArrayType* arType = dyn_cast<ArrayType>(ty)) {
-      unsigned numel = arType->getNumElements();
-      return numel * getSizeOf(ty->getContainedType(0));
-    } else if(StructType* stType = dyn_cast<StructType>(ty)) {
-      unsigned numel = stType->getNumElements();
-      unsigned size = 0;
-      for(unsigned i = 0; i < numel; i++)
-        size += getSizeOf(stType->getContainedType(i));
-      return size;        
-    } else if(isa<PointerType>(ty))
-      return 8;
-  } else {
-    if(ty->isIntegerTy(8))
-      return 1;
-    else if(ty->isIntegerTy(32))    
-      return 4;
-    else if(ty->isIntegerTy(64))
-      return 8;
+void updateMap(map<AggregateAlloca *, AggregateAlloca *> & oldToNewAggrs, 
+  AggregateAlloca * Old, AggregateAlloca * New) {
+  vector<AggregateAlloca *> OldWorkList;
+  vector<AggregateAlloca *> NewWorkList;
+  OldWorkList.push_back(Old);
+  NewWorkList.push_back(New);
+  while(OldWorkList.size()) {
+    AggregateAlloca * currOld = OldWorkList[0];
+    AggregateAlloca * currNew = NewWorkList[0];
+    oldToNewAggrs[currOld] = currNew;
+    for(unsigned i = 0; i < currOld->getNumContained(); i++) {
+      OldWorkList.push_back(currOld->getContained(i));
+      NewWorkList.push_back(currNew->getContained(i));
+    }
+    OldWorkList.erase(OldWorkList.begin());
+    NewWorkList.erase(NewWorkList.begin());
   }
-  return -1;
+}
+
+void updateMap(map<AggregateAlloca *, unsigned> & AggrMap,
+  AggregateAlloca * aa) {
+  vector<AggregateAlloca *> worklist;
+  worklist.push_back(aa);
+  while(worklist.size()) {
+    AggregateAlloca * worker = worklist[0];
+    AggrMap[worker] = 0;
+    for(unsigned i = 0; i < worker->getNumContained(); i++)
+      worklist.push_back(worker->getContained(i));
+    worklist.erase(worklist.begin());
+  }
+}
+
+void duplicateAllocas(ContextInfo * newCi, ContextInfo * oldCi) {
+  map<AggregateAlloca *, AggregateAlloca *> oldToNewAggrs;
+  for(unsigned i = 0; i < oldCi->InstOrder.size(); i++) {
+    Value * I = oldCi->InstOrder[i];
+    if(oldCi->SSAPointers.find(I) == oldCi->SSAPointers.end())
+      continue;
+    SSAPointer * sptr = oldCi->SSAPointers[I];
+    newCi->InstOrder.push_back(I);
+    if(oldToNewAggrs.find(sptr->basePointer) == oldToNewAggrs.end()) {
+      SSAPointer * nsptr = sptr->createClone();
+      newCi->SSAPointers[I] = nsptr;
+      updateMap(oldToNewAggrs, sptr->basePointer, nsptr->basePointer);
+      oldCi->AggregateAllocas.insert(sptr->basePointer);
+      newCi->AggregateAllocas.insert(nsptr->basePointer);
+    } else {
+      AggregateAlloca * newBasePointer = oldToNewAggrs[sptr->basePointer];
+      SSAPointer * nsptr = new SSAPointer(sptr);
+      nsptr->basePointer = newBasePointer;    
+      newCi->SSAPointers[I] = nsptr; 
+    }
+  }
+}
+
+void freeMap(ValSSAPointerMap SSAPointers) {
+  map<AggregateAlloca *, unsigned> AggrMap;
+  vector<AggregateAlloca *> AggrList;
+  for(auto const &ent1 : SSAPointers) {
+    SSAPointer * sptr = ent1.second;
+    AggregateAlloca * basePointer = sptr->basePointer;
+    if(AggrMap.find(basePointer) == AggrMap.end()) {
+      AggrList.push_back(basePointer);
+      updateMap(AggrMap, basePointer);
+    }
+    delete sptr;
+  }  
+  for(unsigned i = 0; i < AggrList.size(); i++)
+    delete AggrList[i];
 }

@@ -7,8 +7,7 @@
 extern void externalFunc(char * buffer);
 
 
-void branchNotPruned(char * buffer, char * buffer2){
-  
+void branchNotPruned(char * buffer, char * buffer2){  
   if(strcmp(buffer, buffer2) == 0)
     printf("Both strings are equal\n"); 
 }

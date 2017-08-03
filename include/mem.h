@@ -17,15 +17,17 @@ enum NodeType {
   aggrArrType
 };
 
+class AggregateAlloca;
 class ScalarAlloca {
 public:  
   void* data; // even if it is not an array e.g. an int or a char, determined by size
   ScalarAlloca(Type* ty);
-  bool isConstant() {
-    return this->constant;
-  }
-  void setConstant(bool val) {
-    this->constant = val;
+  ScalarAlloca(BaseType bt, Type * ty);
+  ~ScalarAlloca();
+  ScalarAlloca * createClone();
+  bool equalsTo(ScalarAlloca * sa);
+  void setParent(AggregateAlloca * aa) {
+    this->parent = aa;
   }
   bool isBaseTypeOf(BaseType Btype) {
     return this->Btype == Btype;
@@ -49,24 +51,50 @@ public:
   Type* getType() {
     return this->allocatedType;
   }  
+  AggregateAlloca * getParent() {
+    return parent;
+  }  
   void createData(Type* ty);
+  void copyData(void * data, bool * initialized, int size);
   Value* createConstVal(int offset);
   void storeConstVal(int ConstVal, int offset);
-private:
-  bool* initialized;
   BaseType Btype;
+private:
+  bool * initialized;
   int size;
-  bool constant;
-  Type* allocatedType;
+  Type * allocatedType;
+  AggregateAlloca * parent;
 };
 
 class AggregateAlloca {
 public:
   AggregateAlloca(Type* ty);
-
+  AggregateAlloca(Type * ty, unsigned totalSize, bool constant, 
+    NodeType nty);   
+  ~AggregateAlloca(); 
+  AggregateAlloca * createClone();
+  bool equalsTo(AggregateAlloca * aa);  
+  void setParent(AggregateAlloca * aa, unsigned offset) {
+    this->parent = aa;
+    this->OffSetInParent = offset;
+  }
   unsigned getNumContained() {
     return this->containedSize;
   }
+  bool isConstant() {
+    bool above = true;
+    if(this->parent)
+      above = this->parent->isConstant();
+    return this->constant && above;
+  }
+  void setConstant(bool val) {
+    this->constant = val;
+  }
+  void setConstantAnc(bool val) {
+    this->setConstant(val);
+    if(this->parent)
+      this->parent->setConstantAnc(val);
+  }  
   AggregateAlloca* getContained(unsigned index) {
     assert(index < this->containedSize && "tried to access invalid index");
     return this->contained[index];
@@ -81,6 +109,7 @@ public:
       this->contained[index] = aa;
     else
       this->insert(aa);
+    aa->setParent(this, index);
   }
   Type* getType() {
     return this->allocatedType;
@@ -96,6 +125,15 @@ public:
       "isNullPointer : pointer operation on non-pointer Node");
     return !this->containedSize;
   } 
+  AggregateAlloca * getParent() {
+    return parent;
+  }
+  void setAlloca(ScalarAlloca * sa) {
+    this->alloca = sa;
+  }
+  unsigned getOffSetInParent() {
+    return OffSetInParent;
+  }
   NodeType Ntype;
 private:
   void initContained(unsigned size) {
@@ -123,10 +161,13 @@ private:
     this->containedSize++;    
   }
   ScalarAlloca* alloca;
-  AggregateAlloca** contained; 
+  AggregateAlloca** contained;
+  AggregateAlloca* parent; 
   unsigned containedSize;
   unsigned totalSize;
   Type* allocatedType;
+  bool constant;
+  unsigned OffSetInParent;
 };
 
 struct SSAPointer {
@@ -147,5 +188,10 @@ struct SSAPointer {
     this->basePointer = aa;
     this->position = 0;
     this->allocatedType = aa->getType();
+  }
+  SSAPointer * createClone() {
+    SSAPointer * sptr = new SSAPointer(this);
+    sptr->basePointer = basePointer->createClone();
+    return sptr;
   }
 };
