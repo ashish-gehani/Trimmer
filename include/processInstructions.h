@@ -39,6 +39,12 @@
 using namespace llvm;
 using namespace std;     
 
+double total = 0;
+double allocaT = 0;
+double mallocT = 0;
+double callT = 0;
+double branchT = 0;
+
 /* This routine marks a cloned call context as specialized */
 /* TODO-IMP: Mark specialized whenever any specialization occurs */
 void ConstantFolding::markSpecialized(BasicBlock * BB){
@@ -57,15 +63,16 @@ void ConstantFolding::processAllocaInst(AllocaInst * allocaInst,
   Type * allocatedType = allocaInst->getAllocatedType();
   SSAPointer * sptr = new SSAPointer(allocatedType);
   ci->SSAPointers[I] = sptr;
+  ci->AggregateAllocas.push_back(sptr->basePointer); 
+  updateMap(ci->idmap, sptr->basePointer); 
   inst++; // Point to next instruction in BB
 }
 
 void ConstantFolding::processMallocInst(CallInst * mallocInst, Instruction* I) {
-
+  clock_t timeVal = clock();      
   assert(isa<PointerType>(I->getType()) && 
     "malloc called for non pointer Instruction");
-  
-  ContextInfo * ci = BasicBlockContexts[currBB];
+  ContextInfo * ci = BasicBlockContexts[currBB];  
   ConstantInt* sizeVal = dyn_cast<ConstantInt>(mallocInst->getArgOperand(0));
   
   if(!sizeVal)
@@ -86,12 +93,14 @@ void ConstantFolding::processMallocInst(CallInst * mallocInst, Instruction* I) {
     sptr = new SSAPointer(arType); 
     sptr->basePointer->Ntype = scalarPtrType;
   }   
-  ci->SSAPointers[I] = sptr;     
+  ci->SSAPointers[I] = sptr;
+  InsertUnique(ci->AggregateAllocas, sptr->basePointer);
+  updateMap(ci->idmap, sptr->basePointer);   
+  mallocT += double(clock() - timeVal);  
 }
 
 void ConstantFolding::processBitCastInst(BitCastInst * bitcastInst, 
-  
-               BasicBlock::iterator & inst) {
+                 BasicBlock::iterator & inst) {
 
   Value* first = bitcastInst->getOperand(0);
   if(Instruction* firstI = dyn_cast<Instruction>(first))
@@ -104,9 +113,9 @@ void ConstantFolding::processBitCastInst(BitCastInst * bitcastInst,
   inst++;
 }
 
-void ConstantFolding::processMemcpyInst(MemCpyInst * memcpyInst, 
-  
+void ConstantFolding::processMemcpyInst(MemCpyInst * memcpyInst,   
                BasicBlock::iterator & inst) {
+  ContextInfo * ci = BasicBlockContexts[currBB];
   ValSSAPointerMap SSAPointers = BasicBlockContexts[currBB]->SSAPointers;
   Value * bufferPtr = memcpyInst->getOperand(0);
   SSAPointer * sptr;
@@ -126,6 +135,7 @@ void ConstantFolding::processMemcpyInst(MemCpyInst * memcpyInst,
           
   if(!getConstantStringInfo(memcpyInst->getOperand(1), stringRef, 0, false)) {
     basePointer->setConstant(false);
+    InsertUnique(ci->modifiedAllocas, basePointer->getId());    
     inst++;
     return; 
   }
@@ -135,18 +145,15 @@ void ConstantFolding::processMemcpyInst(MemCpyInst * memcpyInst,
   int length = strlen(constantString);   
   memcpy(sourceBuffer, constantString, length);
   alloca->fillInit(offset, length, true);
-
-  //only set the alloca as constant if the memcpy is over the entire length
-  if(offset == 0 && length == alloca->getSize())
-    basePointer->setConstant(true);          
+  alloca->setModified(offset, length);
+  //only set the alloca as constant if the memcpy is over the entire length         
   debug(Hashim)<< "constantString = " << constantString << "\n";
-
+  InsertUnique(ci->modifiedAllocas, basePointer->getId());
   inst++; // Point to next instruction in BB
 }
 
 
-void ConstantFolding::processStoreInst(StoreInst * storeInst,
-  
+void ConstantFolding::processStoreInst(StoreInst * storeInst, 
                BasicBlock::iterator & inst) {
 
   ContextInfo * ci = BasicBlockContexts[currBB];
@@ -169,26 +176,30 @@ void ConstantFolding::processStoreInst(StoreInst * storeInst,
     } else
       basePointer->setConstant(false);
   } else if(basePointer->isNodeTypeOf(scalarType) || basePointer->isNodeTypeOf(scalarPtrType)) {
-    if(!basePointer->isConstant()) {
+    ScalarAlloca * alloca = basePointer->getAlloca();
+    int allocaSize = alloca->getSize();    
+    if(allocaSize > 1 && !basePointer->isConstant()) {
       debug(Abubakar) << ".. Skipping non constant basePointer string ... \n";
       inst++;
       return;
     }        
     Value * storeOperand = storeInst->getOperand(0);
     int constantValue;
-    if(ConstantInt * constOp = dyn_cast<ConstantInt>(storeOperand)) {
+    if(ConstantInt * constOp = dyn_cast<ConstantInt>(storeOperand))
       constantValue = constOp->getZExtValue();
-    } else {
+    else {
       debug(Abubakar) << "--- Marking basePointer as non-const \n";
       basePointer->setConstant(false);
+      InsertUnique(ci->modifiedAllocas, basePointer->getId());
       inst++;
       return;
     }
     int offset = sptr->position;
-    ScalarAlloca * alloca = basePointer->getAlloca();
     alloca->storeConstVal(constantValue, offset);
     alloca->setInit(offset, true);
+    alloca->setModified(offset, 1);
   }
+  InsertUnique(ci->modifiedAllocas, basePointer->getId());
   inst++; // Point to next instruction in BB 
 }
 
@@ -238,9 +249,7 @@ void ConstantFolding::processLoadInst(LoadInst * loadInst,
 }
 
 void ConstantFolding::processGEPInst(GetElementPtrInst * GEPInst, 
-
              BasicBlock::iterator & inst) {
-
   ContextInfo * ci = BasicBlockContexts[currBB];
   Instruction * I = &(*inst);
   Value * ptr = GEPInst->getOperand(0);
@@ -256,6 +265,7 @@ void ConstantFolding::processGEPInst(GetElementPtrInst * GEPInst,
   /*string-struct-change*/
   // TODO: more comprehensive test for '0' indices into string      
   if(!basePointer->isConstant()) {
+    debug(Abubakar) << "gepInst : not constant\n";
     inst++;
     return;              
   }
@@ -269,6 +279,7 @@ void ConstantFolding::processGEPInst(GetElementPtrInst * GEPInst,
     }
     else {
       basePointer->setConstant(false);
+      InsertUnique(ci->modifiedAllocas, basePointer->getId());
       inst++;
       return;
     }
@@ -285,14 +296,14 @@ void ConstantFolding::processGEPInst(GetElementPtrInst * GEPInst,
 
 
 void ConstantFolding::processCallInst(CallInst * callInst,
-             BasicBlock::iterator & inst) {
+             BasicBlock::iterator & inst, clock_t & timeVal) {
 
   ContextInfo * ci = BasicBlockContexts[currBB];
   Instruction * I = &(*inst); 
   Function * calledFunction = callInst->getCalledFunction();  
   // Indirect function calls need special handling
   if(calledFunction == NULL){
-    handleIndirectCall(callInst, ci->SSAPointers);
+    handleIndirectCall(callInst, ci->SSAPointers, ci->modifiedAllocas);
     inst++;
     return;
   }   
@@ -415,7 +426,7 @@ void ConstantFolding::processCallInst(CallInst * callInst,
     // which were previously being tracked as non constant
     // It is the same code which was used for isDeclaration                     
     if(!satisfyConds(calledFunction)) {
-      markArgsAsNonConst(callInst, ci->SSAPointers);
+      markArgsAsNonConst(callInst, ci->SSAPointers, ci->modifiedAllocas);
       inst++;
       return;
     }
@@ -425,6 +436,7 @@ void ConstantFolding::processCallInst(CallInst * callInst,
     BasicBlock * successor = NULL;
     bool clonedFlag = false;
     Function * clonedFunc = NULL;    
+    ContextInfo * nci = new ContextInfo(true);
     for(auto arg = calledFunction->arg_begin(), argEnd = calledFunction->arg_end(); arg != argEnd;
         arg++, index++) {
 
@@ -437,7 +449,7 @@ void ConstantFolding::processCallInst(CallInst * callInst,
       Value * pointerArg = callInst->getOperand(index);
       SSAPointer * sptr;
       if(ci->SSAPointers.find(pointerArg) == ci->SSAPointers.end())
-	      continue;
+        continue;
       else
 	      sptr = ci->SSAPointers[pointerArg];
       // TODO-FIXIT: Only clone if function is called only ONCE 
@@ -465,24 +477,33 @@ void ConstantFolding::processCallInst(CallInst * callInst,
       /*string-struct-change*/
       SSAPointer * nsptr = new SSAPointer(sptr);
       Value * pointerVal = getArg(clonedFunc, index);
-      ci->SSAPointers[pointerVal] = nsptr; 
-      ci->InstOrder.push_back(pointerVal);       
+      nci->SSAPointers[pointerVal] = nsptr; 
+      nci->InstOrder.push_back(pointerVal);
       debug(Hashim) << " POINTER VAL = " << *pointerVal << "\n";
           //FIXIT: Reconsider the below choices
 
           // NEW: CANNOT prevent a function from being traversed twice
           // TODO-NEW: Need to restrict RECURSIVE functions - including mutually recursive                                       
     }
-    
     if(clonedFlag) {
-      ContextInfo * nci = new ContextInfo();
-      nci->ScalarAllocas = ci->ScalarAllocas;
-      nci->SSAPointers = ci->SSAPointers;
-      nci->InstOrder = ci->InstOrder;
       BasicBlockContexts[successor] = nci;
       currBB = successor;
+      nci->AggregateAllocas = ci->AggregateAllocas;
+      nci->idmap = ci->idmap;
+      callT += double(clock() - timeVal);
       runOnBB();
-    }
+      timeVal = clock();
+      currBB = callInst->getParent();
+      AggregateAlloca * aa = FuncInfoMap[calledFunction]->returnVal;
+      if(aa) {
+        SSAPointer * rsptr = new SSAPointer(aa);
+        ci->SSAPointers[callInst] = rsptr;
+        ci->AggregateAllocas.push_back(aa);
+        updateMap(ci->idmap, aa);         
+      }
+      handleReturn(calledFunction, BasicBlockContexts);
+    } else
+      delete nci;
   }
   //IMP: The following 'default' cause finds and marks any side effects of external calls
   else {
@@ -496,7 +517,7 @@ void ConstantFolding::processCallInst(CallInst * callInst,
     // Code moved to function defined in utils.cpp
     if(calledFunction->isDeclaration()) {
       debug(Hashim) << "--- Declaration: " << *calledFunction << "\n";
-      markArgsAsNonConst(callInst, ci->SSAPointers);
+      markArgsAsNonConst(callInst, ci->SSAPointers, ci->modifiedAllocas);
     }
   }
 
@@ -507,13 +528,12 @@ void ConstantFolding::processCallInst(CallInst * callInst,
 
 
 void ConstantFolding::processBranchInst(BranchInst * branchInst,
-             BasicBlock::iterator & inst) {
+             BasicBlock::iterator & inst, clock_t & timeVal) {
 
   ContextInfo * ci = BasicBlockContexts[currBB];
   BasicBlock* BB = branchInst->getParent();
-  blockContexts[BB] = ci->ScalarAllocas;
-
-  for(unsigned int index = 0; index < branchInst->getNumSuccessors(); index++){
+  mergePredecessors(BB, BasicBlockContexts, visited);
+  for(unsigned int index = 0; index < branchInst->getNumSuccessors(); index++) {
 
     BasicBlock * successor = branchInst->getSuccessor(index);
     //FIXIT: The check below needs to be strongly reconsidered
@@ -523,24 +543,46 @@ void ConstantFolding::processBranchInst(BranchInst * branchInst,
             
     // Traverse in reverse post-order
     if(!predecessorsVisited(successor, visited))
-      continue;        
-
-    ContextInfo * nci = new ContextInfo();
-    duplicateAllocas(nci, ci);
-    BasicBlockContexts[successor] = nci;
-    currBB = successor; 
-    
-    // Forward context to successor block if the successor has only a single predecessor & isNotVisited
-    if(successor->getUniquePredecessor()) {
-      debug(Hashim) << "Successor has a single predecessor \n";
-      runOnBB();
-    }    
+      continue;   
+    ContextInfo * nci;     
+    if(writesToMemory.find(successor) == writesToMemory.end() &&
+         successor->getUniquePredecessor())
+      nci = ci->createClone();  
     else {
-      debug(Hashim) << "Block has multiple predecessors \n";          
-      mergeContext(successor, BasicBlockContexts, nci);  
-      runOnBB();            
-      // freeMap(newSSAPointers);
-    } 
+      nci = new ContextInfo(false);
+      duplicateAllocas(nci, ci);
+    }
+    BasicBlockContexts[successor] = nci;
+    mergeContext(successor, currBB, BasicBlockContexts, nci);  
+    currBB = successor; 
+    branchT += double(clock() - timeVal);
+    runOnBB(); 
+    timeVal = clock();           
+    freePredecessors(successor, BasicBlockContexts, visited); 
   }         
+  inst++;
+}
+
+void ConstantFolding::processReturnInst(ReturnInst * returnInst,
+             BasicBlock::iterator & inst) {
+  ContextInfo * ci = BasicBlockContexts[currBB];
+  Value * ptr = returnInst->getReturnValue();
+  if(!ptr) {
+    inst++;
+    return;    
+  }
+  SSAPointer * sptr;
+  if(ci->SSAPointers.find(ptr) == ci->SSAPointers.end()) {
+    debug(Abubakar) << "loadInst : not found in map\n";
+    inst++;
+    return;
+  }
+  else
+    sptr = ci->SSAPointers[ptr];
+  if(FuncInfoMap[currBB->getParent()]->returnVal)
+    FuncInfoMap[currBB->getParent()]->returnVal->
+        checkConsistencyWith(sptr->basePointer);
+  else 
+    FuncInfoMap[currBB->getParent()]->returnVal = sptr->basePointer->createClone();
   inst++;
 }

@@ -36,6 +36,7 @@
 #include <sstream>
 #include "Utils.cpp"
 #include <set>
+#include <ctime>
 
 using namespace llvm;
 using namespace std;
@@ -49,10 +50,10 @@ struct ConstantFolding : public ModulePass {
   //map<Value*, StringPointer*> stringPointers;
   map<Instruction *, vector<CallOperand*>> replaceOperands;
   map<Function *, SpecializedCall*> specializedCalls;
-  map<BasicBlock *, ValScalarAllocaMap> blockContexts; 
   BasicBlockContInfoMap BasicBlockContexts;
   BasicBlock * currBB;
-  BasicBlockBoolMap visited;
+  set<BasicBlock *> visited;
+  set<BasicBlock *> writesToMemory;
   Module * M;  
   const TargetLibraryInfo *TLI;
   DataLayout * DL;
@@ -74,10 +75,11 @@ struct ConstantFolding : public ModulePass {
 
   void processGEPInst(GetElementPtrInst * GEPInst, BasicBlock::iterator & inst);
 
-  void processCallInst(CallInst * callInst, BasicBlock::iterator & inst);
+  void processCallInst(CallInst * callInst, BasicBlock::iterator & inst, clock_t & timeVal);
 
-  void processBranchInst(BranchInst * branchInst, BasicBlock::iterator & inst);
-
+  void processBranchInst(BranchInst * branchInst, BasicBlock::iterator & inst, clock_t & timeVal);
+  
+  void processReturnInst(ReturnInst * returnInst, BasicBlock::iterator & inst);
  
   ConstantFolding(): ModulePass(ID){}
 

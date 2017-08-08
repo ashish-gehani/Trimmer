@@ -1,7 +1,7 @@
 import sys
 import random
 
-seed = 9001
+seed = 300
 tab = '    '
 
 outName = sys.argv[1]

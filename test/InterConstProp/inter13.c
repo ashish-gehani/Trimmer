@@ -9,8 +9,7 @@ struct stType {
   int arr[8];
 };
 
-void branchPruned(struct stType st){  
-
+void branchPruned(struct stType st) {  
   if(st.arr[0] == 27 &&
     st.arr[7] == 55)
       printf("*** Branch Taken\n");      

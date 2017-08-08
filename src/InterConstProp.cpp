@@ -119,6 +119,8 @@ void ConstantFolding::gatherFuncInfo(Module& M) {
       LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*mit).getLoopInfo();
       for(BasicBlock::iterator b_it = f_it->begin(), b_ite = f_it->end(); b_it != b_ite; ++b_it) {
         Instruction* I = &*b_it;
+        if(I->mayWriteToMemory())
+          writesToMemory.insert(I->getParent());
         if(CallInst* ci = dyn_cast<CallInst>(I)) {
           Function* F = ci->getCalledFunction();
           if(!F)
@@ -140,36 +142,44 @@ void ConstantFolding::gatherFuncInfo(Module& M) {
 void ConstantFolding::runOnBB() {
    
   BasicBlock& b = *currBB;
-  visited[currBB] = true;  
+  visited.insert(currBB); 
+  BasicBlockContexts[currBB]->ancestors.push_back(currBB); 
   for (BasicBlock::iterator inst = b.begin(), ie = b.end(); inst != ie; ) {
 
     Instruction * I = &(*inst);
     // Only considering allocas for string specialisation
-    // errs() << "push_back " << *I << "\n";
+    // errs() << *I << "\n";
     BasicBlockContexts[currBB]->InstOrder.push_back(I);
-    if(AllocaInst * allocaInst = dyn_cast<AllocaInst>(&*I)){
+    if(AllocaInst * allocaInst = dyn_cast<AllocaInst>(&*I)) {
+      clock_t timeVal = clock();
       processAllocaInst(allocaInst, inst);  
+      allocaT += double(clock() - timeVal);
     }
-    else if(MemCpyInst * memcpyInst = dyn_cast<MemCpyInst>(&*I)){
+    else if(MemCpyInst * memcpyInst = dyn_cast<MemCpyInst>(&*I)) {
       processMemcpyInst(memcpyInst, inst);
     }	
-    else if(StoreInst * storeInst = dyn_cast<StoreInst>(&*I)){
+    else if(StoreInst * storeInst = dyn_cast<StoreInst>(&*I)) {
       processStoreInst(storeInst, inst);
     }
-    else if(LoadInst * loadInst = dyn_cast<LoadInst>(&*I)){
+    else if(LoadInst * loadInst = dyn_cast<LoadInst>(&*I)) {
       processLoadInst(loadInst, inst);
     }    
-    else if(CallInst * callInst = dyn_cast<CallInst>(&*I)){
-      processCallInst(callInst, inst);
+    else if(CallInst * callInst = dyn_cast<CallInst>(&*I)) {
+      clock_t timeVal = clock();      
+      processCallInst(callInst, inst, timeVal);
+      callT += double(clock() - timeVal);
     }
-    else if(GetElementPtrInst * GEPInst = dyn_cast<GetElementPtrInst>(&*I)){
+    else if(GetElementPtrInst * GEPInst = dyn_cast<GetElementPtrInst>(&*I)) {
       processGEPInst(GEPInst, inst);
     }
     else if(BranchInst * branchInst = dyn_cast<BranchInst>(&*I)){
-      // errs() << *I << "\n";
-      processBranchInst(branchInst, inst);
+      clock_t timeVal = clock();      
+      processBranchInst(branchInst, inst, timeVal);
+      branchT += double(clock() - timeVal);
     } else if(BitCastInst * bitcastInst = dyn_cast<BitCastInst>(I)) {
-       processBitCastInst(bitcastInst, inst);
+      processBitCastInst(bitcastInst, inst);
+    } else if(ReturnInst * returnInst = dyn_cast<ReturnInst>(I)) {
+      processReturnInst(returnInst, inst);
     } else {           
       // Any other instruction - currently skip 
       inst++; 
@@ -178,7 +188,7 @@ void ConstantFolding::runOnBB() {
 } 
 
 bool ConstantFolding::runOnModule(Module & module) {
-
+  clock_t begin = clock();
   debug(Abubakar) << "\n\n*******---- InterConstProp -----*********\n\n";
   gatherFuncInfo(module);
     
@@ -191,13 +201,21 @@ bool ConstantFolding::runOnModule(Module & module) {
   M = &module;
   Function * func = M->getFunction(StringRef("main"));
   BasicBlock * entry = &(func->getEntryBlock());
-  ContextInfo * ci = new ContextInfo();
+  ContextInfo * ci = new ContextInfo(true);
   BasicBlockContexts[entry] = ci;
   currBB = entry;        
   runOnBB();   
     	   
   replaceCallOperands();
   replaceCallInsts();
+  clock_t end = clock();
+  total = double(end - begin);
+  errs() << "total = " << total << "\n";
+  errs() << "allocaT = " << allocaT << "\n";
+  errs() << "mallocT = " << mallocT << "\n";
+  errs() << "callT = " << callT << "\n";
+  errs() << "branchT = " << branchT << "\n";
+
   return true;
 }   
   

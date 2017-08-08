@@ -48,17 +48,34 @@ struct SpecializedCall{
 
 struct FuncInfo {
   unsigned numCallInsts;
+  AggregateAlloca * returnVal;
   bool calledInLoop, AddrTaken;
 };
 
 typedef map<Value *, SSAPointer *> ValSSAPointerMap;
 typedef map<Value *, ScalarAlloca *> ValScalarAllocaMap;
 typedef map<Value *, AggregateAlloca *> ValAggrAllocaMap;
-typedef map<BasicBlock*, bool> BasicBlockBoolMap;
 struct ContextInfo {
   ValSSAPointerMap SSAPointers;
-  set<AggregateAlloca *> AggregateAllocas;
-  ValScalarAllocaMap ScalarAllocas;
+  vector<AggregateAlloca *> AggregateAllocas;
   vector<Value *> InstOrder;
+  map<unsigned, AggregateAlloca *> idmap;
+  vector<unsigned> modifiedAllocas;
+  vector<BasicBlock *> ancestors;
+  bool deleted;
+  bool copyOrMain;
+  ContextInfo(bool val) {
+    deleted = false;
+    copyOrMain = val;
+  }
+  ContextInfo * createClone() {
+    ContextInfo * nci = new ContextInfo(true);
+    nci->SSAPointers = SSAPointers;
+    nci->AggregateAllocas = AggregateAllocas;
+    nci->InstOrder = InstOrder;
+    nci->idmap = idmap;
+    nci->modifiedAllocas = modifiedAllocas;  
+    return nci;        
+  }
 };
 typedef map<BasicBlock *, ContextInfo *> BasicBlockContInfoMap;

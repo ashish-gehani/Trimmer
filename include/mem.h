@@ -17,6 +17,19 @@ enum NodeType {
   aggrArrType
 };
 
+template <typename F>
+bool findInVect(vector<F> & vect, F val) {
+  return find(vect.begin(), vect.end(), val) != vect.end();
+}
+
+template <typename F>
+void InsertUnique(vector<F> & vect, F val) {
+  if(!findInVect(vect, val))
+    vect.push_back(val);
+}
+
+
+
 class AggregateAlloca;
 class ScalarAlloca {
 public:  
@@ -25,7 +38,7 @@ public:
   ScalarAlloca(BaseType bt, Type * ty);
   ~ScalarAlloca();
   ScalarAlloca * createClone();
-  bool equalsTo(ScalarAlloca * sa);
+  bool checkConsistencyWith(ScalarAlloca * sa);
   void setParent(AggregateAlloca * aa) {
     this->parent = aa;
   }
@@ -58,22 +71,35 @@ public:
   void copyData(void * data, bool * initialized, int size);
   Value* createConstVal(int offset);
   void storeConstVal(int ConstVal, int offset);
+  unsigned getModified(unsigned index) {
+    assert(index < modified.size() && "tried to access invalid index modified");
+    return modified[index];
+  }
+  vector<unsigned> getModVect() {
+    return modified;
+  }
+  void setModified(unsigned index, unsigned length) {
+    for(unsigned i = index; i < index + length; i++)
+      InsertUnique(modified, i);
+  }
   BaseType Btype;
 private:
   bool * initialized;
+  vector<unsigned> modified;
   int size;
   Type * allocatedType;
   AggregateAlloca * parent;
 };
 
+unsigned AggrAllocaID = 1;
 class AggregateAlloca {
 public:
   AggregateAlloca(Type* ty);
   AggregateAlloca(Type * ty, unsigned totalSize, bool constant, 
-    NodeType nty);   
+    NodeType nty, unsigned allocaID);   
   ~AggregateAlloca(); 
   AggregateAlloca * createClone();
-  bool equalsTo(AggregateAlloca * aa);  
+  void checkConsistencyWith(AggregateAlloca * aa);  
   void setParent(AggregateAlloca * aa, unsigned offset) {
     this->parent = aa;
     this->OffSetInParent = offset;
@@ -134,6 +160,9 @@ public:
   unsigned getOffSetInParent() {
     return OffSetInParent;
   }
+  unsigned getId() {
+    return allocaID;
+  }
   NodeType Ntype;
 private:
   void initContained(unsigned size) {
@@ -168,6 +197,7 @@ private:
   Type* allocatedType;
   bool constant;
   unsigned OffSetInParent;
+  unsigned allocaID;
 };
 
 struct SSAPointer {

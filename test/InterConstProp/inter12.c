@@ -784,6 +784,6 @@ int main() {
 	struct HighType** ht = malloc(10 * sizeof(struct HighType*));
 	doMallocs(ht);
 	initialize(ht);
-	branchPruned(ht);
 	branchNotPruned(ht);
+	branchPruned(ht);
 }
