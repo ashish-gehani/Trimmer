@@ -116,15 +116,14 @@ void ConstantFolding::processBitCastInst(BitCastInst * bitcastInst,
 void ConstantFolding::processMemcpyInst(MemCpyInst * memcpyInst,   
                BasicBlock::iterator & inst) {
   ContextInfo * ci = BasicBlockContexts[currBB];
-  ValSSAPointerMap SSAPointers = BasicBlockContexts[currBB]->SSAPointers;
   Value * bufferPtr = memcpyInst->getOperand(0);
   SSAPointer * sptr;
-  if(SSAPointers.find(bufferPtr) == SSAPointers.end()) {
+  if(ci->SSAPointers.find(bufferPtr) == ci->SSAPointers.end()) {
     inst++;
     return;
   }
   else
-    sptr = SSAPointers[bufferPtr];
+    sptr = ci->SSAPointers[bufferPtr];
   AggregateAlloca * basePointer = sptr->basePointer;
   int offset = sptr->position;
   ScalarAlloca * alloca = basePointer->getAlloca();
@@ -170,7 +169,7 @@ void ConstantFolding::processStoreInst(StoreInst * storeInst,
     sptr = ci->SSAPointers[ptr];
   AggregateAlloca * basePointer = sptr->basePointer;
   if(basePointer->isNodeTypeOf(ptrType)) {
-    if(ci->SSAPointers.find(ptr) != ci->SSAPointers.end()) {
+    if(ci->SSAPointers.find(storeOp) != ci->SSAPointers.end()) {
       AggregateAlloca * aa = new AggregateAlloca(*ci->SSAPointers[storeOp]->basePointer);
       basePointer->setOrInsert(0, aa);
     } else
@@ -356,7 +355,7 @@ void ConstantFolding::processCallInst(CallInst * callInst,
       GetElementPtrInst * stringPtr = GetElementPtrInst::Create(NULL, globalReadString, 
 								indxList, Twine(""), callInst);
             
-      if(specIndex == 0){
+      if(specIndex == 0) {
         vector<CallOperand*> operands;
         replaceOperands[callInst] = operands;       
       }
@@ -434,17 +433,24 @@ void ConstantFolding::processCallInst(CallInst * callInst,
     debug(Hashim) << "---- Traversing function arguments ---- \n\n";       
     int index = 0;
     BasicBlock * successor = NULL;
+    bool visitFunc = false;
     bool clonedFlag = false;
+    bool returnVal = false;
     Function * clonedFunc = NULL;    
     ContextInfo * nci = new ContextInfo(true);
+    if(!callInst->getNumArgOperands()) {
+      if(FuncInfoMap[calledFunction]->visited) {
+        if(FuncInfoMap[calledFunction]->returnVal)
+          returnVal = true;
+      } else {
+        visitFunc = true;
+        successor = &(calledFunction->getEntryBlock());
+      }           
+    }
     for(auto arg = calledFunction->arg_begin(), argEnd = calledFunction->arg_end(); arg != argEnd;
         arg++, index++) {
 
       //FIXIT: make type checks more general	
-      if(!arg->getType()->isPointerTy() && !isa<StructType>(arg->getType())){
-        errs() << "!note: not supported " << *arg << "\n";                
-      	continue;
-      }
   
       Value * pointerArg = callInst->getOperand(index);
       SSAPointer * sptr;
@@ -471,7 +477,8 @@ void ConstantFolding::processCallInst(CallInst * callInst,
       	call->specCall = specCallInst;
       	call->used = false;
       	specializedCalls[clonedFunc] = call; // FIXIT: Re-consider current indexing on cloned function
-      	successor = &(clonedFunc->getEntryBlock());     
+      	successor = &(clonedFunc->getEntryBlock()); 
+        updateMemoryMap(vmap, writesToMemory, calledFunction);    
       	clonedFlag = true; //IMP: prevent cloning function once per argument 
       }
       /*string-struct-change*/
@@ -485,7 +492,8 @@ void ConstantFolding::processCallInst(CallInst * callInst,
           // NEW: CANNOT prevent a function from being traversed twice
           // TODO-NEW: Need to restrict RECURSIVE functions - including mutually recursive                                       
     }
-    if(clonedFlag) {
+    if(visitFunc || clonedFlag) {    
+      FuncInfoMap[calledFunction]->visited = true;
       BasicBlockContexts[successor] = nci;
       currBB = successor;
       nci->AggregateAllocas = ci->AggregateAllocas;
@@ -494,16 +502,18 @@ void ConstantFolding::processCallInst(CallInst * callInst,
       runOnBB();
       timeVal = clock();
       currBB = callInst->getParent();
-      AggregateAlloca * aa = FuncInfoMap[calledFunction]->returnVal;
-      if(aa) {
-        SSAPointer * rsptr = new SSAPointer(aa);
-        ci->SSAPointers[callInst] = rsptr;
-        ci->AggregateAllocas.push_back(aa);
-        updateMap(ci->idmap, aa);         
-      }
+      if(FuncInfoMap[calledFunction]->returnVal)
+        returnVal = true;
       handleReturn(calledFunction, BasicBlockContexts);
     } else
       delete nci;
+    if(returnVal) {
+      AggregateAlloca * aa = FuncInfoMap[calledFunction]->returnVal->createClone();
+      SSAPointer * rsptr = new SSAPointer(aa);
+      ci->SSAPointers[callInst] = rsptr;
+      ci->AggregateAllocas.push_back(aa);
+      updateMap(ci->idmap, aa);         
+    }
   }
   //IMP: The following 'default' cause finds and marks any side effects of external calls
   else {
@@ -525,17 +535,26 @@ void ConstantFolding::processCallInst(CallInst * callInst,
   // End of CallInst
 }
 
-
-
 void ConstantFolding::processBranchInst(BranchInst * branchInst,
              BasicBlock::iterator & inst, clock_t & timeVal) {
+  Instruction * I = branchInst;
+  VisitSuccessors(dyn_cast<TerminatorInst>(I), timeVal);         
+  inst++;
+}
 
+void ConstantFolding::processSwitchInst(SwitchInst * switchInst,
+             BasicBlock::iterator & inst, clock_t & timeVal) {
+  Instruction * I = switchInst;
+  VisitSuccessors(dyn_cast<TerminatorInst>(I), timeVal);         
+  inst++;
+}
+
+void ConstantFolding::VisitSuccessors(TerminatorInst * termInst,
+            clock_t & timeVal) {
   ContextInfo * ci = BasicBlockContexts[currBB];
-  BasicBlock* BB = branchInst->getParent();
-  mergePredecessors(BB, BasicBlockContexts, visited);
-  for(unsigned int index = 0; index < branchInst->getNumSuccessors(); index++) {
-
-    BasicBlock * successor = branchInst->getSuccessor(index);
+  // mergePredecessors(BB, BasicBlockContexts, visited);
+  for(unsigned int index = 0; index < termInst->getNumSuccessors(); index++) {
+    BasicBlock * successor = termInst->getSuccessor(index);
     //FIXIT: The check below needs to be strongly reconsidered
     //FIXIT: In case we don't clone every routine, this check breaks the algorithm
     if(visited.find(successor) != visited.end())
@@ -544,7 +563,7 @@ void ConstantFolding::processBranchInst(BranchInst * branchInst,
     // Traverse in reverse post-order
     if(!predecessorsVisited(successor, visited))
       continue;   
-    ContextInfo * nci;     
+    ContextInfo * nci;
     if(writesToMemory.find(successor) == writesToMemory.end() &&
          successor->getUniquePredecessor())
       nci = ci->createClone();  
@@ -553,14 +572,13 @@ void ConstantFolding::processBranchInst(BranchInst * branchInst,
       duplicateAllocas(nci, ci);
     }
     BasicBlockContexts[successor] = nci;
-    mergeContext(successor, currBB, BasicBlockContexts, nci);  
+    mergeContext(successor, termInst->getParent(), BasicBlockContexts, nci);  
     currBB = successor; 
     branchT += double(clock() - timeVal);
     runOnBB(); 
     timeVal = clock();           
     freePredecessors(successor, BasicBlockContexts, visited); 
-  }         
-  inst++;
+  } 
 }
 
 void ConstantFolding::processReturnInst(ReturnInst * returnInst,

@@ -104,7 +104,8 @@ bool ConstantFolding::satisfyConds(Function* F) {
   if(FuncInfoMap.find(F) == FuncInfoMap.end())
     return false; // conservative
   FuncInfo* fi = FuncInfoMap[F];
-  return !(fi->calledInLoop || fi->AddrTaken || (fi->numCallInsts != 1)); 
+  return !(fi->calledInLoop || fi->AddrTaken || (fi->numCallInsts != 1 && 
+    F->arg_size())); 
 }
 
 /*task1*/
@@ -149,6 +150,7 @@ void ConstantFolding::runOnBB() {
     Instruction * I = &(*inst);
     // Only considering allocas for string specialisation
     // errs() << *I << "\n";
+
     BasicBlockContexts[currBB]->InstOrder.push_back(I);
     if(AllocaInst * allocaInst = dyn_cast<AllocaInst>(&*I)) {
       clock_t timeVal = clock();
@@ -172,9 +174,13 @@ void ConstantFolding::runOnBB() {
     else if(GetElementPtrInst * GEPInst = dyn_cast<GetElementPtrInst>(&*I)) {
       processGEPInst(GEPInst, inst);
     }
-    else if(BranchInst * branchInst = dyn_cast<BranchInst>(&*I)){
+    else if(BranchInst * branchInst = dyn_cast<BranchInst>(&*I)) {
       clock_t timeVal = clock();      
       processBranchInst(branchInst, inst, timeVal);
+      branchT += double(clock() - timeVal);
+    } else if(SwitchInst * switchInst = dyn_cast<SwitchInst>(&*I)) {
+      clock_t timeVal = clock();      
+      processSwitchInst(switchInst, inst, timeVal);
       branchT += double(clock() - timeVal);
     } else if(BitCastInst * bitcastInst = dyn_cast<BitCastInst>(I)) {
       processBitCastInst(bitcastInst, inst);
@@ -188,7 +194,7 @@ void ConstantFolding::runOnBB() {
 } 
 
 bool ConstantFolding::runOnModule(Module & module) {
-  clock_t begin = clock();
+  clock_t startClock = clock();
   debug(Abubakar) << "\n\n*******---- InterConstProp -----*********\n\n";
   gatherFuncInfo(module);
     
@@ -203,18 +209,19 @@ bool ConstantFolding::runOnModule(Module & module) {
   BasicBlock * entry = &(func->getEntryBlock());
   ContextInfo * ci = new ContextInfo(true);
   BasicBlockContexts[entry] = ci;
-  currBB = entry;        
+  currBB = entry;
   runOnBB();   
     	   
   replaceCallOperands();
   replaceCallInsts();
-  clock_t end = clock();
-  total = double(end - begin);
+  total = double(clock() - startClock);
+  
   errs() << "total = " << total << "\n";
   errs() << "allocaT = " << allocaT << "\n";
   errs() << "mallocT = " << mallocT << "\n";
   errs() << "callT = " << callT << "\n";
   errs() << "branchT = " << branchT << "\n";
+  
 
   return true;
 }   

@@ -49,7 +49,7 @@ struct SpecializedCall{
 struct FuncInfo {
   unsigned numCallInsts;
   AggregateAlloca * returnVal;
-  bool calledInLoop, AddrTaken;
+  bool calledInLoop, AddrTaken, visited;
 };
 
 typedef map<Value *, SSAPointer *> ValSSAPointerMap;

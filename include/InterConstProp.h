@@ -78,6 +78,10 @@ struct ConstantFolding : public ModulePass {
   void processCallInst(CallInst * callInst, BasicBlock::iterator & inst, clock_t & timeVal);
 
   void processBranchInst(BranchInst * branchInst, BasicBlock::iterator & inst, clock_t & timeVal);
+
+  void processSwitchInst(SwitchInst * switchInst, BasicBlock::iterator & inst, clock_t & timeVal);
+  
+  void VisitSuccessors(TerminatorInst * termInst, clock_t & timeVal);
   
   void processReturnInst(ReturnInst * returnInst, BasicBlock::iterator & inst);
  

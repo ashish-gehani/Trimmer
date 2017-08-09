@@ -210,12 +210,12 @@ void compareBlockContexts(ContextInfo * newCi, ContextInfo * oldCi,
 }
 
 //TODO: Check context properly including comparing the alloca CONTENTS
-//TODO: Fill the stringPointers and ScalarAllocas correctly - be sound even if imprecise 
+//TODO: Fillthe stringPointers and ScalarAllocas correctly - be sound even if imprecise 
 //TODO: Insert call to merge context and test with examples
 bool mergeContext(BasicBlock * BB, BasicBlock * prev, 
         BasicBlockContInfoMap bbc, ContextInfo * newCi) {
   newCi->ancestors = bbc[prev]->ancestors;
-  vector<ContextInfo *> predecessorContexts;    
+  vector<ContextInfo *> predecessorContexts; 
   for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++){
     BasicBlock * predecessor = *it;
     if(bbc.find(predecessor) == bbc.end()){
@@ -224,7 +224,7 @@ bool mergeContext(BasicBlock * BB, BasicBlock * prev,
     }
     if(predecessor == prev)
       continue;
-    if(bbc[predecessor]->deleted)
+    if(bbc[predecessor]->deleted || bbc[predecessor]->copyOrMain)
       continue;
     predecessorContexts.push_back(bbc[predecessor]);
   }
@@ -304,6 +304,7 @@ FuncInfo* initializeFuncInfo(Function* F) {
   fi->calledInLoop = false;
   fi->AddrTaken = F->hasAddressTaken();
   fi->returnVal = NULL;
+  fi->visited = false;
   return fi;
 }
 
@@ -326,7 +327,7 @@ void duplicateAllocas(ContextInfo * newCi, ContextInfo * oldCi) {
     AggregateAlloca * naa = aa->createClone();
     updateMap(newCi->idmap, naa);
     newCi->AggregateAllocas.push_back(naa);
-  }
+  } 
 
   for(unsigned i = 0; i < oldCi->InstOrder.size(); i++) {
     Value * I = oldCi->InstOrder[i];
@@ -349,6 +350,7 @@ void freeContextInfo(ContextInfo * ci) {
   for(unsigned i = 0; i < ci->AggregateAllocas.size(); i++)
     delete ci->AggregateAllocas[i];   
 }
+
 vector<BasicBlock *> findUnvisitedProgeny(set<BasicBlock *> visited,
        BasicBlock * BB, BasicBlock * except) {
   vector<BasicBlock *> succList;
@@ -370,6 +372,7 @@ vector<BasicBlock *> findUnvisitedProgeny(set<BasicBlock *> visited,
   }
   return succList;
 }
+
 void mergePredecessors(BasicBlock * BB, BasicBlockContInfoMap bbc, 
       set<BasicBlock *> visited) {
   vector<BasicBlock *> BBSuccList = findUnvisitedProgeny(visited, BB, NULL);
@@ -422,3 +425,14 @@ void handleReturn(Function * F, BasicBlockContInfoMap bbc) {
     delete bbc[BB];
   }
 }
+
+void updateMemoryMap(ValueToValueMapTy & vmap, set<BasicBlock *> & writesToMemory,
+      Function * F) {
+  for (Function::iterator f_it = F->begin(), f_ite = F->end();
+       f_it != f_ite; ++f_it) {
+    BasicBlock * BB = &*f_it;
+    BasicBlock * nBB = dyn_cast<BasicBlock>(vmap[BB]);
+    if(writesToMemory.find(BB) != writesToMemory.end())
+      writesToMemory.insert(nBB);
+  } 
+}    

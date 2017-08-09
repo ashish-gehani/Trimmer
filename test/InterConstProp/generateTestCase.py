@@ -44,14 +44,14 @@ def setExtern():
 		return False
 
 def makeMalloc(arrInd):
-	mStr = tab + 'obj[' + str(arrInd) + '] = malloc(sizeof(struct HighType));\n'
-	mStr += tab + 'obj[' + str(arrInd) + ']->lts = malloc(sizeof(struct LowTypeString));\n'
-	mStr += tab + 'obj[' + str(arrInd) + ']->lti = malloc(sizeof(struct LowTypeInt));\n'
-	mStr += tab + 'obj[' + str(arrInd) + ']->lts->x = malloc(1000 * sizeof(char));\n'
-	mStr += tab + 'obj[' + str(arrInd) + ']->lts->y = malloc(1000 * sizeof(char));\n'
-	mStr += tab + 'obj[' + str(arrInd) + ']->lti->x = malloc(1000 * sizeof(int));\n'
-	mStr += tab + 'obj[' + str(arrInd) + ']->lti->y = malloc(1000 * sizeof(int));\n'
-
+	# mStr = tab + 'obj[' + str(arrInd) + '] = malloc(sizeof(struct HighType));\n'
+	# mStr += tab + 'obj[' + str(arrInd) + ']->lts = malloc(sizeof(struct LowTypeString));\n'
+	# mStr += tab + 'obj[' + str(arrInd) + ']->lti = malloc(sizeof(struct LowTypeInt));\n'
+	# mStr += tab + 'obj[' + str(arrInd) + ']->lts->x = malloc(1000 * sizeof(char));\n'
+	# mStr += tab + 'obj[' + str(arrInd) + ']->lts->y = malloc(1000 * sizeof(char));\n'
+	# mStr += tab + 'obj[' + str(arrInd) + ']->lti->x = malloc(1000 * sizeof(int));\n'
+	# mStr += tab + 'obj[' + str(arrInd) + ']->lti->y = malloc(1000 * sizeof(int));\n'
+	mStr = tab + 'obj[' + str(arrInd) + '] = createHighType();\n'
 	return mStr
 
 def makeExtern(arrInd):
@@ -238,6 +238,17 @@ struct HighType {
 	struct LowTypeString * lts;
 	struct LowTypeInt * lti;
 };
+
+struct HighType * createHighType() {
+	struct HighType * ht = malloc(sizeof(struct HighType));
+	ht->lts = malloc(sizeof(struct LowTypeString));
+	ht->lti = malloc(sizeof(struct LowTypeInt));
+	ht->lti->x = malloc(1000 * sizeof(int));
+	ht->lti->y = malloc(1000 * sizeof(int));
+	ht->lts->x = malloc(1000 * sizeof(char));
+	ht->lts->y = malloc(1000 * sizeof(char));
+	return ht;
+}
 '''
 externStr = '''
 extern void externalFunc(struct HighType * ht);
