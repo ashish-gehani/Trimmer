@@ -50,6 +50,7 @@ struct ConstantFolding : public ModulePass {
   //map<Value*, StringPointer*> stringPointers;
   map<Instruction *, vector<CallOperand*>> replaceOperands;
   map<Function *, SpecializedCall*> specializedCalls;
+  vector<GlobalIdPair> GlobalIdList;
   BasicBlockContInfoMap BasicBlockContexts;
   BasicBlock * currBB;
   set<BasicBlock *> visited;
@@ -60,6 +61,7 @@ struct ConstantFolding : public ModulePass {
   DominatorTree * DT;
   CallGraph * CG;
   map<Function*, FuncInfo*> FuncInfoMap;  
+  unsigned numGlobals;
 
   void processAllocaInst(AllocaInst * allocaInst, BasicBlock::iterator & inst);
 
@@ -91,9 +93,15 @@ struct ConstantFolding : public ModulePass {
   virtual void getAnalysisUsage(AnalysisUsage &AU) const;
   
   void replaceCallOperands(); 
-
-  void gatherFuncInfo(Module& M);
-  
+  SSAPointer * getSSAPointer(Value * val, ContextInfo * ci);
+  void gatherFuncInfo();
+  void gatherGlobals();
+  void allocate(Type * ty, Value * val);
+  void allocate(AggregateAlloca * aa, Value * val);
+  void allocate(SSAPointer * sptr, Value * val);
+  void markGlobalUses(Value * val, GlobalVariable * gv);
+  void propagateGlobalUses();
+  Function * addClonedFunction(CallInst * ci, Function * F);
   // TODO: Make sure cloned functions calling other specialized routines are correctly retained
   void replaceCallInsts();  
  
@@ -104,9 +112,7 @@ struct ConstantFolding : public ModulePass {
   /* IMP: New policy - visited passed by reference; no basic block visited twice - important to avoid wrongly 
           duplicating contexts e.g function cloning */ 
   void runOnBB();
-
+  void runOnInst(Instruction * I, BasicBlock::iterator & inst);
   virtual bool runOnModule(Module & module);
 
 };
-
-
