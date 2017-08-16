@@ -201,9 +201,7 @@ void ConstantFolding::propagateGlobalUses() {
 void ConstantFolding::gatherGlobals() {
   for(auto& global : M->globals()) {
     GlobalVariable *  gv = &global;
-    string name = gv->getName().str();
-
-    if(name.size() >= 4 && name.substr(0, 4) == ".str")
+    if(gv->isConstant())
       continue;
     allocate(gv->getType()->getContainedType(0), gv);
     unsigned id = BasicBlockContexts[currBB]->SSAPointers[gv]->
