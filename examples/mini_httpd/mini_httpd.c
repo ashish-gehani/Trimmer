@@ -177,7 +177,7 @@ typedef union {
 #endif /* USE_IPV6 */
     } usockaddr;
 
-
+/* NOTE: Global configuration parameters */
 static char* argv0;
 static int debug;
 static unsigned short port;
@@ -238,6 +238,7 @@ static char* referrer;
 static char* useragent;
 
 static char* remoteuser;
+/*NOTE: End of configuration parameters */
 
 
 /* Forwards. */
@@ -356,6 +357,8 @@ main( int argc, char** argv )
     certfile = DEFAULT_CERTFILE;
     cipher = (char*) 0;
 #endif /* USE_SSL */
+
+    /*
     argn = 1;
     while ( argn < argc && argv[argn][0] == '-' )
 	{
@@ -385,6 +388,8 @@ main( int argc, char** argv )
 	    cipher = argv[argn];
 	    }
 #endif /* USE_SSL */
+
+    /*
 	else if ( strcmp( argv[argn], "-p" ) == 0 && argn + 1 < argc )
 	    {
 	    ++argn;
@@ -450,6 +455,11 @@ main( int argc, char** argv )
 	}
     if ( argn != argc )
 	usage();
+    */
+
+    /* NOTE: Caling read_config directly */
+    read_config(argv[0]);
+
 
     cp = strrchr( argv0, '/' );
     if ( cp != (char*) 0 )
@@ -551,6 +561,8 @@ main( int argc, char** argv )
 	}
 
 #ifdef USE_SSL
+
+    /* NOTE: As a part of specialization, this branch should be pruned */
     if ( do_ssl )
 	{
 	SSL_load_error_strings();
@@ -575,6 +587,10 @@ main( int argc, char** argv )
 		}
 	    }
 	}
+
+    /* */
+
+
 #endif /* USE_SSL */
 
     if ( ! debug )
@@ -1044,7 +1060,10 @@ read_config( char* filename )
 	}
 
     (void) fclose( fp );
-    }
+
+    /* NOTE: Hardcoding do_ssl */
+    do_ssl = 0;
+ }
 
 
 static void
@@ -1193,6 +1212,7 @@ handle_request( void )
 #endif /* TCP_NOPUSH */
 
 #ifdef USE_SSL
+
     if ( do_ssl )
 	{
 	ssl = SSL_new( ssl_ctx );
@@ -1203,6 +1223,7 @@ handle_request( void )
 	    exit( 1 );
 	    }
 	}
+
 #endif /* USE_SSL */
 
     /* Read in the request. */
@@ -2746,10 +2767,11 @@ static ssize_t
 my_read( char* buf, size_t size )
     {
 #ifdef USE_SSL
+
     if ( do_ssl )
 	return SSL_read( ssl, buf, size );
-    else
-	return read( conn_fd, buf, size );
+    else      
+        return read( conn_fd, buf, size );
 #else /* USE_SSL */
     return read( conn_fd, buf, size );
 #endif /* USE_SSL */
@@ -2760,9 +2782,9 @@ static ssize_t
 my_write( void* buf, size_t size )
     {
 #ifdef USE_SSL
-    if ( do_ssl )
+      if ( do_ssl )
 	return SSL_write( ssl, buf, size );
-    else
+      else
 	return write( conn_fd, buf, size );
 #else /* USE_SSL */
     return write( conn_fd, buf, size );
