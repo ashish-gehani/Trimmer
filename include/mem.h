@@ -28,8 +28,6 @@ void InsertUnique(vector<F> & vect, F val) {
     vect.push_back(val);
 }
 
-
-
 class AggregateAlloca;
 class ScalarAlloca {
 public:  
@@ -126,10 +124,6 @@ public:
     return this->contained[index];
   }
   void setOrInsert(unsigned index, AggregateAlloca* aa) {
-    // if insertIndex is less then contained.size() then we will set as the insertIndex is already present
-    // if insertIndex == contained.size() then we will insert
-    // if insertIndex > contained.size() then even if we insert the insertIndex will not be equal to
-    // insertIndex
     assert(index <= this->containedSize && "tried to insert at an invalid index");
     if(index < this->containedSize)
       this->contained[index] = aa;

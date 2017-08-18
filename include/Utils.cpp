@@ -129,7 +129,7 @@ bool isSpecializable(Function * calledFunction){
 }   
 
 // FIXIT: Check if function is readnone or readonly and has no sideeffects
-bool hasNoSideEffects(CallInst * callInst){
+bool hasNoSideEffects(CallInst * callInst) {
   
   Function * calledFunction = callInst->getCalledFunction();
   if(callInst->onlyReadsMemory() || calledFunction->onlyReadsMemory()){
@@ -289,22 +289,33 @@ void handleIndirectCall(CallInst * callInst, ValSSAPointerMap & SSAPointers,
 
 void handleBaseDataTypeGEP(vector<unsigned> indices, SSAPointer* bsptr,
                 Instruction* I, ValSSAPointerMap & SSAPointers) {
-    if(indices.size() > 2) 
-      errs() << "GEPINST : case not handled ntype is baseDataType and indices > 2\n";
-    SSAPointer * sptr = new SSAPointer(bsptr);
-    if(indices.size())
-      sptr->position += indices[indices.size() - 1];
-    SSAPointers[I] = sptr;
+  if(indices.size() > 2) 
+    errs() << "GEPINST : case not handled ntype is baseDataType and indices > 2\n";
+  SSAPointer * sptr = new SSAPointer(bsptr);
+  if(indices.size())
+    sptr->position += indices[indices.size() - 1];
+  SSAPointers[I] = sptr;
 }
-
 
 FuncInfo* initializeFuncInfo(Function* F) {
   FuncInfo* fi = new FuncInfo;
   fi->numCallInsts = 0;
   fi->calledInLoop = false;
-  fi->AddrTaken = F->hasAddressTaken();
+  fi->addrTaken = F->hasAddressTaken();
   fi->returnVal = NULL;
   fi->visited = false;
+  fi->usesGlobals = false;
+  return fi;
+}
+
+FuncInfo * copyFuncInfo(FuncInfo * fi) {
+  FuncInfo* nfi = new FuncInfo; 
+  nfi->numCallInsts = fi->numCallInsts;
+  nfi->calledInLoop = fi->calledInLoop;
+  nfi->addrTaken = fi->addrTaken;
+  nfi->returnVal = NULL;
+  nfi->visited = fi->visited;
+  nfi->usesGlobals = fi->usesGlobals;
   return fi;
 }
 
@@ -403,8 +414,6 @@ void freePredecessors(BasicBlock * BB, BasicBlockContInfoMap bbc,
     ContextInfo * ci = bbc[predecessor];
     if(ci->deleted || ci->copyOrMain)
       continue;
-    // if(&predecessor->getParent()->getEntryBlock() == predecessor)
-    //   continue;
     TerminatorInst * ti = predecessor->getTerminator();
     bool allVisited = true;
     for(unsigned i = 0; i < ti->getNumSuccessors(); i++) {
@@ -436,3 +445,4 @@ void updateMemoryMap(ValueToValueMapTy & vmap, set<BasicBlock *> & writesToMemor
       writesToMemory.insert(nBB);
   } 
 }    
+

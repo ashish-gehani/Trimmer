@@ -31,3 +31,7 @@
 #### Debugging:
      
      The debugPrint macro should be set to 0 to disable debug print messages on the console.
+
+#### Running test cases:
+     cd test/InterConstprop/ && python test.py 3 23 {run and test all cases between inter3.c and inter23.c inclusive}
+     python test.py 3 3 {only run and test inter3.c}

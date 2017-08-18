@@ -44,22 +44,22 @@ def setExtern():
 		return False
 
 def makeMalloc(arrInd):
-	# mStr = tab + 'obj[' + str(arrInd) + '] = malloc(sizeof(struct HighType));\n'
-	# mStr += tab + 'obj[' + str(arrInd) + ']->lts = malloc(sizeof(struct LowTypeString));\n'
-	# mStr += tab + 'obj[' + str(arrInd) + ']->lti = malloc(sizeof(struct LowTypeInt));\n'
-	# mStr += tab + 'obj[' + str(arrInd) + ']->lts->x = malloc(1000 * sizeof(char));\n'
-	# mStr += tab + 'obj[' + str(arrInd) + ']->lts->y = malloc(1000 * sizeof(char));\n'
-	# mStr += tab + 'obj[' + str(arrInd) + ']->lti->x = malloc(1000 * sizeof(int));\n'
-	# mStr += tab + 'obj[' + str(arrInd) + ']->lti->y = malloc(1000 * sizeof(int));\n'
-	mStr = tab + 'obj[' + str(arrInd) + '] = createHighType();\n'
+	# mStr = tab + 'ht[' + str(arrInd) + '] = malloc(sizeof(struct HighType));\n'
+	# mStr += tab + 'ht[' + str(arrInd) + ']->lts = malloc(sizeof(struct LowTypeString));\n'
+	# mStr += tab + 'ht[' + str(arrInd) + ']->lti = malloc(sizeof(struct LowTypeInt));\n'
+	# mStr += tab + 'ht[' + str(arrInd) + ']->lts->x = malloc(1000 * sizeof(char));\n'
+	# mStr += tab + 'ht[' + str(arrInd) + ']->lts->y = malloc(1000 * sizeof(char));\n'
+	# mStr += tab + 'ht[' + str(arrInd) + ']->lti->x = malloc(1000 * sizeof(int));\n'
+	# mStr += tab + 'ht[' + str(arrInd) + ']->lti->y = malloc(1000 * sizeof(int));\n'
+	mStr = tab + 'ht[' + str(arrInd) + '] = createHighType();\n'
 	return mStr
 
 def makeExtern(arrInd):
-	return tab + 'externalFunc(obj[' + str(arrInd) + ']);\n'
+	return tab + 'externalFunc(ht[' + str(arrInd) + ']);\n'
 
 def makeAssign(arrInd, hvar, lvar, index, val):
 	idxStr = '[' + str(index) + ']'
-	return tab + 'obj[' + str(arrInd) + ']->' + hvar + '->' + lvar + idxStr + ' = ' + str(val) + ';\n'	
+	return tab + 'ht[' + str(arrInd) + ']->' + hvar + '->' + lvar + idxStr + ' = ' + str(val) + ';\n'	
 
 def makeMemCpy(arrInd, hvar, lvar, index):
 	idxStr = '[' + str(index) + ']'
@@ -71,19 +71,19 @@ def makeMemCpy(arrInd, hvar, lvar, index):
 		val += chr(alph)
 		ls.append(alph)
 	tup = (index, size)
-	Str = tab + 'memcpy(&obj[' + str(arrInd) + ']->' + hvar + '->' + lvar + idxStr + ', "' + val + '", ' + str(size) + ');\n'
+	Str = tab + 'memcpy(&ht[' + str(arrInd) + ']->' + hvar + '->' + lvar + idxStr + ', "' + val + '", ' + str(size) + ');\n'
 	return (tup, Str, ls)
 
 def makeCondAssign(arrInd, hvar, lvar, index, val):
 	idxStr = '[' + str(index) + ']'
-	return tab + 'obj[' + str(arrInd) + ']->' + hvar + '->' + lvar + idxStr + ' == ' + str(val)
+	return tab + 'ht[' + str(arrInd) + ']->' + hvar + '->' + lvar + idxStr + ' == ' + str(val)
 
 def makeStrcmpCond(arrInd, hvar, lvar, index, val):
 	idxStr = '[' + str(index) + ']'
-	return tab + '!strcmp(&obj[' + str(arrInd) + ']->' + hvar + '->' + lvar + idxStr + ', "' + val + '")'
+	return tab + '!strcmp(&ht[' + str(arrInd) + ']->' + hvar + '->' + lvar + idxStr + ', "' + val + '")'
 
 def makeNullCond(arrInd, sign):
-	return tab + 'obj[' + str(arrInd) + '] ' + sign + ' NULL'
+	return tab + 'ht[' + str(arrInd) + '] ' + sign + ' NULL'
 
 def mergeMemCpyInds(memCpyInds):
 	for key, indices in memCpyInds.iteritems():
@@ -170,8 +170,8 @@ def generateCondFuncs(structArr):
 			else: 
 				bnpConds += ' ||\n'.join(obj.Conds[startInd:]) + ' ||\n'
 		
-	bpStr = 'void branchPruned(struct HighType** obj) {\n'
-	bnpStr = 'void branchNotPruned(struct HighType** obj) {\n'
+	bpStr = 'void branchPruned() {\n'
+	bnpStr = 'void branchNotPruned() {\n'
 
 	if(bpConds != ""):
 		bpConds = tab + 'if(' + bpConds[4:-4] + ')\n'
@@ -189,14 +189,14 @@ def generateCondFuncs(structArr):
 	return bpStr + '\n' + bnpStr
 
 def generateDoMallocs(structArr):
-	dmStr = 'void doMallocs(struct HighType** obj) {\n'
+	dmStr = 'void doMallocs() {\n'
 	for st in structArr:
 		dmStr += st.mallocStr
 	dmStr += '}\n'
 	return dmStr
 
 def generateInitialize(structArr):
-	initStr = 'void initialize(struct HighType** obj) {\n'
+	initStr = 'void initialize() {\n'
 	for st in structArr:
 		initStr += st.assignStr
 	initStr += '}\n'
@@ -238,7 +238,7 @@ struct HighType {
 	struct LowTypeString * lts;
 	struct LowTypeInt * lti;
 };
-
+struct HighType** ht;
 struct HighType * createHighType() {
 	struct HighType * ht = malloc(sizeof(struct HighType));
 	ht->lts = malloc(sizeof(struct LowTypeString));
@@ -257,11 +257,11 @@ extern void externalFunc(struct HighType * ht);
 
 mainStr = '''
 int main() {
-	struct HighType** ht = malloc(%s * sizeof(struct HighType*));
-	doMallocs(ht);
-	initialize(ht);
-	branchPruned(ht);
-	branchNotPruned(ht);
+	ht = malloc(%s * sizeof(struct HighType*));
+	doMallocs();
+	initialize();
+	branchPruned();
+	branchNotPruned();
 }
 ''' % (str(arrSize))
 

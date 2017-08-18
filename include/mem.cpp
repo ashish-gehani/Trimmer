@@ -48,45 +48,45 @@ void ScalarAlloca::createData(Type* ty) {
 	}
 }
 
-void ScalarAlloca::copyData(void * cdata, bool * cinitialized, int csize) {
+void ScalarAlloca::copyData(void * cdata, bool * cinit, int csize) {
   size = csize;
   if(Btype == boolType) {
 	data = new bool[size];
 	initialized = new bool[size];
 	bool * castData = (bool *) data;
-	bool * cCastData = (bool *) cdata;
+	bool * copyData = (bool *) cdata;
 	for(int i = 0; i < size; i++) {
-		castData[i] = cCastData[i];
-		initialized[i] = cinitialized[i];
+		castData[i] = copyData[i];
+		initialized[i] = cinit[i];
 	}
   } else if(Btype == charType) {
 	data = new char[size + 1];
 	initialized = new bool[size];
 	char * castData = (char *) data;
-	char * cCastData = (char *) cdata;
+	char * copyData = (char *) cdata;
 	for(int i = 0; i < size; i++) {
-		castData[i] = cCastData[i];
-		initialized[i] = cinitialized[i];
+		castData[i] = copyData[i];
+		initialized[i] = cinit[i];
 		// errs() << castData[i] << " copy data " << initialized[i] << "\n";		
 	}
 	castData[size] = '\0';
-  }  else if(Btype == intType) {
+  } else if(Btype == intType) {
 	data = new int[size];
 	initialized = new bool[size];
 	int * castData = (int *) data;
-	int * cCastData = (int *) cdata;
+	int * copyData = (int *) cdata;
 	for(int i = 0; i < size; i++) {
-		castData[i] = cCastData[i];
-		initialized[i] = cinitialized[i];
+		castData[i] = copyData[i];
+		initialized[i] = cinit[i];
 	}
-  }  else if(Btype == longType) {
+  } else if(Btype == longType) {
 	data = new long[size];
 	initialized = new bool[size];
 	long * castData = (long *) data;
-	long * cCastData = (long *) cdata;
+	long * copyData = (long *) cdata;
 	for(int i = 0; i < size; i++) {
-		castData[i] = cCastData[i];
-		initialized[i] = cinitialized[i];
+		castData[i] = copyData[i];
+		initialized[i] = cinit[i];
 	}
   }
 }
@@ -152,38 +152,18 @@ ScalarAlloca::~ScalarAlloca() {
   delete [] initialized;
 }
 
-ScalarAlloca::ScalarAlloca(Type* ty) {
-	size = 1;
-	if(ArrayType * arType = dyn_cast<ArrayType>(ty)) {
-		size = arType->getNumElements();
-		createData(ty->getContainedType(0));	
-	} else
-		createData(ty);		
-	initialized = new bool[size];
-	fill(initialized, initialized + size, false);
-	allocatedType = ty;
-}
-
-ScalarAlloca::ScalarAlloca(BaseType bt, Type * ty) {
-	allocatedType = ty;
-	Btype = bt;
-}
-
-ScalarAlloca * ScalarAlloca::createClone() {
-	ScalarAlloca * sa = new ScalarAlloca(Btype, allocatedType);
-	sa->copyData(data, initialized, size);
-	return sa;
-}
-
 bool ScalarAlloca::checkConsistencyWith(ScalarAlloca * sa) {
 	if(allocatedType != sa->allocatedType ||
 	size != sa->getSize() ||
 	!sa->isBaseTypeOf(Btype))
 		return false;
+	
 	vector<unsigned> modcheck = modified;
 	vector<unsigned> secMod = sa->getModVect();
+
 	for(unsigned i = 0; i < secMod.size(); i++)
 		InsertUnique(modcheck, secMod[i]);
+	
 	if(Btype == boolType) {
 		bool * fData = (bool *) data;
 		bool * sData = (bool *) sa->data;
@@ -228,6 +208,29 @@ bool ScalarAlloca::checkConsistencyWith(ScalarAlloca * sa) {
 	return true;	
 }
 
+ScalarAlloca::ScalarAlloca(Type* ty) {
+	size = 1;
+	if(ArrayType * arType = dyn_cast<ArrayType>(ty)) {
+		size = arType->getNumElements();
+		createData(ty->getContainedType(0));	
+	} else
+		createData(ty);		
+	initialized = new bool[size];
+	fill(initialized, initialized + size, false);
+	allocatedType = ty;
+}
+
+ScalarAlloca::ScalarAlloca(BaseType bt, Type * ty) {
+	allocatedType = ty;
+	Btype = bt;
+}
+
+ScalarAlloca * ScalarAlloca::createClone() {
+	ScalarAlloca * sa = new ScalarAlloca(Btype, allocatedType);
+	sa->copyData(data, initialized, size);
+	return sa;
+}
+
 AggregateAlloca::AggregateAlloca(Type* ty) {
 	allocatedType = ty;
 	containedSize = 0;
@@ -237,7 +240,6 @@ AggregateAlloca::AggregateAlloca(Type* ty) {
 	constant = true;
 	allocaID = AggrAllocaID;
 	AggrAllocaID++;
-	// errs() << "creating " << allocaID << "\n";
 	if(StructType* st = dyn_cast<StructType>(ty)) {
 		Ntype = structType;
 		unsigned num = st->getNumElements();
@@ -313,7 +315,6 @@ void AggregateAlloca::checkConsistencyWith(AggregateAlloca * aa) {
 		setConstant(false);
 		return;		
 	}
-
 	for(unsigned i = 0; i < containedSize; i++)
 		contained[i]->checkConsistencyWith(aa->getContained(i));
 }

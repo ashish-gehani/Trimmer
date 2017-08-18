@@ -49,7 +49,9 @@ struct SpecializedCall{
 struct FuncInfo {
   unsigned numCallInsts;
   AggregateAlloca * returnVal;
-  bool calledInLoop, AddrTaken, visited;
+  vector<Function *> calledFunctions;
+  vector<GlobalVariable *> usedGlobals;
+  bool calledInLoop, addrTaken, visited, usesGlobals;
 };
 
 typedef map<Value *, SSAPointer *> ValSSAPointerMap;
@@ -79,3 +81,4 @@ struct ContextInfo {
   }
 };
 typedef map<BasicBlock *, ContextInfo *> BasicBlockContInfoMap;
+typedef pair<GlobalVariable *, unsigned> GlobalIdPair;
