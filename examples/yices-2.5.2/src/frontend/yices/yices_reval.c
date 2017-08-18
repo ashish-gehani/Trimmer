@@ -151,7 +151,7 @@ static char *mode_name;
 
 static smt_logic_t logic_code;
 static arith_code_t arith_code;
-static context_arch_t arch;
+static context_arch_t __attribute__((annotate("specializeArg"))) arch;
 static context_mode_t mode;
 static bool iflag;
 static bool qflag;
@@ -3054,7 +3054,7 @@ int yices_main(int argc, char *argv[]) {
   arch = CTX_ARCH_NOSOLVERS; 
   arch = CTX_ARCH_BV;
 
- 
+  
   printf("arch = %d \n", arch);
   //NOTE: init_ctx-> yices_create_context -> init_context -> init_solvers
   init_ctx(logic_code, arch, mode, iflag, qflag);

@@ -508,10 +508,11 @@ static inline context_t *context_of_header(dl_list_t *l) {
  * Allocate a fresh context object and insert it in the context_list
  * - WARNING: the context is not initialized
  */
-static inline context_t *alloc_context(void) {
+static inline context_t *  __attribute__((annotate("specializeFunc")))  alloc_context(void) {
+  
   context_elem_t *new_elem;
-
-  new_elem = (context_elem_t *) safe_malloc(sizeof(context_elem_t));
+  new_elem = (context_elem_t *)
+                                                         safe_malloc(sizeof(context_elem_t));
   list_insert_next(&context_list, &new_elem->header);
   return &new_elem->context;
 }
@@ -6980,9 +6981,9 @@ static void context_set_default_options(context_t *ctx, smt_logic_t logic, conte
  * - iflag = true to active the integer solver
  * - qflag = true to support quantifiers
  */
-context_t *yices_create_context(smt_logic_t logic, context_arch_t arch, context_mode_t mode, bool iflag, bool qflag) {
-  context_t *ctx;
+context_t *  __attribute__((annotate("specializeFunc"))) yices_create_context(smt_logic_t logic, context_arch_t arch, context_mode_t mode, bool iflag, bool qflag) {
 
+  context_t *ctx;
   printf("yices_create_context \n");
   //NOTE: Mark this allocation 'ctx'
   ctx = alloc_context();
