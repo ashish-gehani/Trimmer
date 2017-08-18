@@ -1,0 +1,4072 @@
+\documentclass[11pt,twoside,fleqn,openright,titlepage]{cslreport}
+\input{moretext}
+\raggedbottom
+\usepackage{cite,relative,url,alltt,times}
+\usepackage{amsfonts,latexsym,amssymb}
+
+\pagenumbering{roman}
+\setcounter{page}{0}
+\usepackage[bookmarks=true,hyperindex=true,colorlinks=true,linkcolor=black,citecolor=blue]{hyperref}
+
+%% \renewcommand{\baselinestretch}{1.5}
+
+%%
+%% Environment to list command-line arguments of a tool
+%% (this is based on the \newenvironment{description} from report.cls)
+%%
+\newenvironment{options}{
+\begin{list}{}{
+\setlength{\labelsep}{1.8ex}
+\setlength{\labelwidth}{0pt}
+\setlength{\itemindent}{-0.5\leftmargin}
+\settowidth{\leftmargin}{\texttt{--}}
+\renewcommand{\makelabel}{\optionlabel}}}
+{\end{list}}
+\newcommand*\optionlabel[1]{\hspace\labelsep\texttt{#1}}
+
+%%
+%% hyphen in Math mode for things like (bool-to-bv ...)
+%%
+\mathchardef\mhyphen="2D
+
+%%
+%% Macros for naturals, integers, reals
+%%
+\newcommand{\integers}{\ensuremath{\mathbb{Z}}}
+\newcommand{\naturals}{\ensuremath{\mathbb{N}}}
+\newcommand{\reals}{\ensuremath{\mathbb{R}}}
+\newcommand{\rationals}{\ensuremath{\mathbb{Q}}}
+
+
+\begin{document}
+\begin{titlepage}
+\date{\today}
+\author{Bruno Dutertre}
+\title{\textbf{Yices Manual\\[0.6em]
+Version 2.5}}
+\end{titlepage}
+
+\maketitle
+\cleardoublepageblank
+\tableofcontents
+%\listoffigures
+\cleardoublepage
+\setcounter{page}{0}
+\pagenumbering{arabic}
+
+
+\chapter{Introduction}
+
+This  manual   is  an  introduction   to  the  logic,   language,  and
+architecture  of the  Yices~2 SMT  solver. Yices  is developed  at SRI
+International's  Computer   Science  Laboratory  and   is  distributed
+free-of-charge for  noncommercial use,  under the  terms of  the Yices
+License   (reproduced   in    Appendix~\ref{license}).    To   discuss
+alternative     license     terms,     please    contact     us     at
+\texttt{fm-license@csl.sri.com}.
+
+
+\section{Download and Installation}
+
+The    latest   version    of   Yices~2    can   be    downloaded   at
+\url{http://yices.csl.sri.com}.  We  provide pre-compiled binaries for
+the platforms and operating systems listed in Table~\ref{versions}. We
+also provide source code.
+
+\subsection{Binary Distributions}
+
+\begin{table}
+\begin{center}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{OS/Hardware} & \textbf{Notes} \\
+\hline
+\hline
+Linux 64 bits & Kernel 2.6.24 or more recent \\
+\hline
+Mac~OS~X 64 bits &  Mac~OS~X El Capitan\\
+\hline
+Windows (32 and 64 bits) & \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Binary Distributions}
+\label{versions}
+\end{table}
+
+
+To download Yices~2, go to \url{http://yices.csl.sri.com} and select
+the distribution that you want to install. This will open a web page
+showing the license terms. If you agree to the terms, click on the
+``accept'' button to download a tarfile or zip file.  Untar or unzip
+the file and follow the instructions in the included README file.  The
+binary distributions are self-contained and do not require
+installation of third-party libraries.
+
+To complete installation on Linux or Mac~OS~X, the binary
+distributions include a shell script called \texttt{install-yices}. By
+default, this script installs Yices in \texttt{/usr/local}. If
+this is fine for you, type
+\begin{small}
+\begin{verbatim}
+   sudo ./install-yices
+\end{verbatim}
+\end{small}
+This will install the binaries in \texttt{/usr/local/bin}, the library
+in \texttt{/usr/local/lib}, and the header files in
+\texttt{/usr/local/include}. 
+
+\medskip\noindent
+To install Yices in a different location, you can type
+\begin{small}
+\begin{verbatim}
+   ./install-yices <directory>
+\end{verbatim}
+\end{small}
+(use \texttt{sudo} if necessary).
+
+
+\subsection{Source Distribution}
+
+The source distribution must be used for operating systems not listed
+in Table~\ref{versions} (or for old versions of Linux or Mac~OS~X). It
+is also useful if you desire to compile Yices with debugging
+information, or if you want to link Yices with your own version of the
+GMP library. The source is available as a tarfile at
+\url{http://yices.csl.sri.com}. To download it, you will be asked to
+agree to the Yices license terms (cf. Appendix~\ref{license}).
+
+Yices~2 is straightforward to compile on UNIX-like systems. Any recent
+version of GCC or Clang should work. The compilation uses standard
+tools such as \texttt{GNU make} and \texttt{sed}. It also requires the
+\texttt{gperf} utility and the GMP library. On many systems,
+\texttt{gperf} and GMP can be installed using package
+managers.  For example, on Ubuntu:
+\begin{small}
+\begin{verbatim}
+   sudo apt-get install libgmp-dev
+   sudo apt-get install gperf
+\end{verbatim}
+\end{small}
+After this, compiling and installing Yices use the following standard steps:
+\begin{small}
+\begin{verbatim}
+   ./configure
+   make -j
+   sudo make install
+\end{verbatim}
+\end{small}
+This will build binaries and libraries, and install them in \texttt{/usr/local}.
+You can change the installation location by giving a \texttt{--prefix} option
+to \texttt{configure}.
+
+For Windows, we recommend building Yices using Cygwin. If you want a
+version that works natively on Windows (i.e., does not depend on the
+Cygwin DLLs) then you can compile form Cygwin using the MinGW
+cross-compilers.  The file \texttt{doc/COMPILING} included in the
+source distribution gives more details.
+
+
+\subsection{Nonlinear Arithmetic and MCSAT}
+\label{mcsat-install}
+
+Yices includes a solver for nonlinear arithmetic based on the Model
+Constructing Satisfiability Calculus (MCSAT). This calculus and its
+application to nonlinear arithmetic are explained
+in~\cite{Jovanovic-etal:MCSATb:2013}
+and~\cite{deMouraJovanovic:nla:2012}.
+
+The precompiled, binary distributions of Yices include the MCSAT
+solver and can process nonlinear arithmetic problems. If you build
+Yices from source and want support for nonlinear arithmetic, you must
+install an external library first and enable MCSAT support when you
+compile Yices.
+
+This library is called ``libpoly.'' It implements various operations
+on polynomials used by the MCSAT solver. It is open source and it is
+available on GitHub (\url{https://github.com/SRI-CSL/libpoly}). Make
+sure that you download the latest version of libpoly. Yices~2.5
+requires libpoly v0.1.3.
+
+Once you have installed libpoly, you can compile Yices with MCSAT
+support as follows:
+\begin{small}
+\begin{verbatim}
+   ./configure --enable-mcsat
+   make -j
+   sudo make install
+\end{verbatim}
+\end{small}
+The usual environment variables (e.g., \texttt{CPPFLAGS} and
+\texttt{LDFLAGS}) can be used if you install libpoly in a non-standad
+location.
+
+
+\section{Content of the Distributions}
+
+The binary distributions include the Yices executables, the Yices
+library and header files, and examples and documentation.  Four
+solvers are currently included:
+\begin{itemize}
+\item \texttt{yices} is  the main SMT solver. It  can read and process
+  input given  in Yices~2's  specification language. This  language is
+  explained in Chapter~\ref{yices-shell}.
+
+\item  \texttt{yices-smt} is  a solver  for input  in  the SMT-LIB~1.2
+  notation~\cite{SMTLIB12:2006}.
+
+\item \texttt{yices-smt2} is a solver for input in the SMT-LIB~2.0
+  notation~\cite{SMTLIB20:2012}.
+
+\item \texttt{yices-sat}  is a Boolean satisfiability  solver that can
+  read input in the DIMACS CNF format.
+\end{itemize}
+The Yices library and header files allow you to use Yices via its
+API, as explained in Chapter~\ref{yices-api}.
+
+The source distribution includes source code for the above four
+solvers and for the library. It also includes documentation for the
+source, more examples and regression tests, various scripts and
+utilities, and the \LaTeX\ source for this manual.
+
+
+\section{Library Dependencies}
+
+Yices uses the GNU Multiple Precision Arithmetic Library (GMP).  The
+binary distribution are statically linked against GMP. If you build
+Yices from source, you will need to install GMP on your system.  The
+GMP library can be installed using common package managers in most
+Linux distributions. It can also be built and installed from
+source. For more information, please visit the GMP website
+\url{http://gmplib.org}. GMP is distributed under the LGPLv3 License,
+reproduced in Appendix~\ref{gmp-license}.
+
+Since release 2.4.0, Yices has optional support for nonlinear real
+arithmetic. As explained in Section~\ref{mcsat-install}, this depends
+on an external library for operations on polynomials which is
+available at~\url{https://github.com/SRI-CSL/libpoly}.
+
+
+\section{Supported Logics}
+
+The current Yices~2 release supports quantifier-free combinations of
+linear and non-linear integer and real arithmetic, uninterpreted
+function, arrays, and bitvectors. Currently, Yices~2 supports most
+SMT-LIB logics that do not involve quantifiers as summarized in
+Table~\ref{supported-logics}.  The meaning of the logics and theories
+in this table is explained at the SMT-LIB website
+(\url{http://www.smtlib.org}).  In addition, Yices~2 supports a more
+general set of array operations than required by SMT-LIB, and Yices~2
+has support for tuple and enumeration types, which are not part of
+SMT-LIB.
+
+%% ALIA
+%% AUFLIA
+%% AUFLIRA
+%% AUFNIRA
+%% LIA
+%% LRA
+%% NIA
+%% NRA
+%% QF_ABV
+%% QF_ALIA
+%% QF_AUFBV
+%% QF_AUFLIA
+%% QF_AX
+%% QF_BV
+%% QF_IDL
+%% QF_LIA
+%% QF_LRA
+%% QF_NIA
+%% QF_NRA
+%% QF_RDL
+%% QF_UF
+%% QF_UFBV
+%% QF_UFIDL
+%% QF_UFLIA
+%% QF_UFLRA
+%% QF_UFNIA
+%% QF_UFNRA
+%% UFLRA
+%% UFNIA
+
+\newcommand{\desc}[1]{\parbox[c][1.6em][c]{9cm}{{\footnotesize #1}}}
+\newcommand{\ddesc}[1]{\parbox[c][2.6em]{9cm}{{\footnotesize #1}}}
+
+\begin{table}
+\begin{small}
+\begin{center}
+\renewcommand{\arraystretch}{1}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{Logic} & \textbf{Description} & \textbf{Supported} \\
+\hline
+\hline
+\textsf{ALIA}  & \desc{Arrays, Linear Integer Arithmetic, Quantifiers} & no \\
+\hline
+\textsf{AUFLIA} & \desc{Arrays, Linear Integer Arithmetic, Quantifiers, Uninterpreted Functions} & no \\
+\hline
+\textsf{AUFLIRA} & \desc{Arrays, Mixed Linear Arithmetic, Quantifiers, Uninterpreted Functions} & no \\
+\hline
+\textsf{AUFNIRA} & \desc{Arrays, Nonlinear Arithmetic, Quantifiers, Uninterpreted Functions} & no \\
+\hline
+\textsf{LIA} & \desc{Linear Integer Arithmetic, Quantifiers} & no \\
+\hline
+\textsf{LRA} & \desc{Linear Real Arithmetic, Quantifiers} & no \\
+\hline
+\textsf{NIA} & \desc{Nonlinear Integer Arithmetic, Quantifiers} & no \\
+\hline
+\textsf{NRA} & \desc{Nonlinear Real Arithmetic, Quantifiers} & no \\
+\hline
+\textsf{QF\_ABV} & \desc{Arrays and Bitvectors} & yes \\
+\hline
+\textsf{QF\_ALIA} & \desc{Arrays and Linear Integer Arithmetic} & yes \\
+\hline
+\textsf{QF\_AUFBV} & \desc{Arrays, Bitvectors Uninterpreted Functions} & yes \\
+\hline
+\textsf{QF\_AUFLIA} & \desc{Arrays, Linear Integer Arithmetic, Uninterpreted Functions} & yes \\
+\hline
+\textsf{QF\_AX} & \desc{Arrays (with extensionality)} & yes \\
+\hline
+\textsf{QF\_BV} & \desc{Bitvectors} & yes \\
+\hline
+\textsf{QF\_IDL} & \desc{Integer Difference Logic}  & yes \\
+\hline
+\textsf{QF\_LIA} & \desc{Linear Integer Arithmetic}  & yes \\
+\hline
+\textsf{QF\_LIRA} & \desc{Mixed Linear Arithmetic}  & yes \\
+\hline
+\textsf{QF\_LRA} & \desc{Linear Real Arithmetic}  & yes \\
+\hline
+\textsf{QF\_NIA} & \desc{Nonlinear Integer Arithmetic}  & yes \\
+\hline
+\textsf{QF\_NIRA} & \desc{Mixed Nonlinear Arithmetic}  & yes \\
+\hline
+\textsf{QF\_NRA} & \desc{Nonlinear Real Arithmetic}  & yes \\
+\hline
+\textsf{QF\_RDL} & \desc{Real Difference Logic}  & yes \\
+\hline
+\textsf{QF\_UF} & \desc{Uninterpreted Functions}  & yes \\
+\hline
+\textsf{QF\_UFBV} & \desc{Uninterpreted Functions, Bitvectors} & yes \\
+\hline
+\textsf{QF\_UFIDL} & \desc{Uninterpreted Functions, Integer Difference Logic} & yes \\
+\hline
+\textsf{QF\_UFLIA} & \desc{Uninterpreted Functions, Linear Integer Arithmetic} & yes \\
+\hline
+\textsf{QF\_UFLRA} & \desc{Uninterpreted Functions, Linear Real Arithmetic} & yes \\
+\hline
+\textsf{QF\_UFNIA} & \desc{Uninterpreted Functions, Nonlinear Integer Arithmetic} & yes \\
+\hline
+\textsf{QF\_UFNIRA} & \desc{Uninterpreted Functions, Mixed Nonlinear Arithmetic} & yes \\
+\hline
+\textsf{QF\_UFNRA} & \desc{Uninterpreted Functions, Nonlinear Real Arithmetic} & yes \\
+\hline
+\textsf{UFLRA} & \desc{Nonlinear Real Arithmetic, Quantifiers, Uninterpreted Functions} & no \\
+\hline
+\textsf{UFNIA} & \desc{Nonlinear Integer Arithmetic, Quantifiers, Uninterpreted Functions} & no \\
+\hline
+\end{tabular}
+\end{center}
+\end{small}
+\caption{Logics Supported by Yices~2}
+\label{supported-logics}
+\end{table}
+
+\newpage
+
+\section{Getting Help and Reporting Bugs}
+
+The Yices  website provides the  latest release and  information about
+Yices.  For bug  reports and questions about Yices,  please contact us
+via the Yices mailing lists:
+\begin{itemize}
+\item Send e-mail to \texttt{yices-help@csl.sri.com} if you have
+  questions about Yices usage or installation.
+
+  This mailing list is moderated, but you do not need to register to
+  post to it. You can register to this mailing list if you are
+  interested in helping others.
+
+\item To report a bug, send e-mail to \texttt{yices-bugs@csl.sri.com}.
+
+  Please include enough information in your bug report to enable us to
+  reproduce and fix the problem. Figure~\ref{good-report} shows what a
+  good bug report looks like. This example is an edited version of
+  real bug report that we actually received (with private information
+  removed). Figure~\ref{bad-report} shows an example of poor bug
+  report. This example is fictitious but representative of what we
+  sometimes receive on our mailing list.
+
+  Please try to use Figure~\ref{good-report} as a template and include
+  answers to the following questions:
+    \begin{itemize}
+    \item Which version of Yices are you using?
+    \item On which hardware and OS?
+    \item How can we reproduce the bug? If at all possible send an input file
+      or program fragment.
+    \end{itemize}
+\end{itemize}
+
+\begin{figure}
+\begin{center}
+\begin{footnotesize}
+\begin{verbatim}
+   From: ...
+   Subject: Yices 1.0.36 segfault
+   To: yices-bugs@csl.sri.com
+
+   Hi,
+
+   I am experiencing a segmentation fault from Yices. I have attached
+   a small test case that causes the crash. I am using Yices 1.0.36 on
+   x86_64 statically linked against GMP on Ubuntu 12.04.
+   ...
+\end{verbatim}
+\end{footnotesize}
+\end{center}
+\caption{Good Bug Report}
+\label{good-report}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\begin{footnotesize}
+\begin{verbatim}
+   From: ...
+   Subject: Segmentation fault
+   To: yices-bugs@csl.sri.com
+
+   I have just downloaded Yices. After I compile my code and link it
+   with Yices, there is a segmentation fault when I run the executable.
+
+   Can you help?
+
+   Thanks,
+   ...
+\end{verbatim}
+\end{footnotesize}
+\end{center}
+\caption{Poor Bug Report}
+\label{bad-report}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\begin{footnotesize}
+\begin{verbatim}
+   From: ...
+   Subject: Invitation to Connect on LinkedIn
+   To: yices-bugs@csl.sri.com
+
+   I'd like to add you to my professional network on LinkedIn.
+
+   ...
+\end{verbatim}
+\end{footnotesize}
+\end{center}
+\caption{Terrible Bug Report}
+\label{terrible-report}
+\end{figure}
+
+
+
+
+\chapter{Yices~2 Logic}
+\label{language}
+
+Yices~2 specifications are  written in a typed logic.  The language is
+intended to be simple enough  for efficient processing by the tool and
+expressive  enough  for most  applications.  The  Yices~2 language  is
+similar to the  logic supported by Yices~1, but  the most complex type
+constructs have been removed.
+
+
+\section{Type System}
+\label{type-system}
+
+Yices~2 has a few built-in types for primitive objects:
+\begin{itemize}
+\item the arithmetic types \texttt{int} and \texttt{real}
+\item the Boolean type \texttt{bool}
+\item the type \texttt{(bitvector k)} of bitvectors of size $k$,
+ where $k$ is a positive integer.
+\end{itemize}
+All these built-in  types are {\em atomic\/}. The  set of atomic types
+can be extended by declaring  new {\em uninterpreted types\/} and {\em
+  scalar types\/}. An uninterpreted type denotes a nonempty collection
+of objects  with no  cardinality constraint. A  scalar type  denotes a
+nonempty, {\em finite\/}  set of objects. The cardinality  of a scalar
+type is defined when the type is created.
+
+\medskip\noindent
+In  addition to the  atomic types,  Yices~2 provides  constructors for
+tuple and function types. The set  of all Yices~2 types can be defined
+inductively as follows:
+\begin{itemize}
+\item Any atomic type $\tau$ is a type.
+\item  If $n>0$  and  $\sigma_1,\ldots,\sigma_n$ are  $n$ types,  then
+  $\sigma   =  (\sigma_1   \times  \ldots   \times  \sigma_n)$   is  a
+  type. Objects of type  $\sigma$ are tuples $(x_1,\ldots, x_n)$ where
+  $x_i$ is an object of type $\sigma_i$.
+\item If  $n>0$ and  $\sigma_1,\ldots,\sigma_n$ and $\tau$  are types,
+  then  $\sigma  =  (\sigma_1\times  \ldots\times\sigma_n  \rightarrow
+  \tau)$ is a  type. Objects of type $\sigma$  are functions of domain
+  $\sigma_1\times\ldots\times\sigma_n$ and range $\tau$.
+\end{itemize}
+By construction,  all the  types are nonempty.  Yices does not  have a
+specific  type  constructor  for  arrays  since  the  logic  does  not
+distinguish  between  arrays  and  functions. For  example,  an  array
+indexed by integers is simply a function of domain $\mathtt{int}$.
+
+\medskip\noindent
+Yices~2 uses a simple form  of subtyping. Given two types $\sigma$ and
+$\tau$, let $\sigma\sqsubset\tau$ denote that $\sigma$ is a subtype of
+$\tau$. Then the subtype relation is defined by the following rules:
+\begin{itemize}
+\item $\tau\sqsubset\tau$ (any type is a subtype of itself)
+\item   $\mathtt{int}\sqsubset\mathtt{real}$  (the  integers   form  a
+  subtype of the reals)
+\item If $\sigma_1\sqsubset\tau_1,\ldots,\sigma_n\sqsubset\tau_n$ then
+$(\sigma_1\times \ldots\times\sigma_n)\sqsubset (\tau_1\times\ldots\times\tau_n)$.
+\item If $\tau\sqsubset\tau'$ then
+  $(\sigma_1\times\ldots\times\sigma_n\rightarrow\tau)\sqsubset
+  (\sigma_1\times\ldots\times\sigma_n\rightarrow\tau')$.
+\end{itemize}
+For  example, the  type  $(\mathtt{int}\times\mathtt{int})$ (pairs  of
+integers) is a  subtype of $(\mathtt{real}\times\mathtt{real})$ (pairs
+of reals).
+
+\medskip\noindent
+Two types,  $\tau$ and $\tau'$, are  said to be  {\em compatible\/} if
+they have a common supertype, that is, if there exists a type $\sigma$
+such that  $\tau\sqsubset\sigma$ and $\tau'\sqsubset\sigma$.   If that
+is the  case, then there exists  a unique minimal  supertype among all
+the common supertypes.  We denote the minimal supertype  of $\tau$ and
+$\tau'$ by $\tau\sqcup\tau'$. By definition, we then have
+$$\tau\sqsubset\sigma~~\mathtt{and}~~\tau'\sqsubset\sigma~~\Rightarrow~~\tau\sqcup\tau'\:\sqsubset\:\sigma.$$
+For            example,           the            tuple           types
+$\tau=(\mathtt{int}\times\mathtt{real}\times\mathtt{int})$          and
+$\tau=(\mathtt{int}\times\mathtt{int}\times\mathtt{real})$          are
+compatible.   Their   minimal    supertype   is   $\tau\sqcup\tau'   =
+(\mathtt{int}\times\mathtt{real}\times\mathtt{real})$.     The    type
+$(\mathtt{real}\times\mathtt{real}\times\mathtt{real})$   is   also  a
+common supertype of $\tau$ and $\tau'$ but it is not minimal.
+
+
+\section{Terms and Formulas}
+\label{terms-and-formulas}
+
+In   Yices~2,  the   atomic  terms   include  the   Boolean  constants
+(\texttt{true} and \texttt{false}) as well as arithmetic and bitvector
+constants.
+
+\medskip\noindent
+When a scalar type $\tau$ of cardinality $n$ is declared, $n$ distinct
+constant   $c_1,\ldots,c_n$  of  type   $\tau$  are   also  implicitly
+defined. In the Yices~2 syntax, this  is done via a declaration of the
+form:
+\begin{small}
+\begin{verbatim}
+  (define-type tau (scalar c1 ... cn))
+\end{verbatim}
+\end{small}
+An  equivalent functionality  is provided  by the  Yices API.  The API
+allows one to create a new  scalar type and to access $n$ constants of
+that  type indexed  by  integers  between $0$  and  $n-1$ (check  file
+\texttt{include/yices.h} for explanations).
+
+\medskip\noindent
+The user can also declare {\em uninterpreted constants\/} of arbitrary
+types.  Informally,  uninterpreted constants  of  type  $\tau$ can  be
+considered like  global variables, but Yices (in  particular the Yices
+API) makes a distinction between  {\em variables\/} of type $\tau$ and
+{\em  uninterpreted constants\/}  of type  $\tau$. In  the  Yices API,
+variables are used to build quantified expressions and to support term
+substitutions. Free variables are not allowed to occur in assertions.
+
+\medskip\noindent
+The   term   constructors  include   the   common  Boolean   operators
+(conjunction,   disjunction,    negation,   implication,   etc.),   an
+if-then-else  constructor, equality,  function application,  and tuple
+constructor   and   projection.  In   addition,   Yices  provides   an
+\texttt{update}   operator   that   can   be  applied   to   arbitrary
+functions. The  type-checking rules for these  primitive operators are
+described in Figure~\ref{type-checking},  where the notation $t::\tau$
+means ``term $t$ has type $\tau$''.
+
+\medskip\noindent
+There are no separate syntax or constructors for formulas. In Yices~2,
+a formula is simply a term of Boolean type.
+
+\begin{figure}
+\begin{center}
+Boolean Operators\\[1ex]
+\begin{displaymath}
+\hspace{3em}
+\frac{~~t::\mathtt{bool}~~}{~~(\mathtt{not}\ t)::\mathtt{bool}~~}
+\hspace{2em}
+\frac{~~t_1::\mathtt{bool}~~~t_2::\mathtt{bool}~~}{~~(\mathtt{implies}\ t_1\ t_2)::\mathtt{bool}~~}
+\end{displaymath}
+\begin{displaymath}
+\hspace{2em}
+\frac{~~t_1::\mathtt{bool}\ldots t_n::\mathtt{bool}~~}{~~(\mathtt{or}\ t_1\ldots t_n)::\mathtt{bool}~~}
+\hspace{2em}
+\frac{~~t_1::\mathtt{bool}\ldots t_n::\mathtt{bool}~~}{~~(\mathtt{and}\ t_1\ldots t_n)::\mathtt{bool}~~}
+\end{displaymath}
+\vspace*{2ex}
+Equality\\[1ex]
+\begin{displaymath}
+\hspace{2em}
+\frac{~~t_1::\tau_1~~~t_2::\tau_2~~}{~~(t_1 = t_2)::\mathtt{bool}~~}\mbox{~~provided $\tau_1$ and $\tau_2$ are compatible}
+\end{displaymath}
+\vspace*{2ex}
+If-then-else\\[1ex]
+\begin{displaymath}
+\hspace{2em}
+\frac{~~c::\mathtt{bool}~~~t_1::\tau_1~~~t_2::\tau_2~~}{~~(\mathtt{ite}\ c\ t_1\ t_2)::\tau_1\sqcup\tau_2~~}
+\mbox{~~provided $\tau_1$ and $\tau_2$ are compatible}
+\end{displaymath}
+\vspace*{2ex}
+Tuple Constructor and Projection\\[1ex]
+\begin{displaymath}
+\hspace{2em}
+\frac{~~t_1::\tau_1 \ldots t_n::\tau_n~~}{~~(\mathtt{tuple}\ t_1\ldots t_n)::(\tau_1\times\ldots\times\tau_n)~~}
+\hspace{2em}
+\frac{~~t::(\tau_1\times\ldots\times\tau_n)~~}{~~(\mathtt{select}_i\ t)::\tau_i~~}
+\end{displaymath}
+\vspace*{2ex}
+Function Application\\[1ex]
+\begin{displaymath}
+\hspace{2em}
+\frac{~~f::(\tau_1\times\ldots\times\tau_n\rightarrow\tau)~~~t_1::\sigma_1\ldots t_n::\sigma_n~~~\sigma_1\sqsubset\tau_1\ldots\sigma_n\sqsubset\tau_n~~}{~~~(f\ t_1\ldots t_n)::\tau~~~}
+\end{displaymath}
+\vspace*{2ex}
+Function Update\\[1ex]
+\begin{displaymath}
+\hspace{2em}
+\frac{~~f::(\tau_1\times\ldots\times\tau_n\rightarrow\tau)~~~t_1::\sigma_1\ldots t_n::\sigma_n~~v::\sigma~~\sigma_i\sqsubset\tau_i~~~\sigma\sqsubset\tau~~}{~~~(\mathtt{update}\ f\ t_1\ldots t_n\ v)::(\tau_1\times\ldots\times\tau_n\rightarrow\tau)~~~}
+\end{displaymath}
+\vspace*{2ex}
+\end{center}
+\caption{Primitive Operators and Type Checking}
+\label{type-checking}
+\end{figure}
+
+\medskip\noindent
+The semantics of most of these operators is standard. The update
+operator for functions is characterized by the following
+axioms\footnote{These are the main axioms of the McCarthy theory of
+  arrays.}:
+\begin{eqnarray*}
+((\mathtt{update}\ f\ t_1\ldots t_n\ v)\ t_1\ldots t_n) & = & v \\
+u_1\neq t_1\vee\ldots\vee u_n\neq t_n\Rightarrow((\mathtt{update}\ f\ t_1\ldots t_n\ v)\ u_1\ldots u_n) & = & (f\ u_1\ldots u_n)
+\end{eqnarray*}
+In  other  words, $(\mathtt{update}\  f\  t_1\ldots  t_n\  v)$ is  the
+function  equal  to  $f$  at  all  points  except  $(t_1,\ldots,t_n)$.
+Informally,  if  $f$  is  interpreted  as an  array  then  the  update
+corresponds  to ``storing''  $v$ at  position $t_1,\ldots,t_n$  in the
+array.   Reading  the content  of  the  array  is nothing  other  than
+function application: $(f\ i_1\ldots i_n)$ is the content of the array
+at position $i_1,\ldots, i_n$.
+
+\medskip\noindent
+The full Yices~2 language has a few more operators not described here,
+and  it includes  existential  and universal  quantifiers.  We do  not
+describe the  type-checking rules  for quantifiers here  since Yices~2
+has limited support for quantified formulas at this point.
+
+
+\section{Theories}
+
+In addition  to the generic operators presented  previously, the Yices
+language includes the standard arithmetic  operators and a rich set of
+bitvector operators.
+
+\subsection{Arithmetic}
+\label{arithmetic-general}
+
+Arithmetic constants  are arbitrary precision integers  and rationals.
+Although  Yices  uses  exact  arithmetic, rational  constants  can  be
+written  in  floating-point   notation.   Internally,  Yices  converts
+floating-point input  to rationals.   For example,  the floating-point
+expression \texttt{3.04e-1} is converted to $38/125$.
+
+\medskip\noindent The Yices language supports the traditional
+arithmetic operators (i.e., addition, subtraction, multiplication).
+The solver for non-linear arithmetic supports arbitrary divsion. The
+linear-arithmetic solver is limited to division by non-zero constants.
+For example, the expression $(x + 4y)/3$ is allowed in linear
+arithmetic, but $3/(x + 4y)$ is not. The arithmetic predicates are the
+usual comparison operators, including both strict and nonstrict
+inequalities.
+
+\medskip\noindent
+We've added more arithmetic operations since Yices 2.4:
+\begin{itemize}
+\item \texttt{abs}: absolute value
+\item \texttt{floor}, \texttt{ceil}: integer floor and ceiling
+\item \texttt{div}, \texttt{mod}: integer division and modulo
+\item \texttt{divides}, \texttt{is-int}: check for divisibility and integrality
+\end{itemize}
+These operations have the usual meaning. As in the SMT-LIB Ints theory, 
+the division and modulo operations are defined by the following constraints:
+$$(\mathtt{div}\ x\ k)\in \integers$$
+$$x~=~k.(\mathtt{div}\ x\ k) + (\mathtt{mod}\ x\ k)$$
+$$0~\leq~(\mathtt{mod}\ x\ k)~< |k|.$$ For these operations, Yices~2
+extends the SMT-LIB definitions by allowing both $x$ and $k$ to be
+arbitrary reals, not just integers.
+
+
+\subsection{Bitvectors}
+\label{bitvector-general}
+
+Yices supports all the bitvector operators defined in the SMT-LIB
+standards~\cite{SMTLIB12:2006,SMTLIB20:2012}.  The most commonly used
+operators are listed in Table~\ref{bitvectors}.  They include
+bitvector arithmetic (where bitvectors are interpreted either as
+unsigned integers or as signed integers in two's complement
+representation), logical operators such as bitwise OR or AND, logical
+and arithmetic shifts, concatenation, and extraction of
+subvectors. Other operators are defined in the theory QF\_BV of
+SMT-LIB (cf.~\url{http://www.smtlib.org}); Yices~2 supports all of them.
+
+
+\begin{table}
+%% \renewcommand{\arraystretch}{1}
+\begin{tabular}{|l|l|}
+\hline
+Operator and Type & Meaning\\
+\hline
+$\mathtt{bvadd}::((\mathtt{bv}\ n)\times (\mathtt{bv}\ n) \rightarrow (\mathtt{bv}\ n))$ &
+addition\\
+$\mathtt{bvsub}::((\mathtt{bv}\ n)\times (\mathtt{bv}\ n) \rightarrow (\mathtt{bv}\ n))$ &
+subtraction\\
+$\mathtt{bvmul}::((\mathtt{bv}\ n)\times (\mathtt{bv}\ n) \rightarrow (\mathtt{bv}\ n))$ &
+multiplication\\
+$\mathtt{bvneg}::((\mathtt{bv}\ n) \rightarrow (\mathtt{bv}\ n))$ &
+2's complement opposite\\
+\hline
+$\mathtt{bvudiv}::((\mathtt{bv}\ n)\times (\mathtt{bv}\ n) \rightarrow (\mathtt{bv}\ n))$ &
+quotient in unsigned division \\
+$\mathtt{bvudiv}::((\mathtt{bv}\ n)\times (\mathtt{bv}\ n) \rightarrow (\mathtt{bv}\ n))$ &
+remainder in unsigned division \\
+$\mathtt{bvsdiv}::((\mathtt{bv}\ n)\times (\mathtt{bv}\ n) \rightarrow (\mathtt{bv}\ n))$ &
+quotient in signed division \\
+& with rounding toward zero\\
+$\mathtt{bvsrem}::((\mathtt{bv}\ n)\times (\mathtt{bv}\ n) \rightarrow (\mathtt{bv}\ n))$ &
+remainder in signed division \\
+& with rounding toward zero\\
+$\mathtt{bvsmod}::((\mathtt{bv}\ n)\times (\mathtt{bv}\ n) \rightarrow (\mathtt{bv}\ n))$ &
+remainder in signed division\\
+& with rounding toward $-\infty$\\
+\hline
+$\mathtt{bvule}::((\mathtt{bv}\ n)\times (\mathtt{bv}\ n) \rightarrow \mathtt{bool}$ &
+unsigned less than or equal\\
+$\mathtt{bvuge}::((\mathtt{bv}\ n)\times (\mathtt{bv}\ n) \rightarrow \mathtt{bool}$ &
+unsigned greater than or equal\\
+$\mathtt{bvult}::((\mathtt{bv}\ n)\times (\mathtt{bv}\ n) \rightarrow \mathtt{bool}$ &
+unsigned less than\\
+$\mathtt{bvugt}::((\mathtt{bv}\ n)\times (\mathtt{bv}\ n) \rightarrow \mathtt{bool}$ &
+unsigned greater than\\
+$\mathtt{bvsle}::((\mathtt{bv}\ n)\times (\mathtt{bv}\ n) \rightarrow \mathtt{bool}$ &
+signed less than or equal\\
+$\mathtt{bvsge}::((\mathtt{bv}\ n)\times (\mathtt{bv}\ n) \rightarrow \mathtt{bool}$ &
+signed greater than or equal\\
+$\mathtt{bvslt}::((\mathtt{bv}\ n)\times (\mathtt{bv}\ n) \rightarrow \mathtt{bool}$ &
+signed less than\\
+$\mathtt{bvsgt}::((\mathtt{bv}\ n)\times (\mathtt{bv}\ n) \rightarrow \mathtt{bool}$ &
+signed greater than\\
+\hline
+$\mathtt{bvand}::((\mathtt{bv}\ n)\times (\mathtt{bv}\ n) \rightarrow (\mathtt{bv}\ n))$ &
+bitwise and\\
+$\mathtt{bvor}::((\mathtt{bv}\ n)\times (\mathtt{bv}\ n) \rightarrow (\mathtt{bv}\ n))$ &
+bitwise or\\
+$\mathtt{bvnot}::((\mathtt{bv}\ n) \rightarrow (\mathtt{bv}\ n))$ &
+bitwise negation\\
+$\mathtt{bvxor}::((\mathtt{bv}\ n)\times (\mathtt{bv}\ n) \rightarrow (\mathtt{bv}\ n))$ &
+bitwise exclusive or\\
+\hline
+$\mathtt{bvshl}::((\mathtt{bv}\ n)\times (\mathtt{bv}\ n) \rightarrow (\mathtt{bv}\ n))$ &
+shift left\\
+$\mathtt{bvlshr}::((\mathtt{bv}\ n)\times (\mathtt{bv}\ n) \rightarrow (\mathtt{bv}\ n))$ &
+logical shift right\\
+$\mathtt{bvashr}::((\mathtt{bv}\ n)\times (\mathtt{bv}\ n) \rightarrow (\mathtt{bv}\ n))$ &
+arithmetic shift right\\
+\hline
+$\mathtt{bvconcat}::((\mathtt{bv}\ n)\times (\mathtt{bv}\ m) \rightarrow (\mathtt{bv}\ n+m))$ &
+concatenation \\
+$\mathtt{bvextract}_{i,j}$$((\mathtt{bv}\ n) \rightarrow (\mathtt{bv}\ m))$ &
+extract bits $i$ down to $j$ \\
+& form a bitvector of size $n$ \\
+\hline
+\end{tabular}
+\caption{Bitvector Operators}
+\label{bitvectors}
+\end{table}
+
+\medskip\noindent The semantics of all the bitvector operators is
+defined in the SMT-LIB standard. Like other SMT solvers, Yices~2
+follows the BTOR conventions for bitvector division by
+zero~\cite{Brummayer-etal:2008}. Until recently, this was not the
+semantics defined by the SMT-LIB standard. The SMT-LIB semantics
+changed in October 2015. It is now the same as BTOR:
+\begin{description}
+\item[Unsigned Division:]  If $b$ is  the zero bitvector  of $n$
+  bits then
+\begin{eqnarray*}
+(\mathtt{bvudiv}\ a\ b) & = & \mathtt{0b111...1} \\
+(\mathtt{bvurem}\ a\ b) & = & a
+\end{eqnarray*}
+In  general, the  quotient $(\mathtt{bvudiv}\  a\ b)$  is  the largest
+unsigned integer that  can be represented on $n$  bits, and is smaller
+than $a/b$,  and the following  identity holds for all  bitvectors $a$
+and $b$
+\begin{eqnarray*}
+a & = & (\mathtt{bvadd}\ (\mathtt{bvmul}\ (\mathtt{bvudiv}\ a\ b)\ b)\ (\mathtt{bvurem}\ a\ b)).
+\end{eqnarray*}
+
+\item[Signed Division] If $b$ is the zero bitvector of $n$ bits then
+\begin{eqnarray*}
+(\mathtt{bvsdiv}\ a\ b) & = & \mathtt{0b000..01}~~\mbox{\rm if $a$ is negative} \\
+(\mathtt{bvsdiv}\ a\ b) & = & \mathtt{0b111...1}~~\mbox{\rm if $a$ is non-negative} \\
+(\mathtt{bvsrem}\ a\ b) & = & a \\
+(\mathtt{bvsmod}\ a\ b) & = & a
+\end{eqnarray*}
+\end{description}
+
+\medskip\noindent Beside the SMT-LIB operations, Yices includes two
+operators to convert between arrays of Booleans and bitvectors. These
+operators were introduced in Yices~2.2.2.
+\begin{itemize}
+\item $(\mathtt{bool\mhyphen to\mhyphen bv}\ b_1 \ldots b_n)$ is the
+  bitvector obtained by concatenating $n$ Boolean terms
+  $b_1,\ldots,b_n$. The high-order bit is $b_1$ and the low-order bit
+  is $b_n$.  For example, the expression
+$$(\mathtt{bool\mhyphen to\mhyphen bv}\ \:\mathtt{true}\ \:\mathtt{false}\ \:\mathtt{false}\ \:\mathtt{false})$$
+is the same as the bitvector constant $\mathtt{0b1000}$.
+\item $(\mathtt{bit}\ a\ i)$ extracts the $i$-th bit of bitvector $a$
+  as a Boolean term. If $a$ has $n$ bits, then $i$ must be an index
+  between $0$ and $n-1$. The low-order bit has index 0, and the high-order bit has index $n-1$.
+For example, we have
+\begin{eqnarray*}
+(\mathtt{bit}\ (\mathtt{bool\mhyphen to\mhyphen bv}\ \:\mathtt{false}\ \:\mathtt{b}\ \:\mathtt{true}\ \:\mathtt{true})\ \:2) & = & \mathtt{b},
+\end{eqnarray*}
+where $\mathtt{b}$ is a Boolean term.
+\begin{small}
+\end{small}
+\end{itemize}
+
+
+
+
+\chapter{Yices~2 Architecture}
+\label{architecture-chapter}
+
+Yices~2 has a modular architecture.  You can select a specific
+combination of theory solvers for your needs using the API or the
+\texttt{yices} executable.  With the API, you can maintain several
+independent contexts in parallel, possibly each using different
+solvers and settings.
+
+\section{Main Components}
+
+The Yices~2  software can be  conceptually decomposed into  three main
+modules:
+\begin{description}
+\item[Term Database] Yices~2 maintains  a global database in which all
+  terms and types are stored. Yices~2 provides an API for constructing
+  terms, formulas, and types in this database.
+
+\item[Context Management] A  context is a central  data structure that
+  stores asserted formulas. Each context  contains a set of assertions
+  to  be  checked  for  satisfiability.   The  context-management  API
+  supports  operations for  creating  and  initializing contexts,  for
+  asserting   formulas  into   a   context,  and   for  checking   the
+  satisfiability of the asserted  formulas.  Optionally, a context can
+  support  operations  for  retracting  assertions  using  a  push/pop
+  mechanism.  Several  contexts  can be  constructed  and  manipulated
+  independently.
+
+  Contexts are highly customizable.  Each context can be configured to
+  support  a  specific  theory,  and  to  use  a  specific  solver  or
+  combination of solvers.
+
+\item[Model Management] If  the set of formulas asserted  in a context
+  is satisfiable, then one can construct  a model of the formulas. The
+  model maps symbols of the formulas to concrete values (e.g., integer
+  or  rational  values, or  bitvector  constants).   The API  provides
+  functions to build and query models.
+\end{description}
+
+Figure~\ref{top-level-architecture}  shows the  top-level architecture
+of Yices~2, divided into the three main modules. Each context consists
+of  two separate  components:  The {\em  solver\/}  employs a  Boolean
+satisfiability solver and  decision procedures for determining whether
+the   formulas  asserted   in  the   context  are   satisfiable.   The
+\emph{simplifier/internalizer\/} component converts the format used by
+the term  database into  the internal format  used by the  solver.  In
+particular,  the  internalizer rewrites  all  formulas in  conjunctive
+normal form, which is used by the internal SAT solver.
+\begin{figure}
+\begin{center}
+\includegraphics[width=10cm]{toplevel-arch}
+\end{center}
+\caption{Top-level Yices~2 Architecture}
+\label{top-level-architecture}
+\end{figure}
+
+
+\section{Solvers}
+\label{solvers}
+
+In Yices~2, it is possible to select a different solver (or
+combination of solvers) for the problem of interest. Each context can
+thus be configured for a specific class of formulas. For example, you
+can use a solver specialized for linear arithmetic, or a solver that
+supports the full Yices~2 language. Figure~\ref{solver-architecture}
+shows the architecture of the most general solver available in
+Yices~2. A major component of all solvers is a SAT solver based on the
+Conflict-Driven Clause Learning (CDCL) procedure. The SAT solver is
+coupled with one or more so-called \emph{theory solvers}. Each theory
+solver implements a decision procedure for a particular theory.
+Currently, Yices~2 includes four main theory solvers:
+\begin{itemize}
+\item The \emph{UF Solver} deals with the theory of uninterpreted
+  functions with equality\footnote{UF stands for uninterpreted
+    functions.}. It implements a decision procedure based on computing
+  congruence closures, similar to the Simplify
+  system~\cite{Detlefs-etal:JACM2005}, with other ideas borrowed
+  from~\cite{Nieuwenhuis+Oliveras:UF:2007}.
+\item The \emph{Arithmetic Solver} deals with linear integer and real
+  arithmetic.  It implements a decision procedure based on the Simplex
+  algorithm~\cite{DutertredeMoura:cav06,DutertredeMoura:report06}.
+\item The \emph{Bitvector Solver} deals with the theory of bitvectors.
+\item  The \emph{Array  Solver}  implements a  decision procedure  for
+  McCarthy's theory of arrays.
+\end{itemize}
+Two arithmetic solvers can be used in place of the Simplex-based
+solver for integer or real difference logic. These solvers implement a
+decision procedure based on the Floyd-Warshall algorithm. These
+solvers are more specialized and limited than the Simplex-based
+solver. They must be used standalone; they cannot be combined with the
+UF solver.
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=10cm]{yices2-arch}
+\end{center}
+\caption{Solver Components}
+\label{solver-architecture}
+\end{figure}
+
+
+It   is    possible   to   remove   some   of    the   components   of
+Figure~\ref{solver-architecture} to  build simpler and  more efficient
+solvers that are specialized for  classes of formulas.  For example, a
+solver  for pure  arithmetic can  be built  by directly  attaching the
+arithmetic solver to  the CDCL SAT solver.  Similarly,  Yices~2 can be
+specialized  for pure  bitvector problems,  or for  problems combining
+uninterpreted  functions,  arrays,  and  bitvectors (by  removing  the
+arithmetic solver).
+
+Yices~2 combines several theory solvers using the Nelson-Oppen
+method~\cite{NelsonOppen79}.  The UF solver is essential for this
+purpose; it coordinates the different theory solvers and ensures
+global consistency. The other solvers (for arithmetic, arrays, and
+bitvectors) communicate only with the central UF solver and never
+directly with each other.  This property considerably simplifies the
+design and implementation of theory solvers.  More details on the
+theory-combination method implemented by Yices are given in a tool
+paper~\cite{Dutertre:cav2014}.
+
+
+\section{Context Configurations}
+\label{features}
+
+A context can be configured to use different solvers and to support
+different usage scenarios. The basic operations on a context
+include:
+\begin{itemize}
+\item asserting one or more formulas
+\item checking satisfiability of the set of assertions
+\item building a model if the assertions are satisfiable
+\end{itemize}
+Optionally, a context can support addition and removal of assertions
+using a push/pop mechanism.  In this case, the context maintains a
+stack of assertions organized in successive levels.  The push
+operation starts a new level, and the pop operation removes all
+assertions at the top level.  Thus, push can be thought as setting a
+backtracking point and pop restores the context state to a previous
+backtracking point.
+
+Support for  push and pop induces  some overhead and  may disable some
+preprocessing and  simplification of assertions. In some  cases, it is
+then desirable to  use a context without support for  push and pop, in
+order to get  higher performance. Yices~2 allows users  to control the
+set of  features supported by a  context by selecting  a specific {\em
+  operating mode\/}.
+\begin{itemize}
+\item The simplest mode is {\em one-shot\/}. In this mode, one can
+  assert formulas then make a one call to the check operation.
+  Assertions are not allowed after the call to check. This mode is the
+  most efficient as Yices may apply powerful preprocessing and
+  simplification (such as symmetry breaking~\cite{Deharbe+etal:2011}).
+\item The next mode is {\em multi-checks\/}. In this mode, several calls
+  to the check operation are allowed. One can assert formulas, call
+  check, assert more formulas and call check again. This can be done
+  as long as the context is satisfiable. Once check returns
+  \texttt{unsat}, then no assertions can be added. This mode avoids
+  the overhead of maintaining a stack of assertions.
+\item The default mode is {\em push-pop\/}. In this mode, a context
+  supports the push and pop operations. Assertions are organized in a
+  stack as explained previously.
+\item The last mode is {\em interactive\/}. This mode provides the
+  same functionalities as {\em push-pop\/} but the context is
+  configured to recover gracefully when a check operation times out or
+  is interrupted.
+\end{itemize}
+
+
+\section{MCSAT}
+\label{mcsat}
+
+Since version~2.4.0, Yices includes another solver that uses a
+different approach and architecture. This new solver is based on the
+Model Constructing Satisfiability Calculus (MCSAT), and it is
+currently dedicated to quantifier-free nonlinear real arithmetic. The
+theory and implementation of MCSAT is discussed in several
+publications~\cite{Jovanovic-etal:MCSATb:2013,deMouraJovanovic:MCSAT:2013}.
+Currently, this solver can process input written in the SMT-LIB~2.0 or
+Yices notations. It does not support as many features as the
+CDCL-based solver described in the previous section. In particular,
+the MCSAT solver does not yet support incremental solving (i.e., push
+and pop).
+
+
+\chapter{Yices Tool}
+\label{yices-shell}
+
+The Yices~2 distribution includes  a tool for processing input written
+in  the Yices~2  language.  This  tool is  called  \texttt{yices} (or
+\texttt{yices.exe}  in  the Windows  and  Cygwin distributions).   The
+syntax  and  the  set  of  commands supported  by  \texttt{yices}  are
+explained  in  the file  \texttt{doc/YICES-LANGUAGE}  included in  the
+distribution. Several example specifications  are also included in the
+\texttt{examples} directory.
+
+\begin{figure}[ht]
+\begin{footnotesize}
+\begin{verbatim}
+  (define-type BV (bitvector 32))
+
+  (define a::BV)
+  (define b::BV)
+  (define c::BV (mk-bv 32 1008832))
+  (define d::BV)
+
+  (assert (= a (bv-or (bv-and (mk-bv 32 255)
+                              (bv-not (bv-or b (bv-not c))))
+                      (bv-and c (bv-xor d (mk-bv 32 1023))))))
+
+  (check)
+
+  (show-model)
+  (eval a)
+  (eval b)
+  (eval c)
+  (eval d)
+\end{verbatim}
+\end{footnotesize}
+\caption{Example Yices Script}
+\label{example:bv_test2}
+\end{figure}
+
+\section{Example}
+
+To      illustrate     the      tool     usage,      consider     file
+\texttt{examples/bv\_test2.ys} shown in Figure~\ref{example:bv_test2}.
+The  first line  defines  a  type called  \texttt{BV}.  In this  case,
+\texttt{BV} is  a synonym for bitvectors  of size 32. Then  four terms
+are  declared of  type \texttt{BV}.   The three  constants \texttt{a},
+\texttt{b},  and \texttt{d}  are  uninterpreted,  while \texttt{c}  is
+defined as  the bitvector representation  of the integer  1008832. The
+next line of the file is  an assertion expressing a constraint between
+\texttt{a},  \texttt{b},  \texttt{c},   and  \texttt{d}.  The  command
+\texttt{(check)} checks whether the assertion is satisfiable. Since it
+is, command  \texttt{(show-model)} asks for  a satisfying model  to be
+displayed. The  next commands ask for  the value of four  terms in the
+model.
+
+
+\medskip\noindent
+To run \texttt{yices} on this input file, just type
+\begin{small}
+\begin{verbatim}
+      yices examples/bv_test2.ys
+\end{verbatim}
+\end{small}
+The tool will output something like this:
+\begin{small}
+\begin{verbatim}
+      sat
+      (= d 0b00000000000000000000000000000000)
+      (= b 0b00000000000000000000000000000000)
+      (= a 0b00000000000000000000000011000000)
+
+      0b00000000000000000000000011000000
+      0b00000000000000000000000000000000
+      0b00000000000011110110010011000000
+      0b00000000000000000000000000000000
+\end{verbatim}
+\end{small}
+The result of the \texttt{(check)}  command is shown on the first line
+(i.e., \texttt{sat}  for satisfiable). The  next three lines  show the
+model as  an assignment to  the three uninterpreted  terms \texttt{a},
+\texttt{b},  and \texttt{d}.  Then,  the tool  displays one  bitvector
+constant for each of the \texttt{(eval ...)} command.
+
+\medskip\noindent
+Since  this  example  contains  only  terms and  constructs  from  the
+bitvector  theory,  we  could  specify logic  \texttt{QF\_BV}  on  the
+command line as follows:
+\begin{small}
+\begin{verbatim}
+      yices --logic=QF_BV examples/bv_test2.ys
+\end{verbatim}
+\end{small}
+Since the file does not use \texttt{push} and \texttt{pop}, and it
+contains only one call to \texttt{(check)}, we can select the mode
+\texttt{one-shot}:
+\begin{small}
+\begin{verbatim}
+      yices --logic=QF_BV --mode=one-shot examples/bv_test2.ys
+\end{verbatim}
+\end{small}
+`To get a more detailed output, we can give a non-zero verbosity level:
+\begin{small}
+\begin{verbatim}
+      yices --verbosity=4 examples/bv_test2.ys
+\end{verbatim}
+\end{small}
+
+\section{Exists/Forall Problems}
+
+\begin{figure}
+\begin{footnotesize}
+\begin{verbatim}
+    (define x::real)
+
+    (assert 
+      (forall (y::real)
+         (=> (and (< (* -1 y) 0) (< (+ -10 y) 0))
+             (< (+ -7 (* -2 x) y) 0))))
+
+    (ef-solve)
+    (show-model)
+\end{verbatim}
+\end{footnotesize}
+\caption{Example Exists/Forall Problem}
+\label{example:ef}
+\end{figure}
+
+Yices can solve a restricted class of quantified problems, known as
+\emph{exists/forall problems\/}. As the name indicates, such
+problems are of the following general form:
+$$\exists x_1,\ldots,x_n:\forall
+y_1,\ldots,y_m: P(x_1,\ldots,x_n,y_1,\ldots,y_m).$$ In many
+applications, the goal to find values $a_1,\ldots,a_n$ for the
+existentially quantified variables $x_1,\ldots,x_n$ such that the
+following formula $$\forall
+y_1,\ldots,y_m: P(a_1,\ldots,a_n,y_1\ldots,y_m)$$ is valid.
+
+\medskip\noindent
+Yices can solve such problems when the quantified variables
+$x_1,\ldots,x_n$ and $y_1,\ldots,y_m$ either have finite type or are
+real variables. The algorithm implemented in Yices and an example
+application are described in~\cite{Gascon+etal:fmcad2014}.
+
+\medskip\noindent Figure~\ref{example:ef} shows how exists/forall
+problems are specified in the Yices language. Global declarations,
+such as the uninterpreted constant \texttt{x} in the figure,
+correspond to the existential variables.  Constraints are then stated
+as assertions be of the form \texttt{(forall (y ...) P)} where
+\texttt{y ...} are universal variables. It is allowed to have several
+assertions of this form, as well as quantifier-free constraints on the
+global variables.
+
+\medskip\noindent
+The command \texttt{(ef-solve)} invokes the exists/forall solver. This
+commands is similar to \texttt{(check)}. It reports \texttt{sat} if
+the problem is satisfiable, \texttt{unsat} if it is not, or
+\texttt{unknown} if the solver does not terminate within a fixed
+number of iterations. If \texttt{(ef-solve)} returns \texttt{sat},
+then we can display the solution it has found using \texttt{(show-model)}.
+This is illustrated in Figure~\ref{example:ef}.
+
+\medskip\noindent
+To run \texttt{yices} on this example, we must give option
+\texttt{--mode=ef} on the command line:
+\begin{small}
+\begin{verbatim}
+      yices --mode=ef test.ys
+\end{verbatim}
+\end{small}
+This will produce the following output:
+\begin{small}
+\begin{verbatim}
+      sat
+      (= x 2)
+\end{verbatim}
+\end{small}
+The first line is the result of \texttt{(ef-solve)}. The second line
+is the model, which just shows the value of the global variable
+\texttt{x}. 
+
+\medskip\noindent
+As previously, we can get more detailed output by increasing the verbosity:
+\begin{small}
+\begin{verbatim}
+      yices --mode=ef --verbosity=5 test.ys
+\end{verbatim}
+\end{small}
+It is also possible to specify a logic on the command-line.
+
+
+
+\section{Tool Invocation}
+
+Yices is invoked on an input file by typing
+\begin{verbatim}
+      yices [option] <filename>
+\end{verbatim}
+If no \texttt{<filename>} is given, \texttt{yices} will run in
+interactive mode and will read the standard input. The following
+options are supported.
+\begin{options}
+\item[--logic=<name>] Select an SMT-LIB logic.
+
+  The \texttt{<name>} must either be an SMT-LIB logic name such as
+  \texttt{QF\_UFLIA} or the special name \texttt{NONE}.
+
+  Yices recognizes the logics defined at \url{http://www.smtlib.org}
+  (as of July 2014).  Option \texttt{--logic=NONE} configures
+  \texttt{yices} for propositional logic.
+
+  By default---that is, if no logic is given---\texttt{yices} includes
+  all the  theory solvers described in  Section~\ref{solvers}. In this
+  default  configuration, \texttt{yices}  supports  linear arithmetic,
+  bitvectors,  uninterpreted  functions, and  arrays.  If  a logic  is
+  specified, \texttt{yices}  uses a specialized  solver or combination
+  of  solvers that is  appropriate for  the given  logic. Some  of the
+  search parameters will also be set  to values that seem to work well
+  for  this logic (based  on extensive  benchmarking). All  the search
+  parameters  can  also be  modified  individually  using the  command
+  \texttt{(set-param ...)}.
+
+  If  option  \texttt{--logic=NONE}   is  given,  then  \texttt{yices}
+  includes no  theory solvers  at all. All  assertions must  be purely
+  propositional (i.e., involve only Boolean terms).
+
+  With option \texttt{--logic=QF\_NRA}, the \texttt{yices} binary uses
+  its MCSAT solver for nonlinear real arithmetic. When this solver is
+  selected, incremental solving is not supported.
+
+\item[--arith-solver=<solver>] Select one of the possible arithmetic solvers.\\[1mm]
+  \texttt{<solver>}     must    be     one     of    \texttt{simplex},
+  \texttt{floyd-warshall}, or \texttt{auto}.
+
+  If  the  logic is  \texttt{QF\_IDL}  (integer  difference logic)  or
+  \texttt{QF\_RDL} (real  difference logic),  then this option  can be
+  used   to  select   the  arithmetic   solver:  either   the  generic
+  Simplex-based  solver   or  a   specialized  solver  based   on  the
+  Floyd-Warshall algorithm.  If option \texttt{--arith-solver=auto} is
+  given, then  the arithmetic solver is  determined automatically; the
+  default is \texttt{auto}.
+
+  This option has no effect  for logics other than \texttt{QF\_IDL} or
+  \texttt{QF\_RDL}.
+
+\item[--mode=<mode>] Select solver features.\\[1mm]
+  \texttt{<mode>} can be \texttt{one-shot}, \texttt{multi-checks},
+  \texttt{push-pop}, \texttt{interactive}, or \texttt{ef}.
+
+  The mode \texttt{ef} enables the exists/forall solver. In this mode,
+  Yices can solve problems  with universally quantified variables. The
+  command  \texttt{(ef-solve)}  can be  used  for  a single  block  of
+  assertions.    No  assertions   are  allowed   after  the   call  to
+  \texttt{(ef-solve)}.
+
+  The other four modes select the set of functionalities supported by
+  the solver as follows:
+  \begin{itemize}
+  \item   \texttt{one-shot}:   no   assertions   are   allowed   after
+    the \texttt{(check)} command. In this mode, \texttt{yices} can
+    check satisfiability of a single block of assertions and possibly
+    build a model if the assertions are satisfiable.
+  \item \texttt{multi-checks}: several  calls to \texttt{(assert)} and
+    \texttt{(check)} are allowed.
+  \item \texttt{push-pop}: like \texttt{multi-checks} but with support
+    for   adding   and   retracting   assertions  via   the   commands
+    \texttt{(push)} and \texttt{(pop)}.
+  \item  \texttt{interactive}:  supports  the  same  features  as  the
+    \texttt{push-pop}  mode,  but  with   a  different  behavior  when
+    \texttt{(check)} is interrupted.
+  \end{itemize}
+  In  the  first  two  modes, \texttt{yices}  employs  more  aggressive
+  simplifications when processing assertions;  this can lead to better
+  performance on some problems.
+
+  In interactive mode,  the solver context is saved  before every call
+  to  \texttt{(check)}  and  it  is restored  if  \texttt{(check)}  is
+  interrupted. This introduces some  overhead, but the solver recovers
+  gracefully if  \texttt{(check)} is interrupted or times  out. In the
+  non-interactive modes, the solver exits after the first interruption
+  or timeout.
+
+  The default mode is \texttt{push-pop} if a file name is given on the
+  command line. If  not input file is given, then  the default mode is
+  \texttt{interactive} and the solver reads standard input.
+
+  Mode \texttt{one-shot} is required to use the Floyd-Warshall solvers.
+
+\item[--version, -V] Display version information then exit.
+
+  This  displays the  Yices version  number,  the version  of the  GMP
+  library  linked with  Yices, and  information about  build date  and
+  platform. For example,  here is the output for  Yices~2.2.0 built on
+  MacOS~X
+  \begin{small}
+  \begin{verbatim}
+     Yices 2.2.0
+     Copyright SRI International.
+     Linked with GMP 5.1.3
+     Copyright Free Software Foundation, Inc.
+     Build date: 2013-12-21
+     Platform: x86_64-apple-darwin13.0.2 (release)
+  \end{verbatim}
+  \end{small}
+  \vspace*{-1em}
+  If you ever have to report a bug, please include this version information
+  in your bug report.
+
+\item[--help, -h] Print a summary of options
+
+\item[--verbosity=<level>, -v <level>] Run in verbose mode.
+\end{options}
+As indicated in this list, some options can be given either in a long
+form (like \texttt{--verbosity=4}) or in an equivalent short from (like
+\texttt{-v 4}). In all cases the long and short forms are equivalent.
+
+\section{Input Language}
+
+The   syntax  of   the   Yices  input   language   is  summarized   in
+Figures~\ref{syntax:commands},~\ref{syntax:types},
+and~\ref{syntax:expressions}.
+
+
+\begin{figure}
+\begin{small}
+\begin{verbatim}
+   <command>  ::=
+              ( define-type <symbol> )
+            | ( define-type <symbol> <typedef> )
+            | ( define <symbol> :: <type> )
+            | ( define <symbol> :: <type> <expression> )
+            | ( assert <expression> )
+            | ( exit )
+            | ( check )
+            | ( push )
+            | ( pop )
+            | ( reset )
+            | ( show-model )
+            | ( eval <expression> )
+            | ( echo <string> )
+            | ( include <string> )
+            | ( set-param <symbol> <immediate-value> )
+            | ( show-param <symbol> )
+            | ( show-params )
+            | ( show-stats )
+            | ( reset-stats )
+            | ( set-timeout <number> )
+            | ( show-timeout )
+            | ( dump-context )
+            | ( help )
+            | ( help <symbol> )
+            | ( help <string> )
+            | ( ef-solve )
+            | ( export-to-dimacs <string> )
+            | ( show-implicant )
+            | EOS
+
+   <immediate-value> ::=
+              true
+            | false
+            | <number>
+            | <symbol>
+
+   <number> ::=
+              <rational>
+            | <float>
+\end{verbatim}
+\end{small}
+\caption{Yices Syntax: Commands}
+\label{syntax:commands}
+\end{figure}
+
+\begin{figure}
+\begin{small}
+\begin{verbatim}
+   <typedef> ::=
+              <type>
+            | ( scalar <symbol> ... <symbol> )
+
+   <type> ::=
+              <symbol>
+            | ( tuple <type> ... <type> )
+            | ( -> <type> ... <type> <type> )
+            | ( bitvector <rational> )
+            | int
+            | bool
+            | real
+\end{verbatim}
+\end{small}
+\caption{Yices Syntax: Types}
+\label{syntax:types}
+\end{figure}
+
+\begin{figure}
+\begin{small}
+\begin{verbatim}
+   <expr> ::=
+              true
+            | false
+            | <symbol>
+            | <rational>
+            | <float>
+            | <binary bv>
+            | <hexa bv>
+            | ( forall ( <var_decl> ... <var_decl> ) <expr> )
+            | ( exists ( <var_decl> ... <var_decl> ) <expr> )
+            | ( lambda ( <var_decl> ... <var_decl> ) <expr> )
+            | ( let ( <binding> ... <binding> ) <expr> )
+            | ( update <expr> ( <expr> ... <expr> ) <expr> )
+            | ( <function> <expr> ... <expr> )
+
+   <function> ::=
+              <function-keyword>
+            | <expr>
+
+   <var_decl> ::= <symbol> :: <type>
+
+   <binding> ::= ( <symbol> <expr> )
+\end{verbatim}
+\end{small}
+\caption{Yices Syntax: Expressions}
+\label{syntax:expressions}
+\end{figure}
+
+\subsection{Lexical  Elements}
+
+\subsubsection*{Comments}
+
+Input  files  may contain  comments,  which  start  with a  semi-colon
+\texttt{`;'} and extend to the end of the line.
+
+\subsubsection*{Strings}
+
+Strings  are similar to  strings in  C. They  are delimited  by double
+quotes \texttt{"} and may contain escaped characters:
+\begin{itemize}
+\item     The     characters     \texttt{\textbackslash     n}     and
+  \texttt{\textbackslash   t}  are  replaced   by  newline   and  tab,
+  respectively.
+\item The character \texttt{\textbackslash}  followed by at most three
+  octal digits  (i.e., from \texttt{0}  to \texttt{7}) is  replaced by
+  the character whose ASCII code is the octal number.
+\item In  all other cases, \texttt{\textbackslash  <char>} is replaced
+  by  \texttt{<char>} (including  if \texttt{<char>}  is a  newline or
+  \texttt{\textbackslash}).
+\item A  newline cannot  occur inside the  string, unless  preceded by
+  \texttt{\textbackslash}.
+\end{itemize}
+
+\subsubsection*{Numerical Constants}
+
+Numerical  constants  can  be   written  as  decimal  integers  (e.g.,
+\texttt{44} or \texttt{-3}), rational (e.g., \texttt{-1/3}), or using a
+floating-point  notation  (e.g.,  \texttt{0.07} or  \texttt{-1.2e+2}).
+Positive  constants can start  with an  optional \texttt{+}  sign. For
+example \texttt{+4} and \texttt{4} denote the same number.
+
+
+\subsubsection*{Bitvector Constants}
+
+Bitvector constants can be written in a binary format using the prefix
+\texttt{0b}  or  in  hexadecimal  using the  prefix  \texttt{0x}.  For
+example, the expressions  \texttt{0b01010101} and \texttt{0x55} denote
+the same bitvector constant of eight bits.
+
+\subsubsection*{Symbols}
+
+A  symbol  is   any  character  string  that's  not   a  keyword  (see
+Table~\ref{syntax:keywords}) and doesn't start  with a digit, a space,
+or   one  of  the   characters  \texttt{(},   \texttt{)},  \texttt{;},
+\texttt{:}, and  \texttt{"}. If the  first character is  \texttt{+} or
+\texttt{-}, then it must not be  followed by a digit. Symbols end by a
+space, or by any of the characters \texttt{(}, \texttt{)}, \texttt{;},
+\texttt{:}, or \texttt{"}. Here are some examples:
+\begin{small}
+\begin{verbatim}
+   a_symbol __another_one  X123  &&&  +z203  t\12
+\end{verbatim}
+\end{small}
+All   the   predefined   keywords    and   symbols   are   listed   in
+Table~\ref{syntax:keywords}.
+
+\begin{table}
+\begin{small}
+\begin{center}
+\begin{tt}
+\begin{tabular}{|p{3.4cm}|p{3.4cm}|p{3.4cm}|}
+\hline
+* & + & - \\
+-> & / & /= \\
+< & <= & <=> \\
+ = & => & > \\
+>= & \verb|^| & abs \\
+and & assert & bit \\
+bitvector & bool & bool-to-bv \\
+bv-add & bv-and & bv-ashift-right\\
+bv-ashr & bv-comp & bv-concat \\
+bv-div  & bv-extract & bv-ge \\
+bv-gt  & bv-le & bv-lshr \\
+bv-lt  & bv-mul & bv-nand \\
+bv-neg & bv-nor & bv-not\\
+bv-or  & bv-pow & bv-redand \\
+bv-redor & bv-rem & bv-repeat \\
+bv-rotate-left & bv-rotate-right & bv-sdiv \\
+bv-sge & bv-sgt & bv-shift-left0 \\
+bv-shift-left1 & bv-shift-right0 & bv-shift-right1 \\
+bv-shl & bv-sign-extend & bv-sle \\
+bv-slt & bv-smod & bv-srem \\
+bv-sub & bv-xnor & bv-xor \\
+bv-zero-extend & ceil & check \\
+define & define-type & distinct \\
+div & divides & dump-context \\
+echo  & ef-solve & eval \\
+exists & exit & export-to-dimacs \\
+false & floor & forall \\
+help & if & include \\
+int & is-int & ite \\
+lambda & let & mk-bv \\
+mk-tuple & mod & not \\
+or & pop & push \\
+real & reset & reset-stats \\
+scalar & select & set-param \\
+set-timeout & show-implicant & show-model \\
+show-param & show-params & show-stats\\
+true & tuple & tuple-update \\
+update & xor &  \\
+\hline
+\end{tabular}
+\end{tt}
+\end{center}
+\end{small}
+\caption{Keywords and predefined symbols}
+\label{syntax:keywords}
+\end{table}
+
+
+\subsection{Declarations}
+\label{declarations}
+
+A declaration either introduces a new type or term or gives a name to
+an existing type or term. Yices uses different name spaces for types
+and terms. It is then permitted to use the same name for a type and
+for a term.
+
+
+\subsubsection*{Type Declaration}
+
+A type declaration is a command of the following two forms.
+\begin{small}
+\begin{verbatim}
+   (define-type name)
+   (define-type name type)
+\end{verbatim}
+\end{small}
+The fist form creates a new uninterpreted type called
+\texttt{name}. The second form gives a \texttt{name} to an
+existing \texttt{type}. After this definition, every occurrence of
+\texttt{name} refers to \texttt{type}. A variant of this second
+form is used to define scalar types. In these two commands,
+\texttt{name} must be a symbol that's not already used as a type
+name.
+
+
+\subsubsection*{Term Declaration}
+
+A term is declared using one for the following two commands.
+\begin{small}
+\begin{verbatim}
+   (define name :: type)
+   (define name :: type term)
+\end{verbatim}
+\end{small}
+The first form declares a new uninterpreted term of the given
+\texttt{type}.  The second form assigns a \texttt{name} to the
+given \texttt{term}, which must be of type \texttt{type}. The
+\texttt{name} must be a symbol that's not already used as a term
+name.
+
+
+
+\subsection{Types}
+
+Yices includes a few predefined types for arithmetic and
+bitvectors. One can extend the set of atomic types by creating
+uninterpreted and scalar types. In addition to the atomic types, Yices
+provides constructors for tuple and function types. More details about
+types and subtyping are given in Section~\ref{type-system}.
+
+\subsubsection*{Predefined Types}
+
+The predefined  types are \texttt{bool},  \texttt{int}, \texttt{real},
+and  \texttt{(bitvector  k)} where  $k$  is  a  positive integer.  For
+example a bit-vector variable \texttt{b}  of 32 bits is declared using
+the command
+\begin{small}
+\begin{verbatim}
+   (define b::(bitvector 32))
+\end{verbatim}
+\end{small}
+The number of bits must be positive so \texttt{(bitvector 0)} is not a
+valid  type.   There  is  also  a hard-coded  limit  on  the  size  of
+bitvectors (namely, $2^{28}  - 1$).  Of course, this  is a theoretical
+limit; the solver will most likely run out of memory if you attempt to
+use bitvectors that are that large.
+
+\subsubsection*{Uninterpreted Types}
+
+A new uninterpreted type T can be introduced using the command
+\begin{small}
+\begin{verbatim}
+   (define-type T)
+\end{verbatim}
+\end{small}
+This command  will succeed provided  \texttt{T} is a fresh  type name,
+that is, if there is no existing type called \texttt{T}.  As explained
+in Section~\ref{type-system}, an uninterpreted type denotes a nonempty
+collection  of  objects.   There   is  no  cardinality  constraint  on
+\texttt{T}, except that \texttt{T} is not empty.
+
+\subsubsection*{Scalar Type}
+
+A scalar type is defined by enumerating its elements. For example, the
+following declaration
+\begin{small}
+\begin{verbatim}
+   (define-type P (scalar A B C))
+\end{verbatim}
+\end{small}
+defines a  new scalar type  called \texttt{P} that contains  the three
+distinct  constants  \texttt{A}, \texttt{B},  and  \texttt{C}. Such  a
+declaration  is valid  provided \texttt{P}  is a  fresh type  name and
+\texttt{A}, \texttt{B}, and \texttt{C} are all fresh term names.
+
+\medskip\noindent The enumeration must include at least one element,
+but  singleton   types  are   allowed.  For  example,   the  following
+declaration is valid.
+\begin{small}
+\begin{verbatim}
+   (define-type Unit (scalar One))
+\end{verbatim}
+\end{small}
+It introduces a  new type \texttt{Unit} of cardinality  one, and which
+contains \texttt{One}  as its unique  element. Thus, any term  of type
+\texttt{Unit} is known to be equal to \texttt{One}.
+
+
+\subsubsection*{Tuple Types}
+
+A tuple  type is written \texttt{(tuple tau\_1  ... tau\_n)} where
+\texttt{tau\_i} is a type. For example, the type of pairs of integer
+can be declared as follows:
+\begin{small}
+\begin{verbatim}
+   (define-type Pairs (tuple int int))
+\end{verbatim}
+\end{small}
+Then one can declare an uninterpreted constant \texttt{x} of this type
+as follows
+\begin{small}
+\begin{verbatim}
+   (define x::Pairs)
+\end{verbatim}
+\end{small}
+This is equivalent to the declaration
+\begin{small}
+\begin{verbatim}
+   (define x::(tuple int int))
+\end{verbatim}
+\end{small}
+
+\medskip\noindent   Tuple  types   with  a   single   component  are
+allowed. For example, the following declaration is legal.
+\begin{small}
+\begin{verbatim}
+   (define-type T (tuple bool))
+\end{verbatim}
+\end{small}
+
+\subsubsection*{Function Types}
+
+A function type is written \texttt{(-> tau\_1 ...  tau\_n
+  sigma)}, where $n$ is positive, and the \texttt{tau\_i}s and
+\texttt{sigma} are types.  The types \texttt{tau\_1}, $\ldots$,
+\texttt{tau\_n} define the domain of the function type, and
+\texttt{sigma} is the range.  For example, a function defined over
+the integers and that returns a Boolean can be declared as follows:
+\begin{small}
+\begin{verbatim}
+   (define f::(-> int bool))
+\end{verbatim}
+\end{small}
+
+\medskip\noindent Yices does not  have a distinct type construct for
+arrays. In Yices, arrays are the same as functions.
+
+
+\subsection{Terms}
+
+Yices uses a Lisp-like syntax. For example, the polynomial $x + 3y +
+z$ is written
+\begin{small}
+\begin{verbatim}
+       (+ x (* 3 y) z)
+\end{verbatim}
+\end{small}
+In general, all associative operations can take one, two, or more
+arguments. For example, one can write
+\begin{small}
+\begin{verbatim}
+      (or A)    (or A B)    (or A B C D)
+\end{verbatim}
+\end{small}
+since \texttt{or} is associative.
+
+
+\subsubsection*{If-Then-Else}
+
+Yices provides an if-then-else construct that applies to any type.  An
+if-then-else term can be written using either one of the two following
+forms
+\begin{small}
+\begin{verbatim}
+     (ite c t1 t2)     (if  c t1 t2)
+\end{verbatim}
+\end{small}
+Both forms are equivalent and just mean ``if \texttt{c} then
+\texttt{t1} else \texttt{t2}.''  The condition \texttt{c} must
+be a Boolean term, and the two terms \texttt{t1} and \texttt{t2}
+must have compatible types. If \texttt{t1} and \texttt{t2} have
+the same type $\tau$ then \texttt{(ite c t1 t2)} also has type
+$\tau$.  Otherwise, as explained in Section~\ref{type-system}, the
+type of \texttt{(if c t1 t2)} is the minimal supertype of
+\texttt{t1} and \texttt{t2}.  For example, if \texttt{t1} has
+type \texttt{int} and \texttt{t2} has type \texttt{real}, then
+\texttt{(ite c t1 t2)} has type \texttt{real}.
+
+\subsubsection*{Equalities and Disequalities}
+
+Equalities and disequalities are written as follows
+\begin{small}
+\begin{verbatim}
+     (=  t1 t2)        (/= t1 t2)
+\end{verbatim}
+\end{small}
+where \texttt{t1} and \texttt{t2} are two terms of compatible
+types. These operators are binary. Unlike SMT-LIB~2, Yices does not
+support constraints such as \texttt{(= x y z t u)}. On the other hand,
+Yices includes an $n$-ary \texttt{distinct} operator that generalizes
+disequality.
+
+%% \pagebreak
+\medskip\noindent
+The Boolean term
+\begin{small}
+\begin{verbatim}
+   (distinct t_1 .... t_n )
+\end{verbatim}
+\end{small}
+is true if \texttt{t\_1}, \ldots, \texttt{t\_n} are all different
+from each other. The terms \texttt{t\_1} to \texttt{t\_n} must all
+have compatible types.  There must be at least two arguments. The
+expression \texttt{(distinct a b)} means the same thing as \texttt{(/= a
+  b)}.
+
+\subsubsection*{Boolean Operators}
+
+\begin{table}[h]
+\begin{small}
+\begin{center}
+\begin{tabular}{|p{2cm}|p{2cm}|}
+\hline
+\texttt{true} & \texttt{false} \\
+\texttt{and} & \texttt{or}  \\
+\texttt{not} & \texttt{xor}  \\
+\texttt{<=>} & \texttt{=>}  \\
+\hline
+\end{tabular}
+\end{center}
+\end{small}
+\caption{Boolean Constants and Operators}
+\label{Boolean-Operators}
+\end{table}
+
+\noindent
+The usual Boolean constants and functions are available. They are
+listed in Table~\ref{Boolean-Operators}.  The associative and
+commutative operators \texttt{or}, \texttt{and}, and \texttt{xor} can
+take any number of arguments. The equivalence (\texttt{<=>}) and
+implication (\texttt{=>}) operators take exactly two arguments.
+
+\medskip\noindent
+One can also use the equality and disequality operators
+with Boolean terms. If \texttt{t1} and \texttt{t2} are Boolean
+then \texttt{(= t1 t2)} is the same as \texttt{(<=> t1 t2)},
+and \texttt{(/= t1 t2)} is the same as \texttt{(xor t1 t2)}.
+
+\subsubsection*{Basic Arithmetic}
+
+\begin{table}[h]
+\begin{small}
+\begin{center}
+\begin{tabular}{|p{4cm}|l|c|}
+\hline
+Syntax & \multicolumn{2}{|c|}{Meaning} \\
+\hline
+\texttt{(+ a1 ... a\_n)} & sum & $a_1 + \ldots + a_n$ \\
+\texttt{(* a1 ... a\_n)} & product & $a_1 \times \ldots \times a_n$ \\
+\texttt{(- a)} & opposite & $-a$\\
+\texttt{(- a1 a2 ... a\_n)} & difference &  $a_1 - a_2 - \ldots - a_n$ \\
+\texttt{(\char`\^\  a k)} & exponentiation & $a^k$ \\
+\texttt{(/ a c)} & division & $a/c$ \\
+\hline
+\texttt{(<= a1 a2)} & inequality & $a_1 \leq a_2$\\
+\texttt{(>= a1 a2)} & inequality & $a_1 \geq a_2$\\
+\texttt{(< a1 a2)} & strict inequality & $a_1 < a_2$ \\
+\texttt{(> a1 a2)} & strict inequality & $a_1 > a_2$ \\
+\hline
+\end{tabular}
+\end{center}
+\end{small}
+\caption{Arithmetic Operations}
+\label{Arithmetic-Operations}
+\end{table}
+
+Arithmetic constants can be written in decimal, as rationals, or using
+the floating point notation. Internally, Yices uses exact rational
+arithmetic and it represents all arithmetic constants as rationals.
+
+\medskip\noindent
+The usual arithmetic operations and comparison operators are
+summarized in Table~\ref{Arithmetic-Operations}. One can freely mix
+terms of real and integer types in all operations. The exponent $k$ in
+\texttt{(\char`\^\ a k)} must be a non-negative integer constant. The
+divisor \texttt{c} in \texttt{(/ a c)} must be a non-zero constant.
+
+
+\medskip\noindent
+The Yices language includes more than linear arithmetic, but this is
+for future extensions. Currently, Yices does not include solvers for
+non-linear arithmetic (cf. Section~\ref{solvers}).
+
+\subsubsection*{Arithmetic Functions}
+
+Other arithmetic operations defined in Yices are listed in Table~\ref{Arithmetic-Functions}.
+The operations \texttt{abs}, \texttt{floor}, and \texttt{ceil} have the usual meaning:
+\begin{itemize}
+\item \texttt{(abs x)} is the absolute value of \texttt{x}.
+\item \texttt{(floor x)} is the largest integer less than or equal to \texttt{x}.
+\item \texttt{(ceil x)} is the smallest integer larger than or equal to \texttt{x}.
+\end{itemize}
+For integer division and modulo, Yices uses the SMT-LIB conventions (see
+Section~\ref{arithmetic-general}), except that the divider \texttt{k}
+must be a non-zero constant and that both \texttt{div} and
+\texttt{mod} are defined over the reals, not just the integers.
+Division by a non-constant term is not supported.
+
+\medskip\noindent In the divisibility test \texttt{(divides k x)}, the
+divider \texttt{k} must be a rational constant but it can be zero. The
+term \texttt{x} can be any real. The atom \texttt{(divides k x)} is
+true if there exists an integer $n\in\integers$ such that $\mathtt{x} = n
+\mathtt{k}$.
+
+\begin{table}[h]
+\begin{small}
+\begin{center}
+\begin{tabular}{|p{3.4cm}|l|}
+\hline Syntax & Meaning \\ 
+\hline
+\texttt{(abs x)} & absolute value \\ 
+\texttt{(floor x)} & floor \\
+\texttt{(ceil x)} & ceiling \\ 
+\hline
+\texttt{(div x k)} & integer division \\
+\texttt{(mod x k)} & modulo \\ 
+\texttt{(divides k x)} & divisibility test\\ 
+\texttt{(is-int x)} & integrality test\\ 
+\hline
+\end{tabular}
+\end{center}
+\end{small}
+\caption{Arithmetic Functions}
+\label{Arithmetic-Functions}
+\end{table}
+
+\subsubsection*{Bitvectors Constants}
+
+A bitvector constant can be written in binary or hexadecimal notation, as follows
+\begin{small}
+\begin{verbatim}
+   0b0   0b1   0xFFFF    0xaaaa    0xC0C0D0D0
+\end{verbatim}
+\end{small}
+In the binary notation, the number of bits in the constant is equal to
+be number of binary digits. For example, the three terms
+\begin{small}
+\begin{verbatim}
+   0b1   0b0001   0b00001
+\end{verbatim}
+\end{small}
+denote distinct bitvector constants, of one, four, and five bits, respectively.
+In the hexadecimal notation, the number of bits is equal to four times the number
+of hexadecimal digit.
+
+\medskip\noindent
+One can also construct a bitvector constant using the expression:
+\begin{small}
+\begin{verbatim}
+   (mk-bv size value)
+\end{verbatim}
+\end{small}
+In this expression, both \texttt{size} and \texttt{value} must be
+integer constants; \texttt{size} is the number of bits in the
+bitvector constant and \texttt{value} is the decimal value of the
+constant interpreted as a non-negative integer. The \texttt{size}
+must then be positive, and the \texttt{value} must be
+non-negative. If \texttt{value} is more than $2^{\mathtt{size}}$,
+only the residue of \texttt{value} modulo $2^{\mathtt{size}}$ is
+taken into account. For example, the expressions
+\begin{small}
+\begin{verbatim}
+   (mk-bv 3 6)    (mk-bv 3 22)
+\end{verbatim}
+\end{small}
+construct the same bitvector constant (whose binary representation is
+\texttt{0b110}).
+
+\subsubsection*{Bitvector Arithmetic}
+
+\begin{table}
+\begin{small}
+\begin{center}
+\begin{tabular}{|p{5cm}|l|}
+\hline Syntax & Meaning \\ 
+\hline
+\texttt{(bv-add u1 ... u\_n)} & sum \\
+\texttt{(bv-mul u1 ... u\_n)} & product \\
+\texttt{(bv-sub u1 ... u\_n)} & subtraction \\
+\texttt{(bv-neg u)} & 2s-complement \\
+\texttt{(bv-pow u k)} & exponentiation \\
+\hline
+\texttt{(bv-not u)} & bitwise complement \\
+\texttt{(bv-and u1 ... u\_n)} & bitwise and \\
+\texttt{(bv-or u1 ... u\_n)} & bitwise or \\
+\texttt{(bv-xor u1 ... u\_n)} & bitwise xor \\
+\texttt{(bv-nand u1 ... u\_n)} & bitwise nand \\
+\texttt{(bv-nor u1 ... u\_n)} & bitwise nor \\
+\texttt{(bv-xnor u1 ... u\_n)} & bitwise xnor \\
+\hline
+\end{tabular}
+\end{center}
+\end{small}
+\caption{Bitvector Operations (Arithmetic and Bitwise Logic)}
+\label{bitvectors1}
+\end{table}
+
+Table~\ref{bitvectors1} lists all the arithmetic and bitwise
+operators. All operators in this table take arguments that have the
+same size and return a result of that size.  As usual, the associative
+operators can take one, two, or more arguments. The \texttt{bv-sub}
+operator takes at least two arguments. In \texttt{(bv-pow u k)},
+the power $k$ must be a non-negative integer constant.
+
+\medskip\noindent
+The expression \texttt{(bv-xnor u1 ... u\_n)} is the same as
+\texttt{(bv-not (bv-xor u1 ... u\_n))}.
+
+\subsubsection*{Bitvector Shift and Rotate}
+
+\begin{table}
+\begin{small}
+\begin{center}
+\begin{tabular}{|p{5cm}|l|}
+\hline
+Syntax & Meaning \\
+\hline
+\texttt{(bv-shift-left0 u k)} & left shift, padding with 0\\
+\texttt{(bv-shift-left1 u k)} & left shift, padding with 1\\
+\texttt{(bv-shift-right0 u k)} & right shift, padding with 0\\
+\texttt{(bv-shift-right1 u k)} & right shift, padding with 1\\
+\texttt{(bv-ashift-right x k)} &  arithmetic shift by $k$ bits\\
+\texttt{(bv-rotate-left x k)} & rotate by $k$ bits to the left\\
+\texttt{(bv-rotate-right x k)} & rotate by $k$ bits to the right\\
+\hline
+\texttt{(bv-shl u v)} & left shift (padding with 0)\\
+\texttt{(bv-lshr u v)} & logical right shift (padding with 0) \\
+\texttt{(bv-ashr u v)} & arithmetic shift (padding with the sign bit)\\
+\hline
+\end{tabular}
+\end{center}
+\end{small}
+\caption{Bitvector Operations (Shift and Rotate)}
+\label{bitvectors2}
+\end{table}
+
+Table~\ref{bitvectors2} lists the shift and rotate operations. The
+operations in the first seven rows shift a bitvector \texttt{u} by a
+fixed number of bits $k$. If \texttt{u} is a bitvector of $n$ bits,
+then $k$ must be an integer constant such that $0 \leq k \leq n$. The
+\texttt{bv-shl}, \texttt{bv-lshr}, and \texttt{bv-ashr} operators
+(last three rows of Table~\ref{bitvectors2}) take two bitvector
+arguments \texttt{u} and \texttt{v}, which must be bitvectors of the
+same size $n$. The shift operation is applied to \texttt{u} and the
+value of \texttt{v}, interpreted as an unsigned integer in the range
+$[0, 2^n-1]$, defines the shift amount. The semantics follows the
+SMT-LIB standards: if \texttt{v}'s value is more than $n$ then the
+padding bit is copied $n$ times.
+
+\subsubsection*{Bitvector Structural Operations}
+
+\begin{table}
+\begin{small}
+\begin{center}
+\begin{tabular}{|p{5cm}|l|}
+\hline
+Syntax & Meaning \\
+\hline
+\texttt{(bv-extract i j u)} & subvector extraction \\
+\texttt{(bv-concat u1 ... u\_n)} & concatenation \\
+\texttt{(bv-repeat u k)} & repeated concatenation \\
+\texttt{(bv-sign-extend u k)} & sign extension \\
+\texttt{(bv-zero-extend u k)} & zero extension \\
+\hline
+\texttt{(bv-redor u)} & or-reduction \\
+\texttt{(bv-redand u)} & and-reduction \\
+\texttt{(bv-redcomp u v)} & equality reduction \\
+\hline
+\end{tabular}
+\end{center}
+\end{small}
+\caption{Bitvector Operations (Structural Operators)}
+\label{bitvectors3}
+\end{table}
+
+The operators in Table~\ref{bitvectors3} perform extraction,
+concatenation, and other structural operations. The expression
+\texttt{(bv-extract i j u)} is the segment of bitvector \texttt{u}
+formed by taking bits $j, j+1, \ldots, i$. If \texttt{u} is a
+bitvector of $n$ bits then the constants $i$ and $j$ must satisfy $0
+\leq j \leq i \leq n-1$, and the result is a bitvector of $(i - j +
+1)$ bits. For example, we have
+\begin{small}
+\begin{verbatim}
+   (bv-extract 7 2 0b110110100) = 0b101101.
+\end{verbatim}
+\end{small}
+
+\medskip\noindent
+In \texttt{(bv-repeat u k)}, bitvector \texttt{u} is concatenated with
+itself $k$ times. The integer constant $k$ must be positive. In the
+sign and zero extension operators, vector \texttt{u} is extended by
+adding $k$ bits (either zero or \texttt{u}'s sign bit copied $k$
+times).  In these two operations, $k$ must be non-negative.
+
+\medskip\noindent
+The \texttt{bv-redor}, \texttt{bv-redand}, and \texttt{bv-redcomp}
+operators produce a one-bit vector.  The term \texttt{(bv-redor u)} is
+the or of \texttt{u}'s bits; it is equal to \texttt{0b0} if all bits
+of \texttt{u} are zero, and to \texttt{0b1} otherwise. Similarly,
+\texttt{(bv-redand u)} is the and of \texttt{u}'s bit; it is equal to
+\texttt{0b1} if all bits of \texttt{u} are one and to \texttt{0b0}
+otherwise. In \texttt{(bv-redcomp u v)}, the arguments \texttt{u} and
+\texttt{v} must be two bitvectors of the same size. The operator
+performs a one-to-one comparison of the bits of \texttt{u} and
+\texttt{v} and returns either \texttt{0b1}, if \texttt{u} and
+\texttt{v} are equal, or \texttt{0b0}, if \texttt{u} and \texttt{v}
+are distinct.
+
+\subsubsection*{Bitvector Division}
+
+\begin{table}
+\begin{small}
+\begin{center}
+\begin{tabular}{|p{3.3cm}|l|}
+\hline
+Syntax & Meaning \\
+\hline
+\texttt{(bv-div u v)} & quotient in unsigned division \\
+\texttt{(bv-rem u v)} & remainder in unsigned division \\
+\hline
+\texttt{(bv-sdiv u v)} & quotient in signed division \\
+\texttt{(bv-srem u v)} & remainder in signed division \\
+\hline
+\texttt{(bv-smod u v)} & remainder in signed division (rounding to $-\infty$)\\
+\hline
+\end{tabular}
+\end{center}
+\end{small}
+\caption{Bitvector Operations (Divisions)}
+\label{bitvectors4}
+\end{table}
+
+Table~\ref{bitvectors4} lists the division and remainder operators. In
+this table, \texttt{u} and \texttt{v} must be two bitvectors of the
+same size $n$.
+
+\medskip\noindent
+In the unsigned division and quotient operations, \texttt{u} and
+\texttt{v} are interpreted as integers in the interval $[0,2^n-1]$.
+As explained in section~\ref{bitvector-general}, \texttt{(bv-div u v)}
+is the largest integer that can be represented using $n$ bits and is
+smaller than or equal to $u/v$. The unsigned remainder
+\texttt{(bv-rem u v)} satisfies the identity
+\begin{small}
+\begin{verbatim}
+  u = (bv-add (bv-mul (bv-div u v) v) (bv-rem u v)).
+\end{verbatim}
+\end{small}
+In the signed division and quotient, \texttt{u} and \texttt{v} are
+interpreted as integers in the interval $[-2^{n-1},2^{n-1}-1]$ (in
+2s-complement representation), and the division is done with rounding
+to zero.
+\begin{itemize}
+\item If $u/v$ is non-negative, then \texttt{(bv-sdiv u v)}
+is the largest integer $q$ in $[0,2^{n-1}-1]$ such that $0 \leq q \leq
+u/v$.
+\item If $u/v$ is negative then \texttt{(bv-sdiv u v)}
+is the smallest integer $q$ in $[-2^{n-1}, 0]$ such that $u/v
+\leq q \leq 0$.
+\end{itemize}
+The signed remainder operation satisfies the identity
+\begin{small}
+\begin{verbatim}
+  u = (bv-add (bv-mul (bv-sdiv u v) v) (bv-srem u v)).
+\end{verbatim}
+\end{small}
+The last operator in Table~\ref{bitvectors4} is the remainder in the
+signed division of \texttt{u} by \texttt{v} with rounding to
+$-\infty$.  In this operation, \texttt{u} and \texttt{v} are
+interpreted as signed integers in the interval $[-2^{n-1},2^{n-1}-1]$;
+the quotient is $\lfloor u/v \rfloor$ (i.e., the largest
+integer $q$ such that $q \leq u/v$); and the remainder is $u -
+q v$. The special case $v=0$ is explained in
+Section~\ref{bitvector-general}.
+
+\subsubsection*{Bitvector Inequalities}
+
+\begin{table}
+\begin{small}
+\begin{center}
+\begin{tabular}{|p{3cm}|l|}
+\hline
+Syntax & Meaning \\
+\hline
+\texttt{(bv-ge u v)} & $u \geq v$ unsigned\\
+\texttt{(bv-gt u v)} & $u > v$ unsigned \\
+\texttt{(bv-le u v)} & $u \leq v$ unsigned \\
+\texttt{(bv-lt u v)} & $u < v$ unsigned \\
+\hline
+\texttt{(bv-sge u v)} & $u \geq v$ signed\\
+\texttt{(bv-sgt u v)} & $u > v$ signed \\
+\texttt{(bv-sle u v)} & $u \leq v$ signed \\
+\texttt{(bv-slt u v)} & $u < v$ signed \\
+\hline
+\end{tabular}
+\end{center}
+\end{small}
+\caption{Bitvector Operations (Comparison)}
+\label{bitvectors5}
+\end{table}
+
+Table~\ref{bitvectors5} lists the inequality comparison operators for
+bitvectors. In the table, \texttt{u} and \texttt{v} must be two
+bitvector terms of the same size. Depending on the operation, both are
+interpreted as unsigned integers or as signed integers (using
+2s-complement representation).  All operators return a Boolean. As
+usual, one can also apply the equality and disequality operators to
+two bitvectors of the same size.
+
+
+\subsubsection*{Conversions Between Booleans and Bitvectors}
+
+Two operations, listed in Table~\ref{bitvectors6},  convert Booleans 
+to bitvectors and conversely.
+
+\begin{table}[h]
+\begin{small}
+\begin{center}
+\begin{tabular}{|p{5cm}|l|}
+\hline
+Syntax & Meaning \\
+\hline
+\texttt{(bool-to-bv b1 ... bn)} & Booleans to bitvector \\
+\texttt{(bit u i)} & Bit extraction\\
+\hline
+\end{tabular}
+\end{center}
+\end{small}
+\caption{Bitvector Operators (Conversions)}
+\label{bitvectors6}
+\end{table}
+
+
+\medskip\noindent
+Operator \texttt{bool-to-bv} builds a bitvector from $n$ Boolean
+terms $b_1$, \ldots, $b_n$.  The result is a bitvector of $n$ bits
+equal to the concatenation of $b_1$, \ldots, $b_n$. The high-order
+bit is $b_1$ and the low-order bit is $b_n$. For example,
+\begin{small}
+\begin{verbatim}
+   (bool-to-bv true true false false)
+\end{verbatim}
+\end{small}
+is equal to the bitvector constant \texttt{0b1100}.
+
+\medskip\noindent 
+Expression \texttt{(bit u i)} is the $i$-th bit of bitvector
+\texttt{u} as a Boolean. If \texttt{u} is a bitvector of $n$ bits then 
+the index \texttt{i} must be an integer constant between 0 and $n-1$.
+The lower-order bit has index 0 and the high-order bit has index $n-1$.
+For example, we have
+\begin{small}
+\begin{verbatim}
+   (bit 0b1100 3) = true
+   (bit 0b1100 2) = true
+   (bit 0b1100 1) = false
+   (bit 0b1100 0) = false
+\end{verbatim}
+\end{small}
+
+
+\subsubsection*{Tuples}
+
+A tuple term can be constructed using \texttt{(mk-tuple t1 ... t\_n)}
+where $n\geq1$ and \texttt{t1}, \ldots, \texttt{t\_n} are arbitrary
+terms. For example, a pair of integers can be constructed using
+\begin{small}
+\begin{verbatim}
+   (mk-tuple -1 1)
+\end{verbatim}
+\end{small}
+
+\medskip\noindent The projection operation extracts the $i$-th
+component of a tuple. It is denoted by \texttt{(select t i)} where
+\texttt{t} is a term of tuple type and $i$ is an integer constant.  If
+the tuple has $n$ components, then $i$ must be between $1$ and
+$n$. The components are indexed from 1 to $n$ starting from the
+left. For example, we have
+\begin{small}
+\begin{verbatim}
+   (select (mk-tuple -1 1) 1) = -1
+   (select (mk-tuple -1 1) 2) = 1
+\end{verbatim}
+\end{small}
+
+\medskip\noindent Yices includes a tuple-update operator. The expression
+\texttt{(tuple-update t i v)} is equal to tuple \texttt{t} with its $i$-th
+component replaced by \texttt{v}. The type of \texttt{v} must be a subtype of
+the $i$-th component of \texttt{t}.
+
+\subsubsection*{Function Updates}
+
+Array or function update is written \texttt{(update a (i\_1 ... i\_n)
+  v)}. In this expression, \texttt{a} must be a term with a function
+type and $n$ is the arity of \texttt{a}. The expression constructs a
+function \texttt{b} that is equal to \texttt{a}, except that it maps
+\texttt{i\_1},\ldots,\texttt{i\_n} to \texttt{v}.  The semantics and
+typechecking rules of this operator are explained in
+Section~\ref{terms-and-formulas}.
+
+
+\subsection{Commands}
+
+The Yices commands allow one to  declare types and terms, build a set
+of  assertions, check  their  satisfiability, and  query models.  Other
+commands set parameters that control preprocessing and heuristics used
+by the different solvers.
+
+\subsubsection*{Declarations}
+
+As presented in Section~\ref{declarations}, a type declaration has one
+of the following forms
+\begin{small}
+\begin{verbatim}
+   (define-type name)
+   (define-type name type)
+\end{verbatim}
+\end{small}
+A term declaration is similar:
+\begin{small}
+\begin{verbatim}
+   (define name :: type)
+   (define name :: type term)
+\end{verbatim}
+\end{small}
+To define a function, one can use the \texttt{lambda} notation.  Here
+is an example:
+\begin{small}
+\begin{verbatim}
+   (define max::(-> real real real)
+      (lambda (x::real y::real) (if (< x y) y x)))
+\end{verbatim}
+\end{small}
+This defines the function \texttt{max} that computes the maximum of
+two real numbers. Note that such a function definition acts like a
+macro. A term of the form \texttt{(max a b)} is eagerly replaced by
+the ``function body'', that is, by the term \texttt{(if (< a b) b a)}.
+The ability to define function is useful to abbreviate specifications,
+but it must be used with care. Since the substitution is performed
+eagerly, the expanded terms may grow quickly, especially if they
+contain nested function applications.
+
+\medskip\noindent
+All declarations have global scope and are permanent. They are not
+affected by commands such as push, pop, or reset. Also, as discussed
+previously, Yices uses separate name spaces for terms and for types.
+
+
+
+\subsubsection*{Assertions}
+
+The following command adds an assertion to the current context.
+\begin{small}
+\begin{verbatim}
+   (assert formula)
+\end{verbatim}
+\end{small}
+In this command, the \texttt{formula} must be a Boolean term.
+
+\medskip\noindent
+In the mode \texttt{one-shot}, assertions are stored internally and
+are not processed immediately. Processing of assertions is delayed,
+and all assertions are processed and simplified on the first call to
+\texttt{(check)}.
+
+\medskip\noindent
+In all other modes, the assertions are processed and simplified
+immediately and are added to the context. As a result, \texttt{yices}
+may detect and report that the current set of assertions is
+inconsistent after an \texttt{assert} command. This happens when the
+context is seen to be unsatisfiable by simplification only. The most
+trivial example is:
+\begin{small}
+\begin{verbatim}
+   (assert false)
+\end{verbatim}
+\end{small}
+Once the context is unsatisfiable, any new assertion is treated as an
+error.
+
+
+\subsubsection*{Check}
+
+The command
+\begin{small}
+\begin{verbatim}
+   (check)
+\end{verbatim}
+\end{small}
+checks whether the current set of assertions is satisfiable.
+
+\medskip\noindent
+If the context's current status is already known, then the command
+returns immediately and prints the status as either \texttt{sat} or
+\texttt{unsat}. This happens, for example, in the following situation:
+\begin{small}
+\begin{verbatim}
+   (assert ...)
+   (check)
+   (check)
+\end{verbatim}
+\end{small}
+The context status is known after the first \texttt{(check)} command
+(provided this command does not timeout or otherwise fails). Then the
+second \texttt{(check)} does nothing and just prints the current
+status.
+
+\medskip\noindent
+If the context's status is unknown, then \texttt{(check)} invokes the
+SMT solver to establish whether the assertions are satisfiable. As
+discussed previously, the actual solver or solver combination is
+dependent on command-line options given to the \texttt{yices} tool. In
+particular, the \texttt{--logic} option allows one to select a solver
+architecture that is specialized for a particular logic. For best
+performance, it is usually better to specify the logic if it is known
+in advance.
+
+\medskip\noindent Several parameters also control the heuristics employed
+by the solver. Yices uses default settings based on the specified logic
+(or global defaults if no logic is given). All these parameters can be
+examined and modified, using the command \texttt{show-params} and
+\texttt{set-param} described in a subsequent section.
+
+\medskip\noindent One can also provide a timeout before calling
+\texttt{(check)}. If the timeout is reached or the search is
+interrupted (by CTRL-C), then the result will be displayed as
+\texttt{interrupted}.
+
+
+\subsubsection*{Push, Pop, Reset}
+
+Command \texttt{(push)}, \texttt{(pop)}, and \texttt{(reset)} allows
+one to manipulate the set of assertions.
+
+\medskip\noindent
+The command \texttt{(reset)} clears all assertions. The current
+context is then returned to its initial state, where the set of
+assertions is empty. This command can be used in all modes.
+
+\medskip\noindent
+The push and pop commands are supported by \texttt{yices} if it is run
+in mode \texttt{push-pop} or \texttt{interactive}. In these modes, the
+context maintains a stack of assertions organized in successive
+levels. The \texttt{(push)} command starts a new assertion level in
+this stack, and \texttt{(pop)} removes all assertions at the current
+level. The command \texttt{(assert f)} adds an assertion \texttt{f} to
+the current level. This assertion will be part of the context until
+this current level is exited by either a call to \texttt{(pop)} or a
+call to \texttt{(reset)}. Thus, a call to \texttt{(pop)} retracts all
+assertions entered since the matching \texttt{(push)}.  The initial
+assertion level includes all formulas that are asserted before the
+first \texttt{(push)} command. Such assertions cannot be retracted by
+\texttt{(pop)}. They remain in the context until \texttt{(reset)} is
+called.
+
+\medskip\noindent
+The commands \texttt{(reset)} and \texttt{(pop)} modify the set of
+assertions in the context, but they do not affect term and type
+declarations. For example, the following sequence of commands is
+valid.
+\begin{small}
+\begin{verbatim}
+   (push)
+   (define A::bool)
+   (assert A)
+   (check)
+   (pop)
+   (assert (not A))
+   (check)
+\end{verbatim}
+\end{small}
+The term \texttt{A} is declared after the \texttt{(push)} command. The
+\texttt{(pop}) command removes the first assertion but its does not
+remove the declaration. Thus, \texttt{A} remains declared as a Boolean
+term after the \texttt{(pop)} command. The second assertion is then
+valid. Both calls to \texttt{(check)} return \texttt{sat}.
+
+
+\subsubsection*{Model}
+
+If a call to \texttt{(check)} returns \texttt{sat}, then the set of
+assertions in the context is satisfiable. One can request
+\texttt{yices} to construct and display a model for the
+assertions. One can also evaluate the value of arbitrary terms in this
+model.
+
+\medskip\noindent
+The command
+\begin{small}
+\begin{verbatim}
+   (show-model)
+\end{verbatim}
+\end{small}
+displays the current model (and constructs it if necessary). An error
+is reported if the context's status is unknown or if the context is
+not satisfiable. Otherwise, the model is displayed in the format
+illustrated in Figure~\ref{model-format}. The model is displayed as a
+list of assignments, possibly followed by a list of function
+definitions. An assignment has the form
+\begin{small}
+\begin{verbatim}
+   (= name value)
+\end{verbatim}
+\end{small}
+where \texttt{name} is an uninterpreted constant and
+\texttt{value} is a constant, that is, the value mapped to
+\texttt{name} in the model. This format is used for all terms of
+atomic types (Boolean, integer and real, bitvector, scalar, and
+uninterpreted types). It is also used to display the value of terms
+that have tuple type. The value of an uninterpreted functions $f$ is
+displayed as shown on the right column of Figure~\ref{model-format}.
+For each uninterpreted function, \texttt{yices} displays the type of
+the function, a finite list of assignments, and the function's default
+value. For example, in Figure~\ref{model-format}, one can see that
+\texttt{yices} has constructed a model where \texttt{(b 0)} and
+\texttt{(b 1)} are \texttt{true}, and the default value for \texttt{b}
+is \texttt{false}.  This means that \texttt{(b x)} is \texttt{false}
+for any \texttt{x} different from \texttt{0} and \texttt{1}.
+
+\begin{figure}
+\begin{footnotesize}
+\begin{center}
+\begin{tabular}{c|c}
+\multicolumn{1}{c}{Input} & \multicolumn{1}{c}{Model~~~~} \\[0.4em]
+
+\begin{minipage}[c]{6cm}
+\begin{verbatim}
+(define a::(-> int bool))
+(define b::(-> int bool))
+(define c::(-> int bool))
+(define x::int)
+(define y::int)
+(assert (and (a x) (b y)))
+(assert (/= x y))
+(assert (distinct a b c))
+(check)
+(show-model)
+\end{verbatim}
+\end{minipage}~~
+&
+~~~\begin{minipage}[c]{6cm}
+\begin{verbatim}
+  (= y 0)
+  (= x -579)
+  (function c
+   (type (-> int bool))
+   (default true))
+  (function a
+   (type (-> int bool))
+   (= (a 1) false)
+   (default true))
+  (function b
+   (type (-> int bool))
+   (= (b 0) true)
+   (= (b 1) true)
+   (default false))
+\end{verbatim}
+\end{minipage}
+\end{tabular}
+\end{center}
+\end{footnotesize}
+\caption{Model Display Format}
+\label{model-format}
+\end{figure}
+
+%% \pagebreak
+
+\medskip\noindent
+Command
+\begin{small}
+\begin{verbatim}
+   (eval term)
+\end{verbatim}
+\end{small}
+computes the value assigned to \texttt{term} in the current model,
+and displays this value. For example, assuming the model shown in
+Figure~\ref{model-format}, one can type
+\begin{small}
+\begin{verbatim}
+   (eval (a y))
+\end{verbatim}
+\end{small}
+and the result will be \texttt{true}. It is also possible to ask for
+the value of a function term, as in
+\begin{small}
+\begin{verbatim}
+   (eval (update a (y) false))
+\end{verbatim}
+\end{small}
+The result is displayed as a function specification such as:
+\begin{small}
+\begin{verbatim}
+   (function fun!17
+     (type (-> int bool))
+     (= (fun!17 1) false)
+     (= (fun!17 0) false)
+     (default true))
+\end{verbatim}
+\end{small}
+Yices creates an internal name of the form \texttt{fun!<number>} to
+display the function value.
+
+\subsubsection*{Implicants}
+
+If a set of assertions is satisfiable, one can construct an implicant
+for them. The implicant is a set of literals $l_1,\ldots,l_n$ (i.e.,
+atoms or negations of atoms) such that the conjunct $l_1 \wedge \ldots
+\wedge l_n$ is satisfiable and implies the assertions. To compute such
+an implicant, Yices first constructs a model $M$ of the assertions then
+builds the implicant from the model: all the literals $l_i$ are
+true in $M$.
+
+\begin{figure}
+\begin{footnotesize}
+\begin{center}
+\begin{tabular}{c|c}
+\multicolumn{1}{c}{Input} & \multicolumn{1}{c}{Implicant~~~~} \\[0.4em]
+
+\begin{minipage}[c]{6.2cm}
+\begin{verbatim}
+(define x::int)
+(define y::int)
+(define z::int)
+(assert (distinct x y z))
+(assert (or (> x (+ z (* 2 y)))
+            (< x (- z (* 2 y)))))
+(check)
+(show-implicant)
+\end{verbatim}
+\end{minipage}~~
+&
+~~~\begin{minipage}[c]{6cm}
+\begin{verbatim}
+(< (+ (* -1 y) z) 0)
+(< (+ (* -1 x) (* 2 y) z) 0)
+(< (+ (* -1 x) y) 0)
+\end{verbatim}
+\end{minipage}
+\end{tabular}
+\end{center}
+\end{footnotesize}
+\caption{Implicant}
+\label{implicant-format}
+\end{figure}
+
+\medskip\noindent The command to display an implicant is
+\texttt{(show-implicant)}. It can be used only when Yices is executed
+in mode \texttt{one-shot}. Like \texttt{(show-model)}, it can be used
+after a call to \texttt{(check)} that returns \texttt{sat}. The
+implicant is displayed as a list of literals, one per
+line. Figure~\ref{implicant-format} shows an example. The assertion
+\texttt{(distinct x y z)} is not considered atomic in this case. The
+implicant includes two literals equivalent to $z < y\ \wedge\ y < x$,
+which implies that $x$, $y$, and $z$ are distinct.
+
+
+\subsubsection*{Exists/Forall Solver}
+
+The command
+\begin{small}
+\begin{verbatim}
+   (ef-solve)
+\end{verbatim}
+\end{small}
+checks satisfiability of an exists/forall problem. This command is
+available when \texttt{yices} is run with option \texttt{--mode=ef}.
+
+
+\subsubsection*{Parameters}
+
+A number of parameters controls the preprocessing and simplifications
+applied by Yices, and the heuristics used by the CDCL SAT solver and
+the theory solvers. Several commands allow one to examine and modify
+these parameters.
+
+\medskip\noindent
+To see the list of all available parameters, and their current values, type
+\begin{small}
+\begin{verbatim}
+   (show-params)
+\end{verbatim}
+\end{small}
+If you want to see the value of a specific parameter, type
+\begin{small}
+\begin{verbatim}
+   (show-param name)
+\end{verbatim}
+\end{small}
+where \texttt{name} is the parameter name. To set a parameter value, use
+\begin{small}
+\begin{verbatim}
+   (set-param name value)
+\end{verbatim}
+\end{small}
+For example, the CDCL solver can use different branching
+heuristics. This is controlled by the \texttt{branching} parameter. To
+see its current value, type the command
+\begin{small}
+\begin{verbatim}
+   (show-param branching)
+\end{verbatim}
+\end{small}
+To select a branching heuristic, use a command like
+\begin{small}
+\begin{verbatim}
+   (set-param branching negative)
+\end{verbatim}
+\end{small}
+
+\medskip\noindent
+There are many search and preprocessing parameters. The full list is
+described in the file \texttt{doc/YICES-LANGUAGE} included in the
+distribution. You can also get on-line help on the parameter using
+\begin{small}
+\begin{verbatim}
+   (help params)
+\end{verbatim}
+\end{small}
+You can also get on-line help on a specific parameter. For example,
+the command
+\begin{small}
+\begin{verbatim}
+   (help branching)
+\end{verbatim}
+\end{small}
+will print a short description of the parameter \texttt{branching} and
+list its possible values.
+
+\subsubsection*{Conversion to DIMACS}
+
+Command
+\begin{small}
+\begin{verbatim}
+   (export-to-dimacs file)
+\end{verbatim}
+\end{small}
+converts Boolean and bitvector problems to the DIMACS format. This
+command is supported if \texttt{yices} is run with option
+\texttt{--logic=NONE} or \texttt{--logic=QF\_BV}.
+
+\medskip\noindent The argument must be the name of a file to store the
+result. It must be given as a string. The command collects all the
+assertions and converts them to CNF, then it writes the result into
+\texttt{file}. A mapping from Yices terms to the DIMACS literals is
+included.
+
+\begin{figure}
+\begin{footnotesize}
+\begin{center}
+\begin{tabular}{c|c}
+\multicolumn{1}{c}{Input} & \multicolumn{1}{c}{Result~~~~} \\[0.4em]
+
+\begin{minipage}[c]{6.2cm}
+\begin{verbatim}
+(define a::(bitvector 4)) 
+(define b::(bitvector 4)) 
+(assert (bv-ge a b))
+(export-to-dimacs "test.cnf")
+(exit)
+\end{verbatim}
+\end{minipage}~~
+&
+~~~~\begin{minipage}[c]{6cm}
+\begin{verbatim}
+c Autogenerated by Yices
+c
+c   a --> [6 7 8]
+c   b --> [3 4 5]
+c
+p cnf 10 14
+1 0
+-2 0
+-3 9 0
+-5 8 0
+-5 -10 0
+6 9 0
+8 -10 0
+-9 -6 3 0
+-10 -7 4 0
+-4 7 10 0
+-10 9 4 0
+-4 -9 10 0
+-7 9 -10 0
+7 10 -9 0
+\end{verbatim}
+\end{minipage}
+\end{tabular}
+\end{center}
+\end{footnotesize}
+\caption{Export to DIMACS}
+\label{export-example}
+\end{figure}
+
+Figure~\ref{export-example} shows a small example. The left-hand side
+is a small bitvector problem. The right-hand side shows the DIMACS
+file produced by \texttt{yices}. The comments shows how the two
+bitvector variables \texttt{a} and \texttt{b} are converted to arrays
+of DIMACS literals.  To produce this file, \texttt{yices} must be
+run with option \texttt{--logic=QF\_BV}.
+
+
+\subsubsection*{Timeout}
+
+By default, \texttt{yices} does not use a timeout. So a call to
+\texttt{(check)} may take a very long time to terminate. To limit the
+runtime of \texttt{(check)}, one can give a timeout is seconds. For
+example, to limit the runtime to 2 minutes:
+\begin{small}
+\begin{verbatim}
+   (set-timeout 120)
+\end{verbatim}
+\end{small}
+This timeout will apply to the next call to \texttt{(check)}, but not
+to the one after that. After every call to \texttt{(check)}, the
+timeout is reset to 0 (which means no timeout). One can also clear the
+timeout explicitly by setting it to 0:
+\begin{small}
+\begin{verbatim}
+   (set-timeout 0)
+\end{verbatim}
+\end{small}
+To see the current value of the timeout, one can use the command
+\begin{small}
+\begin{verbatim}
+   (show-timeout)
+\end{verbatim}
+\end{small}
+
+\subsubsection*{Echo}
+
+The \texttt{echo} command can be use to print a string on the standard
+output. It can be useful in Yices scripts to help display
+results. An example in Figure~\ref{example-echo} illustrates its use.
+
+\begin{figure}
+\begin{center}
+\begin{footnotesize}
+\begin{verbatim}
+    (define a::bool)
+    (define b::bool)
+    (define c::bool)
+    (define d::bool)
+    (define e::bool)
+
+    (assert (= a (or b c)))
+    (assert (= d (and b c)))
+    (assert (= a d))
+    (echo "First check: should be sat\n")
+    (check)
+    (show-model)
+
+    (assert (= e (xor b c)))
+    (assert (= e d))
+    (echo "\nSecond check: should be sat\n")
+    (check)
+    (show-model)
+
+    (assert d)
+    (echo "\nThird check: should be unsat\n")
+    (check)
+\end{verbatim}
+\end{footnotesize}
+\end{center}
+\caption{Example Use of the \texttt{echo} Command}
+\label{example-echo}
+\end{figure}
+
+\subsubsection*{Include}
+
+It is possible to include a Yices script using the following command:
+\begin{small}
+\begin{verbatim}
+   (include filename)
+\end{verbatim}
+\end{small}
+where \texttt{filename} is the name of an input file given as a
+string. For example, to include the file \texttt{example.ys}, type
+\begin{small}
+\begin{verbatim}
+   (include "example.ys")
+\end{verbatim}
+\end{small}
+This command will read and execute all commands contained in the given
+file.
+
+\subsubsection*{Help}
+
+The \texttt{yices} tool has on-line help, which can be obtained using one
+of the following commands:
+\begin{small}
+\begin{verbatim}
+   (help)
+   (help topic)
+\end{verbatim}
+\end{small}
+Without argument, \texttt{(help)} prints a summary of the main Yices
+commands. With an argument, \texttt{(help topic)} gives help on the
+specified \texttt{topic}. The argument can be a command name, one of
+the built-in type or term constructor, or the name of a parameter.
+The argument can be given as a string or as a symbol. For example, to
+get some information on the search parameter \texttt{var-elim}, you
+can type either
+\begin{small}
+\begin{verbatim}
+   (help "var-elim")
+\end{verbatim}
+\end{small}
+or just
+\begin{small}
+\begin{verbatim}
+   (help var-elim).
+\end{verbatim}
+\end{small}
+On-line help is available for other topics such as the syntax. To get a
+list of all topics, type
+\begin{small}
+\begin{verbatim}
+   (help index)
+\end{verbatim}
+\end{small}
+
+
+\subsubsection*{Statistics}
+
+The solver keeps track of various statistics concerning the search
+algorithms (e.g., the number of decisions and conflicts in the CDCL
+solver). The following command prints all the internal statistics
+\begin{small}
+\begin{verbatim}
+   (show-stats)
+\end{verbatim}
+\end{small}
+As part of these statistics, \texttt{yices} keeps track of the
+cumulative CPU time spent in calls to the \texttt{check} command.  To
+get time measurement for a specific call to \texttt{(check)} (rather
+than the total amount of time spent in all calls to \texttt{(check)}
+so far), one can reset the global time counter to zero using command
+\texttt{(reset-stats)}. To get the runtime and other statistics about
+a specific \texttt{(check)}, type the following commands:
+\begin{small}
+\begin{verbatim}
+   (reset-stats)
+   (check)
+   (show-stats)
+\end{verbatim}
+\end{small}
+
+\subsubsection*{Exit}
+
+At any time, one can exit the solver using the command
+\begin{small}
+\begin{verbatim}
+   (exit)
+\end{verbatim}
+\end{small}
+If this command is part of a Yices script file, then \texttt{yices}
+exits immediately after this command, without parsing or processing the
+rest of the file.
+
+
+\chapter{Support for SMT-LIB}
+\label{yices-smt}
+
+The \texttt{yices} tool described in the previous chapter processes
+input given in the Yices~2 language. The distribution includes two
+other tools that can process input in the SMT-LIB~2.0 and the older
+SMT-LIB~1.2 notations.
+
+\section{SMT-LIB 2.0}
+
+To process SMT-LIB~2.0 input, use the \texttt{yices-smt2} solver
+instead of \texttt{yices}. This tool is included in the \texttt{bin}
+directory in the distribution. In the Windows or Cygwin distribution,
+it is called \texttt{yices-smt2.exe}.
+
+\medskip\noindent
+The SMT-LIB~2.0 language is defined in~\cite{SMTLIB20:2012}. More
+information about the various logics defined in SMT-LIB~2.0 is
+available at the SMT-LIB website: \url{http://www.smtlib.org}. David Cok's
+tutorial covers all aspects of the language in
+detail~\cite{SMTLIB:tutorial:2013}.
+
+
+\subsection{Tool Invocation}
+
+To run \texttt{yices-smt2} on an input file, type
+\begin{small}
+\begin{verbatim}
+   yices-smt2 <input-file>
+\end{verbatim}
+\end{small}
+Since \texttt{yices-smt2} runs in mode \texttt{one-shot} by default,
+this will work fine as long as the \texttt{<input-file>} does not use
+the commands \texttt{push} and \texttt{pop} of SMT-LIB~2.0
+(cf. Section~\ref{features}).
+
+\medskip\noindent To enable support for \texttt{push} and
+\texttt{pop}, give the command-line option \texttt{--incremental}.
+This option configures \texttt{yices-smt2} to work in the mode
+\texttt{push-pop}. This flag is also required if the input files
+contains several blocks of assertions and multiple calls to the
+command \texttt{(check-sat)}.
+
+\medskip\noindent If no \texttt{<input-file>} is given,
+\texttt{yices-smt2} will read commands from the standard
+input. Optionally, one can also run the solver with
+the following option:
+\begin{small}
+\begin{verbatim}
+   yices-smt2 --interactive
+\end{verbatim}
+\end{small}
+When invoked in this manner, \texttt{yices-smt2} will print a prompt
+before accepting commands from standard input. In addition, option
+\texttt{:print-success} is set to \texttt{true}. This causes
+\texttt{yices-smt2} to report \texttt{success} after various commands
+that would otherwise be executed silently (as required
+by~\cite{SMTLIB20:2012}).
+
+\medskip\noindent The \texttt{yices-smt2} tool can process problems in
+quantifier-free nonlinear real arithmetic (QF\_NRA). This requires
+selecting the MCSAT solver of Yices by giving the option
+\texttt{--mcsat} on the command line:
+\begin{small}
+\begin{verbatim}
+   yices-smt2 --mcsat <input file>
+\end{verbatim}
+\end{small}
+
+
+\subsubsection*{Command-line Options}
+
+Here is the full list of command-line options supported by
+\texttt{yices-smt2}.
+\begin{options}
+\item[--verbosity=<level>, -v <level>] Set the initial verbosity level.
+
+  By default, \texttt{yices-smt2} runs with verbosity level 0. This
+  can be changed by using the SMT command \texttt{(set-option :verbosity <level>)}.
+  Calling \texttt{yices-smt2 --verbosity=<level>} has the same effect.
+
+\item[--incremental] Enable support for \texttt{push},
+  \texttt{pop}, and multiple calls to \texttt{check-sat}.
+
+\item[--interactive] Run in interactive mode.
+
+   This flag has no effect if \texttt{yices-smt2} is called with an
+   \texttt{input-file}. Otherwise, this flag sets the
+   \texttt{:print-success} option to \texttt{true}.
+
+\item[--timeout=<timeout>, -t <timeout>] Give a timeout in seconds.
+
+  This sets a timeout for the SMT-LIB command \texttt{(check-sat)}. If
+  the timeout is reached, the command returns \texttt{unknown}. In
+  non-interactive mode, there can be only one such command. In
+  interactive mode, the same timeout applies to every
+  \texttt{(check-sat)}.
+
+\item[--mcsat] Use the MCSAT solver.
+
+   This flag selects the MCSAT solver of Yices instead of the default
+   CDCL-based solver. This flag is required for nonlinear arithmetic
+   problems.
+
+\item[--stats, -s] Display statistics on exit.
+
+  If this option is given, \texttt{yices-smt2} will print statistics
+  after all commands have been executed (i.e., after reaching the
+  command \texttt{(exit)} or the end of the input file).
+
+\item[--version, -V] Print version and exit.
+
+\item[--help, -h] Show a summary of command-line options and exit.
+
+\end{options}
+
+
+\subsection{SMT-LIB~2.0 Compliance}
+
+Yices follows the SMT-LIB~2.0 specifications as much as possible. In
+this section, we list the few special cases where Yices may not adhere
+to the standard.
+
+\subsubsection*{Arithmetic}
+
+Because Yices uses a more liberal type system than SMT-LIB~2.0, it
+will accept input that is not strictly compliant with SMT-LIB~2.0. The
+difference occurs in arithmetic problems. Yices allows formulas to
+freely mix real and integer terms. In SMT-LIB 2.0, the types
+\texttt{Int} and \texttt{Real} are disjoint and cannot be mixed in
+arithmetic expression. This should not be a problem, as any properly
+typed SMT-LIB~2.0 arithmetic expression is also type-correct for
+Yices.
+
+
+\subsubsection*{Bitvectors}
+
+As mentioned previously, Yices follows the SMT-LIB standard definition
+for all bit-vector operators except division by zero. The conventions
+used by Yices are explained in Section~\ref{bitvector-general}.
+
+\subsubsection*{Unsupported Commands}
+
+Some commands defined in SMT-LIB 2.0 are optional. This version of
+Yices supports the basic commands for declaration and definition of
+sorts and terms, assertions, and satisfiability checking. It also
+implements the commands \texttt{push} and \texttt{pop}, and the
+optional commands \texttt{get-value} and \texttt{get-assignment}.
+Yices does not support the other optional commands:
+\texttt{get-assertions}, \texttt{get-proof}, and
+\texttt{get-unsat-core}.
+
+\medskip\noindent
+The standard requires option \texttt{:produce-assignments} to be set
+to \texttt{true} before the command \texttt{get-assignment} can be
+issued.  It also requires option \texttt{:produce-models} to be set to
+\texttt{true} before using the command \texttt{get-value}. Yices does
+not enforce these rules. It supports both commands
+\texttt{get-assignment} and \texttt{get-value} even if the
+corresponding option is \texttt{false}.
+
+\subsubsection*{In-line Definitions}
+
+In SMT-LIB 2.0, one can attach annotations to any term. In particular,
+one can give a name to a term using the syntax
+\begin{small}
+\begin{verbatim}
+   (! <term> :named <symbol>)
+\end{verbatim}
+\end{small}
+The \texttt{<symbol>} is a label attached to \texttt{<term>} and marks
+it as important for the command \texttt{get-assignment} and
+\texttt{get-unsat-core}.  The standard also requires such an
+annotation to be treated as an in-line definition. When an annotated
+subterm \texttt{(! <term> :named <name>)} is encountered while parsing
+a larger term \texttt{t0}, then the annotation must be treated as if
+one had written
+\begin{small}
+\begin{verbatim}
+  (define-fun <name> () <sort> <term>)
+\end{verbatim}
+\end{small}
+before the term \texttt{t0}. This unfortunate decision breaks
+well-established, common-sense rules about the scope of
+identifiers. It also means that removing annotations can turn a
+syntactically correct formula into an incorrect one. It forces SMT-LIB
+solver to process annotations even if they do not support the commands
+\texttt{get-unsat-core} and \texttt{get-assignment}, which were the
+reason for attaching labels to terms in the first place.  Other
+undesirable consequences include the fact that simple syntactic
+transformations, for example, rewriting \texttt{(or a b)} to
+\texttt{(or b a)}, may be incorrect if \texttt{a} contains named
+annotations.  In short, this decision complicates implementation
+while providing little, if any, benefit.
+
+\medskip\noindent Still, Yices supports in-line definitions, provided
+the \texttt{<name>} occurring in the annotation is globally fresh. That
+is, the \texttt{<name>} must not be assigned via a previous global
+definition or by a local \texttt{let}.  For example, the following
+monstrosity will cause Yices to complain
+\begin{small}
+\begin{verbatim}
+  (assert (let ((x (+ y 1))) (! (P (* 2 x))) :named x)))
+\end{verbatim}
+\end{small}
+because the symbol \texttt{x} is bound by the enclosing \texttt{let}
+when the annotated term is processed.
+
+
+\subsubsection*{Miscellaneous Issues}
+
+The SMT-LIB 2.0 document states that option \texttt{:print-success}
+should be \texttt{true} by default. This setting requires SMT solvers
+to report success after any command in a script. This is fine for
+interactive use, but impractical when reading large input files (such
+as the SMT-LIB benchmarks at \url{http://www.smtlib.org}). These
+input files typically contain long sequences of declarations and
+definitions, and printing \texttt{success} after each of them is not
+useful or informative, and can generate hundreds of thousands if not
+millions of lines of output.  Like other solvers, Yices avoids these
+issues by setting \texttt{:print-success} to \texttt{false} by default,
+unless command-line option \texttt{--interactive} is given.
+
+
+\medskip\noindent SMT-LIB 2.0 includes two options for directing
+output and diagnostic information to other channels than the default
+\texttt{stdout} and \texttt{stderr}. To send output to a file, you can
+use the command
+\begin{small}
+\begin{verbatim}
+  (set-option :regular-output-channel <filename>)
+\end{verbatim}
+\end{small}
+SMT-LIB~2.0 states that \texttt{<filename>} should follow the POSIX
+standard. Yices does not check or enforce this requirement. You can
+use any character string that can be interpreted as a file name by the
+underlying operating system.
+
+
+\subsubsection*{Non-standard Extensions}
+
+Yices provides a few commands that are not defined in SMT-LIB~2.0 but
+should be useful. Similar commands are available in other solvers such
+as MathSAT~5\footnote{\url{http://mathsat.fbk.eu/smt2examples.html}} and
+Z3\footnote{\url{http://rise4fun.com/z3/tutorial/guide}}.
+
+\medskip\noindent The primary command to examine models in SMT-LIB~2.0
+is \texttt{get-value}, which prints the value of a list of terms in
+the current model. It is often more convenient to just display the
+whole model.  Yices provides command \texttt{(get-model)} for this
+purpose. It displays the model in a format similar to the one
+illustrated in Figure~\ref{model-format}, except that constants are
+printed with the SMT-LIB~2.0 syntax.
+
+\medskip\noindent When Yices is run in incremental mode, a
+\texttt{(reset)} command is available to remove all assertions,
+declarations, and definitions from the context. This command cannot be
+used before \texttt{set-logic} (cf.~\cite{SMTLIB20:2012}). It resets
+the solver to its initial state, but it keeps the logic and all
+options unchanged.
+
+\medskip\noindent Yices provides the non-standard command
+\texttt{(echo <string>)} that just prints the given \texttt{<string>}
+on the output channel.
+
+\subsubsection*{Global Declarations}
+
+Yices supports the option \texttt{:global-decls} introduced by MathSAT
+to control the removal of declarations in incremental mode. By
+default, \texttt{:global-decls} is \texttt{false} and Yices follows
+the SMT-LIB~2.0 conventions. In this mode, the command \texttt{(pop
+  ..)}  removes all the terms and sorts declared since the matching
+\texttt{(push ...)}. Here is a small example of this default behavior
+\begin{small}
+\begin{verbatim}
+   (set-logic QF_UF)
+   (declare-sort U 0)
+   (declare-fun a () U)
+   (push 1)
+   (declare-fun b () U)
+   (assert (not (= a b)))
+   (check-sat)
+   (pop 1)
+   (declare-fun f (U) U)
+   (assert (= a (f b))) ;; error: b is not in scope here
+   (check-sat)
+\end{verbatim}
+\end{small}
+In this small script, the command \texttt{(pop 1)} retracts the first
+assertion and removes the declaration of constant \texttt{b}.  The
+second assertion is then incorrect as \texttt{b} is now undefined.
+
+\medskip\noindent Setting \texttt{:global-decls} to \texttt{true}
+makes all declarations global and unaffected by \texttt{push} and
+\texttt{pop}. A small change to the previous scripts shows the difference:
+\begin{small}
+\begin{verbatim}
+   (set-option :global-decls true)
+   (set-logic QF_UF)
+   (declare-sort U 0)
+   (declare-fun a () U)
+   (push 1)
+   (declare-fun b () U)
+   (assert (not (= a b)))
+   (check-sat)
+   (pop 1)
+   (declare-fun f (U) U)
+   (assert (= a (f b))) ;; correct: b is still in scope here
+   (check-sat)
+\end{verbatim}
+\end{small}
+The second assertion is now correct as the command \texttt{(pop 1)}
+just retracts the first assertion but it does not remove the
+declaration of \texttt{b}.  Like other options in SMT-LIB~2.0, the
+\texttt{:global-decls} must be set before \texttt{set-logic}.
+
+
+\section{SMT-LIB 1.2}
+
+Another tool included in the distribution can process input written in
+the SMT-LIB~1.2 notation. This tool is called \texttt{yices-smt} (or
+\texttt{yices-smt.exe} on Windows or Cygwin). It is included in the
+\texttt{bin} directory.  This tool can process SMT problems written in
+version~1.2 of SMT-LIB, which is documented
+in~\cite{SMTLIB12:2006}. This version of SMT-LIB was used in the SMT
+competitions before 2010.  Since 2010, the competitions have used
+SMT-LIB~2.0.
+
+
+\subsection{Tool Usage}
+
+To execute this solver on an input file in the SMT-LIB~1.2 format, just type:
+\begin{small}
+\begin{verbatim}
+   yices-smt <input-file>
+\end{verbatim}
+\end{small}
+The solver will check satisfiability of the constraints in
+\texttt{input-file} and report either \texttt{sat} or
+\texttt{unsat}. The input file must contain a specification in the
+SMT-LIB {\em benchmark language\/} (cf.~\cite{SMTLIB12:2006}). The
+standard also defines a {\em theory language\/} that is not supported
+by \texttt{yices-smt}. If no input file is given, \texttt{yices-smt}
+will read standard input.
+
+
+\subsection{Command-Line Options}
+
+The following command-line options can be given to \texttt{yices-smt}.
+\begin{options}
+\item[--model, -m] If this option is given, and the benchmark
+  is satisfiable, \texttt{yices-smt} will display a model.
+
+  This model may be partial. Some variables of the input benchmark may
+  be eliminated by preprocessing and formula simplification. The value
+  of these variables is not displayed in the model.
+
+\item[--full-model, -f] Print a full model.
+
+  This causes \texttt{yices-smt} to display a model if the benchmark
+  is satisfiable. Unlike option \texttt{--model}, this option forces
+  Yices to display a complete model. The value of all variables
+  declared in the input benchmark is displayed, even for variables
+  that are eliminated during preprocessing.
+
+\item[--verbose, -v] Run in verbose mode.
+
+  The tool will print various statistics during the search.
+
+\item[--stats, -s] Show statistics.
+
+  This causes \texttt{yices-smt} to display statistics about the
+  search, including search time, number of decisions and conflicts,
+  and so forth.
+
+\item[--timeout=<int>, -t <int>] Give a timeout in seconds.
+
+  For example, to run \texttt{yices-smt} with a 20~s timeout, use:
+  \begin{small}
+  \vspace*{-2mm}
+  \begin{verbatim}
+     yices-smt --timeout=20 ...
+  \end{verbatim}
+  \vspace*{-7mm}
+  \end{small}
+\item[--version, -V] Display the version and exit.
+
+\item[--help, -h] Show a summary of all options and exit.
+\end{options}
+
+
+\chapter{Yices API}
+\label{yices-api}
+
+%% The distribution includes a library and header files for embedding
+%% Yices in other software. The main header file is \texttt{yices.h}
+%% which includes all the API. The API functions are documented in this
+%% header file. More complete and detailed documentation on the Yices~2
+%% API will be provided at the Yices website
+%% \url{http://yices.csl.sri.com/}.
+
+As sketched in Figure~\ref{top-level-architecture}, the API provides
+three main classes of functions:
+\begin{itemize}
+\item Type and term constructors
+\item Operations on contexts
+\item Operations on models
+\end{itemize}
+The API also includes functions related to error reporting and
+diagnosis, global initialization and cleanup, and garbage collection.
+
+In the API, types and terms are identified by 32bit signed integers
+(the types \texttt{type\_t} and \texttt{term\_t} are aliases for
+\texttt{int32\_t}, as defined in file \texttt{yices\_types.h}). Other
+data structures internal to Yices are accessed via opaque
+pointers. For example, a context is an object of the following type
+\begin{small}
+\begin{verbatim}
+   typedef struct context_s context_t;
+\end{verbatim}
+\end{small}
+and all functions that operate on contexts take an argument of type
+\texttt{context\_t *}.
+
+When an API function fails, it returns a special code. Term
+constructors return the constant \texttt{NULL\_TERM}; type
+constructors return \texttt{NULL\_TYPE}. Other functions either return
+a negative integer or the \texttt{NULL} pointer. In addition,
+diagnostic information is stored in a global data structure of type
+\texttt{error\_report\_t} (defined in \texttt{yices\_types.h}). The API
+provides functions to help diagnosis by printing error messages or
+consulting the error report structure.
+
+
+
+
+\section{A Minimal Example}
+
+The distribution includes four header files:
+\begin{itemize}
+\item \texttt{yices\_types.h} defines all types that are part of the API,
+including a data structure used for error reporting and a set of error codes.
+\item \texttt{yices\_limits.h} defines a few constants that set hard
+  limits on the sizes of various constructs. For example, this file
+  defined the maximal arity of functions and the maximal size of
+  bitvector types supported by Yices.
+\item \texttt{yices.h} contains the declaration of all the API functions.
+\item \texttt{yices\_exit\_codes.h} lists the exit codes that can be
+  returned by the Yices executables (via an \texttt{exit} system call).
+\end{itemize}
+
+\begin{figure}
+\begin{footnotesize}
+\begin{verbatim}
+   #include <stdio.h>
+   #include <yices.h>
+
+   int main(void) {
+      printf("Testing Yices %s (%s, %s)\n", yices_version,
+              yices_build_arch, yices_build_mode);
+      return 0;
+   }
+\end{verbatim}
+\end{footnotesize}
+\caption{Minimal Example}
+\label{minimal}
+\end{figure}
+
+To use the library, it is enough to include \texttt{yices.h} in your
+code. This will also include \texttt{yices\_types.h} and
+\texttt{yices\_limits.h}. A minimal example is shown in
+Figure~\ref{minimal}. Assuming the Yices library and header files are
+in standard directories such as \texttt{/usr/local/lib} and
+\texttt{/usr/local/include}, this code should compile with the
+following command
+\begin{small}
+\begin{verbatim}
+   gcc minimal.c -o minimal -lyices
+\end{verbatim}
+\end{small}
+(other compilers than GCC can be used). If Yices is installed in a
+non-standard location, then give appropriate flags to the compilation
+command. For example, if Yices is installed in your home directory:
+\begin{small}
+\begin{verbatim}
+   gcc minimal.c -o minimal -I${HOME}/yices-2.2.0/include \
+        -L${HOME}/yices-2.2.0/lib -lyices
+\end{verbatim}
+\end{small}
+Running the program should print something like this:
+\begin{small}
+\begin{verbatim}
+   Testing Yices 2.2.0 (x86_64-unknown-linux-gnu, release)
+\end{verbatim}
+\end{small}
+If you have build a version of Yices that's dynamically linked against
+GMP, make sure to install GMP on your system.  If the Yices library is
+installed in a non-standard location, you may also need to set
+environment variable \texttt{LD\_LIBRARY\_PATH} (or
+\texttt{DYLD\_LIBRARY\_PATH} on Mac~OS~X).
+
+
+\section{Basic API Usage}
+
+The distribution includes a few simple examples that illustrate basic
+use of the Yices library. The code fragments shown in this section
+come from file \texttt{examples/example1.c} included in the
+distribution.
+
+\subsection*{Global Initialization}
+
+Before doing anything with Yices, make sure to initialize all internal
+data structures by calling function \texttt{yices\_init}.  To avoid
+memory leaks, you should also call \texttt{yices\_exit} at the end of
+your code to free all the memory that Yices has allocated internally.
+
+\subsection*{Term Construction}
+
+Figure~\ref{term-construction} shows code that builds two
+uninterpreted terms \texttt{x} and \texttt{y} of type \texttt{int},
+then constructs the formula
+\begin{small}
+\begin{verbatim}
+  (and (>= x 0) (>= y 0) (= (+ x y) 100))
+\end{verbatim}
+\end{small}
+This code fragment comes from file \texttt{example1.c} that is
+included in the distribution.
+
+
+\begin{figure}
+\begin{footnotesize}
+\begin{verbatim}
+ // Create two uninterpreted terms of type int.
+ type_t int_type = yices_int_type();
+ term_t x = yices_new_uninterpreted_term(int_type);
+ term_t y = yices_new_uninterpreted_term(int_type);
+
+ // Assign names "x" and "y" to these terms.
+ // This is optional, but we need the names in yices_parse_term
+ // and it makes pretty printing nicer.
+ yices_set_term_name(x, "x");
+ yices_set_term_name(y, "y");
+
+ // Build the formula (and (>= x 0) (>= y 0) (= (+ x y) 100))
+ term_t f = yices_and3(yices_arith_geq0_atom(x),
+                       yices_arith_geq0_atom(y),
+                       yices_arith_eq_atom(yices_add(x, y),
+                                           yices_int32(100)));
+
+ // Another way to do it
+ term_t f_var =
+   yices_parse_term("(and (>= x 0) (>= y 0) (= (+ x y) 100))");
+\end{verbatim}
+\end{footnotesize}
+\caption{Term Construction using the API}
+\label{term-construction}
+\end{figure}
+
+\subsection*{Pretty Printing}
+
+Once a term is constructed, we can print it as shown in
+Figure~\ref{pretty-printing}.  This uses the pretty-printing function
+\texttt{yices\_pp\_term}. The first argument to this function is the
+output file to use (in this case, \texttt{stdout}). The second
+argument is the term to print. The other three arguments define the
+pretty-printing area (in this case, a rectangle of 80 columns and 70
+lines). The figure also shows how one checks for errors and prints
+an error message.
+
+\begin{figure}
+\begin{footnotesize}
+\begin{verbatim}
+ static void print_term(term_t term) {
+   int32_t code;
+
+   code = yices_pp_term(stdout, term, 80, 20, 0);
+   if (code < 0) {
+     // An error occurred
+     fprintf(stderr, "Error in print_term: ");
+     yices_print_error(stderr);
+     exit(1);
+   }
+ }
+
+ ...
+
+ // print f and f_var: they should be identical
+ printf("Formula f\n");
+ print_term(f);
+ printf("Formula f_var\n");
+ print_term(f_var);
+\end{verbatim}
+\end{footnotesize}
+\caption{Pretty Printing a Term}
+\label{pretty-printing}
+\end{figure}
+
+\subsection*{Building a Context and Checking Satisfiability}
+
+To check whether formula \texttt{f} constructed previously is
+satisfiable, we create a fresh context, assert formula \texttt{f}
+in this context, then call function
+\texttt{yices\_check\_context}. This is illustrated in
+Figure~\ref{context-check}.
+
+\begin{figure}
+\begin{footnotesize}
+\begin{verbatim}
+context_t *ctx = yices_new_context(NULL);
+code = yices_assert_formula(ctx, f);
+if (code < 0) {
+  fprintf(stderr, "Assert failed: code = %"PRId32", error = %"PRId32"\n",
+          code, yices_error_code());
+  yices_print_error(stderr);
+}
+
+switch (yices_check_context(ctx, NULL)) {
+case STATUS_SAT:
+  printf("The formula is satisfiable\n");
+  ...
+  break;
+
+ case STATUS_UNSAT:
+   printf("The formula is not satisfiable\n");
+   break;
+
+ case STATUS_UNKNOWN:
+   printf("The status is unknown\n");
+   break;
+
+ case STATUS_IDLE:
+ case STATUS_SEARCHING:
+ case STATUS_INTERRUPTED:
+ case STATUS_ERROR:
+   fprintf(stderr, "Error in check_context\n");
+   yices_print_error(stderr);
+   break;
+ }
+ yices_free_context(ctx);
+\end{verbatim}
+\end{footnotesize}
+\caption{Checking Satisfiability}
+\label{context-check}
+\end{figure}
+
+
+\subsection*{Building and Querying a Model}
+
+If \texttt{yices\_check\_context} returns \texttt{STATUS\_SAT} (or
+\texttt{STATUS\_UNKNOWN}), then we can construct a model of the
+asserted formulas as shown in Figure~\ref{model-query}. The code also
+shows how to print the model and how to evaluate the value of terms in
+a model.
+
+\begin{figure}
+\begin{footnotesize}
+\begin{verbatim}
+ model_t* model = yices_get_model(ctx, true);  // get the model
+ if (model == NULL) {
+   fprintf(stderr, "Error in get_model\n");
+   yices_print_error(stderr);
+ } else {
+   printf("Model\n");
+   code = yices_pp_model(stdout, model, 80, 4, 0); // print the model
+
+   int32_t v;
+   // get the value of x, we know it fits int32
+   code = yices_get_int32_value(model, x, &v);
+   if (code < 0) {
+     printf(stderr, "Error in get_int32_value for 'x'\n");
+     yices_print_error(stderr);
+   } else {
+     printf("Value of x = %"PRId32"\n", v);
+   }
+
+   // get the value of y
+   code = yices_get_int32_value(model, y, &v);
+   if (code < 0) {
+     fprintf(stderr, "Error in get_int32_value for 'y'\n");
+     yices_print_error(stderr);
+   } else {
+     printf("Value of y = %"PRId32"\n", v);
+   }
+
+   yices_free_model(model); // clean up: delete the model
+ }
+\end{verbatim}
+\end{footnotesize}
+\caption{Building and Querying a Model}
+\label{model-query}
+\end{figure}
+
+
+\section{Full API}
+
+The main header file \texttt{yices.h} includes documentation about all
+API functions. We provide more documentation on the Yices website:
+\url{http://yices.csl.sri.com/}.
+
+\newpage
+\bibliographystyle{alpha}
+\bibliography{manual}
+
+\appendix
+\chapter{License Terms}
+\label{license}
+
+Before downloading and using Yices, you will be asked to agree to the
+End-User License Agreement (EULA) reproduced below. SRI is open to
+distributing Yices under other agreements. Contact us at
+\texttt{fm-licensing@csl.sri.com} to discuss alternative license
+terms.
+
+\begin{small}
+\subsection*{NONCOMMERCIAL END USER LICENSE AGREEMENT}
+
+
+\paragraph{IMPORTANT - READ CAREFULLY.}
+This EULA  permits use of the  software only for projects  that do not
+receive  external funding  other than  government research  grants and
+contracts.  Any other use requires a commercial license.
+
+Be  sure  to carefully  read  and understand  all  of  the rights  and
+restrictions  described in this  End-User License  Agreement (``EULA'').
+You will be asked to review  and either accept or not accept the terms
+of the EULA.  You will not be permitted to access  or use the Software
+unless or until you accept  the terms of the EULA. Alternative license
+terms may be available to you by contacting fm-licensing@csl.sri.com.
+
+Your  affirmative response  to the  ``Do you  accept the  terms  of the
+EULA?'' prompt is a symbol of  your signature that you accept the terms
+of the EULA.
+
+This EULA is a legal agreement  between you (either an individual or a
+single entity) and SRI International (``SRI'') for the software referred
+to by SRI as ``YICES,'' which includes the computer software accessible
+via  this web  browser interface,  and may  include  associated media,
+printed  materials  and   any  "online"  or  electronic  documentation
+(``Software''). By utilizing the Software,  you agree to be bound by the
+terms of this EULA. If you do not agree to the terms of this EULA, you
+may not access or use the Software.
+
+
+\paragraph{GRANT OF LIMITED LICENSE.}
+SRI hereby grants to  you a personal, non-exclusive, non-transferable,
+royalty-free license to  access, use and modify the  Software for your
+own  internal,  non-commercial  purposes.    You  may  also  share  or
+distribute copies of  the Software or of derivative  works you make of
+the  Software, but  solely  if restricted  to  non-commercial use  and
+subject to all terms of this EULA.  Teaching and academic research are
+typical examples of non-commercial use.
+
+The Software is licensed to  you, and such license does not constitute
+a  sale  of the  Software.   SRI reserves  the  right  to release  the
+Software  under different  license terms  or to  stop  distributing or
+providing access to the Software at any time.
+
+
+\paragraph{RESTRICTIONS.}
+You may not  use or distribute this Software, or  any derivative works
+of  this Software,  for commercial  purposes.  Examples  of commercial
+purposes include  running business operations; licensing,  leasing, or
+selling  the   Software;  distributing  the  Software   for  use  with
+commercial  products; using  the Software  in the  creation or  use of
+commercial products; or any other activity whose purpose is to procure
+a commercial gain to you or others.
+
+You may not:  (i) distribute, sublicense, rent or  lease the Software,
+except as expressly permitted under the limited license above; or (ii)
+sell professional services or commercial  products based on the use of
+this software or the interpretation of its results.
+
+
+\paragraph{OWNERSHIP.}
+SRI is  the sole owner of  the Software and  the intellectual property
+rights therein.  You agree that  SRI retains title to and ownership of
+the Software  and that  you will keep  confidential and use  your best
+efforts to prevent and  protect the Software from unauthorized access,
+use or disclosure.  All trademarks, service marks, and trade names are
+proprietary  to SRI.   All  rights not  expressly  granted herein  are
+hereby reserved.
+
+
+\paragraph{TERMINATION.}
+The EULA  is effective upon  the date you  first use the  Software and
+shall continue until terminated as specified below.
+
+You may terminate the EULA at any time prior to the natural expiration
+date by destroying the Software  and any and all related documentation
+and copies and installations thereof,  whether made under the terms of
+these terms  or otherwise. SRI may  terminate the EULA if  you fail to
+comply with any condition of the  EULA or at SRI's discretion for good
+cause.If you  sue anyone over patents  that you think may  apply to or
+read on the  software or anyone's use of the  software, this EULA (and
+your  license  and rights  obtained  herein) terminate  automatically.
+Upon termination, you must destroy the Software in your possession, if
+any, and any  and all copies thereof. In the  event of termination for
+any  reason, the provisions  set forth  under the  paragraphs entitled
+DISCLAIMER OF ALL WARRANTIES, EXCLUSION OF ALL DAMAGES, and LIMITATION
+AND RELEASE OF LIABILITY shall survive.
+
+
+\paragraph{U.S. GOVERNMENT RESTRICTED RIGHTS.}
+The  Software is deemed  to be  ``commercial software'' and ``commercial
+computer  software  documentation,'' respectively, pursuant  to  DFARS
+\S 227.7202  and  FAR 12.212,  as  applicable.   Any use,  modification,
+reproduction,  release,  performance, display,  or  disclosure of  the
+Software  by the  U.S.  Government  or  any of  its agencies  or by  a
+U.S. Government prime contractor  or subcontractor (at any tier) shall
+be governed solely by the terms  of this EULA, and shall be prohibited
+except to the extent expressly permitted by the terms of this EULA.
+
+
+\paragraph{DISCLAIMER OF ALL WARRANTIES.}
+SRI  PROVIDES THE SOFTWARE  ``AS IS''  AND WITH  ALL FAULTS,  AND HEREBY
+DISCLAIMS ALL OTHER WARRANTIES AND CONDITIONS, EITHER EXPRESS, IMPLIED
+OR  STATUTORY, INCLUDING  BUT  NOT  LIMITED TO  ANY  (IF ANY)  IMPLIED
+WARRANTIES  OR  CONDITIONS  OF   MERCHANTABILITY,  OF  FITNESS  FOR  A
+PARTICULAR PURPOSE,  OF LACK OF VIRUSES  AND OF LACK  OF NEGLIGENCE OR
+LACK OF WORKMANLIKE EFFORT. ALSO, THERE IS NO WARRANTY OR CONDITION OF
+TITLE,  OF QUIET ENJOYMENT  OR OF  NON-INFRINGEMENT.  THE  ENTIRE RISK
+ARISING OUT OF THE USE OR PERFORMANCE OF THE SOFTWARE IS WITH YOU.
+
+
+\paragraph{EXCLUSION OF ALL DAMAGES.}
+TO THE MAXIMUM  EXTENT PERMITTED BY APPLICABLE LAW,  IN NO EVENT SHALL
+SRI  BE LIABLE  FOR ANY  CONSEQUENTIAL, INCIDENTAL,  DIRECT, INDIRECT,
+SPECIAL,  PUNITIVE  OR OTHER  DAMAGES  WHATSOEVER (INCLUDING,  WITHOUT
+LIMITATION, DAMAGES FOR ANY INJURY  TO PERSON OR PROPERTY, DAMAGES FOR
+LOSS OF PROFITS, BUSINESS  INTERRUPTION, LOSS OF BUSINESS INFORMATION,
+FOR LOSS  OF PRIVACY FOR  FAILURE TO MEET  ANY DUTY INCLUDING  OF GOOD
+FAITH OR OF  REASONABLE CARE, FOR NEGLIGENCE AND  FOR ANY PECUNIARY OR
+OTHER LOSS WHATSOEVER) ARISING OUT OF OR IN ANY WAY RELATED TO THE USE
+OF OR INABILITY  TO USE THE SOFTWARE, EVEN IF SRI  HAS BEEN ADVISED OF
+THE POSSIBILITY OF  SUCH DAMAGES.  THIS EXCLUSION OF  DAMAGES SHALL BE
+EFFECTIVE EVEN IF ANY REMEDY FAILS OF ITS ESSENTIAL PURPOSE.
+
+
+\paragraph{LIMITATION AND RELEASE OF LIABILITY.}
+
+SRI has included  in this EULA terms that  disclaim all warranties and
+liability for  the Software.  To the full  extent allowed by  law, YOU
+HEREBY RELEASE SRI FROM ANY  AND ALL LIABILITY ARISING FROM OR RELATED
+TO ALL CLAIMS CONCERNING THE SOFTWARE  OR ITS USE.  If you do not wish
+to accept access to the Software  under the terms of this EULA, do not
+access  or use  the Software.   No refund  will be  made,  because the
+Software was provided to you  at no charge.  Independent of, severable
+from, and to be enforced  independently of any other provision of this
+EULA,  UNDER NO CIRCUMSTANCE  SHALL SRI'S  AGGREGATE LIABILITY  TO YOU
+(INCLUDING LIABILITY  TO ANY  THIRD PERSON OR  PERSONS WHOSE  CLAIM OR
+CLAIMS ARE BASED ON OR DERIVED FROM A RIGHT OR RIGHTS CLAIMED BY YOU),
+WITH RESPECT TO  ANY AND ALL CLAIMS AT ANY AND  ALL TIMES ARISING FROM
+OR RELATED TO  THE SUBJECT MATTER OF THIS EULA,  IN CONTRACT, TORT, OR
+OTHERWISE, EXCEED  THE TOTAL AMOUNT, IF  ANY, ACTUALLY PAID  BY YOU TO
+SRI PURSUANT TO THIS EULA.
+
+
+\paragraph{JURISDICTIONAL ISSUES.}
+
+This Software is  controlled by SRI from its  offices within the State
+of  California.  SRI makes  no  representation  that  the Software  is
+appropriate or available for use  in other locations. Those who choose
+to  access this  Software  from other  locations  do so  at their  own
+initiative and are responsible for  compliance with local laws, if and
+to the extent  local laws are applicable. You  hereby acknowledge that
+the rights  and obligations of  the EULA are  subject to the  laws and
+regulations of  the United States  relating to the export  of products
+and technical  information. Without limitation, you  shall comply with
+all  such laws  and regulations,  including the  restriction  that the
+Software  may not  be accessed  from,  used or  otherwise exported  or
+reexported (i) into  (or to a national or resident  of) any country to
+which  the  U.S.   has embargoed  goods;  or  (ii)  to anyone  on  the
+U.S. Treasury  Department's list of Specialty  Designated Nationals or
+the U.S. Commerce  Department's Table of Deny Orders.  By accessing or
+using the Software, you represent and warrant that you are not located
+in,  under the  control of,  or  a national  or resident  of any  such
+country on any such list.
+
+
+\paragraph{NOTICE AND PROCEDURE FOR MAKING CLAIMS OF COPYRIGHT INFRINGEMENT.}
+Pursuant   to  Title   17,  United   States  Code,   Section  512(c)(2),
+notifications of claimed copyright  infringement should be sent to SRI
+International,  Office of  the General  Counsel, 333  Ravenswood Ave.,
+Menlo Park, CA 94025.
+
+
+\paragraph{SUPPORT, UPDATES AND NEW RELEASES.}
+The  EULA does  not  grant you  any  rights to  any software  support,
+enhancements or updates.  Any updates  or new releases of the Software
+which  SRI chooses  at its  own  discretion to  distribute or  provide
+access to shall be subject to the terms hereof.
+
+
+\paragraph{GENERAL INFORMATION.}
+The  EULA constitutes  the entire  agreement between  you and  SRI and
+governs your access to and use  of the Software. The EULA shall not be
+modified except in writing by both parties.
+
+The EULA  shall be  governed by and  construed in accordance  with the
+laws of  the State of California,  without regard to  the conflicts of
+law principles thereof.  Any litigation  arising out of or relating to
+this  EULA or  the Software,  shall be  brought in  the  United States
+District Court for the Northern  District of California, if in federal
+court, or in  the San Mateo County Superior Court,  if in state court,
+and the  parties hereby waive any objections  to personal jurisdiction
+and/or venue in such courts for the purpose of such action.
+
+If any  provision of the EULA  shall be deemed unlawful,  void, or for
+any  reason  unenforceable,  then   that  provision  shall  be  deemed
+severable  from these  terms and  shall  not affect  the validity  and
+enforceability of any remaining provisions.
+
+In consideration of  your use of the Software,  you represent that you
+are  of legal age  to form  a binding  contract and  are not  a person
+barred from receiving services under  the laws of the United States or
+other applicable jurisdiction.
+
+The failure  of SRI to exercise  or enforce any right  or provision of
+the EULA shall not constitute a waiver of such right or provision.
+\end{small}
+
+
+
+\chapter{GMP License Terms}
+\label{gmp-license}
+
+Yices depends on the GNU Multiple Precision library (GMP), available
+from \url{http://www.gmplib.org}. The following terms apply to GMP.
+
+\begin{small}
+\begin{verbatim}
+
+                 GNU LESSER GENERAL PUBLIC LICENSE
+                     Version 3, 29 June 2007
+
+Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
+Everyone is permitted to copy  and distribute verbatim copies of
+this license document, but changing it is not allowed.
+
+
+This version of the GNU Lesser General Public License incorporates
+the terms and conditions of version 3 of the GNU General Public
+License, supplemented by the additional permissions listed below.
+
+  0. Additional Definitions.
+
+  As used herein, "this License" refers to version 3 of the GNU 
+Lesser General Public License, and the "GNU GPL" refers to 
+version 3 of the GNU General Public License.
+
+  "The Library" refers to a covered work governed by this License,
+other than an Application or a Combined Work as defined below.
+
+  An "Application" is any work that makes use of an interface
+provided by the Library, but which is not otherwise based on the 
+Library. Defining a subclass of a class defined by the Library is
+deemed a mode of using an interface provided by the Library.
+
+  A "Combined Work" is a work produced by combining or linking an
+Application with the Library. The particular version of the
+Library with which the Combined Work was made is also called 
+the "Linked Version".
+
+  The "Minimal Corresponding Source" for a Combined Work means the
+Corresponding Source for the Combined Work, excluding any source
+code for portions of the Combined Work that, considered in 
+isolation, are based on the Application, and not on the Linked
+Version.
+
+  The "Corresponding Application Code" for a Combined Work means 
+the object code and/or source code for the Application, including
+any data and utility programs needed for reproducing the Combined
+Work from the Application, but excluding the System Libraries of
+the Combined Work.
+
+  1. Exception to Section 3 of the GNU GPL.
+
+  You may convey a covered work under sections 3 and 4 of this 
+License without being bound by section 3 of the GNU GPL.
+
+  2. Conveying Modified Versions.
+
+  If you modify a copy of the Library, and, in your modifications,
+a facility refers to a function or data to be supplied by an
+Application that uses the facility (other than as an argument 
+passed when the facility is invoked), then you may convey a copy
+of the modified version:
+
+   a) under this License, provided that you make a good faith 
+   effort to ensure that, in the event an Application does not 
+   supply the function or data, the facility still operates, and
+   performs whatever part of its purpose remains meaningful, or
+
+   b) under the GNU GPL, with none of the additional permissions 
+   of this License applicable to that copy.
+
+  3. Object Code Incorporating Material from Library Header Files.
+
+  The object code form of an Application may incorporate material
+from a header file that is part of the Library. You may convey 
+such object code under terms of your choice, provided that, if the 
+incorporated material is not limited to numerical parameters, data
+structure layouts and accessors, or small macros, inline functions 
+and templates (ten or fewer lines in length), you do both of the 
+following:
+
+   a) Give prominent notice with each copy of the object code that
+   the Library is used in it and that the Library and its use are
+   covered by this License.
+
+   b) Accompany the object code with a copy of the GNU GPL and
+   this license document.
+
+  4. Combined Works.
+
+  You may convey a Combined Work under terms of your choice that,
+taken together, effectively do not restrict modification of the
+portions of the Library contained in the Combined Work and reverse
+engineering for debugging such modifications, if you also do each 
+of the following:
+
+   a) Give prominent notice with each copy of the Combined Work
+   that the Library is used in it and that the Library and its use
+   are covered by this License.
+
+   b) Accompany the Combined Work with a copy of the GNU GPL and
+   this license document.
+
+   c) For a Combined Work that displays copyright notices during
+   execution, include the copyright notice for the Library among
+   these notices, as well as a reference directing the user to the
+   copies of the GNU GPL and this license document.
+
+   d) Do one of the following:
+
+       0) Convey the Minimal Corresponding Source under the terms 
+       of this License, and the Corresponding Application Code in
+       a form suitable for, and under terms that permit, the user
+       to recombine or relink the Application with a modified
+       version of the Linked Version to produce a modified
+       Combined Work, in the manner specified by section 6 of the
+       GNU GPL for conveying Corresponding Source.
+
+       1) Use a suitable shared library mechanism for linking with
+       the Library. A suitable mechanism is one that (a) uses at
+       run time a copy of the Library already present on the
+       user's computer system, and (b) will operate properly
+       with a modified version of the Library that is
+       interface-compatible with the Linked Version.
+
+   e) Provide Installation Information, but only if you would 
+   otherwise be required to provide such information under
+   section 6 of the GNU GPL, and only to the extent that such
+   information is necessary to install and execute a modified
+   version of the Combined Work produced by recombining or 
+   relinking the Application with a modified version of the
+   Linked Version. (If you use option 4d0, the Installation
+   Information must accompany the Minimal Corresponding Source 
+   and Corresponding Application Code. If you use option 4d1, 
+   you must provide the Installation Information in the manner
+   specified by section 6 of the GNU GPL for conveying
+   Corresponding Source.)
+
+  5. Combined Libraries.
+
+  You may place library facilities that are a work based on the
+Library side by side in a single library together with other
+library facilities that are not Applications and are not covered
+by this License, and convey such a combined library under terms
+of your choice, if you do both of the following:
+
+   a) Accompany the combined library with a copy of the same work
+   based on the Library, uncombined with any other library 
+   facilities, conveyed under the terms of this License.
+
+   b) Give prominent notice with the combined library that part
+   of it is a work based on the Library, and explaining where to
+   find the accompanying uncombined form of the same work.
+
+  6. Revised Versions of the GNU Lesser General Public License.
+
+  The Free Software Foundation may publish revised and/or new
+versions of the GNU Lesser General Public License from time to 
+time. Such new versions will be similar in spirit to the present
+version, but may differ in detail to address new problems or 
+concerns.
+
+  Each version is given a distinguishing version number. If the
+Library as you received it specifies that a certain numbered
+version of the GNU Lesser General Public License "or any later
+version" applies to it, you have the option of following the terms
+and conditions either of that published version or of any later
+version published by the Free Software Foundation. If the Library
+as you received it does not specify a version number of the GNU
+Lesser General Public License, you may choose any version of the
+GNU Lesser General Public License ever published by the Free 
+Software Foundation.
+
+  If the Library as you received it specifies that a proxy can
+decide whether future versions of the GNU Lesser General Public
+License shall apply, that proxy's public statement of acceptance
+of any version is permanent authorization for you to choose that
+version for the Library.
+\end{verbatim}
+\end{small}
+
+\end{document}
