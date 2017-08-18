@@ -2990,7 +2990,7 @@ int yices_main(int argc, char *argv[]) {
   // Deal with command-line options
   process_command_line(argc, argv);
 
-  /*
+ /*
    * Check the input file
    * - initialize the lexer
    * - set the interactive flag and timeout
@@ -3035,13 +3035,30 @@ int yices_main(int argc, char *argv[]) {
     print_version(stderr);
   }
 
-  if (efmode) {
+ 
+  //NOTE: Eliminating efmode execution.
+  /* if (efmode) {
     context = NULL;
     model = NULL;
     default_ctx_params(&ctx_parameters, &parameters, logic_code, arch, CTX_MODE_MULTICHECKS);
   } else {
     init_ctx(logic_code, arch, mode, iflag, qflag);
-  }
+  }*/
+
+
+  /* NOTE: Architecture Settings */
+  arch = CTX_ARCH_SPLX;
+  arch = CTX_ARCH_MCSAT;
+  arch = CTX_ARCH_EG;
+  arch = CTX_ARCH_EGSPLX;
+  arch = CTX_ARCH_NOSOLVERS; 
+  arch = CTX_ARCH_BV;
+
+ 
+  printf("arch = %d \n", arch);
+  //NOTE: init_ctx-> yices_create_context -> init_context -> init_solvers
+  init_ctx(logic_code, arch, mode, iflag, qflag);
+
   ready_time = get_cpu_time();
 
   /*
