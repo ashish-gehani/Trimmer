@@ -4,7 +4,8 @@ using namespace llvm;
 
 enum BaseType {
   boolType,
-  charType, 
+  charType,
+  shortType, 
   intType, 
   longType
 };
@@ -93,9 +94,9 @@ unsigned AggrAllocaID = 1;
 class AggregateAlloca {
 public:
   AggregateAlloca(Type* ty);
-  AggregateAlloca(Type * ty, unsigned totalSize, bool constant, 
-    NodeType nty, unsigned allocaID);   
+  AggregateAlloca();   
   ~AggregateAlloca(); 
+  void initialize(AggregateAlloca * aa, unsigned totalSize);
   AggregateAlloca * createClone();
   void checkConsistencyWith(AggregateAlloca * aa);  
   void setParent(AggregateAlloca * aa, unsigned offset) {
@@ -157,6 +158,18 @@ public:
   unsigned getId() {
     return allocaID;
   }
+  bool base() {
+    return isBase;
+  }
+  void setBase(bool val) {
+    isBase = val;
+  }
+  bool global() {
+    return isGlobal;
+  }
+  void setGlobal(bool val) {
+    isGlobal = val;
+  }
   NodeType Ntype;
 private:
   void initContained(unsigned size) {
@@ -190,6 +203,8 @@ private:
   unsigned totalSize;
   Type* allocatedType;
   bool constant;
+  bool isBase;
+  bool isGlobal;
   unsigned OffSetInParent;
   unsigned allocaID;
 };
@@ -200,6 +215,7 @@ struct SSAPointer {
   Type* allocatedType;
   SSAPointer(Type * ty) {
     this->basePointer = new AggregateAlloca(ty);
+    this->basePointer->setBase(true);
     this->position = 0;
     this->allocatedType = ty;
   }

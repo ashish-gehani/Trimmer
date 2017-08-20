@@ -36,8 +36,11 @@ void ScalarAlloca::createData(Type* ty) {
 	if(ty->isIntegerTy(8)) {
 		Btype = charType;
 		data = new char[size + 1];
-		memset(data, '\0', size + 1);
- 	}
+	}
+	if(ty->isIntegerTy(16)) {
+		Btype = shortType;
+		data = new short[size];
+	}
 	if(ty->isIntegerTy(32)) {
 		Btype = intType;
 		data = new int[size];
@@ -46,6 +49,7 @@ void ScalarAlloca::createData(Type* ty) {
 		Btype = longType;
 		data = new long[size];
 	}
+	memset(data, '\0', size + 1);
 }
 
 void ScalarAlloca::copyData(void * cdata, bool * cinit, int csize) {
@@ -67,9 +71,17 @@ void ScalarAlloca::copyData(void * cdata, bool * cinit, int csize) {
 	for(int i = 0; i < size; i++) {
 		castData[i] = copyData[i];
 		initialized[i] = cinit[i];
-		// errs() << castData[i] << " copy data " << initialized[i] << "\n";		
 	}
 	castData[size] = '\0';
+  } else if(Btype == shortType) {
+	data = new short[size];
+	initialized = new bool[size];
+	short * castData = (short *) data;
+	short * copyData = (short *) cdata;
+	for(int i = 0; i < size; i++) {
+		castData[i] = copyData[i];
+		initialized[i] = cinit[i];
+	}
   } else if(Btype == intType) {
 	data = new int[size];
 	initialized = new bool[size];
@@ -103,6 +115,9 @@ Value* ScalarAlloca::createConstVal(int offset) {
     char * loadData = (char*) data;
     constVal = ConstantInt::get(ty, loadData[offset]);
     // errs() << "char loaded " << loadData[offset] << "\n";
+  } else if(Btype == shortType) {
+    short * loadData = (short*) data;
+    constVal = ConstantInt::get(ty, loadData[offset]);    
   }  else if(Btype == intType) {
     int * loadData = (int*) data;
     constVal = ConstantInt::get(ty, loadData[offset]);
@@ -123,10 +138,13 @@ void ScalarAlloca::storeConstVal(int ConstVal, int offset) {
     char storeVal = (char) ConstVal;
     char * storeData = (char*) data;
     storeData[offset] = storeVal;
+  } else if(Btype == shortType) {
+    short storeVal = (short) ConstVal;
+    short * storeData = (short*) data;
+    storeData[offset] = storeVal;    
   }  else if(Btype == intType) {
     int storeVal = (int) ConstVal;
     int * storeData = (int*) data;
-    // errs() << "int stored " << storeVal << "\n";    
     storeData[offset] = storeVal;
   }  else if(Btype == longType) {
     long storeVal = (long) ConstVal;
@@ -142,6 +160,9 @@ ScalarAlloca::~ScalarAlloca() {
   } else if(Btype == charType) {
     char * loadData = (char*) data;
     delete [] loadData;
+  } else if(Btype == shortType) {
+    short * loadData = (short*) data;
+    delete [] loadData;    
   }  else if(Btype == intType) {
     int * loadData = (int*) data;
     delete [] loadData;
@@ -177,6 +198,16 @@ bool ScalarAlloca::checkConsistencyWith(ScalarAlloca * sa) {
 	} else if(Btype == charType) {
 		char * fData = (char *) data;
 		char * sData = (char *) sa->data;
+		for(unsigned i = 0; i < modcheck.size(); i++) {
+			unsigned index = modcheck[i];
+			if(initialized[index] != sa->getInit(index))
+				return false;
+			if(initialized[index] && fData[index] != sData[index])
+				return false;
+		}
+	} else if(Btype == shortType) {
+		short * fData = (short *) data;
+		short * sData = (short *) sa->data;
 		for(unsigned i = 0; i < modcheck.size(); i++) {
 			unsigned index = modcheck[i];
 			if(initialized[index] != sa->getInit(index))
@@ -238,6 +269,7 @@ AggregateAlloca::AggregateAlloca(Type* ty) {
 	alloca = NULL;
 	parent = NULL;
 	constant = true;
+	isBase = false;
 	allocaID = AggrAllocaID;
 	AggrAllocaID++;
 	if(StructType* st = dyn_cast<StructType>(ty)) {
@@ -268,30 +300,33 @@ AggregateAlloca::AggregateAlloca(Type* ty) {
 	}
 }
 
-AggregateAlloca::AggregateAlloca(Type * ty, unsigned totalSize, bool val, 
-    NodeType nty, unsigned id) {
-    parent = NULL;
-    allocatedType = ty;
-    initContained(totalSize);
-    containedSize = 0;
-    constant = val;
-    Ntype = nty;
-    allocaID = id;
-    alloca = NULL;
+AggregateAlloca::AggregateAlloca() {
+  parent = NULL;
+  alloca = NULL;
+  containedSize = 0;
 }
 
-AggregateAlloca * AggregateAlloca::createClone() {
-    AggregateAlloca * aa = new AggregateAlloca(allocatedType, totalSize, 
-    	constant, Ntype, allocaID);
-    for(unsigned i = 0; i < containedSize; i++) {
-      aa->setOrInsert(i, getContained(i)->createClone());
-      aa->getContained(i)->setParent(aa, i);
-    }
-    if(alloca) {
-      aa->setAlloca(alloca->createClone());
-      aa->getAlloca()->setParent(aa);
-    }
-    return aa;
+void AggregateAlloca::initialize(AggregateAlloca * aa, unsigned totalSize) {
+  allocatedType = aa->getType();
+  constant = aa->isConstant();
+  allocaID = aa->getId();
+  isBase = aa->base();
+  initContained(totalSize);
+  Ntype = aa->Ntype;  
+}
+
+AggregateAlloca * AggregateAlloca::createClone() {		
+  AggregateAlloca * aa = new AggregateAlloca();
+  aa->initialize(this, totalSize);
+  for(unsigned i = 0; i < containedSize; i++) {
+    aa->setOrInsert(i, getContained(i)->createClone());
+    aa->getContained(i)->setParent(aa, i);
+  }
+  if(alloca) {
+    aa->setAlloca(alloca->createClone());
+    aa->getAlloca()->setParent(aa);
+  }
+  return aa;
 }	
 
 AggregateAlloca::~AggregateAlloca() {
