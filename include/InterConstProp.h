@@ -43,76 +43,88 @@ using namespace std;
 
 struct ConstantFolding : public ModulePass {
 
-  static char ID;
-   
-  // map<Value*, StringAlloca*> stringAllocas;  
-  // stringPointers is a map of constant pointers - string pointers with constant index into alloca   
-  //map<Value*, StringPointer*> stringPointers;
-  map<Instruction *, vector<CallOperand*>> replaceOperands;
-  map<Function *, SpecializedCall*> specializedCalls;
-  vector<GlobalIdPair> GlobalIdList;
-  BasicBlockContInfoMap BasicBlockContexts;
-  BasicBlock * currBB;
-  set<BasicBlock *> visited;
-  set<BasicBlock *> writesToMemory;
+  static char ID;  
   Module * M;  
+  
+  bool useAnnotations;
+  bool currContextIsAnnotated;
+  set<Value *> AnnotationList;
+
   const TargetLibraryInfo *TLI;
   DataLayout * DL;
   DominatorTree * DT;
   CallGraph * CG;
+  
   map<Function*, FuncInfo*> FuncInfoMap;  
-  unsigned numGlobals;
+  map<BasicBlock *, BBInfo *> BBInfoMap;
 
-  void processAllocaInst(AllocaInst * allocaInst, BasicBlock::iterator & inst);
+  map<Instruction *, vector<CallOperand*>> replaceOperands;
+  map<Function *, SpecializedCall*> specializedCalls;
 
-  void processBitCastInst(BitCastInst * bitcastInst, BasicBlock::iterator & inst);
+  BasicBlock * currBB;
+  BasicBlockContInfoMap BasicBlockContexts;
+  set<BasicBlock *> visited;
+
+  vector<GlobalIdPair> GlobalIdList;
+
+  void processAllocaInst(AllocaInst * allocaInst);
+
+  void processBitCastInst(BitCastInst * bitcastInst);
  
-  void processMemcpyInst(MemCpyInst * memcpyInst, BasicBlock::iterator & inst);
+  void processMemcpyInst(MemCpyInst * memcpyInst);
 
   void processMallocInst(CallInst * mallocInst, Instruction* I);
  
-  void processStoreInst(StoreInst * storeInst, BasicBlock::iterator & inst);
+  void processStoreInst(StoreInst * storeInst);
 
-  void processLoadInst(LoadInst * loadInst, BasicBlock::iterator & inst);
+  void processLoadInst(LoadInst * loadInst);
 
-  void processGEPInst(GetElementPtrInst * GEPInst, BasicBlock::iterator & inst);
+  void processGEPInst(GetElementPtrInst * GEPInst);
 
-  void processCallInst(CallInst * callInst, BasicBlock::iterator & inst, clock_t & timeVal);
+  void processCallInst(CallInst * callInst);
 
-  void processBranchInst(BranchInst * branchInst, BasicBlock::iterator & inst, clock_t & timeVal);
+  void processBranchInst(BranchInst * branchInst);
 
-  void processSwitchInst(SwitchInst * switchInst, BasicBlock::iterator & inst, clock_t & timeVal);
+  void processSwitchInst(SwitchInst * switchInst);
   
-  void VisitSuccessors(TerminatorInst * termInst, clock_t & timeVal);
+  void VisitSuccessors(TerminatorInst * termInst);
   
-  void processReturnInst(ReturnInst * returnInst, BasicBlock::iterator & inst);
+  void processReturnInst(ReturnInst * returnInst);
  
   ConstantFolding(): ModulePass(ID){}
 
   // Adding llvm::MemoryDependenceAnalysis as a required PrePass                                                         
   virtual void getAnalysisUsage(AnalysisUsage &AU) const;
+
+  // TODO: Make sure cloned functions calling other specialized routines are correctly retained
+  void replaceCallInsts();  
   
   void replaceCallOperands(); 
-  SSAPointer * getSSAPointer(Value * val, ContextInfo * ci);
   void gatherFuncInfo();
   void gatherGlobals();
+  bool satisfyConds(Function* F);
+
   void allocate(Type * ty, Value * val);
   void allocate(AggregateAlloca * aa, Value * val);
   void allocate(SSAPointer * sptr, Value * val);
+  bool trackAllocas();
+
+  void createAnnotationList(); 
+  void updateAnnotationContext(Function * F);
   void markGlobalUses(Value * val, GlobalVariable * gv);
   void propagateGlobalUses();
+  void initializeGlobal(GlobalVariable * gv);  
+
+  bool predecessorsVisited(BasicBlock * BB);
+  bool mergeContext(BasicBlock * BB, BasicBlock * prev, ContextInfo * newCi);
+  
+  SSAPointer * getSSAPointer(Value * val, ContextInfo * ci);
   Function * addClonedFunction(CallInst * ci, Function * F);
-  // TODO: Make sure cloned functions calling other specialized routines are correctly retained
-  void replaceCallInsts();  
- 
+
   void markSpecialized(BasicBlock * BB);
  
-  bool satisfyConds(Function* F);
-
-  /* IMP: New policy - visited passed by reference; no basic block visited twice - important to avoid wrongly 
-          duplicating contexts e.g function cloning */ 
   void runOnBB();
-  void runOnInst(Instruction * I, BasicBlock::iterator & inst);
+  void runOnInst(Instruction * I);
   virtual bool runOnModule(Module & module);
 
 };

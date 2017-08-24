@@ -50,8 +50,13 @@ struct FuncInfo {
   unsigned numCallInsts;
   AggregateAlloca * returnVal;
   vector<Function *> calledFunctions;
-  vector<GlobalVariable *> usedGlobals;
-  bool calledInLoop, addrTaken, visited, usesGlobals;
+  int calledInLoop, visited, usesGlobals;
+  int numAddrTaken;
+};
+
+struct BBInfo {
+  bool writesToMemory, partOfLoop, isHeader;
+  vector<BasicBlock *> loopLatchesWithEdge;
 };
 
 typedef map<Value *, SSAPointer *> ValSSAPointerMap;
@@ -65,9 +70,12 @@ struct ContextInfo {
   vector<unsigned> modifiedAllocas;
   vector<BasicBlock *> ancestors;
   bool deleted;
+  bool executed;
   bool copyOrMain;
+  BasicBlock::iterator inst;
   ContextInfo(bool val) {
     deleted = false;
+    executed = false;
     copyOrMain = val;
   }
   ContextInfo * createClone() {
@@ -82,3 +90,5 @@ struct ContextInfo {
 };
 typedef map<BasicBlock *, ContextInfo *> BasicBlockContInfoMap;
 typedef pair<GlobalVariable *, unsigned> GlobalIdPair;
+
+map<unsigned, Value *> AggregateAllocaToVal;

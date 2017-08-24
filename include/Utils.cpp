@@ -170,21 +170,6 @@ Value * getArg(Function * func, int index){
   return NULL;	
 }
 
-// FIXIT: Allow dominated predecessors to not have executed prior to current basic block
-bool predecessorsVisited(BasicBlock * BB, set<BasicBlock *> visited){
-   
-  for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++){
-    BasicBlock * predecessor = *it;
-    if(visited.find(predecessor) == visited.end()){
-      debug(Hashim) << "NOTE: predecessor not visited \n";
-      return false;
-    }
-  }
-
-  debug(Hashim) << "NOTE: predecessors visited \n";
-  return true;
-}
-
 void compareBlockContexts(ContextInfo * newCi, ContextInfo * oldCi, 
         BasicBlockContInfoMap bbc) {
   vector<BasicBlock *> diffBBs;
@@ -209,45 +194,16 @@ void compareBlockContexts(ContextInfo * newCi, ContextInfo * oldCi,
     InsertUnique(newCi->ancestors, diffBBs[i]);
 }
 
-//TODO: Check context properly including comparing the alloca CONTENTS
-//TODO: Fillthe stringPointers and ScalarAllocas correctly - be sound even if imprecise 
-//TODO: Insert call to merge context and test with examples
-bool mergeContext(BasicBlock * BB, BasicBlock * prev, 
-        BasicBlockContInfoMap bbc, ContextInfo * newCi) {
-  newCi->ancestors = bbc[prev]->ancestors;
-  vector<ContextInfo *> predecessorContexts; 
-  for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++){
-    BasicBlock * predecessor = *it;
-    if(bbc.find(predecessor) == bbc.end()){
-      errs() << "basic block context not found\n";
-      exit(0);
-    }
-    if(predecessor == prev)
-      continue;
-    if(bbc[predecessor]->deleted || bbc[predecessor]->copyOrMain)
-      continue;
-    predecessorContexts.push_back(bbc[predecessor]);
-  }
-  for(unsigned i = 0; i < predecessorContexts.size(); i++) 
-    compareBlockContexts(newCi, predecessorContexts[i], bbc);
-  return true;
-}
-/*task1*/
-
 void markArgsAsNonConst(CallInst* callInst, ValSSAPointerMap SSAPointers,
         vector<unsigned> & modifiedAllocas) {
   int index = 0;
   Function* calledFunction = callInst->getCalledFunction();
   for(auto arg = calledFunction->arg_begin(), argEnd = calledFunction->arg_end(); arg != argEnd; 
     arg++, index++) {
-    // Check for constant pointers
-    // All arguments in a 'readonly' function are assumed readonly     
     if(arg->onlyReadsMemory()) {
       debug(Hashim) << "!note: Argument/Function is readonly - no side effects \n";
       continue;
     }
-    
-    // Searching for the pointer
     Value * pointerArg = callInst->getOperand(index);
     AggregateAlloca * basePointer;
     if(SSAPointers.find(pointerArg) == SSAPointers.end()){ 
@@ -255,10 +211,6 @@ void markArgsAsNonConst(CallInst* callInst, ValSSAPointerMap SSAPointers,
     } 
     else
       basePointer = SSAPointers[pointerArg]->basePointer;
-    // if(basePointer->isNodeTypeOf(ptrType) ||
-    //   basePointer->isNodeTypeOf(scalarPtrType))
-    //   basePointer->setConstantAnc(false);
-    // else
     basePointer->setConstant(false);
     InsertUnique(modifiedAllocas, basePointer->getId());
     debug(Hashim) << "Note: Marking allocation as NON-CONSTANT \n";
@@ -266,10 +218,7 @@ void markArgsAsNonConst(CallInst* callInst, ValSSAPointerMap SSAPointers,
 }
 
 void handleIndirectCall(CallInst * callInst, ValSSAPointerMap & SSAPointers,
-        vector<unsigned> & modifiedAllocas){
-
-  // For any argument to the indirect call that aliases any of the allocated memory 
-  // mark the side effects i.e mark allocation as non-constant
+        vector<unsigned> & modifiedAllocas) {
   for(unsigned int index = 0; index < callInst->getNumArgOperands(); index++){
     Value * pointerArg = callInst->getArgOperand(index);
     AggregateAlloca * basePointer;
@@ -278,16 +227,12 @@ void handleIndirectCall(CallInst * callInst, ValSSAPointerMap & SSAPointers,
     } 
     else
       basePointer = SSAPointers[pointerArg]->basePointer;  
-    // if(basePointer->isNodeTypeOf(ptrType) ||
-    //   basePointer->isNodeTypeOf(scalarPtrType))
-    //   basePointer->setConstantAnc(false);
-    // else
     basePointer->setConstant(false);
     InsertUnique(modifiedAllocas, basePointer->getId());
   }
 }
 
-void handleBaseDataTypeGEP(vector<unsigned> indices, SSAPointer* bsptr,
+void handleBaseDataTypeGEP(vector<unsigned> indices, SSAPointer * bsptr,
                 Instruction* I, ValSSAPointerMap & SSAPointers) {
   if(indices.size() > 2) 
     errs() << "GEPINST : case not handled ntype is baseDataType and indices > 2\n";
@@ -297,22 +242,57 @@ void handleBaseDataTypeGEP(vector<unsigned> indices, SSAPointer* bsptr,
   SSAPointers[I] = sptr;
 }
 
-FuncInfo* initializeFuncInfo(Function* F) {
-  FuncInfo* fi = new FuncInfo;
+void handleBaseDataTypeGEP(vector<unsigned> indices, AggregateAlloca * aa,
+                Instruction* I, ValSSAPointerMap & SSAPointers) {
+  if(indices.size() > 2) 
+    errs() << "GEPINST : case not handled ntype is baseDataType and indices > 2\n";
+  SSAPointer * sptr = new SSAPointer(aa);
+  if(indices.size())
+    sptr->position += indices[indices.size() - 1];
+  SSAPointers[I] = sptr;
+}
+
+unsigned hasAddressTaken(Function * F) {
+  unsigned num = 0;
+  for (const Use &U : F->uses()) {
+    const User *FU = U.getUser();
+    if (isa<BlockAddress>(FU))
+      continue;
+    if (!isa<CallInst>(FU) && !isa<InvokeInst>(FU)) {
+      num++;
+      continue;
+    }
+    ImmutableCallSite CS(cast<Instruction>(FU));
+    if (!CS.isCallee(&U))
+      num++;
+  }
+  return num;
+}
+
+FuncInfo * initializeFuncInfo(Function * F) {
+  FuncInfo * fi = new FuncInfo;
   fi->numCallInsts = 0;
   fi->calledInLoop = false;
-  fi->addrTaken = F->hasAddressTaken();
+  fi->numAddrTaken = F->hasAddressTaken();
   fi->returnVal = NULL;
   fi->visited = false;
   fi->usesGlobals = false;
   return fi;
 }
 
+BBInfo * initializeBBInfo() {
+  BBInfo * bbi = new BBInfo;
+  bbi->writesToMemory = false;
+  bbi->partOfLoop = false;
+  bbi->isHeader = false;
+  return bbi;
+}
+
 FuncInfo * copyFuncInfo(FuncInfo * fi) {
   FuncInfo* nfi = new FuncInfo; 
   nfi->numCallInsts = fi->numCallInsts;
   nfi->calledInLoop = fi->calledInLoop;
-  nfi->addrTaken = fi->addrTaken;
+  nfi->numAddrTaken = fi->numAddrTaken;
   nfi->returnVal = NULL;
   nfi->visited = fi->visited;
   nfi->usesGlobals = fi->usesGlobals;
@@ -333,13 +313,12 @@ void updateMap(map<unsigned, AggregateAlloca *> & idmap, AggregateAlloca * aa) {
 void duplicateAllocas(ContextInfo * newCi, ContextInfo * oldCi) {
   for(unsigned i = 0; i < oldCi->AggregateAllocas.size(); i++) {
     AggregateAlloca * aa = oldCi->AggregateAllocas[i];
-    if(newCi->idmap.find(aa->getId()) != newCi->idmap.end())
+    if(!aa->base())
       continue;
     AggregateAlloca * naa = aa->createClone();
     updateMap(newCi->idmap, naa);
     newCi->AggregateAllocas.push_back(naa);
   } 
-
   for(unsigned i = 0; i < oldCi->InstOrder.size(); i++) {
     Value * I = oldCi->InstOrder[i];
     if(oldCi->SSAPointers.find(I) == oldCi->SSAPointers.end())
@@ -358,61 +337,19 @@ void freeContextInfo(ContextInfo * ci) {
     SSAPointer * sptr = ent.second;
     delete sptr;
   }
-  for(unsigned i = 0; i < ci->AggregateAllocas.size(); i++)
-    delete ci->AggregateAllocas[i];   
-}
-
-vector<BasicBlock *> findUnvisitedProgeny(set<BasicBlock *> visited,
-       BasicBlock * BB, BasicBlock * except) {
-  vector<BasicBlock *> succList;
-  vector<BasicBlock *> worklist;
-  worklist.push_back(BB);
-  while(worklist.size()) {
-    BasicBlock * worker = worklist[0];
-    TerminatorInst * ti = worker->getTerminator();    
-    for(unsigned i = 0; i < ti->getNumSuccessors(); i++) {
-      BasicBlock * succ = ti->getSuccessor(i);
-      if(succ == except)
-        continue;
-      else if(visited.find(succ) == visited.end())
-        succList.push_back(succ);
-      else  
-        worklist.push_back(succ);
-    }
-    worklist.erase(worklist.begin());
-  }
-  return succList;
-}
-
-void mergePredecessors(BasicBlock * BB, BasicBlockContInfoMap bbc, 
-      set<BasicBlock *> visited) {
-  vector<BasicBlock *> BBSuccList = findUnvisitedProgeny(visited, BB, NULL);
-  for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++) {
-    BasicBlock * predecessor = *it;
-    if(bbc[predecessor]->deleted || bbc[predecessor]->copyOrMain)
-      continue;
-    vector<BasicBlock *> currSuccList = findUnvisitedProgeny(visited, 
-      predecessor, BB);
-    bool allMutual = true;
-    for(unsigned i = 0; i < currSuccList.size(); i++) {
-      if(find(BBSuccList.begin(), BBSuccList.end(), currSuccList[i]) == 
-        BBSuccList.end())
-        allMutual = false;
-    }
-    if(allMutual) {
-      compareBlockContexts(bbc[BB], bbc[predecessor], bbc);
-      freeContextInfo(bbc[predecessor]);
-      bbc[predecessor]->deleted = true;
-    }
+  for(unsigned i = 0; i < ci->AggregateAllocas.size(); i++) {
+    if(ci->AggregateAllocas[i]->base())
+      delete ci->AggregateAllocas[i];   
   }
 }
+
 
 void freePredecessors(BasicBlock * BB, BasicBlockContInfoMap bbc,
         set<BasicBlock *> visited) {
   for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++){
     BasicBlock * predecessor = *it;
     ContextInfo * ci = bbc[predecessor];
-    if(ci->deleted || ci->copyOrMain)
+    if(ci->deleted || ci->copyOrMain || !ci->executed)
       continue;
     TerminatorInst * ti = predecessor->getTerminator();
     bool allVisited = true;
@@ -427,6 +364,21 @@ void freePredecessors(BasicBlock * BB, BasicBlockContInfoMap bbc,
   }
 }
 
+void freeBB(BasicBlock * BB, ContextInfo * ci,
+        set<BasicBlock *> visited) {
+  if(ci->deleted || ci->copyOrMain || !ci->executed)
+    return;
+  TerminatorInst * ti = BB->getTerminator();
+  bool allVisited = true;
+  for(unsigned i = 0; i < ti->getNumSuccessors(); i++) {
+    if(visited.find(ti->getSuccessor(i)) == visited.end())
+      allVisited = false;
+  }
+  if(allVisited) {
+    freeContextInfo(ci);
+    ci->deleted = true;
+  }  
+}
 void handleReturn(Function * F, BasicBlockContInfoMap bbc) {
   for (Function::iterator f_it = F->begin(), f_ite = F->end();
        f_it != f_ite; ++f_it) {
@@ -435,14 +387,16 @@ void handleReturn(Function * F, BasicBlockContInfoMap bbc) {
   }
 }
 
-void updateMemoryMap(ValueToValueMapTy & vmap, set<BasicBlock *> & writesToMemory,
+void updateBBInfo(ValueToValueMapTy & vmap, map<BasicBlock *, BBInfo *> & bbimap,
       Function * F) {
   for (Function::iterator f_it = F->begin(), f_ite = F->end();
        f_it != f_ite; ++f_it) {
     BasicBlock * BB = &*f_it;
     BasicBlock * nBB = dyn_cast<BasicBlock>(vmap[BB]);
-    if(writesToMemory.find(BB) != writesToMemory.end())
-      writesToMemory.insert(nBB);
+    BBInfo * bbi = bbimap[BB];
+    BBInfo * nbbi = initializeBBInfo();
+    nbbi->writesToMemory = bbi->writesToMemory;
+    bbimap[nBB] = nbbi;
   } 
 }    
 
