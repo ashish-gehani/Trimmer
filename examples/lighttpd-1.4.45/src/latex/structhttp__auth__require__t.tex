@@ -1,0 +1,72 @@
+\hypertarget{structhttp__auth__require__t}{\section{http\-\_\-auth\-\_\-require\-\_\-t Struct Reference}
+\label{structhttp__auth__require__t}\index{http\-\_\-auth\-\_\-require\-\_\-t@{http\-\_\-auth\-\_\-require\-\_\-t}}
+}
+
+
+{\ttfamily \#include $<$http\-\_\-auth.\-h$>$}
+
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+const struct \hyperlink{structhttp__auth__scheme__t}{http\-\_\-auth\-\_\-scheme\-\_\-t} $\ast$ \hyperlink{structhttp__auth__require__t_a954a85447f059f76d25965b0f245d828}{scheme}
+\item 
+\hyperlink{structbuffer}{buffer} $\ast$ \hyperlink{structhttp__auth__require__t_aa16fcd03a3089dff8de91e1c3b9ea05e}{realm}
+\item 
+int \hyperlink{structhttp__auth__require__t_a939171e2f0f71928f4b93aa91e83b459}{valid\-\_\-user}
+\item 
+\hyperlink{structarray}{array} $\ast$ \hyperlink{structhttp__auth__require__t_a852fde18e5fca4b85de09b1fab2aadb0}{user}
+\item 
+\hyperlink{structarray}{array} $\ast$ \hyperlink{structhttp__auth__require__t_a18ac3fd4fae41d3a59d91b891859ab0e}{group}
+\item 
+\hyperlink{structarray}{array} $\ast$ \hyperlink{structhttp__auth__require__t_a9ce819a42f5767702d67b60ca5f94925}{host}
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{structhttp__auth__require__t_a18ac3fd4fae41d3a59d91b891859ab0e}{\index{http\-\_\-auth\-\_\-require\-\_\-t@{http\-\_\-auth\-\_\-require\-\_\-t}!group@{group}}
+\index{group@{group}!http_auth_require_t@{http\-\_\-auth\-\_\-require\-\_\-t}}
+\subsubsection[{group}]{\setlength{\rightskip}{0pt plus 5cm}{\bf array}$\ast$ http\-\_\-auth\-\_\-require\-\_\-t\-::group}}\label{structhttp__auth__require__t_a18ac3fd4fae41d3a59d91b891859ab0e}
+
+
+Referenced by http\-\_\-auth\-\_\-match\-\_\-rules(), http\-\_\-auth\-\_\-require\-\_\-free(), http\-\_\-auth\-\_\-require\-\_\-init(), and mod\-\_\-auth\-\_\-require\-\_\-parse().
+
+\hypertarget{structhttp__auth__require__t_a9ce819a42f5767702d67b60ca5f94925}{\index{http\-\_\-auth\-\_\-require\-\_\-t@{http\-\_\-auth\-\_\-require\-\_\-t}!host@{host}}
+\index{host@{host}!http_auth_require_t@{http\-\_\-auth\-\_\-require\-\_\-t}}
+\subsubsection[{host}]{\setlength{\rightskip}{0pt plus 5cm}{\bf array}$\ast$ http\-\_\-auth\-\_\-require\-\_\-t\-::host}}\label{structhttp__auth__require__t_a9ce819a42f5767702d67b60ca5f94925}
+
+
+Referenced by http\-\_\-auth\-\_\-match\-\_\-rules(), http\-\_\-auth\-\_\-require\-\_\-free(), http\-\_\-auth\-\_\-require\-\_\-init(), and mod\-\_\-auth\-\_\-require\-\_\-parse().
+
+\hypertarget{structhttp__auth__require__t_aa16fcd03a3089dff8de91e1c3b9ea05e}{\index{http\-\_\-auth\-\_\-require\-\_\-t@{http\-\_\-auth\-\_\-require\-\_\-t}!realm@{realm}}
+\index{realm@{realm}!http_auth_require_t@{http\-\_\-auth\-\_\-require\-\_\-t}}
+\subsubsection[{realm}]{\setlength{\rightskip}{0pt plus 5cm}{\bf buffer}$\ast$ http\-\_\-auth\-\_\-require\-\_\-t\-::realm}}\label{structhttp__auth__require__t_aa16fcd03a3089dff8de91e1c3b9ea05e}
+
+
+Referenced by http\-\_\-auth\-\_\-require\-\_\-free(), http\-\_\-auth\-\_\-require\-\_\-init(), mod\-\_\-auth\-\_\-check\-\_\-basic(), mod\-\_\-auth\-\_\-check\-\_\-digest(), mod\-\_\-authn\-\_\-file\-\_\-htdigest\-\_\-basic(), mod\-\_\-authn\-\_\-gssapi\-\_\-basic(), mod\-\_\-authn\-\_\-gssapi\-\_\-check\-\_\-spnego(), mod\-\_\-authn\-\_\-mysql\-\_\-basic(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structhttp__auth__require__t_a954a85447f059f76d25965b0f245d828}{\index{http\-\_\-auth\-\_\-require\-\_\-t@{http\-\_\-auth\-\_\-require\-\_\-t}!scheme@{scheme}}
+\index{scheme@{scheme}!http_auth_require_t@{http\-\_\-auth\-\_\-require\-\_\-t}}
+\subsubsection[{scheme}]{\setlength{\rightskip}{0pt plus 5cm}const struct {\bf http\-\_\-auth\-\_\-scheme\-\_\-t}$\ast$ http\-\_\-auth\-\_\-require\-\_\-t\-::scheme}}\label{structhttp__auth__require__t_a954a85447f059f76d25965b0f245d828}
+
+
+Referenced by mod\-\_\-auth\-\_\-uri\-\_\-handler(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structhttp__auth__require__t_a852fde18e5fca4b85de09b1fab2aadb0}{\index{http\-\_\-auth\-\_\-require\-\_\-t@{http\-\_\-auth\-\_\-require\-\_\-t}!user@{user}}
+\index{user@{user}!http_auth_require_t@{http\-\_\-auth\-\_\-require\-\_\-t}}
+\subsubsection[{user}]{\setlength{\rightskip}{0pt plus 5cm}{\bf array}$\ast$ http\-\_\-auth\-\_\-require\-\_\-t\-::user}}\label{structhttp__auth__require__t_a852fde18e5fca4b85de09b1fab2aadb0}
+
+
+Referenced by http\-\_\-auth\-\_\-match\-\_\-rules(), http\-\_\-auth\-\_\-require\-\_\-free(), http\-\_\-auth\-\_\-require\-\_\-init(), and mod\-\_\-auth\-\_\-require\-\_\-parse().
+
+\hypertarget{structhttp__auth__require__t_a939171e2f0f71928f4b93aa91e83b459}{\index{http\-\_\-auth\-\_\-require\-\_\-t@{http\-\_\-auth\-\_\-require\-\_\-t}!valid\-\_\-user@{valid\-\_\-user}}
+\index{valid\-\_\-user@{valid\-\_\-user}!http_auth_require_t@{http\-\_\-auth\-\_\-require\-\_\-t}}
+\subsubsection[{valid\-\_\-user}]{\setlength{\rightskip}{0pt plus 5cm}int http\-\_\-auth\-\_\-require\-\_\-t\-::valid\-\_\-user}}\label{structhttp__auth__require__t_a939171e2f0f71928f4b93aa91e83b459}
+
+
+Referenced by http\-\_\-auth\-\_\-match\-\_\-rules(), http\-\_\-auth\-\_\-require\-\_\-init(), and mod\-\_\-auth\-\_\-require\-\_\-parse().
+
+
+
+The documentation for this struct was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{http__auth_8h}{http\-\_\-auth.\-h}\end{DoxyCompactItemize}

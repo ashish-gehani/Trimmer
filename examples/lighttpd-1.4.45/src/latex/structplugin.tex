@@ -1,0 +1,189 @@
+\hypertarget{structplugin}{\section{plugin Struct Reference}
+\label{structplugin}\index{plugin@{plugin}}
+}
+
+
+{\ttfamily \#include $<$plugin.\-h$>$}
+
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+size\-\_\-t \hyperlink{structplugin_aa4b3d495a0ae1df759643b712d91068f}{version}
+\item 
+\hyperlink{structbuffer}{buffer} $\ast$ \hyperlink{structplugin_a235162d1645d005e4d8ea2cedc80a236}{name}
+\item 
+void $\ast$($\ast$ \hyperlink{structplugin_a4cc5013e8cbed0a0d60337960674a1a4}{init} )()
+\item 
+\hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t}($\ast$ \hyperlink{structplugin_a04251883174cadf3e02ae1b1a388bdb7}{set\-\_\-defaults} )(\hyperlink{structserver}{server} $\ast$srv, void $\ast$p\-\_\-d)
+\item 
+\hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t}($\ast$ \hyperlink{structplugin_ac092882ffd286543515174a8bd3b70d2}{cleanup} )(\hyperlink{structserver}{server} $\ast$srv, void $\ast$p\-\_\-d)
+\item 
+\hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t}($\ast$ \hyperlink{structplugin_a6490af8e037a60d248395a8c68ee83f0}{handle\-\_\-trigger} )(\hyperlink{structserver}{server} $\ast$srv, void $\ast$p\-\_\-d)
+\item 
+\hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t}($\ast$ \hyperlink{structplugin_aaa3aaf5324316058a36ab97ab7303a62}{handle\-\_\-sighup} )(\hyperlink{structserver}{server} $\ast$srv, void $\ast$p\-\_\-d)
+\item 
+\hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t}($\ast$ \hyperlink{structplugin_ae798106278e8cd7e7241b1f1ee9ac914}{handle\-\_\-uri\-\_\-raw} )(\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, void $\ast$p\-\_\-d)
+\item 
+\hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t}($\ast$ \hyperlink{structplugin_afc26fff5d1ec7666608fda729b6a9a74}{handle\-\_\-uri\-\_\-clean} )(\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, void $\ast$p\-\_\-d)
+\item 
+\hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t}($\ast$ \hyperlink{structplugin_ac6e9dddb37aca959bd90651e949d5f4d}{handle\-\_\-docroot} )(\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, void $\ast$p\-\_\-d)
+\item 
+\hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t}($\ast$ \hyperlink{structplugin_ae5818db20f5d464df84a4c8bf4354567}{handle\-\_\-physical} )(\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, void $\ast$p\-\_\-d)
+\item 
+\hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t}($\ast$ \hyperlink{structplugin_af9d117621289c84a7cb0d705dbc9f47b}{handle\-\_\-request\-\_\-done} )(\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, void $\ast$p\-\_\-d)
+\item 
+\hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t}($\ast$ \hyperlink{structplugin_ab59fbc651a4308ac4e89ed27d1d33a00}{handle\-\_\-connection\-\_\-close} )(\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, void $\ast$p\-\_\-d)
+\item 
+\hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t}($\ast$ \hyperlink{structplugin_ae99ea16bdd683b294f3017490fd1e63f}{handle\-\_\-subrequest\-\_\-start} )(\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, void $\ast$p\-\_\-d)
+\item 
+\hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t}($\ast$ \hyperlink{structplugin_abf5ea22c50c0dc4ef11047565fbfc9a5}{handle\-\_\-subrequest} )(\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, void $\ast$p\-\_\-d)
+\item 
+\hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t}($\ast$ \hyperlink{structplugin_a2a517137ba9b9e231e97cceef3f41d5e}{handle\-\_\-response\-\_\-start} )(\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, void $\ast$p\-\_\-d)
+\item 
+\hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t}($\ast$ \hyperlink{structplugin_a5c3bbcff69dfdf5c591c0a420b38c055}{connection\-\_\-reset} )(\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, void $\ast$p\-\_\-d)
+\item 
+void $\ast$ \hyperlink{structplugin_aa5c0338878875f24bcaf3bb4e3f60bc6}{data}
+\item 
+void $\ast$ \hyperlink{structplugin_ab8a4a02c20d1fa7be51580e5c7584998}{lib}
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{structplugin_ac092882ffd286543515174a8bd3b70d2}{\index{plugin@{plugin}!cleanup@{cleanup}}
+\index{cleanup@{cleanup}!plugin@{plugin}}
+\subsubsection[{cleanup}]{\setlength{\rightskip}{0pt plus 5cm}{\bf handler\-\_\-t}($\ast$  plugin\-::cleanup)({\bf server} $\ast$srv, void $\ast$p\-\_\-d)}}\label{structplugin_ac092882ffd286543515174a8bd3b70d2}
+
+
+Referenced by mod\-\_\-access\-\_\-plugin\-\_\-init(), mod\-\_\-accesslog\-\_\-plugin\-\_\-init(), mod\-\_\-alias\-\_\-plugin\-\_\-init(), mod\-\_\-auth\-\_\-plugin\-\_\-init(), mod\-\_\-authn\-\_\-file\-\_\-plugin\-\_\-init(), mod\-\_\-authn\-\_\-gssapi\-\_\-plugin\-\_\-init(), mod\-\_\-authn\-\_\-ldap\-\_\-plugin\-\_\-init(), mod\-\_\-authn\-\_\-mysql\-\_\-plugin\-\_\-init(), mod\-\_\-cgi\-\_\-plugin\-\_\-init(), mod\-\_\-cml\-\_\-plugin\-\_\-init(), mod\-\_\-compress\-\_\-plugin\-\_\-init(), mod\-\_\-deflate\-\_\-plugin\-\_\-init(), mod\-\_\-dirlisting\-\_\-plugin\-\_\-init(), mod\-\_\-evasive\-\_\-plugin\-\_\-init(), mod\-\_\-evhost\-\_\-plugin\-\_\-init(), mod\-\_\-expire\-\_\-plugin\-\_\-init(), mod\-\_\-extforward\-\_\-plugin\-\_\-init(), mod\-\_\-fastcgi\-\_\-plugin\-\_\-init(), mod\-\_\-flv\-\_\-streaming\-\_\-plugin\-\_\-init(), mod\-\_\-geoip\-\_\-plugin\-\_\-init(), mod\-\_\-indexfile\-\_\-plugin\-\_\-init(), mod\-\_\-magnet\-\_\-plugin\-\_\-init(), mod\-\_\-mysql\-\_\-vhost\-\_\-plugin\-\_\-init(), mod\-\_\-proxy\-\_\-plugin\-\_\-init(), mod\-\_\-redirect\-\_\-plugin\-\_\-init(), mod\-\_\-rewrite\-\_\-plugin\-\_\-init(), mod\-\_\-rrdtool\-\_\-plugin\-\_\-init(), mod\-\_\-scgi\-\_\-plugin\-\_\-init(), mod\-\_\-secdownload\-\_\-plugin\-\_\-init(), mod\-\_\-setenv\-\_\-plugin\-\_\-init(), mod\-\_\-simple\-\_\-vhost\-\_\-plugin\-\_\-init(), mod\-\_\-skeleton\-\_\-plugin\-\_\-init(), mod\-\_\-ssi\-\_\-plugin\-\_\-init(), mod\-\_\-staticfile\-\_\-plugin\-\_\-init(), mod\-\_\-status\-\_\-plugin\-\_\-init(), mod\-\_\-trigger\-\_\-b4\-\_\-dl\-\_\-plugin\-\_\-init(), mod\-\_\-uploadprogress\-\_\-plugin\-\_\-init(), mod\-\_\-userdir\-\_\-plugin\-\_\-init(), mod\-\_\-usertrack\-\_\-plugin\-\_\-init(), and mod\-\_\-webdav\-\_\-plugin\-\_\-init().
+
+\hypertarget{structplugin_a5c3bbcff69dfdf5c591c0a420b38c055}{\index{plugin@{plugin}!connection\-\_\-reset@{connection\-\_\-reset}}
+\index{connection\-\_\-reset@{connection\-\_\-reset}!plugin@{plugin}}
+\subsubsection[{connection\-\_\-reset}]{\setlength{\rightskip}{0pt plus 5cm}{\bf handler\-\_\-t}($\ast$  plugin\-::connection\-\_\-reset)({\bf server} $\ast$srv, {\bf connection} $\ast$con, void $\ast$p\-\_\-d)}}\label{structplugin_a5c3bbcff69dfdf5c591c0a420b38c055}
+
+
+Referenced by mod\-\_\-authn\-\_\-gssapi\-\_\-plugin\-\_\-init(), mod\-\_\-cgi\-\_\-plugin\-\_\-init(), mod\-\_\-deflate\-\_\-plugin\-\_\-init(), mod\-\_\-extforward\-\_\-plugin\-\_\-init(), mod\-\_\-fastcgi\-\_\-plugin\-\_\-init(), mod\-\_\-mysql\-\_\-vhost\-\_\-plugin\-\_\-init(), mod\-\_\-proxy\-\_\-plugin\-\_\-init(), mod\-\_\-rewrite\-\_\-plugin\-\_\-init(), mod\-\_\-scgi\-\_\-plugin\-\_\-init(), mod\-\_\-setenv\-\_\-plugin\-\_\-init(), mod\-\_\-ssi\-\_\-plugin\-\_\-init(), and mod\-\_\-webdav\-\_\-plugin\-\_\-init().
+
+\hypertarget{structplugin_aa5c0338878875f24bcaf3bb4e3f60bc6}{\index{plugin@{plugin}!data@{data}}
+\index{data@{data}!plugin@{plugin}}
+\subsubsection[{data}]{\setlength{\rightskip}{0pt plus 5cm}void$\ast$ plugin\-::data}}\label{structplugin_aa5c0338878875f24bcaf3bb4e3f60bc6}
+
+
+Referenced by connection\-\_\-handle\-\_\-shutdown(), mod\-\_\-access\-\_\-plugin\-\_\-init(), mod\-\_\-accesslog\-\_\-plugin\-\_\-init(), mod\-\_\-alias\-\_\-plugin\-\_\-init(), mod\-\_\-auth\-\_\-plugin\-\_\-init(), mod\-\_\-authn\-\_\-file\-\_\-plugin\-\_\-init(), mod\-\_\-authn\-\_\-gssapi\-\_\-plugin\-\_\-init(), mod\-\_\-authn\-\_\-ldap\-\_\-plugin\-\_\-init(), mod\-\_\-authn\-\_\-mysql\-\_\-plugin\-\_\-init(), mod\-\_\-cgi\-\_\-plugin\-\_\-init(), mod\-\_\-cml\-\_\-plugin\-\_\-init(), mod\-\_\-compress\-\_\-plugin\-\_\-init(), mod\-\_\-deflate\-\_\-plugin\-\_\-init(), mod\-\_\-dirlisting\-\_\-plugin\-\_\-init(), mod\-\_\-evasive\-\_\-plugin\-\_\-init(), mod\-\_\-evhost\-\_\-plugin\-\_\-init(), mod\-\_\-expire\-\_\-plugin\-\_\-init(), mod\-\_\-extforward\-\_\-plugin\-\_\-init(), mod\-\_\-fastcgi\-\_\-plugin\-\_\-init(), mod\-\_\-flv\-\_\-streaming\-\_\-plugin\-\_\-init(), mod\-\_\-geoip\-\_\-plugin\-\_\-init(), mod\-\_\-indexfile\-\_\-plugin\-\_\-init(), mod\-\_\-magnet\-\_\-plugin\-\_\-init(), mod\-\_\-proxy\-\_\-plugin\-\_\-init(), mod\-\_\-redirect\-\_\-plugin\-\_\-init(), mod\-\_\-rewrite\-\_\-plugin\-\_\-init(), mod\-\_\-rrdtool\-\_\-plugin\-\_\-init(), mod\-\_\-scgi\-\_\-plugin\-\_\-init(), mod\-\_\-secdownload\-\_\-plugin\-\_\-init(), mod\-\_\-setenv\-\_\-plugin\-\_\-init(), mod\-\_\-simple\-\_\-vhost\-\_\-plugin\-\_\-init(), mod\-\_\-skeleton\-\_\-plugin\-\_\-init(), mod\-\_\-ssi\-\_\-plugin\-\_\-init(), mod\-\_\-staticfile\-\_\-plugin\-\_\-init(), mod\-\_\-status\-\_\-plugin\-\_\-init(), mod\-\_\-trigger\-\_\-b4\-\_\-dl\-\_\-plugin\-\_\-init(), mod\-\_\-uploadprogress\-\_\-plugin\-\_\-init(), mod\-\_\-userdir\-\_\-plugin\-\_\-init(), mod\-\_\-usertrack\-\_\-plugin\-\_\-init(), mod\-\_\-webdav\-\_\-plugin\-\_\-init(), and plugins\-\_\-call\-\_\-init().
+
+\hypertarget{structplugin_ab59fbc651a4308ac4e89ed27d1d33a00}{\index{plugin@{plugin}!handle\-\_\-connection\-\_\-close@{handle\-\_\-connection\-\_\-close}}
+\index{handle\-\_\-connection\-\_\-close@{handle\-\_\-connection\-\_\-close}!plugin@{plugin}}
+\subsubsection[{handle\-\_\-connection\-\_\-close}]{\setlength{\rightskip}{0pt plus 5cm}{\bf handler\-\_\-t}($\ast$  plugin\-::handle\-\_\-connection\-\_\-close)({\bf server} $\ast$srv, {\bf connection} $\ast$con, void $\ast$p\-\_\-d)}}\label{structplugin_ab59fbc651a4308ac4e89ed27d1d33a00}
+
+
+Referenced by mod\-\_\-deflate\-\_\-plugin\-\_\-init(), mod\-\_\-fastcgi\-\_\-plugin\-\_\-init(), mod\-\_\-proxy\-\_\-plugin\-\_\-init(), mod\-\_\-scgi\-\_\-plugin\-\_\-init(), and mod\-\_\-uploadprogress\-\_\-plugin\-\_\-init().
+
+\hypertarget{structplugin_ac6e9dddb37aca959bd90651e949d5f4d}{\index{plugin@{plugin}!handle\-\_\-docroot@{handle\-\_\-docroot}}
+\index{handle\-\_\-docroot@{handle\-\_\-docroot}!plugin@{plugin}}
+\subsubsection[{handle\-\_\-docroot}]{\setlength{\rightskip}{0pt plus 5cm}{\bf handler\-\_\-t}($\ast$  plugin\-::handle\-\_\-docroot)({\bf server} $\ast$srv, {\bf connection} $\ast$con, void $\ast$p\-\_\-d)}}\label{structplugin_ac6e9dddb37aca959bd90651e949d5f4d}
+
+
+Referenced by mod\-\_\-evhost\-\_\-plugin\-\_\-init(), mod\-\_\-mysql\-\_\-vhost\-\_\-plugin\-\_\-init(), and mod\-\_\-simple\-\_\-vhost\-\_\-plugin\-\_\-init().
+
+\hypertarget{structplugin_ae5818db20f5d464df84a4c8bf4354567}{\index{plugin@{plugin}!handle\-\_\-physical@{handle\-\_\-physical}}
+\index{handle\-\_\-physical@{handle\-\_\-physical}!plugin@{plugin}}
+\subsubsection[{handle\-\_\-physical}]{\setlength{\rightskip}{0pt plus 5cm}{\bf handler\-\_\-t}($\ast$  plugin\-::handle\-\_\-physical)({\bf server} $\ast$srv, {\bf connection} $\ast$con, void $\ast$p\-\_\-d)}}\label{structplugin_ae5818db20f5d464df84a4c8bf4354567}
+
+
+Referenced by mod\-\_\-alias\-\_\-plugin\-\_\-init(), mod\-\_\-cml\-\_\-plugin\-\_\-init(), mod\-\_\-flv\-\_\-streaming\-\_\-plugin\-\_\-init(), mod\-\_\-magnet\-\_\-plugin\-\_\-init(), mod\-\_\-rewrite\-\_\-plugin\-\_\-init(), mod\-\_\-secdownload\-\_\-plugin\-\_\-init(), mod\-\_\-userdir\-\_\-plugin\-\_\-init(), and mod\-\_\-webdav\-\_\-plugin\-\_\-init().
+
+\hypertarget{structplugin_af9d117621289c84a7cb0d705dbc9f47b}{\index{plugin@{plugin}!handle\-\_\-request\-\_\-done@{handle\-\_\-request\-\_\-done}}
+\index{handle\-\_\-request\-\_\-done@{handle\-\_\-request\-\_\-done}!plugin@{plugin}}
+\subsubsection[{handle\-\_\-request\-\_\-done}]{\setlength{\rightskip}{0pt plus 5cm}{\bf handler\-\_\-t}($\ast$  plugin\-::handle\-\_\-request\-\_\-done)({\bf server} $\ast$srv, {\bf connection} $\ast$con, void $\ast$p\-\_\-d)}}\label{structplugin_af9d117621289c84a7cb0d705dbc9f47b}
+
+
+Referenced by mod\-\_\-accesslog\-\_\-plugin\-\_\-init(), mod\-\_\-extforward\-\_\-plugin\-\_\-init(), mod\-\_\-rrdtool\-\_\-plugin\-\_\-init(), mod\-\_\-status\-\_\-plugin\-\_\-init(), and mod\-\_\-uploadprogress\-\_\-plugin\-\_\-init().
+
+\hypertarget{structplugin_a2a517137ba9b9e231e97cceef3f41d5e}{\index{plugin@{plugin}!handle\-\_\-response\-\_\-start@{handle\-\_\-response\-\_\-start}}
+\index{handle\-\_\-response\-\_\-start@{handle\-\_\-response\-\_\-start}!plugin@{plugin}}
+\subsubsection[{handle\-\_\-response\-\_\-start}]{\setlength{\rightskip}{0pt plus 5cm}{\bf handler\-\_\-t}($\ast$  plugin\-::handle\-\_\-response\-\_\-start)({\bf server} $\ast$srv, {\bf connection} $\ast$con, void $\ast$p\-\_\-d)}}\label{structplugin_a2a517137ba9b9e231e97cceef3f41d5e}
+
+
+Referenced by mod\-\_\-deflate\-\_\-plugin\-\_\-init(), and mod\-\_\-expire\-\_\-plugin\-\_\-init().
+
+\hypertarget{structplugin_aaa3aaf5324316058a36ab97ab7303a62}{\index{plugin@{plugin}!handle\-\_\-sighup@{handle\-\_\-sighup}}
+\index{handle\-\_\-sighup@{handle\-\_\-sighup}!plugin@{plugin}}
+\subsubsection[{handle\-\_\-sighup}]{\setlength{\rightskip}{0pt plus 5cm}{\bf handler\-\_\-t}($\ast$  plugin\-::handle\-\_\-sighup)({\bf server} $\ast$srv, void $\ast$p\-\_\-d)}}\label{structplugin_aaa3aaf5324316058a36ab97ab7303a62}
+
+
+Referenced by mod\-\_\-accesslog\-\_\-plugin\-\_\-init().
+
+\hypertarget{structplugin_abf5ea22c50c0dc4ef11047565fbfc9a5}{\index{plugin@{plugin}!handle\-\_\-subrequest@{handle\-\_\-subrequest}}
+\index{handle\-\_\-subrequest@{handle\-\_\-subrequest}!plugin@{plugin}}
+\subsubsection[{handle\-\_\-subrequest}]{\setlength{\rightskip}{0pt plus 5cm}{\bf handler\-\_\-t}($\ast$  plugin\-::handle\-\_\-subrequest)({\bf server} $\ast$srv, {\bf connection} $\ast$con, void $\ast$p\-\_\-d)}}\label{structplugin_abf5ea22c50c0dc4ef11047565fbfc9a5}
+
+
+Referenced by mod\-\_\-cgi\-\_\-plugin\-\_\-init(), mod\-\_\-fastcgi\-\_\-plugin\-\_\-init(), mod\-\_\-proxy\-\_\-plugin\-\_\-init(), mod\-\_\-scgi\-\_\-plugin\-\_\-init(), mod\-\_\-ssi\-\_\-plugin\-\_\-init(), and mod\-\_\-webdav\-\_\-plugin\-\_\-init().
+
+\hypertarget{structplugin_ae99ea16bdd683b294f3017490fd1e63f}{\index{plugin@{plugin}!handle\-\_\-subrequest\-\_\-start@{handle\-\_\-subrequest\-\_\-start}}
+\index{handle\-\_\-subrequest\-\_\-start@{handle\-\_\-subrequest\-\_\-start}!plugin@{plugin}}
+\subsubsection[{handle\-\_\-subrequest\-\_\-start}]{\setlength{\rightskip}{0pt plus 5cm}{\bf handler\-\_\-t}($\ast$  plugin\-::handle\-\_\-subrequest\-\_\-start)({\bf server} $\ast$srv, {\bf connection} $\ast$con, void $\ast$p\-\_\-d)}}\label{structplugin_ae99ea16bdd683b294f3017490fd1e63f}
+
+
+Referenced by mod\-\_\-access\-\_\-plugin\-\_\-init(), mod\-\_\-cgi\-\_\-plugin\-\_\-init(), mod\-\_\-cml\-\_\-plugin\-\_\-init(), mod\-\_\-compress\-\_\-plugin\-\_\-init(), mod\-\_\-dirlisting\-\_\-plugin\-\_\-init(), mod\-\_\-fastcgi\-\_\-plugin\-\_\-init(), mod\-\_\-geoip\-\_\-plugin\-\_\-init(), mod\-\_\-indexfile\-\_\-plugin\-\_\-init(), mod\-\_\-scgi\-\_\-plugin\-\_\-init(), mod\-\_\-ssi\-\_\-plugin\-\_\-init(), and mod\-\_\-staticfile\-\_\-plugin\-\_\-init().
+
+\hypertarget{structplugin_a6490af8e037a60d248395a8c68ee83f0}{\index{plugin@{plugin}!handle\-\_\-trigger@{handle\-\_\-trigger}}
+\index{handle\-\_\-trigger@{handle\-\_\-trigger}!plugin@{plugin}}
+\subsubsection[{handle\-\_\-trigger}]{\setlength{\rightskip}{0pt plus 5cm}{\bf handler\-\_\-t}($\ast$  plugin\-::handle\-\_\-trigger)({\bf server} $\ast$srv, void $\ast$p\-\_\-d)}}\label{structplugin_a6490af8e037a60d248395a8c68ee83f0}
+
+
+Referenced by mod\-\_\-cgi\-\_\-plugin\-\_\-init(), mod\-\_\-fastcgi\-\_\-plugin\-\_\-init(), mod\-\_\-proxy\-\_\-plugin\-\_\-init(), mod\-\_\-rrdtool\-\_\-plugin\-\_\-init(), mod\-\_\-scgi\-\_\-plugin\-\_\-init(), mod\-\_\-status\-\_\-plugin\-\_\-init(), and mod\-\_\-trigger\-\_\-b4\-\_\-dl\-\_\-plugin\-\_\-init().
+
+\hypertarget{structplugin_afc26fff5d1ec7666608fda729b6a9a74}{\index{plugin@{plugin}!handle\-\_\-uri\-\_\-clean@{handle\-\_\-uri\-\_\-clean}}
+\index{handle\-\_\-uri\-\_\-clean@{handle\-\_\-uri\-\_\-clean}!plugin@{plugin}}
+\subsubsection[{handle\-\_\-uri\-\_\-clean}]{\setlength{\rightskip}{0pt plus 5cm}{\bf handler\-\_\-t}($\ast$  plugin\-::handle\-\_\-uri\-\_\-clean)({\bf server} $\ast$srv, {\bf connection} $\ast$con, void $\ast$p\-\_\-d)}}\label{structplugin_afc26fff5d1ec7666608fda729b6a9a74}
+
+
+Referenced by mod\-\_\-access\-\_\-plugin\-\_\-init(), mod\-\_\-auth\-\_\-plugin\-\_\-init(), mod\-\_\-evasive\-\_\-plugin\-\_\-init(), mod\-\_\-fastcgi\-\_\-plugin\-\_\-init(), mod\-\_\-magnet\-\_\-plugin\-\_\-init(), mod\-\_\-proxy\-\_\-plugin\-\_\-init(), mod\-\_\-redirect\-\_\-plugin\-\_\-init(), mod\-\_\-scgi\-\_\-plugin\-\_\-init(), mod\-\_\-setenv\-\_\-plugin\-\_\-init(), mod\-\_\-skeleton\-\_\-plugin\-\_\-init(), mod\-\_\-status\-\_\-plugin\-\_\-init(), mod\-\_\-trigger\-\_\-b4\-\_\-dl\-\_\-plugin\-\_\-init(), mod\-\_\-uploadprogress\-\_\-plugin\-\_\-init(), mod\-\_\-usertrack\-\_\-plugin\-\_\-init(), and mod\-\_\-webdav\-\_\-plugin\-\_\-init().
+
+\hypertarget{structplugin_ae798106278e8cd7e7241b1f1ee9ac914}{\index{plugin@{plugin}!handle\-\_\-uri\-\_\-raw@{handle\-\_\-uri\-\_\-raw}}
+\index{handle\-\_\-uri\-\_\-raw@{handle\-\_\-uri\-\_\-raw}!plugin@{plugin}}
+\subsubsection[{handle\-\_\-uri\-\_\-raw}]{\setlength{\rightskip}{0pt plus 5cm}{\bf handler\-\_\-t}($\ast$  plugin\-::handle\-\_\-uri\-\_\-raw)({\bf server} $\ast$srv, {\bf connection} $\ast$con, void $\ast$p\-\_\-d)}}\label{structplugin_ae798106278e8cd7e7241b1f1ee9ac914}
+
+
+Referenced by mod\-\_\-extforward\-\_\-plugin\-\_\-init(), and mod\-\_\-rewrite\-\_\-plugin\-\_\-init().
+
+\hypertarget{structplugin_a4cc5013e8cbed0a0d60337960674a1a4}{\index{plugin@{plugin}!init@{init}}
+\index{init@{init}!plugin@{plugin}}
+\subsubsection[{init}]{\setlength{\rightskip}{0pt plus 5cm}void$\ast$($\ast$  plugin\-::init)()}}\label{structplugin_a4cc5013e8cbed0a0d60337960674a1a4}
+
+
+Referenced by mod\-\_\-access\-\_\-plugin\-\_\-init(), mod\-\_\-accesslog\-\_\-plugin\-\_\-init(), mod\-\_\-alias\-\_\-plugin\-\_\-init(), mod\-\_\-auth\-\_\-plugin\-\_\-init(), mod\-\_\-authn\-\_\-file\-\_\-plugin\-\_\-init(), mod\-\_\-authn\-\_\-gssapi\-\_\-plugin\-\_\-init(), mod\-\_\-authn\-\_\-ldap\-\_\-plugin\-\_\-init(), mod\-\_\-authn\-\_\-mysql\-\_\-plugin\-\_\-init(), mod\-\_\-cgi\-\_\-plugin\-\_\-init(), mod\-\_\-cml\-\_\-plugin\-\_\-init(), mod\-\_\-compress\-\_\-plugin\-\_\-init(), mod\-\_\-deflate\-\_\-plugin\-\_\-init(), mod\-\_\-dirlisting\-\_\-plugin\-\_\-init(), mod\-\_\-evasive\-\_\-plugin\-\_\-init(), mod\-\_\-evhost\-\_\-plugin\-\_\-init(), mod\-\_\-expire\-\_\-plugin\-\_\-init(), mod\-\_\-extforward\-\_\-plugin\-\_\-init(), mod\-\_\-fastcgi\-\_\-plugin\-\_\-init(), mod\-\_\-flv\-\_\-streaming\-\_\-plugin\-\_\-init(), mod\-\_\-geoip\-\_\-plugin\-\_\-init(), mod\-\_\-indexfile\-\_\-plugin\-\_\-init(), mod\-\_\-magnet\-\_\-plugin\-\_\-init(), mod\-\_\-mysql\-\_\-vhost\-\_\-plugin\-\_\-init(), mod\-\_\-proxy\-\_\-plugin\-\_\-init(), mod\-\_\-redirect\-\_\-plugin\-\_\-init(), mod\-\_\-rewrite\-\_\-plugin\-\_\-init(), mod\-\_\-rrdtool\-\_\-plugin\-\_\-init(), mod\-\_\-scgi\-\_\-plugin\-\_\-init(), mod\-\_\-secdownload\-\_\-plugin\-\_\-init(), mod\-\_\-setenv\-\_\-plugin\-\_\-init(), mod\-\_\-simple\-\_\-vhost\-\_\-plugin\-\_\-init(), mod\-\_\-skeleton\-\_\-plugin\-\_\-init(), mod\-\_\-ssi\-\_\-plugin\-\_\-init(), mod\-\_\-staticfile\-\_\-plugin\-\_\-init(), mod\-\_\-status\-\_\-plugin\-\_\-init(), mod\-\_\-trigger\-\_\-b4\-\_\-dl\-\_\-plugin\-\_\-init(), mod\-\_\-uploadprogress\-\_\-plugin\-\_\-init(), mod\-\_\-userdir\-\_\-plugin\-\_\-init(), mod\-\_\-usertrack\-\_\-plugin\-\_\-init(), mod\-\_\-webdav\-\_\-plugin\-\_\-init(), and plugins\-\_\-call\-\_\-init().
+
+\hypertarget{structplugin_ab8a4a02c20d1fa7be51580e5c7584998}{\index{plugin@{plugin}!lib@{lib}}
+\index{lib@{lib}!plugin@{plugin}}
+\subsubsection[{lib}]{\setlength{\rightskip}{0pt plus 5cm}void$\ast$ plugin\-::lib}}\label{structplugin_ab8a4a02c20d1fa7be51580e5c7584998}
+
+
+Referenced by plugin\-\_\-free(), and plugins\-\_\-load().
+
+\hypertarget{structplugin_a235162d1645d005e4d8ea2cedc80a236}{\index{plugin@{plugin}!name@{name}}
+\index{name@{name}!plugin@{plugin}}
+\subsubsection[{name}]{\setlength{\rightskip}{0pt plus 5cm}{\bf buffer}$\ast$ plugin\-::name}}\label{structplugin_a235162d1645d005e4d8ea2cedc80a236}
+
+
+Referenced by connection\-\_\-handle\-\_\-shutdown(), mod\-\_\-access\-\_\-plugin\-\_\-init(), mod\-\_\-accesslog\-\_\-plugin\-\_\-init(), mod\-\_\-alias\-\_\-plugin\-\_\-init(), mod\-\_\-auth\-\_\-plugin\-\_\-init(), mod\-\_\-authn\-\_\-file\-\_\-plugin\-\_\-init(), mod\-\_\-authn\-\_\-gssapi\-\_\-plugin\-\_\-init(), mod\-\_\-authn\-\_\-ldap\-\_\-plugin\-\_\-init(), mod\-\_\-authn\-\_\-mysql\-\_\-plugin\-\_\-init(), mod\-\_\-cgi\-\_\-plugin\-\_\-init(), mod\-\_\-cml\-\_\-plugin\-\_\-init(), mod\-\_\-compress\-\_\-plugin\-\_\-init(), mod\-\_\-deflate\-\_\-plugin\-\_\-init(), mod\-\_\-dirlisting\-\_\-plugin\-\_\-init(), mod\-\_\-evasive\-\_\-plugin\-\_\-init(), mod\-\_\-evhost\-\_\-plugin\-\_\-init(), mod\-\_\-expire\-\_\-plugin\-\_\-init(), mod\-\_\-extforward\-\_\-plugin\-\_\-init(), mod\-\_\-fastcgi\-\_\-plugin\-\_\-init(), mod\-\_\-flv\-\_\-streaming\-\_\-plugin\-\_\-init(), mod\-\_\-geoip\-\_\-plugin\-\_\-init(), mod\-\_\-indexfile\-\_\-plugin\-\_\-init(), mod\-\_\-magnet\-\_\-plugin\-\_\-init(), mod\-\_\-mysql\-\_\-vhost\-\_\-plugin\-\_\-init(), mod\-\_\-proxy\-\_\-plugin\-\_\-init(), mod\-\_\-redirect\-\_\-plugin\-\_\-init(), mod\-\_\-rewrite\-\_\-plugin\-\_\-init(), mod\-\_\-rrdtool\-\_\-plugin\-\_\-init(), mod\-\_\-scgi\-\_\-plugin\-\_\-init(), mod\-\_\-secdownload\-\_\-plugin\-\_\-init(), mod\-\_\-setenv\-\_\-plugin\-\_\-init(), mod\-\_\-simple\-\_\-vhost\-\_\-plugin\-\_\-init(), mod\-\_\-skeleton\-\_\-plugin\-\_\-init(), mod\-\_\-ssi\-\_\-plugin\-\_\-init(), mod\-\_\-staticfile\-\_\-plugin\-\_\-init(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-config(), mod\-\_\-status\-\_\-plugin\-\_\-init(), mod\-\_\-trigger\-\_\-b4\-\_\-dl\-\_\-plugin\-\_\-init(), mod\-\_\-uploadprogress\-\_\-plugin\-\_\-init(), mod\-\_\-userdir\-\_\-plugin\-\_\-init(), mod\-\_\-usertrack\-\_\-plugin\-\_\-init(), mod\-\_\-webdav\-\_\-plugin\-\_\-init(), plugin\-\_\-free(), and plugins\-\_\-call\-\_\-init().
+
+\hypertarget{structplugin_a04251883174cadf3e02ae1b1a388bdb7}{\index{plugin@{plugin}!set\-\_\-defaults@{set\-\_\-defaults}}
+\index{set\-\_\-defaults@{set\-\_\-defaults}!plugin@{plugin}}
+\subsubsection[{set\-\_\-defaults}]{\setlength{\rightskip}{0pt plus 5cm}{\bf handler\-\_\-t}($\ast$  plugin\-::set\-\_\-defaults)({\bf server} $\ast$srv, void $\ast$p\-\_\-d)}}\label{structplugin_a04251883174cadf3e02ae1b1a388bdb7}
+
+
+Referenced by mod\-\_\-access\-\_\-plugin\-\_\-init(), mod\-\_\-accesslog\-\_\-plugin\-\_\-init(), mod\-\_\-alias\-\_\-plugin\-\_\-init(), mod\-\_\-auth\-\_\-plugin\-\_\-init(), mod\-\_\-authn\-\_\-file\-\_\-plugin\-\_\-init(), mod\-\_\-authn\-\_\-gssapi\-\_\-plugin\-\_\-init(), mod\-\_\-authn\-\_\-ldap\-\_\-plugin\-\_\-init(), mod\-\_\-authn\-\_\-mysql\-\_\-plugin\-\_\-init(), mod\-\_\-cgi\-\_\-plugin\-\_\-init(), mod\-\_\-cml\-\_\-plugin\-\_\-init(), mod\-\_\-compress\-\_\-plugin\-\_\-init(), mod\-\_\-deflate\-\_\-plugin\-\_\-init(), mod\-\_\-dirlisting\-\_\-plugin\-\_\-init(), mod\-\_\-evasive\-\_\-plugin\-\_\-init(), mod\-\_\-evhost\-\_\-plugin\-\_\-init(), mod\-\_\-expire\-\_\-plugin\-\_\-init(), mod\-\_\-extforward\-\_\-plugin\-\_\-init(), mod\-\_\-fastcgi\-\_\-plugin\-\_\-init(), mod\-\_\-flv\-\_\-streaming\-\_\-plugin\-\_\-init(), mod\-\_\-geoip\-\_\-plugin\-\_\-init(), mod\-\_\-indexfile\-\_\-plugin\-\_\-init(), mod\-\_\-magnet\-\_\-plugin\-\_\-init(), mod\-\_\-mysql\-\_\-vhost\-\_\-plugin\-\_\-init(), mod\-\_\-proxy\-\_\-plugin\-\_\-init(), mod\-\_\-redirect\-\_\-plugin\-\_\-init(), mod\-\_\-rewrite\-\_\-plugin\-\_\-init(), mod\-\_\-rrdtool\-\_\-plugin\-\_\-init(), mod\-\_\-scgi\-\_\-plugin\-\_\-init(), mod\-\_\-secdownload\-\_\-plugin\-\_\-init(), mod\-\_\-setenv\-\_\-plugin\-\_\-init(), mod\-\_\-simple\-\_\-vhost\-\_\-plugin\-\_\-init(), mod\-\_\-skeleton\-\_\-plugin\-\_\-init(), mod\-\_\-ssi\-\_\-plugin\-\_\-init(), mod\-\_\-staticfile\-\_\-plugin\-\_\-init(), mod\-\_\-status\-\_\-plugin\-\_\-init(), mod\-\_\-trigger\-\_\-b4\-\_\-dl\-\_\-plugin\-\_\-init(), mod\-\_\-uploadprogress\-\_\-plugin\-\_\-init(), mod\-\_\-userdir\-\_\-plugin\-\_\-init(), mod\-\_\-usertrack\-\_\-plugin\-\_\-init(), and mod\-\_\-webdav\-\_\-plugin\-\_\-init().
+
+\hypertarget{structplugin_aa4b3d495a0ae1df759643b712d91068f}{\index{plugin@{plugin}!version@{version}}
+\index{version@{version}!plugin@{plugin}}
+\subsubsection[{version}]{\setlength{\rightskip}{0pt plus 5cm}size\-\_\-t plugin\-::version}}\label{structplugin_aa4b3d495a0ae1df759643b712d91068f}
+
+
+Referenced by mod\-\_\-access\-\_\-plugin\-\_\-init(), mod\-\_\-accesslog\-\_\-plugin\-\_\-init(), mod\-\_\-alias\-\_\-plugin\-\_\-init(), mod\-\_\-auth\-\_\-plugin\-\_\-init(), mod\-\_\-authn\-\_\-file\-\_\-plugin\-\_\-init(), mod\-\_\-authn\-\_\-gssapi\-\_\-plugin\-\_\-init(), mod\-\_\-authn\-\_\-ldap\-\_\-plugin\-\_\-init(), mod\-\_\-authn\-\_\-mysql\-\_\-plugin\-\_\-init(), mod\-\_\-cgi\-\_\-plugin\-\_\-init(), mod\-\_\-cml\-\_\-plugin\-\_\-init(), mod\-\_\-compress\-\_\-plugin\-\_\-init(), mod\-\_\-deflate\-\_\-plugin\-\_\-init(), mod\-\_\-dirlisting\-\_\-plugin\-\_\-init(), mod\-\_\-evasive\-\_\-plugin\-\_\-init(), mod\-\_\-evhost\-\_\-plugin\-\_\-init(), mod\-\_\-expire\-\_\-plugin\-\_\-init(), mod\-\_\-extforward\-\_\-plugin\-\_\-init(), mod\-\_\-fastcgi\-\_\-plugin\-\_\-init(), mod\-\_\-flv\-\_\-streaming\-\_\-plugin\-\_\-init(), mod\-\_\-geoip\-\_\-plugin\-\_\-init(), mod\-\_\-indexfile\-\_\-plugin\-\_\-init(), mod\-\_\-magnet\-\_\-plugin\-\_\-init(), mod\-\_\-mysql\-\_\-vhost\-\_\-plugin\-\_\-init(), mod\-\_\-proxy\-\_\-plugin\-\_\-init(), mod\-\_\-redirect\-\_\-plugin\-\_\-init(), mod\-\_\-rewrite\-\_\-plugin\-\_\-init(), mod\-\_\-rrdtool\-\_\-plugin\-\_\-init(), mod\-\_\-scgi\-\_\-plugin\-\_\-init(), mod\-\_\-secdownload\-\_\-plugin\-\_\-init(), mod\-\_\-setenv\-\_\-plugin\-\_\-init(), mod\-\_\-simple\-\_\-vhost\-\_\-plugin\-\_\-init(), mod\-\_\-skeleton\-\_\-plugin\-\_\-init(), mod\-\_\-ssi\-\_\-plugin\-\_\-init(), mod\-\_\-staticfile\-\_\-plugin\-\_\-init(), mod\-\_\-status\-\_\-plugin\-\_\-init(), mod\-\_\-trigger\-\_\-b4\-\_\-dl\-\_\-plugin\-\_\-init(), mod\-\_\-uploadprogress\-\_\-plugin\-\_\-init(), mod\-\_\-userdir\-\_\-plugin\-\_\-init(), mod\-\_\-usertrack\-\_\-plugin\-\_\-init(), mod\-\_\-webdav\-\_\-plugin\-\_\-init(), and plugins\-\_\-call\-\_\-init().
+
+
+
+The documentation for this struct was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{plugin_8h}{plugin.\-h}\end{DoxyCompactItemize}

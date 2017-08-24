@@ -1,0 +1,283 @@
+\hypertarget{mod__extforward_8c}{\section{mod\-\_\-extforward.\-c File Reference}
+\label{mod__extforward_8c}\index{mod\-\_\-extforward.\-c@{mod\-\_\-extforward.\-c}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}base.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}log.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}buffer.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}plugin.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}inet\-\_\-ntop\-\_\-cache.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}configfile.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include $<$ctype.\-h$>$}\\*
+{\ttfamily \#include $<$stdlib.\-h$>$}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$netinet/in.\-h$>$}\\*
+{\ttfamily \#include $<$errno.\-h$>$}\\*
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structplugin__config}{plugin\-\_\-config}
+\item 
+struct \hyperlink{structplugin__data}{plugin\-\_\-data}
+\item 
+struct \hyperlink{structhandler__ctx}{handler\-\_\-ctx}
+\end{DoxyCompactItemize}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{mod__extforward_8c_a20876ec7c0c844d0e0c1628528bbb8da}{P\-A\-T\-C\-H}(x)~p-\/$>$conf.\-x = s-\/$>$x;
+\item 
+\#define \hyperlink{mod__extforward_8c_a75b917c351b6eaa33dbabf5a38b4dede}{I\-P\-\_\-\-T\-R\-U\-S\-T\-E\-D}~1
+\item 
+\#define \hyperlink{mod__extforward_8c_aaf6853350123dd5efa86295f8d08b099}{I\-P\-\_\-\-U\-N\-T\-R\-U\-S\-T\-E\-D}~0
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$ \hyperlink{mod__extforward_8c_a3fa81400929cab8ea453b94dbe6cb3a0}{handler\-\_\-ctx\-\_\-init} (\hyperlink{unionsock__addr}{sock\-\_\-addr} oldaddr, \hyperlink{structbuffer}{buffer} $\ast$oldaddr\-\_\-buf)
+\item 
+static void \hyperlink{mod__extforward_8c_af9f2bc62e505066048458b2893d9c111}{handler\-\_\-ctx\-\_\-free} (\hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx)
+\item 
+\hyperlink{mod__extforward_8c_a7349372cea1c708ec5ba8b2db4141730}{I\-N\-I\-T\-\_\-\-F\-U\-N\-C} (mod\-\_\-extforward\-\_\-init)
+\item 
+\hyperlink{mod__extforward_8c_a4f07b22f6dac89842ecf52daee7298fa}{F\-R\-E\-E\-\_\-\-F\-U\-N\-C} (mod\-\_\-extforward\-\_\-free)
+\item 
+\hyperlink{mod__extforward_8c_aa89d4a72b83ec984c680e5fc79d5af00}{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C} (mod\-\_\-extforward\-\_\-set\-\_\-defaults)
+\item 
+static int \hyperlink{mod__extforward_8c_a90946209d1e7e8cad69794a5d0044671}{mod\-\_\-extforward\-\_\-patch\-\_\-connection} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structplugin__data}{plugin\-\_\-data} $\ast$p)
+\item 
+static void \hyperlink{mod__extforward_8c_ac85039ba5e1d092ace182dc906dc3fcc}{put\-\_\-string\-\_\-into\-\_\-array\-\_\-len} (\hyperlink{structarray}{array} $\ast$ary, const char $\ast$str, int len)
+\item 
+static \hyperlink{structarray}{array} $\ast$ \hyperlink{mod__extforward_8c_a9fbfd56e787420136b09b06dba6cc488}{extract\-\_\-forward\-\_\-array} (\hyperlink{structbuffer}{buffer} $\ast$pbuffer)
+\item 
+static int \hyperlink{mod__extforward_8c_ad7693df7a8699426a5ee47a3713b1141}{is\-\_\-proxy\-\_\-trusted} (const char $\ast$ipstr, \hyperlink{structplugin__data}{plugin\-\_\-data} $\ast$p)
+\item 
+static const char $\ast$ \hyperlink{mod__extforward_8c_a026c7d332073d4d155d3064ae93a5237}{last\-\_\-not\-\_\-in\-\_\-array} (\hyperlink{structarray}{array} $\ast$a, \hyperlink{structplugin__data}{plugin\-\_\-data} $\ast$p)
+\item 
+static void \hyperlink{mod__extforward_8c_a7470f63305e785ddbbc4cda4e7a589e6}{clean\-\_\-cond\-\_\-cache} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con)
+\item 
+\hyperlink{mod__extforward_8c_a9bbe0b2c41c8625d97d380b0070bfb93}{U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C} (mod\-\_\-extforward\-\_\-uri\-\_\-handler)
+\item 
+\hyperlink{mod__extforward_8c_a54b28ccbfa0b54d6651dc0349a29f516}{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C} (mod\-\_\-extforward\-\_\-restore)
+\item 
+int \hyperlink{mod__extforward_8c_abeae25902196569d22b974cb9e418420}{mod\-\_\-extforward\-\_\-plugin\-\_\-init} (\hyperlink{structplugin}{plugin} $\ast$p)
+\end{DoxyCompactItemize}
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{mod__extforward_8c_a75b917c351b6eaa33dbabf5a38b4dede}{\index{mod\-\_\-extforward.\-c@{mod\-\_\-extforward.\-c}!I\-P\-\_\-\-T\-R\-U\-S\-T\-E\-D@{I\-P\-\_\-\-T\-R\-U\-S\-T\-E\-D}}
+\index{I\-P\-\_\-\-T\-R\-U\-S\-T\-E\-D@{I\-P\-\_\-\-T\-R\-U\-S\-T\-E\-D}!mod_extforward.c@{mod\-\_\-extforward.\-c}}
+\subsubsection[{I\-P\-\_\-\-T\-R\-U\-S\-T\-E\-D}]{\setlength{\rightskip}{0pt plus 5cm}\#define I\-P\-\_\-\-T\-R\-U\-S\-T\-E\-D~1}}\label{mod__extforward_8c_a75b917c351b6eaa33dbabf5a38b4dede}
+
+
+Referenced by is\-\_\-proxy\-\_\-trusted().
+
+\hypertarget{mod__extforward_8c_aaf6853350123dd5efa86295f8d08b099}{\index{mod\-\_\-extforward.\-c@{mod\-\_\-extforward.\-c}!I\-P\-\_\-\-U\-N\-T\-R\-U\-S\-T\-E\-D@{I\-P\-\_\-\-U\-N\-T\-R\-U\-S\-T\-E\-D}}
+\index{I\-P\-\_\-\-U\-N\-T\-R\-U\-S\-T\-E\-D@{I\-P\-\_\-\-U\-N\-T\-R\-U\-S\-T\-E\-D}!mod_extforward.c@{mod\-\_\-extforward.\-c}}
+\subsubsection[{I\-P\-\_\-\-U\-N\-T\-R\-U\-S\-T\-E\-D}]{\setlength{\rightskip}{0pt plus 5cm}\#define I\-P\-\_\-\-U\-N\-T\-R\-U\-S\-T\-E\-D~0}}\label{mod__extforward_8c_aaf6853350123dd5efa86295f8d08b099}
+
+
+Referenced by is\-\_\-proxy\-\_\-trusted(), and U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__extforward_8c_a20876ec7c0c844d0e0c1628528bbb8da}{\index{mod\-\_\-extforward.\-c@{mod\-\_\-extforward.\-c}!P\-A\-T\-C\-H@{P\-A\-T\-C\-H}}
+\index{P\-A\-T\-C\-H@{P\-A\-T\-C\-H}!mod_extforward.c@{mod\-\_\-extforward.\-c}}
+\subsubsection[{P\-A\-T\-C\-H}]{\setlength{\rightskip}{0pt plus 5cm}\#define P\-A\-T\-C\-H(
+\begin{DoxyParamCaption}
+\item[{}]{x}
+\end{DoxyParamCaption}
+)~p-\/$>$conf.\-x = s-\/$>$x;}}\label{mod__extforward_8c_a20876ec7c0c844d0e0c1628528bbb8da}
+
+
+Referenced by mod\-\_\-extforward\-\_\-patch\-\_\-connection().
+
+
+
+\subsection{Function Documentation}
+\hypertarget{mod__extforward_8c_a7470f63305e785ddbbc4cda4e7a589e6}{\index{mod\-\_\-extforward.\-c@{mod\-\_\-extforward.\-c}!clean\-\_\-cond\-\_\-cache@{clean\-\_\-cond\-\_\-cache}}
+\index{clean\-\_\-cond\-\_\-cache@{clean\-\_\-cond\-\_\-cache}!mod_extforward.c@{mod\-\_\-extforward.\-c}}
+\subsubsection[{clean\-\_\-cond\-\_\-cache}]{\setlength{\rightskip}{0pt plus 5cm}static void clean\-\_\-cond\-\_\-cache (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__extforward_8c_a7470f63305e785ddbbc4cda4e7a589e6}
+
+
+References C\-O\-M\-P\-\_\-\-H\-T\-T\-P\-\_\-\-R\-E\-M\-O\-T\-E\-\_\-\-I\-P, C\-O\-M\-P\-\_\-\-H\-T\-T\-P\-\_\-\-S\-C\-H\-E\-M\-E, and config\-\_\-cond\-\_\-cache\-\_\-reset\-\_\-item().
+
+
+
+Referenced by C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), and U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__extforward_8c_a54b28ccbfa0b54d6651dc0349a29f516}{\index{mod\-\_\-extforward.\-c@{mod\-\_\-extforward.\-c}!C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C@{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C}}
+\index{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C@{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C}!mod_extforward.c@{mod\-\_\-extforward.\-c}}
+\subsubsection[{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-extforward\-\_\-restore}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__extforward_8c_a54b28ccbfa0b54d6651dc0349a29f516}
+
+
+References buffer\-\_\-free(), clean\-\_\-cond\-\_\-cache(), handler\-\_\-ctx\-\_\-free(), H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, handler\-\_\-ctx\-::saved\-\_\-remote\-\_\-addr, and handler\-\_\-ctx\-::saved\-\_\-remote\-\_\-addr\-\_\-buf.
+
+\hypertarget{mod__extforward_8c_a9fbfd56e787420136b09b06dba6cc488}{\index{mod\-\_\-extforward.\-c@{mod\-\_\-extforward.\-c}!extract\-\_\-forward\-\_\-array@{extract\-\_\-forward\-\_\-array}}
+\index{extract\-\_\-forward\-\_\-array@{extract\-\_\-forward\-\_\-array}!mod_extforward.c@{mod\-\_\-extforward.\-c}}
+\subsubsection[{extract\-\_\-forward\-\_\-array}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf array}$\ast$ extract\-\_\-forward\-\_\-array (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{pbuffer}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__extforward_8c_a9fbfd56e787420136b09b06dba6cc488}
+
+
+References array\-\_\-init(), buffer\-\_\-string\-\_\-is\-\_\-empty(), buffer\-::ptr, and put\-\_\-string\-\_\-into\-\_\-array\-\_\-len().
+
+
+
+Referenced by U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__extforward_8c_a4f07b22f6dac89842ecf52daee7298fa}{\index{mod\-\_\-extforward.\-c@{mod\-\_\-extforward.\-c}!F\-R\-E\-E\-\_\-\-F\-U\-N\-C@{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}}
+\index{F\-R\-E\-E\-\_\-\-F\-U\-N\-C@{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}!mod_extforward.c@{mod\-\_\-extforward.\-c}}
+\subsubsection[{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}F\-R\-E\-E\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-extforward\-\_\-free}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__extforward_8c_a4f07b22f6dac89842ecf52daee7298fa}
+
+
+References array\-\_\-free(), plugin\-\_\-data\-::config\-\_\-storage, plugin\-\_\-config\-::forwarder, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, plugin\-\_\-config\-::headers, and U\-N\-U\-S\-E\-D.
+
+\hypertarget{mod__extforward_8c_af9f2bc62e505066048458b2893d9c111}{\index{mod\-\_\-extforward.\-c@{mod\-\_\-extforward.\-c}!handler\-\_\-ctx\-\_\-free@{handler\-\_\-ctx\-\_\-free}}
+\index{handler\-\_\-ctx\-\_\-free@{handler\-\_\-ctx\-\_\-free}!mod_extforward.c@{mod\-\_\-extforward.\-c}}
+\subsubsection[{handler\-\_\-ctx\-\_\-free}]{\setlength{\rightskip}{0pt plus 5cm}static void handler\-\_\-ctx\-\_\-free (
+\begin{DoxyParamCaption}
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__extforward_8c_af9f2bc62e505066048458b2893d9c111}
+
+
+Referenced by C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), and U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__extforward_8c_a3fa81400929cab8ea453b94dbe6cb3a0}{\index{mod\-\_\-extforward.\-c@{mod\-\_\-extforward.\-c}!handler\-\_\-ctx\-\_\-init@{handler\-\_\-ctx\-\_\-init}}
+\index{handler\-\_\-ctx\-\_\-init@{handler\-\_\-ctx\-\_\-init}!mod_extforward.c@{mod\-\_\-extforward.\-c}}
+\subsubsection[{handler\-\_\-ctx\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf handler\-\_\-ctx}$\ast$ handler\-\_\-ctx\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{{\bf sock\-\_\-addr}}]{oldaddr, }
+\item[{{\bf buffer} $\ast$}]{oldaddr\-\_\-buf}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__extforward_8c_a3fa81400929cab8ea453b94dbe6cb3a0}
+
+
+References handler\-\_\-ctx\-::saved\-\_\-remote\-\_\-addr, and handler\-\_\-ctx\-::saved\-\_\-remote\-\_\-addr\-\_\-buf.
+
+
+
+Referenced by U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__extforward_8c_a7349372cea1c708ec5ba8b2db4141730}{\index{mod\-\_\-extforward.\-c@{mod\-\_\-extforward.\-c}!I\-N\-I\-T\-\_\-\-F\-U\-N\-C@{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}}
+\index{I\-N\-I\-T\-\_\-\-F\-U\-N\-C@{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}!mod_extforward.c@{mod\-\_\-extforward.\-c}}
+\subsubsection[{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}I\-N\-I\-T\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-extforward\-\_\-init}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__extforward_8c_a7349372cea1c708ec5ba8b2db4141730}
+\hypertarget{mod__extforward_8c_ad7693df7a8699426a5ee47a3713b1141}{\index{mod\-\_\-extforward.\-c@{mod\-\_\-extforward.\-c}!is\-\_\-proxy\-\_\-trusted@{is\-\_\-proxy\-\_\-trusted}}
+\index{is\-\_\-proxy\-\_\-trusted@{is\-\_\-proxy\-\_\-trusted}!mod_extforward.c@{mod\-\_\-extforward.\-c}}
+\subsubsection[{is\-\_\-proxy\-\_\-trusted}]{\setlength{\rightskip}{0pt plus 5cm}static int is\-\_\-proxy\-\_\-trusted (
+\begin{DoxyParamCaption}
+\item[{const char $\ast$}]{ipstr, }
+\item[{{\bf plugin\-\_\-data} $\ast$}]{p}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__extforward_8c_ad7693df7a8699426a5ee47a3713b1141}
+
+
+References array\-\_\-get\-\_\-element(), plugin\-\_\-data\-::conf, plugin\-\_\-config\-::forwarder, I\-P\-\_\-\-T\-R\-U\-S\-T\-E\-D, I\-P\-\_\-\-U\-N\-T\-R\-U\-S\-T\-E\-D, buffer\-::ptr, and data\-\_\-string\-::value.
+
+
+
+Referenced by U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__extforward_8c_a026c7d332073d4d155d3064ae93a5237}{\index{mod\-\_\-extforward.\-c@{mod\-\_\-extforward.\-c}!last\-\_\-not\-\_\-in\-\_\-array@{last\-\_\-not\-\_\-in\-\_\-array}}
+\index{last\-\_\-not\-\_\-in\-\_\-array@{last\-\_\-not\-\_\-in\-\_\-array}!mod_extforward.c@{mod\-\_\-extforward.\-c}}
+\subsubsection[{last\-\_\-not\-\_\-in\-\_\-array}]{\setlength{\rightskip}{0pt plus 5cm}static const char$\ast$ last\-\_\-not\-\_\-in\-\_\-array (
+\begin{DoxyParamCaption}
+\item[{{\bf array} $\ast$}]{a, }
+\item[{{\bf plugin\-\_\-data} $\ast$}]{p}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__extforward_8c_a026c7d332073d4d155d3064ae93a5237}
+
+
+References array\-\_\-get\-\_\-element(), plugin\-\_\-data\-::conf, array\-::data, plugin\-\_\-config\-::forwarder, buffer\-::ptr, array\-::used, and data\-\_\-string\-::value.
+
+
+
+Referenced by U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__extforward_8c_a90946209d1e7e8cad69794a5d0044671}{\index{mod\-\_\-extforward.\-c@{mod\-\_\-extforward.\-c}!mod\-\_\-extforward\-\_\-patch\-\_\-connection@{mod\-\_\-extforward\-\_\-patch\-\_\-connection}}
+\index{mod\-\_\-extforward\-\_\-patch\-\_\-connection@{mod\-\_\-extforward\-\_\-patch\-\_\-connection}!mod_extforward.c@{mod\-\_\-extforward.\-c}}
+\subsubsection[{mod\-\_\-extforward\-\_\-patch\-\_\-connection}]{\setlength{\rightskip}{0pt plus 5cm}static int mod\-\_\-extforward\-\_\-patch\-\_\-connection (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf plugin\-\_\-data} $\ast$}]{p}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__extforward_8c_a90946209d1e7e8cad69794a5d0044671}
+
+
+References buffer\-\_\-is\-\_\-equal\-\_\-string(), config\-\_\-check\-\_\-cond(), server\-::config\-\_\-context, plugin\-\_\-data\-::config\-\_\-storage, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, array\-::data, P\-A\-T\-C\-H, array\-::used, and data\-\_\-config\-::value.
+
+
+
+Referenced by U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__extforward_8c_abeae25902196569d22b974cb9e418420}{\index{mod\-\_\-extforward.\-c@{mod\-\_\-extforward.\-c}!mod\-\_\-extforward\-\_\-plugin\-\_\-init@{mod\-\_\-extforward\-\_\-plugin\-\_\-init}}
+\index{mod\-\_\-extforward\-\_\-plugin\-\_\-init@{mod\-\_\-extforward\-\_\-plugin\-\_\-init}!mod_extforward.c@{mod\-\_\-extforward.\-c}}
+\subsubsection[{mod\-\_\-extforward\-\_\-plugin\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}int mod\-\_\-extforward\-\_\-plugin\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{{\bf plugin} $\ast$}]{p}
+\end{DoxyParamCaption}
+)}}\label{mod__extforward_8c_abeae25902196569d22b974cb9e418420}
+
+
+References buffer\-\_\-init\-\_\-string(), plugin\-::cleanup, plugin\-::connection\-\_\-reset, plugin\-::data, plugin\-::handle\-\_\-request\-\_\-done, plugin\-::handle\-\_\-uri\-\_\-raw, plugin\-::init, plugin\-::name, plugin\-::set\-\_\-defaults, and plugin\-::version.
+
+\hypertarget{mod__extforward_8c_ac85039ba5e1d092ace182dc906dc3fcc}{\index{mod\-\_\-extforward.\-c@{mod\-\_\-extforward.\-c}!put\-\_\-string\-\_\-into\-\_\-array\-\_\-len@{put\-\_\-string\-\_\-into\-\_\-array\-\_\-len}}
+\index{put\-\_\-string\-\_\-into\-\_\-array\-\_\-len@{put\-\_\-string\-\_\-into\-\_\-array\-\_\-len}!mod_extforward.c@{mod\-\_\-extforward.\-c}}
+\subsubsection[{put\-\_\-string\-\_\-into\-\_\-array\-\_\-len}]{\setlength{\rightskip}{0pt plus 5cm}static void put\-\_\-string\-\_\-into\-\_\-array\-\_\-len (
+\begin{DoxyParamCaption}
+\item[{{\bf array} $\ast$}]{ary, }
+\item[{const char $\ast$}]{str, }
+\item[{int}]{len}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__extforward_8c_ac85039ba5e1d092ace182dc906dc3fcc}
+
+
+References array\-\_\-insert\-\_\-unique(), buffer\-\_\-copy\-\_\-string\-\_\-len(), data\-\_\-string\-\_\-init(), and data\-\_\-string\-::value.
+
+
+
+Referenced by extract\-\_\-forward\-\_\-array().
+
+\hypertarget{mod__extforward_8c_aa89d4a72b83ec984c680e5fc79d5af00}{\index{mod\-\_\-extforward.\-c@{mod\-\_\-extforward.\-c}!S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C@{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}}
+\index{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C@{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}!mod_extforward.c@{mod\-\_\-extforward.\-c}}
+\subsubsection[{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-extforward\-\_\-set\-\_\-defaults}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__extforward_8c_aa89d4a72b83ec984c680e5fc79d5af00}
+
+
+References array\-\_\-init(), config\-\_\-insert\-\_\-values\-\_\-global(), plugin\-\_\-data\-::config\-\_\-storage, config\-\_\-values\-\_\-t\-::destination, plugin\-\_\-config\-::forwarder, H\-A\-N\-D\-L\-E\-R\-\_\-\-E\-R\-R\-O\-R, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-A\-R\-R\-A\-Y, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T\-I\-O\-N, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-S\-E\-R\-V\-E\-R, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-U\-N\-S\-E\-T, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-U\-N\-S\-E\-T, and data\-\_\-config\-::value.
+
+\hypertarget{mod__extforward_8c_a9bbe0b2c41c8625d97d380b0070bfb93}{\index{mod\-\_\-extforward.\-c@{mod\-\_\-extforward.\-c}!U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C@{U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C}}
+\index{U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C@{U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C}!mod_extforward.c@{mod\-\_\-extforward.\-c}}
+\subsubsection[{U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-extforward\-\_\-uri\-\_\-handler}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__extforward_8c_a9bbe0b2c41c8625d97d380b0070bfb93}
+
+
+References array\-\_\-free(), array\-\_\-get\-\_\-element(), buffer\-\_\-copy\-\_\-string(), buffer\-\_\-copy\-\_\-string\-\_\-len(), buffer\-\_\-init(), buffer\-\_\-is\-\_\-equal\-\_\-caseless\-\_\-string(), clean\-\_\-cond\-\_\-cache(), plugin\-\_\-data\-::conf, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, array\-::data, extract\-\_\-forward\-\_\-array(), handler\-\_\-ctx\-\_\-free(), handler\-\_\-ctx\-\_\-init(), H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, plugin\-\_\-config\-::headers, I\-P\-\_\-\-U\-N\-T\-R\-U\-S\-T\-E\-D, sock\-\_\-addr\-::ipv4, is\-\_\-proxy\-\_\-trusted(), last\-\_\-not\-\_\-in\-\_\-array(), log\-\_\-error\-\_\-write(), mod\-\_\-extforward\-\_\-patch\-\_\-connection(), sock\-\_\-addr\-::plain, buffer\-::ptr, array\-::used, and data\-\_\-string\-::value.
+

@@ -1,0 +1,63 @@
+\hypertarget{structserver__socket}{\section{server\-\_\-socket Struct Reference}
+\label{structserver__socket}\index{server\-\_\-socket@{server\-\_\-socket}}
+}
+
+
+{\ttfamily \#include $<$base.\-h$>$}
+
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{unionsock__addr}{sock\-\_\-addr} \hyperlink{structserver__socket_aeb0c2aaf7084b2731b0735660f48b11f}{addr}
+\item 
+int \hyperlink{structserver__socket_a30382f57e0e544baac6491aa54cfd3e1}{fd}
+\item 
+int \hyperlink{structserver__socket_ac2a4c92cdb399017e2e4ae6847975a2e}{fde\-\_\-ndx}
+\item 
+unsigned short \hyperlink{structserver__socket_a84b0aea1a3f4801bfb2d017e7e608e0e}{is\-\_\-ssl}
+\item 
+\hyperlink{structbuffer}{buffer} $\ast$ \hyperlink{structserver__socket_a39a8f89f90488013461f207dc3e86138}{srv\-\_\-token}
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{structserver__socket_aeb0c2aaf7084b2731b0735660f48b11f}{\index{server\-\_\-socket@{server\-\_\-socket}!addr@{addr}}
+\index{addr@{addr}!server_socket@{server\-\_\-socket}}
+\subsubsection[{addr}]{\setlength{\rightskip}{0pt plus 5cm}{\bf sock\-\_\-addr} server\-\_\-socket\-::addr}}\label{structserver__socket_aeb0c2aaf7084b2731b0735660f48b11f}
+
+
+Referenced by config\-\_\-check\-\_\-cond\-\_\-nocache(), http\-\_\-cgi\-\_\-headers(), network\-\_\-server\-\_\-init(), and server\-\_\-oneshot\-\_\-getsock().
+
+\hypertarget{structserver__socket_a30382f57e0e544baac6491aa54cfd3e1}{\index{server\-\_\-socket@{server\-\_\-socket}!fd@{fd}}
+\index{fd@{fd}!server_socket@{server\-\_\-socket}}
+\subsubsection[{fd}]{\setlength{\rightskip}{0pt plus 5cm}int server\-\_\-socket\-::fd}}\label{structserver__socket_a30382f57e0e544baac6491aa54cfd3e1}
+
+
+Referenced by connection\-\_\-accept(), main(), network\-\_\-close(), network\-\_\-register\-\_\-fdevents(), network\-\_\-server\-\_\-handle\-\_\-fdevent(), and network\-\_\-server\-\_\-init().
+
+\hypertarget{structserver__socket_ac2a4c92cdb399017e2e4ae6847975a2e}{\index{server\-\_\-socket@{server\-\_\-socket}!fde\-\_\-ndx@{fde\-\_\-ndx}}
+\index{fde\-\_\-ndx@{fde\-\_\-ndx}!server_socket@{server\-\_\-socket}}
+\subsubsection[{fde\-\_\-ndx}]{\setlength{\rightskip}{0pt plus 5cm}int server\-\_\-socket\-::fde\-\_\-ndx}}\label{structserver__socket_ac2a4c92cdb399017e2e4ae6847975a2e}
+
+
+Referenced by main(), network\-\_\-close(), network\-\_\-register\-\_\-fdevents(), and network\-\_\-server\-\_\-init().
+
+\hypertarget{structserver__socket_a84b0aea1a3f4801bfb2d017e7e608e0e}{\index{server\-\_\-socket@{server\-\_\-socket}!is\-\_\-ssl@{is\-\_\-ssl}}
+\index{is\-\_\-ssl@{is\-\_\-ssl}!server_socket@{server\-\_\-socket}}
+\subsubsection[{is\-\_\-ssl}]{\setlength{\rightskip}{0pt plus 5cm}unsigned short server\-\_\-socket\-::is\-\_\-ssl}}\label{structserver__socket_a84b0aea1a3f4801bfb2d017e7e608e0e}
+
+
+Referenced by connection\-\_\-accepted(), connection\-\_\-close(), connection\-\_\-handle\-\_\-fdevent(), connection\-\_\-handle\-\_\-read(), connection\-\_\-handle\-\_\-read\-\_\-ssl(), connection\-\_\-handle\-\_\-shutdown(), http\-\_\-response\-\_\-prepare(), network\-\_\-server\-\_\-init(), and network\-\_\-write\-\_\-chunkqueue().
+
+\hypertarget{structserver__socket_a39a8f89f90488013461f207dc3e86138}{\index{server\-\_\-socket@{server\-\_\-socket}!srv\-\_\-token@{srv\-\_\-token}}
+\index{srv\-\_\-token@{srv\-\_\-token}!server_socket@{server\-\_\-socket}}
+\subsubsection[{srv\-\_\-token}]{\setlength{\rightskip}{0pt plus 5cm}{\bf buffer}$\ast$ server\-\_\-socket\-::srv\-\_\-token}}\label{structserver__socket_a39a8f89f90488013461f207dc3e86138}
+
+
+Referenced by config\-\_\-check\-\_\-cond\-\_\-nocache(), network\-\_\-close(), network\-\_\-init(), and network\-\_\-server\-\_\-init().
+
+
+
+The documentation for this struct was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{base_8h}{base.\-h}\end{DoxyCompactItemize}

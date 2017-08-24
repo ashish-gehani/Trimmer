@@ -1,0 +1,270 @@
+\hypertarget{proc__open_8c}{\section{proc\-\_\-open.\-c File Reference}
+\label{proc__open_8c}\index{proc\-\_\-open.\-c@{proc\-\_\-open.\-c}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}proc\-\_\-open.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$stdlib.\-h$>$}\\*
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$ctype.\-h$>$}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+{\ttfamily \#include $<$errno.\-h$>$}\\*
+{\ttfamily \#include $<$sys/wait.\-h$>$}\\*
+{\ttfamily \#include $<$unistd.\-h$>$}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{proc__open_8c_ab9f520997a0b1a53869446e50629067a}{S\-H\-E\-L\-L\-E\-N\-V}~\char`\"{}S\-H\-E\-L\-L\char`\"{}
+\item 
+\#define \hyperlink{proc__open_8c_aeb86e6be57fa06eff6ca360dab9164d5}{S\-E\-C\-U\-R\-I\-T\-Y\-\_\-\-D\-C}
+\item 
+\#define \hyperlink{proc__open_8c_a5d7fd57cc6e58dabb3ba189b6c286f62}{S\-E\-C\-U\-R\-I\-T\-Y\-\_\-\-C\-C}
+\item 
+\#define \hyperlink{proc__open_8c_a29b0f798f4567df94261092c81debe39}{close\-\_\-descriptor}(fd)~close(fd)
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+static void \hyperlink{proc__open_8c_a0e320e0abf103a1295bc475811317889}{pipe\-\_\-close\-\_\-parent} (\hyperlink{structpipe__t}{pipe\-\_\-t} $\ast$p)
+\item 
+static void \hyperlink{proc__open_8c_a9858ec84fdc979d1856dc32ecd54b85d}{pipe\-\_\-close\-\_\-child} (\hyperlink{structpipe__t}{pipe\-\_\-t} $\ast$p)
+\item 
+static void \hyperlink{proc__open_8c_a1925edbfa5f5dbd5f9a26fe7e26137ae}{pipe\-\_\-close} (\hyperlink{structpipe__t}{pipe\-\_\-t} $\ast$p)
+\item 
+static int \hyperlink{proc__open_8c_aa8cdadd1f68706854ba76547d6b2d9bb}{pipe\-\_\-open} (\hyperlink{structpipe__t}{pipe\-\_\-t} $\ast$p, int fd \hyperlink{proc__open_8c_aeb86e6be57fa06eff6ca360dab9164d5}{S\-E\-C\-U\-R\-I\-T\-Y\-\_\-\-D\-C})
+\item 
+static int \hyperlink{proc__open_8c_a9b07c814c2a00d9339d0e981e5b1a2da}{proc\-\_\-open\-\_\-pipes} (\hyperlink{structproc__handler__t}{proc\-\_\-handler\-\_\-t} $\ast$proc \hyperlink{proc__open_8c_aeb86e6be57fa06eff6ca360dab9164d5}{S\-E\-C\-U\-R\-I\-T\-Y\-\_\-\-D\-C})
+\item 
+static void \hyperlink{proc__open_8c_a0048fd1b8efd1055cdca2de68a1a7a23}{proc\-\_\-close\-\_\-pipes} (\hyperlink{structproc__handler__t}{proc\-\_\-handler\-\_\-t} $\ast$proc)
+\item 
+static void \hyperlink{proc__open_8c_a41edd48549c68ebb2f60a0530356e45c}{proc\-\_\-close\-\_\-parents} (\hyperlink{structproc__handler__t}{proc\-\_\-handler\-\_\-t} $\ast$proc)
+\item 
+static void \hyperlink{proc__open_8c_a5435a8d1d5599dfe075412039ea5fa57}{proc\-\_\-close\-\_\-childs} (\hyperlink{structproc__handler__t}{proc\-\_\-handler\-\_\-t} $\ast$proc)
+\item 
+int \hyperlink{proc__open_8c_aa50d686cb7bcf920a3f06eb416a9a262}{proc\-\_\-close} (\hyperlink{structproc__handler__t}{proc\-\_\-handler\-\_\-t} $\ast$proc)
+\item 
+int \hyperlink{proc__open_8c_aa85d9d955b97fbb8436a1f04a109bc4b}{proc\-\_\-open} (\hyperlink{structproc__handler__t}{proc\-\_\-handler\-\_\-t} $\ast$proc, const char $\ast$command)
+\item 
+static void \hyperlink{proc__open_8c_ac2058a332deffb5cb9721fb0f2a8316e}{proc\-\_\-read\-\_\-fd\-\_\-to\-\_\-buffer} (int fd, \hyperlink{structbuffer}{buffer} $\ast$b)
+\item 
+int \hyperlink{proc__open_8c_a1581b623b26bb41cd1c6abf090c9f356}{proc\-\_\-open\-\_\-buffer} (const char $\ast$command, \hyperlink{structbuffer}{buffer} $\ast$in, \hyperlink{structbuffer}{buffer} $\ast$out, \hyperlink{structbuffer}{buffer} $\ast$err)
+\end{DoxyCompactItemize}
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{proc__open_8c_a29b0f798f4567df94261092c81debe39}{\index{proc\-\_\-open.\-c@{proc\-\_\-open.\-c}!close\-\_\-descriptor@{close\-\_\-descriptor}}
+\index{close\-\_\-descriptor@{close\-\_\-descriptor}!proc_open.c@{proc\-\_\-open.\-c}}
+\subsubsection[{close\-\_\-descriptor}]{\setlength{\rightskip}{0pt plus 5cm}\#define close\-\_\-descriptor(
+\begin{DoxyParamCaption}
+\item[{}]{fd}
+\end{DoxyParamCaption}
+)~close(fd)}}\label{proc__open_8c_a29b0f798f4567df94261092c81debe39}
+
+
+Referenced by pipe\-\_\-close(), pipe\-\_\-close\-\_\-child(), and pipe\-\_\-close\-\_\-parent().
+
+\hypertarget{proc__open_8c_a5d7fd57cc6e58dabb3ba189b6c286f62}{\index{proc\-\_\-open.\-c@{proc\-\_\-open.\-c}!S\-E\-C\-U\-R\-I\-T\-Y\-\_\-\-C\-C@{S\-E\-C\-U\-R\-I\-T\-Y\-\_\-\-C\-C}}
+\index{S\-E\-C\-U\-R\-I\-T\-Y\-\_\-\-C\-C@{S\-E\-C\-U\-R\-I\-T\-Y\-\_\-\-C\-C}!proc_open.c@{proc\-\_\-open.\-c}}
+\subsubsection[{S\-E\-C\-U\-R\-I\-T\-Y\-\_\-\-C\-C}]{\setlength{\rightskip}{0pt plus 5cm}\#define S\-E\-C\-U\-R\-I\-T\-Y\-\_\-\-C\-C}}\label{proc__open_8c_a5d7fd57cc6e58dabb3ba189b6c286f62}
+
+
+Referenced by proc\-\_\-open\-\_\-pipes().
+
+\hypertarget{proc__open_8c_aeb86e6be57fa06eff6ca360dab9164d5}{\index{proc\-\_\-open.\-c@{proc\-\_\-open.\-c}!S\-E\-C\-U\-R\-I\-T\-Y\-\_\-\-D\-C@{S\-E\-C\-U\-R\-I\-T\-Y\-\_\-\-D\-C}}
+\index{S\-E\-C\-U\-R\-I\-T\-Y\-\_\-\-D\-C@{S\-E\-C\-U\-R\-I\-T\-Y\-\_\-\-D\-C}!proc_open.c@{proc\-\_\-open.\-c}}
+\subsubsection[{S\-E\-C\-U\-R\-I\-T\-Y\-\_\-\-D\-C}]{\setlength{\rightskip}{0pt plus 5cm}\#define S\-E\-C\-U\-R\-I\-T\-Y\-\_\-\-D\-C}}\label{proc__open_8c_aeb86e6be57fa06eff6ca360dab9164d5}
+\hypertarget{proc__open_8c_ab9f520997a0b1a53869446e50629067a}{\index{proc\-\_\-open.\-c@{proc\-\_\-open.\-c}!S\-H\-E\-L\-L\-E\-N\-V@{S\-H\-E\-L\-L\-E\-N\-V}}
+\index{S\-H\-E\-L\-L\-E\-N\-V@{S\-H\-E\-L\-L\-E\-N\-V}!proc_open.c@{proc\-\_\-open.\-c}}
+\subsubsection[{S\-H\-E\-L\-L\-E\-N\-V}]{\setlength{\rightskip}{0pt plus 5cm}\#define S\-H\-E\-L\-L\-E\-N\-V~\char`\"{}S\-H\-E\-L\-L\char`\"{}}}\label{proc__open_8c_ab9f520997a0b1a53869446e50629067a}
+
+
+Referenced by proc\-\_\-open().
+
+
+
+\subsection{Function Documentation}
+\hypertarget{proc__open_8c_a1925edbfa5f5dbd5f9a26fe7e26137ae}{\index{proc\-\_\-open.\-c@{proc\-\_\-open.\-c}!pipe\-\_\-close@{pipe\-\_\-close}}
+\index{pipe\-\_\-close@{pipe\-\_\-close}!proc_open.c@{proc\-\_\-open.\-c}}
+\subsubsection[{pipe\-\_\-close}]{\setlength{\rightskip}{0pt plus 5cm}static void pipe\-\_\-close (
+\begin{DoxyParamCaption}
+\item[{{\bf pipe\-\_\-t} $\ast$}]{p}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{proc__open_8c_a1925edbfa5f5dbd5f9a26fe7e26137ae}
+
+
+References pipe\-\_\-t\-::child, close\-\_\-descriptor, pipe\-\_\-t\-::fd, and pipe\-\_\-t\-::parent.
+
+
+
+Referenced by proc\-\_\-close\-\_\-pipes(), and proc\-\_\-open\-\_\-buffer().
+
+\hypertarget{proc__open_8c_a9858ec84fdc979d1856dc32ecd54b85d}{\index{proc\-\_\-open.\-c@{proc\-\_\-open.\-c}!pipe\-\_\-close\-\_\-child@{pipe\-\_\-close\-\_\-child}}
+\index{pipe\-\_\-close\-\_\-child@{pipe\-\_\-close\-\_\-child}!proc_open.c@{proc\-\_\-open.\-c}}
+\subsubsection[{pipe\-\_\-close\-\_\-child}]{\setlength{\rightskip}{0pt plus 5cm}static void pipe\-\_\-close\-\_\-child (
+\begin{DoxyParamCaption}
+\item[{{\bf pipe\-\_\-t} $\ast$}]{p}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{proc__open_8c_a9858ec84fdc979d1856dc32ecd54b85d}
+
+
+References pipe\-\_\-t\-::child, close\-\_\-descriptor, pipe\-\_\-t\-::fd, and pipe\-\_\-t\-::parent.
+
+
+
+Referenced by proc\-\_\-close\-\_\-childs().
+
+\hypertarget{proc__open_8c_a0e320e0abf103a1295bc475811317889}{\index{proc\-\_\-open.\-c@{proc\-\_\-open.\-c}!pipe\-\_\-close\-\_\-parent@{pipe\-\_\-close\-\_\-parent}}
+\index{pipe\-\_\-close\-\_\-parent@{pipe\-\_\-close\-\_\-parent}!proc_open.c@{proc\-\_\-open.\-c}}
+\subsubsection[{pipe\-\_\-close\-\_\-parent}]{\setlength{\rightskip}{0pt plus 5cm}static void pipe\-\_\-close\-\_\-parent (
+\begin{DoxyParamCaption}
+\item[{{\bf pipe\-\_\-t} $\ast$}]{p}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{proc__open_8c_a0e320e0abf103a1295bc475811317889}
+
+
+References pipe\-\_\-t\-::child, close\-\_\-descriptor, pipe\-\_\-t\-::fd, and pipe\-\_\-t\-::parent.
+
+
+
+Referenced by proc\-\_\-close\-\_\-parents().
+
+\hypertarget{proc__open_8c_aa8cdadd1f68706854ba76547d6b2d9bb}{\index{proc\-\_\-open.\-c@{proc\-\_\-open.\-c}!pipe\-\_\-open@{pipe\-\_\-open}}
+\index{pipe\-\_\-open@{pipe\-\_\-open}!proc_open.c@{proc\-\_\-open.\-c}}
+\subsubsection[{pipe\-\_\-open}]{\setlength{\rightskip}{0pt plus 5cm}static int pipe\-\_\-open (
+\begin{DoxyParamCaption}
+\item[{{\bf pipe\-\_\-t} $\ast$}]{p, }
+\item[{int fd}]{S\-E\-C\-U\-R\-I\-T\-Y\-\_\-\-D\-C}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{proc__open_8c_aa8cdadd1f68706854ba76547d6b2d9bb}
+
+
+References pipe\-\_\-t\-::child, pipe\-\_\-t\-::fd, and pipe\-\_\-t\-::parent.
+
+
+
+Referenced by proc\-\_\-open\-\_\-pipes().
+
+\hypertarget{proc__open_8c_aa50d686cb7bcf920a3f06eb416a9a262}{\index{proc\-\_\-open.\-c@{proc\-\_\-open.\-c}!proc\-\_\-close@{proc\-\_\-close}}
+\index{proc\-\_\-close@{proc\-\_\-close}!proc_open.c@{proc\-\_\-open.\-c}}
+\subsubsection[{proc\-\_\-close}]{\setlength{\rightskip}{0pt plus 5cm}int proc\-\_\-close (
+\begin{DoxyParamCaption}
+\item[{{\bf proc\-\_\-handler\-\_\-t} $\ast$}]{proc}
+\end{DoxyParamCaption}
+)}}\label{proc__open_8c_aa50d686cb7bcf920a3f06eb416a9a262}
+
+
+References proc\-\_\-handler\-\_\-t\-::child, and proc\-\_\-close\-\_\-pipes().
+
+
+
+Referenced by proc\-\_\-open(), and proc\-\_\-open\-\_\-buffer().
+
+\hypertarget{proc__open_8c_a5435a8d1d5599dfe075412039ea5fa57}{\index{proc\-\_\-open.\-c@{proc\-\_\-open.\-c}!proc\-\_\-close\-\_\-childs@{proc\-\_\-close\-\_\-childs}}
+\index{proc\-\_\-close\-\_\-childs@{proc\-\_\-close\-\_\-childs}!proc_open.c@{proc\-\_\-open.\-c}}
+\subsubsection[{proc\-\_\-close\-\_\-childs}]{\setlength{\rightskip}{0pt plus 5cm}static void proc\-\_\-close\-\_\-childs (
+\begin{DoxyParamCaption}
+\item[{{\bf proc\-\_\-handler\-\_\-t} $\ast$}]{proc}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{proc__open_8c_a5435a8d1d5599dfe075412039ea5fa57}
+
+
+References proc\-\_\-handler\-\_\-t\-::err, proc\-\_\-handler\-\_\-t\-::in, proc\-\_\-handler\-\_\-t\-::out, and pipe\-\_\-close\-\_\-child().
+
+
+
+Referenced by proc\-\_\-open().
+
+\hypertarget{proc__open_8c_a41edd48549c68ebb2f60a0530356e45c}{\index{proc\-\_\-open.\-c@{proc\-\_\-open.\-c}!proc\-\_\-close\-\_\-parents@{proc\-\_\-close\-\_\-parents}}
+\index{proc\-\_\-close\-\_\-parents@{proc\-\_\-close\-\_\-parents}!proc_open.c@{proc\-\_\-open.\-c}}
+\subsubsection[{proc\-\_\-close\-\_\-parents}]{\setlength{\rightskip}{0pt plus 5cm}static void proc\-\_\-close\-\_\-parents (
+\begin{DoxyParamCaption}
+\item[{{\bf proc\-\_\-handler\-\_\-t} $\ast$}]{proc}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{proc__open_8c_a41edd48549c68ebb2f60a0530356e45c}
+
+
+References proc\-\_\-handler\-\_\-t\-::err, proc\-\_\-handler\-\_\-t\-::in, proc\-\_\-handler\-\_\-t\-::out, and pipe\-\_\-close\-\_\-parent().
+
+
+
+Referenced by proc\-\_\-open().
+
+\hypertarget{proc__open_8c_a0048fd1b8efd1055cdca2de68a1a7a23}{\index{proc\-\_\-open.\-c@{proc\-\_\-open.\-c}!proc\-\_\-close\-\_\-pipes@{proc\-\_\-close\-\_\-pipes}}
+\index{proc\-\_\-close\-\_\-pipes@{proc\-\_\-close\-\_\-pipes}!proc_open.c@{proc\-\_\-open.\-c}}
+\subsubsection[{proc\-\_\-close\-\_\-pipes}]{\setlength{\rightskip}{0pt plus 5cm}static void proc\-\_\-close\-\_\-pipes (
+\begin{DoxyParamCaption}
+\item[{{\bf proc\-\_\-handler\-\_\-t} $\ast$}]{proc}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{proc__open_8c_a0048fd1b8efd1055cdca2de68a1a7a23}
+
+
+References proc\-\_\-handler\-\_\-t\-::err, proc\-\_\-handler\-\_\-t\-::in, proc\-\_\-handler\-\_\-t\-::out, and pipe\-\_\-close().
+
+
+
+Referenced by proc\-\_\-close().
+
+\hypertarget{proc__open_8c_aa85d9d955b97fbb8436a1f04a109bc4b}{\index{proc\-\_\-open.\-c@{proc\-\_\-open.\-c}!proc\-\_\-open@{proc\-\_\-open}}
+\index{proc\-\_\-open@{proc\-\_\-open}!proc_open.c@{proc\-\_\-open.\-c}}
+\subsubsection[{proc\-\_\-open}]{\setlength{\rightskip}{0pt plus 5cm}int proc\-\_\-open (
+\begin{DoxyParamCaption}
+\item[{{\bf proc\-\_\-handler\-\_\-t} $\ast$}]{proc, }
+\item[{const char $\ast$}]{command}
+\end{DoxyParamCaption}
+)}}\label{proc__open_8c_aa85d9d955b97fbb8436a1f04a109bc4b}
+
+
+References proc\-\_\-handler\-\_\-t\-::child, proc\-\_\-close(), proc\-\_\-close\-\_\-childs(), proc\-\_\-close\-\_\-parents(), proc\-\_\-open\-\_\-pipes(), and S\-H\-E\-L\-L\-E\-N\-V.
+
+
+
+Referenced by proc\-\_\-open\-\_\-buffer().
+
+\hypertarget{proc__open_8c_a1581b623b26bb41cd1c6abf090c9f356}{\index{proc\-\_\-open.\-c@{proc\-\_\-open.\-c}!proc\-\_\-open\-\_\-buffer@{proc\-\_\-open\-\_\-buffer}}
+\index{proc\-\_\-open\-\_\-buffer@{proc\-\_\-open\-\_\-buffer}!proc_open.c@{proc\-\_\-open.\-c}}
+\subsubsection[{proc\-\_\-open\-\_\-buffer}]{\setlength{\rightskip}{0pt plus 5cm}int proc\-\_\-open\-\_\-buffer (
+\begin{DoxyParamCaption}
+\item[{const char $\ast$}]{command, }
+\item[{{\bf buffer} $\ast$}]{in, }
+\item[{{\bf buffer} $\ast$}]{out, }
+\item[{{\bf buffer} $\ast$}]{err}
+\end{DoxyParamCaption}
+)}}\label{proc__open_8c_a1581b623b26bb41cd1c6abf090c9f356}
+
+
+References buffer\-\_\-free(), buffer\-\_\-init(), buffer\-\_\-string\-\_\-is\-\_\-empty(), C\-O\-N\-S\-T\-\_\-\-B\-U\-F\-\_\-\-L\-E\-N, proc\-\_\-handler\-\_\-t\-::err, pipe\-\_\-t\-::fd, proc\-\_\-handler\-\_\-t\-::in, proc\-\_\-handler\-\_\-t\-::out, pipe\-\_\-close(), proc\-\_\-close(), proc\-\_\-open(), and proc\-\_\-read\-\_\-fd\-\_\-to\-\_\-buffer().
+
+
+
+Referenced by config\-\_\-parse\-\_\-cmd().
+
+\hypertarget{proc__open_8c_a9b07c814c2a00d9339d0e981e5b1a2da}{\index{proc\-\_\-open.\-c@{proc\-\_\-open.\-c}!proc\-\_\-open\-\_\-pipes@{proc\-\_\-open\-\_\-pipes}}
+\index{proc\-\_\-open\-\_\-pipes@{proc\-\_\-open\-\_\-pipes}!proc_open.c@{proc\-\_\-open.\-c}}
+\subsubsection[{proc\-\_\-open\-\_\-pipes}]{\setlength{\rightskip}{0pt plus 5cm}static int proc\-\_\-open\-\_\-pipes (
+\begin{DoxyParamCaption}
+\item[{{\bf proc\-\_\-handler\-\_\-t} $\ast$proc}]{S\-E\-C\-U\-R\-I\-T\-Y\-\_\-\-D\-C}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{proc__open_8c_a9b07c814c2a00d9339d0e981e5b1a2da}
+
+
+References pipe\-\_\-open(), and S\-E\-C\-U\-R\-I\-T\-Y\-\_\-\-C\-C.
+
+
+
+Referenced by proc\-\_\-open().
+
+\hypertarget{proc__open_8c_ac2058a332deffb5cb9721fb0f2a8316e}{\index{proc\-\_\-open.\-c@{proc\-\_\-open.\-c}!proc\-\_\-read\-\_\-fd\-\_\-to\-\_\-buffer@{proc\-\_\-read\-\_\-fd\-\_\-to\-\_\-buffer}}
+\index{proc\-\_\-read\-\_\-fd\-\_\-to\-\_\-buffer@{proc\-\_\-read\-\_\-fd\-\_\-to\-\_\-buffer}!proc_open.c@{proc\-\_\-open.\-c}}
+\subsubsection[{proc\-\_\-read\-\_\-fd\-\_\-to\-\_\-buffer}]{\setlength{\rightskip}{0pt plus 5cm}static void proc\-\_\-read\-\_\-fd\-\_\-to\-\_\-buffer (
+\begin{DoxyParamCaption}
+\item[{int}]{fd, }
+\item[{{\bf buffer} $\ast$}]{b}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{proc__open_8c_ac2058a332deffb5cb9721fb0f2a8316e}
+
+
+References buffer\-\_\-commit(), buffer\-\_\-string\-\_\-length(), buffer\-\_\-string\-\_\-prepare\-\_\-append(), buffer\-\_\-string\-\_\-space(), and buffer\-::ptr.
+
+
+
+Referenced by proc\-\_\-open\-\_\-buffer().
+

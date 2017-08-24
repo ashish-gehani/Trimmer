@@ -1,0 +1,124 @@
+\hypertarget{mod__alias_8c}{\section{mod\-\_\-alias.\-c File Reference}
+\label{mod__alias_8c}\index{mod\-\_\-alias.\-c@{mod\-\_\-alias.\-c}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}base.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}log.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}buffer.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}plugin.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ctype.\-h$>$}\\*
+{\ttfamily \#include $<$stdlib.\-h$>$}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structplugin__config}{plugin\-\_\-config}
+\item 
+struct \hyperlink{structplugin__data}{plugin\-\_\-data}
+\end{DoxyCompactItemize}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{mod__alias_8c_a20876ec7c0c844d0e0c1628528bbb8da}{P\-A\-T\-C\-H}(x)~p-\/$>$conf.\-x = s-\/$>$x;
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{mod__alias_8c_a29ed04dc3982f0417c3fbacf29e74539}{I\-N\-I\-T\-\_\-\-F\-U\-N\-C} (mod\-\_\-alias\-\_\-init)
+\item 
+\hyperlink{mod__alias_8c_adebd3d77036a4b5243a397644b7a5dbc}{F\-R\-E\-E\-\_\-\-F\-U\-N\-C} (mod\-\_\-alias\-\_\-free)
+\item 
+\hyperlink{mod__alias_8c_ab88c75f1bdab6284822881ae1c89d7aa}{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C} (mod\-\_\-alias\-\_\-set\-\_\-defaults)
+\item 
+static int \hyperlink{mod__alias_8c_a5e0d172e807047c046178ae33ab0a022}{mod\-\_\-alias\-\_\-patch\-\_\-connection} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structplugin__data}{plugin\-\_\-data} $\ast$p)
+\item 
+\hyperlink{mod__alias_8c_afed08f5a6be925b3381a5b2dbdecaf74}{P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C} (mod\-\_\-alias\-\_\-physical\-\_\-handler)
+\item 
+int \hyperlink{mod__alias_8c_a2a96ca5311aa29628b5ef2d5560c8768}{mod\-\_\-alias\-\_\-plugin\-\_\-init} (\hyperlink{structplugin}{plugin} $\ast$p)
+\end{DoxyCompactItemize}
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{mod__alias_8c_a20876ec7c0c844d0e0c1628528bbb8da}{\index{mod\-\_\-alias.\-c@{mod\-\_\-alias.\-c}!P\-A\-T\-C\-H@{P\-A\-T\-C\-H}}
+\index{P\-A\-T\-C\-H@{P\-A\-T\-C\-H}!mod_alias.c@{mod\-\_\-alias.\-c}}
+\subsubsection[{P\-A\-T\-C\-H}]{\setlength{\rightskip}{0pt plus 5cm}\#define P\-A\-T\-C\-H(
+\begin{DoxyParamCaption}
+\item[{}]{x}
+\end{DoxyParamCaption}
+)~p-\/$>$conf.\-x = s-\/$>$x;}}\label{mod__alias_8c_a20876ec7c0c844d0e0c1628528bbb8da}
+
+
+Referenced by mod\-\_\-alias\-\_\-patch\-\_\-connection().
+
+
+
+\subsection{Function Documentation}
+\hypertarget{mod__alias_8c_adebd3d77036a4b5243a397644b7a5dbc}{\index{mod\-\_\-alias.\-c@{mod\-\_\-alias.\-c}!F\-R\-E\-E\-\_\-\-F\-U\-N\-C@{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}}
+\index{F\-R\-E\-E\-\_\-\-F\-U\-N\-C@{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}!mod_alias.c@{mod\-\_\-alias.\-c}}
+\subsubsection[{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}F\-R\-E\-E\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-alias\-\_\-free}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__alias_8c_adebd3d77036a4b5243a397644b7a5dbc}
+
+
+References plugin\-\_\-config\-::alias, array\-\_\-free(), plugin\-\_\-data\-::config\-\_\-storage, and H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N.
+
+\hypertarget{mod__alias_8c_a29ed04dc3982f0417c3fbacf29e74539}{\index{mod\-\_\-alias.\-c@{mod\-\_\-alias.\-c}!I\-N\-I\-T\-\_\-\-F\-U\-N\-C@{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}}
+\index{I\-N\-I\-T\-\_\-\-F\-U\-N\-C@{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}!mod_alias.c@{mod\-\_\-alias.\-c}}
+\subsubsection[{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}I\-N\-I\-T\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-alias\-\_\-init}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__alias_8c_a29ed04dc3982f0417c3fbacf29e74539}
+\hypertarget{mod__alias_8c_a5e0d172e807047c046178ae33ab0a022}{\index{mod\-\_\-alias.\-c@{mod\-\_\-alias.\-c}!mod\-\_\-alias\-\_\-patch\-\_\-connection@{mod\-\_\-alias\-\_\-patch\-\_\-connection}}
+\index{mod\-\_\-alias\-\_\-patch\-\_\-connection@{mod\-\_\-alias\-\_\-patch\-\_\-connection}!mod_alias.c@{mod\-\_\-alias.\-c}}
+\subsubsection[{mod\-\_\-alias\-\_\-patch\-\_\-connection}]{\setlength{\rightskip}{0pt plus 5cm}static int mod\-\_\-alias\-\_\-patch\-\_\-connection (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf plugin\-\_\-data} $\ast$}]{p}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__alias_8c_a5e0d172e807047c046178ae33ab0a022}
+
+
+References buffer\-\_\-is\-\_\-equal\-\_\-string(), config\-\_\-check\-\_\-cond(), server\-::config\-\_\-context, plugin\-\_\-data\-::config\-\_\-storage, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, array\-::data, P\-A\-T\-C\-H, array\-::used, and data\-\_\-config\-::value.
+
+
+
+Referenced by P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__alias_8c_a2a96ca5311aa29628b5ef2d5560c8768}{\index{mod\-\_\-alias.\-c@{mod\-\_\-alias.\-c}!mod\-\_\-alias\-\_\-plugin\-\_\-init@{mod\-\_\-alias\-\_\-plugin\-\_\-init}}
+\index{mod\-\_\-alias\-\_\-plugin\-\_\-init@{mod\-\_\-alias\-\_\-plugin\-\_\-init}!mod_alias.c@{mod\-\_\-alias.\-c}}
+\subsubsection[{mod\-\_\-alias\-\_\-plugin\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}int mod\-\_\-alias\-\_\-plugin\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{{\bf plugin} $\ast$}]{p}
+\end{DoxyParamCaption}
+)}}\label{mod__alias_8c_a2a96ca5311aa29628b5ef2d5560c8768}
+
+
+References buffer\-\_\-init\-\_\-string(), plugin\-::cleanup, plugin\-::data, plugin\-::handle\-\_\-physical, plugin\-::init, plugin\-::name, plugin\-::set\-\_\-defaults, and plugin\-::version.
+
+\hypertarget{mod__alias_8c_afed08f5a6be925b3381a5b2dbdecaf74}{\index{mod\-\_\-alias.\-c@{mod\-\_\-alias.\-c}!P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C@{P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C}}
+\index{P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C@{P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C}!mod_alias.c@{mod\-\_\-alias.\-c}}
+\subsubsection[{P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-alias\-\_\-physical\-\_\-handler}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__alias_8c_afed08f5a6be925b3381a5b2dbdecaf74}
+
+
+References plugin\-\_\-config\-::alias, buffer\-\_\-append\-\_\-string(), buffer\-\_\-copy\-\_\-buffer(), buffer\-\_\-is\-\_\-empty(), buffer\-\_\-string\-\_\-length(), plugin\-\_\-data\-::conf, array\-::data, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, mod\-\_\-alias\-\_\-patch\-\_\-connection(), array\-::used, and data\-\_\-string\-::value.
+
+\hypertarget{mod__alias_8c_ab88c75f1bdab6284822881ae1c89d7aa}{\index{mod\-\_\-alias.\-c@{mod\-\_\-alias.\-c}!S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C@{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}}
+\index{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C@{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}!mod_alias.c@{mod\-\_\-alias.\-c}}
+\subsubsection[{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-alias\-\_\-set\-\_\-defaults}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__alias_8c_ab88c75f1bdab6284822881ae1c89d7aa}
+
+
+References plugin\-\_\-config\-::alias, array\-\_\-init(), buffer\-\_\-string\-\_\-length(), config\-\_\-insert\-\_\-values\-\_\-global(), plugin\-\_\-data\-::config\-\_\-storage, array\-::data, config\-\_\-values\-\_\-t\-::destination, H\-A\-N\-D\-L\-E\-R\-\_\-\-E\-R\-R\-O\-R, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, log\-\_\-error\-\_\-write(), buffer\-::ptr, array\-::sorted, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-A\-R\-R\-A\-Y, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T\-I\-O\-N, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-S\-E\-R\-V\-E\-R, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-U\-N\-S\-E\-T, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-U\-N\-S\-E\-T, array\-::used, and data\-\_\-config\-::value.
+

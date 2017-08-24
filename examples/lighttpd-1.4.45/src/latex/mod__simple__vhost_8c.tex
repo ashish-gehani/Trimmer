@@ -1,0 +1,157 @@
+\hypertarget{mod__simple__vhost_8c}{\section{mod\-\_\-simple\-\_\-vhost.\-c File Reference}
+\label{mod__simple__vhost_8c}\index{mod\-\_\-simple\-\_\-vhost.\-c@{mod\-\_\-simple\-\_\-vhost.\-c}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}base.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}log.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}buffer.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}stat\-\_\-cache.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}plugin.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include $<$ctype.\-h$>$}\\*
+{\ttfamily \#include $<$stdlib.\-h$>$}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+{\ttfamily \#include $<$errno.\-h$>$}\\*
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structplugin__config}{plugin\-\_\-config}
+\item 
+struct \hyperlink{structplugin__data}{plugin\-\_\-data}
+\end{DoxyCompactItemize}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{mod__simple__vhost_8c_a20876ec7c0c844d0e0c1628528bbb8da}{P\-A\-T\-C\-H}(x)~p-\/$>$conf.\-x = s-\/$>$x;
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{mod__simple__vhost_8c_a98eca3e01a5c0afb25309e2b7fe2a92c}{I\-N\-I\-T\-\_\-\-F\-U\-N\-C} (mod\-\_\-simple\-\_\-vhost\-\_\-init)
+\item 
+\hyperlink{mod__simple__vhost_8c_a13d418bd4381b1570fda883398720d0d}{F\-R\-E\-E\-\_\-\-F\-U\-N\-C} (mod\-\_\-simple\-\_\-vhost\-\_\-free)
+\item 
+\hyperlink{mod__simple__vhost_8c_a9e5b895eb58d2ab0416bce5f3b9ca027}{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C} (mod\-\_\-simple\-\_\-vhost\-\_\-set\-\_\-defaults)
+\item 
+static int \hyperlink{mod__simple__vhost_8c_a74feddc0b2bb844574d93a982010f7d0}{build\-\_\-doc\-\_\-root} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structplugin__data}{plugin\-\_\-data} $\ast$p, \hyperlink{structbuffer}{buffer} $\ast$out, \hyperlink{structbuffer}{buffer} $\ast$host)
+\item 
+static int \hyperlink{mod__simple__vhost_8c_a7938757e04c930afb0e7ca8065e9aa14}{mod\-\_\-simple\-\_\-vhost\-\_\-patch\-\_\-connection} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structplugin__data}{plugin\-\_\-data} $\ast$p)
+\item 
+static \hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t} \hyperlink{mod__simple__vhost_8c_a5befa4fbd2db0ecb853e25ab5f9635c0}{mod\-\_\-simple\-\_\-vhost\-\_\-docroot} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, void $\ast$p\-\_\-data)
+\item 
+int \hyperlink{mod__simple__vhost_8c_ad34bc332eaefb54f9d9657830ce71ef2}{mod\-\_\-simple\-\_\-vhost\-\_\-plugin\-\_\-init} (\hyperlink{structplugin}{plugin} $\ast$p)
+\end{DoxyCompactItemize}
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{mod__simple__vhost_8c_a20876ec7c0c844d0e0c1628528bbb8da}{\index{mod\-\_\-simple\-\_\-vhost.\-c@{mod\-\_\-simple\-\_\-vhost.\-c}!P\-A\-T\-C\-H@{P\-A\-T\-C\-H}}
+\index{P\-A\-T\-C\-H@{P\-A\-T\-C\-H}!mod_simple_vhost.c@{mod\-\_\-simple\-\_\-vhost.\-c}}
+\subsubsection[{P\-A\-T\-C\-H}]{\setlength{\rightskip}{0pt plus 5cm}\#define P\-A\-T\-C\-H(
+\begin{DoxyParamCaption}
+\item[{}]{x}
+\end{DoxyParamCaption}
+)~p-\/$>$conf.\-x = s-\/$>$x;}}\label{mod__simple__vhost_8c_a20876ec7c0c844d0e0c1628528bbb8da}
+
+
+Referenced by mod\-\_\-simple\-\_\-vhost\-\_\-patch\-\_\-connection().
+
+
+
+\subsection{Function Documentation}
+\hypertarget{mod__simple__vhost_8c_a74feddc0b2bb844574d93a982010f7d0}{\index{mod\-\_\-simple\-\_\-vhost.\-c@{mod\-\_\-simple\-\_\-vhost.\-c}!build\-\_\-doc\-\_\-root@{build\-\_\-doc\-\_\-root}}
+\index{build\-\_\-doc\-\_\-root@{build\-\_\-doc\-\_\-root}!mod_simple_vhost.c@{mod\-\_\-simple\-\_\-vhost.\-c}}
+\subsubsection[{build\-\_\-doc\-\_\-root}]{\setlength{\rightskip}{0pt plus 5cm}static int build\-\_\-doc\-\_\-root (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf plugin\-\_\-data} $\ast$}]{p, }
+\item[{{\bf buffer} $\ast$}]{out, }
+\item[{{\bf buffer} $\ast$}]{host}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__simple__vhost_8c_a74feddc0b2bb844574d93a982010f7d0}
+
+
+References buffer\-\_\-append\-\_\-slash(), buffer\-\_\-append\-\_\-string\-\_\-buffer(), buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-copy\-\_\-buffer(), buffer\-\_\-string\-\_\-is\-\_\-empty(), buffer\-\_\-string\-\_\-length(), buffer\-\_\-string\-\_\-prepare\-\_\-copy(), plugin\-\_\-data\-::conf, plugin\-\_\-config\-::debug, plugin\-\_\-config\-::document\-\_\-root, force\-\_\-assert, H\-A\-N\-D\-L\-E\-R\-\_\-\-E\-R\-R\-O\-R, log\-\_\-error\-\_\-write(), buffer\-::ptr, plugin\-\_\-config\-::server\-\_\-root, stat\-\_\-cache\-\_\-entry\-::st, and stat\-\_\-cache\-\_\-get\-\_\-entry().
+
+
+
+Referenced by mod\-\_\-simple\-\_\-vhost\-\_\-docroot().
+
+\hypertarget{mod__simple__vhost_8c_a13d418bd4381b1570fda883398720d0d}{\index{mod\-\_\-simple\-\_\-vhost.\-c@{mod\-\_\-simple\-\_\-vhost.\-c}!F\-R\-E\-E\-\_\-\-F\-U\-N\-C@{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}}
+\index{F\-R\-E\-E\-\_\-\-F\-U\-N\-C@{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}!mod_simple_vhost.c@{mod\-\_\-simple\-\_\-vhost.\-c}}
+\subsubsection[{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}F\-R\-E\-E\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-simple\-\_\-vhost\-\_\-free}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__simple__vhost_8c_a13d418bd4381b1570fda883398720d0d}
+
+
+References buffer\-\_\-free(), plugin\-\_\-data\-::config\-\_\-storage, plugin\-\_\-config\-::default\-\_\-host, plugin\-\_\-data\-::doc\-\_\-root, plugin\-\_\-config\-::docroot\-\_\-cache\-\_\-key, plugin\-\_\-config\-::docroot\-\_\-cache\-\_\-servername, plugin\-\_\-config\-::docroot\-\_\-cache\-\_\-value, plugin\-\_\-config\-::document\-\_\-root, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, plugin\-\_\-config\-::server\-\_\-root, and U\-N\-U\-S\-E\-D.
+
+\hypertarget{mod__simple__vhost_8c_a98eca3e01a5c0afb25309e2b7fe2a92c}{\index{mod\-\_\-simple\-\_\-vhost.\-c@{mod\-\_\-simple\-\_\-vhost.\-c}!I\-N\-I\-T\-\_\-\-F\-U\-N\-C@{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}}
+\index{I\-N\-I\-T\-\_\-\-F\-U\-N\-C@{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}!mod_simple_vhost.c@{mod\-\_\-simple\-\_\-vhost.\-c}}
+\subsubsection[{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}I\-N\-I\-T\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-simple\-\_\-vhost\-\_\-init}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__simple__vhost_8c_a98eca3e01a5c0afb25309e2b7fe2a92c}
+
+
+References buffer\-\_\-init(), and plugin\-\_\-data\-::doc\-\_\-root.
+
+\hypertarget{mod__simple__vhost_8c_a5befa4fbd2db0ecb853e25ab5f9635c0}{\index{mod\-\_\-simple\-\_\-vhost.\-c@{mod\-\_\-simple\-\_\-vhost.\-c}!mod\-\_\-simple\-\_\-vhost\-\_\-docroot@{mod\-\_\-simple\-\_\-vhost\-\_\-docroot}}
+\index{mod\-\_\-simple\-\_\-vhost\-\_\-docroot@{mod\-\_\-simple\-\_\-vhost\-\_\-docroot}!mod_simple_vhost.c@{mod\-\_\-simple\-\_\-vhost.\-c}}
+\subsubsection[{mod\-\_\-simple\-\_\-vhost\-\_\-docroot}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf handler\-\_\-t} mod\-\_\-simple\-\_\-vhost\-\_\-docroot (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{void $\ast$}]{p\-\_\-data}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__simple__vhost_8c_a5befa4fbd2db0ecb853e25ab5f9635c0}
+
+
+References request\-\_\-uri\-::authority, buffer\-\_\-copy\-\_\-buffer(), buffer\-\_\-is\-\_\-equal(), buffer\-\_\-string\-\_\-is\-\_\-empty(), build\-\_\-doc\-\_\-root(), plugin\-\_\-data\-::conf, plugin\-\_\-config\-::default\-\_\-host, plugin\-\_\-data\-::doc\-\_\-root, physical\-::doc\-\_\-root, plugin\-\_\-config\-::docroot\-\_\-cache\-\_\-key, plugin\-\_\-config\-::docroot\-\_\-cache\-\_\-servername, plugin\-\_\-config\-::docroot\-\_\-cache\-\_\-value, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, mod\-\_\-simple\-\_\-vhost\-\_\-patch\-\_\-connection(), connection\-::physical, connection\-::server\-\_\-name, plugin\-\_\-config\-::server\-\_\-root, and connection\-::uri.
+
+
+
+Referenced by mod\-\_\-simple\-\_\-vhost\-\_\-plugin\-\_\-init().
+
+\hypertarget{mod__simple__vhost_8c_a7938757e04c930afb0e7ca8065e9aa14}{\index{mod\-\_\-simple\-\_\-vhost.\-c@{mod\-\_\-simple\-\_\-vhost.\-c}!mod\-\_\-simple\-\_\-vhost\-\_\-patch\-\_\-connection@{mod\-\_\-simple\-\_\-vhost\-\_\-patch\-\_\-connection}}
+\index{mod\-\_\-simple\-\_\-vhost\-\_\-patch\-\_\-connection@{mod\-\_\-simple\-\_\-vhost\-\_\-patch\-\_\-connection}!mod_simple_vhost.c@{mod\-\_\-simple\-\_\-vhost.\-c}}
+\subsubsection[{mod\-\_\-simple\-\_\-vhost\-\_\-patch\-\_\-connection}]{\setlength{\rightskip}{0pt plus 5cm}static int mod\-\_\-simple\-\_\-vhost\-\_\-patch\-\_\-connection (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf plugin\-\_\-data} $\ast$}]{p}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__simple__vhost_8c_a7938757e04c930afb0e7ca8065e9aa14}
+
+
+References buffer\-\_\-is\-\_\-equal\-\_\-string(), config\-\_\-check\-\_\-cond(), server\-::config\-\_\-context, plugin\-\_\-data\-::config\-\_\-storage, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, array\-::data, P\-A\-T\-C\-H, array\-::used, and data\-\_\-config\-::value.
+
+
+
+Referenced by mod\-\_\-simple\-\_\-vhost\-\_\-docroot().
+
+\hypertarget{mod__simple__vhost_8c_ad34bc332eaefb54f9d9657830ce71ef2}{\index{mod\-\_\-simple\-\_\-vhost.\-c@{mod\-\_\-simple\-\_\-vhost.\-c}!mod\-\_\-simple\-\_\-vhost\-\_\-plugin\-\_\-init@{mod\-\_\-simple\-\_\-vhost\-\_\-plugin\-\_\-init}}
+\index{mod\-\_\-simple\-\_\-vhost\-\_\-plugin\-\_\-init@{mod\-\_\-simple\-\_\-vhost\-\_\-plugin\-\_\-init}!mod_simple_vhost.c@{mod\-\_\-simple\-\_\-vhost.\-c}}
+\subsubsection[{mod\-\_\-simple\-\_\-vhost\-\_\-plugin\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}int mod\-\_\-simple\-\_\-vhost\-\_\-plugin\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{{\bf plugin} $\ast$}]{p}
+\end{DoxyParamCaption}
+)}}\label{mod__simple__vhost_8c_ad34bc332eaefb54f9d9657830ce71ef2}
+
+
+References buffer\-\_\-init\-\_\-string(), plugin\-::cleanup, plugin\-::data, plugin\-::handle\-\_\-docroot, plugin\-::init, mod\-\_\-simple\-\_\-vhost\-\_\-docroot(), plugin\-::name, plugin\-::set\-\_\-defaults, and plugin\-::version.
+
+\hypertarget{mod__simple__vhost_8c_a9e5b895eb58d2ab0416bce5f3b9ca027}{\index{mod\-\_\-simple\-\_\-vhost.\-c@{mod\-\_\-simple\-\_\-vhost.\-c}!S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C@{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}}
+\index{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C@{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}!mod_simple_vhost.c@{mod\-\_\-simple\-\_\-vhost.\-c}}
+\subsubsection[{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-simple\-\_\-vhost\-\_\-set\-\_\-defaults}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__simple__vhost_8c_a9e5b895eb58d2ab0416bce5f3b9ca027}
+
+
+References buffer\-\_\-init(), config\-\_\-insert\-\_\-values\-\_\-global(), plugin\-\_\-data\-::config\-\_\-storage, config\-\_\-values\-\_\-t\-::destination, H\-A\-N\-D\-L\-E\-R\-\_\-\-E\-R\-R\-O\-R, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, plugin\-\_\-config\-::server\-\_\-root, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T\-I\-O\-N, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-S\-E\-R\-V\-E\-R, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-U\-N\-S\-E\-T, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-H\-O\-R\-T, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-T\-R\-I\-N\-G, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-U\-N\-S\-E\-T, and data\-\_\-config\-::value.
+

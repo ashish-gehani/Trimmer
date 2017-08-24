@@ -1,0 +1,69 @@
+\hypertarget{etag_8c}{\section{etag.\-c File Reference}
+\label{etag_8c}\index{etag.\-c@{etag.\-c}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}buffer.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}etag.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \hyperlink{etag_8c_ab0e7d1b2174a6b91f55837fd1eb56fcd}{etag\-\_\-is\-\_\-equal} (\hyperlink{structbuffer}{buffer} $\ast$etag, const char $\ast$line, int weak\-\_\-ok)
+\item 
+int \hyperlink{etag_8c_a0be0bfc19d66477b0225cb190e517380}{etag\-\_\-create} (\hyperlink{structbuffer}{buffer} $\ast$etag, struct stat $\ast$st, \hyperlink{etag_8h_a75c43c1ab132717944031de235cf76c3}{etag\-\_\-flags\-\_\-t} flags)
+\item 
+int \hyperlink{etag_8c_ab4f331af7d560c36ed8d6ed6e5f4c645}{etag\-\_\-mutate} (\hyperlink{structbuffer}{buffer} $\ast$mut, \hyperlink{structbuffer}{buffer} $\ast$etag)
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\hypertarget{etag_8c_a0be0bfc19d66477b0225cb190e517380}{\index{etag.\-c@{etag.\-c}!etag\-\_\-create@{etag\-\_\-create}}
+\index{etag\-\_\-create@{etag\-\_\-create}!etag.c@{etag.\-c}}
+\subsubsection[{etag\-\_\-create}]{\setlength{\rightskip}{0pt plus 5cm}int etag\-\_\-create (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{etag, }
+\item[{struct stat $\ast$}]{st, }
+\item[{{\bf etag\-\_\-flags\-\_\-t}}]{flags}
+\end{DoxyParamCaption}
+)}}\label{etag_8c_a0be0bfc19d66477b0225cb190e517380}
+
+
+References buffer\-\_\-append\-\_\-int(), buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-reset(), C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, E\-T\-A\-G\-\_\-\-U\-S\-E\-\_\-\-I\-N\-O\-D\-E, E\-T\-A\-G\-\_\-\-U\-S\-E\-\_\-\-M\-T\-I\-M\-E, and E\-T\-A\-G\-\_\-\-U\-S\-E\-\_\-\-S\-I\-Z\-E.
+
+
+
+Referenced by mod\-\_\-ssi\-\_\-handle\-\_\-request(), stat\-\_\-cache\-\_\-get\-\_\-entry(), and webdav\-\_\-get\-\_\-live\-\_\-property().
+
+\hypertarget{etag_8c_ab0e7d1b2174a6b91f55837fd1eb56fcd}{\index{etag.\-c@{etag.\-c}!etag\-\_\-is\-\_\-equal@{etag\-\_\-is\-\_\-equal}}
+\index{etag\-\_\-is\-\_\-equal@{etag\-\_\-is\-\_\-equal}!etag.c@{etag.\-c}}
+\subsubsection[{etag\-\_\-is\-\_\-equal}]{\setlength{\rightskip}{0pt plus 5cm}int etag\-\_\-is\-\_\-equal (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{etag, }
+\item[{const char $\ast$}]{line, }
+\item[{int}]{weak\-\_\-ok}
+\end{DoxyParamCaption}
+)}}\label{etag_8c_ab0e7d1b2174a6b91f55837fd1eb56fcd}
+
+
+References buffer\-\_\-string\-\_\-is\-\_\-empty(), current, and buffer\-::ptr.
+
+
+
+Referenced by http\-\_\-response\-\_\-handle\-\_\-cachable().
+
+\hypertarget{etag_8c_ab4f331af7d560c36ed8d6ed6e5f4c645}{\index{etag.\-c@{etag.\-c}!etag\-\_\-mutate@{etag\-\_\-mutate}}
+\index{etag\-\_\-mutate@{etag\-\_\-mutate}!etag.c@{etag.\-c}}
+\subsubsection[{etag\-\_\-mutate}]{\setlength{\rightskip}{0pt plus 5cm}int etag\-\_\-mutate (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{mut, }
+\item[{{\bf buffer} $\ast$}]{etag}
+\end{DoxyParamCaption}
+)}}\label{etag_8c_ab4f331af7d560c36ed8d6ed6e5f4c645}
+
+
+References buffer\-\_\-append\-\_\-int(), buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-copy\-\_\-string\-\_\-len(), buffer\-\_\-reset(), buffer\-\_\-string\-\_\-length(), C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, buffer\-::ptr, and uint32\-\_\-t.
+
+
+
+Referenced by http\-\_\-response\-\_\-send\-\_\-file(), magnet\-\_\-stat(), and P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C().
+

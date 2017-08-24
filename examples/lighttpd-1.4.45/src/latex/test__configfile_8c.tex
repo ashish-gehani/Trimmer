@@ -1,0 +1,136 @@
+\hypertarget{test__configfile_8c}{\section{test\-\_\-configfile.\-c File Reference}
+\label{test__configfile_8c}\index{test\-\_\-configfile.\-c@{test\-\_\-configfile.\-c}}
+}
+{\ttfamily \#include \char`\"{}configfile-\/glue.\-c\char`\"{}}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include $<$stdlib.\-h$>$}\\*
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+static void \hyperlink{test__configfile_8c_a8eee4287e02465f66ce1ca3fbb2a2df9}{test\-\_\-configfile\-\_\-addrbuf\-\_\-eq\-\_\-remote\-\_\-ip\-\_\-mask} (void)
+\item 
+int \hyperlink{test__configfile_8c_a840291bc02cba5474a4cb46a9b9566fe}{main} (void)
+\item 
+void \hyperlink{test__configfile_8c_ae4766c1a8c07aabe1900324dac356351}{fd\-\_\-close\-\_\-on\-\_\-exec} (int fd)
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=\kill
+struct \{\\
+\>const char $\ast$ \hyperlink{test__configfile_8c_ae1adbce218e7a9d09164012443191d24}{string}\\
+\>const char $\ast$ \hyperlink{test__configfile_8c_ae4f2fda348e99ec2b5f91f09553ebde5}{rmtstr}\\
+\>int \hyperlink{test__configfile_8c_ae4f7cbd23a43390e6fc16c27a8204f88}{rmtfamily}\\
+\>int \hyperlink{test__configfile_8c_a40afe419fd2f07c6e8107d0feff34ffe}{expect}\\
+\} \hyperlink{test__configfile_8c_aa1d11935d6be0af7b0668b982f968c02}{rmtmask} \mbox{[}$\,$\mbox{]}\\
+
+\end{tabbing}\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\hypertarget{test__configfile_8c_ae4766c1a8c07aabe1900324dac356351}{\index{test\-\_\-configfile.\-c@{test\-\_\-configfile.\-c}!fd\-\_\-close\-\_\-on\-\_\-exec@{fd\-\_\-close\-\_\-on\-\_\-exec}}
+\index{fd\-\_\-close\-\_\-on\-\_\-exec@{fd\-\_\-close\-\_\-on\-\_\-exec}!test_configfile.c@{test\-\_\-configfile.\-c}}
+\subsubsection[{fd\-\_\-close\-\_\-on\-\_\-exec}]{\setlength{\rightskip}{0pt plus 5cm}void fd\-\_\-close\-\_\-on\-\_\-exec (
+\begin{DoxyParamCaption}
+\item[{int}]{fd}
+\end{DoxyParamCaption}
+)}}\label{test__configfile_8c_ae4766c1a8c07aabe1900324dac356351}
+
+
+References force\-\_\-assert, and U\-N\-U\-S\-E\-D.
+
+\hypertarget{test__configfile_8c_a840291bc02cba5474a4cb46a9b9566fe}{\index{test\-\_\-configfile.\-c@{test\-\_\-configfile.\-c}!main@{main}}
+\index{main@{main}!test_configfile.c@{test\-\_\-configfile.\-c}}
+\subsubsection[{main}]{\setlength{\rightskip}{0pt plus 5cm}int main (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)}}\label{test__configfile_8c_a840291bc02cba5474a4cb46a9b9566fe}
+
+
+References test\-\_\-configfile\-\_\-addrbuf\-\_\-eq\-\_\-remote\-\_\-ip\-\_\-mask().
+
+\hypertarget{test__configfile_8c_a8eee4287e02465f66ce1ca3fbb2a2df9}{\index{test\-\_\-configfile.\-c@{test\-\_\-configfile.\-c}!test\-\_\-configfile\-\_\-addrbuf\-\_\-eq\-\_\-remote\-\_\-ip\-\_\-mask@{test\-\_\-configfile\-\_\-addrbuf\-\_\-eq\-\_\-remote\-\_\-ip\-\_\-mask}}
+\index{test\-\_\-configfile\-\_\-addrbuf\-\_\-eq\-\_\-remote\-\_\-ip\-\_\-mask@{test\-\_\-configfile\-\_\-addrbuf\-\_\-eq\-\_\-remote\-\_\-ip\-\_\-mask}!test_configfile.c@{test\-\_\-configfile.\-c}}
+\subsubsection[{test\-\_\-configfile\-\_\-addrbuf\-\_\-eq\-\_\-remote\-\_\-ip\-\_\-mask}]{\setlength{\rightskip}{0pt plus 5cm}static void test\-\_\-configfile\-\_\-addrbuf\-\_\-eq\-\_\-remote\-\_\-ip\-\_\-mask (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{test__configfile_8c_a8eee4287e02465f66ce1ca3fbb2a2df9}
+
+
+References assert, buffer\-\_\-copy\-\_\-string(), buffer\-\_\-free(), buffer\-\_\-init(), config\-\_\-addrbuf\-\_\-eq\-\_\-remote\-\_\-ip\-\_\-mask(), expect, sock\-\_\-addr\-::ipv4, buffer\-::ptr, rmtfamily, rmtmask, and rmtstr.
+
+
+
+Referenced by main().
+
+
+
+\subsection{Variable Documentation}
+\hypertarget{test__configfile_8c_a40afe419fd2f07c6e8107d0feff34ffe}{\index{test\-\_\-configfile.\-c@{test\-\_\-configfile.\-c}!expect@{expect}}
+\index{expect@{expect}!test_configfile.c@{test\-\_\-configfile.\-c}}
+\subsubsection[{expect}]{\setlength{\rightskip}{0pt plus 5cm}int expect}}\label{test__configfile_8c_a40afe419fd2f07c6e8107d0feff34ffe}
+
+
+Referenced by test\-\_\-configfile\-\_\-addrbuf\-\_\-eq\-\_\-remote\-\_\-ip\-\_\-mask().
+
+\hypertarget{test__configfile_8c_ae4f7cbd23a43390e6fc16c27a8204f88}{\index{test\-\_\-configfile.\-c@{test\-\_\-configfile.\-c}!rmtfamily@{rmtfamily}}
+\index{rmtfamily@{rmtfamily}!test_configfile.c@{test\-\_\-configfile.\-c}}
+\subsubsection[{rmtfamily}]{\setlength{\rightskip}{0pt plus 5cm}int rmtfamily}}\label{test__configfile_8c_ae4f7cbd23a43390e6fc16c27a8204f88}
+
+
+Referenced by test\-\_\-configfile\-\_\-addrbuf\-\_\-eq\-\_\-remote\-\_\-ip\-\_\-mask().
+
+\hypertarget{test__configfile_8c_aa1d11935d6be0af7b0668b982f968c02}{\index{test\-\_\-configfile.\-c@{test\-\_\-configfile.\-c}!rmtmask@{rmtmask}}
+\index{rmtmask@{rmtmask}!test_configfile.c@{test\-\_\-configfile.\-c}}
+\subsubsection[{rmtmask}]{\setlength{\rightskip}{0pt plus 5cm}const \{ ... \}   rmtmask\mbox{[}$\,$\mbox{]}}}\label{test__configfile_8c_aa1d11935d6be0af7b0668b982f968c02}
+{\bfseries Initial value\-:}
+\begin{DoxyCode}
+= \{
+    \{ \textcolor{stringliteral}{"1.0.0.1/1"},          \textcolor{stringliteral}{"1.0.0.1"},         AF\_INET, 1 \}
+   ,\{ \textcolor{stringliteral}{"254.254.254.254/1"},  \textcolor{stringliteral}{"254.0.0.1"},       AF\_INET, 1 \}
+   ,\{ \textcolor{stringliteral}{"254.254.254.252/31"}, \textcolor{stringliteral}{"254.254.254.253"}, AF\_INET, 1 \}
+   ,\{ \textcolor{stringliteral}{"254.254.254.253/31"}, \textcolor{stringliteral}{"254.254.254.254"}, AF\_INET, 0 \}
+   ,\{ \textcolor{stringliteral}{"254.254.254.253/32"}, \textcolor{stringliteral}{"254.254.254.254"}, AF\_INET, 0 \}
+   ,\{ \textcolor{stringliteral}{"254.254.254.254/32"}, \textcolor{stringliteral}{"254.254.254.254"}, AF\_INET, 1 \}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\}
+\end{DoxyCode}
+
+
+Referenced by test\-\_\-configfile\-\_\-addrbuf\-\_\-eq\-\_\-remote\-\_\-ip\-\_\-mask().
+
+\hypertarget{test__configfile_8c_ae4f2fda348e99ec2b5f91f09553ebde5}{\index{test\-\_\-configfile.\-c@{test\-\_\-configfile.\-c}!rmtstr@{rmtstr}}
+\index{rmtstr@{rmtstr}!test_configfile.c@{test\-\_\-configfile.\-c}}
+\subsubsection[{rmtstr}]{\setlength{\rightskip}{0pt plus 5cm}const char$\ast$ rmtstr}}\label{test__configfile_8c_ae4f2fda348e99ec2b5f91f09553ebde5}
+
+
+Referenced by test\-\_\-configfile\-\_\-addrbuf\-\_\-eq\-\_\-remote\-\_\-ip\-\_\-mask().
+
+\hypertarget{test__configfile_8c_ae1adbce218e7a9d09164012443191d24}{\index{test\-\_\-configfile.\-c@{test\-\_\-configfile.\-c}!string@{string}}
+\index{string@{string}!test_configfile.c@{test\-\_\-configfile.\-c}}
+\subsubsection[{string}]{\setlength{\rightskip}{0pt plus 5cm}const char$\ast$ string}}\label{test__configfile_8c_ae1adbce218e7a9d09164012443191d24}

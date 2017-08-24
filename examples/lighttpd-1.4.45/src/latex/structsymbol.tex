@@ -1,0 +1,173 @@
+\hypertarget{structsymbol}{\section{symbol Struct Reference}
+\label{structsymbol}\index{symbol@{symbol}}
+}
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+enum \{ \hyperlink{structsymbol_a242da504a37dd209a6efc3081af86398a4dda29b0fd0fb56d3150477e0ad05719}{T\-E\-R\-M\-I\-N\-A\-L}, 
+\hyperlink{structsymbol_a242da504a37dd209a6efc3081af86398af6dfc61644c21d651c80f4739b176d59}{N\-O\-N\-T\-E\-R\-M\-I\-N\-A\-L}
+ \}
+\item 
+enum \hyperlink{structsymbol_a898f1247f875b32c8d38fcb533096ff7}{e\-\_\-assoc} \{ \hyperlink{structsymbol_a898f1247f875b32c8d38fcb533096ff7a0144ac577a110a479a0932942b9b75a6}{L\-E\-F\-T}, 
+\hyperlink{structsymbol_a898f1247f875b32c8d38fcb533096ff7abc003df93b64dcd23cf6be03a9f0578c}{R\-I\-G\-H\-T}, 
+\hyperlink{structsymbol_a898f1247f875b32c8d38fcb533096ff7ac2a025171e72c2bfa515e05a10aaa2c6}{N\-O\-N\-E}, 
+\hyperlink{structsymbol_a898f1247f875b32c8d38fcb533096ff7ac96d39d8ea5dfa8635dd319df45e2424}{U\-N\-K}
+ \}
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+char $\ast$ \hyperlink{structsymbol_a4fad8f11a2b2d8a21dcb4f5623d6c0fd}{name}
+\item 
+int \hyperlink{structsymbol_a1aa96687297a13a207e48b4d8f3ba78b}{index}
+\item 
+enum symbol\-:: \{ ... \}  \hyperlink{structsymbol_af7354af68ac51816c1823dd6172f9b54}{type}
+\item 
+struct \hyperlink{structrule}{rule} $\ast$ \hyperlink{structsymbol_a15c02dd88e3c480c918854efb5a803d6}{rule}
+\item 
+struct \hyperlink{structsymbol}{symbol} $\ast$ \hyperlink{structsymbol_a0a658f976944ccfbed28466b4eec903b}{fallback}
+\item 
+int \hyperlink{structsymbol_a4058876fd1fcbafa71c0e52c518551ee}{prec}
+\item 
+enum \hyperlink{structsymbol_a898f1247f875b32c8d38fcb533096ff7}{symbol\-::e\-\_\-assoc} \hyperlink{structsymbol_a127ca0c533713b891c419c179f7adbc1}{assoc}
+\item 
+char $\ast$ \hyperlink{structsymbol_a3a267e61976991b0371b307ac4110b26}{firstset}
+\item 
+\hyperlink{lemon_8c_ae7d38601dfbd73adbe5c1b3ec34e0e13}{Boolean} \hyperlink{structsymbol_af12ee4e73e9878f1e5243ad1d1d06987}{lambda}
+\item 
+char $\ast$ \hyperlink{structsymbol_ae2b28522ba863dcbf3669b507721f09a}{destructor}
+\item 
+int \hyperlink{structsymbol_a1bff7c9f99ddfaf424749f0d4d81de55}{destructorln}
+\item 
+char $\ast$ \hyperlink{structsymbol_a357d5f2896188ae50564294cc294580f}{datatype}
+\item 
+int \hyperlink{structsymbol_ae976c29bbbd980685a026b6e658c4dc3}{dtnum}
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Enumeration Documentation}
+\hypertarget{structsymbol_a242da504a37dd209a6efc3081af86398}{\subsubsection[{anonymous enum}]{\setlength{\rightskip}{0pt plus 5cm}anonymous enum}}\label{structsymbol_a242da504a37dd209a6efc3081af86398}
+\begin{Desc}
+\item[Enumerator]\par
+\begin{description}
+\index{T\-E\-R\-M\-I\-N\-A\-L@{T\-E\-R\-M\-I\-N\-A\-L}!symbol@{symbol}}\index{symbol@{symbol}!T\-E\-R\-M\-I\-N\-A\-L@{T\-E\-R\-M\-I\-N\-A\-L}}\item[{\em 
+\hypertarget{structsymbol_a242da504a37dd209a6efc3081af86398a4dda29b0fd0fb56d3150477e0ad05719}{T\-E\-R\-M\-I\-N\-A\-L}\label{structsymbol_a242da504a37dd209a6efc3081af86398a4dda29b0fd0fb56d3150477e0ad05719}
+}]\index{N\-O\-N\-T\-E\-R\-M\-I\-N\-A\-L@{N\-O\-N\-T\-E\-R\-M\-I\-N\-A\-L}!symbol@{symbol}}\index{symbol@{symbol}!N\-O\-N\-T\-E\-R\-M\-I\-N\-A\-L@{N\-O\-N\-T\-E\-R\-M\-I\-N\-A\-L}}\item[{\em 
+\hypertarget{structsymbol_a242da504a37dd209a6efc3081af86398af6dfc61644c21d651c80f4739b176d59}{N\-O\-N\-T\-E\-R\-M\-I\-N\-A\-L}\label{structsymbol_a242da504a37dd209a6efc3081af86398af6dfc61644c21d651c80f4739b176d59}
+}]\end{description}
+\end{Desc}
+\hypertarget{structsymbol_a898f1247f875b32c8d38fcb533096ff7}{\index{symbol@{symbol}!e\-\_\-assoc@{e\-\_\-assoc}}
+\index{e\-\_\-assoc@{e\-\_\-assoc}!symbol@{symbol}}
+\subsubsection[{e\-\_\-assoc}]{\setlength{\rightskip}{0pt plus 5cm}enum {\bf symbol\-::e\-\_\-assoc}}}\label{structsymbol_a898f1247f875b32c8d38fcb533096ff7}
+\begin{Desc}
+\item[Enumerator]\par
+\begin{description}
+\index{L\-E\-F\-T@{L\-E\-F\-T}!symbol@{symbol}}\index{symbol@{symbol}!L\-E\-F\-T@{L\-E\-F\-T}}\item[{\em 
+\hypertarget{structsymbol_a898f1247f875b32c8d38fcb533096ff7a0144ac577a110a479a0932942b9b75a6}{L\-E\-F\-T}\label{structsymbol_a898f1247f875b32c8d38fcb533096ff7a0144ac577a110a479a0932942b9b75a6}
+}]\index{R\-I\-G\-H\-T@{R\-I\-G\-H\-T}!symbol@{symbol}}\index{symbol@{symbol}!R\-I\-G\-H\-T@{R\-I\-G\-H\-T}}\item[{\em 
+\hypertarget{structsymbol_a898f1247f875b32c8d38fcb533096ff7abc003df93b64dcd23cf6be03a9f0578c}{R\-I\-G\-H\-T}\label{structsymbol_a898f1247f875b32c8d38fcb533096ff7abc003df93b64dcd23cf6be03a9f0578c}
+}]\index{N\-O\-N\-E@{N\-O\-N\-E}!symbol@{symbol}}\index{symbol@{symbol}!N\-O\-N\-E@{N\-O\-N\-E}}\item[{\em 
+\hypertarget{structsymbol_a898f1247f875b32c8d38fcb533096ff7ac2a025171e72c2bfa515e05a10aaa2c6}{N\-O\-N\-E}\label{structsymbol_a898f1247f875b32c8d38fcb533096ff7ac2a025171e72c2bfa515e05a10aaa2c6}
+}]\index{U\-N\-K@{U\-N\-K}!symbol@{symbol}}\index{symbol@{symbol}!U\-N\-K@{U\-N\-K}}\item[{\em 
+\hypertarget{structsymbol_a898f1247f875b32c8d38fcb533096ff7ac96d39d8ea5dfa8635dd319df45e2424}{U\-N\-K}\label{structsymbol_a898f1247f875b32c8d38fcb533096ff7ac96d39d8ea5dfa8635dd319df45e2424}
+}]\end{description}
+\end{Desc}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{structsymbol_a127ca0c533713b891c419c179f7adbc1}{\index{symbol@{symbol}!assoc@{assoc}}
+\index{assoc@{assoc}!symbol@{symbol}}
+\subsubsection[{assoc}]{\setlength{\rightskip}{0pt plus 5cm}enum {\bf symbol\-::e\-\_\-assoc}  symbol\-::assoc}}\label{structsymbol_a127ca0c533713b891c419c179f7adbc1}
+
+
+Referenced by parseonetoken(), resolve\-\_\-conflict(), and Symbol\-\_\-new().
+
+\hypertarget{structsymbol_a357d5f2896188ae50564294cc294580f}{\index{symbol@{symbol}!datatype@{datatype}}
+\index{datatype@{datatype}!symbol@{symbol}}
+\subsubsection[{datatype}]{\setlength{\rightskip}{0pt plus 5cm}char$\ast$ symbol\-::datatype}}\label{structsymbol_a357d5f2896188ae50564294cc294580f}
+
+
+Referenced by parseonetoken(), print\-\_\-stack\-\_\-union(), and Symbol\-\_\-new().
+
+\hypertarget{structsymbol_ae2b28522ba863dcbf3669b507721f09a}{\index{symbol@{symbol}!destructor@{destructor}}
+\index{destructor@{destructor}!symbol@{symbol}}
+\subsubsection[{destructor}]{\setlength{\rightskip}{0pt plus 5cm}char$\ast$ symbol\-::destructor}}\label{structsymbol_ae2b28522ba863dcbf3669b507721f09a}
+
+
+Referenced by emit\-\_\-destructor\-\_\-code(), parseonetoken(), Report\-Table(), and Symbol\-\_\-new().
+
+\hypertarget{structsymbol_a1bff7c9f99ddfaf424749f0d4d81de55}{\index{symbol@{symbol}!destructorln@{destructorln}}
+\index{destructorln@{destructorln}!symbol@{symbol}}
+\subsubsection[{destructorln}]{\setlength{\rightskip}{0pt plus 5cm}int symbol\-::destructorln}}\label{structsymbol_a1bff7c9f99ddfaf424749f0d4d81de55}
+
+
+Referenced by emit\-\_\-destructor\-\_\-code(), and parseonetoken().
+
+\hypertarget{structsymbol_ae976c29bbbd980685a026b6e658c4dc3}{\index{symbol@{symbol}!dtnum@{dtnum}}
+\index{dtnum@{dtnum}!symbol@{symbol}}
+\subsubsection[{dtnum}]{\setlength{\rightskip}{0pt plus 5cm}int symbol\-::dtnum}}\label{structsymbol_ae976c29bbbd980685a026b6e658c4dc3}
+
+
+Referenced by emit\-\_\-code(), emit\-\_\-destructor\-\_\-code(), and print\-\_\-stack\-\_\-union().
+
+\hypertarget{structsymbol_a0a658f976944ccfbed28466b4eec903b}{\index{symbol@{symbol}!fallback@{fallback}}
+\index{fallback@{fallback}!symbol@{symbol}}
+\subsubsection[{fallback}]{\setlength{\rightskip}{0pt plus 5cm}struct {\bf symbol}$\ast$ symbol\-::fallback}}\label{structsymbol_a0a658f976944ccfbed28466b4eec903b}
+
+
+Referenced by parseonetoken(), Report\-Table(), and Symbol\-\_\-new().
+
+\hypertarget{structsymbol_a3a267e61976991b0371b307ac4110b26}{\index{symbol@{symbol}!firstset@{firstset}}
+\index{firstset@{firstset}!symbol@{symbol}}
+\subsubsection[{firstset}]{\setlength{\rightskip}{0pt plus 5cm}char$\ast$ symbol\-::firstset}}\label{structsymbol_a3a267e61976991b0371b307ac4110b26}
+
+
+Referenced by Configlist\-\_\-closure(), Find\-First\-Sets(), and Symbol\-\_\-new().
+
+\hypertarget{structsymbol_a1aa96687297a13a207e48b4d8f3ba78b}{\index{symbol@{symbol}!index@{index}}
+\index{index@{index}!symbol@{symbol}}
+\subsubsection[{index}]{\setlength{\rightskip}{0pt plus 5cm}int symbol\-::index}}\label{structsymbol_a1aa96687297a13a207e48b4d8f3ba78b}
+
+
+Referenced by actioncmp(), Configlist\-\_\-closure(), emit\-\_\-code(), Find\-First\-Sets(), main(), Report\-Table(), and Reprint().
+
+\hypertarget{structsymbol_af12ee4e73e9878f1e5243ad1d1d06987}{\index{symbol@{symbol}!lambda@{lambda}}
+\index{lambda@{lambda}!symbol@{symbol}}
+\subsubsection[{lambda}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Boolean} symbol\-::lambda}}\label{structsymbol_af12ee4e73e9878f1e5243ad1d1d06987}
+
+
+Referenced by Configlist\-\_\-closure(), Find\-First\-Sets(), and Symbol\-\_\-new().
+
+\hypertarget{structsymbol_a4fad8f11a2b2d8a21dcb4f5623d6c0fd}{\index{symbol@{symbol}!name@{name}}
+\index{name@{name}!symbol@{symbol}}
+\subsubsection[{name}]{\setlength{\rightskip}{0pt plus 5cm}char$\ast$ symbol\-::name}}\label{structsymbol_a4fad8f11a2b2d8a21dcb4f5623d6c0fd}
+
+
+Referenced by Configlist\-\_\-closure(), Config\-Print(), emit\-\_\-code(), Find\-States(), main(), Print\-Action(), Report\-Table(), Reprint(), and Symbol\-\_\-new().
+
+\hypertarget{structsymbol_a4058876fd1fcbafa71c0e52c518551ee}{\index{symbol@{symbol}!prec@{prec}}
+\index{prec@{prec}!symbol@{symbol}}
+\subsubsection[{prec}]{\setlength{\rightskip}{0pt plus 5cm}int symbol\-::prec}}\label{structsymbol_a4058876fd1fcbafa71c0e52c518551ee}
+
+
+Referenced by Find\-Rule\-Precedences(), parseonetoken(), resolve\-\_\-conflict(), and Symbol\-\_\-new().
+
+\hypertarget{structsymbol_a15c02dd88e3c480c918854efb5a803d6}{\index{symbol@{symbol}!rule@{rule}}
+\index{rule@{rule}!symbol@{symbol}}
+\subsubsection[{rule}]{\setlength{\rightskip}{0pt plus 5cm}struct {\bf rule}$\ast$ symbol\-::rule}}\label{structsymbol_a15c02dd88e3c480c918854efb5a803d6}
+
+
+Referenced by Configlist\-\_\-closure(), Find\-Actions(), Find\-States(), parseonetoken(), and Symbol\-\_\-new().
+
+\hypertarget{structsymbol_af7354af68ac51816c1823dd6172f9b54}{\index{symbol@{symbol}!type@{type}}
+\index{type@{type}!symbol@{symbol}}
+\subsubsection[{type}]{\setlength{\rightskip}{0pt plus 5cm}enum \{ ... \}   symbol\-::type}}\label{structsymbol_af7354af68ac51816c1823dd6172f9b54}
+
+
+Referenced by Configlist\-\_\-closure(), emit\-\_\-destructor\-\_\-code(), Find\-First\-Sets(), print\-\_\-stack\-\_\-union(), Report\-Table(), and Symbol\-\_\-new().
+
+
+
+The documentation for this struct was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{lemon_8c}{lemon.\-c}\end{DoxyCompactItemize}

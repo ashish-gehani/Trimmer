@@ -1,0 +1,111 @@
+\hypertarget{mod__ssi__expr_8c}{\section{mod\-\_\-ssi\-\_\-expr.\-c File Reference}
+\label{mod__ssi__expr_8c}\index{mod\-\_\-ssi\-\_\-expr.\-c@{mod\-\_\-ssi\-\_\-expr.\-c}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}buffer.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}log.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}mod\-\_\-ssi.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}mod\-\_\-ssi\-\_\-expr.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}mod\-\_\-ssi\-\_\-exprparser.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ctype.\-h$>$}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structssi__tokenizer__t}{ssi\-\_\-tokenizer\-\_\-t}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{structssi__val__t}{ssi\-\_\-val\-\_\-t} $\ast$ \hyperlink{mod__ssi__expr_8c_ae956023eeceba1260641937ec57ab8dd}{ssi\-\_\-val\-\_\-init} (void)
+\item 
+void \hyperlink{mod__ssi__expr_8c_a6adb4daab5fa2ccd6b6264939985d793}{ssi\-\_\-val\-\_\-free} (\hyperlink{structssi__val__t}{ssi\-\_\-val\-\_\-t} $\ast$s)
+\item 
+int \hyperlink{mod__ssi__expr_8c_a983ef1af339708044bac8e117606941e}{ssi\-\_\-val\-\_\-tobool} (\hyperlink{structssi__val__t}{ssi\-\_\-val\-\_\-t} $\ast$B)
+\item 
+static int \hyperlink{mod__ssi__expr_8c_a068a080caf2321cbbf42871d3b8cf185}{ssi\-\_\-expr\-\_\-tokenizer} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$p, \hyperlink{structssi__tokenizer__t}{ssi\-\_\-tokenizer\-\_\-t} $\ast$t, int $\ast$token\-\_\-id, \hyperlink{structbuffer}{buffer} $\ast$token)
+\item 
+int \hyperlink{mod__ssi__expr_8c_ae587290600d074048675179abad047f8}{ssi\-\_\-eval\-\_\-expr} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$p, const char $\ast$expr)
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\hypertarget{mod__ssi__expr_8c_ae587290600d074048675179abad047f8}{\index{mod\-\_\-ssi\-\_\-expr.\-c@{mod\-\_\-ssi\-\_\-expr.\-c}!ssi\-\_\-eval\-\_\-expr@{ssi\-\_\-eval\-\_\-expr}}
+\index{ssi\-\_\-eval\-\_\-expr@{ssi\-\_\-eval\-\_\-expr}!mod_ssi_expr.c@{mod\-\_\-ssi\-\_\-expr.\-c}}
+\subsubsection[{ssi\-\_\-eval\-\_\-expr}]{\setlength{\rightskip}{0pt plus 5cm}int ssi\-\_\-eval\-\_\-expr (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{p, }
+\item[{const char $\ast$}]{expr}
+\end{DoxyParamCaption}
+)}}\label{mod__ssi__expr_8c_ae587290600d074048675179abad047f8}
+
+
+References ssi\-\_\-val\-\_\-t\-::bo, buffer\-\_\-free(), buffer\-\_\-init(), force\-\_\-assert, ssi\-\_\-tokenizer\-\_\-t\-::in\-\_\-brace, ssi\-\_\-tokenizer\-\_\-t\-::in\-\_\-cond, ssi\-\_\-tokenizer\-\_\-t\-::in\-\_\-key, ssi\-\_\-tokenizer\-\_\-t\-::input, ssi\-\_\-tokenizer\-\_\-t\-::line\-\_\-pos, log\-\_\-error\-\_\-write(), ssi\-\_\-tokenizer\-\_\-t\-::offset, ssi\-\_\-ctx\-\_\-t\-::ok, ssi\-\_\-tokenizer\-\_\-t\-::size, ssi\-\_\-ctx\-\_\-t\-::srv, ssi\-\_\-expr\-\_\-tokenizer(), ssiexprparser(), ssiexprparser\-Alloc(), ssiexprparser\-Free(), and ssi\-\_\-ctx\-\_\-t\-::val.
+
+
+
+Referenced by process\-\_\-ssi\-\_\-stmt().
+
+\hypertarget{mod__ssi__expr_8c_a068a080caf2321cbbf42871d3b8cf185}{\index{mod\-\_\-ssi\-\_\-expr.\-c@{mod\-\_\-ssi\-\_\-expr.\-c}!ssi\-\_\-expr\-\_\-tokenizer@{ssi\-\_\-expr\-\_\-tokenizer}}
+\index{ssi\-\_\-expr\-\_\-tokenizer@{ssi\-\_\-expr\-\_\-tokenizer}!mod_ssi_expr.c@{mod\-\_\-ssi\-\_\-expr.\-c}}
+\subsubsection[{ssi\-\_\-expr\-\_\-tokenizer}]{\setlength{\rightskip}{0pt plus 5cm}static int ssi\-\_\-expr\-\_\-tokenizer (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{p, }
+\item[{{\bf ssi\-\_\-tokenizer\-\_\-t} $\ast$}]{t, }
+\item[{int $\ast$}]{token\-\_\-id, }
+\item[{{\bf buffer} $\ast$}]{token}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__ssi__expr_8c_a068a080caf2321cbbf42871d3b8cf185}
+
+
+References array\-\_\-get\-\_\-element(), buffer\-\_\-copy\-\_\-buffer(), buffer\-\_\-copy\-\_\-string\-\_\-len(), C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, ssi\-\_\-tokenizer\-\_\-t\-::in\-\_\-brace, ssi\-\_\-tokenizer\-\_\-t\-::input, ssi\-\_\-tokenizer\-\_\-t\-::line\-\_\-pos, log\-\_\-error\-\_\-write(), ssi\-\_\-tokenizer\-\_\-t\-::offset, buffer\-::ptr, ssi\-\_\-tokenizer\-\_\-t\-::size, handler\-\_\-ctx\-::ssi\-\_\-cgi\-\_\-env, handler\-\_\-ctx\-::ssi\-\_\-vars, T\-K\-\_\-\-A\-N\-D, T\-K\-\_\-\-E\-Q, T\-K\-\_\-\-G\-E, T\-K\-\_\-\-G\-T, T\-K\-\_\-\-L\-E, T\-K\-\_\-\-L\-P\-A\-R\-A\-N, T\-K\-\_\-\-L\-T, T\-K\-\_\-\-N\-E, T\-K\-\_\-\-N\-O\-T, T\-K\-\_\-\-O\-R, T\-K\-\_\-\-R\-P\-A\-R\-A\-N, T\-K\-\_\-\-V\-A\-L\-U\-E, U\-N\-U\-S\-E\-D, and data\-\_\-string\-::value.
+
+
+
+Referenced by ssi\-\_\-eval\-\_\-expr().
+
+\hypertarget{mod__ssi__expr_8c_a6adb4daab5fa2ccd6b6264939985d793}{\index{mod\-\_\-ssi\-\_\-expr.\-c@{mod\-\_\-ssi\-\_\-expr.\-c}!ssi\-\_\-val\-\_\-free@{ssi\-\_\-val\-\_\-free}}
+\index{ssi\-\_\-val\-\_\-free@{ssi\-\_\-val\-\_\-free}!mod_ssi_expr.c@{mod\-\_\-ssi\-\_\-expr.\-c}}
+\subsubsection[{ssi\-\_\-val\-\_\-free}]{\setlength{\rightskip}{0pt plus 5cm}void ssi\-\_\-val\-\_\-free (
+\begin{DoxyParamCaption}
+\item[{{\bf ssi\-\_\-val\-\_\-t} $\ast$}]{s}
+\end{DoxyParamCaption}
+)}}\label{mod__ssi__expr_8c_a6adb4daab5fa2ccd6b6264939985d793}
+
+
+References buffer\-\_\-free(), and ssi\-\_\-val\-\_\-t\-::str.
+
+
+
+Referenced by yy\-\_\-reduce().
+
+\hypertarget{mod__ssi__expr_8c_ae956023eeceba1260641937ec57ab8dd}{\index{mod\-\_\-ssi\-\_\-expr.\-c@{mod\-\_\-ssi\-\_\-expr.\-c}!ssi\-\_\-val\-\_\-init@{ssi\-\_\-val\-\_\-init}}
+\index{ssi\-\_\-val\-\_\-init@{ssi\-\_\-val\-\_\-init}!mod_ssi_expr.c@{mod\-\_\-ssi\-\_\-expr.\-c}}
+\subsubsection[{ssi\-\_\-val\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ssi\-\_\-val\-\_\-t}$\ast$ ssi\-\_\-val\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__ssi__expr_8c_ae956023eeceba1260641937ec57ab8dd}
+
+
+Referenced by yy\-\_\-reduce().
+
+\hypertarget{mod__ssi__expr_8c_a983ef1af339708044bac8e117606941e}{\index{mod\-\_\-ssi\-\_\-expr.\-c@{mod\-\_\-ssi\-\_\-expr.\-c}!ssi\-\_\-val\-\_\-tobool@{ssi\-\_\-val\-\_\-tobool}}
+\index{ssi\-\_\-val\-\_\-tobool@{ssi\-\_\-val\-\_\-tobool}!mod_ssi_expr.c@{mod\-\_\-ssi\-\_\-expr.\-c}}
+\subsubsection[{ssi\-\_\-val\-\_\-tobool}]{\setlength{\rightskip}{0pt plus 5cm}int ssi\-\_\-val\-\_\-tobool (
+\begin{DoxyParamCaption}
+\item[{{\bf ssi\-\_\-val\-\_\-t} $\ast$}]{B}
+\end{DoxyParamCaption}
+)}}\label{mod__ssi__expr_8c_a983ef1af339708044bac8e117606941e}
+
+
+References ssi\-\_\-val\-\_\-t\-::bo, buffer\-\_\-string\-\_\-is\-\_\-empty(), ssi\-\_\-val\-\_\-t\-::str, and ssi\-\_\-val\-\_\-t\-::type.
+
+
+
+Referenced by yy\-\_\-reduce().
+

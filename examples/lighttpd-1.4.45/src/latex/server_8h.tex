@@ -1,0 +1,46 @@
+\hypertarget{server_8h}{\section{server.\-h File Reference}
+\label{server_8h}\index{server.\-h@{server.\-h}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}base.\-h\char`\"{}}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \hyperlink{server_8h_acaa020a7b9cd23f6701fbad442e31702}{config\-\_\-read} (\hyperlink{structserver}{server} $\ast$srv, const char $\ast$fn)
+\item 
+int \hyperlink{server_8h_ab3f0880664ac7c51ea7ba0a0dbff2394}{config\-\_\-set\-\_\-defaults} (\hyperlink{structserver}{server} $\ast$srv)
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\hypertarget{server_8h_acaa020a7b9cd23f6701fbad442e31702}{\index{server.\-h@{server.\-h}!config\-\_\-read@{config\-\_\-read}}
+\index{config\-\_\-read@{config\-\_\-read}!server.h@{server.\-h}}
+\subsubsection[{config\-\_\-read}]{\setlength{\rightskip}{0pt plus 5cm}int config\-\_\-read (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{const char $\ast$}]{fn}
+\end{DoxyParamCaption}
+)}}\label{server_8h_acaa020a7b9cd23f6701fbad442e31702}
+
+
+References config\-\_\-t\-::all\-\_\-configs, array\-\_\-insert\-\_\-unique(), config\-\_\-t\-::basedir, buffer\-\_\-commit(), buffer\-\_\-copy\-\_\-string\-\_\-len(), buffer\-\_\-free(), buffer\-\_\-init\-\_\-string(), buffer\-\_\-string\-\_\-prepare\-\_\-copy(), server\-::config\-\_\-context, config\-\_\-insert(), config\-\_\-parse\-\_\-file\-\_\-stream(), config\-\_\-t\-::configs\-\_\-stack, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, context\-\_\-free(), context\-\_\-init(), data\-\_\-config\-::context\-\_\-ndx, config\-\_\-t\-::current, data\-\_\-config\-\_\-init(), data\-\_\-integer\-\_\-init(), data\-\_\-string\-\_\-init(), force\-\_\-assert, config\-\_\-t\-::ok, buffer\-::ptr, buffer\-::size, array\-::used, data\-\_\-string\-::value, data\-\_\-config\-::value, and data\-\_\-integer\-::value.
+
+
+
+Referenced by main().
+
+\hypertarget{server_8h_ab3f0880664ac7c51ea7ba0a0dbff2394}{\index{server.\-h@{server.\-h}!config\-\_\-set\-\_\-defaults@{config\-\_\-set\-\_\-defaults}}
+\index{config\-\_\-set\-\_\-defaults@{config\-\_\-set\-\_\-defaults}!server.h@{server.\-h}}
+\subsubsection[{config\-\_\-set\-\_\-defaults}]{\setlength{\rightskip}{0pt plus 5cm}int config\-\_\-set\-\_\-defaults (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv}
+\end{DoxyParamCaption}
+)}}\label{server_8h_ab3f0880664ac7c51ea7ba0a0dbff2394}
+
+
+References array\-\_\-insert\-\_\-unique(), buffer\-\_\-append\-\_\-slash(), buffer\-\_\-append\-\_\-string\-\_\-buffer(), buffer\-\_\-copy\-\_\-buffer(), buffer\-\_\-copy\-\_\-string(), buffer\-\_\-is\-\_\-equal(), buffer\-\_\-reset(), buffer\-\_\-string\-\_\-is\-\_\-empty(), buffer\-\_\-string\-\_\-length(), buffer\-\_\-string\-\_\-set\-\_\-length(), buffer\-\_\-to\-\_\-lower(), buffer\-\_\-to\-\_\-upper(), server\-\_\-config\-::changeroot, chunkqueue\-\_\-set\-\_\-tempdirs\-\_\-default(), server\-::config\-\_\-storage, array\-::data, data\-\_\-string\-\_\-init(), specific\-\_\-config\-::document\-\_\-root, server\-\_\-config\-::event\-\_\-handler, server\-::event\-\_\-handler, F\-D\-E\-V\-E\-N\-T\-\_\-\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-R\-E\-E\-B\-S\-D\-\_\-\-K\-Q\-U\-E\-U\-E, F\-D\-E\-V\-E\-N\-T\-\_\-\-H\-A\-N\-D\-L\-E\-R\-\_\-\-L\-I\-B\-E\-V, F\-D\-E\-V\-E\-N\-T\-\_\-\-H\-A\-N\-D\-L\-E\-R\-\_\-\-L\-I\-N\-U\-X\-\_\-\-S\-Y\-S\-E\-P\-O\-L\-L, F\-D\-E\-V\-E\-N\-T\-\_\-\-H\-A\-N\-D\-L\-E\-R\-\_\-\-P\-O\-L\-L, F\-D\-E\-V\-E\-N\-T\-\_\-\-H\-A\-N\-D\-L\-E\-R\-\_\-\-S\-E\-L\-E\-C\-T, F\-D\-E\-V\-E\-N\-T\-\_\-\-H\-A\-N\-D\-L\-E\-R\-\_\-\-S\-O\-L\-A\-R\-I\-S\-\_\-\-D\-E\-V\-P\-O\-L\-L, F\-D\-E\-V\-E\-N\-T\-\_\-\-H\-A\-N\-D\-L\-E\-R\-\_\-\-S\-O\-L\-A\-R\-I\-S\-\_\-\-P\-O\-R\-T, F\-D\-E\-V\-E\-N\-T\-\_\-\-H\-A\-N\-D\-L\-E\-R\-\_\-\-U\-N\-S\-E\-T, specific\-\_\-config\-::force\-\_\-lowercase\-\_\-filenames, log\-\_\-error\-\_\-write(), server\-\_\-config\-::port, buffer\-::ptr, server\-::srvconf, specific\-\_\-config\-::ssl\-\_\-enabled, specific\-\_\-config\-::ssl\-\_\-pemfile, server\-::tmp\-\_\-buf, server\-\_\-config\-::upload\-\_\-temp\-\_\-file\-\_\-size, server\-\_\-config\-::upload\-\_\-tempdirs, array\-::used, and data\-\_\-string\-::value.
+
+
+
+Referenced by main().
+

@@ -1,0 +1,70 @@
+\hypertarget{mod__magnet__cache_8h}{\section{mod\-\_\-magnet\-\_\-cache.\-h File Reference}
+\label{mod__magnet__cache_8h}\index{mod\-\_\-magnet\-\_\-cache.\-h@{mod\-\_\-magnet\-\_\-cache.\-h}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}buffer.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}base.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$lua.\-h$>$}\\*
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structscript}{script}
+\item 
+struct \hyperlink{structscript__cache}{script\-\_\-cache}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{structscript__cache}{script\-\_\-cache} $\ast$ \hyperlink{mod__magnet__cache_8h_a7629b51fc933bdc44bbd031a96002735}{script\-\_\-cache\-\_\-init} (void)
+\item 
+void \hyperlink{mod__magnet__cache_8h_a5d355bd10c6f35214dce732a9e2f5be3}{script\-\_\-cache\-\_\-free} (\hyperlink{structscript__cache}{script\-\_\-cache} $\ast$cache)
+\item 
+lua\-\_\-\-State $\ast$ \hyperlink{mod__magnet__cache_8h_a455bc72fc67e7b88846727e71983d55d}{script\-\_\-cache\-\_\-get\-\_\-script} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structscript__cache}{script\-\_\-cache} $\ast$cache, \hyperlink{structbuffer}{buffer} $\ast$name)
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\hypertarget{mod__magnet__cache_8h_a5d355bd10c6f35214dce732a9e2f5be3}{\index{mod\-\_\-magnet\-\_\-cache.\-h@{mod\-\_\-magnet\-\_\-cache.\-h}!script\-\_\-cache\-\_\-free@{script\-\_\-cache\-\_\-free}}
+\index{script\-\_\-cache\-\_\-free@{script\-\_\-cache\-\_\-free}!mod_magnet_cache.h@{mod\-\_\-magnet\-\_\-cache.\-h}}
+\subsubsection[{script\-\_\-cache\-\_\-free}]{\setlength{\rightskip}{0pt plus 5cm}void script\-\_\-cache\-\_\-free (
+\begin{DoxyParamCaption}
+\item[{{\bf script\-\_\-cache} $\ast$}]{cache}
+\end{DoxyParamCaption}
+)}}\label{mod__magnet__cache_8h_a5d355bd10c6f35214dce732a9e2f5be3}
+
+
+References script\-\_\-cache\-::ptr, script\-\_\-free(), and script\-\_\-cache\-::used.
+
+
+
+Referenced by F\-R\-E\-E\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__magnet__cache_8h_a455bc72fc67e7b88846727e71983d55d}{\index{mod\-\_\-magnet\-\_\-cache.\-h@{mod\-\_\-magnet\-\_\-cache.\-h}!script\-\_\-cache\-\_\-get\-\_\-script@{script\-\_\-cache\-\_\-get\-\_\-script}}
+\index{script\-\_\-cache\-\_\-get\-\_\-script@{script\-\_\-cache\-\_\-get\-\_\-script}!mod_magnet_cache.h@{mod\-\_\-magnet\-\_\-cache.\-h}}
+\subsubsection[{script\-\_\-cache\-\_\-get\-\_\-script}]{\setlength{\rightskip}{0pt plus 5cm}lua\-\_\-\-State$\ast$ script\-\_\-cache\-\_\-get\-\_\-script (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf script\-\_\-cache} $\ast$}]{cache, }
+\item[{{\bf buffer} $\ast$}]{name}
+\end{DoxyParamCaption}
+)}}\label{mod__magnet__cache_8h_a455bc72fc67e7b88846727e71983d55d}
+
+
+References buffer\-\_\-copy\-\_\-buffer(), buffer\-\_\-is\-\_\-equal(), script\-::etag, stat\-\_\-cache\-\_\-entry\-::etag, force\-\_\-assert, H\-A\-N\-D\-L\-E\-R\-\_\-\-E\-R\-R\-O\-R, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, script\-::\-L, script\-::last\-\_\-used, script\-::name, script\-\_\-cache\-::ptr, buffer\-::ptr, script\-\_\-init(), script\-\_\-cache\-::size, stat\-\_\-cache\-\_\-get\-\_\-entry(), and script\-\_\-cache\-::used.
+
+
+
+Referenced by magnet\-\_\-attract().
+
+\hypertarget{mod__magnet__cache_8h_a7629b51fc933bdc44bbd031a96002735}{\index{mod\-\_\-magnet\-\_\-cache.\-h@{mod\-\_\-magnet\-\_\-cache.\-h}!script\-\_\-cache\-\_\-init@{script\-\_\-cache\-\_\-init}}
+\index{script\-\_\-cache\-\_\-init@{script\-\_\-cache\-\_\-init}!mod_magnet_cache.h@{mod\-\_\-magnet\-\_\-cache.\-h}}
+\subsubsection[{script\-\_\-cache\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}{\bf script\-\_\-cache}$\ast$ script\-\_\-cache\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__magnet__cache_8h_a7629b51fc933bdc44bbd031a96002735}
+
+
+Referenced by I\-N\-I\-T\-\_\-\-F\-U\-N\-C().
+

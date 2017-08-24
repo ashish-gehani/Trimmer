@@ -1,0 +1,109 @@
+\hypertarget{splaytree_8h}{\section{splaytree.\-h File Reference}
+\label{splaytree_8h}\index{splaytree.\-h@{splaytree.\-h}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structtree__node}{tree\-\_\-node}
+\end{DoxyCompactItemize}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{splaytree_8h_a697dadc0c8fc8d8ade535682ab785361}{splaytree\-\_\-size}(x)~(((x)==N\-U\-L\-L) ? 0 \-: ((x)-\/$>$size))
+\end{DoxyCompactItemize}
+\subsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef struct \hyperlink{structtree__node}{tree\-\_\-node} \hyperlink{splaytree_8h_ab42fb7db89d33ad5cdd866d99476b0e6}{splay\-\_\-tree}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{splaytree_8h_ab42fb7db89d33ad5cdd866d99476b0e6}{splay\-\_\-tree} $\ast$ \hyperlink{splaytree_8h_aae7d9a464c41f3d7fb9569377612f3a3}{splaytree\-\_\-splay} (\hyperlink{splaytree_8h_ab42fb7db89d33ad5cdd866d99476b0e6}{splay\-\_\-tree} $\ast$t, int key)
+\item 
+\hyperlink{splaytree_8h_ab42fb7db89d33ad5cdd866d99476b0e6}{splay\-\_\-tree} $\ast$ \hyperlink{splaytree_8h_a2f18bb355cf93a71ea8a20efb562966e}{splaytree\-\_\-insert} (\hyperlink{splaytree_8h_ab42fb7db89d33ad5cdd866d99476b0e6}{splay\-\_\-tree} $\ast$t, int key, void $\ast$data)
+\item 
+\hyperlink{splaytree_8h_ab42fb7db89d33ad5cdd866d99476b0e6}{splay\-\_\-tree} $\ast$ \hyperlink{splaytree_8h_ae9ae4e245dc3ed8417ce8f50e71947a0}{splaytree\-\_\-delete} (\hyperlink{splaytree_8h_ab42fb7db89d33ad5cdd866d99476b0e6}{splay\-\_\-tree} $\ast$t, int key)
+\item 
+\hyperlink{splaytree_8h_ab42fb7db89d33ad5cdd866d99476b0e6}{splay\-\_\-tree} $\ast$ \hyperlink{splaytree_8h_a74321fd50785ecc3ed9e2eed9855758c}{splaytree\-\_\-size} (\hyperlink{splaytree_8h_ab42fb7db89d33ad5cdd866d99476b0e6}{splay\-\_\-tree} $\ast$t)
+\end{DoxyCompactItemize}
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{splaytree_8h_a697dadc0c8fc8d8ade535682ab785361}{\index{splaytree.\-h@{splaytree.\-h}!splaytree\-\_\-size@{splaytree\-\_\-size}}
+\index{splaytree\-\_\-size@{splaytree\-\_\-size}!splaytree.h@{splaytree.\-h}}
+\subsubsection[{splaytree\-\_\-size}]{\setlength{\rightskip}{0pt plus 5cm}\#define splaytree\-\_\-size(
+\begin{DoxyParamCaption}
+\item[{}]{x}
+\end{DoxyParamCaption}
+)~(((x)==N\-U\-L\-L) ? 0 \-: ((x)-\/$>$size))}}\label{splaytree_8h_a697dadc0c8fc8d8ade535682ab785361}
+
+
+\subsection{Typedef Documentation}
+\hypertarget{splaytree_8h_ab42fb7db89d33ad5cdd866d99476b0e6}{\index{splaytree.\-h@{splaytree.\-h}!splay\-\_\-tree@{splay\-\_\-tree}}
+\index{splay\-\_\-tree@{splay\-\_\-tree}!splaytree.h@{splaytree.\-h}}
+\subsubsection[{splay\-\_\-tree}]{\setlength{\rightskip}{0pt plus 5cm}typedef struct {\bf tree\-\_\-node}  {\bf splay\-\_\-tree}}}\label{splaytree_8h_ab42fb7db89d33ad5cdd866d99476b0e6}
+
+
+\subsection{Function Documentation}
+\hypertarget{splaytree_8h_ae9ae4e245dc3ed8417ce8f50e71947a0}{\index{splaytree.\-h@{splaytree.\-h}!splaytree\-\_\-delete@{splaytree\-\_\-delete}}
+\index{splaytree\-\_\-delete@{splaytree\-\_\-delete}!splaytree.h@{splaytree.\-h}}
+\subsubsection[{splaytree\-\_\-delete}]{\setlength{\rightskip}{0pt plus 5cm}{\bf splay\-\_\-tree}$\ast$ splaytree\-\_\-delete (
+\begin{DoxyParamCaption}
+\item[{{\bf splay\-\_\-tree} $\ast$}]{t, }
+\item[{int}]{key}
+\end{DoxyParamCaption}
+)}}\label{splaytree_8h_ae9ae4e245dc3ed8417ce8f50e71947a0}
+
+
+References compare, tree\-\_\-node\-::key, tree\-\_\-node\-::left, tree\-\_\-node\-::right, tree\-\_\-node\-::size, and splaytree\-\_\-splay().
+
+
+
+Referenced by stat\-\_\-cache\-\_\-free(), and stat\-\_\-cache\-\_\-trigger\-\_\-cleanup().
+
+\hypertarget{splaytree_8h_a2f18bb355cf93a71ea8a20efb562966e}{\index{splaytree.\-h@{splaytree.\-h}!splaytree\-\_\-insert@{splaytree\-\_\-insert}}
+\index{splaytree\-\_\-insert@{splaytree\-\_\-insert}!splaytree.h@{splaytree.\-h}}
+\subsubsection[{splaytree\-\_\-insert}]{\setlength{\rightskip}{0pt plus 5cm}{\bf splay\-\_\-tree}$\ast$ splaytree\-\_\-insert (
+\begin{DoxyParamCaption}
+\item[{{\bf splay\-\_\-tree} $\ast$}]{t, }
+\item[{int}]{key, }
+\item[{void $\ast$}]{data}
+\end{DoxyParamCaption}
+)}}\label{splaytree_8h_a2f18bb355cf93a71ea8a20efb562966e}
+
+
+References assert, compare, tree\-\_\-node\-::key, tree\-\_\-node\-::left, node\-\_\-size, tree\-\_\-node\-::right, tree\-\_\-node\-::size, and splaytree\-\_\-splay().
+
+
+
+Referenced by stat\-\_\-cache\-\_\-get\-\_\-entry().
+
+\hypertarget{splaytree_8h_a74321fd50785ecc3ed9e2eed9855758c}{\index{splaytree.\-h@{splaytree.\-h}!splaytree\-\_\-size@{splaytree\-\_\-size}}
+\index{splaytree\-\_\-size@{splaytree\-\_\-size}!splaytree.h@{splaytree.\-h}}
+\subsubsection[{splaytree\-\_\-size}]{\setlength{\rightskip}{0pt plus 5cm}{\bf splay\-\_\-tree}$\ast$ splaytree\-\_\-size (
+\begin{DoxyParamCaption}
+\item[{{\bf splay\-\_\-tree} $\ast$}]{t}
+\end{DoxyParamCaption}
+)}}\label{splaytree_8h_a74321fd50785ecc3ed9e2eed9855758c}
+
+
+Referenced by stat\-\_\-cache\-\_\-free(), stat\-\_\-cache\-\_\-get\-\_\-entry(), and stat\-\_\-cache\-\_\-trigger\-\_\-cleanup().
+
+\hypertarget{splaytree_8h_aae7d9a464c41f3d7fb9569377612f3a3}{\index{splaytree.\-h@{splaytree.\-h}!splaytree\-\_\-splay@{splaytree\-\_\-splay}}
+\index{splaytree\-\_\-splay@{splaytree\-\_\-splay}!splaytree.h@{splaytree.\-h}}
+\subsubsection[{splaytree\-\_\-splay}]{\setlength{\rightskip}{0pt plus 5cm}{\bf splay\-\_\-tree}$\ast$ splaytree\-\_\-splay (
+\begin{DoxyParamCaption}
+\item[{{\bf splay\-\_\-tree} $\ast$}]{t, }
+\item[{int}]{key}
+\end{DoxyParamCaption}
+)}}\label{splaytree_8h_aae7d9a464c41f3d7fb9569377612f3a3}
+
+
+References compare, tree\-\_\-node\-::key, tree\-\_\-node\-::left, node\-\_\-size, tree\-\_\-node\-::right, and tree\-\_\-node\-::size.
+
+
+
+Referenced by splaytree\-\_\-delete(), splaytree\-\_\-insert(), stat\-\_\-cache\-\_\-get\-\_\-entry(), and stat\-\_\-cache\-\_\-trigger\-\_\-cleanup().
+

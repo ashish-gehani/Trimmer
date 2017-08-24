@@ -1,0 +1,167 @@
+\hypertarget{network__backends_8h}{\section{network\-\_\-backends.\-h File Reference}
+\label{network__backends_8h}\index{network\-\_\-backends.\-h@{network\-\_\-backends.\-h}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}settings.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$sys/types.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}base.\-h\char`\"{}}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \hyperlink{network__backends_8h_ac79bbc93036d92f869f4ee670a698c1e}{network\-\_\-write\-\_\-chunkqueue\-\_\-write} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, int fd, \hyperlink{structchunkqueue}{chunkqueue} $\ast$cq, off\-\_\-t max\-\_\-bytes)
+\item 
+int \hyperlink{network__backends_8h_aca66b5bcdb2e5f3d6d27a24a40e0f061}{network\-\_\-write\-\_\-mem\-\_\-chunk} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, int fd, \hyperlink{structchunkqueue}{chunkqueue} $\ast$cq, off\-\_\-t $\ast$p\-\_\-max\-\_\-bytes)
+\item 
+static int \hyperlink{network__backends_8h_aced3f29fc6fed6264d34d6c0b18213bb}{network\-\_\-writev\-\_\-mem\-\_\-chunks} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, int fd, \hyperlink{structchunkqueue}{chunkqueue} $\ast$cq, off\-\_\-t $\ast$p\-\_\-max\-\_\-bytes)
+\item 
+int \hyperlink{network__backends_8h_adad00903488b2cb551b14af39a58a280}{network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-no\-\_\-mmap} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, int fd, \hyperlink{structchunkqueue}{chunkqueue} $\ast$cq, off\-\_\-t $\ast$p\-\_\-max\-\_\-bytes)
+\item 
+off\-\_\-t \hyperlink{network__backends_8h_a4017bd8ad088da5f304fae8acdaa51fe}{mmap\-\_\-align\-\_\-offset} (off\-\_\-t start)
+\item 
+static int \hyperlink{network__backends_8h_ac4621e98733a34d79f80b2f4cdb2c5f5}{network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-mmap} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, int fd, \hyperlink{structchunkqueue}{chunkqueue} $\ast$cq, off\-\_\-t $\ast$p\-\_\-max\-\_\-bytes)
+\item 
+static int \hyperlink{network__backends_8h_ae4faa7585934e2dc3ea06383d42f0818}{network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-sendfile} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, int fd, \hyperlink{structchunkqueue}{chunkqueue} $\ast$cq, off\-\_\-t $\ast$p\-\_\-max\-\_\-bytes)
+\item 
+int \hyperlink{network__backends_8h_a679364a10d948acbd73ce9ebb85e5f94}{network\-\_\-open\-\_\-file\-\_\-chunk} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structchunkqueue}{chunkqueue} $\ast$cq)
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\hypertarget{network__backends_8h_a4017bd8ad088da5f304fae8acdaa51fe}{\index{network\-\_\-backends.\-h@{network\-\_\-backends.\-h}!mmap\-\_\-align\-\_\-offset@{mmap\-\_\-align\-\_\-offset}}
+\index{mmap\-\_\-align\-\_\-offset@{mmap\-\_\-align\-\_\-offset}!network_backends.h@{network\-\_\-backends.\-h}}
+\subsubsection[{mmap\-\_\-align\-\_\-offset}]{\setlength{\rightskip}{0pt plus 5cm}off\-\_\-t mmap\-\_\-align\-\_\-offset (
+\begin{DoxyParamCaption}
+\item[{off\-\_\-t}]{start}
+\end{DoxyParamCaption}
+)}}\label{network__backends_8h_a4017bd8ad088da5f304fae8acdaa51fe}
+
+
+References force\-\_\-assert, and M\-M\-A\-P\-\_\-\-C\-H\-U\-N\-K\-\_\-\-S\-I\-Z\-E.
+
+\hypertarget{network__backends_8h_a679364a10d948acbd73ce9ebb85e5f94}{\index{network\-\_\-backends.\-h@{network\-\_\-backends.\-h}!network\-\_\-open\-\_\-file\-\_\-chunk@{network\-\_\-open\-\_\-file\-\_\-chunk}}
+\index{network\-\_\-open\-\_\-file\-\_\-chunk@{network\-\_\-open\-\_\-file\-\_\-chunk}!network_backends.h@{network\-\_\-backends.\-h}}
+\subsubsection[{network\-\_\-open\-\_\-file\-\_\-chunk}]{\setlength{\rightskip}{0pt plus 5cm}int network\-\_\-open\-\_\-file\-\_\-chunk (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf chunkqueue} $\ast$}]{cq}
+\end{DoxyParamCaption}
+)}}\label{network__backends_8h_a679364a10d948acbd73ce9ebb85e5f94}
+
+
+References chunk\-::fd, fdevent\-\_\-open\-\_\-cloexec(), chunk\-::file, chunkqueue\-::first, force\-\_\-assert, chunk\-::is\-\_\-temp, chunk\-::length, log\-\_\-error\-\_\-write(), chunk\-::name, chunk\-::offset, buffer\-::ptr, chunk\-::start, chunk\-::type, and U\-N\-U\-S\-E\-D.
+
+
+
+Referenced by network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-no\-\_\-mmap().
+
+\hypertarget{network__backends_8h_ac79bbc93036d92f869f4ee670a698c1e}{\index{network\-\_\-backends.\-h@{network\-\_\-backends.\-h}!network\-\_\-write\-\_\-chunkqueue\-\_\-write@{network\-\_\-write\-\_\-chunkqueue\-\_\-write}}
+\index{network\-\_\-write\-\_\-chunkqueue\-\_\-write@{network\-\_\-write\-\_\-chunkqueue\-\_\-write}!network_backends.h@{network\-\_\-backends.\-h}}
+\subsubsection[{network\-\_\-write\-\_\-chunkqueue\-\_\-write}]{\setlength{\rightskip}{0pt plus 5cm}int network\-\_\-write\-\_\-chunkqueue\-\_\-write (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{int}]{fd, }
+\item[{{\bf chunkqueue} $\ast$}]{cq, }
+\item[{off\-\_\-t}]{max\-\_\-bytes}
+\end{DoxyParamCaption}
+)}}\label{network__backends_8h_ac79bbc93036d92f869f4ee670a698c1e}
+
+
+References chunkqueue\-::first, network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-mmap(), network\-\_\-write\-\_\-mem\-\_\-chunk(), and chunk\-::type.
+
+
+
+Referenced by network\-\_\-init().
+
+\hypertarget{network__backends_8h_ac4621e98733a34d79f80b2f4cdb2c5f5}{\index{network\-\_\-backends.\-h@{network\-\_\-backends.\-h}!network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-mmap@{network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-mmap}}
+\index{network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-mmap@{network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-mmap}!network_backends.h@{network\-\_\-backends.\-h}}
+\subsubsection[{network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-mmap}]{\setlength{\rightskip}{0pt plus 5cm}static int network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-mmap (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{int}]{fd, }
+\item[{{\bf chunkqueue} $\ast$}]{cq, }
+\item[{off\-\_\-t $\ast$}]{p\-\_\-max\-\_\-bytes}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{network__backends_8h_ac4621e98733a34d79f80b2f4cdb2c5f5}
+
+
+References network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-no\-\_\-mmap().
+
+
+
+Referenced by network\-\_\-write\-\_\-chunkqueue\-\_\-write(), network\-\_\-write\-\_\-chunkqueue\-\_\-writev(), and network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-sendfile().
+
+\hypertarget{network__backends_8h_adad00903488b2cb551b14af39a58a280}{\index{network\-\_\-backends.\-h@{network\-\_\-backends.\-h}!network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-no\-\_\-mmap@{network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-no\-\_\-mmap}}
+\index{network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-no\-\_\-mmap@{network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-no\-\_\-mmap}!network_backends.h@{network\-\_\-backends.\-h}}
+\subsubsection[{network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-no\-\_\-mmap}]{\setlength{\rightskip}{0pt plus 5cm}int network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-no\-\_\-mmap (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{int}]{fd, }
+\item[{{\bf chunkqueue} $\ast$}]{cq, }
+\item[{off\-\_\-t $\ast$}]{p\-\_\-max\-\_\-bytes}
+\end{DoxyParamCaption}
+)}}\label{network__backends_8h_adad00903488b2cb551b14af39a58a280}
+
+
+References buffer\-\_\-string\-\_\-prepare\-\_\-copy(), chunkqueue\-\_\-mark\-\_\-written(), chunkqueue\-\_\-remove\-\_\-finished\-\_\-chunks(), chunk\-::fd, chunk\-::file, chunkqueue\-::first, force\-\_\-assert, chunk\-::length, log\-\_\-error\-\_\-write(), network\-\_\-open\-\_\-file\-\_\-chunk(), chunk\-::offset, buffer\-::ptr, chunk\-::start, server\-::tmp\-\_\-buf, and chunk\-::type.
+
+
+
+Referenced by network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-mmap().
+
+\hypertarget{network__backends_8h_ae4faa7585934e2dc3ea06383d42f0818}{\index{network\-\_\-backends.\-h@{network\-\_\-backends.\-h}!network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-sendfile@{network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-sendfile}}
+\index{network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-sendfile@{network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-sendfile}!network_backends.h@{network\-\_\-backends.\-h}}
+\subsubsection[{network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-sendfile}]{\setlength{\rightskip}{0pt plus 5cm}static int network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-sendfile (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{int}]{fd, }
+\item[{{\bf chunkqueue} $\ast$}]{cq, }
+\item[{off\-\_\-t $\ast$}]{p\-\_\-max\-\_\-bytes}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{network__backends_8h_ae4faa7585934e2dc3ea06383d42f0818}
+
+
+References network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-mmap().
+
+\hypertarget{network__backends_8h_aca66b5bcdb2e5f3d6d27a24a40e0f061}{\index{network\-\_\-backends.\-h@{network\-\_\-backends.\-h}!network\-\_\-write\-\_\-mem\-\_\-chunk@{network\-\_\-write\-\_\-mem\-\_\-chunk}}
+\index{network\-\_\-write\-\_\-mem\-\_\-chunk@{network\-\_\-write\-\_\-mem\-\_\-chunk}!network_backends.h@{network\-\_\-backends.\-h}}
+\subsubsection[{network\-\_\-write\-\_\-mem\-\_\-chunk}]{\setlength{\rightskip}{0pt plus 5cm}int network\-\_\-write\-\_\-mem\-\_\-chunk (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{int}]{fd, }
+\item[{{\bf chunkqueue} $\ast$}]{cq, }
+\item[{off\-\_\-t $\ast$}]{p\-\_\-max\-\_\-bytes}
+\end{DoxyParamCaption}
+)}}\label{network__backends_8h_aca66b5bcdb2e5f3d6d27a24a40e0f061}
+
+
+References buffer\-\_\-string\-\_\-length(), chunkqueue\-\_\-mark\-\_\-written(), chunkqueue\-\_\-remove\-\_\-finished\-\_\-chunks(), chunkqueue\-::first, force\-\_\-assert, log\-\_\-error\-\_\-write(), chunk\-::mem, chunk\-::offset, buffer\-::ptr, chunk\-::type, and U\-N\-U\-S\-E\-D.
+
+
+
+Referenced by network\-\_\-write\-\_\-chunkqueue\-\_\-write(), and network\-\_\-writev\-\_\-mem\-\_\-chunks().
+
+\hypertarget{network__backends_8h_aced3f29fc6fed6264d34d6c0b18213bb}{\index{network\-\_\-backends.\-h@{network\-\_\-backends.\-h}!network\-\_\-writev\-\_\-mem\-\_\-chunks@{network\-\_\-writev\-\_\-mem\-\_\-chunks}}
+\index{network\-\_\-writev\-\_\-mem\-\_\-chunks@{network\-\_\-writev\-\_\-mem\-\_\-chunks}!network_backends.h@{network\-\_\-backends.\-h}}
+\subsubsection[{network\-\_\-writev\-\_\-mem\-\_\-chunks}]{\setlength{\rightskip}{0pt plus 5cm}static int network\-\_\-writev\-\_\-mem\-\_\-chunks (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{int}]{fd, }
+\item[{{\bf chunkqueue} $\ast$}]{cq, }
+\item[{off\-\_\-t $\ast$}]{p\-\_\-max\-\_\-bytes}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{network__backends_8h_aced3f29fc6fed6264d34d6c0b18213bb}
+
+
+References network\-\_\-write\-\_\-mem\-\_\-chunk().
+
+
+
+Referenced by network\-\_\-write\-\_\-chunkqueue\-\_\-writev().
+

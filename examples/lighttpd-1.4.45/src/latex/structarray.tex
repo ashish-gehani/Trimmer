@@ -1,0 +1,63 @@
+\hypertarget{structarray}{\section{array Struct Reference}
+\label{structarray}\index{array@{array}}
+}
+
+
+{\ttfamily \#include $<$array.\-h$>$}
+
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{structdata__unset}{data\-\_\-unset} $\ast$$\ast$ \hyperlink{structarray_a5836436f13fe0c470088f135d278b391}{data}
+\item 
+size\-\_\-t $\ast$ \hyperlink{structarray_a808e210b6e5be6f238cf06727f4ef757}{sorted}
+\item 
+size\-\_\-t \hyperlink{structarray_a83a03fea6f802526509b398c24013d5b}{used}
+\item 
+size\-\_\-t \hyperlink{structarray_a223f5760985fe124132e794b6e3e1a64}{size}
+\item 
+size\-\_\-t \hyperlink{structarray_af86dee9c05aa7a91196b9d8a0a42d1fd}{unique\-\_\-ndx}
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{structarray_a5836436f13fe0c470088f135d278b391}{\index{array@{array}!data@{data}}
+\index{data@{data}!array@{array}}
+\subsubsection[{data}]{\setlength{\rightskip}{0pt plus 5cm}{\bf data\-\_\-unset}$\ast$$\ast$ array\-::data}}\label{structarray_a5836436f13fe0c470088f135d278b391}
+
+
+Referenced by array\-\_\-extract\-\_\-element(), array\-\_\-find\-\_\-or\-\_\-insert(), array\-\_\-free(), array\-\_\-get\-\_\-element(), array\-\_\-get\-\_\-index(), array\-\_\-get\-\_\-max\-\_\-key\-\_\-length(), array\-\_\-get\-\_\-unused\-\_\-element(), array\-\_\-init\-\_\-array(), array\-\_\-pop(), array\-\_\-print(), array\-\_\-reset(), cgi\-\_\-get\-\_\-handler(), chunkqueue\-\_\-get\-\_\-append\-\_\-tempfile(), config\-\_\-cond\-\_\-cache\-\_\-reset\-\_\-item(), config\-\_\-insert(), config\-\_\-insert\-\_\-values\-\_\-internal(), config\-\_\-patch\-\_\-connection(), config\-\_\-set\-\_\-defaults(), configparser\-\_\-merge\-\_\-data(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), data\-\_\-config\-\_\-print(), fcgi\-\_\-check\-\_\-extension(), fcgi\-\_\-patch\-\_\-connection(), fcgi\-\_\-response\-\_\-parse(), http\-\_\-auth\-\_\-array\-\_\-contains(), http\-\_\-cgi\-\_\-headers(), http\-\_\-list\-\_\-directory(), http\-\_\-request\-\_\-parse(), http\-\_\-response\-\_\-write\-\_\-header(), http\-\_\-response\-\_\-xsendfile(), last\-\_\-not\-\_\-in\-\_\-array(), magnet\-\_\-array\-\_\-next(), magnet\-\_\-attract\-\_\-array(), main(), mod\-\_\-access\-\_\-patch\-\_\-connection(), mod\-\_\-accesslog\-\_\-patch\-\_\-connection(), mod\-\_\-alias\-\_\-patch\-\_\-connection(), mod\-\_\-auth\-\_\-patch\-\_\-connection(), mod\-\_\-auth\-\_\-uri\-\_\-handler(), mod\-\_\-authn\-\_\-file\-\_\-patch\-\_\-connection(), mod\-\_\-authn\-\_\-gssapi\-\_\-patch\-\_\-connection(), mod\-\_\-authn\-\_\-ldap\-\_\-patch\-\_\-connection(), mod\-\_\-authn\-\_\-mysql\-\_\-patch\-\_\-connection(), mod\-\_\-cgi\-\_\-patch\-\_\-connection(), mod\-\_\-cml\-\_\-patch\-\_\-connection(), mod\-\_\-compress\-\_\-patch\-\_\-connection(), mod\-\_\-deflate\-\_\-patch\-\_\-connection(), mod\-\_\-dirlisting\-\_\-patch\-\_\-connection(), mod\-\_\-evasive\-\_\-patch\-\_\-connection(), mod\-\_\-evhost\-\_\-patch\-\_\-connection(), mod\-\_\-expire\-\_\-patch\-\_\-connection(), mod\-\_\-extforward\-\_\-patch\-\_\-connection(), mod\-\_\-flv\-\_\-streaming\-\_\-patch\-\_\-connection(), mod\-\_\-geoip\-\_\-patch\-\_\-connection(), mod\-\_\-indexfile\-\_\-patch\-\_\-connection(), mod\-\_\-magnet\-\_\-patch\-\_\-connection(), mod\-\_\-mysql\-\_\-vhost\-\_\-patch\-\_\-connection(), mod\-\_\-proxy\-\_\-check\-\_\-extension(), mod\-\_\-proxy\-\_\-extension\-\_\-host\-\_\-get(), mod\-\_\-proxy\-\_\-patch\-\_\-connection(), mod\-\_\-rrd\-\_\-patch\-\_\-connection(), mod\-\_\-secdownload\-\_\-patch\-\_\-connection(), mod\-\_\-setenv\-\_\-patch\-\_\-connection(), mod\-\_\-simple\-\_\-vhost\-\_\-patch\-\_\-connection(), mod\-\_\-skeleton\-\_\-patch\-\_\-connection(), mod\-\_\-ssi\-\_\-patch\-\_\-connection(), mod\-\_\-staticfile\-\_\-patch\-\_\-connection(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-statistics(), mod\-\_\-status\-\_\-patch\-\_\-connection(), mod\-\_\-trigger\-\_\-b4\-\_\-dl\-\_\-patch\-\_\-connection(), mod\-\_\-uploadprogress\-\_\-patch\-\_\-connection(), mod\-\_\-userdir\-\_\-patch\-\_\-connection(), mod\-\_\-usertrack\-\_\-patch\-\_\-connection(), mod\-\_\-webdav\-\_\-patch\-\_\-connection(), network\-\_\-init(), P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C(), plugins\-\_\-load(), process\-\_\-ssi\-\_\-stmt(), proxy\-\_\-create\-\_\-env(), scgi\-\_\-patch\-\_\-connection(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), stat\-\_\-cache\-\_\-get\-\_\-entry(), T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C(), U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C(), and webdav\-\_\-get\-\_\-live\-\_\-property().
+
+\hypertarget{structarray_a223f5760985fe124132e794b6e3e1a64}{\index{array@{array}!size@{size}}
+\index{size@{size}!array@{array}}
+\subsubsection[{size}]{\setlength{\rightskip}{0pt plus 5cm}size\-\_\-t array\-::size}}\label{structarray_a223f5760985fe124132e794b6e3e1a64}
+
+
+Referenced by array\-\_\-find\-\_\-or\-\_\-insert(), array\-\_\-free(), and array\-\_\-init\-\_\-array().
+
+\hypertarget{structarray_a808e210b6e5be6f238cf06727f4ef757}{\index{array@{array}!sorted@{sorted}}
+\index{sorted@{sorted}!array@{array}}
+\subsubsection[{sorted}]{\setlength{\rightskip}{0pt plus 5cm}size\-\_\-t$\ast$ array\-::sorted}}\label{structarray_a808e210b6e5be6f238cf06727f4ef757}
+
+
+Referenced by array\-\_\-extract\-\_\-element(), array\-\_\-find\-\_\-or\-\_\-insert(), array\-\_\-free(), array\-\_\-get\-\_\-index(), array\-\_\-init\-\_\-array(), array\-\_\-pop(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-statistics(), process\-\_\-ssi\-\_\-stmt(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structarray_af86dee9c05aa7a91196b9d8a0a42d1fd}{\index{array@{array}!unique\-\_\-ndx@{unique\-\_\-ndx}}
+\index{unique\-\_\-ndx@{unique\-\_\-ndx}!array@{array}}
+\subsubsection[{unique\-\_\-ndx}]{\setlength{\rightskip}{0pt plus 5cm}size\-\_\-t array\-::unique\-\_\-ndx}}\label{structarray_af86dee9c05aa7a91196b9d8a0a42d1fd}
+
+
+Referenced by array\-\_\-find\-\_\-or\-\_\-insert(), array\-\_\-init\-\_\-array(), and array\-\_\-reset().
+
+\hypertarget{structarray_a83a03fea6f802526509b398c24013d5b}{\index{array@{array}!used@{used}}
+\index{used@{used}!array@{array}}
+\subsubsection[{used}]{\setlength{\rightskip}{0pt plus 5cm}size\-\_\-t array\-::used}}\label{structarray_a83a03fea6f802526509b398c24013d5b}
+
+
+Referenced by array\-\_\-extract\-\_\-element(), array\-\_\-find\-\_\-or\-\_\-insert(), array\-\_\-get\-\_\-index(), array\-\_\-get\-\_\-max\-\_\-key\-\_\-length(), array\-\_\-get\-\_\-unused\-\_\-element(), array\-\_\-init\-\_\-array(), array\-\_\-pop(), array\-\_\-print(), array\-\_\-reset(), cgi\-\_\-get\-\_\-handler(), chunkqueue\-\_\-append\-\_\-mem\-\_\-to\-\_\-tempfile(), chunkqueue\-\_\-get\-\_\-append\-\_\-tempfile(), config\-\_\-cond\-\_\-cache\-\_\-reset(), config\-\_\-cond\-\_\-cache\-\_\-reset\-\_\-item(), config\-\_\-insert(), config\-\_\-insert\-\_\-values\-\_\-internal(), config\-\_\-patch\-\_\-connection(), config\-\_\-read(), config\-\_\-set\-\_\-defaults(), configparser\-\_\-merge\-\_\-data(), configparser\-\_\-push(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), connection\-\_\-init(), data\-\_\-config\-\_\-print(), fcgi\-\_\-check\-\_\-extension(), fcgi\-\_\-patch\-\_\-connection(), fcgi\-\_\-response\-\_\-parse(), http\-\_\-auth\-\_\-array\-\_\-contains(), http\-\_\-cgi\-\_\-headers(), http\-\_\-list\-\_\-directory(), http\-\_\-request\-\_\-parse(), http\-\_\-response\-\_\-write\-\_\-header(), http\-\_\-response\-\_\-xsendfile(), last\-\_\-not\-\_\-in\-\_\-array(), magnet\-\_\-array\-\_\-next(), magnet\-\_\-attract\-\_\-array(), main(), mod\-\_\-access\-\_\-patch\-\_\-connection(), mod\-\_\-accesslog\-\_\-patch\-\_\-connection(), mod\-\_\-alias\-\_\-patch\-\_\-connection(), mod\-\_\-auth\-\_\-patch\-\_\-connection(), mod\-\_\-auth\-\_\-uri\-\_\-handler(), mod\-\_\-authn\-\_\-file\-\_\-patch\-\_\-connection(), mod\-\_\-authn\-\_\-gssapi\-\_\-patch\-\_\-connection(), mod\-\_\-authn\-\_\-ldap\-\_\-patch\-\_\-connection(), mod\-\_\-authn\-\_\-mysql\-\_\-patch\-\_\-connection(), mod\-\_\-cgi\-\_\-patch\-\_\-connection(), mod\-\_\-cml\-\_\-patch\-\_\-connection(), mod\-\_\-compress\-\_\-patch\-\_\-connection(), mod\-\_\-deflate\-\_\-patch\-\_\-connection(), mod\-\_\-dirlisting\-\_\-patch\-\_\-connection(), mod\-\_\-evasive\-\_\-patch\-\_\-connection(), mod\-\_\-evhost\-\_\-patch\-\_\-connection(), mod\-\_\-expire\-\_\-patch\-\_\-connection(), mod\-\_\-extforward\-\_\-patch\-\_\-connection(), mod\-\_\-flv\-\_\-streaming\-\_\-patch\-\_\-connection(), mod\-\_\-geoip\-\_\-patch\-\_\-connection(), mod\-\_\-indexfile\-\_\-patch\-\_\-connection(), mod\-\_\-magnet\-\_\-patch\-\_\-connection(), mod\-\_\-mysql\-\_\-vhost\-\_\-patch\-\_\-connection(), mod\-\_\-proxy\-\_\-check\-\_\-extension(), mod\-\_\-proxy\-\_\-extension\-\_\-host\-\_\-get(), mod\-\_\-proxy\-\_\-patch\-\_\-connection(), mod\-\_\-rrd\-\_\-patch\-\_\-connection(), mod\-\_\-secdownload\-\_\-patch\-\_\-connection(), mod\-\_\-setenv\-\_\-patch\-\_\-connection(), mod\-\_\-simple\-\_\-vhost\-\_\-patch\-\_\-connection(), mod\-\_\-skeleton\-\_\-patch\-\_\-connection(), mod\-\_\-ssi\-\_\-patch\-\_\-connection(), mod\-\_\-staticfile\-\_\-patch\-\_\-connection(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-statistics(), mod\-\_\-status\-\_\-patch\-\_\-connection(), mod\-\_\-trigger\-\_\-b4\-\_\-dl\-\_\-patch\-\_\-connection(), mod\-\_\-uploadprogress\-\_\-patch\-\_\-connection(), mod\-\_\-userdir\-\_\-patch\-\_\-connection(), mod\-\_\-usertrack\-\_\-patch\-\_\-connection(), mod\-\_\-webdav\-\_\-patch\-\_\-connection(), network\-\_\-init(), P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C(), plugins\-\_\-load(), process\-\_\-ssi\-\_\-stmt(), proxy\-\_\-create\-\_\-env(), scgi\-\_\-patch\-\_\-connection(), server\-\_\-free(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), stat\-\_\-cache\-\_\-get\-\_\-entry(), T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C(), U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C(), and webdav\-\_\-get\-\_\-live\-\_\-property().
+
+
+
+The documentation for this struct was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{array_8h}{array.\-h}\end{DoxyCompactItemize}

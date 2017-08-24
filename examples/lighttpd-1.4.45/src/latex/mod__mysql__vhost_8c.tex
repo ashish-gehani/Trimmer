@@ -1,0 +1,176 @@
+\hypertarget{mod__mysql__vhost_8c}{\section{mod\-\_\-mysql\-\_\-vhost.\-c File Reference}
+\label{mod__mysql__vhost_8c}\index{mod\-\_\-mysql\-\_\-vhost.\-c@{mod\-\_\-mysql\-\_\-vhost.\-c}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$unistd.\-h$>$}\\*
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$errno.\-h$>$}\\*
+{\ttfamily \#include $<$fcntl.\-h$>$}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+{\ttfamily \#include $<$mysql.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}plugin.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}log.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}stat\-\_\-cache.\-h\char`\"{}}\\*
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structplugin__config}{plugin\-\_\-config}
+\item 
+struct \hyperlink{structplugin__data}{plugin\-\_\-data}
+\item 
+struct \hyperlink{structplugin__connection__data}{plugin\-\_\-connection\-\_\-data}
+\end{DoxyCompactItemize}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{mod__mysql__vhost_8c_a528ac17e4c796a1c47ff9631664c51f0}{F\-O\-O}(x)~(\hyperlink{buffer_8h_a141f13aaa1f623c39a4b551f9b89f997}{buffer\-\_\-string\-\_\-is\-\_\-empty}(s-\/$>$x) ? N\-U\-L\-L \-: s-\/$>$x-\/$>$ptr)
+\item 
+\#define \hyperlink{mod__mysql__vhost_8c_a20876ec7c0c844d0e0c1628528bbb8da}{P\-A\-T\-C\-H}(x)~p-\/$>$conf.\-x = s-\/$>$x;
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{mod__mysql__vhost_8c_ac5d71af975c5c9cf5d08a2ea5776dd64}{I\-N\-I\-T\-\_\-\-F\-U\-N\-C} (mod\-\_\-mysql\-\_\-vhost\-\_\-init)
+\item 
+\hyperlink{mod__mysql__vhost_8c_a30ec5f08ce2402131bbd6dbe0d556ae3}{S\-E\-R\-V\-E\-R\-\_\-\-F\-U\-N\-C} (mod\-\_\-mysql\-\_\-vhost\-\_\-cleanup)
+\item 
+static void $\ast$ \hyperlink{mod__mysql__vhost_8c_a85df1eb7af90eb1ace12a4fe3ff8ab2d}{mod\-\_\-mysql\-\_\-vhost\-\_\-connection\-\_\-data} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, void $\ast$p\-\_\-d)
+\item 
+\hyperlink{mod__mysql__vhost_8c_a4e9884b5931e4135f6a8420a50a9f699}{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C} (mod\-\_\-mysql\-\_\-vhost\-\_\-handle\-\_\-connection\-\_\-close)
+\item 
+\hyperlink{mod__mysql__vhost_8c_a42f8c93d4ea0c9d204fd33e6ec44ed78}{S\-E\-R\-V\-E\-R\-\_\-\-F\-U\-N\-C} (mod\-\_\-mysql\-\_\-vhost\-\_\-set\-\_\-defaults)
+\item 
+static int \hyperlink{mod__mysql__vhost_8c_a7132edae7676c2e73cbd12efd4b29b33}{mod\-\_\-mysql\-\_\-vhost\-\_\-patch\-\_\-connection} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structplugin__data}{plugin\-\_\-data} $\ast$p)
+\item 
+\hyperlink{mod__mysql__vhost_8c_a242e2a1e4c4ac6fac8b3fa19099bc249}{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C} (mod\-\_\-mysql\-\_\-vhost\-\_\-handle\-\_\-docroot)
+\item 
+int \hyperlink{mod__mysql__vhost_8c_af4a2234e0c1967b1631fc4ee54e8530f}{mod\-\_\-mysql\-\_\-vhost\-\_\-plugin\-\_\-init} (\hyperlink{structplugin}{plugin} $\ast$p)
+\end{DoxyCompactItemize}
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{mod__mysql__vhost_8c_a528ac17e4c796a1c47ff9631664c51f0}{\index{mod\-\_\-mysql\-\_\-vhost.\-c@{mod\-\_\-mysql\-\_\-vhost.\-c}!F\-O\-O@{F\-O\-O}}
+\index{F\-O\-O@{F\-O\-O}!mod_mysql_vhost.c@{mod\-\_\-mysql\-\_\-vhost.\-c}}
+\subsubsection[{F\-O\-O}]{\setlength{\rightskip}{0pt plus 5cm}\#define F\-O\-O(
+\begin{DoxyParamCaption}
+\item[{}]{x}
+\end{DoxyParamCaption}
+)~({\bf buffer\-\_\-string\-\_\-is\-\_\-empty}(s-\/$>$x) ? N\-U\-L\-L \-: s-\/$>$x-\/$>$ptr)}}\label{mod__mysql__vhost_8c_a528ac17e4c796a1c47ff9631664c51f0}
+
+
+Referenced by S\-E\-R\-V\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__mysql__vhost_8c_a20876ec7c0c844d0e0c1628528bbb8da}{\index{mod\-\_\-mysql\-\_\-vhost.\-c@{mod\-\_\-mysql\-\_\-vhost.\-c}!P\-A\-T\-C\-H@{P\-A\-T\-C\-H}}
+\index{P\-A\-T\-C\-H@{P\-A\-T\-C\-H}!mod_mysql_vhost.c@{mod\-\_\-mysql\-\_\-vhost.\-c}}
+\subsubsection[{P\-A\-T\-C\-H}]{\setlength{\rightskip}{0pt plus 5cm}\#define P\-A\-T\-C\-H(
+\begin{DoxyParamCaption}
+\item[{}]{x}
+\end{DoxyParamCaption}
+)~p-\/$>$conf.\-x = s-\/$>$x;}}\label{mod__mysql__vhost_8c_a20876ec7c0c844d0e0c1628528bbb8da}
+
+
+Referenced by mod\-\_\-mysql\-\_\-vhost\-\_\-patch\-\_\-connection().
+
+
+
+\subsection{Function Documentation}
+\hypertarget{mod__mysql__vhost_8c_a4e9884b5931e4135f6a8420a50a9f699}{\index{mod\-\_\-mysql\-\_\-vhost.\-c@{mod\-\_\-mysql\-\_\-vhost.\-c}!C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C@{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C}}
+\index{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C@{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C}!mod_mysql_vhost.c@{mod\-\_\-mysql\-\_\-vhost.\-c}}
+\subsubsection[{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-mysql\-\_\-vhost\-\_\-handle\-\_\-connection\-\_\-close}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__mysql__vhost_8c_a4e9884b5931e4135f6a8420a50a9f699}
+
+
+References buffer\-\_\-free(), plugin\-\_\-connection\-\_\-data\-::document\-\_\-root, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, log\-\_\-error\-\_\-write(), plugin\-\_\-connection\-\_\-data\-::server\-\_\-name, and U\-N\-U\-S\-E\-D.
+
+\hypertarget{mod__mysql__vhost_8c_a242e2a1e4c4ac6fac8b3fa19099bc249}{\index{mod\-\_\-mysql\-\_\-vhost.\-c@{mod\-\_\-mysql\-\_\-vhost.\-c}!C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C@{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C}}
+\index{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C@{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C}!mod_mysql_vhost.c@{mod\-\_\-mysql\-\_\-vhost.\-c}}
+\subsubsection[{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-mysql\-\_\-vhost\-\_\-handle\-\_\-docroot}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__mysql__vhost_8c_a242e2a1e4c4ac6fac8b3fa19099bc249}
+
+
+References buffer\-\_\-append\-\_\-slash(), buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-commit(), buffer\-\_\-copy\-\_\-buffer(), buffer\-\_\-copy\-\_\-string(), buffer\-\_\-is\-\_\-equal(), buffer\-\_\-string\-\_\-is\-\_\-empty(), buffer\-\_\-string\-\_\-length(), buffer\-\_\-string\-\_\-prepare\-\_\-append(), buffer\-\_\-string\-\_\-set\-\_\-length(), plugin\-\_\-data\-::conf, C\-O\-N\-S\-T\-\_\-\-B\-U\-F\-\_\-\-L\-E\-N, D\-I\-R\-E\-C\-T, plugin\-\_\-connection\-\_\-data\-::document\-\_\-root, H\-A\-N\-D\-L\-E\-R\-\_\-\-E\-R\-R\-O\-R, H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-I\-N\-I\-S\-H\-E\-D, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, log\-\_\-error\-\_\-write(), mod\-\_\-mysql\-\_\-vhost\-\_\-connection\-\_\-data(), mod\-\_\-mysql\-\_\-vhost\-\_\-patch\-\_\-connection(), plugin\-\_\-config\-::mysql, plugin\-\_\-config\-::mysql\-\_\-query, buffer\-::ptr, plugin\-\_\-connection\-\_\-data\-::server\-\_\-name, stat\-\_\-cache\-\_\-entry\-::st, stat\-\_\-cache\-\_\-get\-\_\-entry(), and plugin\-\_\-data\-::tmp\-\_\-buf.
+
+\hypertarget{mod__mysql__vhost_8c_ac5d71af975c5c9cf5d08a2ea5776dd64}{\index{mod\-\_\-mysql\-\_\-vhost.\-c@{mod\-\_\-mysql\-\_\-vhost.\-c}!I\-N\-I\-T\-\_\-\-F\-U\-N\-C@{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}}
+\index{I\-N\-I\-T\-\_\-\-F\-U\-N\-C@{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}!mod_mysql_vhost.c@{mod\-\_\-mysql\-\_\-vhost.\-c}}
+\subsubsection[{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}I\-N\-I\-T\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-mysql\-\_\-vhost\-\_\-init}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__mysql__vhost_8c_ac5d71af975c5c9cf5d08a2ea5776dd64}
+
+
+References buffer\-\_\-init(), and plugin\-\_\-data\-::tmp\-\_\-buf.
+
+\hypertarget{mod__mysql__vhost_8c_a85df1eb7af90eb1ace12a4fe3ff8ab2d}{\index{mod\-\_\-mysql\-\_\-vhost.\-c@{mod\-\_\-mysql\-\_\-vhost.\-c}!mod\-\_\-mysql\-\_\-vhost\-\_\-connection\-\_\-data@{mod\-\_\-mysql\-\_\-vhost\-\_\-connection\-\_\-data}}
+\index{mod\-\_\-mysql\-\_\-vhost\-\_\-connection\-\_\-data@{mod\-\_\-mysql\-\_\-vhost\-\_\-connection\-\_\-data}!mod_mysql_vhost.c@{mod\-\_\-mysql\-\_\-vhost.\-c}}
+\subsubsection[{mod\-\_\-mysql\-\_\-vhost\-\_\-connection\-\_\-data}]{\setlength{\rightskip}{0pt plus 5cm}static void$\ast$ mod\-\_\-mysql\-\_\-vhost\-\_\-connection\-\_\-data (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{void $\ast$}]{p\-\_\-d}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__mysql__vhost_8c_a85df1eb7af90eb1ace12a4fe3ff8ab2d}
+
+
+References buffer\-\_\-init(), plugin\-\_\-connection\-\_\-data\-::document\-\_\-root, log\-\_\-error\-\_\-write(), connection\-::plugin\-\_\-ctx, plugin\-\_\-connection\-\_\-data\-::server\-\_\-name, and U\-N\-U\-S\-E\-D.
+
+
+
+Referenced by C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__mysql__vhost_8c_a7132edae7676c2e73cbd12efd4b29b33}{\index{mod\-\_\-mysql\-\_\-vhost.\-c@{mod\-\_\-mysql\-\_\-vhost.\-c}!mod\-\_\-mysql\-\_\-vhost\-\_\-patch\-\_\-connection@{mod\-\_\-mysql\-\_\-vhost\-\_\-patch\-\_\-connection}}
+\index{mod\-\_\-mysql\-\_\-vhost\-\_\-patch\-\_\-connection@{mod\-\_\-mysql\-\_\-vhost\-\_\-patch\-\_\-connection}!mod_mysql_vhost.c@{mod\-\_\-mysql\-\_\-vhost.\-c}}
+\subsubsection[{mod\-\_\-mysql\-\_\-vhost\-\_\-patch\-\_\-connection}]{\setlength{\rightskip}{0pt plus 5cm}static int mod\-\_\-mysql\-\_\-vhost\-\_\-patch\-\_\-connection (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf plugin\-\_\-data} $\ast$}]{p}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__mysql__vhost_8c_a7132edae7676c2e73cbd12efd4b29b33}
+
+
+References buffer\-\_\-is\-\_\-equal\-\_\-string(), config\-\_\-check\-\_\-cond(), server\-::config\-\_\-context, plugin\-\_\-data\-::config\-\_\-storage, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, array\-::data, plugin\-\_\-config\-::mysql, P\-A\-T\-C\-H, array\-::used, and data\-\_\-config\-::value.
+
+
+
+Referenced by C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__mysql__vhost_8c_af4a2234e0c1967b1631fc4ee54e8530f}{\index{mod\-\_\-mysql\-\_\-vhost.\-c@{mod\-\_\-mysql\-\_\-vhost.\-c}!mod\-\_\-mysql\-\_\-vhost\-\_\-plugin\-\_\-init@{mod\-\_\-mysql\-\_\-vhost\-\_\-plugin\-\_\-init}}
+\index{mod\-\_\-mysql\-\_\-vhost\-\_\-plugin\-\_\-init@{mod\-\_\-mysql\-\_\-vhost\-\_\-plugin\-\_\-init}!mod_mysql_vhost.c@{mod\-\_\-mysql\-\_\-vhost.\-c}}
+\subsubsection[{mod\-\_\-mysql\-\_\-vhost\-\_\-plugin\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}int mod\-\_\-mysql\-\_\-vhost\-\_\-plugin\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{{\bf plugin} $\ast$}]{p}
+\end{DoxyParamCaption}
+)}}\label{mod__mysql__vhost_8c_af4a2234e0c1967b1631fc4ee54e8530f}
+
+
+References buffer\-\_\-init\-\_\-string(), plugin\-::cleanup, plugin\-::connection\-\_\-reset, plugin\-::handle\-\_\-docroot, plugin\-::init, plugin\-::name, plugin\-::set\-\_\-defaults, and plugin\-::version.
+
+\hypertarget{mod__mysql__vhost_8c_a30ec5f08ce2402131bbd6dbe0d556ae3}{\index{mod\-\_\-mysql\-\_\-vhost.\-c@{mod\-\_\-mysql\-\_\-vhost.\-c}!S\-E\-R\-V\-E\-R\-\_\-\-F\-U\-N\-C@{S\-E\-R\-V\-E\-R\-\_\-\-F\-U\-N\-C}}
+\index{S\-E\-R\-V\-E\-R\-\_\-\-F\-U\-N\-C@{S\-E\-R\-V\-E\-R\-\_\-\-F\-U\-N\-C}!mod_mysql_vhost.c@{mod\-\_\-mysql\-\_\-vhost.\-c}}
+\subsubsection[{S\-E\-R\-V\-E\-R\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}S\-E\-R\-V\-E\-R\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-mysql\-\_\-vhost\-\_\-cleanup}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__mysql__vhost_8c_a30ec5f08ce2402131bbd6dbe0d556ae3}
+
+
+References buffer\-\_\-free(), plugin\-\_\-data\-::config\-\_\-storage, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, plugin\-\_\-config\-::hostname, log\-\_\-error\-\_\-write(), plugin\-\_\-config\-::mydb, plugin\-\_\-config\-::mypass, plugin\-\_\-config\-::mysock, plugin\-\_\-config\-::mysql, plugin\-\_\-config\-::mysql\-\_\-query, plugin\-\_\-config\-::myuser, plugin\-\_\-data\-::tmp\-\_\-buf, and U\-N\-U\-S\-E\-D.
+
+\hypertarget{mod__mysql__vhost_8c_a42f8c93d4ea0c9d204fd33e6ec44ed78}{\index{mod\-\_\-mysql\-\_\-vhost.\-c@{mod\-\_\-mysql\-\_\-vhost.\-c}!S\-E\-R\-V\-E\-R\-\_\-\-F\-U\-N\-C@{S\-E\-R\-V\-E\-R\-\_\-\-F\-U\-N\-C}}
+\index{S\-E\-R\-V\-E\-R\-\_\-\-F\-U\-N\-C@{S\-E\-R\-V\-E\-R\-\_\-\-F\-U\-N\-C}!mod_mysql_vhost.c@{mod\-\_\-mysql\-\_\-vhost.\-c}}
+\subsubsection[{S\-E\-R\-V\-E\-R\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}S\-E\-R\-V\-E\-R\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-mysql\-\_\-vhost\-\_\-set\-\_\-defaults}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__mysql__vhost_8c_a42f8c93d4ea0c9d204fd33e6ec44ed78}
+
+
+References buffer\-\_\-init(), buffer\-\_\-string\-\_\-is\-\_\-empty(), config\-\_\-insert\-\_\-values\-\_\-global(), plugin\-\_\-data\-::config\-\_\-storage, config\-\_\-values\-\_\-t\-::destination, fd\-\_\-close\-\_\-on\-\_\-exec(), F\-O\-O, H\-A\-N\-D\-L\-E\-R\-\_\-\-E\-R\-R\-O\-R, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, log\-\_\-error\-\_\-write(), plugin\-\_\-config\-::mysql\-\_\-query, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T\-I\-O\-N, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-S\-E\-R\-V\-E\-R, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-U\-N\-S\-E\-T, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-H\-O\-R\-T, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-T\-R\-I\-N\-G, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-U\-N\-S\-E\-T, and data\-\_\-config\-::value.
+

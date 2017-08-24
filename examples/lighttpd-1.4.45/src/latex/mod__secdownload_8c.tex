@@ -1,0 +1,321 @@
+\hypertarget{mod__secdownload_8c}{\section{mod\-\_\-secdownload.\-c File Reference}
+\label{mod__secdownload_8c}\index{mod\-\_\-secdownload.\-c@{mod\-\_\-secdownload.\-c}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}base.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}log.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}buffer.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}base64.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}plugin.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ctype.\-h$>$}\\*
+{\ttfamily \#include $<$stdlib.\-h$>$}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}md5.\-h\char`\"{}}\\*
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structplugin__config}{plugin\-\_\-config}
+\item 
+struct \hyperlink{structplugin__data}{plugin\-\_\-data}
+\end{DoxyCompactItemize}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{mod__secdownload_8c_a044f8d045fb7bf924ce44c1be20c6746}{H\-A\-S\-H\-L\-E\-N}~16
+\item 
+\#define \hyperlink{mod__secdownload_8c_a8a15023e03feb7b6ca9bedd0b8e3a737}{H\-A\-S\-H\-H\-E\-X\-L\-E\-N}~32
+\item 
+\#define \hyperlink{mod__secdownload_8c_a20876ec7c0c844d0e0c1628528bbb8da}{P\-A\-T\-C\-H}(x)~p-\/$>$conf.\-x = s-\/$>$x;
+\end{DoxyCompactItemize}
+\subsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef unsigned char \hyperlink{mod__secdownload_8c_ac713e55c3ad120c7ae09a0249f1ef9e7}{H\-A\-S\-H} \mbox{[}\hyperlink{mod__secdownload_8c_a044f8d045fb7bf924ce44c1be20c6746}{H\-A\-S\-H\-L\-E\-N}\mbox{]}
+\item 
+typedef char \hyperlink{mod__secdownload_8c_ac7f94972a047c62b4661213eb0aec242}{H\-A\-S\-H\-H\-E\-X} \mbox{[}\hyperlink{mod__secdownload_8c_a8a15023e03feb7b6ca9bedd0b8e3a737}{H\-A\-S\-H\-H\-E\-X\-L\-E\-N}+1\mbox{]}
+\end{DoxyCompactItemize}
+\subsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \hyperlink{mod__secdownload_8c_a25bdb2a17a4fd66c1cff8711909a776e}{secdl\-\_\-algorithm} \{ \hyperlink{mod__secdownload_8c_a25bdb2a17a4fd66c1cff8711909a776ea8b0f0a90af3d8f53fd62c90309ec0afe}{S\-E\-C\-D\-L\-\_\-\-I\-N\-V\-A\-L\-I\-D} = 0, 
+\hyperlink{mod__secdownload_8c_a25bdb2a17a4fd66c1cff8711909a776eab17369712676266d0f2453f2276a6423}{S\-E\-C\-D\-L\-\_\-\-M\-D5} = 1, 
+\hyperlink{mod__secdownload_8c_a25bdb2a17a4fd66c1cff8711909a776ea61cc8c04c84b0fd2181f6229621eaac4}{S\-E\-C\-D\-L\-\_\-\-H\-M\-A\-C\-\_\-\-S\-H\-A1} = 2, 
+\hyperlink{mod__secdownload_8c_a25bdb2a17a4fd66c1cff8711909a776ea85a87623ff8baf4f760023d2dcd54481}{S\-E\-C\-D\-L\-\_\-\-H\-M\-A\-C\-\_\-\-S\-H\-A256} = 3
+ \}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+static int \hyperlink{mod__secdownload_8c_a4c4f6b3898b32c08810b45177a02a891}{const\-\_\-time\-\_\-memeq} (const char $\ast$a, const char $\ast$b, size\-\_\-t len)
+\item 
+static \hyperlink{mod__secdownload_8c_a25bdb2a17a4fd66c1cff8711909a776e}{secdl\-\_\-algorithm} \hyperlink{mod__secdownload_8c_adf7ce60941635d64ad4014524f455e5b}{algorithm\-\_\-from\-\_\-string} (\hyperlink{structbuffer}{buffer} $\ast$name)
+\item 
+static size\-\_\-t \hyperlink{mod__secdownload_8c_a698efa3f14c7b46b2f4c1e54378c598c}{secdl\-\_\-algorithm\-\_\-mac\-\_\-length} (\hyperlink{mod__secdownload_8c_a25bdb2a17a4fd66c1cff8711909a776e}{secdl\-\_\-algorithm} alg)
+\item 
+static int \hyperlink{mod__secdownload_8c_a12b52fa94ba83f707c818b05dad99642}{secdl\-\_\-verify\-\_\-mac} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structplugin__config}{plugin\-\_\-config} $\ast$\hyperlink{structconfig}{config}, const char $\ast$protected\-\_\-path, const char $\ast$mac, size\-\_\-t maclen)
+\item 
+\hyperlink{mod__secdownload_8c_afadfaef076d505bcfd7fc2cd10770c0d}{I\-N\-I\-T\-\_\-\-F\-U\-N\-C} (mod\-\_\-secdownload\-\_\-init)
+\item 
+\hyperlink{mod__secdownload_8c_ab4f36620b6ccc3246c6221f6a14a726b}{F\-R\-E\-E\-\_\-\-F\-U\-N\-C} (mod\-\_\-secdownload\-\_\-free)
+\item 
+\hyperlink{mod__secdownload_8c_a46c69814cd5d70b2a02ad69d232a5826}{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C} (mod\-\_\-secdownload\-\_\-set\-\_\-defaults)
+\item 
+static int \hyperlink{mod__secdownload_8c_a4dd4d0320e368d5c1347b1ac662c7389}{is\-\_\-hex\-\_\-len} (const char $\ast$str, size\-\_\-t len)
+\item 
+static int \hyperlink{mod__secdownload_8c_ab7f3b0fb12a4bb4f7decaf897905fdd0}{is\-\_\-base64\-\_\-len} (const char $\ast$str, size\-\_\-t len)
+\item 
+static int \hyperlink{mod__secdownload_8c_ac9c759c93a8aee8c739c35db946769cd}{mod\-\_\-secdownload\-\_\-patch\-\_\-connection} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structplugin__data}{plugin\-\_\-data} $\ast$p)
+\item 
+\hyperlink{mod__secdownload_8c_a7f3217e0f688d34f9c31e4d602730585}{U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C} (mod\-\_\-secdownload\-\_\-uri\-\_\-handler)
+\item 
+int \hyperlink{mod__secdownload_8c_a60eb67885f21f358e91e193b6dfce052}{mod\-\_\-secdownload\-\_\-plugin\-\_\-init} (\hyperlink{structplugin}{plugin} $\ast$p)
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+static const char $\ast$ \hyperlink{mod__secdownload_8c_a17109d8b3aaf35e72ae3543f07b052f2}{secdl\-\_\-algorithm\-\_\-names} \mbox{[}$\,$\mbox{]}
+\end{DoxyCompactItemize}
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{mod__secdownload_8c_a8a15023e03feb7b6ca9bedd0b8e3a737}{\index{mod\-\_\-secdownload.\-c@{mod\-\_\-secdownload.\-c}!H\-A\-S\-H\-H\-E\-X\-L\-E\-N@{H\-A\-S\-H\-H\-E\-X\-L\-E\-N}}
+\index{H\-A\-S\-H\-H\-E\-X\-L\-E\-N@{H\-A\-S\-H\-H\-E\-X\-L\-E\-N}!mod_secdownload.c@{mod\-\_\-secdownload.\-c}}
+\subsubsection[{H\-A\-S\-H\-H\-E\-X\-L\-E\-N}]{\setlength{\rightskip}{0pt plus 5cm}\#define H\-A\-S\-H\-H\-E\-X\-L\-E\-N~32}}\label{mod__secdownload_8c_a8a15023e03feb7b6ca9bedd0b8e3a737}
+\hypertarget{mod__secdownload_8c_a044f8d045fb7bf924ce44c1be20c6746}{\index{mod\-\_\-secdownload.\-c@{mod\-\_\-secdownload.\-c}!H\-A\-S\-H\-L\-E\-N@{H\-A\-S\-H\-L\-E\-N}}
+\index{H\-A\-S\-H\-L\-E\-N@{H\-A\-S\-H\-L\-E\-N}!mod_secdownload.c@{mod\-\_\-secdownload.\-c}}
+\subsubsection[{H\-A\-S\-H\-L\-E\-N}]{\setlength{\rightskip}{0pt plus 5cm}\#define H\-A\-S\-H\-L\-E\-N~16}}\label{mod__secdownload_8c_a044f8d045fb7bf924ce44c1be20c6746}
+\hypertarget{mod__secdownload_8c_a20876ec7c0c844d0e0c1628528bbb8da}{\index{mod\-\_\-secdownload.\-c@{mod\-\_\-secdownload.\-c}!P\-A\-T\-C\-H@{P\-A\-T\-C\-H}}
+\index{P\-A\-T\-C\-H@{P\-A\-T\-C\-H}!mod_secdownload.c@{mod\-\_\-secdownload.\-c}}
+\subsubsection[{P\-A\-T\-C\-H}]{\setlength{\rightskip}{0pt plus 5cm}\#define P\-A\-T\-C\-H(
+\begin{DoxyParamCaption}
+\item[{}]{x}
+\end{DoxyParamCaption}
+)~p-\/$>$conf.\-x = s-\/$>$x;}}\label{mod__secdownload_8c_a20876ec7c0c844d0e0c1628528bbb8da}
+
+
+Referenced by mod\-\_\-secdownload\-\_\-patch\-\_\-connection().
+
+
+
+\subsection{Typedef Documentation}
+\hypertarget{mod__secdownload_8c_ac713e55c3ad120c7ae09a0249f1ef9e7}{\index{mod\-\_\-secdownload.\-c@{mod\-\_\-secdownload.\-c}!H\-A\-S\-H@{H\-A\-S\-H}}
+\index{H\-A\-S\-H@{H\-A\-S\-H}!mod_secdownload.c@{mod\-\_\-secdownload.\-c}}
+\subsubsection[{H\-A\-S\-H}]{\setlength{\rightskip}{0pt plus 5cm}typedef unsigned char H\-A\-S\-H\mbox{[}{\bf H\-A\-S\-H\-L\-E\-N}\mbox{]}}}\label{mod__secdownload_8c_ac713e55c3ad120c7ae09a0249f1ef9e7}
+\hypertarget{mod__secdownload_8c_ac7f94972a047c62b4661213eb0aec242}{\index{mod\-\_\-secdownload.\-c@{mod\-\_\-secdownload.\-c}!H\-A\-S\-H\-H\-E\-X@{H\-A\-S\-H\-H\-E\-X}}
+\index{H\-A\-S\-H\-H\-E\-X@{H\-A\-S\-H\-H\-E\-X}!mod_secdownload.c@{mod\-\_\-secdownload.\-c}}
+\subsubsection[{H\-A\-S\-H\-H\-E\-X}]{\setlength{\rightskip}{0pt plus 5cm}typedef char H\-A\-S\-H\-H\-E\-X\mbox{[}{\bf H\-A\-S\-H\-H\-E\-X\-L\-E\-N}+1\mbox{]}}}\label{mod__secdownload_8c_ac7f94972a047c62b4661213eb0aec242}
+
+
+\subsection{Enumeration Type Documentation}
+\hypertarget{mod__secdownload_8c_a25bdb2a17a4fd66c1cff8711909a776e}{\index{mod\-\_\-secdownload.\-c@{mod\-\_\-secdownload.\-c}!secdl\-\_\-algorithm@{secdl\-\_\-algorithm}}
+\index{secdl\-\_\-algorithm@{secdl\-\_\-algorithm}!mod_secdownload.c@{mod\-\_\-secdownload.\-c}}
+\subsubsection[{secdl\-\_\-algorithm}]{\setlength{\rightskip}{0pt plus 5cm}enum {\bf secdl\-\_\-algorithm}}}\label{mod__secdownload_8c_a25bdb2a17a4fd66c1cff8711909a776e}
+\begin{Desc}
+\item[Enumerator]\par
+\begin{description}
+\index{S\-E\-C\-D\-L\-\_\-\-I\-N\-V\-A\-L\-I\-D@{S\-E\-C\-D\-L\-\_\-\-I\-N\-V\-A\-L\-I\-D}!mod\-\_\-secdownload.\-c@{mod\-\_\-secdownload.\-c}}\index{mod\-\_\-secdownload.\-c@{mod\-\_\-secdownload.\-c}!S\-E\-C\-D\-L\-\_\-\-I\-N\-V\-A\-L\-I\-D@{S\-E\-C\-D\-L\-\_\-\-I\-N\-V\-A\-L\-I\-D}}\item[{\em 
+\hypertarget{mod__secdownload_8c_a25bdb2a17a4fd66c1cff8711909a776ea8b0f0a90af3d8f53fd62c90309ec0afe}{S\-E\-C\-D\-L\-\_\-\-I\-N\-V\-A\-L\-I\-D}\label{mod__secdownload_8c_a25bdb2a17a4fd66c1cff8711909a776ea8b0f0a90af3d8f53fd62c90309ec0afe}
+}]\index{S\-E\-C\-D\-L\-\_\-\-M\-D5@{S\-E\-C\-D\-L\-\_\-\-M\-D5}!mod\-\_\-secdownload.\-c@{mod\-\_\-secdownload.\-c}}\index{mod\-\_\-secdownload.\-c@{mod\-\_\-secdownload.\-c}!S\-E\-C\-D\-L\-\_\-\-M\-D5@{S\-E\-C\-D\-L\-\_\-\-M\-D5}}\item[{\em 
+\hypertarget{mod__secdownload_8c_a25bdb2a17a4fd66c1cff8711909a776eab17369712676266d0f2453f2276a6423}{S\-E\-C\-D\-L\-\_\-\-M\-D5}\label{mod__secdownload_8c_a25bdb2a17a4fd66c1cff8711909a776eab17369712676266d0f2453f2276a6423}
+}]\index{S\-E\-C\-D\-L\-\_\-\-H\-M\-A\-C\-\_\-\-S\-H\-A1@{S\-E\-C\-D\-L\-\_\-\-H\-M\-A\-C\-\_\-\-S\-H\-A1}!mod\-\_\-secdownload.\-c@{mod\-\_\-secdownload.\-c}}\index{mod\-\_\-secdownload.\-c@{mod\-\_\-secdownload.\-c}!S\-E\-C\-D\-L\-\_\-\-H\-M\-A\-C\-\_\-\-S\-H\-A1@{S\-E\-C\-D\-L\-\_\-\-H\-M\-A\-C\-\_\-\-S\-H\-A1}}\item[{\em 
+\hypertarget{mod__secdownload_8c_a25bdb2a17a4fd66c1cff8711909a776ea61cc8c04c84b0fd2181f6229621eaac4}{S\-E\-C\-D\-L\-\_\-\-H\-M\-A\-C\-\_\-\-S\-H\-A1}\label{mod__secdownload_8c_a25bdb2a17a4fd66c1cff8711909a776ea61cc8c04c84b0fd2181f6229621eaac4}
+}]\index{S\-E\-C\-D\-L\-\_\-\-H\-M\-A\-C\-\_\-\-S\-H\-A256@{S\-E\-C\-D\-L\-\_\-\-H\-M\-A\-C\-\_\-\-S\-H\-A256}!mod\-\_\-secdownload.\-c@{mod\-\_\-secdownload.\-c}}\index{mod\-\_\-secdownload.\-c@{mod\-\_\-secdownload.\-c}!S\-E\-C\-D\-L\-\_\-\-H\-M\-A\-C\-\_\-\-S\-H\-A256@{S\-E\-C\-D\-L\-\_\-\-H\-M\-A\-C\-\_\-\-S\-H\-A256}}\item[{\em 
+\hypertarget{mod__secdownload_8c_a25bdb2a17a4fd66c1cff8711909a776ea85a87623ff8baf4f760023d2dcd54481}{S\-E\-C\-D\-L\-\_\-\-H\-M\-A\-C\-\_\-\-S\-H\-A256}\label{mod__secdownload_8c_a25bdb2a17a4fd66c1cff8711909a776ea85a87623ff8baf4f760023d2dcd54481}
+}]\end{description}
+\end{Desc}
+
+
+\subsection{Function Documentation}
+\hypertarget{mod__secdownload_8c_adf7ce60941635d64ad4014524f455e5b}{\index{mod\-\_\-secdownload.\-c@{mod\-\_\-secdownload.\-c}!algorithm\-\_\-from\-\_\-string@{algorithm\-\_\-from\-\_\-string}}
+\index{algorithm\-\_\-from\-\_\-string@{algorithm\-\_\-from\-\_\-string}!mod_secdownload.c@{mod\-\_\-secdownload.\-c}}
+\subsubsection[{algorithm\-\_\-from\-\_\-string}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf secdl\-\_\-algorithm} algorithm\-\_\-from\-\_\-string (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{name}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__secdownload_8c_adf7ce60941635d64ad4014524f455e5b}
+
+
+References buffer\-\_\-string\-\_\-is\-\_\-empty(), buffer\-::ptr, secdl\-\_\-algorithm\-\_\-names, and S\-E\-C\-D\-L\-\_\-\-I\-N\-V\-A\-L\-I\-D.
+
+
+
+Referenced by S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__secdownload_8c_a4c4f6b3898b32c08810b45177a02a891}{\index{mod\-\_\-secdownload.\-c@{mod\-\_\-secdownload.\-c}!const\-\_\-time\-\_\-memeq@{const\-\_\-time\-\_\-memeq}}
+\index{const\-\_\-time\-\_\-memeq@{const\-\_\-time\-\_\-memeq}!mod_secdownload.c@{mod\-\_\-secdownload.\-c}}
+\subsubsection[{const\-\_\-time\-\_\-memeq}]{\setlength{\rightskip}{0pt plus 5cm}static int const\-\_\-time\-\_\-memeq (
+\begin{DoxyParamCaption}
+\item[{const char $\ast$}]{a, }
+\item[{const char $\ast$}]{b, }
+\item[{size\-\_\-t}]{len}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__secdownload_8c_a4c4f6b3898b32c08810b45177a02a891}
+
+
+Referenced by secdl\-\_\-verify\-\_\-mac().
+
+\hypertarget{mod__secdownload_8c_ab4f36620b6ccc3246c6221f6a14a726b}{\index{mod\-\_\-secdownload.\-c@{mod\-\_\-secdownload.\-c}!F\-R\-E\-E\-\_\-\-F\-U\-N\-C@{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}}
+\index{F\-R\-E\-E\-\_\-\-F\-U\-N\-C@{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}!mod_secdownload.c@{mod\-\_\-secdownload.\-c}}
+\subsubsection[{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}F\-R\-E\-E\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-secdownload\-\_\-free}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__secdownload_8c_ab4f36620b6ccc3246c6221f6a14a726b}
+
+
+References buffer\-\_\-free(), plugin\-\_\-data\-::config\-\_\-storage, plugin\-\_\-config\-::doc\-\_\-root, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, plugin\-\_\-config\-::secret, U\-N\-U\-S\-E\-D, and plugin\-\_\-config\-::uri\-\_\-prefix.
+
+\hypertarget{mod__secdownload_8c_afadfaef076d505bcfd7fc2cd10770c0d}{\index{mod\-\_\-secdownload.\-c@{mod\-\_\-secdownload.\-c}!I\-N\-I\-T\-\_\-\-F\-U\-N\-C@{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}}
+\index{I\-N\-I\-T\-\_\-\-F\-U\-N\-C@{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}!mod_secdownload.c@{mod\-\_\-secdownload.\-c}}
+\subsubsection[{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}I\-N\-I\-T\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-secdownload\-\_\-init}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__secdownload_8c_afadfaef076d505bcfd7fc2cd10770c0d}
+\hypertarget{mod__secdownload_8c_ab7f3b0fb12a4bb4f7decaf897905fdd0}{\index{mod\-\_\-secdownload.\-c@{mod\-\_\-secdownload.\-c}!is\-\_\-base64\-\_\-len@{is\-\_\-base64\-\_\-len}}
+\index{is\-\_\-base64\-\_\-len@{is\-\_\-base64\-\_\-len}!mod_secdownload.c@{mod\-\_\-secdownload.\-c}}
+\subsubsection[{is\-\_\-base64\-\_\-len}]{\setlength{\rightskip}{0pt plus 5cm}static int is\-\_\-base64\-\_\-len (
+\begin{DoxyParamCaption}
+\item[{const char $\ast$}]{str, }
+\item[{size\-\_\-t}]{len}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__secdownload_8c_ab7f3b0fb12a4bb4f7decaf897905fdd0}
+checks if the supplied string is a base64 (modified U\-R\-L) string
+
+
+\begin{DoxyParams}{Parameters}
+{\em str} & a possible base64 (modified U\-R\-L) string \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+if the supplied string is a valid base64 (modified U\-R\-L) string 1 is returned otherwise 0 
+\end{DoxyReturn}
+
+
+Referenced by U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__secdownload_8c_a4dd4d0320e368d5c1347b1ac662c7389}{\index{mod\-\_\-secdownload.\-c@{mod\-\_\-secdownload.\-c}!is\-\_\-hex\-\_\-len@{is\-\_\-hex\-\_\-len}}
+\index{is\-\_\-hex\-\_\-len@{is\-\_\-hex\-\_\-len}!mod_secdownload.c@{mod\-\_\-secdownload.\-c}}
+\subsubsection[{is\-\_\-hex\-\_\-len}]{\setlength{\rightskip}{0pt plus 5cm}static int is\-\_\-hex\-\_\-len (
+\begin{DoxyParamCaption}
+\item[{const char $\ast$}]{str, }
+\item[{size\-\_\-t}]{len}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__secdownload_8c_a4dd4d0320e368d5c1347b1ac662c7389}
+checks if the supplied string is a hex string
+
+
+\begin{DoxyParams}{Parameters}
+{\em str} & a possible hex string \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+if the supplied string is a valid hex string 1 is returned otherwise 0 
+\end{DoxyReturn}
+
+
+Referenced by U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__secdownload_8c_ac9c759c93a8aee8c739c35db946769cd}{\index{mod\-\_\-secdownload.\-c@{mod\-\_\-secdownload.\-c}!mod\-\_\-secdownload\-\_\-patch\-\_\-connection@{mod\-\_\-secdownload\-\_\-patch\-\_\-connection}}
+\index{mod\-\_\-secdownload\-\_\-patch\-\_\-connection@{mod\-\_\-secdownload\-\_\-patch\-\_\-connection}!mod_secdownload.c@{mod\-\_\-secdownload.\-c}}
+\subsubsection[{mod\-\_\-secdownload\-\_\-patch\-\_\-connection}]{\setlength{\rightskip}{0pt plus 5cm}static int mod\-\_\-secdownload\-\_\-patch\-\_\-connection (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf plugin\-\_\-data} $\ast$}]{p}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__secdownload_8c_ac9c759c93a8aee8c739c35db946769cd}
+
+
+References buffer\-\_\-is\-\_\-equal\-\_\-string(), config\-\_\-check\-\_\-cond(), server\-::config\-\_\-context, plugin\-\_\-data\-::config\-\_\-storage, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, array\-::data, P\-A\-T\-C\-H, array\-::used, and data\-\_\-config\-::value.
+
+
+
+Referenced by U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__secdownload_8c_a60eb67885f21f358e91e193b6dfce052}{\index{mod\-\_\-secdownload.\-c@{mod\-\_\-secdownload.\-c}!mod\-\_\-secdownload\-\_\-plugin\-\_\-init@{mod\-\_\-secdownload\-\_\-plugin\-\_\-init}}
+\index{mod\-\_\-secdownload\-\_\-plugin\-\_\-init@{mod\-\_\-secdownload\-\_\-plugin\-\_\-init}!mod_secdownload.c@{mod\-\_\-secdownload.\-c}}
+\subsubsection[{mod\-\_\-secdownload\-\_\-plugin\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}int mod\-\_\-secdownload\-\_\-plugin\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{{\bf plugin} $\ast$}]{p}
+\end{DoxyParamCaption}
+)}}\label{mod__secdownload_8c_a60eb67885f21f358e91e193b6dfce052}
+
+
+References buffer\-\_\-init\-\_\-string(), plugin\-::cleanup, plugin\-::data, plugin\-::handle\-\_\-physical, plugin\-::init, plugin\-::name, plugin\-::set\-\_\-defaults, and plugin\-::version.
+
+\hypertarget{mod__secdownload_8c_a698efa3f14c7b46b2f4c1e54378c598c}{\index{mod\-\_\-secdownload.\-c@{mod\-\_\-secdownload.\-c}!secdl\-\_\-algorithm\-\_\-mac\-\_\-length@{secdl\-\_\-algorithm\-\_\-mac\-\_\-length}}
+\index{secdl\-\_\-algorithm\-\_\-mac\-\_\-length@{secdl\-\_\-algorithm\-\_\-mac\-\_\-length}!mod_secdownload.c@{mod\-\_\-secdownload.\-c}}
+\subsubsection[{secdl\-\_\-algorithm\-\_\-mac\-\_\-length}]{\setlength{\rightskip}{0pt plus 5cm}static size\-\_\-t secdl\-\_\-algorithm\-\_\-mac\-\_\-length (
+\begin{DoxyParamCaption}
+\item[{{\bf secdl\-\_\-algorithm}}]{alg}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__secdownload_8c_a698efa3f14c7b46b2f4c1e54378c598c}
+
+
+References S\-E\-C\-D\-L\-\_\-\-H\-M\-A\-C\-\_\-\-S\-H\-A1, S\-E\-C\-D\-L\-\_\-\-H\-M\-A\-C\-\_\-\-S\-H\-A256, S\-E\-C\-D\-L\-\_\-\-I\-N\-V\-A\-L\-I\-D, and S\-E\-C\-D\-L\-\_\-\-M\-D5.
+
+
+
+Referenced by secdl\-\_\-verify\-\_\-mac(), and U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__secdownload_8c_a12b52fa94ba83f707c818b05dad99642}{\index{mod\-\_\-secdownload.\-c@{mod\-\_\-secdownload.\-c}!secdl\-\_\-verify\-\_\-mac@{secdl\-\_\-verify\-\_\-mac}}
+\index{secdl\-\_\-verify\-\_\-mac@{secdl\-\_\-verify\-\_\-mac}!mod_secdownload.c@{mod\-\_\-secdownload.\-c}}
+\subsubsection[{secdl\-\_\-verify\-\_\-mac}]{\setlength{\rightskip}{0pt plus 5cm}static int secdl\-\_\-verify\-\_\-mac (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf plugin\-\_\-config} $\ast$}]{config, }
+\item[{const char $\ast$}]{protected\-\_\-path, }
+\item[{const char $\ast$}]{mac, }
+\item[{size\-\_\-t}]{maclen}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__secdownload_8c_a12b52fa94ba83f707c818b05dad99642}
+
+
+References plugin\-\_\-config\-::algorithm, B\-A\-S\-E64\-\_\-\-U\-R\-L, C\-O\-N\-S\-T\-\_\-\-B\-U\-F\-\_\-\-L\-E\-N, const\-\_\-time\-\_\-memeq(), li\-\_\-\-M\-D5\-\_\-\-Final(), li\-\_\-\-M\-D5\-\_\-\-Init(), li\-\_\-\-M\-D5\-\_\-\-Update(), li\-\_\-to\-\_\-base64\-\_\-no\-\_\-padding(), li\-\_\-tohex(), log\-\_\-error\-\_\-write(), secdl\-\_\-algorithm\-\_\-mac\-\_\-length(), S\-E\-C\-D\-L\-\_\-\-H\-M\-A\-C\-\_\-\-S\-H\-A1, S\-E\-C\-D\-L\-\_\-\-H\-M\-A\-C\-\_\-\-S\-H\-A256, S\-E\-C\-D\-L\-\_\-\-I\-N\-V\-A\-L\-I\-D, S\-E\-C\-D\-L\-\_\-\-M\-D5, plugin\-\_\-config\-::secret, and U\-N\-U\-S\-E\-D.
+
+
+
+Referenced by U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__secdownload_8c_a46c69814cd5d70b2a02ad69d232a5826}{\index{mod\-\_\-secdownload.\-c@{mod\-\_\-secdownload.\-c}!S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C@{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}}
+\index{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C@{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}!mod_secdownload.c@{mod\-\_\-secdownload.\-c}}
+\subsubsection[{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-secdownload\-\_\-set\-\_\-defaults}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__secdownload_8c_a46c69814cd5d70b2a02ad69d232a5826}
+
+
+References algorithm\-\_\-from\-\_\-string(), buffer\-\_\-free(), buffer\-\_\-init(), buffer\-\_\-is\-\_\-empty(), config\-\_\-insert\-\_\-values\-\_\-global(), plugin\-\_\-data\-::config\-\_\-storage, config\-\_\-values\-\_\-t\-::destination, H\-A\-N\-D\-L\-E\-R\-\_\-\-E\-R\-R\-O\-R, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, log\-\_\-error\-\_\-write(), S\-E\-C\-D\-L\-\_\-\-H\-M\-A\-C\-\_\-\-S\-H\-A1, S\-E\-C\-D\-L\-\_\-\-H\-M\-A\-C\-\_\-\-S\-H\-A256, S\-E\-C\-D\-L\-\_\-\-I\-N\-V\-A\-L\-I\-D, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-I\-N\-T, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T\-I\-O\-N, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-S\-E\-R\-V\-E\-R, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-U\-N\-S\-E\-T, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-T\-R\-I\-N\-G, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-U\-N\-S\-E\-T, and data\-\_\-config\-::value.
+
+\hypertarget{mod__secdownload_8c_a7f3217e0f688d34f9c31e4d602730585}{\index{mod\-\_\-secdownload.\-c@{mod\-\_\-secdownload.\-c}!U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C@{U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C}}
+\index{U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C@{U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C}!mod_secdownload.c@{mod\-\_\-secdownload.\-c}}
+\subsubsection[{U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-secdownload\-\_\-uri\-\_\-handler}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__secdownload_8c_a7f3217e0f688d34f9c31e4d602730585}
+
+
+References plugin\-\_\-config\-::algorithm, buffer\-\_\-append\-\_\-string\-\_\-buffer(), buffer\-\_\-copy\-\_\-buffer(), buffer\-\_\-copy\-\_\-string(), buffer\-\_\-is\-\_\-empty(), buffer\-\_\-string\-\_\-is\-\_\-empty(), buffer\-\_\-string\-\_\-length(), plugin\-\_\-data\-::conf, D\-I\-R\-E\-C\-T, plugin\-\_\-config\-::doc\-\_\-root, H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-I\-N\-I\-S\-H\-E\-D, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, hex2int(), is\-\_\-base64\-\_\-len(), is\-\_\-hex\-\_\-len(), log\-\_\-error\-\_\-write(), mod\-\_\-secdownload\-\_\-patch\-\_\-connection(), buffer\-::ptr, secdl\-\_\-algorithm\-\_\-mac\-\_\-length(), S\-E\-C\-D\-L\-\_\-\-I\-N\-V\-A\-L\-I\-D, secdl\-\_\-verify\-\_\-mac(), plugin\-\_\-config\-::secret, plugin\-\_\-config\-::timeout, and plugin\-\_\-config\-::uri\-\_\-prefix.
+
+
+
+\subsection{Variable Documentation}
+\hypertarget{mod__secdownload_8c_a17109d8b3aaf35e72ae3543f07b052f2}{\index{mod\-\_\-secdownload.\-c@{mod\-\_\-secdownload.\-c}!secdl\-\_\-algorithm\-\_\-names@{secdl\-\_\-algorithm\-\_\-names}}
+\index{secdl\-\_\-algorithm\-\_\-names@{secdl\-\_\-algorithm\-\_\-names}!mod_secdownload.c@{mod\-\_\-secdownload.\-c}}
+\subsubsection[{secdl\-\_\-algorithm\-\_\-names}]{\setlength{\rightskip}{0pt plus 5cm}const char$\ast$ secdl\-\_\-algorithm\-\_\-names\mbox{[}$\,$\mbox{]}\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__secdownload_8c_a17109d8b3aaf35e72ae3543f07b052f2}
+{\bfseries Initial value\-:}
+\begin{DoxyCode}
+= \{
+    \textcolor{stringliteral}{"invalid"},
+    \textcolor{stringliteral}{"md5"},
+    \textcolor{stringliteral}{"hmac-sha1"},
+    \textcolor{stringliteral}{"hmac-sha256"},
+\}
+\end{DoxyCode}
+
+
+Referenced by algorithm\-\_\-from\-\_\-string().
+

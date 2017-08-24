@@ -1,0 +1,152 @@
+\hypertarget{structscgi__proc}{\section{scgi\-\_\-proc Struct Reference}
+\label{structscgi__proc}\index{scgi\-\_\-proc@{scgi\-\_\-proc}}
+}
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+enum \{ \\*
+\hyperlink{structscgi__proc_a22b30f271abaa36d184a5be409aeadcaa5f716e6d6aac1f24da978a4d65cfefe7}{P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-U\-N\-S\-E\-T}, 
+\hyperlink{structscgi__proc_a22b30f271abaa36d184a5be409aeadcaaa973460346b7ca06a2b00657e9064148}{P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-U\-N\-N\-I\-N\-G}, 
+\hyperlink{structscgi__proc_a22b30f271abaa36d184a5be409aeadcaaee44ce0af0629134dad57834c26fb464}{P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-D\-I\-E\-D\-\_\-\-W\-A\-I\-T\-\_\-\-F\-O\-R\-\_\-\-P\-I\-D}, 
+\hyperlink{structscgi__proc_a22b30f271abaa36d184a5be409aeadcaab5916089a3ba78d20bb2bda9805db1b7}{P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-K\-I\-L\-L\-E\-D}, 
+\\*
+\hyperlink{structscgi__proc_a22b30f271abaa36d184a5be409aeadcaa05ff1cb3203a4ce40c90487da67b7e47}{P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-D\-I\-E\-D}, 
+\hyperlink{structscgi__proc_a22b30f271abaa36d184a5be409aeadcaa145b6ad4803e704802ccbf45a1ab6769}{P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-D\-I\-S\-A\-B\-L\-E\-D}
+ \}
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+size\-\_\-t \hyperlink{structscgi__proc_af7e907a950ab620af3a5b06727adf575}{id}
+\item 
+\hyperlink{structbuffer}{buffer} $\ast$ \hyperlink{structscgi__proc_ab75f773ba805b864842cc38e6413c9a5}{socket}
+\item 
+unsigned \hyperlink{structscgi__proc_a01546bbb3cf9a34a11cd28f9db430561}{port}
+\item 
+pid\-\_\-t \hyperlink{structscgi__proc_a95b096cdf28e86fd91b41043c70997c8}{pid}
+\item 
+size\-\_\-t \hyperlink{structscgi__proc_a013e0b6ff195b7e6cb1f97c9ffb296fe}{load}
+\item 
+time\-\_\-t \hyperlink{structscgi__proc_a668a2d7ba5885239e7a53f154ff6d3af}{last\-\_\-used}
+\item 
+size\-\_\-t \hyperlink{structscgi__proc_a44f6cb8237c073b1394bfb3999ae9a81}{requests}
+\item 
+struct \hyperlink{structscgi__proc}{scgi\-\_\-proc} $\ast$ \hyperlink{structscgi__proc_aa92d0093242bd955f454bff80f30e368}{prev}
+\item 
+struct \hyperlink{structscgi__proc}{scgi\-\_\-proc} $\ast$ \hyperlink{structscgi__proc_aa97160627b2702e3c5249d5fe2083893}{next}
+\item 
+time\-\_\-t \hyperlink{structscgi__proc_a18fdad63d74fd0490a64e494a7273286}{disable\-\_\-ts}
+\item 
+int \hyperlink{structscgi__proc_a0bcb2715d253cb39b0ee95a94dd91fa9}{is\-\_\-local}
+\item 
+enum scgi\-\_\-proc\-:: \{ ... \}  \hyperlink{structscgi__proc_a49e46b6044c5a88b1f7f2503834379ce}{state}
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Enumeration Documentation}
+\hypertarget{structscgi__proc_a22b30f271abaa36d184a5be409aeadca}{\subsubsection[{anonymous enum}]{\setlength{\rightskip}{0pt plus 5cm}anonymous enum}}\label{structscgi__proc_a22b30f271abaa36d184a5be409aeadca}
+\begin{Desc}
+\item[Enumerator]\par
+\begin{description}
+\index{P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-U\-N\-S\-E\-T@{P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-U\-N\-S\-E\-T}!scgi\-\_\-proc@{scgi\-\_\-proc}}\index{scgi\-\_\-proc@{scgi\-\_\-proc}!P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-U\-N\-S\-E\-T@{P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-U\-N\-S\-E\-T}}\item[{\em 
+\hypertarget{structscgi__proc_a22b30f271abaa36d184a5be409aeadcaa5f716e6d6aac1f24da978a4d65cfefe7}{P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-U\-N\-S\-E\-T}\label{structscgi__proc_a22b30f271abaa36d184a5be409aeadcaa5f716e6d6aac1f24da978a4d65cfefe7}
+}]\index{P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-U\-N\-N\-I\-N\-G@{P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-U\-N\-N\-I\-N\-G}!scgi\-\_\-proc@{scgi\-\_\-proc}}\index{scgi\-\_\-proc@{scgi\-\_\-proc}!P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-U\-N\-N\-I\-N\-G@{P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-U\-N\-N\-I\-N\-G}}\item[{\em 
+\hypertarget{structscgi__proc_a22b30f271abaa36d184a5be409aeadcaaa973460346b7ca06a2b00657e9064148}{P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-U\-N\-N\-I\-N\-G}\label{structscgi__proc_a22b30f271abaa36d184a5be409aeadcaaa973460346b7ca06a2b00657e9064148}
+}]\index{P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-D\-I\-E\-D\-\_\-\-W\-A\-I\-T\-\_\-\-F\-O\-R\-\_\-\-P\-I\-D@{P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-D\-I\-E\-D\-\_\-\-W\-A\-I\-T\-\_\-\-F\-O\-R\-\_\-\-P\-I\-D}!scgi\-\_\-proc@{scgi\-\_\-proc}}\index{scgi\-\_\-proc@{scgi\-\_\-proc}!P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-D\-I\-E\-D\-\_\-\-W\-A\-I\-T\-\_\-\-F\-O\-R\-\_\-\-P\-I\-D@{P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-D\-I\-E\-D\-\_\-\-W\-A\-I\-T\-\_\-\-F\-O\-R\-\_\-\-P\-I\-D}}\item[{\em 
+\hypertarget{structscgi__proc_a22b30f271abaa36d184a5be409aeadcaaee44ce0af0629134dad57834c26fb464}{P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-D\-I\-E\-D\-\_\-\-W\-A\-I\-T\-\_\-\-F\-O\-R\-\_\-\-P\-I\-D}\label{structscgi__proc_a22b30f271abaa36d184a5be409aeadcaaee44ce0af0629134dad57834c26fb464}
+}]\index{P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-K\-I\-L\-L\-E\-D@{P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-K\-I\-L\-L\-E\-D}!scgi\-\_\-proc@{scgi\-\_\-proc}}\index{scgi\-\_\-proc@{scgi\-\_\-proc}!P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-K\-I\-L\-L\-E\-D@{P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-K\-I\-L\-L\-E\-D}}\item[{\em 
+\hypertarget{structscgi__proc_a22b30f271abaa36d184a5be409aeadcaab5916089a3ba78d20bb2bda9805db1b7}{P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-K\-I\-L\-L\-E\-D}\label{structscgi__proc_a22b30f271abaa36d184a5be409aeadcaab5916089a3ba78d20bb2bda9805db1b7}
+}]\index{P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-D\-I\-E\-D@{P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-D\-I\-E\-D}!scgi\-\_\-proc@{scgi\-\_\-proc}}\index{scgi\-\_\-proc@{scgi\-\_\-proc}!P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-D\-I\-E\-D@{P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-D\-I\-E\-D}}\item[{\em 
+\hypertarget{structscgi__proc_a22b30f271abaa36d184a5be409aeadcaa05ff1cb3203a4ce40c90487da67b7e47}{P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-D\-I\-E\-D}\label{structscgi__proc_a22b30f271abaa36d184a5be409aeadcaa05ff1cb3203a4ce40c90487da67b7e47}
+}]\index{P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-D\-I\-S\-A\-B\-L\-E\-D@{P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-D\-I\-S\-A\-B\-L\-E\-D}!scgi\-\_\-proc@{scgi\-\_\-proc}}\index{scgi\-\_\-proc@{scgi\-\_\-proc}!P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-D\-I\-S\-A\-B\-L\-E\-D@{P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-D\-I\-S\-A\-B\-L\-E\-D}}\item[{\em 
+\hypertarget{structscgi__proc_a22b30f271abaa36d184a5be409aeadcaa145b6ad4803e704802ccbf45a1ab6769}{P\-R\-O\-C\-\_\-\-S\-T\-A\-T\-E\-\_\-\-D\-I\-S\-A\-B\-L\-E\-D}\label{structscgi__proc_a22b30f271abaa36d184a5be409aeadcaa145b6ad4803e704802ccbf45a1ab6769}
+}]\end{description}
+\end{Desc}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{structscgi__proc_a18fdad63d74fd0490a64e494a7273286}{\index{scgi\-\_\-proc@{scgi\-\_\-proc}!disable\-\_\-ts@{disable\-\_\-ts}}
+\index{disable\-\_\-ts@{disable\-\_\-ts}!scgi_proc@{scgi\-\_\-proc}}
+\subsubsection[{disable\-\_\-ts}]{\setlength{\rightskip}{0pt plus 5cm}time\-\_\-t scgi\-\_\-proc\-::disable\-\_\-ts}}\label{structscgi__proc_a18fdad63d74fd0490a64e494a7273286}
+
+
+Referenced by scgi\-\_\-restart\-\_\-dead\-\_\-procs(), and scgi\-\_\-send\-\_\-request().
+
+\hypertarget{structscgi__proc_af7e907a950ab620af3a5b06727adf575}{\index{scgi\-\_\-proc@{scgi\-\_\-proc}!id@{id}}
+\index{id@{id}!scgi_proc@{scgi\-\_\-proc}}
+\subsubsection[{id}]{\setlength{\rightskip}{0pt plus 5cm}size\-\_\-t scgi\-\_\-proc\-::id}}\label{structscgi__proc_af7e907a950ab620af3a5b06727adf575}
+
+
+Referenced by S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), and T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structscgi__proc_a0bcb2715d253cb39b0ee95a94dd91fa9}{\index{scgi\-\_\-proc@{scgi\-\_\-proc}!is\-\_\-local@{is\-\_\-local}}
+\index{is\-\_\-local@{is\-\_\-local}!scgi_proc@{scgi\-\_\-proc}}
+\subsubsection[{is\-\_\-local}]{\setlength{\rightskip}{0pt plus 5cm}int scgi\-\_\-proc\-::is\-\_\-local}}\label{structscgi__proc_a0bcb2715d253cb39b0ee95a94dd91fa9}
+
+
+Referenced by F\-R\-E\-E\-\_\-\-F\-U\-N\-C(), scgi\-\_\-restart\-\_\-dead\-\_\-procs(), and scgi\-\_\-send\-\_\-request().
+
+\hypertarget{structscgi__proc_a668a2d7ba5885239e7a53f154ff6d3af}{\index{scgi\-\_\-proc@{scgi\-\_\-proc}!last\-\_\-used@{last\-\_\-used}}
+\index{last\-\_\-used@{last\-\_\-used}!scgi_proc@{scgi\-\_\-proc}}
+\subsubsection[{last\-\_\-used}]{\setlength{\rightskip}{0pt plus 5cm}time\-\_\-t scgi\-\_\-proc\-::last\-\_\-used}}\label{structscgi__proc_a668a2d7ba5885239e7a53f154ff6d3af}
+
+
+Referenced by T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structscgi__proc_a013e0b6ff195b7e6cb1f97c9ffb296fe}{\index{scgi\-\_\-proc@{scgi\-\_\-proc}!load@{load}}
+\index{load@{load}!scgi_proc@{scgi\-\_\-proc}}
+\subsubsection[{load}]{\setlength{\rightskip}{0pt plus 5cm}size\-\_\-t scgi\-\_\-proc\-::load}}\label{structscgi__proc_a013e0b6ff195b7e6cb1f97c9ffb296fe}
+
+
+Referenced by scgi\-\_\-proclist\-\_\-sort\-\_\-down(), scgi\-\_\-proclist\-\_\-sort\-\_\-up(), scgi\-\_\-restart\-\_\-dead\-\_\-procs(), and T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structscgi__proc_aa97160627b2702e3c5249d5fe2083893}{\index{scgi\-\_\-proc@{scgi\-\_\-proc}!next@{next}}
+\index{next@{next}!scgi_proc@{scgi\-\_\-proc}}
+\subsubsection[{next}]{\setlength{\rightskip}{0pt plus 5cm}struct {\bf scgi\-\_\-proc} $\ast$ scgi\-\_\-proc\-::next}}\label{structscgi__proc_aa97160627b2702e3c5249d5fe2083893}
+
+
+Referenced by F\-R\-E\-E\-\_\-\-F\-U\-N\-C(), scgi\-\_\-process\-\_\-free(), scgi\-\_\-process\-\_\-init(), scgi\-\_\-proclist\-\_\-sort\-\_\-down(), scgi\-\_\-proclist\-\_\-sort\-\_\-up(), scgi\-\_\-restart\-\_\-dead\-\_\-procs(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), and T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structscgi__proc_a95b096cdf28e86fd91b41043c70997c8}{\index{scgi\-\_\-proc@{scgi\-\_\-proc}!pid@{pid}}
+\index{pid@{pid}!scgi_proc@{scgi\-\_\-proc}}
+\subsubsection[{pid}]{\setlength{\rightskip}{0pt plus 5cm}pid\-\_\-t scgi\-\_\-proc\-::pid}}\label{structscgi__proc_a95b096cdf28e86fd91b41043c70997c8}
+
+
+Referenced by F\-R\-E\-E\-\_\-\-F\-U\-N\-C(), scgi\-\_\-proclist\-\_\-sort\-\_\-down(), scgi\-\_\-proclist\-\_\-sort\-\_\-up(), scgi\-\_\-recv\-\_\-response(), scgi\-\_\-restart\-\_\-dead\-\_\-procs(), scgi\-\_\-send\-\_\-request(), and T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structscgi__proc_a01546bbb3cf9a34a11cd28f9db430561}{\index{scgi\-\_\-proc@{scgi\-\_\-proc}!port@{port}}
+\index{port@{port}!scgi_proc@{scgi\-\_\-proc}}
+\subsubsection[{port}]{\setlength{\rightskip}{0pt plus 5cm}unsigned scgi\-\_\-proc\-::port}}\label{structscgi__proc_a01546bbb3cf9a34a11cd28f9db430561}
+
+
+Referenced by scgi\-\_\-establish\-\_\-connection(), scgi\-\_\-restart\-\_\-dead\-\_\-procs(), scgi\-\_\-send\-\_\-request(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), and T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structscgi__proc_aa92d0093242bd955f454bff80f30e368}{\index{scgi\-\_\-proc@{scgi\-\_\-proc}!prev@{prev}}
+\index{prev@{prev}!scgi_proc@{scgi\-\_\-proc}}
+\subsubsection[{prev}]{\setlength{\rightskip}{0pt plus 5cm}struct {\bf scgi\-\_\-proc}$\ast$ scgi\-\_\-proc\-::prev}}\label{structscgi__proc_aa92d0093242bd955f454bff80f30e368}
+
+
+Referenced by scgi\-\_\-process\-\_\-init(), scgi\-\_\-proclist\-\_\-sort\-\_\-down(), scgi\-\_\-proclist\-\_\-sort\-\_\-up(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), and T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structscgi__proc_a44f6cb8237c073b1394bfb3999ae9a81}{\index{scgi\-\_\-proc@{scgi\-\_\-proc}!requests@{requests}}
+\index{requests@{requests}!scgi_proc@{scgi\-\_\-proc}}
+\subsubsection[{requests}]{\setlength{\rightskip}{0pt plus 5cm}size\-\_\-t scgi\-\_\-proc\-::requests}}\label{structscgi__proc_a44f6cb8237c073b1394bfb3999ae9a81}
+\hypertarget{structscgi__proc_ab75f773ba805b864842cc38e6413c9a5}{\index{scgi\-\_\-proc@{scgi\-\_\-proc}!socket@{socket}}
+\index{socket@{socket}!scgi_proc@{scgi\-\_\-proc}}
+\subsubsection[{socket}]{\setlength{\rightskip}{0pt plus 5cm}{\bf buffer}$\ast$ scgi\-\_\-proc\-::socket}}\label{structscgi__proc_ab75f773ba805b864842cc38e6413c9a5}
+
+
+Referenced by F\-R\-E\-E\-\_\-\-F\-U\-N\-C(), scgi\-\_\-establish\-\_\-connection(), scgi\-\_\-process\-\_\-free(), scgi\-\_\-process\-\_\-init(), scgi\-\_\-restart\-\_\-dead\-\_\-procs(), scgi\-\_\-send\-\_\-request(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), and T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structscgi__proc_a49e46b6044c5a88b1f7f2503834379ce}{\index{scgi\-\_\-proc@{scgi\-\_\-proc}!state@{state}}
+\index{state@{state}!scgi_proc@{scgi\-\_\-proc}}
+\subsubsection[{state}]{\setlength{\rightskip}{0pt plus 5cm}enum \{ ... \}   scgi\-\_\-proc\-::state}}\label{structscgi__proc_a49e46b6044c5a88b1f7f2503834379ce}
+
+
+Referenced by scgi\-\_\-recv\-\_\-response(), scgi\-\_\-restart\-\_\-dead\-\_\-procs(), scgi\-\_\-send\-\_\-request(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), and T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C().
+
+
+
+The documentation for this struct was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{mod__scgi_8c}{mod\-\_\-scgi.\-c}\end{DoxyCompactItemize}

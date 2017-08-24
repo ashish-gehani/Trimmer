@@ -1,0 +1,391 @@
+\hypertarget{mod__authn__gssapi_8c}{\section{mod\-\_\-authn\-\_\-gssapi.\-c File Reference}
+\label{mod__authn__gssapi_8c}\index{mod\-\_\-authn\-\_\-gssapi.\-c@{mod\-\_\-authn\-\_\-gssapi.\-c}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}plugin.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$krb5.\-h$>$}\\*
+{\ttfamily \#include $<$gssapi.\-h$>$}\\*
+{\ttfamily \#include $<$gssapi/gssapi\-\_\-krb5.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}http\-\_\-auth.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}base.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}log.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}md5.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}base64.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}response.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$errno.\-h$>$}\\*
+{\ttfamily \#include $<$stdlib.\-h$>$}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structplugin__config}{plugin\-\_\-config}
+\item 
+struct \hyperlink{structplugin__data}{plugin\-\_\-data}
+\end{DoxyCompactItemize}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{mod__authn__gssapi_8c_a20876ec7c0c844d0e0c1628528bbb8da}{P\-A\-T\-C\-H}(x)~p-\/$>$conf.\-x = s-\/$>$x;
+\item 
+\#define \hyperlink{mod__authn__gssapi_8c_a66e472b36ef29417784aef4b24a46c48}{G\-S\-S\-\_\-\-K\-R\-B5\-\_\-\-N\-T\-\_\-\-P\-R\-I\-N\-C\-I\-P\-A\-L\-\_\-\-N\-A\-M\-E}~gss\-\_\-nt\-\_\-krb5\-\_\-name
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t} \hyperlink{mod__authn__gssapi_8c_a57da81ae669907dd8cbe6e4fd90d76dc}{mod\-\_\-authn\-\_\-gssapi\-\_\-check} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, void $\ast$p\-\_\-d, const struct \hyperlink{structhttp__auth__require__t}{http\-\_\-auth\-\_\-require\-\_\-t} $\ast$require, const struct \hyperlink{structhttp__auth__backend__t}{http\-\_\-auth\-\_\-backend\-\_\-t} $\ast$backend)
+\item 
+static \hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t} \hyperlink{mod__authn__gssapi_8c_a41ee85a81e1f54e0f1d1adf47e5b255d}{mod\-\_\-authn\-\_\-gssapi\-\_\-basic} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, void $\ast$p\-\_\-d, const \hyperlink{structhttp__auth__require__t}{http\-\_\-auth\-\_\-require\-\_\-t} $\ast$require, const \hyperlink{structbuffer}{buffer} $\ast$username, const char $\ast$pw)
+\item 
+\hyperlink{mod__authn__gssapi_8c_a3f14fe0e1b86367c95be72b91fca690d}{I\-N\-I\-T\-\_\-\-F\-U\-N\-C} (mod\-\_\-authn\-\_\-gssapi\-\_\-init)
+\item 
+\hyperlink{mod__authn__gssapi_8c_ac5f21e79374e3daf165e62ecfda6b6ea}{F\-R\-E\-E\-\_\-\-F\-U\-N\-C} (mod\-\_\-authn\-\_\-gssapi\-\_\-free)
+\item 
+\hyperlink{mod__authn__gssapi_8c_acff7347f2519cefaaf8766c34d786810}{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C} (mod\-\_\-authn\-\_\-gssapi\-\_\-set\-\_\-defaults)
+\item 
+static int \hyperlink{mod__authn__gssapi_8c_a7232df290999c8bf08ac93a63b05e147}{mod\-\_\-authn\-\_\-gssapi\-\_\-patch\-\_\-connection} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structplugin__data}{plugin\-\_\-data} $\ast$p)
+\item 
+static \hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t} \hyperlink{mod__authn__gssapi_8c_a2ec442e68255e0d6045ddce457e19d50}{mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-400\-\_\-bad\-\_\-request} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con)
+\item 
+static void \hyperlink{mod__authn__gssapi_8c_abb65b58fed3fb3ec9c92c44aced69971}{mod\-\_\-authn\-\_\-gssapi\-\_\-log\-\_\-gss\-\_\-error} (\hyperlink{structserver}{server} $\ast$srv, const char $\ast$file, unsigned int line, const char $\ast$func, const char $\ast$extra, O\-M\-\_\-uint32 err\-\_\-maj, O\-M\-\_\-uint32 err\-\_\-min)
+\item 
+static void \hyperlink{mod__authn__gssapi_8c_aa42b50e43ec4517ec202ec5e482303fa}{mod\-\_\-authn\-\_\-gssapi\-\_\-log\-\_\-krb5\-\_\-error} (\hyperlink{structserver}{server} $\ast$srv, const char $\ast$file, unsigned int line, const char $\ast$func, const char $\ast$extra, krb5\-\_\-context context, int code)
+\item 
+static int \hyperlink{mod__authn__gssapi_8c_af630555fd8a8bacfaa65da61a7663110}{mod\-\_\-authn\-\_\-gssapi\-\_\-create\-\_\-krb5\-\_\-ccache} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structplugin__data}{plugin\-\_\-data} $\ast$p, krb5\-\_\-context kcontext, krb5\-\_\-principal princ, krb5\-\_\-ccache $\ast$ccache)
+\item 
+static \hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t} \hyperlink{mod__authn__gssapi_8c_a7354dfe1ed8e5f06130abcccf3d0f2ea}{mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-negotiate} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con)
+\item 
+static int \hyperlink{mod__authn__gssapi_8c_a81b2be97bf8527fc1944e4d006970404}{mod\-\_\-authn\-\_\-gssapi\-\_\-store\-\_\-gss\-\_\-creds} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structplugin__data}{plugin\-\_\-data} $\ast$p, char $\ast$princ\-\_\-name, gss\-\_\-cred\-\_\-id\-\_\-t delegated\-\_\-cred)
+\item 
+static \hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t} \hyperlink{mod__authn__gssapi_8c_aa15d2af0d503adedff0b0ae09af85f6b}{mod\-\_\-authn\-\_\-gssapi\-\_\-check\-\_\-spnego} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structplugin__data}{plugin\-\_\-data} $\ast$p, const \hyperlink{structhttp__auth__require__t}{http\-\_\-auth\-\_\-require\-\_\-t} $\ast$require, const char $\ast$realm\-\_\-str)
+\item 
+static krb5\-\_\-error\-\_\-code \hyperlink{mod__authn__gssapi_8c_a6b05240243a1c665a1ff0715b196c6d4}{mod\-\_\-authn\-\_\-gssapi\-\_\-verify\-\_\-krb5\-\_\-init\-\_\-creds} (\hyperlink{structserver}{server} $\ast$srv, krb5\-\_\-context context, krb5\-\_\-creds $\ast$creds, krb5\-\_\-principal ap\-\_\-req\-\_\-server, krb5\-\_\-keytab ap\-\_\-req\-\_\-keytab)
+\item 
+static int \hyperlink{mod__authn__gssapi_8c_a86fab6180b4b7da81127257b79b7d677}{mod\-\_\-authn\-\_\-gssapi\-\_\-store\-\_\-krb5\-\_\-creds} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structplugin__data}{plugin\-\_\-data} $\ast$p, krb5\-\_\-context kcontext, krb5\-\_\-ccache delegated\-\_\-cred)
+\item 
+static \hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t} \hyperlink{mod__authn__gssapi_8c_aca1539cd44a3414a0db77eb5cf199ae9}{mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-basic} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con)
+\item 
+\hyperlink{mod__authn__gssapi_8c_a43569cf1495f3d6075f25c5cc2808749}{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C} (mod\-\_\-authn\-\_\-gssapi\-\_\-handle\-\_\-reset)
+\item 
+int \hyperlink{mod__authn__gssapi_8c_a95fe0465ae1030e66be9eb8209aad75f}{mod\-\_\-authn\-\_\-gssapi\-\_\-plugin\-\_\-init} (\hyperlink{structplugin}{plugin} $\ast$p)
+\end{DoxyCompactItemize}
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{mod__authn__gssapi_8c_a66e472b36ef29417784aef4b24a46c48}{\index{mod\-\_\-authn\-\_\-gssapi.\-c@{mod\-\_\-authn\-\_\-gssapi.\-c}!G\-S\-S\-\_\-\-K\-R\-B5\-\_\-\-N\-T\-\_\-\-P\-R\-I\-N\-C\-I\-P\-A\-L\-\_\-\-N\-A\-M\-E@{G\-S\-S\-\_\-\-K\-R\-B5\-\_\-\-N\-T\-\_\-\-P\-R\-I\-N\-C\-I\-P\-A\-L\-\_\-\-N\-A\-M\-E}}
+\index{G\-S\-S\-\_\-\-K\-R\-B5\-\_\-\-N\-T\-\_\-\-P\-R\-I\-N\-C\-I\-P\-A\-L\-\_\-\-N\-A\-M\-E@{G\-S\-S\-\_\-\-K\-R\-B5\-\_\-\-N\-T\-\_\-\-P\-R\-I\-N\-C\-I\-P\-A\-L\-\_\-\-N\-A\-M\-E}!mod_authn_gssapi.c@{mod\-\_\-authn\-\_\-gssapi.\-c}}
+\subsubsection[{G\-S\-S\-\_\-\-K\-R\-B5\-\_\-\-N\-T\-\_\-\-P\-R\-I\-N\-C\-I\-P\-A\-L\-\_\-\-N\-A\-M\-E}]{\setlength{\rightskip}{0pt plus 5cm}\#define G\-S\-S\-\_\-\-K\-R\-B5\-\_\-\-N\-T\-\_\-\-P\-R\-I\-N\-C\-I\-P\-A\-L\-\_\-\-N\-A\-M\-E~gss\-\_\-nt\-\_\-krb5\-\_\-name}}\label{mod__authn__gssapi_8c_a66e472b36ef29417784aef4b24a46c48}
+
+
+Referenced by mod\-\_\-authn\-\_\-gssapi\-\_\-check\-\_\-spnego().
+
+\hypertarget{mod__authn__gssapi_8c_a20876ec7c0c844d0e0c1628528bbb8da}{\index{mod\-\_\-authn\-\_\-gssapi.\-c@{mod\-\_\-authn\-\_\-gssapi.\-c}!P\-A\-T\-C\-H@{P\-A\-T\-C\-H}}
+\index{P\-A\-T\-C\-H@{P\-A\-T\-C\-H}!mod_authn_gssapi.c@{mod\-\_\-authn\-\_\-gssapi.\-c}}
+\subsubsection[{P\-A\-T\-C\-H}]{\setlength{\rightskip}{0pt plus 5cm}\#define P\-A\-T\-C\-H(
+\begin{DoxyParamCaption}
+\item[{}]{x}
+\end{DoxyParamCaption}
+)~p-\/$>$conf.\-x = s-\/$>$x;}}\label{mod__authn__gssapi_8c_a20876ec7c0c844d0e0c1628528bbb8da}
+
+
+Referenced by mod\-\_\-authn\-\_\-gssapi\-\_\-patch\-\_\-connection().
+
+
+
+\subsection{Function Documentation}
+\hypertarget{mod__authn__gssapi_8c_a43569cf1495f3d6075f25c5cc2808749}{\index{mod\-\_\-authn\-\_\-gssapi.\-c@{mod\-\_\-authn\-\_\-gssapi.\-c}!C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C@{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C}}
+\index{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C@{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C}!mod_authn_gssapi.c@{mod\-\_\-authn\-\_\-gssapi.\-c}}
+\subsubsection[{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-authn\-\_\-gssapi\-\_\-handle\-\_\-reset}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__authn__gssapi_8c_a43569cf1495f3d6075f25c5cc2808749}
+
+
+References buffer\-\_\-free(), H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, buffer\-::ptr, and U\-N\-U\-S\-E\-D.
+
+\hypertarget{mod__authn__gssapi_8c_ac5f21e79374e3daf165e62ecfda6b6ea}{\index{mod\-\_\-authn\-\_\-gssapi.\-c@{mod\-\_\-authn\-\_\-gssapi.\-c}!F\-R\-E\-E\-\_\-\-F\-U\-N\-C@{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}}
+\index{F\-R\-E\-E\-\_\-\-F\-U\-N\-C@{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}!mod_authn_gssapi.c@{mod\-\_\-authn\-\_\-gssapi.\-c}}
+\subsubsection[{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}F\-R\-E\-E\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-authn\-\_\-gssapi\-\_\-free}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__authn__gssapi_8c_ac5f21e79374e3daf165e62ecfda6b6ea}
+
+
+References plugin\-\_\-config\-::auth\-\_\-gssapi\-\_\-keytab, plugin\-\_\-config\-::auth\-\_\-gssapi\-\_\-principal, buffer\-\_\-free(), plugin\-\_\-data\-::config\-\_\-storage, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, and U\-N\-U\-S\-E\-D.
+
+\hypertarget{mod__authn__gssapi_8c_a3f14fe0e1b86367c95be72b91fca690d}{\index{mod\-\_\-authn\-\_\-gssapi.\-c@{mod\-\_\-authn\-\_\-gssapi.\-c}!I\-N\-I\-T\-\_\-\-F\-U\-N\-C@{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}}
+\index{I\-N\-I\-T\-\_\-\-F\-U\-N\-C@{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}!mod_authn_gssapi.c@{mod\-\_\-authn\-\_\-gssapi.\-c}}
+\subsubsection[{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}I\-N\-I\-T\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-authn\-\_\-gssapi\-\_\-init}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__authn__gssapi_8c_a3f14fe0e1b86367c95be72b91fca690d}
+
+
+References http\-\_\-auth\-\_\-backend\-\_\-set(), http\-\_\-auth\-\_\-scheme\-\_\-set(), mod\-\_\-authn\-\_\-gssapi\-\_\-basic(), mod\-\_\-authn\-\_\-gssapi\-\_\-check(), http\-\_\-auth\-\_\-backend\-\_\-t\-::p\-\_\-d, and http\-\_\-auth\-\_\-scheme\-\_\-t\-::p\-\_\-d.
+
+\hypertarget{mod__authn__gssapi_8c_a41ee85a81e1f54e0f1d1adf47e5b255d}{\index{mod\-\_\-authn\-\_\-gssapi.\-c@{mod\-\_\-authn\-\_\-gssapi.\-c}!mod\-\_\-authn\-\_\-gssapi\-\_\-basic@{mod\-\_\-authn\-\_\-gssapi\-\_\-basic}}
+\index{mod\-\_\-authn\-\_\-gssapi\-\_\-basic@{mod\-\_\-authn\-\_\-gssapi\-\_\-basic}!mod_authn_gssapi.c@{mod\-\_\-authn\-\_\-gssapi.\-c}}
+\subsubsection[{mod\-\_\-authn\-\_\-gssapi\-\_\-basic}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf handler\-\_\-t} mod\-\_\-authn\-\_\-gssapi\-\_\-basic (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{void $\ast$}]{p\-\_\-d, }
+\item[{const {\bf http\-\_\-auth\-\_\-require\-\_\-t} $\ast$}]{require, }
+\item[{const {\bf buffer} $\ast$}]{username, }
+\item[{const char $\ast$}]{pw}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__authn__gssapi_8c_a41ee85a81e1f54e0f1d1adf47e5b255d}
+
+
+References plugin\-\_\-config\-::auth\-\_\-gssapi\-\_\-keytab, plugin\-\_\-config\-::auth\-\_\-gssapi\-\_\-principal, buffer\-\_\-append\-\_\-string(), buffer\-\_\-append\-\_\-string\-\_\-buffer(), B\-U\-F\-F\-E\-R\-\_\-\-A\-P\-P\-E\-N\-D\-\_\-\-S\-T\-R\-I\-N\-G\-\_\-\-C\-O\-N\-S\-T, buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-free(), buffer\-\_\-init\-\_\-buffer(), buffer\-\_\-is\-\_\-empty(), plugin\-\_\-data\-::conf, connection\-::dst\-\_\-addr\-\_\-buf, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, http\-\_\-auth\-\_\-match\-\_\-rules(), request\-::http\-\_\-host, log\-\_\-error\-\_\-write(), mod\-\_\-authn\-\_\-gssapi\-\_\-log\-\_\-krb5\-\_\-error(), mod\-\_\-authn\-\_\-gssapi\-\_\-patch\-\_\-connection(), mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-basic(), mod\-\_\-authn\-\_\-gssapi\-\_\-store\-\_\-krb5\-\_\-creds(), mod\-\_\-authn\-\_\-gssapi\-\_\-verify\-\_\-krb5\-\_\-init\-\_\-creds(), request\-\_\-uri\-::path, buffer\-::ptr, http\-\_\-auth\-\_\-require\-\_\-t\-::realm, connection\-::request, and connection\-::uri.
+
+
+
+Referenced by I\-N\-I\-T\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__authn__gssapi_8c_a57da81ae669907dd8cbe6e4fd90d76dc}{\index{mod\-\_\-authn\-\_\-gssapi.\-c@{mod\-\_\-authn\-\_\-gssapi.\-c}!mod\-\_\-authn\-\_\-gssapi\-\_\-check@{mod\-\_\-authn\-\_\-gssapi\-\_\-check}}
+\index{mod\-\_\-authn\-\_\-gssapi\-\_\-check@{mod\-\_\-authn\-\_\-gssapi\-\_\-check}!mod_authn_gssapi.c@{mod\-\_\-authn\-\_\-gssapi.\-c}}
+\subsubsection[{mod\-\_\-authn\-\_\-gssapi\-\_\-check}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf handler\-\_\-t} mod\-\_\-authn\-\_\-gssapi\-\_\-check (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{void $\ast$}]{p\-\_\-d, }
+\item[{const struct {\bf http\-\_\-auth\-\_\-require\-\_\-t} $\ast$}]{require, }
+\item[{const struct {\bf http\-\_\-auth\-\_\-backend\-\_\-t} $\ast$}]{backend}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__authn__gssapi_8c_a57da81ae669907dd8cbe6e4fd90d76dc}
+
+
+References array\-\_\-get\-\_\-element(), buffer\-\_\-is\-\_\-empty(), request\-::headers, mod\-\_\-authn\-\_\-gssapi\-\_\-check\-\_\-spnego(), mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-400\-\_\-bad\-\_\-request(), mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-negotiate(), buffer\-::ptr, connection\-::request, U\-N\-U\-S\-E\-D, and data\-\_\-string\-::value.
+
+
+
+Referenced by I\-N\-I\-T\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__authn__gssapi_8c_aa15d2af0d503adedff0b0ae09af85f6b}{\index{mod\-\_\-authn\-\_\-gssapi.\-c@{mod\-\_\-authn\-\_\-gssapi.\-c}!mod\-\_\-authn\-\_\-gssapi\-\_\-check\-\_\-spnego@{mod\-\_\-authn\-\_\-gssapi\-\_\-check\-\_\-spnego}}
+\index{mod\-\_\-authn\-\_\-gssapi\-\_\-check\-\_\-spnego@{mod\-\_\-authn\-\_\-gssapi\-\_\-check\-\_\-spnego}!mod_authn_gssapi.c@{mod\-\_\-authn\-\_\-gssapi.\-c}}
+\subsubsection[{mod\-\_\-authn\-\_\-gssapi\-\_\-check\-\_\-spnego}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf handler\-\_\-t} mod\-\_\-authn\-\_\-gssapi\-\_\-check\-\_\-spnego (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf plugin\-\_\-data} $\ast$}]{p, }
+\item[{const {\bf http\-\_\-auth\-\_\-require\-\_\-t} $\ast$}]{require, }
+\item[{const char $\ast$}]{realm\-\_\-str}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__authn__gssapi_8c_aa15d2af0d503adedff0b0ae09af85f6b}
+
+
+References plugin\-\_\-config\-::auth\-\_\-gssapi\-\_\-keytab, plugin\-\_\-config\-::auth\-\_\-gssapi\-\_\-principal, B\-A\-S\-E64\-\_\-\-S\-T\-A\-N\-D\-A\-R\-D, buffer\-\_\-append\-\_\-base64\-\_\-decode(), buffer\-\_\-append\-\_\-string(), buffer\-\_\-append\-\_\-string\-\_\-buffer(), buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-copy\-\_\-string(), buffer\-\_\-free(), buffer\-\_\-init(), buffer\-\_\-init\-\_\-buffer(), buffer\-\_\-is\-\_\-empty(), buffer\-\_\-string\-\_\-length(), plugin\-\_\-data\-::conf, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, connection\-::environment, G\-S\-S\-\_\-\-K\-R\-B5\-\_\-\-N\-T\-\_\-\-P\-R\-I\-N\-C\-I\-P\-A\-L\-\_\-\-N\-A\-M\-E, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, http\-\_\-auth\-\_\-match\-\_\-rules(), http\-\_\-auth\-\_\-setenv(), request\-::http\-\_\-host, log\-\_\-error\-\_\-write(), mod\-\_\-authn\-\_\-gssapi\-\_\-log\-\_\-gss\-\_\-error(), mod\-\_\-authn\-\_\-gssapi\-\_\-patch\-\_\-connection(), mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-400\-\_\-bad\-\_\-request(), mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-negotiate(), mod\-\_\-authn\-\_\-gssapi\-\_\-store\-\_\-gss\-\_\-creds(), buffer\-::ptr, http\-\_\-auth\-\_\-require\-\_\-t\-::realm, and connection\-::request.
+
+
+
+Referenced by mod\-\_\-authn\-\_\-gssapi\-\_\-check().
+
+\hypertarget{mod__authn__gssapi_8c_af630555fd8a8bacfaa65da61a7663110}{\index{mod\-\_\-authn\-\_\-gssapi.\-c@{mod\-\_\-authn\-\_\-gssapi.\-c}!mod\-\_\-authn\-\_\-gssapi\-\_\-create\-\_\-krb5\-\_\-ccache@{mod\-\_\-authn\-\_\-gssapi\-\_\-create\-\_\-krb5\-\_\-ccache}}
+\index{mod\-\_\-authn\-\_\-gssapi\-\_\-create\-\_\-krb5\-\_\-ccache@{mod\-\_\-authn\-\_\-gssapi\-\_\-create\-\_\-krb5\-\_\-ccache}!mod_authn_gssapi.c@{mod\-\_\-authn\-\_\-gssapi.\-c}}
+\subsubsection[{mod\-\_\-authn\-\_\-gssapi\-\_\-create\-\_\-krb5\-\_\-ccache}]{\setlength{\rightskip}{0pt plus 5cm}static int mod\-\_\-authn\-\_\-gssapi\-\_\-create\-\_\-krb5\-\_\-ccache (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf plugin\-\_\-data} $\ast$}]{p, }
+\item[{krb5\-\_\-context}]{kcontext, }
+\item[{krb5\-\_\-principal}]{princ, }
+\item[{krb5\-\_\-ccache $\ast$}]{ccache}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__authn__gssapi_8c_af630555fd8a8bacfaa65da61a7663110}
+
+
+References array\-\_\-set\-\_\-key\-\_\-value(), buffer\-\_\-free(), buffer\-\_\-init\-\_\-string(), buffer\-\_\-string\-\_\-length(), C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, connection\-::environment, request\-::headers, log\-\_\-error\-\_\-write(), mod\-\_\-authn\-\_\-gssapi\-\_\-log\-\_\-krb5\-\_\-error(), connection\-::plugin\-\_\-ctx, buffer\-::ptr, and connection\-::request.
+
+
+
+Referenced by mod\-\_\-authn\-\_\-gssapi\-\_\-store\-\_\-gss\-\_\-creds(), and mod\-\_\-authn\-\_\-gssapi\-\_\-store\-\_\-krb5\-\_\-creds().
+
+\hypertarget{mod__authn__gssapi_8c_abb65b58fed3fb3ec9c92c44aced69971}{\index{mod\-\_\-authn\-\_\-gssapi.\-c@{mod\-\_\-authn\-\_\-gssapi.\-c}!mod\-\_\-authn\-\_\-gssapi\-\_\-log\-\_\-gss\-\_\-error@{mod\-\_\-authn\-\_\-gssapi\-\_\-log\-\_\-gss\-\_\-error}}
+\index{mod\-\_\-authn\-\_\-gssapi\-\_\-log\-\_\-gss\-\_\-error@{mod\-\_\-authn\-\_\-gssapi\-\_\-log\-\_\-gss\-\_\-error}!mod_authn_gssapi.c@{mod\-\_\-authn\-\_\-gssapi.\-c}}
+\subsubsection[{mod\-\_\-authn\-\_\-gssapi\-\_\-log\-\_\-gss\-\_\-error}]{\setlength{\rightskip}{0pt plus 5cm}static void mod\-\_\-authn\-\_\-gssapi\-\_\-log\-\_\-gss\-\_\-error (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{const char $\ast$}]{file, }
+\item[{unsigned int}]{line, }
+\item[{const char $\ast$}]{func, }
+\item[{const char $\ast$}]{extra, }
+\item[{O\-M\-\_\-uint32}]{err\-\_\-maj, }
+\item[{O\-M\-\_\-uint32}]{err\-\_\-min}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__authn__gssapi_8c_abb65b58fed3fb3ec9c92c44aced69971}
+
+
+References buffer\-\_\-append\-\_\-string(), buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-free(), buffer\-\_\-init\-\_\-string(), C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, and log\-\_\-error\-\_\-write().
+
+
+
+Referenced by mod\-\_\-authn\-\_\-gssapi\-\_\-check\-\_\-spnego(), and mod\-\_\-authn\-\_\-gssapi\-\_\-store\-\_\-gss\-\_\-creds().
+
+\hypertarget{mod__authn__gssapi_8c_aa42b50e43ec4517ec202ec5e482303fa}{\index{mod\-\_\-authn\-\_\-gssapi.\-c@{mod\-\_\-authn\-\_\-gssapi.\-c}!mod\-\_\-authn\-\_\-gssapi\-\_\-log\-\_\-krb5\-\_\-error@{mod\-\_\-authn\-\_\-gssapi\-\_\-log\-\_\-krb5\-\_\-error}}
+\index{mod\-\_\-authn\-\_\-gssapi\-\_\-log\-\_\-krb5\-\_\-error@{mod\-\_\-authn\-\_\-gssapi\-\_\-log\-\_\-krb5\-\_\-error}!mod_authn_gssapi.c@{mod\-\_\-authn\-\_\-gssapi.\-c}}
+\subsubsection[{mod\-\_\-authn\-\_\-gssapi\-\_\-log\-\_\-krb5\-\_\-error}]{\setlength{\rightskip}{0pt plus 5cm}static void mod\-\_\-authn\-\_\-gssapi\-\_\-log\-\_\-krb5\-\_\-error (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{const char $\ast$}]{file, }
+\item[{unsigned int}]{line, }
+\item[{const char $\ast$}]{func, }
+\item[{const char $\ast$}]{extra, }
+\item[{krb5\-\_\-context}]{context, }
+\item[{int}]{code}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__authn__gssapi_8c_aa42b50e43ec4517ec202ec5e482303fa}
+
+
+References log\-\_\-error\-\_\-write(), and U\-N\-U\-S\-E\-D.
+
+
+
+Referenced by mod\-\_\-authn\-\_\-gssapi\-\_\-basic(), mod\-\_\-authn\-\_\-gssapi\-\_\-create\-\_\-krb5\-\_\-ccache(), mod\-\_\-authn\-\_\-gssapi\-\_\-store\-\_\-gss\-\_\-creds(), and mod\-\_\-authn\-\_\-gssapi\-\_\-store\-\_\-krb5\-\_\-creds().
+
+\hypertarget{mod__authn__gssapi_8c_a7232df290999c8bf08ac93a63b05e147}{\index{mod\-\_\-authn\-\_\-gssapi.\-c@{mod\-\_\-authn\-\_\-gssapi.\-c}!mod\-\_\-authn\-\_\-gssapi\-\_\-patch\-\_\-connection@{mod\-\_\-authn\-\_\-gssapi\-\_\-patch\-\_\-connection}}
+\index{mod\-\_\-authn\-\_\-gssapi\-\_\-patch\-\_\-connection@{mod\-\_\-authn\-\_\-gssapi\-\_\-patch\-\_\-connection}!mod_authn_gssapi.c@{mod\-\_\-authn\-\_\-gssapi.\-c}}
+\subsubsection[{mod\-\_\-authn\-\_\-gssapi\-\_\-patch\-\_\-connection}]{\setlength{\rightskip}{0pt plus 5cm}static int mod\-\_\-authn\-\_\-gssapi\-\_\-patch\-\_\-connection (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf plugin\-\_\-data} $\ast$}]{p}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__authn__gssapi_8c_a7232df290999c8bf08ac93a63b05e147}
+
+
+References buffer\-\_\-is\-\_\-equal\-\_\-string(), config\-\_\-check\-\_\-cond(), server\-::config\-\_\-context, plugin\-\_\-data\-::config\-\_\-storage, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, array\-::data, P\-A\-T\-C\-H, array\-::used, and data\-\_\-config\-::value.
+
+
+
+Referenced by mod\-\_\-authn\-\_\-gssapi\-\_\-basic(), and mod\-\_\-authn\-\_\-gssapi\-\_\-check\-\_\-spnego().
+
+\hypertarget{mod__authn__gssapi_8c_a95fe0465ae1030e66be9eb8209aad75f}{\index{mod\-\_\-authn\-\_\-gssapi.\-c@{mod\-\_\-authn\-\_\-gssapi.\-c}!mod\-\_\-authn\-\_\-gssapi\-\_\-plugin\-\_\-init@{mod\-\_\-authn\-\_\-gssapi\-\_\-plugin\-\_\-init}}
+\index{mod\-\_\-authn\-\_\-gssapi\-\_\-plugin\-\_\-init@{mod\-\_\-authn\-\_\-gssapi\-\_\-plugin\-\_\-init}!mod_authn_gssapi.c@{mod\-\_\-authn\-\_\-gssapi.\-c}}
+\subsubsection[{mod\-\_\-authn\-\_\-gssapi\-\_\-plugin\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}int mod\-\_\-authn\-\_\-gssapi\-\_\-plugin\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{{\bf plugin} $\ast$}]{p}
+\end{DoxyParamCaption}
+)}}\label{mod__authn__gssapi_8c_a95fe0465ae1030e66be9eb8209aad75f}
+
+
+References buffer\-\_\-init\-\_\-string(), plugin\-::cleanup, plugin\-::connection\-\_\-reset, plugin\-::data, plugin\-::init, plugin\-::name, plugin\-::set\-\_\-defaults, and plugin\-::version.
+
+\hypertarget{mod__authn__gssapi_8c_a2ec442e68255e0d6045ddce457e19d50}{\index{mod\-\_\-authn\-\_\-gssapi.\-c@{mod\-\_\-authn\-\_\-gssapi.\-c}!mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-400\-\_\-bad\-\_\-request@{mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-400\-\_\-bad\-\_\-request}}
+\index{mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-400\-\_\-bad\-\_\-request@{mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-400\-\_\-bad\-\_\-request}!mod_authn_gssapi.c@{mod\-\_\-authn\-\_\-gssapi.\-c}}
+\subsubsection[{mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-400\-\_\-bad\-\_\-request}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf handler\-\_\-t} mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-400\-\_\-bad\-\_\-request (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__authn__gssapi_8c_a2ec442e68255e0d6045ddce457e19d50}
+
+
+References D\-I\-R\-E\-C\-T, H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-I\-N\-I\-S\-H\-E\-D, connection\-::http\-\_\-status, connection\-::mode, and U\-N\-U\-S\-E\-D.
+
+
+
+Referenced by mod\-\_\-authn\-\_\-gssapi\-\_\-check(), and mod\-\_\-authn\-\_\-gssapi\-\_\-check\-\_\-spnego().
+
+\hypertarget{mod__authn__gssapi_8c_aca1539cd44a3414a0db77eb5cf199ae9}{\index{mod\-\_\-authn\-\_\-gssapi.\-c@{mod\-\_\-authn\-\_\-gssapi.\-c}!mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-basic@{mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-basic}}
+\index{mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-basic@{mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-basic}!mod_authn_gssapi.c@{mod\-\_\-authn\-\_\-gssapi.\-c}}
+\subsubsection[{mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-basic}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf handler\-\_\-t} mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-basic (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__authn__gssapi_8c_aca1539cd44a3414a0db77eb5cf199ae9}
+
+
+References C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, D\-I\-R\-E\-C\-T, H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-I\-N\-I\-S\-H\-E\-D, connection\-::http\-\_\-status, connection\-::mode, and response\-\_\-header\-\_\-insert().
+
+
+
+Referenced by mod\-\_\-authn\-\_\-gssapi\-\_\-basic().
+
+\hypertarget{mod__authn__gssapi_8c_a7354dfe1ed8e5f06130abcccf3d0f2ea}{\index{mod\-\_\-authn\-\_\-gssapi.\-c@{mod\-\_\-authn\-\_\-gssapi.\-c}!mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-negotiate@{mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-negotiate}}
+\index{mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-negotiate@{mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-negotiate}!mod_authn_gssapi.c@{mod\-\_\-authn\-\_\-gssapi.\-c}}
+\subsubsection[{mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-negotiate}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf handler\-\_\-t} mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-negotiate (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__authn__gssapi_8c_a7354dfe1ed8e5f06130abcccf3d0f2ea}
+
+
+References C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, D\-I\-R\-E\-C\-T, H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-I\-N\-I\-S\-H\-E\-D, connection\-::http\-\_\-status, connection\-::mode, and response\-\_\-header\-\_\-insert().
+
+
+
+Referenced by mod\-\_\-authn\-\_\-gssapi\-\_\-check(), and mod\-\_\-authn\-\_\-gssapi\-\_\-check\-\_\-spnego().
+
+\hypertarget{mod__authn__gssapi_8c_a81b2be97bf8527fc1944e4d006970404}{\index{mod\-\_\-authn\-\_\-gssapi.\-c@{mod\-\_\-authn\-\_\-gssapi.\-c}!mod\-\_\-authn\-\_\-gssapi\-\_\-store\-\_\-gss\-\_\-creds@{mod\-\_\-authn\-\_\-gssapi\-\_\-store\-\_\-gss\-\_\-creds}}
+\index{mod\-\_\-authn\-\_\-gssapi\-\_\-store\-\_\-gss\-\_\-creds@{mod\-\_\-authn\-\_\-gssapi\-\_\-store\-\_\-gss\-\_\-creds}!mod_authn_gssapi.c@{mod\-\_\-authn\-\_\-gssapi.\-c}}
+\subsubsection[{mod\-\_\-authn\-\_\-gssapi\-\_\-store\-\_\-gss\-\_\-creds}]{\setlength{\rightskip}{0pt plus 5cm}static int mod\-\_\-authn\-\_\-gssapi\-\_\-store\-\_\-gss\-\_\-creds (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf plugin\-\_\-data} $\ast$}]{p, }
+\item[{char $\ast$}]{princ\-\_\-name, }
+\item[{gss\-\_\-cred\-\_\-id\-\_\-t}]{delegated\-\_\-cred}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__authn__gssapi_8c_a81b2be97bf8527fc1944e4d006970404}
+
+
+References mod\-\_\-authn\-\_\-gssapi\-\_\-create\-\_\-krb5\-\_\-ccache(), mod\-\_\-authn\-\_\-gssapi\-\_\-log\-\_\-gss\-\_\-error(), and mod\-\_\-authn\-\_\-gssapi\-\_\-log\-\_\-krb5\-\_\-error().
+
+
+
+Referenced by mod\-\_\-authn\-\_\-gssapi\-\_\-check\-\_\-spnego().
+
+\hypertarget{mod__authn__gssapi_8c_a86fab6180b4b7da81127257b79b7d677}{\index{mod\-\_\-authn\-\_\-gssapi.\-c@{mod\-\_\-authn\-\_\-gssapi.\-c}!mod\-\_\-authn\-\_\-gssapi\-\_\-store\-\_\-krb5\-\_\-creds@{mod\-\_\-authn\-\_\-gssapi\-\_\-store\-\_\-krb5\-\_\-creds}}
+\index{mod\-\_\-authn\-\_\-gssapi\-\_\-store\-\_\-krb5\-\_\-creds@{mod\-\_\-authn\-\_\-gssapi\-\_\-store\-\_\-krb5\-\_\-creds}!mod_authn_gssapi.c@{mod\-\_\-authn\-\_\-gssapi.\-c}}
+\subsubsection[{mod\-\_\-authn\-\_\-gssapi\-\_\-store\-\_\-krb5\-\_\-creds}]{\setlength{\rightskip}{0pt plus 5cm}static int mod\-\_\-authn\-\_\-gssapi\-\_\-store\-\_\-krb5\-\_\-creds (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf plugin\-\_\-data} $\ast$}]{p, }
+\item[{krb5\-\_\-context}]{kcontext, }
+\item[{krb5\-\_\-ccache}]{delegated\-\_\-cred}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__authn__gssapi_8c_a86fab6180b4b7da81127257b79b7d677}
+
+
+References mod\-\_\-authn\-\_\-gssapi\-\_\-create\-\_\-krb5\-\_\-ccache(), and mod\-\_\-authn\-\_\-gssapi\-\_\-log\-\_\-krb5\-\_\-error().
+
+
+
+Referenced by mod\-\_\-authn\-\_\-gssapi\-\_\-basic().
+
+\hypertarget{mod__authn__gssapi_8c_a6b05240243a1c665a1ff0715b196c6d4}{\index{mod\-\_\-authn\-\_\-gssapi.\-c@{mod\-\_\-authn\-\_\-gssapi.\-c}!mod\-\_\-authn\-\_\-gssapi\-\_\-verify\-\_\-krb5\-\_\-init\-\_\-creds@{mod\-\_\-authn\-\_\-gssapi\-\_\-verify\-\_\-krb5\-\_\-init\-\_\-creds}}
+\index{mod\-\_\-authn\-\_\-gssapi\-\_\-verify\-\_\-krb5\-\_\-init\-\_\-creds@{mod\-\_\-authn\-\_\-gssapi\-\_\-verify\-\_\-krb5\-\_\-init\-\_\-creds}!mod_authn_gssapi.c@{mod\-\_\-authn\-\_\-gssapi.\-c}}
+\subsubsection[{mod\-\_\-authn\-\_\-gssapi\-\_\-verify\-\_\-krb5\-\_\-init\-\_\-creds}]{\setlength{\rightskip}{0pt plus 5cm}static krb5\-\_\-error\-\_\-code mod\-\_\-authn\-\_\-gssapi\-\_\-verify\-\_\-krb5\-\_\-init\-\_\-creds (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{krb5\-\_\-context}]{context, }
+\item[{krb5\-\_\-creds $\ast$}]{creds, }
+\item[{krb5\-\_\-principal}]{ap\-\_\-req\-\_\-server, }
+\item[{krb5\-\_\-keytab}]{ap\-\_\-req\-\_\-keytab}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__authn__gssapi_8c_a6b05240243a1c665a1ff0715b196c6d4}
+
+
+References log\-\_\-error\-\_\-write().
+
+
+
+Referenced by mod\-\_\-authn\-\_\-gssapi\-\_\-basic().
+
+\hypertarget{mod__authn__gssapi_8c_acff7347f2519cefaaf8766c34d786810}{\index{mod\-\_\-authn\-\_\-gssapi.\-c@{mod\-\_\-authn\-\_\-gssapi.\-c}!S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C@{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}}
+\index{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C@{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}!mod_authn_gssapi.c@{mod\-\_\-authn\-\_\-gssapi.\-c}}
+\subsubsection[{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-authn\-\_\-gssapi\-\_\-set\-\_\-defaults}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__authn__gssapi_8c_acff7347f2519cefaaf8766c34d786810}
+
+
+References plugin\-\_\-config\-::auth\-\_\-gssapi\-\_\-keytab, buffer\-\_\-init(), config\-\_\-insert\-\_\-values\-\_\-global(), plugin\-\_\-data\-::config\-\_\-storage, config\-\_\-values\-\_\-t\-::destination, H\-A\-N\-D\-L\-E\-R\-\_\-\-E\-R\-R\-O\-R, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T\-I\-O\-N, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-S\-E\-R\-V\-E\-R, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-U\-N\-S\-E\-T, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-T\-R\-I\-N\-G, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-U\-N\-S\-E\-T, and data\-\_\-config\-::value.
+

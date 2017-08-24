@@ -1,0 +1,289 @@
+\hypertarget{server_8c}{\section{server.\-c File Reference}
+\label{server_8c}\index{server.\-c@{server.\-c}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}server.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}buffer.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}network.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}log.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}keyvalue.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}rand.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}response.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}request.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}chunk.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}http\-\_\-chunk.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}fdevent.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}connections.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}stat\-\_\-cache.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}plugin.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}joblist.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}network\-\_\-backends.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}version.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$sys/types.\-h$>$}\\*
+{\ttfamily \#include $<$sys/time.\-h$>$}\\*
+{\ttfamily \#include $<$sys/stat.\-h$>$}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+{\ttfamily \#include $<$errno.\-h$>$}\\*
+{\ttfamily \#include $<$fcntl.\-h$>$}\\*
+{\ttfamily \#include $<$unistd.\-h$>$}\\*
+{\ttfamily \#include $<$stdlib.\-h$>$}\\*
+{\ttfamily \#include $<$time.\-h$>$}\\*
+{\ttfamily \#include $<$signal.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include $<$locale.\-h$>$}\\*
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{server_8c_a05b3586abd20197117285bc6f4e89394}{C\-L\-E\-A\-N}(x)~srv-\/$>$x = \hyperlink{buffer_8h_af447519a12f8488d289adedb31c38086}{buffer\-\_\-init}();
+\item 
+\#define \hyperlink{server_8c_a05b3586abd20197117285bc6f4e89394}{C\-L\-E\-A\-N}(x)~srv-\/$>$x = \hyperlink{array_8h_a90bca88acbd6bfab18e7a5c91edc344e}{array\-\_\-init}();
+\item 
+\#define \hyperlink{server_8c_a05b3586abd20197117285bc6f4e89394}{C\-L\-E\-A\-N}(x)~\hyperlink{buffer_8h_ad591d3747a0ec8cf335e3538b0e640b4}{buffer\-\_\-free}(srv-\/$>$x);
+\item 
+\#define \hyperlink{server_8c_a05b3586abd20197117285bc6f4e89394}{C\-L\-E\-A\-N}(x)~\hyperlink{array_8h_a6ecc0b8fe82afcb76e18dcb854092e6a}{array\-\_\-free}(srv-\/$>$x);
+\item 
+\#define \hyperlink{server_8c_a7712fcea99a4a38757d9bde10aaa891b}{T\-E\-X\-T\-\_\-\-S\-S\-L}
+\item 
+\#define \hyperlink{server_8c_a7712fcea99a4a38757d9bde10aaa891b}{T\-E\-X\-T\-\_\-\-S\-S\-L}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{structserver}{server} $\ast$ \hyperlink{server_8c_a4080ca4f3725beed6a65f9e0c4753f57}{server\-\_\-init} (void)
+\item 
+static void \hyperlink{server_8c_a09c683356fe4ac27e3b78aebce47ffad}{server\-\_\-free} (\hyperlink{structserver}{server} $\ast$srv)
+\item 
+static void \hyperlink{server_8c_ad6c99079ab88d128ffcdf5566b3cb448}{remove\-\_\-pid\-\_\-file} (\hyperlink{structserver}{server} $\ast$srv, int $\ast$pid\-\_\-fd)
+\item 
+static \hyperlink{structserver__socket}{server\-\_\-socket} $\ast$ \hyperlink{server_8c_a5a6580fa072af2cf2438f6133071be54}{server\-\_\-oneshot\-\_\-getsock} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{unionsock__addr}{sock\-\_\-addr} $\ast$cnt\-\_\-addr)
+\item 
+static int \hyperlink{server_8c_a7367a85468e6070a34572e536901ce5a}{server\-\_\-oneshot\-\_\-init} (\hyperlink{structserver}{server} $\ast$srv, int fd)
+\item 
+static void \hyperlink{server_8c_ae6fb83fb418716a81df2a2d1f3a68103}{show\-\_\-version} (void)
+\item 
+static void \hyperlink{server_8c_a3631b2390cdb69b8f83d766a66b3b419}{show\-\_\-features} (void)
+\item 
+static void \hyperlink{server_8c_aef20148be3ae52ac456c42f8217b8a95}{show\-\_\-help} (void)
+\item 
+int \hyperlink{server_8c_a3c04138a5bfe5d72780bb7e82a18e627}{main} (int argc, char $\ast$$\ast$\hyperlink{lemon_8c_af2efa898e9eed6fe6715279cb1ec35b0}{argv})
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+static int \hyperlink{server_8c_a8ff5f267f3e584786d95ead71427185c}{oneshot\-\_\-fd} = 0
+\item 
+static volatile sig\-\_\-atomic\-\_\-t \hyperlink{server_8c_a3a342de928b87eb91a4dc575124c38ad}{srv\-\_\-shutdown} = 0
+\item 
+static volatile sig\-\_\-atomic\-\_\-t \hyperlink{server_8c_a621eb1a1241e12f63b259d957d347f08}{graceful\-\_\-shutdown} = 0
+\item 
+static volatile sig\-\_\-atomic\-\_\-t \hyperlink{server_8c_a4397a3c7592214aad7a78479b4707d28}{handle\-\_\-sig\-\_\-alarm} = 1
+\item 
+static volatile sig\-\_\-atomic\-\_\-t \hyperlink{server_8c_a9d97f73c202dfa95fa2270c1286c69ff}{handle\-\_\-sig\-\_\-hup} = 0
+\item 
+static volatile sig\-\_\-atomic\-\_\-t \hyperlink{server_8c_adc9fdf3c66e81599ad148796de1eca64}{forwarded\-\_\-sig\-\_\-hup} = 0
+\end{DoxyCompactItemize}
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{server_8c_a05b3586abd20197117285bc6f4e89394}{\index{server.\-c@{server.\-c}!C\-L\-E\-A\-N@{C\-L\-E\-A\-N}}
+\index{C\-L\-E\-A\-N@{C\-L\-E\-A\-N}!server.c@{server.\-c}}
+\subsubsection[{C\-L\-E\-A\-N}]{\setlength{\rightskip}{0pt plus 5cm}\#define C\-L\-E\-A\-N(
+\begin{DoxyParamCaption}
+\item[{}]{x}
+\end{DoxyParamCaption}
+)~srv-\/$>$x = {\bf buffer\-\_\-init}();}}\label{server_8c_a05b3586abd20197117285bc6f4e89394}
+
+
+Referenced by server\-\_\-free(), and server\-\_\-init().
+
+\hypertarget{server_8c_a05b3586abd20197117285bc6f4e89394}{\index{server.\-c@{server.\-c}!C\-L\-E\-A\-N@{C\-L\-E\-A\-N}}
+\index{C\-L\-E\-A\-N@{C\-L\-E\-A\-N}!server.c@{server.\-c}}
+\subsubsection[{C\-L\-E\-A\-N}]{\setlength{\rightskip}{0pt plus 5cm}\#define C\-L\-E\-A\-N(
+\begin{DoxyParamCaption}
+\item[{}]{x}
+\end{DoxyParamCaption}
+)~srv-\/$>$x = {\bf array\-\_\-init}();}}\label{server_8c_a05b3586abd20197117285bc6f4e89394}
+\hypertarget{server_8c_a05b3586abd20197117285bc6f4e89394}{\index{server.\-c@{server.\-c}!C\-L\-E\-A\-N@{C\-L\-E\-A\-N}}
+\index{C\-L\-E\-A\-N@{C\-L\-E\-A\-N}!server.c@{server.\-c}}
+\subsubsection[{C\-L\-E\-A\-N}]{\setlength{\rightskip}{0pt plus 5cm}\#define C\-L\-E\-A\-N(
+\begin{DoxyParamCaption}
+\item[{}]{x}
+\end{DoxyParamCaption}
+)~{\bf buffer\-\_\-free}(srv-\/$>$x);}}\label{server_8c_a05b3586abd20197117285bc6f4e89394}
+\hypertarget{server_8c_a05b3586abd20197117285bc6f4e89394}{\index{server.\-c@{server.\-c}!C\-L\-E\-A\-N@{C\-L\-E\-A\-N}}
+\index{C\-L\-E\-A\-N@{C\-L\-E\-A\-N}!server.c@{server.\-c}}
+\subsubsection[{C\-L\-E\-A\-N}]{\setlength{\rightskip}{0pt plus 5cm}\#define C\-L\-E\-A\-N(
+\begin{DoxyParamCaption}
+\item[{}]{x}
+\end{DoxyParamCaption}
+)~{\bf array\-\_\-free}(srv-\/$>$x);}}\label{server_8c_a05b3586abd20197117285bc6f4e89394}
+\hypertarget{server_8c_a7712fcea99a4a38757d9bde10aaa891b}{\index{server.\-c@{server.\-c}!T\-E\-X\-T\-\_\-\-S\-S\-L@{T\-E\-X\-T\-\_\-\-S\-S\-L}}
+\index{T\-E\-X\-T\-\_\-\-S\-S\-L@{T\-E\-X\-T\-\_\-\-S\-S\-L}!server.c@{server.\-c}}
+\subsubsection[{T\-E\-X\-T\-\_\-\-S\-S\-L}]{\setlength{\rightskip}{0pt plus 5cm}\#define T\-E\-X\-T\-\_\-\-S\-S\-L}}\label{server_8c_a7712fcea99a4a38757d9bde10aaa891b}
+
+
+Referenced by show\-\_\-help(), and show\-\_\-version().
+
+\hypertarget{server_8c_a7712fcea99a4a38757d9bde10aaa891b}{\index{server.\-c@{server.\-c}!T\-E\-X\-T\-\_\-\-S\-S\-L@{T\-E\-X\-T\-\_\-\-S\-S\-L}}
+\index{T\-E\-X\-T\-\_\-\-S\-S\-L@{T\-E\-X\-T\-\_\-\-S\-S\-L}!server.c@{server.\-c}}
+\subsubsection[{T\-E\-X\-T\-\_\-\-S\-S\-L}]{\setlength{\rightskip}{0pt plus 5cm}\#define T\-E\-X\-T\-\_\-\-S\-S\-L}}\label{server_8c_a7712fcea99a4a38757d9bde10aaa891b}
+
+
+\subsection{Function Documentation}
+\hypertarget{server_8c_a3c04138a5bfe5d72780bb7e82a18e627}{\index{server.\-c@{server.\-c}!main@{main}}
+\index{main@{main}!server.c@{server.\-c}}
+\subsubsection[{main}]{\setlength{\rightskip}{0pt plus 5cm}int main (
+\begin{DoxyParamCaption}
+\item[{int}]{argc, }
+\item[{char $\ast$$\ast$}]{argv}
+\end{DoxyParamCaption}
+)}}\label{server_8c_a3c04138a5bfe5d72780bb7e82a18e627}
+check all connections for timeouts
+
+References array\-\_\-get\-\_\-element(), buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-copy\-\_\-int(), buffer\-\_\-copy\-\_\-string(), buffer\-\_\-reset(), buffer\-\_\-string\-\_\-is\-\_\-empty(), connection\-::bytes\-\_\-written, connection\-::bytes\-\_\-written\-\_\-cur\-\_\-second, server\-\_\-config\-::changeroot, connection\-::close\-\_\-timeout\-\_\-ts, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-C\-L\-O\-S\-E, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-E\-R\-R\-O\-R, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-A\-D, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-W\-R\-I\-T\-E, connection\-::conf, server\-::config\-\_\-context, server\-::config\-\_\-deprecated, config\-\_\-read(), config\-\_\-set\-\_\-defaults(), server\-::config\-\_\-storage, server\-::config\-\_\-touched, server\-::config\-\_\-unsupported, connection\-\_\-get\-\_\-state(), connection\-\_\-set\-\_\-state(), connection\-::connection\-\_\-start, connection\-\_\-state\-\_\-machine(), connections\-\_\-free(), server\-::conns, C\-O\-N\-S\-T\-\_\-\-B\-U\-F\-\_\-\-L\-E\-N, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, server\-::cur\-\_\-fds, server\-::cur\-\_\-ts, array\-::data, specific\-\_\-config\-::document\-\_\-root, server\-\_\-config\-::dont\-\_\-daemonize, connection\-::dst\-\_\-addr\-\_\-buf, server\-\_\-config\-::enable\-\_\-cores, server\-::ev, server\-::event\-\_\-handler, connection\-::fd, server\-\_\-socket\-::fd, fd\-\_\-close\-\_\-on\-\_\-exec(), server\-\_\-socket\-::fde\-\_\-ndx, fdevent\-\_\-event\-\_\-del(), fdevent\-\_\-event\-\_\-get\-\_\-fd(), fdevent\-\_\-event\-\_\-get\-\_\-interest, fdevent\-\_\-event\-\_\-get\-\_\-revent(), fdevent\-\_\-event\-\_\-next\-\_\-fdndx(), fdevent\-\_\-event\-\_\-set(), fdevent\-\_\-fcntl\-\_\-set\-\_\-nb\-\_\-cloexec\-\_\-sock(), fdevent\-\_\-get\-\_\-context(), fdevent\-\_\-get\-\_\-handler(), F\-D\-E\-V\-E\-N\-T\-\_\-\-H\-A\-N\-D\-L\-E\-R\-\_\-\-S\-E\-L\-E\-C\-T, F\-D\-E\-V\-E\-N\-T\-\_\-\-I\-N, fdevent\-\_\-init(), fdevent\-\_\-open\-\_\-cloexec(), fdevent\-\_\-poll(), fdevent\-\_\-register(), fdevent\-\_\-sched\-\_\-run(), fdevent\-\_\-unregister(), server\-::fdwaitqueue, fdwaitqueue\-\_\-unshift(), server\-::gid, specific\-\_\-config\-::global\-\_\-bytes\-\_\-per\-\_\-second\-\_\-cnt\-\_\-ptr, server\-\_\-config\-::groupname, H\-A\-N\-D\-L\-E\-R\-\_\-\-E\-R\-R\-O\-R, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, specific\-\_\-config\-::high\-\_\-precision\-\_\-timestamps, server\-\_\-config\-::high\-\_\-precision\-\_\-timestamps, H\-T\-T\-P\-\_\-\-L\-I\-N\-G\-E\-R\-\_\-\-T\-I\-M\-E\-O\-U\-T, connection\-::in\-\_\-joblist, server\-::joblist, specific\-\_\-config\-::kbytes\-\_\-per\-\_\-second, connection\-::keep\-\_\-alive\-\_\-idle, li\-\_\-rand\-\_\-reseed(), server\-\_\-config\-::loadavg, server\-\_\-config\-::loadts, log\-\_\-error\-\_\-close(), log\-\_\-error\-\_\-cycle(), log\-\_\-error\-\_\-open(), log\-\_\-error\-\_\-write(), specific\-\_\-config\-::log\-\_\-request\-\_\-handling, specific\-\_\-config\-::log\-\_\-timeouts, server\-\_\-config\-::max\-\_\-conns, server\-::max\-\_\-conns, server\-\_\-config\-::max\-\_\-fds, server\-::max\-\_\-fds, specific\-\_\-config\-::max\-\_\-read\-\_\-idle, server\-\_\-config\-::max\-\_\-worker, specific\-\_\-config\-::max\-\_\-write\-\_\-idle, server\-\_\-config\-::modules\-\_\-dir, network\-\_\-close(), network\-\_\-init(), network\-\_\-register\-\_\-fdevents(), open\-Dev\-Null(), server\-\_\-config\-::pid\-\_\-file, plugins\-\_\-call\-\_\-handle\-\_\-sighup(), plugins\-\_\-call\-\_\-handle\-\_\-trigger(), plugins\-\_\-call\-\_\-init(), plugins\-\_\-call\-\_\-set\-\_\-defaults(), plugins\-\_\-free(), server\-\_\-config\-::port, server\-\_\-config\-::preflight\-\_\-check, buffer\-::ptr, connections\-::ptr, server\-\_\-socket\-\_\-array\-::ptr, connection\-::read\-\_\-idle\-\_\-ts, remove\-\_\-pid\-\_\-file(), connection\-::request, connection\-::request\-\_\-count, server\-\_\-free(), server\-\_\-init(), server\-\_\-oneshot\-\_\-init(), show\-\_\-features(), show\-\_\-help(), show\-\_\-version(), sigaction\-\_\-handler(), server\-::sockets\-\_\-disabled, server\-::srv\-\_\-sockets, server\-::srvconf, server\-::stat\-\_\-cache, server\-\_\-config\-::stat\-\_\-cache\-\_\-engine, stat\-\_\-cache\-\_\-handle\-\_\-fdevent(), stat\-\_\-cache\-\_\-init(), stat\-\_\-cache\-\_\-trigger\-\_\-cleanup(), connection\-::state, server\-::tmp\-\_\-buf, connection\-::traffic\-\_\-limit\-\_\-reached, server\-::uid, request\-::uri, array\-::used, connections\-::used, server\-\_\-socket\-\_\-array\-::used, server\-\_\-config\-::username, server\-::want\-\_\-fds, write\-\_\-all(), and connection\-::write\-\_\-request\-\_\-ts.
+
+\hypertarget{server_8c_ad6c99079ab88d128ffcdf5566b3cb448}{\index{server.\-c@{server.\-c}!remove\-\_\-pid\-\_\-file@{remove\-\_\-pid\-\_\-file}}
+\index{remove\-\_\-pid\-\_\-file@{remove\-\_\-pid\-\_\-file}!server.c@{server.\-c}}
+\subsubsection[{remove\-\_\-pid\-\_\-file}]{\setlength{\rightskip}{0pt plus 5cm}static void remove\-\_\-pid\-\_\-file (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{int $\ast$}]{pid\-\_\-fd}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{server_8c_ad6c99079ab88d128ffcdf5566b3cb448}
+
+
+References buffer\-\_\-string\-\_\-is\-\_\-empty(), server\-\_\-config\-::changeroot, log\-\_\-error\-\_\-write(), server\-\_\-config\-::pid\-\_\-file, buffer\-::ptr, and server\-::srvconf.
+
+
+
+Referenced by main().
+
+\hypertarget{server_8c_a09c683356fe4ac27e3b78aebce47ffad}{\index{server.\-c@{server.\-c}!server\-\_\-free@{server\-\_\-free}}
+\index{server\-\_\-free@{server\-\_\-free}!server.c@{server.\-c}}
+\subsubsection[{server\-\_\-free}]{\setlength{\rightskip}{0pt plus 5cm}static void server\-\_\-free (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{server_8c_a09c683356fe4ac27e3b78aebce47ffad}
+
+
+References array\-\_\-free(), buffer\-\_\-free(), C\-L\-E\-A\-N, server\-::config\-\_\-context, server\-::config\-\_\-storage, server\-::conns, specific\-\_\-config\-::document\-\_\-root, specific\-\_\-config\-::error\-\_\-handler, specific\-\_\-config\-::error\-\_\-handler\-\_\-404, specific\-\_\-config\-::errorfile\-\_\-prefix, server\-::ev, fdevent\-\_\-free(), fdevent\-\_\-unregister(), server\-::fdwaitqueue, fdwaitqueue\-\_\-free(), F\-I\-L\-E\-\_\-\-C\-A\-C\-H\-E\-\_\-\-M\-A\-X, server\-::joblist, joblist\-\_\-free(), li\-\_\-rand\-\_\-cleanup(), specific\-\_\-config\-::mimetypes, server\-\_\-config\-::modules, server\-::mtime\-\_\-cache, specific\-\_\-config\-::server\-\_\-name, specific\-\_\-config\-::server\-\_\-tag, server\-::split\-\_\-vals, server\-::srvconf, specific\-\_\-config\-::ssl\-\_\-ca\-\_\-file, specific\-\_\-config\-::ssl\-\_\-cipher\-\_\-list, specific\-\_\-config\-::ssl\-\_\-dh\-\_\-file, specific\-\_\-config\-::ssl\-\_\-ec\-\_\-curve, server\-::ssl\-\_\-is\-\_\-init, specific\-\_\-config\-::ssl\-\_\-pemfile, specific\-\_\-config\-::ssl\-\_\-verifyclient\-\_\-username, server\-::stat\-\_\-cache, stat\-\_\-cache\-\_\-free(), mtime\-\_\-cache\-\_\-type\-::str, and array\-::used.
+
+
+
+Referenced by main().
+
+\hypertarget{server_8c_a4080ca4f3725beed6a65f9e0c4753f57}{\index{server.\-c@{server.\-c}!server\-\_\-init@{server\-\_\-init}}
+\index{server\-\_\-init@{server\-\_\-init}!server.c@{server.\-c}}
+\subsubsection[{server\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf server}$\ast$ server\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{server_8c_a4080ca4f3725beed6a65f9e0c4753f57}
+
+
+References array\-\_\-init(), buffer\-\_\-init(), buffer\-\_\-init\-\_\-string(), C\-L\-E\-A\-N, server\-::conns, server\-::cur\-\_\-ts, server\-::empty\-\_\-string, server\-::errorlog\-\_\-fd, server\-::errorlog\-\_\-mode, server\-::fdwaitqueue, F\-I\-L\-E\-\_\-\-C\-A\-C\-H\-E\-\_\-\-M\-A\-X, force\-\_\-assert, server\-\_\-config\-::high\-\_\-precision\-\_\-timestamps, server\-\_\-config\-::http\-\_\-header\-\_\-strict, server\-\_\-config\-::http\-\_\-host\-\_\-normalize, server\-\_\-config\-::http\-\_\-host\-\_\-strict, server\-::joblist, li\-\_\-rand\-\_\-reseed(), server\-\_\-config\-::loadavg, server\-\_\-config\-::max\-\_\-request\-\_\-field\-\_\-size, server\-\_\-config\-::modules, server\-\_\-config\-::modules\-\_\-dir, mtime\-\_\-cache\-\_\-type\-::mtime, server\-::mtime\-\_\-cache, server\-\_\-config\-::network\-\_\-backend, server\-\_\-config\-::reject\-\_\-expect\-\_\-100\-\_\-with\-\_\-417, server\-::split\-\_\-vals, server\-::srvconf, server\-::startup\-\_\-ts, mtime\-\_\-cache\-\_\-type\-::str, server\-\_\-config\-::upload\-\_\-tempdirs, and server\-\_\-config\-::xattr\-\_\-name.
+
+
+
+Referenced by main().
+
+\hypertarget{server_8c_a5a6580fa072af2cf2438f6133071be54}{\index{server.\-c@{server.\-c}!server\-\_\-oneshot\-\_\-getsock@{server\-\_\-oneshot\-\_\-getsock}}
+\index{server\-\_\-oneshot\-\_\-getsock@{server\-\_\-oneshot\-\_\-getsock}!server.c@{server.\-c}}
+\subsubsection[{server\-\_\-oneshot\-\_\-getsock}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf server\-\_\-socket}$\ast$ server\-\_\-oneshot\-\_\-getsock (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf sock\-\_\-addr} $\ast$}]{cnt\-\_\-addr}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{server_8c_a5a6580fa072af2cf2438f6133071be54}
+
+
+References server\-\_\-socket\-::addr, sock\-\_\-addr\-::ipv4, log\-\_\-error\-\_\-write(), sock\-\_\-addr\-::plain, server\-\_\-socket\-\_\-array\-::ptr, server\-::srv\-\_\-sockets, and server\-\_\-socket\-\_\-array\-::used.
+
+
+
+Referenced by server\-\_\-oneshot\-\_\-init().
+
+\hypertarget{server_8c_a7367a85468e6070a34572e536901ce5a}{\index{server.\-c@{server.\-c}!server\-\_\-oneshot\-\_\-init@{server\-\_\-oneshot\-\_\-init}}
+\index{server\-\_\-oneshot\-\_\-init@{server\-\_\-oneshot\-\_\-init}!server.c@{server.\-c}}
+\subsubsection[{server\-\_\-oneshot\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}static int server\-\_\-oneshot\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{int}]{fd}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{server_8c_a7367a85468e6070a34572e536901ce5a}
+
+
+References connection\-\_\-accepted(), connection\-\_\-state\-\_\-machine(), log\-\_\-error\-\_\-write(), network\-\_\-accept\-\_\-tcp\-\_\-nagle\-\_\-disable(), sock\-\_\-addr\-::plain, and server\-\_\-oneshot\-\_\-getsock().
+
+
+
+Referenced by main().
+
+\hypertarget{server_8c_a3631b2390cdb69b8f83d766a66b3b419}{\index{server.\-c@{server.\-c}!show\-\_\-features@{show\-\_\-features}}
+\index{show\-\_\-features@{show\-\_\-features}!server.c@{server.\-c}}
+\subsubsection[{show\-\_\-features}]{\setlength{\rightskip}{0pt plus 5cm}static void show\-\_\-features (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{server_8c_a3631b2390cdb69b8f83d766a66b3b419}
+
+
+References show\-\_\-version().
+
+
+
+Referenced by main().
+
+\hypertarget{server_8c_aef20148be3ae52ac456c42f8217b8a95}{\index{server.\-c@{server.\-c}!show\-\_\-help@{show\-\_\-help}}
+\index{show\-\_\-help@{show\-\_\-help}!server.c@{server.\-c}}
+\subsubsection[{show\-\_\-help}]{\setlength{\rightskip}{0pt plus 5cm}static void show\-\_\-help (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{server_8c_aef20148be3ae52ac456c42f8217b8a95}
+
+
+References P\-A\-C\-K\-A\-G\-E\-\_\-\-D\-E\-S\-C, T\-E\-X\-T\-\_\-\-S\-S\-L, and write\-\_\-all().
+
+
+
+Referenced by main().
+
+\hypertarget{server_8c_ae6fb83fb418716a81df2a2d1f3a68103}{\index{server.\-c@{server.\-c}!show\-\_\-version@{show\-\_\-version}}
+\index{show\-\_\-version@{show\-\_\-version}!server.c@{server.\-c}}
+\subsubsection[{show\-\_\-version}]{\setlength{\rightskip}{0pt plus 5cm}static void show\-\_\-version (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{server_8c_ae6fb83fb418716a81df2a2d1f3a68103}
+
+
+References P\-A\-C\-K\-A\-G\-E\-\_\-\-D\-E\-S\-C, T\-E\-X\-T\-\_\-\-S\-S\-L, and write\-\_\-all().
+
+
+
+Referenced by main(), and show\-\_\-features().
+
+
+
+\subsection{Variable Documentation}
+\hypertarget{server_8c_adc9fdf3c66e81599ad148796de1eca64}{\index{server.\-c@{server.\-c}!forwarded\-\_\-sig\-\_\-hup@{forwarded\-\_\-sig\-\_\-hup}}
+\index{forwarded\-\_\-sig\-\_\-hup@{forwarded\-\_\-sig\-\_\-hup}!server.c@{server.\-c}}
+\subsubsection[{forwarded\-\_\-sig\-\_\-hup}]{\setlength{\rightskip}{0pt plus 5cm}volatile sig\-\_\-atomic\-\_\-t forwarded\-\_\-sig\-\_\-hup = 0\hspace{0.3cm}{\ttfamily [static]}}}\label{server_8c_adc9fdf3c66e81599ad148796de1eca64}
+\hypertarget{server_8c_a621eb1a1241e12f63b259d957d347f08}{\index{server.\-c@{server.\-c}!graceful\-\_\-shutdown@{graceful\-\_\-shutdown}}
+\index{graceful\-\_\-shutdown@{graceful\-\_\-shutdown}!server.c@{server.\-c}}
+\subsubsection[{graceful\-\_\-shutdown}]{\setlength{\rightskip}{0pt plus 5cm}volatile sig\-\_\-atomic\-\_\-t graceful\-\_\-shutdown = 0\hspace{0.3cm}{\ttfamily [static]}}}\label{server_8c_a621eb1a1241e12f63b259d957d347f08}
+\hypertarget{server_8c_a4397a3c7592214aad7a78479b4707d28}{\index{server.\-c@{server.\-c}!handle\-\_\-sig\-\_\-alarm@{handle\-\_\-sig\-\_\-alarm}}
+\index{handle\-\_\-sig\-\_\-alarm@{handle\-\_\-sig\-\_\-alarm}!server.c@{server.\-c}}
+\subsubsection[{handle\-\_\-sig\-\_\-alarm}]{\setlength{\rightskip}{0pt plus 5cm}volatile sig\-\_\-atomic\-\_\-t handle\-\_\-sig\-\_\-alarm = 1\hspace{0.3cm}{\ttfamily [static]}}}\label{server_8c_a4397a3c7592214aad7a78479b4707d28}
+\hypertarget{server_8c_a9d97f73c202dfa95fa2270c1286c69ff}{\index{server.\-c@{server.\-c}!handle\-\_\-sig\-\_\-hup@{handle\-\_\-sig\-\_\-hup}}
+\index{handle\-\_\-sig\-\_\-hup@{handle\-\_\-sig\-\_\-hup}!server.c@{server.\-c}}
+\subsubsection[{handle\-\_\-sig\-\_\-hup}]{\setlength{\rightskip}{0pt plus 5cm}volatile sig\-\_\-atomic\-\_\-t handle\-\_\-sig\-\_\-hup = 0\hspace{0.3cm}{\ttfamily [static]}}}\label{server_8c_a9d97f73c202dfa95fa2270c1286c69ff}
+\hypertarget{server_8c_a8ff5f267f3e584786d95ead71427185c}{\index{server.\-c@{server.\-c}!oneshot\-\_\-fd@{oneshot\-\_\-fd}}
+\index{oneshot\-\_\-fd@{oneshot\-\_\-fd}!server.c@{server.\-c}}
+\subsubsection[{oneshot\-\_\-fd}]{\setlength{\rightskip}{0pt plus 5cm}int oneshot\-\_\-fd = 0\hspace{0.3cm}{\ttfamily [static]}}}\label{server_8c_a8ff5f267f3e584786d95ead71427185c}
+\hypertarget{server_8c_a3a342de928b87eb91a4dc575124c38ad}{\index{server.\-c@{server.\-c}!srv\-\_\-shutdown@{srv\-\_\-shutdown}}
+\index{srv\-\_\-shutdown@{srv\-\_\-shutdown}!server.c@{server.\-c}}
+\subsubsection[{srv\-\_\-shutdown}]{\setlength{\rightskip}{0pt plus 5cm}volatile sig\-\_\-atomic\-\_\-t srv\-\_\-shutdown = 0\hspace{0.3cm}{\ttfamily [static]}}}\label{server_8c_a3a342de928b87eb91a4dc575124c38ad}

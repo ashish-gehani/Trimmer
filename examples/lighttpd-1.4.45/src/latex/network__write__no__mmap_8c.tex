@@ -1,0 +1,63 @@
+\hypertarget{network__write__no__mmap_8c}{\section{network\-\_\-write\-\_\-no\-\_\-mmap.\-c File Reference}
+\label{network__write__no__mmap_8c}\index{network\-\_\-write\-\_\-no\-\_\-mmap.\-c@{network\-\_\-write\-\_\-no\-\_\-mmap.\-c}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}network\-\_\-backends.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}network.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}fdevent.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}log.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}stat\-\_\-cache.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}sys-\/socket.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$sys/time.\-h$>$}\\*
+{\ttfamily \#include $<$stdlib.\-h$>$}\\*
+{\ttfamily \#include $<$fcntl.\-h$>$}\\*
+{\ttfamily \#include $<$sys/stat.\-h$>$}\\*
+{\ttfamily \#include $<$unistd.\-h$>$}\\*
+{\ttfamily \#include $<$errno.\-h$>$}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \hyperlink{network__write__no__mmap_8c_a679364a10d948acbd73ce9ebb85e5f94}{network\-\_\-open\-\_\-file\-\_\-chunk} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structchunkqueue}{chunkqueue} $\ast$cq)
+\item 
+int \hyperlink{network__write__no__mmap_8c_adad00903488b2cb551b14af39a58a280}{network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-no\-\_\-mmap} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, int fd, \hyperlink{structchunkqueue}{chunkqueue} $\ast$cq, off\-\_\-t $\ast$p\-\_\-max\-\_\-bytes)
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\hypertarget{network__write__no__mmap_8c_a679364a10d948acbd73ce9ebb85e5f94}{\index{network\-\_\-write\-\_\-no\-\_\-mmap.\-c@{network\-\_\-write\-\_\-no\-\_\-mmap.\-c}!network\-\_\-open\-\_\-file\-\_\-chunk@{network\-\_\-open\-\_\-file\-\_\-chunk}}
+\index{network\-\_\-open\-\_\-file\-\_\-chunk@{network\-\_\-open\-\_\-file\-\_\-chunk}!network_write_no_mmap.c@{network\-\_\-write\-\_\-no\-\_\-mmap.\-c}}
+\subsubsection[{network\-\_\-open\-\_\-file\-\_\-chunk}]{\setlength{\rightskip}{0pt plus 5cm}int network\-\_\-open\-\_\-file\-\_\-chunk (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf chunkqueue} $\ast$}]{cq}
+\end{DoxyParamCaption}
+)}}\label{network__write__no__mmap_8c_a679364a10d948acbd73ce9ebb85e5f94}
+
+
+References chunk\-::fd, fdevent\-\_\-open\-\_\-cloexec(), chunk\-::file, chunkqueue\-::first, force\-\_\-assert, chunk\-::is\-\_\-temp, chunk\-::length, log\-\_\-error\-\_\-write(), chunk\-::name, chunk\-::offset, buffer\-::ptr, chunk\-::start, chunk\-::type, and U\-N\-U\-S\-E\-D.
+
+
+
+Referenced by network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-no\-\_\-mmap().
+
+\hypertarget{network__write__no__mmap_8c_adad00903488b2cb551b14af39a58a280}{\index{network\-\_\-write\-\_\-no\-\_\-mmap.\-c@{network\-\_\-write\-\_\-no\-\_\-mmap.\-c}!network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-no\-\_\-mmap@{network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-no\-\_\-mmap}}
+\index{network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-no\-\_\-mmap@{network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-no\-\_\-mmap}!network_write_no_mmap.c@{network\-\_\-write\-\_\-no\-\_\-mmap.\-c}}
+\subsubsection[{network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-no\-\_\-mmap}]{\setlength{\rightskip}{0pt plus 5cm}int network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-no\-\_\-mmap (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{int}]{fd, }
+\item[{{\bf chunkqueue} $\ast$}]{cq, }
+\item[{off\-\_\-t $\ast$}]{p\-\_\-max\-\_\-bytes}
+\end{DoxyParamCaption}
+)}}\label{network__write__no__mmap_8c_adad00903488b2cb551b14af39a58a280}
+
+
+References buffer\-\_\-string\-\_\-prepare\-\_\-copy(), chunkqueue\-\_\-mark\-\_\-written(), chunkqueue\-\_\-remove\-\_\-finished\-\_\-chunks(), chunk\-::fd, chunk\-::file, chunkqueue\-::first, force\-\_\-assert, chunk\-::length, log\-\_\-error\-\_\-write(), network\-\_\-open\-\_\-file\-\_\-chunk(), chunk\-::offset, buffer\-::ptr, chunk\-::start, server\-::tmp\-\_\-buf, and chunk\-::type.
+
+
+
+Referenced by network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-mmap().
+

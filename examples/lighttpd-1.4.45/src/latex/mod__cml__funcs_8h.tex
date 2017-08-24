@@ -1,0 +1,119 @@
+\hypertarget{mod__cml__funcs_8h}{\section{mod\-\_\-cml\-\_\-funcs.\-h File Reference}
+\label{mod__cml__funcs_8h}\index{mod\-\_\-cml\-\_\-funcs.\-h@{mod\-\_\-cml\-\_\-funcs.\-h}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$lua.\-h$>$}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \hyperlink{mod__cml__funcs_8h_a6f340381e72fe756be63375328735d1e}{f\-\_\-crypto\-\_\-md5} (lua\-\_\-\-State $\ast$L)
+\item 
+int \hyperlink{mod__cml__funcs_8h_a33df949c58e59560d1cff4de2a6cd813}{f\-\_\-file\-\_\-mtime} (lua\-\_\-\-State $\ast$L)
+\item 
+int \hyperlink{mod__cml__funcs_8h_a320d58701c7a7114b77acba52f7f9452}{f\-\_\-file\-\_\-isreg} (lua\-\_\-\-State $\ast$L)
+\item 
+int \hyperlink{mod__cml__funcs_8h_af0f7d909be224318e7ee7eb53ef0545d}{f\-\_\-file\-\_\-isdir} (lua\-\_\-\-State $\ast$L)
+\item 
+int \hyperlink{mod__cml__funcs_8h_a6db653fa4445466222fc08d73d2b1cc5}{f\-\_\-dir\-\_\-files} (lua\-\_\-\-State $\ast$L)
+\item 
+int \hyperlink{mod__cml__funcs_8h_aaa416e8ee9f977543869068d4dc6cb5c}{f\-\_\-memcache\-\_\-exists} (lua\-\_\-\-State $\ast$L)
+\item 
+int \hyperlink{mod__cml__funcs_8h_aa5f0156e32799cadc189cf0f589bb5c7}{f\-\_\-memcache\-\_\-get\-\_\-string} (lua\-\_\-\-State $\ast$L)
+\item 
+int \hyperlink{mod__cml__funcs_8h_a3b0a6d02edc786c95f8778233e49c4f7}{f\-\_\-memcache\-\_\-get\-\_\-long} (lua\-\_\-\-State $\ast$L)
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\hypertarget{mod__cml__funcs_8h_a6f340381e72fe756be63375328735d1e}{\index{mod\-\_\-cml\-\_\-funcs.\-h@{mod\-\_\-cml\-\_\-funcs.\-h}!f\-\_\-crypto\-\_\-md5@{f\-\_\-crypto\-\_\-md5}}
+\index{f\-\_\-crypto\-\_\-md5@{f\-\_\-crypto\-\_\-md5}!mod_cml_funcs.h@{mod\-\_\-cml\-\_\-funcs.\-h}}
+\subsubsection[{f\-\_\-crypto\-\_\-md5}]{\setlength{\rightskip}{0pt plus 5cm}int f\-\_\-crypto\-\_\-md5 (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L}
+\end{DoxyParamCaption}
+)}}\label{mod__cml__funcs_8h_a6f340381e72fe756be63375328735d1e}
+
+
+References li\-\_\-\-M\-D5\-\_\-\-Final(), li\-\_\-\-M\-D5\-\_\-\-Init(), li\-\_\-\-M\-D5\-\_\-\-Update(), and li\-\_\-tohex().
+
+
+
+Referenced by cache\-\_\-parse\-\_\-lua().
+
+\hypertarget{mod__cml__funcs_8h_a6db653fa4445466222fc08d73d2b1cc5}{\index{mod\-\_\-cml\-\_\-funcs.\-h@{mod\-\_\-cml\-\_\-funcs.\-h}!f\-\_\-dir\-\_\-files@{f\-\_\-dir\-\_\-files}}
+\index{f\-\_\-dir\-\_\-files@{f\-\_\-dir\-\_\-files}!mod_cml_funcs.h@{mod\-\_\-cml\-\_\-funcs.\-h}}
+\subsubsection[{f\-\_\-dir\-\_\-files}]{\setlength{\rightskip}{0pt plus 5cm}int f\-\_\-dir\-\_\-files (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L}
+\end{DoxyParamCaption}
+)}}\label{mod__cml__funcs_8h_a6db653fa4445466222fc08d73d2b1cc5}
+
+
+References f\-\_\-dir\-\_\-files\-\_\-iter().
+
+
+
+Referenced by cache\-\_\-parse\-\_\-lua().
+
+\hypertarget{mod__cml__funcs_8h_af0f7d909be224318e7ee7eb53ef0545d}{\index{mod\-\_\-cml\-\_\-funcs.\-h@{mod\-\_\-cml\-\_\-funcs.\-h}!f\-\_\-file\-\_\-isdir@{f\-\_\-file\-\_\-isdir}}
+\index{f\-\_\-file\-\_\-isdir@{f\-\_\-file\-\_\-isdir}!mod_cml_funcs.h@{mod\-\_\-cml\-\_\-funcs.\-h}}
+\subsubsection[{f\-\_\-file\-\_\-isdir}]{\setlength{\rightskip}{0pt plus 5cm}int f\-\_\-file\-\_\-isdir (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L}
+\end{DoxyParamCaption}
+)}}\label{mod__cml__funcs_8h_af0f7d909be224318e7ee7eb53ef0545d}
+\hypertarget{mod__cml__funcs_8h_a320d58701c7a7114b77acba52f7f9452}{\index{mod\-\_\-cml\-\_\-funcs.\-h@{mod\-\_\-cml\-\_\-funcs.\-h}!f\-\_\-file\-\_\-isreg@{f\-\_\-file\-\_\-isreg}}
+\index{f\-\_\-file\-\_\-isreg@{f\-\_\-file\-\_\-isreg}!mod_cml_funcs.h@{mod\-\_\-cml\-\_\-funcs.\-h}}
+\subsubsection[{f\-\_\-file\-\_\-isreg}]{\setlength{\rightskip}{0pt plus 5cm}int f\-\_\-file\-\_\-isreg (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L}
+\end{DoxyParamCaption}
+)}}\label{mod__cml__funcs_8h_a320d58701c7a7114b77acba52f7f9452}
+
+
+Referenced by cache\-\_\-parse\-\_\-lua().
+
+\hypertarget{mod__cml__funcs_8h_a33df949c58e59560d1cff4de2a6cd813}{\index{mod\-\_\-cml\-\_\-funcs.\-h@{mod\-\_\-cml\-\_\-funcs.\-h}!f\-\_\-file\-\_\-mtime@{f\-\_\-file\-\_\-mtime}}
+\index{f\-\_\-file\-\_\-mtime@{f\-\_\-file\-\_\-mtime}!mod_cml_funcs.h@{mod\-\_\-cml\-\_\-funcs.\-h}}
+\subsubsection[{f\-\_\-file\-\_\-mtime}]{\setlength{\rightskip}{0pt plus 5cm}int f\-\_\-file\-\_\-mtime (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L}
+\end{DoxyParamCaption}
+)}}\label{mod__cml__funcs_8h_a33df949c58e59560d1cff4de2a6cd813}
+
+
+Referenced by cache\-\_\-parse\-\_\-lua().
+
+\hypertarget{mod__cml__funcs_8h_aaa416e8ee9f977543869068d4dc6cb5c}{\index{mod\-\_\-cml\-\_\-funcs.\-h@{mod\-\_\-cml\-\_\-funcs.\-h}!f\-\_\-memcache\-\_\-exists@{f\-\_\-memcache\-\_\-exists}}
+\index{f\-\_\-memcache\-\_\-exists@{f\-\_\-memcache\-\_\-exists}!mod_cml_funcs.h@{mod\-\_\-cml\-\_\-funcs.\-h}}
+\subsubsection[{f\-\_\-memcache\-\_\-exists}]{\setlength{\rightskip}{0pt plus 5cm}int f\-\_\-memcache\-\_\-exists (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L}
+\end{DoxyParamCaption}
+)}}\label{mod__cml__funcs_8h_aaa416e8ee9f977543869068d4dc6cb5c}
+
+
+Referenced by cache\-\_\-parse\-\_\-lua().
+
+\hypertarget{mod__cml__funcs_8h_a3b0a6d02edc786c95f8778233e49c4f7}{\index{mod\-\_\-cml\-\_\-funcs.\-h@{mod\-\_\-cml\-\_\-funcs.\-h}!f\-\_\-memcache\-\_\-get\-\_\-long@{f\-\_\-memcache\-\_\-get\-\_\-long}}
+\index{f\-\_\-memcache\-\_\-get\-\_\-long@{f\-\_\-memcache\-\_\-get\-\_\-long}!mod_cml_funcs.h@{mod\-\_\-cml\-\_\-funcs.\-h}}
+\subsubsection[{f\-\_\-memcache\-\_\-get\-\_\-long}]{\setlength{\rightskip}{0pt plus 5cm}int f\-\_\-memcache\-\_\-get\-\_\-long (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L}
+\end{DoxyParamCaption}
+)}}\label{mod__cml__funcs_8h_a3b0a6d02edc786c95f8778233e49c4f7}
+
+
+Referenced by cache\-\_\-parse\-\_\-lua().
+
+\hypertarget{mod__cml__funcs_8h_aa5f0156e32799cadc189cf0f589bb5c7}{\index{mod\-\_\-cml\-\_\-funcs.\-h@{mod\-\_\-cml\-\_\-funcs.\-h}!f\-\_\-memcache\-\_\-get\-\_\-string@{f\-\_\-memcache\-\_\-get\-\_\-string}}
+\index{f\-\_\-memcache\-\_\-get\-\_\-string@{f\-\_\-memcache\-\_\-get\-\_\-string}!mod_cml_funcs.h@{mod\-\_\-cml\-\_\-funcs.\-h}}
+\subsubsection[{f\-\_\-memcache\-\_\-get\-\_\-string}]{\setlength{\rightskip}{0pt plus 5cm}int f\-\_\-memcache\-\_\-get\-\_\-string (
+\begin{DoxyParamCaption}
+\item[{lua\-\_\-\-State $\ast$}]{L}
+\end{DoxyParamCaption}
+)}}\label{mod__cml__funcs_8h_aa5f0156e32799cadc189cf0f589bb5c7}
+
+
+Referenced by cache\-\_\-parse\-\_\-lua().
+

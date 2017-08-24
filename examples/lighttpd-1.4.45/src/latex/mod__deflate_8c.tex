@@ -1,0 +1,451 @@
+\hypertarget{mod__deflate_8c}{\section{mod\-\_\-deflate.\-c File Reference}
+\label{mod__deflate_8c}\index{mod\-\_\-deflate.\-c@{mod\-\_\-deflate.\-c}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$sys/types.\-h$>$}\\*
+{\ttfamily \#include $<$sys/stat.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}sys-\/mmap.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$fcntl.\-h$>$}\\*
+{\ttfamily \#include $<$stdlib.\-h$>$}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+{\ttfamily \#include $<$errno.\-h$>$}\\*
+{\ttfamily \#include $<$time.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}base.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}log.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}buffer.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}etag.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}http\-\_\-chunk.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}response.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}plugin.\-h\char`\"{}}\\*
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structplugin__config}{plugin\-\_\-config}
+\item 
+struct \hyperlink{structplugin__data}{plugin\-\_\-data}
+\item 
+struct \hyperlink{structhandler__ctx}{handler\-\_\-ctx}
+\end{DoxyCompactItemize}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{mod__deflate_8c_af5387baee05124298e431ebe6fe96b17}{Z\-\_\-\-D\-E\-F\-A\-U\-L\-T\-\_\-\-C\-O\-M\-P\-R\-E\-S\-S\-I\-O\-N}~-\/1
+\item 
+\#define \hyperlink{mod__deflate_8c_abd2f406ac1f9c49236376115d78ccb5b}{M\-A\-X\-\_\-\-W\-B\-I\-T\-S}~15
+\item 
+\#define \hyperlink{mod__deflate_8c_aa978c5beefcb9a990b38660e09c0fa00}{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-I\-D\-E\-N\-T\-I\-T\-Y}~\hyperlink{settings_8h_a663d8c125655d41622b1e6bc96e5d63d}{B\-V}(0)
+\item 
+\#define \hyperlink{mod__deflate_8c_a9bcf122fe4d40dee73afd1ccd1a01a93}{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-G\-Z\-I\-P}~\hyperlink{settings_8h_a663d8c125655d41622b1e6bc96e5d63d}{B\-V}(1)
+\item 
+\#define \hyperlink{mod__deflate_8c_a73c75a180941edec0cd935c4416a00e9}{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-D\-E\-F\-L\-A\-T\-E}~\hyperlink{settings_8h_a663d8c125655d41622b1e6bc96e5d63d}{B\-V}(2)
+\item 
+\#define \hyperlink{mod__deflate_8c_ad0134fbb333930d82c8b9657d693815b}{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-C\-O\-M\-P\-R\-E\-S\-S}~\hyperlink{settings_8h_a663d8c125655d41622b1e6bc96e5d63d}{B\-V}(3)
+\item 
+\#define \hyperlink{mod__deflate_8c_a409ba76058a7dc445d2b70772c2a4d8f}{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-B\-Z\-I\-P2}~\hyperlink{settings_8h_a663d8c125655d41622b1e6bc96e5d63d}{B\-V}(4)
+\item 
+\#define \hyperlink{mod__deflate_8c_ad903aaae32c7213f61de8da9b1e8a161}{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-X\-\_\-\-G\-Z\-I\-P}~\hyperlink{settings_8h_a663d8c125655d41622b1e6bc96e5d63d}{B\-V}(5)
+\item 
+\#define \hyperlink{mod__deflate_8c_a6d9076a3ead0e58cf129a6f3ce66476f}{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-X\-\_\-\-B\-Z\-I\-P2}~\hyperlink{settings_8h_a663d8c125655d41622b1e6bc96e5d63d}{B\-V}(6)
+\item 
+\#define \hyperlink{mod__deflate_8c_a3c80645b4af4ac8cf3053cb36f9ebbc9}{K\-Byte}~$\ast$ 1024
+\item 
+\#define \hyperlink{mod__deflate_8c_a467eac68e4381d32f3d3d3021285dfea}{M\-Byte}~$\ast$ 1024 \hyperlink{mod__deflate_8c_a3c80645b4af4ac8cf3053cb36f9ebbc9}{K\-Byte}
+\item 
+\#define \hyperlink{mod__deflate_8c_a810a22ca9aad2825ff504fe2c7b8fd1f}{G\-Byte}~$\ast$ 1024 \hyperlink{mod__deflate_8c_a467eac68e4381d32f3d3d3021285dfea}{M\-Byte}
+\item 
+\#define \hyperlink{mod__deflate_8c_a20876ec7c0c844d0e0c1628528bbb8da}{P\-A\-T\-C\-H}(x)~p-\/$>$conf.\-x = s-\/$>$x;
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$ \hyperlink{mod__deflate_8c_a301f2b0bcc47c33ffee75b8cc767bf23}{handler\-\_\-ctx\-\_\-init} ()
+\item 
+static void \hyperlink{mod__deflate_8c_af9f2bc62e505066048458b2893d9c111}{handler\-\_\-ctx\-\_\-free} (\hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx)
+\item 
+\hyperlink{mod__deflate_8c_ad77320f34b14498f200381148e233493}{I\-N\-I\-T\-\_\-\-F\-U\-N\-C} (mod\-\_\-deflate\-\_\-init)
+\item 
+\hyperlink{mod__deflate_8c_a459f57274802390268bfc4f54602c606}{F\-R\-E\-E\-\_\-\-F\-U\-N\-C} (mod\-\_\-deflate\-\_\-free)
+\item 
+\hyperlink{mod__deflate_8c_a22ccb826ea89f27184ce0de8a3b6f2c0}{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C} (mod\-\_\-deflate\-\_\-setdefaults)
+\item 
+static int \hyperlink{mod__deflate_8c_a5a8a9974ea6b460f379fa7f03544c061}{mod\-\_\-deflate\-\_\-stream\-\_\-init} (\hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx)
+\item 
+static int \hyperlink{mod__deflate_8c_a950fd8dabb330f25f493ae47af0cc553}{mod\-\_\-deflate\-\_\-compress} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx, unsigned char $\ast$start, off\-\_\-t st\-\_\-size)
+\item 
+static int \hyperlink{mod__deflate_8c_ae05f0ae7a7c5fe4f161820477a677533}{mod\-\_\-deflate\-\_\-stream\-\_\-flush} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx, int end)
+\item 
+static void \hyperlink{mod__deflate_8c_ad3ae8eab27adb5091d74ab653c2e28c8}{mod\-\_\-deflate\-\_\-note\-\_\-ratio} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx)
+\item 
+static int \hyperlink{mod__deflate_8c_aee06091bb0fb9bfa05ede866238e3fd1}{mod\-\_\-deflate\-\_\-stream\-\_\-end} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx)
+\item 
+static void \hyperlink{mod__deflate_8c_aa6a24ec13b39fa1952b4c76c17d45a7a}{deflate\-\_\-compress\-\_\-cleanup} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx)
+\item 
+static int \hyperlink{mod__deflate_8c_a3f2b7c0892d9d1ba37479f79244c4676}{mod\-\_\-deflate\-\_\-file\-\_\-chunk} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx, \hyperlink{structchunk}{chunk} $\ast$c, off\-\_\-t st\-\_\-size)
+\item 
+static \hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t} \hyperlink{mod__deflate_8c_a41ff4d16333d249d86c7a0e37bcc8045}{deflate\-\_\-compress\-\_\-response} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx)
+\item 
+static int \hyperlink{mod__deflate_8c_a0b0576cb86bb118da73288cc6b1670c8}{mod\-\_\-deflate\-\_\-patch\-\_\-connection} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structplugin__data}{plugin\-\_\-data} $\ast$p)
+\item 
+static int \hyperlink{mod__deflate_8c_afe6b960df727e3521932507b2c100d89}{mod\-\_\-deflate\-\_\-choose\-\_\-encoding} (const char $\ast$value, \hyperlink{structplugin__data}{plugin\-\_\-data} $\ast$p, const char $\ast$$\ast$label)
+\item 
+\hyperlink{mod__deflate_8c_a9c10cd28fc8fccab6c00ce83cdc30cbc}{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C} (mod\-\_\-deflate\-\_\-handle\-\_\-response\-\_\-start)
+\item 
+static \hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t} \hyperlink{mod__deflate_8c_a72758a9c139d7f94bfa5996d7370f62e}{mod\-\_\-deflate\-\_\-cleanup} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, void $\ast$p\-\_\-d)
+\item 
+int \hyperlink{mod__deflate_8c_abdeb52763ad3a1938cee2ed6a373efc0}{mod\-\_\-deflate\-\_\-plugin\-\_\-init} (\hyperlink{structplugin}{plugin} $\ast$p)
+\end{DoxyCompactItemize}
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{mod__deflate_8c_a810a22ca9aad2825ff504fe2c7b8fd1f}{\index{mod\-\_\-deflate.\-c@{mod\-\_\-deflate.\-c}!G\-Byte@{G\-Byte}}
+\index{G\-Byte@{G\-Byte}!mod_deflate.c@{mod\-\_\-deflate.\-c}}
+\subsubsection[{G\-Byte}]{\setlength{\rightskip}{0pt plus 5cm}\#define G\-Byte~$\ast$ 1024 {\bf M\-Byte}}}\label{mod__deflate_8c_a810a22ca9aad2825ff504fe2c7b8fd1f}
+\hypertarget{mod__deflate_8c_a409ba76058a7dc445d2b70772c2a4d8f}{\index{mod\-\_\-deflate.\-c@{mod\-\_\-deflate.\-c}!H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-B\-Z\-I\-P2@{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-B\-Z\-I\-P2}}
+\index{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-B\-Z\-I\-P2@{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-B\-Z\-I\-P2}!mod_deflate.c@{mod\-\_\-deflate.\-c}}
+\subsubsection[{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-B\-Z\-I\-P2}]{\setlength{\rightskip}{0pt plus 5cm}\#define H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-B\-Z\-I\-P2~{\bf B\-V}(4)}}\label{mod__deflate_8c_a409ba76058a7dc445d2b70772c2a4d8f}
+
+
+Referenced by mod\-\_\-deflate\-\_\-choose\-\_\-encoding(), mod\-\_\-deflate\-\_\-compress(), mod\-\_\-deflate\-\_\-stream\-\_\-end(), mod\-\_\-deflate\-\_\-stream\-\_\-flush(), mod\-\_\-deflate\-\_\-stream\-\_\-init(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__deflate_8c_ad0134fbb333930d82c8b9657d693815b}{\index{mod\-\_\-deflate.\-c@{mod\-\_\-deflate.\-c}!H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-C\-O\-M\-P\-R\-E\-S\-S@{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-C\-O\-M\-P\-R\-E\-S\-S}}
+\index{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-C\-O\-M\-P\-R\-E\-S\-S@{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-C\-O\-M\-P\-R\-E\-S\-S}!mod_deflate.c@{mod\-\_\-deflate.\-c}}
+\subsubsection[{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-C\-O\-M\-P\-R\-E\-S\-S}]{\setlength{\rightskip}{0pt plus 5cm}\#define H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-C\-O\-M\-P\-R\-E\-S\-S~{\bf B\-V}(3)}}\label{mod__deflate_8c_ad0134fbb333930d82c8b9657d693815b}
+\hypertarget{mod__deflate_8c_a73c75a180941edec0cd935c4416a00e9}{\index{mod\-\_\-deflate.\-c@{mod\-\_\-deflate.\-c}!H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-D\-E\-F\-L\-A\-T\-E@{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-D\-E\-F\-L\-A\-T\-E}}
+\index{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-D\-E\-F\-L\-A\-T\-E@{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-D\-E\-F\-L\-A\-T\-E}!mod_deflate.c@{mod\-\_\-deflate.\-c}}
+\subsubsection[{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-D\-E\-F\-L\-A\-T\-E}]{\setlength{\rightskip}{0pt plus 5cm}\#define H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-D\-E\-F\-L\-A\-T\-E~{\bf B\-V}(2)}}\label{mod__deflate_8c_a73c75a180941edec0cd935c4416a00e9}
+
+
+Referenced by C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), mod\-\_\-deflate\-\_\-choose\-\_\-encoding(), mod\-\_\-deflate\-\_\-compress(), mod\-\_\-deflate\-\_\-stream\-\_\-end(), mod\-\_\-deflate\-\_\-stream\-\_\-flush(), mod\-\_\-deflate\-\_\-stream\-\_\-init(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__deflate_8c_a9bcf122fe4d40dee73afd1ccd1a01a93}{\index{mod\-\_\-deflate.\-c@{mod\-\_\-deflate.\-c}!H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-G\-Z\-I\-P@{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-G\-Z\-I\-P}}
+\index{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-G\-Z\-I\-P@{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-G\-Z\-I\-P}!mod_deflate.c@{mod\-\_\-deflate.\-c}}
+\subsubsection[{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-G\-Z\-I\-P}]{\setlength{\rightskip}{0pt plus 5cm}\#define H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-G\-Z\-I\-P~{\bf B\-V}(1)}}\label{mod__deflate_8c_a9bcf122fe4d40dee73afd1ccd1a01a93}
+
+
+Referenced by mod\-\_\-deflate\-\_\-choose\-\_\-encoding(), mod\-\_\-deflate\-\_\-compress(), mod\-\_\-deflate\-\_\-stream\-\_\-end(), mod\-\_\-deflate\-\_\-stream\-\_\-flush(), mod\-\_\-deflate\-\_\-stream\-\_\-init(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__deflate_8c_aa978c5beefcb9a990b38660e09c0fa00}{\index{mod\-\_\-deflate.\-c@{mod\-\_\-deflate.\-c}!H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-I\-D\-E\-N\-T\-I\-T\-Y@{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-I\-D\-E\-N\-T\-I\-T\-Y}}
+\index{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-I\-D\-E\-N\-T\-I\-T\-Y@{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-I\-D\-E\-N\-T\-I\-T\-Y}!mod_deflate.c@{mod\-\_\-deflate.\-c}}
+\subsubsection[{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-I\-D\-E\-N\-T\-I\-T\-Y}]{\setlength{\rightskip}{0pt plus 5cm}\#define H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-I\-D\-E\-N\-T\-I\-T\-Y~{\bf B\-V}(0)}}\label{mod__deflate_8c_aa978c5beefcb9a990b38660e09c0fa00}
+\hypertarget{mod__deflate_8c_a6d9076a3ead0e58cf129a6f3ce66476f}{\index{mod\-\_\-deflate.\-c@{mod\-\_\-deflate.\-c}!H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-X\-\_\-\-B\-Z\-I\-P2@{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-X\-\_\-\-B\-Z\-I\-P2}}
+\index{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-X\-\_\-\-B\-Z\-I\-P2@{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-X\-\_\-\-B\-Z\-I\-P2}!mod_deflate.c@{mod\-\_\-deflate.\-c}}
+\subsubsection[{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-X\-\_\-\-B\-Z\-I\-P2}]{\setlength{\rightskip}{0pt plus 5cm}\#define H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-X\-\_\-\-B\-Z\-I\-P2~{\bf B\-V}(6)}}\label{mod__deflate_8c_a6d9076a3ead0e58cf129a6f3ce66476f}
+
+
+Referenced by mod\-\_\-deflate\-\_\-choose\-\_\-encoding(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__deflate_8c_ad903aaae32c7213f61de8da9b1e8a161}{\index{mod\-\_\-deflate.\-c@{mod\-\_\-deflate.\-c}!H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-X\-\_\-\-G\-Z\-I\-P@{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-X\-\_\-\-G\-Z\-I\-P}}
+\index{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-X\-\_\-\-G\-Z\-I\-P@{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-X\-\_\-\-G\-Z\-I\-P}!mod_deflate.c@{mod\-\_\-deflate.\-c}}
+\subsubsection[{H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-X\-\_\-\-G\-Z\-I\-P}]{\setlength{\rightskip}{0pt plus 5cm}\#define H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-X\-\_\-\-G\-Z\-I\-P~{\bf B\-V}(5)}}\label{mod__deflate_8c_ad903aaae32c7213f61de8da9b1e8a161}
+
+
+Referenced by mod\-\_\-deflate\-\_\-choose\-\_\-encoding(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__deflate_8c_a3c80645b4af4ac8cf3053cb36f9ebbc9}{\index{mod\-\_\-deflate.\-c@{mod\-\_\-deflate.\-c}!K\-Byte@{K\-Byte}}
+\index{K\-Byte@{K\-Byte}!mod_deflate.c@{mod\-\_\-deflate.\-c}}
+\subsubsection[{K\-Byte}]{\setlength{\rightskip}{0pt plus 5cm}\#define K\-Byte~$\ast$ 1024}}\label{mod__deflate_8c_a3c80645b4af4ac8cf3053cb36f9ebbc9}
+
+
+Referenced by I\-N\-I\-T\-\_\-\-F\-U\-N\-C(), and mod\-\_\-deflate\-\_\-file\-\_\-chunk().
+
+\hypertarget{mod__deflate_8c_abd2f406ac1f9c49236376115d78ccb5b}{\index{mod\-\_\-deflate.\-c@{mod\-\_\-deflate.\-c}!M\-A\-X\-\_\-\-W\-B\-I\-T\-S@{M\-A\-X\-\_\-\-W\-B\-I\-T\-S}}
+\index{M\-A\-X\-\_\-\-W\-B\-I\-T\-S@{M\-A\-X\-\_\-\-W\-B\-I\-T\-S}!mod_deflate.c@{mod\-\_\-deflate.\-c}}
+\subsubsection[{M\-A\-X\-\_\-\-W\-B\-I\-T\-S}]{\setlength{\rightskip}{0pt plus 5cm}\#define M\-A\-X\-\_\-\-W\-B\-I\-T\-S~15}}\label{mod__deflate_8c_abd2f406ac1f9c49236376115d78ccb5b}
+\hypertarget{mod__deflate_8c_a467eac68e4381d32f3d3d3021285dfea}{\index{mod\-\_\-deflate.\-c@{mod\-\_\-deflate.\-c}!M\-Byte@{M\-Byte}}
+\index{M\-Byte@{M\-Byte}!mod_deflate.c@{mod\-\_\-deflate.\-c}}
+\subsubsection[{M\-Byte}]{\setlength{\rightskip}{0pt plus 5cm}\#define M\-Byte~$\ast$ 1024 {\bf K\-Byte}}}\label{mod__deflate_8c_a467eac68e4381d32f3d3d3021285dfea}
+
+
+Referenced by mod\-\_\-deflate\-\_\-file\-\_\-chunk().
+
+\hypertarget{mod__deflate_8c_a20876ec7c0c844d0e0c1628528bbb8da}{\index{mod\-\_\-deflate.\-c@{mod\-\_\-deflate.\-c}!P\-A\-T\-C\-H@{P\-A\-T\-C\-H}}
+\index{P\-A\-T\-C\-H@{P\-A\-T\-C\-H}!mod_deflate.c@{mod\-\_\-deflate.\-c}}
+\subsubsection[{P\-A\-T\-C\-H}]{\setlength{\rightskip}{0pt plus 5cm}\#define P\-A\-T\-C\-H(
+\begin{DoxyParamCaption}
+\item[{}]{x}
+\end{DoxyParamCaption}
+)~p-\/$>$conf.\-x = s-\/$>$x;}}\label{mod__deflate_8c_a20876ec7c0c844d0e0c1628528bbb8da}
+
+
+Referenced by mod\-\_\-deflate\-\_\-patch\-\_\-connection().
+
+\hypertarget{mod__deflate_8c_af5387baee05124298e431ebe6fe96b17}{\index{mod\-\_\-deflate.\-c@{mod\-\_\-deflate.\-c}!Z\-\_\-\-D\-E\-F\-A\-U\-L\-T\-\_\-\-C\-O\-M\-P\-R\-E\-S\-S\-I\-O\-N@{Z\-\_\-\-D\-E\-F\-A\-U\-L\-T\-\_\-\-C\-O\-M\-P\-R\-E\-S\-S\-I\-O\-N}}
+\index{Z\-\_\-\-D\-E\-F\-A\-U\-L\-T\-\_\-\-C\-O\-M\-P\-R\-E\-S\-S\-I\-O\-N@{Z\-\_\-\-D\-E\-F\-A\-U\-L\-T\-\_\-\-C\-O\-M\-P\-R\-E\-S\-S\-I\-O\-N}!mod_deflate.c@{mod\-\_\-deflate.\-c}}
+\subsubsection[{Z\-\_\-\-D\-E\-F\-A\-U\-L\-T\-\_\-\-C\-O\-M\-P\-R\-E\-S\-S\-I\-O\-N}]{\setlength{\rightskip}{0pt plus 5cm}\#define Z\-\_\-\-D\-E\-F\-A\-U\-L\-T\-\_\-\-C\-O\-M\-P\-R\-E\-S\-S\-I\-O\-N~-\/1}}\label{mod__deflate_8c_af5387baee05124298e431ebe6fe96b17}
+
+
+\subsection{Function Documentation}
+\hypertarget{mod__deflate_8c_a9c10cd28fc8fccab6c00ce83cdc30cbc}{\index{mod\-\_\-deflate.\-c@{mod\-\_\-deflate.\-c}!C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C@{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C}}
+\index{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C@{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C}!mod_deflate.c@{mod\-\_\-deflate.\-c}}
+\subsubsection[{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-deflate\-\_\-handle\-\_\-response\-\_\-start}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__deflate_8c_a9c10cd28fc8fccab6c00ce83cdc30cbc}
+
+
+References array\-\_\-get\-\_\-element(), buffer\-\_\-append\-\_\-string(), buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-reset(), buffer\-\_\-string\-\_\-is\-\_\-empty(), buffer\-\_\-string\-\_\-length(), buffer\-\_\-string\-\_\-set\-\_\-length(), chunkqueue\-\_\-length(), chunkqueue\-\_\-reset(), handler\-\_\-ctx\-::compression\-\_\-type, plugin\-\_\-data\-::conf, connection\-::conf, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, array\-::data, deflate\-\_\-compress\-\_\-cleanup(), deflate\-\_\-compress\-\_\-response(), D\-I\-R\-E\-C\-T, connection\-::file\-\_\-finished, handler\-\_\-ctx\-\_\-free(), handler\-\_\-ctx\-\_\-init(), H\-A\-N\-D\-L\-E\-R\-\_\-\-E\-R\-R\-O\-R, H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-I\-N\-I\-S\-H\-E\-D, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, request\-::headers, response\-::headers, H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-D\-E\-F\-L\-A\-T\-E, H\-T\-T\-P\-\_\-\-C\-O\-N\-T\-E\-N\-T\-\_\-\-L\-E\-N\-G\-T\-H, request\-::http\-\_\-if\-\_\-none\-\_\-match, request\-::http\-\_\-method, H\-T\-T\-P\-\_\-\-M\-E\-T\-H\-O\-D\-\_\-\-G\-E\-T, H\-T\-T\-P\-\_\-\-M\-E\-T\-H\-O\-D\-\_\-\-H\-E\-A\-D, connection\-::http\-\_\-status, server\-\_\-config\-::loadavg, log\-\_\-error\-\_\-write(), plugin\-\_\-config\-::max\-\_\-compress\-\_\-size, plugin\-\_\-config\-::max\-\_\-loadavg, plugin\-\_\-config\-::mimetypes, plugin\-\_\-config\-::min\-\_\-compress\-\_\-size, mod\-\_\-deflate\-\_\-choose\-\_\-encoding(), mod\-\_\-deflate\-\_\-note\-\_\-ratio(), mod\-\_\-deflate\-\_\-patch\-\_\-connection(), mod\-\_\-deflate\-\_\-stream\-\_\-init(), connection\-::mode, handler\-\_\-ctx\-::output, plugin\-\_\-config\-::output\-\_\-buffer\-\_\-size, connection\-::parsed\-\_\-response, connection\-::plugin\-\_\-ctx, handler\-\_\-ctx\-::plugin\-\_\-data, buffer\-::ptr, connection\-::request, connection\-::response, response\-\_\-header\-\_\-insert(), response\-\_\-header\-\_\-overwrite(), server\-::srvconf, specific\-\_\-config\-::stream\-\_\-response\-\_\-body, plugin\-\_\-config\-::sync\-\_\-flush, plugin\-\_\-data\-::tmp\-\_\-buf, response\-::transfer\-\_\-encoding, array\-::used, data\-\_\-string\-::value, and connection\-::write\-\_\-queue.
+
+\hypertarget{mod__deflate_8c_aa6a24ec13b39fa1952b4c76c17d45a7a}{\index{mod\-\_\-deflate.\-c@{mod\-\_\-deflate.\-c}!deflate\-\_\-compress\-\_\-cleanup@{deflate\-\_\-compress\-\_\-cleanup}}
+\index{deflate\-\_\-compress\-\_\-cleanup@{deflate\-\_\-compress\-\_\-cleanup}!mod_deflate.c@{mod\-\_\-deflate.\-c}}
+\subsubsection[{deflate\-\_\-compress\-\_\-cleanup}]{\setlength{\rightskip}{0pt plus 5cm}static void deflate\-\_\-compress\-\_\-cleanup (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__deflate_8c_aa6a24ec13b39fa1952b4c76c17d45a7a}
+
+
+References handler\-\_\-ctx\-::bytes\-\_\-in, handler\-\_\-ctx\-::bytes\-\_\-out, handler\-\_\-ctx\-\_\-free(), log\-\_\-error\-\_\-write(), mod\-\_\-deflate\-\_\-stream\-\_\-end(), request\-\_\-uri\-::path\-\_\-raw, connection\-::plugin\-\_\-ctx, handler\-\_\-ctx\-::plugin\-\_\-data, and connection\-::uri.
+
+
+
+Referenced by C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), and mod\-\_\-deflate\-\_\-cleanup().
+
+\hypertarget{mod__deflate_8c_a41ff4d16333d249d86c7a0e37bcc8045}{\index{mod\-\_\-deflate.\-c@{mod\-\_\-deflate.\-c}!deflate\-\_\-compress\-\_\-response@{deflate\-\_\-compress\-\_\-response}}
+\index{deflate\-\_\-compress\-\_\-response@{deflate\-\_\-compress\-\_\-response}!mod_deflate.c@{mod\-\_\-deflate.\-c}}
+\subsubsection[{deflate\-\_\-compress\-\_\-response}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf handler\-\_\-t} deflate\-\_\-compress\-\_\-response (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__deflate_8c_a41ff4d16333d249d86c7a0e37bcc8045}
+
+
+References buffer\-\_\-string\-\_\-length(), chunkqueue\-::bytes\-\_\-in, chunkqueue\-::bytes\-\_\-out, chunkqueue\-\_\-append\-\_\-chunkqueue(), chunkqueue\-\_\-is\-\_\-empty(), chunkqueue\-\_\-length(), chunkqueue\-\_\-mark\-\_\-written(), chunkqueue\-\_\-remove\-\_\-finished\-\_\-chunks(), plugin\-\_\-data\-::conf, chunk\-::file, connection\-::file\-\_\-finished, chunkqueue\-::first, H\-A\-N\-D\-L\-E\-R\-\_\-\-E\-R\-R\-O\-R, H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-I\-N\-I\-S\-H\-E\-D, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, handler\-\_\-ctx\-::in\-\_\-queue, chunk\-::length, log\-\_\-error\-\_\-write(), chunk\-::mem, mod\-\_\-deflate\-\_\-compress(), mod\-\_\-deflate\-\_\-file\-\_\-chunk(), mod\-\_\-deflate\-\_\-stream\-\_\-flush(), chunk\-::offset, buffer\-::ptr, plugin\-\_\-config\-::sync\-\_\-flush, chunk\-::type, plugin\-\_\-config\-::work\-\_\-block\-\_\-size, and connection\-::write\-\_\-queue.
+
+
+
+Referenced by C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__deflate_8c_a459f57274802390268bfc4f54602c606}{\index{mod\-\_\-deflate.\-c@{mod\-\_\-deflate.\-c}!F\-R\-E\-E\-\_\-\-F\-U\-N\-C@{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}}
+\index{F\-R\-E\-E\-\_\-\-F\-U\-N\-C@{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}!mod_deflate.c@{mod\-\_\-deflate.\-c}}
+\subsubsection[{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}F\-R\-E\-E\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-deflate\-\_\-free}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__deflate_8c_a459f57274802390268bfc4f54602c606}
+
+
+References array\-\_\-free(), buffer\-\_\-free(), plugin\-\_\-data\-::config\-\_\-storage, plugin\-\_\-data\-::encodings, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, plugin\-\_\-config\-::mimetypes, plugin\-\_\-data\-::tmp\-\_\-buf, and U\-N\-U\-S\-E\-D.
+
+\hypertarget{mod__deflate_8c_af9f2bc62e505066048458b2893d9c111}{\index{mod\-\_\-deflate.\-c@{mod\-\_\-deflate.\-c}!handler\-\_\-ctx\-\_\-free@{handler\-\_\-ctx\-\_\-free}}
+\index{handler\-\_\-ctx\-\_\-free@{handler\-\_\-ctx\-\_\-free}!mod_deflate.c@{mod\-\_\-deflate.\-c}}
+\subsubsection[{handler\-\_\-ctx\-\_\-free}]{\setlength{\rightskip}{0pt plus 5cm}static void handler\-\_\-ctx\-\_\-free (
+\begin{DoxyParamCaption}
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__deflate_8c_af9f2bc62e505066048458b2893d9c111}
+
+
+References buffer\-\_\-free(), chunkqueue\-\_\-free(), handler\-\_\-ctx\-::in\-\_\-queue, and handler\-\_\-ctx\-::output.
+
+
+
+Referenced by C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), and deflate\-\_\-compress\-\_\-cleanup().
+
+\hypertarget{mod__deflate_8c_a301f2b0bcc47c33ffee75b8cc767bf23}{\index{mod\-\_\-deflate.\-c@{mod\-\_\-deflate.\-c}!handler\-\_\-ctx\-\_\-init@{handler\-\_\-ctx\-\_\-init}}
+\index{handler\-\_\-ctx\-\_\-init@{handler\-\_\-ctx\-\_\-init}!mod_deflate.c@{mod\-\_\-deflate.\-c}}
+\subsubsection[{handler\-\_\-ctx\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf handler\-\_\-ctx}$\ast$ handler\-\_\-ctx\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__deflate_8c_a301f2b0bcc47c33ffee75b8cc767bf23}
+
+
+References chunkqueue\-\_\-init(), and handler\-\_\-ctx\-::in\-\_\-queue.
+
+
+
+Referenced by C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__deflate_8c_ad77320f34b14498f200381148e233493}{\index{mod\-\_\-deflate.\-c@{mod\-\_\-deflate.\-c}!I\-N\-I\-T\-\_\-\-F\-U\-N\-C@{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}}
+\index{I\-N\-I\-T\-\_\-\-F\-U\-N\-C@{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}!mod_deflate.c@{mod\-\_\-deflate.\-c}}
+\subsubsection[{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}I\-N\-I\-T\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-deflate\-\_\-init}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__deflate_8c_ad77320f34b14498f200381148e233493}
+
+
+References array\-\_\-init(), buffer\-\_\-init(), buffer\-\_\-string\-\_\-prepare\-\_\-copy(), plugin\-\_\-data\-::encodings, K\-Byte, and plugin\-\_\-data\-::tmp\-\_\-buf.
+
+\hypertarget{mod__deflate_8c_afe6b960df727e3521932507b2c100d89}{\index{mod\-\_\-deflate.\-c@{mod\-\_\-deflate.\-c}!mod\-\_\-deflate\-\_\-choose\-\_\-encoding@{mod\-\_\-deflate\-\_\-choose\-\_\-encoding}}
+\index{mod\-\_\-deflate\-\_\-choose\-\_\-encoding@{mod\-\_\-deflate\-\_\-choose\-\_\-encoding}!mod_deflate.c@{mod\-\_\-deflate.\-c}}
+\subsubsection[{mod\-\_\-deflate\-\_\-choose\-\_\-encoding}]{\setlength{\rightskip}{0pt plus 5cm}static int mod\-\_\-deflate\-\_\-choose\-\_\-encoding (
+\begin{DoxyParamCaption}
+\item[{const char $\ast$}]{value, }
+\item[{{\bf plugin\-\_\-data} $\ast$}]{p, }
+\item[{const char $\ast$$\ast$}]{label}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__deflate_8c_afe6b960df727e3521932507b2c100d89}
+
+
+References plugin\-\_\-config\-::allowed\-\_\-encodings, plugin\-\_\-data\-::conf, H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-B\-Z\-I\-P2, H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-D\-E\-F\-L\-A\-T\-E, H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-G\-Z\-I\-P, H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-X\-\_\-\-B\-Z\-I\-P2, H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-X\-\_\-\-G\-Z\-I\-P, and U\-N\-U\-S\-E\-D.
+
+
+
+Referenced by C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__deflate_8c_a72758a9c139d7f94bfa5996d7370f62e}{\index{mod\-\_\-deflate.\-c@{mod\-\_\-deflate.\-c}!mod\-\_\-deflate\-\_\-cleanup@{mod\-\_\-deflate\-\_\-cleanup}}
+\index{mod\-\_\-deflate\-\_\-cleanup@{mod\-\_\-deflate\-\_\-cleanup}!mod_deflate.c@{mod\-\_\-deflate.\-c}}
+\subsubsection[{mod\-\_\-deflate\-\_\-cleanup}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf handler\-\_\-t} mod\-\_\-deflate\-\_\-cleanup (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{void $\ast$}]{p\-\_\-d}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__deflate_8c_a72758a9c139d7f94bfa5996d7370f62e}
+
+
+References deflate\-\_\-compress\-\_\-cleanup(), H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, and connection\-::plugin\-\_\-ctx.
+
+
+
+Referenced by mod\-\_\-deflate\-\_\-plugin\-\_\-init().
+
+\hypertarget{mod__deflate_8c_a950fd8dabb330f25f493ae47af0cc553}{\index{mod\-\_\-deflate.\-c@{mod\-\_\-deflate.\-c}!mod\-\_\-deflate\-\_\-compress@{mod\-\_\-deflate\-\_\-compress}}
+\index{mod\-\_\-deflate\-\_\-compress@{mod\-\_\-deflate\-\_\-compress}!mod_deflate.c@{mod\-\_\-deflate.\-c}}
+\subsubsection[{mod\-\_\-deflate\-\_\-compress}]{\setlength{\rightskip}{0pt plus 5cm}static int mod\-\_\-deflate\-\_\-compress (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx, }
+\item[{unsigned char $\ast$}]{start, }
+\item[{off\-\_\-t}]{st\-\_\-size}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__deflate_8c_a950fd8dabb330f25f493ae47af0cc553}
+
+
+References handler\-\_\-ctx\-::compression\-\_\-type, H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-B\-Z\-I\-P2, H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-D\-E\-F\-L\-A\-T\-E, H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-G\-Z\-I\-P, and U\-N\-U\-S\-E\-D.
+
+
+
+Referenced by deflate\-\_\-compress\-\_\-response(), and mod\-\_\-deflate\-\_\-file\-\_\-chunk().
+
+\hypertarget{mod__deflate_8c_a3f2b7c0892d9d1ba37479f79244c4676}{\index{mod\-\_\-deflate.\-c@{mod\-\_\-deflate.\-c}!mod\-\_\-deflate\-\_\-file\-\_\-chunk@{mod\-\_\-deflate\-\_\-file\-\_\-chunk}}
+\index{mod\-\_\-deflate\-\_\-file\-\_\-chunk@{mod\-\_\-deflate\-\_\-file\-\_\-chunk}!mod_deflate.c@{mod\-\_\-deflate.\-c}}
+\subsubsection[{mod\-\_\-deflate\-\_\-file\-\_\-chunk}]{\setlength{\rightskip}{0pt plus 5cm}static int mod\-\_\-deflate\-\_\-file\-\_\-chunk (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx, }
+\item[{{\bf chunk} $\ast$}]{c, }
+\item[{off\-\_\-t}]{st\-\_\-size}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__deflate_8c_a3f2b7c0892d9d1ba37479f79244c4676}
+
+
+References chunk\-::fd, fdevent\-\_\-open\-\_\-cloexec(), chunk\-::file, force\-\_\-assert, K\-Byte, chunk\-::length, log\-\_\-error\-\_\-write(), M\-A\-P\-\_\-\-F\-A\-I\-L\-E\-D, M\-A\-P\-\_\-\-S\-H\-A\-R\-E\-D, M\-Byte, mmap, chunk\-::mmap, mod\-\_\-deflate\-\_\-compress(), munmap, chunk\-::name, chunk\-::offset, P\-R\-O\-T\-\_\-\-R\-E\-A\-D, buffer\-::ptr, and chunk\-::start.
+
+
+
+Referenced by deflate\-\_\-compress\-\_\-response().
+
+\hypertarget{mod__deflate_8c_ad3ae8eab27adb5091d74ab653c2e28c8}{\index{mod\-\_\-deflate.\-c@{mod\-\_\-deflate.\-c}!mod\-\_\-deflate\-\_\-note\-\_\-ratio@{mod\-\_\-deflate\-\_\-note\-\_\-ratio}}
+\index{mod\-\_\-deflate\-\_\-note\-\_\-ratio@{mod\-\_\-deflate\-\_\-note\-\_\-ratio}!mod_deflate.c@{mod\-\_\-deflate.\-c}}
+\subsubsection[{mod\-\_\-deflate\-\_\-note\-\_\-ratio}]{\setlength{\rightskip}{0pt plus 5cm}static void mod\-\_\-deflate\-\_\-note\-\_\-ratio (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__deflate_8c_ad3ae8eab27adb5091d74ab653c2e28c8}
+
+
+References array\-\_\-set\-\_\-key\-\_\-value(), handler\-\_\-ctx\-::bytes\-\_\-in, handler\-\_\-ctx\-::bytes\-\_\-out, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, connection\-::environment, L\-I\-\_\-\-I\-T\-O\-S\-T\-R\-I\-N\-G\-\_\-\-L\-E\-N\-G\-T\-H, li\-\_\-itostrn(), and U\-N\-U\-S\-E\-D.
+
+
+
+Referenced by C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__deflate_8c_a0b0576cb86bb118da73288cc6b1670c8}{\index{mod\-\_\-deflate.\-c@{mod\-\_\-deflate.\-c}!mod\-\_\-deflate\-\_\-patch\-\_\-connection@{mod\-\_\-deflate\-\_\-patch\-\_\-connection}}
+\index{mod\-\_\-deflate\-\_\-patch\-\_\-connection@{mod\-\_\-deflate\-\_\-patch\-\_\-connection}!mod_deflate.c@{mod\-\_\-deflate.\-c}}
+\subsubsection[{mod\-\_\-deflate\-\_\-patch\-\_\-connection}]{\setlength{\rightskip}{0pt plus 5cm}static int mod\-\_\-deflate\-\_\-patch\-\_\-connection (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf plugin\-\_\-data} $\ast$}]{p}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__deflate_8c_a0b0576cb86bb118da73288cc6b1670c8}
+
+
+References buffer\-\_\-is\-\_\-equal\-\_\-string(), config\-\_\-check\-\_\-cond(), server\-::config\-\_\-context, plugin\-\_\-data\-::config\-\_\-storage, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, array\-::data, P\-A\-T\-C\-H, array\-::used, and data\-\_\-config\-::value.
+
+
+
+Referenced by C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__deflate_8c_abdeb52763ad3a1938cee2ed6a373efc0}{\index{mod\-\_\-deflate.\-c@{mod\-\_\-deflate.\-c}!mod\-\_\-deflate\-\_\-plugin\-\_\-init@{mod\-\_\-deflate\-\_\-plugin\-\_\-init}}
+\index{mod\-\_\-deflate\-\_\-plugin\-\_\-init@{mod\-\_\-deflate\-\_\-plugin\-\_\-init}!mod_deflate.c@{mod\-\_\-deflate.\-c}}
+\subsubsection[{mod\-\_\-deflate\-\_\-plugin\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}int mod\-\_\-deflate\-\_\-plugin\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{{\bf plugin} $\ast$}]{p}
+\end{DoxyParamCaption}
+)}}\label{mod__deflate_8c_abdeb52763ad3a1938cee2ed6a373efc0}
+
+
+References buffer\-\_\-init\-\_\-string(), plugin\-::cleanup, plugin\-::connection\-\_\-reset, plugin\-::data, plugin\-::handle\-\_\-connection\-\_\-close, plugin\-::handle\-\_\-response\-\_\-start, plugin\-::init, mod\-\_\-deflate\-\_\-cleanup(), plugin\-::name, plugin\-::set\-\_\-defaults, and plugin\-::version.
+
+\hypertarget{mod__deflate_8c_aee06091bb0fb9bfa05ede866238e3fd1}{\index{mod\-\_\-deflate.\-c@{mod\-\_\-deflate.\-c}!mod\-\_\-deflate\-\_\-stream\-\_\-end@{mod\-\_\-deflate\-\_\-stream\-\_\-end}}
+\index{mod\-\_\-deflate\-\_\-stream\-\_\-end@{mod\-\_\-deflate\-\_\-stream\-\_\-end}!mod_deflate.c@{mod\-\_\-deflate.\-c}}
+\subsubsection[{mod\-\_\-deflate\-\_\-stream\-\_\-end}]{\setlength{\rightskip}{0pt plus 5cm}static int mod\-\_\-deflate\-\_\-stream\-\_\-end (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__deflate_8c_aee06091bb0fb9bfa05ede866238e3fd1}
+
+
+References handler\-\_\-ctx\-::compression\-\_\-type, H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-B\-Z\-I\-P2, H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-D\-E\-F\-L\-A\-T\-E, H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-G\-Z\-I\-P, and U\-N\-U\-S\-E\-D.
+
+
+
+Referenced by deflate\-\_\-compress\-\_\-cleanup().
+
+\hypertarget{mod__deflate_8c_ae05f0ae7a7c5fe4f161820477a677533}{\index{mod\-\_\-deflate.\-c@{mod\-\_\-deflate.\-c}!mod\-\_\-deflate\-\_\-stream\-\_\-flush@{mod\-\_\-deflate\-\_\-stream\-\_\-flush}}
+\index{mod\-\_\-deflate\-\_\-stream\-\_\-flush@{mod\-\_\-deflate\-\_\-stream\-\_\-flush}!mod_deflate.c@{mod\-\_\-deflate.\-c}}
+\subsubsection[{mod\-\_\-deflate\-\_\-stream\-\_\-flush}]{\setlength{\rightskip}{0pt plus 5cm}static int mod\-\_\-deflate\-\_\-stream\-\_\-flush (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx, }
+\item[{int}]{end}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__deflate_8c_ae05f0ae7a7c5fe4f161820477a677533}
+
+
+References handler\-\_\-ctx\-::bytes\-\_\-in, handler\-\_\-ctx\-::compression\-\_\-type, H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-B\-Z\-I\-P2, H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-D\-E\-F\-L\-A\-T\-E, H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-G\-Z\-I\-P, and U\-N\-U\-S\-E\-D.
+
+
+
+Referenced by deflate\-\_\-compress\-\_\-response().
+
+\hypertarget{mod__deflate_8c_a5a8a9974ea6b460f379fa7f03544c061}{\index{mod\-\_\-deflate.\-c@{mod\-\_\-deflate.\-c}!mod\-\_\-deflate\-\_\-stream\-\_\-init@{mod\-\_\-deflate\-\_\-stream\-\_\-init}}
+\index{mod\-\_\-deflate\-\_\-stream\-\_\-init@{mod\-\_\-deflate\-\_\-stream\-\_\-init}!mod_deflate.c@{mod\-\_\-deflate.\-c}}
+\subsubsection[{mod\-\_\-deflate\-\_\-stream\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}static int mod\-\_\-deflate\-\_\-stream\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__deflate_8c_a5a8a9974ea6b460f379fa7f03544c061}
+
+
+References handler\-\_\-ctx\-::compression\-\_\-type, H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-B\-Z\-I\-P2, H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-D\-E\-F\-L\-A\-T\-E, and H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-G\-Z\-I\-P.
+
+
+
+Referenced by C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__deflate_8c_a22ccb826ea89f27184ce0de8a3b6f2c0}{\index{mod\-\_\-deflate.\-c@{mod\-\_\-deflate.\-c}!S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C@{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}}
+\index{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C@{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}!mod_deflate.c@{mod\-\_\-deflate.\-c}}
+\subsubsection[{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-deflate\-\_\-setdefaults}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__deflate_8c_a22ccb826ea89f27184ce0de8a3b6f2c0}
+
+
+References plugin\-\_\-config\-::allowed\-\_\-encodings, array\-\_\-init(), array\-\_\-reset(), buffer\-\_\-string\-\_\-is\-\_\-empty(), buffer\-\_\-string\-\_\-length(), buffer\-\_\-string\-\_\-set\-\_\-length(), plugin\-\_\-config\-::compression\-\_\-level, config\-\_\-insert\-\_\-values\-\_\-global(), plugin\-\_\-data\-::config\-\_\-storage, array\-::data, config\-\_\-values\-\_\-t\-::destination, plugin\-\_\-data\-::encodings, H\-A\-N\-D\-L\-E\-R\-\_\-\-E\-R\-R\-O\-R, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-B\-Z\-I\-P2, H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-D\-E\-F\-L\-A\-T\-E, H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-G\-Z\-I\-P, H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-X\-\_\-\-B\-Z\-I\-P2, H\-T\-T\-P\-\_\-\-A\-C\-C\-E\-P\-T\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-X\-\_\-\-G\-Z\-I\-P, log\-\_\-error\-\_\-write(), plugin\-\_\-config\-::max\-\_\-compress\-\_\-size, plugin\-\_\-config\-::max\-\_\-loadavg, plugin\-\_\-config\-::mimetypes, plugin\-\_\-config\-::min\-\_\-compress\-\_\-size, plugin\-\_\-config\-::output\-\_\-buffer\-\_\-size, buffer\-::ptr, plugin\-\_\-config\-::sync\-\_\-flush, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-A\-R\-R\-A\-Y, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-I\-N\-T, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T\-I\-O\-N, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-S\-E\-R\-V\-E\-R, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-U\-N\-S\-E\-T, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-H\-O\-R\-T, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-T\-R\-I\-N\-G, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-U\-N\-S\-E\-T, plugin\-\_\-data\-::tmp\-\_\-buf, array\-::used, data\-\_\-string\-::value, and plugin\-\_\-config\-::work\-\_\-block\-\_\-size.
+

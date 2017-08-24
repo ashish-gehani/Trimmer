@@ -1,0 +1,199 @@
+\hypertarget{http__auth_8h}{\section{http\-\_\-auth.\-h File Reference}
+\label{http__auth_8h}\index{http\-\_\-auth.\-h@{http\-\_\-auth.\-h}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}base.\-h\char`\"{}}\\*
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structhttp__auth__require__t}{http\-\_\-auth\-\_\-require\-\_\-t}
+\item 
+struct \hyperlink{structhttp__auth__backend__t}{http\-\_\-auth\-\_\-backend\-\_\-t}
+\item 
+struct \hyperlink{structhttp__auth__scheme__t}{http\-\_\-auth\-\_\-scheme\-\_\-t}
+\end{DoxyCompactItemize}
+\subsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef struct \hyperlink{structhttp__auth__require__t}{http\-\_\-auth\-\_\-require\-\_\-t} \hyperlink{http__auth_8h_af7547b194ef1b3d143da816c07969683}{http\-\_\-auth\-\_\-require\-\_\-t}
+\item 
+typedef struct \hyperlink{structhttp__auth__backend__t}{http\-\_\-auth\-\_\-backend\-\_\-t} \hyperlink{http__auth_8h_aa09f10665b4cee8a61994d29c6bd4974}{http\-\_\-auth\-\_\-backend\-\_\-t}
+\item 
+typedef struct \hyperlink{structhttp__auth__scheme__t}{http\-\_\-auth\-\_\-scheme\-\_\-t} \hyperlink{http__auth_8h_a21866cb8d6140603496a49940db386b2}{http\-\_\-auth\-\_\-scheme\-\_\-t}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{structhttp__auth__require__t}{http\-\_\-auth\-\_\-require\-\_\-t} $\ast$ \hyperlink{http__auth_8h_a4c1fe6044d964a34ac1cf12569ba8fb1}{http\-\_\-auth\-\_\-require\-\_\-init} (void)
+\item 
+void \hyperlink{http__auth_8h_a8e816e2b05a7b648077e24e85756c99d}{http\-\_\-auth\-\_\-require\-\_\-free} (\hyperlink{structhttp__auth__require__t}{http\-\_\-auth\-\_\-require\-\_\-t} $\ast$require)
+\item 
+int \hyperlink{http__auth_8h_afda0a08b4d014439e15c6b30487b5b95}{http\-\_\-auth\-\_\-match\-\_\-rules} (const \hyperlink{structhttp__auth__require__t}{http\-\_\-auth\-\_\-require\-\_\-t} $\ast$require, const char $\ast$user, const char $\ast$group, const char $\ast$host)
+\item 
+const \hyperlink{structhttp__auth__scheme__t}{http\-\_\-auth\-\_\-scheme\-\_\-t} $\ast$ \hyperlink{http__auth_8h_a06c4a348677f8c5bd56d8aa5d7446fa0}{http\-\_\-auth\-\_\-scheme\-\_\-get} (const \hyperlink{structbuffer}{buffer} $\ast$name)
+\item 
+void \hyperlink{http__auth_8h_aa1378d5febccfb18e5bd1c0bbf959932}{http\-\_\-auth\-\_\-scheme\-\_\-set} (const \hyperlink{structhttp__auth__scheme__t}{http\-\_\-auth\-\_\-scheme\-\_\-t} $\ast$scheme)
+\item 
+const \hyperlink{structhttp__auth__backend__t}{http\-\_\-auth\-\_\-backend\-\_\-t} $\ast$ \hyperlink{http__auth_8h_aa2f33952b313698eab0755eeddbf75a0}{http\-\_\-auth\-\_\-backend\-\_\-get} (const \hyperlink{structbuffer}{buffer} $\ast$name)
+\item 
+void \hyperlink{http__auth_8h_acfb5b398e4a9db4cea686d1ecc30bd0d}{http\-\_\-auth\-\_\-backend\-\_\-set} (const \hyperlink{structhttp__auth__backend__t}{http\-\_\-auth\-\_\-backend\-\_\-t} $\ast$backend)
+\item 
+void \hyperlink{http__auth_8h_a0f898aa82f76142665590a3a00017e5a}{http\-\_\-auth\-\_\-setenv} (\hyperlink{structarray}{array} $\ast$env, const char $\ast$username, size\-\_\-t ulen, const char $\ast$auth\-\_\-type, size\-\_\-t alen)
+\item 
+int \hyperlink{http__auth_8h_a3259dac897863cd14b6ec3cdecea7f6e}{http\-\_\-auth\-\_\-md5\-\_\-hex2bin} (const char $\ast$md5hex, size\-\_\-t len, unsigned char md5bin\mbox{[}16\mbox{]})
+\end{DoxyCompactItemize}
+
+
+\subsection{Typedef Documentation}
+\hypertarget{http__auth_8h_aa09f10665b4cee8a61994d29c6bd4974}{\index{http\-\_\-auth.\-h@{http\-\_\-auth.\-h}!http\-\_\-auth\-\_\-backend\-\_\-t@{http\-\_\-auth\-\_\-backend\-\_\-t}}
+\index{http\-\_\-auth\-\_\-backend\-\_\-t@{http\-\_\-auth\-\_\-backend\-\_\-t}!http_auth.h@{http\-\_\-auth.\-h}}
+\subsubsection[{http\-\_\-auth\-\_\-backend\-\_\-t}]{\setlength{\rightskip}{0pt plus 5cm}typedef struct {\bf http\-\_\-auth\-\_\-backend\-\_\-t}  {\bf http\-\_\-auth\-\_\-backend\-\_\-t}}}\label{http__auth_8h_aa09f10665b4cee8a61994d29c6bd4974}
+\hypertarget{http__auth_8h_af7547b194ef1b3d143da816c07969683}{\index{http\-\_\-auth.\-h@{http\-\_\-auth.\-h}!http\-\_\-auth\-\_\-require\-\_\-t@{http\-\_\-auth\-\_\-require\-\_\-t}}
+\index{http\-\_\-auth\-\_\-require\-\_\-t@{http\-\_\-auth\-\_\-require\-\_\-t}!http_auth.h@{http\-\_\-auth.\-h}}
+\subsubsection[{http\-\_\-auth\-\_\-require\-\_\-t}]{\setlength{\rightskip}{0pt plus 5cm}typedef struct {\bf http\-\_\-auth\-\_\-require\-\_\-t}  {\bf http\-\_\-auth\-\_\-require\-\_\-t}}}\label{http__auth_8h_af7547b194ef1b3d143da816c07969683}
+\hypertarget{http__auth_8h_a21866cb8d6140603496a49940db386b2}{\index{http\-\_\-auth.\-h@{http\-\_\-auth.\-h}!http\-\_\-auth\-\_\-scheme\-\_\-t@{http\-\_\-auth\-\_\-scheme\-\_\-t}}
+\index{http\-\_\-auth\-\_\-scheme\-\_\-t@{http\-\_\-auth\-\_\-scheme\-\_\-t}!http_auth.h@{http\-\_\-auth.\-h}}
+\subsubsection[{http\-\_\-auth\-\_\-scheme\-\_\-t}]{\setlength{\rightskip}{0pt plus 5cm}typedef struct {\bf http\-\_\-auth\-\_\-scheme\-\_\-t}  {\bf http\-\_\-auth\-\_\-scheme\-\_\-t}}}\label{http__auth_8h_a21866cb8d6140603496a49940db386b2}
+
+
+\subsection{Function Documentation}
+\hypertarget{http__auth_8h_aa2f33952b313698eab0755eeddbf75a0}{\index{http\-\_\-auth.\-h@{http\-\_\-auth.\-h}!http\-\_\-auth\-\_\-backend\-\_\-get@{http\-\_\-auth\-\_\-backend\-\_\-get}}
+\index{http\-\_\-auth\-\_\-backend\-\_\-get@{http\-\_\-auth\-\_\-backend\-\_\-get}!http_auth.h@{http\-\_\-auth.\-h}}
+\subsubsection[{http\-\_\-auth\-\_\-backend\-\_\-get}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf http\-\_\-auth\-\_\-backend\-\_\-t}$\ast$ http\-\_\-auth\-\_\-backend\-\_\-get (
+\begin{DoxyParamCaption}
+\item[{const {\bf buffer} $\ast$}]{name}
+\end{DoxyParamCaption}
+)}}\label{http__auth_8h_aa2f33952b313698eab0755eeddbf75a0}
+
+
+References buffer\-::ptr.
+
+
+
+Referenced by S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{http__auth_8h_acfb5b398e4a9db4cea686d1ecc30bd0d}{\index{http\-\_\-auth.\-h@{http\-\_\-auth.\-h}!http\-\_\-auth\-\_\-backend\-\_\-set@{http\-\_\-auth\-\_\-backend\-\_\-set}}
+\index{http\-\_\-auth\-\_\-backend\-\_\-set@{http\-\_\-auth\-\_\-backend\-\_\-set}!http_auth.h@{http\-\_\-auth.\-h}}
+\subsubsection[{http\-\_\-auth\-\_\-backend\-\_\-set}]{\setlength{\rightskip}{0pt plus 5cm}void http\-\_\-auth\-\_\-backend\-\_\-set (
+\begin{DoxyParamCaption}
+\item[{const {\bf http\-\_\-auth\-\_\-backend\-\_\-t} $\ast$}]{backend}
+\end{DoxyParamCaption}
+)}}\label{http__auth_8h_acfb5b398e4a9db4cea686d1ecc30bd0d}
+
+
+References force\-\_\-assert.
+
+
+
+Referenced by I\-N\-I\-T\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{http__auth_8h_afda0a08b4d014439e15c6b30487b5b95}{\index{http\-\_\-auth.\-h@{http\-\_\-auth.\-h}!http\-\_\-auth\-\_\-match\-\_\-rules@{http\-\_\-auth\-\_\-match\-\_\-rules}}
+\index{http\-\_\-auth\-\_\-match\-\_\-rules@{http\-\_\-auth\-\_\-match\-\_\-rules}!http_auth.h@{http\-\_\-auth.\-h}}
+\subsubsection[{http\-\_\-auth\-\_\-match\-\_\-rules}]{\setlength{\rightskip}{0pt plus 5cm}int http\-\_\-auth\-\_\-match\-\_\-rules (
+\begin{DoxyParamCaption}
+\item[{const {\bf http\-\_\-auth\-\_\-require\-\_\-t} $\ast$}]{require, }
+\item[{const char $\ast$}]{user, }
+\item[{const char $\ast$}]{group, }
+\item[{const char $\ast$}]{host}
+\end{DoxyParamCaption}
+)}}\label{http__auth_8h_afda0a08b4d014439e15c6b30487b5b95}
+
+
+References http\-\_\-auth\-\_\-require\-\_\-t\-::group, http\-\_\-auth\-\_\-require\-\_\-t\-::host, http\-\_\-auth\-\_\-array\-\_\-contains(), http\-\_\-auth\-\_\-require\-\_\-t\-::user, and http\-\_\-auth\-\_\-require\-\_\-t\-::valid\-\_\-user.
+
+
+
+Referenced by mod\-\_\-auth\-\_\-check\-\_\-digest(), mod\-\_\-auth\-\_\-check\-\_\-extern(), mod\-\_\-authn\-\_\-file\-\_\-htdigest\-\_\-basic(), mod\-\_\-authn\-\_\-file\-\_\-htpasswd\-\_\-basic(), mod\-\_\-authn\-\_\-file\-\_\-plain\-\_\-basic(), mod\-\_\-authn\-\_\-gssapi\-\_\-basic(), mod\-\_\-authn\-\_\-gssapi\-\_\-check\-\_\-spnego(), mod\-\_\-authn\-\_\-ldap\-\_\-basic(), and mod\-\_\-authn\-\_\-mysql\-\_\-basic().
+
+\hypertarget{http__auth_8h_a3259dac897863cd14b6ec3cdecea7f6e}{\index{http\-\_\-auth.\-h@{http\-\_\-auth.\-h}!http\-\_\-auth\-\_\-md5\-\_\-hex2bin@{http\-\_\-auth\-\_\-md5\-\_\-hex2bin}}
+\index{http\-\_\-auth\-\_\-md5\-\_\-hex2bin@{http\-\_\-auth\-\_\-md5\-\_\-hex2bin}!http_auth.h@{http\-\_\-auth.\-h}}
+\subsubsection[{http\-\_\-auth\-\_\-md5\-\_\-hex2bin}]{\setlength{\rightskip}{0pt plus 5cm}int http\-\_\-auth\-\_\-md5\-\_\-hex2bin (
+\begin{DoxyParamCaption}
+\item[{const char $\ast$}]{md5hex, }
+\item[{size\-\_\-t}]{len, }
+\item[{unsigned char}]{md5bin\mbox{[}16\mbox{]}}
+\end{DoxyParamCaption}
+)}}\label{http__auth_8h_a3259dac897863cd14b6ec3cdecea7f6e}
+
+
+Referenced by mod\-\_\-authn\-\_\-file\-\_\-htdigest\-\_\-get(), mod\-\_\-authn\-\_\-mysql\-\_\-password\-\_\-cmp(), and mod\-\_\-authn\-\_\-mysql\-\_\-result().
+
+\hypertarget{http__auth_8h_a8e816e2b05a7b648077e24e85756c99d}{\index{http\-\_\-auth.\-h@{http\-\_\-auth.\-h}!http\-\_\-auth\-\_\-require\-\_\-free@{http\-\_\-auth\-\_\-require\-\_\-free}}
+\index{http\-\_\-auth\-\_\-require\-\_\-free@{http\-\_\-auth\-\_\-require\-\_\-free}!http_auth.h@{http\-\_\-auth.\-h}}
+\subsubsection[{http\-\_\-auth\-\_\-require\-\_\-free}]{\setlength{\rightskip}{0pt plus 5cm}void http\-\_\-auth\-\_\-require\-\_\-free (
+\begin{DoxyParamCaption}
+\item[{{\bf http\-\_\-auth\-\_\-require\-\_\-t} $\ast$}]{require}
+\end{DoxyParamCaption}
+)}}\label{http__auth_8h_a8e816e2b05a7b648077e24e85756c99d}
+
+
+References array\-\_\-free(), buffer\-\_\-free(), http\-\_\-auth\-\_\-require\-\_\-t\-::group, http\-\_\-auth\-\_\-require\-\_\-t\-::host, http\-\_\-auth\-\_\-require\-\_\-t\-::realm, and http\-\_\-auth\-\_\-require\-\_\-t\-::user.
+
+
+
+Referenced by data\-\_\-auth\-\_\-free().
+
+\hypertarget{http__auth_8h_a4c1fe6044d964a34ac1cf12569ba8fb1}{\index{http\-\_\-auth.\-h@{http\-\_\-auth.\-h}!http\-\_\-auth\-\_\-require\-\_\-init@{http\-\_\-auth\-\_\-require\-\_\-init}}
+\index{http\-\_\-auth\-\_\-require\-\_\-init@{http\-\_\-auth\-\_\-require\-\_\-init}!http_auth.h@{http\-\_\-auth.\-h}}
+\subsubsection[{http\-\_\-auth\-\_\-require\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}{\bf http\-\_\-auth\-\_\-require\-\_\-t}$\ast$ http\-\_\-auth\-\_\-require\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)}}\label{http__auth_8h_a4c1fe6044d964a34ac1cf12569ba8fb1}
+
+
+References array\-\_\-init(), buffer\-\_\-init(), force\-\_\-assert, http\-\_\-auth\-\_\-require\-\_\-t\-::group, http\-\_\-auth\-\_\-require\-\_\-t\-::host, http\-\_\-auth\-\_\-require\-\_\-t\-::realm, http\-\_\-auth\-\_\-require\-\_\-t\-::user, and http\-\_\-auth\-\_\-require\-\_\-t\-::valid\-\_\-user.
+
+
+
+Referenced by data\-\_\-auth\-\_\-init().
+
+\hypertarget{http__auth_8h_a06c4a348677f8c5bd56d8aa5d7446fa0}{\index{http\-\_\-auth.\-h@{http\-\_\-auth.\-h}!http\-\_\-auth\-\_\-scheme\-\_\-get@{http\-\_\-auth\-\_\-scheme\-\_\-get}}
+\index{http\-\_\-auth\-\_\-scheme\-\_\-get@{http\-\_\-auth\-\_\-scheme\-\_\-get}!http_auth.h@{http\-\_\-auth.\-h}}
+\subsubsection[{http\-\_\-auth\-\_\-scheme\-\_\-get}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf http\-\_\-auth\-\_\-scheme\-\_\-t}$\ast$ http\-\_\-auth\-\_\-scheme\-\_\-get (
+\begin{DoxyParamCaption}
+\item[{const {\bf buffer} $\ast$}]{name}
+\end{DoxyParamCaption}
+)}}\label{http__auth_8h_a06c4a348677f8c5bd56d8aa5d7446fa0}
+
+
+References buffer\-::ptr.
+
+
+
+Referenced by S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{http__auth_8h_aa1378d5febccfb18e5bd1c0bbf959932}{\index{http\-\_\-auth.\-h@{http\-\_\-auth.\-h}!http\-\_\-auth\-\_\-scheme\-\_\-set@{http\-\_\-auth\-\_\-scheme\-\_\-set}}
+\index{http\-\_\-auth\-\_\-scheme\-\_\-set@{http\-\_\-auth\-\_\-scheme\-\_\-set}!http_auth.h@{http\-\_\-auth.\-h}}
+\subsubsection[{http\-\_\-auth\-\_\-scheme\-\_\-set}]{\setlength{\rightskip}{0pt plus 5cm}void http\-\_\-auth\-\_\-scheme\-\_\-set (
+\begin{DoxyParamCaption}
+\item[{const {\bf http\-\_\-auth\-\_\-scheme\-\_\-t} $\ast$}]{scheme}
+\end{DoxyParamCaption}
+)}}\label{http__auth_8h_aa1378d5febccfb18e5bd1c0bbf959932}
+
+
+References force\-\_\-assert.
+
+
+
+Referenced by I\-N\-I\-T\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{http__auth_8h_a0f898aa82f76142665590a3a00017e5a}{\index{http\-\_\-auth.\-h@{http\-\_\-auth.\-h}!http\-\_\-auth\-\_\-setenv@{http\-\_\-auth\-\_\-setenv}}
+\index{http\-\_\-auth\-\_\-setenv@{http\-\_\-auth\-\_\-setenv}!http_auth.h@{http\-\_\-auth.\-h}}
+\subsubsection[{http\-\_\-auth\-\_\-setenv}]{\setlength{\rightskip}{0pt plus 5cm}void http\-\_\-auth\-\_\-setenv (
+\begin{DoxyParamCaption}
+\item[{{\bf array} $\ast$}]{env, }
+\item[{const char $\ast$}]{username, }
+\item[{size\-\_\-t}]{ulen, }
+\item[{const char $\ast$}]{auth\-\_\-type, }
+\item[{size\-\_\-t}]{alen}
+\end{DoxyParamCaption}
+)}}\label{http__auth_8h_a0f898aa82f76142665590a3a00017e5a}
+
+
+References array\-\_\-get\-\_\-element(), array\-\_\-get\-\_\-unused\-\_\-element(), array\-\_\-insert\-\_\-unique(), buffer\-\_\-copy\-\_\-string\-\_\-len(), C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, data\-\_\-string\-\_\-init(), T\-Y\-P\-E\-\_\-\-S\-T\-R\-I\-N\-G, and data\-\_\-string\-::value.
+
+
+
+Referenced by mod\-\_\-auth\-\_\-check\-\_\-basic(), mod\-\_\-auth\-\_\-check\-\_\-digest(), and mod\-\_\-authn\-\_\-gssapi\-\_\-check\-\_\-spnego().
+

@@ -1,0 +1,32 @@
+\hypertarget{network__writev_8c}{\section{network\-\_\-writev.\-c File Reference}
+\label{network__writev_8c}\index{network\-\_\-writev.\-c@{network\-\_\-writev.\-c}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}network\-\_\-backends.\-h\char`\"{}}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \hyperlink{network__writev_8c_a06ddf478fb88b99bed082ed83e8bd573}{network\-\_\-write\-\_\-chunkqueue\-\_\-writev} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, int fd, \hyperlink{structchunkqueue}{chunkqueue} $\ast$cq, off\-\_\-t max\-\_\-bytes)
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\hypertarget{network__writev_8c_a06ddf478fb88b99bed082ed83e8bd573}{\index{network\-\_\-writev.\-c@{network\-\_\-writev.\-c}!network\-\_\-write\-\_\-chunkqueue\-\_\-writev@{network\-\_\-write\-\_\-chunkqueue\-\_\-writev}}
+\index{network\-\_\-write\-\_\-chunkqueue\-\_\-writev@{network\-\_\-write\-\_\-chunkqueue\-\_\-writev}!network_writev.c@{network\-\_\-writev.\-c}}
+\subsubsection[{network\-\_\-write\-\_\-chunkqueue\-\_\-writev}]{\setlength{\rightskip}{0pt plus 5cm}int network\-\_\-write\-\_\-chunkqueue\-\_\-writev (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{int}]{fd, }
+\item[{{\bf chunkqueue} $\ast$}]{cq, }
+\item[{off\-\_\-t}]{max\-\_\-bytes}
+\end{DoxyParamCaption}
+)}}\label{network__writev_8c_a06ddf478fb88b99bed082ed83e8bd573}
+
+
+References chunkqueue\-::first, network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-mmap(), network\-\_\-writev\-\_\-mem\-\_\-chunks(), and chunk\-::type.
+
+
+
+Referenced by network\-\_\-init().
+

@@ -1,0 +1,154 @@
+\hypertarget{data__string_8c}{\section{data\-\_\-string.\-c File Reference}
+\label{data__string_8c}\index{data\-\_\-string.\-c@{data\-\_\-string.\-c}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}array.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$stdlib.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{structdata__unset}{data\-\_\-unset} $\ast$ \hyperlink{data__string_8c_a4dd8b934ff386e5cc521f8f581f122ae}{data\-\_\-string\-\_\-copy} (const \hyperlink{structdata__unset}{data\-\_\-unset} $\ast$s)
+\item 
+static void \hyperlink{data__string_8c_a996f4c8dee804d4385e9c3144a459d24}{data\-\_\-string\-\_\-free} (\hyperlink{structdata__unset}{data\-\_\-unset} $\ast$d)
+\item 
+static void \hyperlink{data__string_8c_af0459ad4337052594ae8822fa9859f81}{data\-\_\-string\-\_\-reset} (\hyperlink{structdata__unset}{data\-\_\-unset} $\ast$d)
+\item 
+static int \hyperlink{data__string_8c_aaec550f8254b649edf06b31518f79f39}{data\-\_\-string\-\_\-insert\-\_\-dup} (\hyperlink{structdata__unset}{data\-\_\-unset} $\ast$dst, \hyperlink{structdata__unset}{data\-\_\-unset} $\ast$src)
+\item 
+static int \hyperlink{data__string_8c_afc2ff3daaefa2000e6f2df0baa904567}{data\-\_\-response\-\_\-insert\-\_\-dup} (\hyperlink{structdata__unset}{data\-\_\-unset} $\ast$dst, \hyperlink{structdata__unset}{data\-\_\-unset} $\ast$src)
+\item 
+static void \hyperlink{data__string_8c_a2259f4b08b247ec0f090644703a348dd}{data\-\_\-string\-\_\-print} (const \hyperlink{structdata__unset}{data\-\_\-unset} $\ast$d, int depth)
+\item 
+\hyperlink{structdata__string}{data\-\_\-string} $\ast$ \hyperlink{data__string_8c_acf05baf49b422d2ec0327357a2868001}{data\-\_\-string\-\_\-init} (void)
+\item 
+\hyperlink{structdata__string}{data\-\_\-string} $\ast$ \hyperlink{data__string_8c_a9c0f30b79e5c846198c127d7f8d51c88}{data\-\_\-response\-\_\-init} (void)
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\hypertarget{data__string_8c_a9c0f30b79e5c846198c127d7f8d51c88}{\index{data\-\_\-string.\-c@{data\-\_\-string.\-c}!data\-\_\-response\-\_\-init@{data\-\_\-response\-\_\-init}}
+\index{data\-\_\-response\-\_\-init@{data\-\_\-response\-\_\-init}!data_string.c@{data\-\_\-string.\-c}}
+\subsubsection[{data\-\_\-response\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}{\bf data\-\_\-string}$\ast$ data\-\_\-response\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)}}\label{data__string_8c_a9c0f30b79e5c846198c127d7f8d51c88}
+
+
+References data\-\_\-response\-\_\-insert\-\_\-dup(), and data\-\_\-string\-\_\-init().
+
+
+
+Referenced by cgi\-\_\-response\-\_\-parse(), fcgi\-\_\-response\-\_\-parse(), proxy\-\_\-response\-\_\-parse(), response\-\_\-header\-\_\-insert(), scgi\-\_\-response\-\_\-parse(), and U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{data__string_8c_afc2ff3daaefa2000e6f2df0baa904567}{\index{data\-\_\-string.\-c@{data\-\_\-string.\-c}!data\-\_\-response\-\_\-insert\-\_\-dup@{data\-\_\-response\-\_\-insert\-\_\-dup}}
+\index{data\-\_\-response\-\_\-insert\-\_\-dup@{data\-\_\-response\-\_\-insert\-\_\-dup}!data_string.c@{data\-\_\-string.\-c}}
+\subsubsection[{data\-\_\-response\-\_\-insert\-\_\-dup}]{\setlength{\rightskip}{0pt plus 5cm}static int data\-\_\-response\-\_\-insert\-\_\-dup (
+\begin{DoxyParamCaption}
+\item[{{\bf data\-\_\-unset} $\ast$}]{dst, }
+\item[{{\bf data\-\_\-unset} $\ast$}]{src}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{data__string_8c_afc2ff3daaefa2000e6f2df0baa904567}
+
+
+References buffer\-\_\-append\-\_\-string\-\_\-buffer(), buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-copy\-\_\-buffer(), buffer\-\_\-is\-\_\-empty(), C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, and data\-\_\-string\-::value.
+
+
+
+Referenced by data\-\_\-response\-\_\-init().
+
+\hypertarget{data__string_8c_a4dd8b934ff386e5cc521f8f581f122ae}{\index{data\-\_\-string.\-c@{data\-\_\-string.\-c}!data\-\_\-string\-\_\-copy@{data\-\_\-string\-\_\-copy}}
+\index{data\-\_\-string\-\_\-copy@{data\-\_\-string\-\_\-copy}!data_string.c@{data\-\_\-string.\-c}}
+\subsubsection[{data\-\_\-string\-\_\-copy}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf data\-\_\-unset}$\ast$ data\-\_\-string\-\_\-copy (
+\begin{DoxyParamCaption}
+\item[{const {\bf data\-\_\-unset} $\ast$}]{s}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{data__string_8c_a4dd8b934ff386e5cc521f8f581f122ae}
+
+
+References buffer\-\_\-copy\-\_\-buffer(), data\-\_\-string\-\_\-init(), and data\-\_\-string\-::value.
+
+
+
+Referenced by data\-\_\-string\-\_\-init().
+
+\hypertarget{data__string_8c_a996f4c8dee804d4385e9c3144a459d24}{\index{data\-\_\-string.\-c@{data\-\_\-string.\-c}!data\-\_\-string\-\_\-free@{data\-\_\-string\-\_\-free}}
+\index{data\-\_\-string\-\_\-free@{data\-\_\-string\-\_\-free}!data_string.c@{data\-\_\-string.\-c}}
+\subsubsection[{data\-\_\-string\-\_\-free}]{\setlength{\rightskip}{0pt plus 5cm}static void data\-\_\-string\-\_\-free (
+\begin{DoxyParamCaption}
+\item[{{\bf data\-\_\-unset} $\ast$}]{d}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{data__string_8c_a996f4c8dee804d4385e9c3144a459d24}
+
+
+References buffer\-\_\-free(), and data\-\_\-string\-::value.
+
+
+
+Referenced by data\-\_\-string\-\_\-init().
+
+\hypertarget{data__string_8c_acf05baf49b422d2ec0327357a2868001}{\index{data\-\_\-string.\-c@{data\-\_\-string.\-c}!data\-\_\-string\-\_\-init@{data\-\_\-string\-\_\-init}}
+\index{data\-\_\-string\-\_\-init@{data\-\_\-string\-\_\-init}!data_string.c@{data\-\_\-string.\-c}}
+\subsubsection[{data\-\_\-string\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}{\bf data\-\_\-string}$\ast$ data\-\_\-string\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)}}\label{data__string_8c_acf05baf49b422d2ec0327357a2868001}
+
+
+References buffer\-\_\-init(), data\-\_\-string\-\_\-copy(), data\-\_\-string\-\_\-free(), data\-\_\-string\-\_\-insert\-\_\-dup(), data\-\_\-string\-\_\-print(), data\-\_\-string\-\_\-reset(), force\-\_\-assert, T\-Y\-P\-E\-\_\-\-S\-T\-R\-I\-N\-G, and data\-\_\-string\-::value.
+
+
+
+Referenced by array\-\_\-set\-\_\-key\-\_\-value(), config\-\_\-insert(), config\-\_\-insert\-\_\-values\-\_\-global(), config\-\_\-read(), config\-\_\-set\-\_\-defaults(), configparser\-\_\-merge\-\_\-data(), connection\-\_\-state\-\_\-machine(), data\-\_\-response\-\_\-init(), data\-\_\-string\-\_\-copy(), http\-\_\-auth\-\_\-setenv(), http\-\_\-request\-\_\-parse(), http\-\_\-request\-\_\-split\-\_\-value(), mod\-\_\-auth\-\_\-require\-\_\-parse(), mod\-\_\-evhost\-\_\-parse\-\_\-host(), process\-\_\-ssi\-\_\-stmt(), proxy\-\_\-append\-\_\-header(), proxy\-\_\-set\-\_\-header(), put\-\_\-string\-\_\-into\-\_\-array\-\_\-len(), split\-\_\-get\-\_\-params(), ssi\-\_\-env\-\_\-add(), U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C(), and yy\-\_\-reduce().
+
+\hypertarget{data__string_8c_aaec550f8254b649edf06b31518f79f39}{\index{data\-\_\-string.\-c@{data\-\_\-string.\-c}!data\-\_\-string\-\_\-insert\-\_\-dup@{data\-\_\-string\-\_\-insert\-\_\-dup}}
+\index{data\-\_\-string\-\_\-insert\-\_\-dup@{data\-\_\-string\-\_\-insert\-\_\-dup}!data_string.c@{data\-\_\-string.\-c}}
+\subsubsection[{data\-\_\-string\-\_\-insert\-\_\-dup}]{\setlength{\rightskip}{0pt plus 5cm}static int data\-\_\-string\-\_\-insert\-\_\-dup (
+\begin{DoxyParamCaption}
+\item[{{\bf data\-\_\-unset} $\ast$}]{dst, }
+\item[{{\bf data\-\_\-unset} $\ast$}]{src}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{data__string_8c_aaec550f8254b649edf06b31518f79f39}
+
+
+References buffer\-\_\-append\-\_\-string\-\_\-buffer(), buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-copy\-\_\-buffer(), buffer\-\_\-is\-\_\-empty(), C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, and data\-\_\-string\-::value.
+
+
+
+Referenced by data\-\_\-string\-\_\-init().
+
+\hypertarget{data__string_8c_a2259f4b08b247ec0f090644703a348dd}{\index{data\-\_\-string.\-c@{data\-\_\-string.\-c}!data\-\_\-string\-\_\-print@{data\-\_\-string\-\_\-print}}
+\index{data\-\_\-string\-\_\-print@{data\-\_\-string\-\_\-print}!data_string.c@{data\-\_\-string.\-c}}
+\subsubsection[{data\-\_\-string\-\_\-print}]{\setlength{\rightskip}{0pt plus 5cm}static void data\-\_\-string\-\_\-print (
+\begin{DoxyParamCaption}
+\item[{const {\bf data\-\_\-unset} $\ast$}]{d, }
+\item[{int}]{depth}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{data__string_8c_a2259f4b08b247ec0f090644703a348dd}
+
+
+References buffer\-\_\-string\-\_\-is\-\_\-empty(), buffer\-\_\-string\-\_\-length(), buffer\-::ptr, U\-N\-U\-S\-E\-D, and data\-\_\-string\-::value.
+
+
+
+Referenced by data\-\_\-string\-\_\-init().
+
+\hypertarget{data__string_8c_af0459ad4337052594ae8822fa9859f81}{\index{data\-\_\-string.\-c@{data\-\_\-string.\-c}!data\-\_\-string\-\_\-reset@{data\-\_\-string\-\_\-reset}}
+\index{data\-\_\-string\-\_\-reset@{data\-\_\-string\-\_\-reset}!data_string.c@{data\-\_\-string.\-c}}
+\subsubsection[{data\-\_\-string\-\_\-reset}]{\setlength{\rightskip}{0pt plus 5cm}static void data\-\_\-string\-\_\-reset (
+\begin{DoxyParamCaption}
+\item[{{\bf data\-\_\-unset} $\ast$}]{d}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{data__string_8c_af0459ad4337052594ae8822fa9859f81}
+
+
+References buffer\-\_\-reset(), and data\-\_\-string\-::value.
+
+
+
+Referenced by data\-\_\-string\-\_\-init().
+

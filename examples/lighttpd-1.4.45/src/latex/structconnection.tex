@@ -1,0 +1,459 @@
+\hypertarget{structconnection}{\section{connection Struct Reference}
+\label{structconnection}\index{connection@{connection}}
+}
+
+
+{\ttfamily \#include $<$base.\-h$>$}
+
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{base_8h_a4a3875c10232b606f19a1e9f9d2a698a}{connection\-\_\-state\-\_\-t} \hyperlink{structconnection_aaa1da90a3bf944e556dcf5ad7d69a20d}{state}
+\item 
+time\-\_\-t \hyperlink{structconnection_a3de703d57f7d66da8493cf8554ed3cb2}{read\-\_\-idle\-\_\-ts}
+\item 
+time\-\_\-t \hyperlink{structconnection_a991918bf683703616c8a7f6a3a0eacfa}{close\-\_\-timeout\-\_\-ts}
+\item 
+time\-\_\-t \hyperlink{structconnection_a56f8f4cad319b1d2e3db5ac960cf09c9}{write\-\_\-request\-\_\-ts}
+\item 
+time\-\_\-t \hyperlink{structconnection_afbe997df45b9c7c51e7db09b52830642}{connection\-\_\-start}
+\item 
+time\-\_\-t \hyperlink{structconnection_a35ab49ce195e54eb674b504a5b82aa72}{request\-\_\-start}
+\item 
+struct timespec \hyperlink{structconnection_afffa8ceb142ef540be58e430107c1601}{request\-\_\-start\-\_\-hp}
+\item 
+size\-\_\-t \hyperlink{structconnection_a7607ed0216aca45cbc4d20b83b2b5102}{request\-\_\-count}
+\item 
+size\-\_\-t \hyperlink{structconnection_af0f62059eb64e548372987ea930b80da}{loops\-\_\-per\-\_\-request}
+\item 
+int \hyperlink{structconnection_aa9a96cc6c66ef5a617f51247b2809a40}{fd}
+\item 
+int \hyperlink{structconnection_a6d5f98c61e568390686dd9ec8f743c76}{fde\-\_\-ndx}
+\item 
+int \hyperlink{structconnection_aadeba61ce7467142b9a766e9bfb7defa}{ndx}
+\item 
+int \hyperlink{structconnection_a4356ba50972fa86e3b1852bee2486192}{is\-\_\-readable}
+\item 
+int \hyperlink{structconnection_af60569b593cb548343b58ff650d57486}{is\-\_\-writable}
+\item 
+int \hyperlink{structconnection_a3c26e699587345c2ab4039b4fbc5dd44}{keep\-\_\-alive}
+\item 
+int \hyperlink{structconnection_a60fbb1938d3a5f459b005b150f6dc9db}{keep\-\_\-alive\-\_\-idle}
+\item 
+int \hyperlink{structconnection_a86f6550572fa72ac814b35df1d6b890b}{file\-\_\-started}
+\item 
+int \hyperlink{structconnection_acf4d9c3f706cf8bd97c5453a211bb42e}{file\-\_\-finished}
+\item 
+\hyperlink{structchunkqueue}{chunkqueue} $\ast$ \hyperlink{structconnection_a79b48981e863f483d429bf5b6c1af617}{write\-\_\-queue}
+\item 
+\hyperlink{structchunkqueue}{chunkqueue} $\ast$ \hyperlink{structconnection_a1d21a149b6145872f687bbe27b1d90d6}{read\-\_\-queue}
+\item 
+\hyperlink{structchunkqueue}{chunkqueue} $\ast$ \hyperlink{structconnection_a08379ad329cc6e8f08732000d23992ec}{request\-\_\-content\-\_\-queue}
+\item 
+int \hyperlink{structconnection_a5fa0f8dc5c0b893683b4b092be217f50}{traffic\-\_\-limit\-\_\-reached}
+\item 
+off\-\_\-t \hyperlink{structconnection_a3f55620e6831c486b00beb2df653060e}{bytes\-\_\-written}
+\item 
+off\-\_\-t \hyperlink{structconnection_ab08325b9e7ce8208ba2f5ab8d030543c}{bytes\-\_\-written\-\_\-cur\-\_\-second}
+\item 
+off\-\_\-t \hyperlink{structconnection_a05f8c969aa3a06d3aed99c797c51bf88}{bytes\-\_\-read}
+\item 
+off\-\_\-t \hyperlink{structconnection_aa8743e91a38aa71d3fef9b0f7be115a4}{bytes\-\_\-header}
+\item 
+int \hyperlink{structconnection_a1fcd32a23ddbacfda74678d98fbf077f}{http\-\_\-status}
+\item 
+\hyperlink{unionsock__addr}{sock\-\_\-addr} \hyperlink{structconnection_a908b051bd40a4075c2502e75755aa62b}{dst\-\_\-addr}
+\item 
+\hyperlink{structbuffer}{buffer} $\ast$ \hyperlink{structconnection_ab67760a30c3d3819b625beb7bdd1e635}{dst\-\_\-addr\-\_\-buf}
+\item 
+\hyperlink{structbuffer}{buffer} $\ast$ \hyperlink{structconnection_a9f90ff4eab33e4bf140d0386165fbe87}{parse\-\_\-request}
+\item 
+unsigned int \hyperlink{structconnection_a24f4cb581343ebeb71a06bccf3eaa98d}{parsed\-\_\-response}
+\item 
+\hyperlink{structrequest}{request} \hyperlink{structconnection_a4b3fe80fe7d59788f44466d04077b11a}{request}
+\item 
+\hyperlink{structrequest__uri}{request\-\_\-uri} \hyperlink{structconnection_a92531d3094bf5ce3af5107506702067c}{uri}
+\item 
+\hyperlink{structphysical}{physical} \hyperlink{structconnection_acd39e26d871845fac20b85ef5e3823ef}{physical}
+\item 
+\hyperlink{structresponse}{response} \hyperlink{structconnection_abe43f9dc2787128011e6510fe4673081}{response}
+\item 
+size\-\_\-t \hyperlink{structconnection_a754a1fa8b70b9bc38d1dd924d379c34f}{header\-\_\-len}
+\item 
+\hyperlink{structarray}{array} $\ast$ \hyperlink{structconnection_accccbe3ddcf8b246d8d6ee93c84e6c9b}{environment}
+\item 
+int \hyperlink{structconnection_a31bce9025d3e04d9df2e5876f4f1868a}{got\-\_\-response}
+\item 
+int \hyperlink{structconnection_a739dd4884f14ad354d8f0db35ae12efb}{in\-\_\-joblist}
+\item 
+\hyperlink{base_8h_acdf0efffcd30d2dd47aa36b78d3398a7}{connection\-\_\-type} \hyperlink{structconnection_a678265f403b80798cd979f7e8108cdaf}{mode}
+\item 
+void $\ast$$\ast$ \hyperlink{structconnection_a50b86ed1f96cd78db67d7178d27395ff}{plugin\-\_\-ctx}
+\item 
+\hyperlink{structspecific__config}{specific\-\_\-config} \hyperlink{structconnection_a64fd7626accd6bfd28525e9d17adf612}{conf}
+\item 
+\hyperlink{structcond__cache__t}{cond\-\_\-cache\-\_\-t} $\ast$ \hyperlink{structconnection_a84fcfd608740374ca944491f11bee7c6}{cond\-\_\-cache}
+\item 
+\hyperlink{structbuffer}{buffer} $\ast$ \hyperlink{structconnection_a1733a3bc86e073fd98e2dac8e2c7ed0f}{server\-\_\-name}
+\item 
+int \hyperlink{structconnection_a6dd3ddb643153f1d6e7946d1ac973135}{error\-\_\-handler\-\_\-saved\-\_\-status}
+\item 
+\hyperlink{keyvalue_8h_a2fd930fba66817097e73ba9b75800eb2}{http\-\_\-method\-\_\-t} \hyperlink{structconnection_ad631932dd50684e43436654946c5951f}{error\-\_\-handler\-\_\-saved\-\_\-method}
+\item 
+struct \hyperlink{structserver__socket}{server\-\_\-socket} $\ast$ \hyperlink{structconnection_a3735b8160fe578295774457191c06244}{srv\-\_\-socket}
+\item 
+\hyperlink{etag_8h_a75c43c1ab132717944031de235cf76c3}{etag\-\_\-flags\-\_\-t} \hyperlink{structconnection_a2251cd32b04d7203e44954d944b589ce}{etag\-\_\-flags}
+\item 
+int \hyperlink{structconnection_adb2d47b554fdf1d0e502a98b2bb81661}{conditional\-\_\-is\-\_\-valid} \mbox{[}\hyperlink{array_8h_a70eba8cb401a078bd3a4b284e5ab6b83a53c3dd05cbda10399ad710ffa1e99eb3}{C\-O\-M\-P\-\_\-\-L\-A\-S\-T\-\_\-\-E\-L\-E\-M\-E\-N\-T}\mbox{]}
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{structconnection_aa8743e91a38aa71d3fef9b0f7be115a4}{\index{connection@{connection}!bytes\-\_\-header@{bytes\-\_\-header}}
+\index{bytes\-\_\-header@{bytes\-\_\-header}!connection@{connection}}
+\subsubsection[{bytes\-\_\-header}]{\setlength{\rightskip}{0pt plus 5cm}off\-\_\-t connection\-::bytes\-\_\-header}}\label{structconnection_aa8743e91a38aa71d3fef9b0f7be115a4}
+
+
+Referenced by connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-error(), connection\-\_\-init(), connection\-\_\-reset(), and http\-\_\-response\-\_\-write\-\_\-header().
+
+\hypertarget{structconnection_a05f8c969aa3a06d3aed99c797c51bf88}{\index{connection@{connection}!bytes\-\_\-read@{bytes\-\_\-read}}
+\index{bytes\-\_\-read@{bytes\-\_\-read}!connection@{connection}}
+\subsubsection[{bytes\-\_\-read}]{\setlength{\rightskip}{0pt plus 5cm}off\-\_\-t connection\-::bytes\-\_\-read}}\label{structconnection_a05f8c969aa3a06d3aed99c797c51bf88}
+
+
+Referenced by connection\-\_\-handle\-\_\-read(), connection\-\_\-handle\-\_\-read\-\_\-ssl(), connection\-\_\-init(), and connection\-\_\-reset().
+
+\hypertarget{structconnection_a3f55620e6831c486b00beb2df653060e}{\index{connection@{connection}!bytes\-\_\-written@{bytes\-\_\-written}}
+\index{bytes\-\_\-written@{bytes\-\_\-written}!connection@{connection}}
+\subsubsection[{bytes\-\_\-written}]{\setlength{\rightskip}{0pt plus 5cm}off\-\_\-t connection\-::bytes\-\_\-written}}\label{structconnection_a3f55620e6831c486b00beb2df653060e}
+
+
+Referenced by connection\-\_\-init(), connection\-\_\-reset(), main(), and network\-\_\-write\-\_\-chunkqueue().
+
+\hypertarget{structconnection_ab08325b9e7ce8208ba2f5ab8d030543c}{\index{connection@{connection}!bytes\-\_\-written\-\_\-cur\-\_\-second@{bytes\-\_\-written\-\_\-cur\-\_\-second}}
+\index{bytes\-\_\-written\-\_\-cur\-\_\-second@{bytes\-\_\-written\-\_\-cur\-\_\-second}!connection@{connection}}
+\subsubsection[{bytes\-\_\-written\-\_\-cur\-\_\-second}]{\setlength{\rightskip}{0pt plus 5cm}off\-\_\-t connection\-::bytes\-\_\-written\-\_\-cur\-\_\-second}}\label{structconnection_ab08325b9e7ce8208ba2f5ab8d030543c}
+
+
+Referenced by connection\-\_\-reset(), main(), network\-\_\-write\-\_\-chunkqueue(), and T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structconnection_a991918bf683703616c8a7f6a3a0eacfa}{\index{connection@{connection}!close\-\_\-timeout\-\_\-ts@{close\-\_\-timeout\-\_\-ts}}
+\index{close\-\_\-timeout\-\_\-ts@{close\-\_\-timeout\-\_\-ts}!connection@{connection}}
+\subsubsection[{close\-\_\-timeout\-\_\-ts}]{\setlength{\rightskip}{0pt plus 5cm}time\-\_\-t connection\-::close\-\_\-timeout\-\_\-ts}}\label{structconnection_a991918bf683703616c8a7f6a3a0eacfa}
+
+
+Referenced by connection\-\_\-handle\-\_\-close\-\_\-state(), connection\-\_\-handle\-\_\-fdevent(), connection\-\_\-handle\-\_\-shutdown(), connection\-\_\-read\-\_\-for\-\_\-eos(), and main().
+
+\hypertarget{structconnection_a84fcfd608740374ca944491f11bee7c6}{\index{connection@{connection}!cond\-\_\-cache@{cond\-\_\-cache}}
+\index{cond\-\_\-cache@{cond\-\_\-cache}!connection@{connection}}
+\subsubsection[{cond\-\_\-cache}]{\setlength{\rightskip}{0pt plus 5cm}{\bf cond\-\_\-cache\-\_\-t}$\ast$ connection\-::cond\-\_\-cache}}\label{structconnection_a84fcfd608740374ca944491f11bee7c6}
+
+
+Referenced by config\-\_\-append\-\_\-cond\-\_\-match\-\_\-buffer(), config\-\_\-check\-\_\-cond\-\_\-cached(), config\-\_\-check\-\_\-cond\-\_\-nocache(), config\-\_\-cond\-\_\-cache\-\_\-reset(), config\-\_\-cond\-\_\-cache\-\_\-reset\-\_\-item(), config\-\_\-cond\-\_\-clear\-\_\-node(), connection\-\_\-init(), and connections\-\_\-free().
+
+\hypertarget{structconnection_adb2d47b554fdf1d0e502a98b2bb81661}{\index{connection@{connection}!conditional\-\_\-is\-\_\-valid@{conditional\-\_\-is\-\_\-valid}}
+\index{conditional\-\_\-is\-\_\-valid@{conditional\-\_\-is\-\_\-valid}!connection@{connection}}
+\subsubsection[{conditional\-\_\-is\-\_\-valid}]{\setlength{\rightskip}{0pt plus 5cm}int connection\-::conditional\-\_\-is\-\_\-valid\mbox{[}{\bf C\-O\-M\-P\-\_\-\-L\-A\-S\-T\-\_\-\-E\-L\-E\-M\-E\-N\-T}\mbox{]}}}\label{structconnection_adb2d47b554fdf1d0e502a98b2bb81661}
+
+
+Referenced by config\-\_\-check\-\_\-cond\-\_\-nocache(), config\-\_\-cond\-\_\-cache\-\_\-reset(), and http\-\_\-response\-\_\-prepare().
+
+\hypertarget{structconnection_a64fd7626accd6bfd28525e9d17adf612}{\index{connection@{connection}!conf@{conf}}
+\index{conf@{conf}!connection@{connection}}
+\subsubsection[{conf}]{\setlength{\rightskip}{0pt plus 5cm}{\bf specific\-\_\-config} connection\-::conf}}\label{structconnection_a64fd7626accd6bfd28525e9d17adf612}
+
+
+Referenced by cgi\-\_\-demux\-\_\-response(), cgi\-\_\-write\-\_\-request(), config\-\_\-check\-\_\-cond(), config\-\_\-check\-\_\-cond\-\_\-cached(), config\-\_\-check\-\_\-cond\-\_\-nocache(), config\-\_\-patch\-\_\-connection(), config\-\_\-setup\-\_\-connection(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-chunked(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-state(), connection\-\_\-handle\-\_\-read\-\_\-ssl(), connection\-\_\-handle\-\_\-read\-\_\-state(), connection\-\_\-handle\-\_\-write\-\_\-prepare(), connection\-\_\-state\-\_\-machine(), fcgi\-\_\-check\-\_\-extension(), fcgi\-\_\-demux\-\_\-response(), fcgi\-\_\-response\-\_\-parse(), fcgi\-\_\-write\-\_\-request(), http\-\_\-cgi\-\_\-headers(), http\-\_\-chunk\-\_\-append\-\_\-data(), http\-\_\-chunk\-\_\-append\-\_\-file\-\_\-open\-\_\-fstat(), http\-\_\-list\-\_\-directory(), http\-\_\-list\-\_\-directory\-\_\-footer(), http\-\_\-request\-\_\-parse(), http\-\_\-response\-\_\-prepare(), http\-\_\-response\-\_\-send\-\_\-file(), http\-\_\-response\-\_\-write\-\_\-header(), http\-\_\-response\-\_\-xsendfile(), main(), mod\-\_\-auth\-\_\-uri\-\_\-handler(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-config(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-html(), network\-\_\-write\-\_\-chunkqueue(), P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C(), process\-\_\-ssi\-\_\-stmt(), proxy\-\_\-demux\-\_\-response(), proxy\-\_\-write\-\_\-request(), scgi\-\_\-check\-\_\-extension(), scgi\-\_\-demux\-\_\-response(), scgi\-\_\-write\-\_\-request(), stat\-\_\-cache\-\_\-get\-\_\-entry(), stat\-\_\-cache\-\_\-open\-\_\-rdonly\-\_\-fstat(), S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C(), and webdav\-\_\-get\-\_\-live\-\_\-property().
+
+\hypertarget{structconnection_afbe997df45b9c7c51e7db09b52830642}{\index{connection@{connection}!connection\-\_\-start@{connection\-\_\-start}}
+\index{connection\-\_\-start@{connection\-\_\-start}!connection@{connection}}
+\subsubsection[{connection\-\_\-start}]{\setlength{\rightskip}{0pt plus 5cm}time\-\_\-t connection\-::connection\-\_\-start}}\label{structconnection_afbe997df45b9c7c51e7db09b52830642}
+
+
+Referenced by connection\-\_\-accepted(), and main().
+
+\hypertarget{structconnection_a908b051bd40a4075c2502e75755aa62b}{\index{connection@{connection}!dst\-\_\-addr@{dst\-\_\-addr}}
+\index{dst\-\_\-addr@{dst\-\_\-addr}!connection@{connection}}
+\subsubsection[{dst\-\_\-addr}]{\setlength{\rightskip}{0pt plus 5cm}{\bf sock\-\_\-addr} connection\-::dst\-\_\-addr}}\label{structconnection_a908b051bd40a4075c2502e75755aa62b}
+
+
+Referenced by config\-\_\-check\-\_\-cond\-\_\-nocache(), connection\-\_\-accepted(), http\-\_\-cgi\-\_\-headers(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-html(), proxy\-\_\-create\-\_\-env(), and U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structconnection_ab67760a30c3d3819b625beb7bdd1e635}{\index{connection@{connection}!dst\-\_\-addr\-\_\-buf@{dst\-\_\-addr\-\_\-buf}}
+\index{dst\-\_\-addr\-\_\-buf@{dst\-\_\-addr\-\_\-buf}!connection@{connection}}
+\subsubsection[{dst\-\_\-addr\-\_\-buf}]{\setlength{\rightskip}{0pt plus 5cm}{\bf buffer}$\ast$ connection\-::dst\-\_\-addr\-\_\-buf}}\label{structconnection_ab67760a30c3d3819b625beb7bdd1e635}
+
+
+Referenced by config\-\_\-check\-\_\-cond\-\_\-nocache(), connection\-\_\-accepted(), http\-\_\-cgi\-\_\-headers(), magnet\-\_\-env\-\_\-get\-\_\-buffer\-\_\-by\-\_\-id(), main(), mod\-\_\-auth\-\_\-check\-\_\-basic(), mod\-\_\-auth\-\_\-check\-\_\-digest(), mod\-\_\-authn\-\_\-gssapi\-\_\-basic(), and mod\-\_\-proxy\-\_\-extension\-\_\-host\-\_\-get().
+
+\hypertarget{structconnection_accccbe3ddcf8b246d8d6ee93c84e6c9b}{\index{connection@{connection}!environment@{environment}}
+\index{environment@{environment}!connection@{connection}}
+\subsubsection[{environment}]{\setlength{\rightskip}{0pt plus 5cm}{\bf array}$\ast$ connection\-::environment}}\label{structconnection_accccbe3ddcf8b246d8d6ee93c84e6c9b}
+
+
+Referenced by connection\-\_\-init(), connection\-\_\-reset(), connection\-\_\-state\-\_\-machine(), connections\-\_\-free(), fcgi\-\_\-response\-\_\-parse(), http\-\_\-cgi\-\_\-headers(), magnet\-\_\-attract\-\_\-array(), magnet\-\_\-cgi\-\_\-get(), magnet\-\_\-cgi\-\_\-pairs(), magnet\-\_\-cgi\-\_\-set(), mod\-\_\-auth\-\_\-check\-\_\-basic(), mod\-\_\-auth\-\_\-check\-\_\-digest(), mod\-\_\-auth\-\_\-check\-\_\-extern(), mod\-\_\-authn\-\_\-gssapi\-\_\-check\-\_\-spnego(), mod\-\_\-authn\-\_\-gssapi\-\_\-create\-\_\-krb5\-\_\-ccache(), mod\-\_\-compress\-\_\-note\-\_\-ratio(), and mod\-\_\-deflate\-\_\-note\-\_\-ratio().
+
+\hypertarget{structconnection_ad631932dd50684e43436654946c5951f}{\index{connection@{connection}!error\-\_\-handler\-\_\-saved\-\_\-method@{error\-\_\-handler\-\_\-saved\-\_\-method}}
+\index{error\-\_\-handler\-\_\-saved\-\_\-method@{error\-\_\-handler\-\_\-saved\-\_\-method}!connection@{connection}}
+\subsubsection[{error\-\_\-handler\-\_\-saved\-\_\-method}]{\setlength{\rightskip}{0pt plus 5cm}{\bf http\-\_\-method\-\_\-t} connection\-::error\-\_\-handler\-\_\-saved\-\_\-method}}\label{structconnection_ad631932dd50684e43436654946c5951f}
+
+
+Referenced by connection\-\_\-state\-\_\-machine().
+
+\hypertarget{structconnection_a6dd3ddb643153f1d6e7946d1ac973135}{\index{connection@{connection}!error\-\_\-handler\-\_\-saved\-\_\-status@{error\-\_\-handler\-\_\-saved\-\_\-status}}
+\index{error\-\_\-handler\-\_\-saved\-\_\-status@{error\-\_\-handler\-\_\-saved\-\_\-status}!connection@{connection}}
+\subsubsection[{error\-\_\-handler\-\_\-saved\-\_\-status}]{\setlength{\rightskip}{0pt plus 5cm}int connection\-::error\-\_\-handler\-\_\-saved\-\_\-status}}\label{structconnection_a6dd3ddb643153f1d6e7946d1ac973135}
+
+
+Referenced by connection\-\_\-reset(), connection\-\_\-state\-\_\-machine(), http\-\_\-cgi\-\_\-headers(), and magnet\-\_\-attract\-\_\-array().
+
+\hypertarget{structconnection_a2251cd32b04d7203e44954d944b589ce}{\index{connection@{connection}!etag\-\_\-flags@{etag\-\_\-flags}}
+\index{etag\-\_\-flags@{etag\-\_\-flags}!connection@{connection}}
+\subsubsection[{etag\-\_\-flags}]{\setlength{\rightskip}{0pt plus 5cm}{\bf etag\-\_\-flags\-\_\-t} connection\-::etag\-\_\-flags}}\label{structconnection_a2251cd32b04d7203e44954d944b589ce}
+
+
+Referenced by config\-\_\-patch\-\_\-connection(), http\-\_\-response\-\_\-send\-\_\-file(), mod\-\_\-ssi\-\_\-handle\-\_\-request(), stat\-\_\-cache\-\_\-get\-\_\-entry(), and webdav\-\_\-get\-\_\-live\-\_\-property().
+
+\hypertarget{structconnection_aa9a96cc6c66ef5a617f51247b2809a40}{\index{connection@{connection}!fd@{fd}}
+\index{fd@{fd}!connection@{connection}}
+\subsubsection[{fd}]{\setlength{\rightskip}{0pt plus 5cm}int connection\-::fd}}\label{structconnection_aa9a96cc6c66ef5a617f51247b2809a40}
+
+
+Referenced by cgi\-\_\-demux\-\_\-response(), cgi\-\_\-handle\-\_\-fdevent(), connection\-\_\-accepted(), connection\-\_\-close(), connection\-\_\-del(), connection\-\_\-handle\-\_\-fdevent(), connection\-\_\-handle\-\_\-read(), connection\-\_\-handle\-\_\-shutdown(), connection\-\_\-handle\-\_\-write(), connection\-\_\-init(), connection\-\_\-read\-\_\-for\-\_\-eos(), connection\-\_\-state\-\_\-machine(), connections\-\_\-get\-\_\-new\-\_\-connection(), fcgi\-\_\-write\-\_\-request(), http\-\_\-cgi\-\_\-headers(), http\-\_\-request\-\_\-parse(), http\-\_\-response\-\_\-redirect\-\_\-to\-\_\-directory(), main(), network\-\_\-write\-\_\-chunkqueue(), scgi\-\_\-demux\-\_\-response(), scgi\-\_\-recv\-\_\-response(), and scgi\-\_\-write\-\_\-request().
+
+\hypertarget{structconnection_a6d5f98c61e568390686dd9ec8f743c76}{\index{connection@{connection}!fde\-\_\-ndx@{fde\-\_\-ndx}}
+\index{fde\-\_\-ndx@{fde\-\_\-ndx}!connection@{connection}}
+\subsubsection[{fde\-\_\-ndx}]{\setlength{\rightskip}{0pt plus 5cm}int connection\-::fde\-\_\-ndx}}\label{structconnection_a6d5f98c61e568390686dd9ec8f743c76}
+
+
+Referenced by connection\-\_\-accepted(), connection\-\_\-close(), connection\-\_\-init(), and connection\-\_\-state\-\_\-machine().
+
+\hypertarget{structconnection_acf4d9c3f706cf8bd97c5453a211bb42e}{\index{connection@{connection}!file\-\_\-finished@{file\-\_\-finished}}
+\index{file\-\_\-finished@{file\-\_\-finished}!connection@{connection}}
+\subsubsection[{file\-\_\-finished}]{\setlength{\rightskip}{0pt plus 5cm}int connection\-::file\-\_\-finished}}\label{structconnection_acf4d9c3f706cf8bd97c5453a211bb42e}
+
+
+Referenced by cache\-\_\-parse\-\_\-lua(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), connection\-\_\-handle\-\_\-write(), connection\-\_\-handle\-\_\-write\-\_\-prepare(), connection\-\_\-response\-\_\-reset(), connection\-\_\-state\-\_\-machine(), deflate\-\_\-compress\-\_\-response(), deflate\-\_\-file\-\_\-to\-\_\-buffer(), http\-\_\-list\-\_\-directory(), http\-\_\-response\-\_\-backend\-\_\-done(), http\-\_\-response\-\_\-backend\-\_\-error(), http\-\_\-response\-\_\-prepare(), http\-\_\-response\-\_\-redirect\-\_\-to\-\_\-directory(), http\-\_\-response\-\_\-send\-\_\-file(), magnet\-\_\-attract(), mod\-\_\-redirect\-\_\-uri\-\_\-handler(), mod\-\_\-ssi\-\_\-handle\-\_\-request(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-config(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-statistics(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status(), and S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structconnection_a86f6550572fa72ac814b35df1d6b890b}{\index{connection@{connection}!file\-\_\-started@{file\-\_\-started}}
+\index{file\-\_\-started@{file\-\_\-started}!connection@{connection}}
+\subsubsection[{file\-\_\-started}]{\setlength{\rightskip}{0pt plus 5cm}int connection\-::file\-\_\-started}}\label{structconnection_a86f6550572fa72ac814b35df1d6b890b}
+
+
+Referenced by cgi\-\_\-demux\-\_\-response(), cgi\-\_\-handle\-\_\-fdevent(), connection\-\_\-response\-\_\-reset(), connection\-\_\-state\-\_\-machine(), deflate\-\_\-file\-\_\-to\-\_\-buffer(), fcgi\-\_\-demux\-\_\-response(), fcgi\-\_\-handle\-\_\-fdevent(), fcgi\-\_\-recv\-\_\-response(), http\-\_\-response\-\_\-backend\-\_\-done(), http\-\_\-response\-\_\-backend\-\_\-error(), http\-\_\-response\-\_\-xsendfile(), mod\-\_\-proxy\-\_\-check\-\_\-extension(), mod\-\_\-ssi\-\_\-handle\-\_\-request(), proxy\-\_\-demux\-\_\-response(), proxy\-\_\-handle\-\_\-fdevent(), scgi\-\_\-check\-\_\-extension(), scgi\-\_\-demux\-\_\-response(), scgi\-\_\-handle\-\_\-fdevent(), and scgi\-\_\-recv\-\_\-response().
+
+\hypertarget{structconnection_a31bce9025d3e04d9df2e5876f4f1868a}{\index{connection@{connection}!got\-\_\-response@{got\-\_\-response}}
+\index{got\-\_\-response@{got\-\_\-response}!connection@{connection}}
+\subsubsection[{got\-\_\-response}]{\setlength{\rightskip}{0pt plus 5cm}int connection\-::got\-\_\-response}}\label{structconnection_a31bce9025d3e04d9df2e5876f4f1868a}
+
+
+Referenced by connection\-\_\-response\-\_\-reset(), connection\-\_\-state\-\_\-machine(), and proxy\-\_\-demux\-\_\-response().
+
+\hypertarget{structconnection_a754a1fa8b70b9bc38d1dd924d379c34f}{\index{connection@{connection}!header\-\_\-len@{header\-\_\-len}}
+\index{header\-\_\-len@{header\-\_\-len}!connection@{connection}}
+\subsubsection[{header\-\_\-len}]{\setlength{\rightskip}{0pt plus 5cm}size\-\_\-t connection\-::header\-\_\-len}}\label{structconnection_a754a1fa8b70b9bc38d1dd924d379c34f}
+
+
+Referenced by connection\-\_\-reset(), and http\-\_\-request\-\_\-parse().
+
+\hypertarget{structconnection_a1fcd32a23ddbacfda74678d98fbf077f}{\index{connection@{connection}!http\-\_\-status@{http\-\_\-status}}
+\index{http\-\_\-status@{http\-\_\-status}!connection@{connection}}
+\subsubsection[{http\-\_\-status}]{\setlength{\rightskip}{0pt plus 5cm}int connection\-::http\-\_\-status}}\label{structconnection_a1fcd32a23ddbacfda74678d98fbf077f}
+
+
+Referenced by build\-\_\-ssi\-\_\-cgi\-\_\-vars(), cgi\-\_\-demux\-\_\-response(), cgi\-\_\-response\-\_\-parse(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), connection\-\_\-handle\-\_\-errdoc\-\_\-init(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-error(), connection\-\_\-handle\-\_\-read\-\_\-state(), connection\-\_\-handle\-\_\-response\-\_\-end\-\_\-state(), connection\-\_\-handle\-\_\-write\-\_\-prepare(), connection\-\_\-response\-\_\-reset(), connection\-\_\-state\-\_\-machine(), fcgi\-\_\-create\-\_\-env(), fcgi\-\_\-demux\-\_\-response(), fcgi\-\_\-extension\-\_\-host\-\_\-get(), fcgi\-\_\-recv\-\_\-response(), fcgi\-\_\-response\-\_\-parse(), fcgi\-\_\-send\-\_\-request(), http\-\_\-request\-\_\-parse(), http\-\_\-response\-\_\-backend\-\_\-done(), http\-\_\-response\-\_\-handle\-\_\-cachable(), http\-\_\-response\-\_\-parse\-\_\-range(), http\-\_\-response\-\_\-prepare(), http\-\_\-response\-\_\-redirect\-\_\-to\-\_\-directory(), http\-\_\-response\-\_\-send\-\_\-file(), http\-\_\-response\-\_\-write\-\_\-header(), http\-\_\-response\-\_\-xsendfile(), magnet\-\_\-attract(), mod\-\_\-auth\-\_\-check\-\_\-basic(), mod\-\_\-auth\-\_\-check\-\_\-digest(), mod\-\_\-auth\-\_\-check\-\_\-extern(), mod\-\_\-auth\-\_\-send\-\_\-400\-\_\-bad\-\_\-request(), mod\-\_\-auth\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-basic(), mod\-\_\-auth\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-digest(), mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-400\-\_\-bad\-\_\-request(), mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-basic(), mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-negotiate(), mod\-\_\-authn\-\_\-ldap\-\_\-basic(), mod\-\_\-proxy\-\_\-extension\-\_\-host\-\_\-get(), mod\-\_\-redirect\-\_\-uri\-\_\-handler(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-config(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-statistics(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status(), P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C(), proxy\-\_\-demux\-\_\-response(), proxy\-\_\-response\-\_\-parse(), scgi\-\_\-create\-\_\-env(), scgi\-\_\-demux\-\_\-response(), scgi\-\_\-extension\-\_\-host\-\_\-get(), scgi\-\_\-response\-\_\-parse(), scgi\-\_\-send\-\_\-request(), and S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structconnection_a739dd4884f14ad354d8f0db35ae12efb}{\index{connection@{connection}!in\-\_\-joblist@{in\-\_\-joblist}}
+\index{in\-\_\-joblist@{in\-\_\-joblist}!connection@{connection}}
+\subsubsection[{in\-\_\-joblist}]{\setlength{\rightskip}{0pt plus 5cm}int connection\-::in\-\_\-joblist}}\label{structconnection_a739dd4884f14ad354d8f0db35ae12efb}
+
+
+Referenced by joblist\-\_\-append(), and main().
+
+\hypertarget{structconnection_a4356ba50972fa86e3b1852bee2486192}{\index{connection@{connection}!is\-\_\-readable@{is\-\_\-readable}}
+\index{is\-\_\-readable@{is\-\_\-readable}!connection@{connection}}
+\subsubsection[{is\-\_\-readable}]{\setlength{\rightskip}{0pt plus 5cm}int connection\-::is\-\_\-readable}}\label{structconnection_a4356ba50972fa86e3b1852bee2486192}
+
+
+Referenced by cgi\-\_\-write\-\_\-request(), connection\-\_\-handle\-\_\-fdevent(), connection\-\_\-handle\-\_\-read(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-state(), connection\-\_\-handle\-\_\-read\-\_\-ssl(), connection\-\_\-handle\-\_\-read\-\_\-state(), connection\-\_\-reset(), connection\-\_\-state\-\_\-machine(), fcgi\-\_\-write\-\_\-request(), proxy\-\_\-write\-\_\-request(), and scgi\-\_\-write\-\_\-request().
+
+\hypertarget{structconnection_af60569b593cb548343b58ff650d57486}{\index{connection@{connection}!is\-\_\-writable@{is\-\_\-writable}}
+\index{is\-\_\-writable@{is\-\_\-writable}!connection@{connection}}
+\subsubsection[{is\-\_\-writable}]{\setlength{\rightskip}{0pt plus 5cm}int connection\-::is\-\_\-writable}}\label{structconnection_af60569b593cb548343b58ff650d57486}
+
+
+Referenced by cgi\-\_\-demux\-\_\-response(), connection\-\_\-handle\-\_\-fdevent(), connection\-\_\-handle\-\_\-read\-\_\-ssl(), connection\-\_\-handle\-\_\-write(), connection\-\_\-response\-\_\-reset(), connection\-\_\-state\-\_\-machine(), fcgi\-\_\-demux\-\_\-response(), proxy\-\_\-demux\-\_\-response(), and scgi\-\_\-demux\-\_\-response().
+
+\hypertarget{structconnection_a3c26e699587345c2ab4039b4fbc5dd44}{\index{connection@{connection}!keep\-\_\-alive@{keep\-\_\-alive}}
+\index{keep\-\_\-alive@{keep\-\_\-alive}!connection@{connection}}
+\subsubsection[{keep\-\_\-alive}]{\setlength{\rightskip}{0pt plus 5cm}int connection\-::keep\-\_\-alive}}\label{structconnection_a3c26e699587345c2ab4039b4fbc5dd44}
+
+
+Referenced by cgi\-\_\-demux\-\_\-response(), cgi\-\_\-handle\-\_\-fdevent\-\_\-send(), connection\-\_\-handle\-\_\-fdevent(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-chunked(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-error(), connection\-\_\-handle\-\_\-read\-\_\-state(), connection\-\_\-handle\-\_\-response\-\_\-end\-\_\-state(), connection\-\_\-handle\-\_\-write\-\_\-prepare(), connection\-\_\-state\-\_\-machine(), http\-\_\-request\-\_\-parse(), http\-\_\-response\-\_\-backend\-\_\-error(), http\-\_\-response\-\_\-prepare(), and http\-\_\-response\-\_\-write\-\_\-header().
+
+\hypertarget{structconnection_a60fbb1938d3a5f459b005b150f6dc9db}{\index{connection@{connection}!keep\-\_\-alive\-\_\-idle@{keep\-\_\-alive\-\_\-idle}}
+\index{keep\-\_\-alive\-\_\-idle@{keep\-\_\-alive\-\_\-idle}!connection@{connection}}
+\subsubsection[{keep\-\_\-alive\-\_\-idle}]{\setlength{\rightskip}{0pt plus 5cm}int connection\-::keep\-\_\-alive\-\_\-idle}}\label{structconnection_a60fbb1938d3a5f459b005b150f6dc9db}
+
+
+Referenced by http\-\_\-response\-\_\-write\-\_\-header(), and main().
+
+\hypertarget{structconnection_af0f62059eb64e548372987ea930b80da}{\index{connection@{connection}!loops\-\_\-per\-\_\-request@{loops\-\_\-per\-\_\-request}}
+\index{loops\-\_\-per\-\_\-request@{loops\-\_\-per\-\_\-request}!connection@{connection}}
+\subsubsection[{loops\-\_\-per\-\_\-request}]{\setlength{\rightskip}{0pt plus 5cm}size\-\_\-t connection\-::loops\-\_\-per\-\_\-request}}\label{structconnection_af0f62059eb64e548372987ea930b80da}
+
+
+Referenced by cgi\-\_\-demux\-\_\-response(), connection\-\_\-init(), connection\-\_\-reset(), connection\-\_\-state\-\_\-machine(), and fcgi\-\_\-recv\-\_\-response().
+
+\hypertarget{structconnection_a678265f403b80798cd979f7e8108cdaf}{\index{connection@{connection}!mode@{mode}}
+\index{mode@{mode}!connection@{connection}}
+\subsubsection[{mode}]{\setlength{\rightskip}{0pt plus 5cm}{\bf connection\-\_\-type} connection\-::mode}}\label{structconnection_a678265f403b80798cd979f7e8108cdaf}
+
+
+Referenced by cgi\-\_\-connection\-\_\-close(), cgi\-\_\-demux\-\_\-response(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-error(), connection\-\_\-handle\-\_\-write\-\_\-prepare(), connection\-\_\-response\-\_\-reset(), connection\-\_\-state\-\_\-machine(), fcgi\-\_\-check\-\_\-extension(), fcgi\-\_\-connection\-\_\-close(), fcgi\-\_\-demux\-\_\-response(), fcgi\-\_\-extension\-\_\-host\-\_\-get(), fcgi\-\_\-recv\-\_\-response(), http\-\_\-response\-\_\-backend\-\_\-done(), http\-\_\-response\-\_\-backend\-\_\-error(), http\-\_\-response\-\_\-handle\-\_\-cachable(), http\-\_\-response\-\_\-prepare(), http\-\_\-response\-\_\-xsendfile(), magnet\-\_\-attract(), mod\-\_\-auth\-\_\-check\-\_\-basic(), mod\-\_\-auth\-\_\-check\-\_\-digest(), mod\-\_\-auth\-\_\-check\-\_\-extern(), mod\-\_\-auth\-\_\-send\-\_\-400\-\_\-bad\-\_\-request(), mod\-\_\-auth\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-basic(), mod\-\_\-auth\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-digest(), mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-400\-\_\-bad\-\_\-request(), mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-basic(), mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-negotiate(), mod\-\_\-authn\-\_\-ldap\-\_\-basic(), mod\-\_\-proxy\-\_\-check\-\_\-extension(), mod\-\_\-proxy\-\_\-extension\-\_\-host\-\_\-get(), mod\-\_\-redirect\-\_\-uri\-\_\-handler(), mod\-\_\-status\-\_\-handler(), P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C(), proxy\-\_\-connection\-\_\-close(), proxy\-\_\-demux\-\_\-response(), scgi\-\_\-check\-\_\-extension(), scgi\-\_\-connection\-\_\-close(), scgi\-\_\-create\-\_\-env(), scgi\-\_\-demux\-\_\-response(), scgi\-\_\-extension\-\_\-host\-\_\-get(), and S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structconnection_aadeba61ce7467142b9a766e9bfb7defa}{\index{connection@{connection}!ndx@{ndx}}
+\index{ndx@{ndx}!connection@{connection}}
+\subsubsection[{ndx}]{\setlength{\rightskip}{0pt plus 5cm}int connection\-::ndx}}\label{structconnection_aadeba61ce7467142b9a766e9bfb7defa}
+
+
+Referenced by connection\-\_\-del(), connection\-\_\-init(), and connections\-\_\-get\-\_\-new\-\_\-connection().
+
+\hypertarget{structconnection_a9f90ff4eab33e4bf140d0386165fbe87}{\index{connection@{connection}!parse\-\_\-request@{parse\-\_\-request}}
+\index{parse\-\_\-request@{parse\-\_\-request}!connection@{connection}}
+\subsubsection[{parse\-\_\-request}]{\setlength{\rightskip}{0pt plus 5cm}{\bf buffer}$\ast$ connection\-::parse\-\_\-request}}\label{structconnection_a9f90ff4eab33e4bf140d0386165fbe87}
+
+
+Referenced by http\-\_\-request\-\_\-parse().
+
+\hypertarget{structconnection_a24f4cb581343ebeb71a06bccf3eaa98d}{\index{connection@{connection}!parsed\-\_\-response@{parsed\-\_\-response}}
+\index{parsed\-\_\-response@{parsed\-\_\-response}!connection@{connection}}
+\subsubsection[{parsed\-\_\-response}]{\setlength{\rightskip}{0pt plus 5cm}unsigned int connection\-::parsed\-\_\-response}}\label{structconnection_a24f4cb581343ebeb71a06bccf3eaa98d}
+
+
+Referenced by cgi\-\_\-response\-\_\-parse(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), connection\-\_\-handle\-\_\-write\-\_\-prepare(), connection\-\_\-response\-\_\-reset(), connection\-\_\-state\-\_\-machine(), fcgi\-\_\-response\-\_\-parse(), http\-\_\-response\-\_\-xsendfile(), proxy\-\_\-response\-\_\-parse(), and scgi\-\_\-response\-\_\-parse().
+
+\hypertarget{structconnection_acd39e26d871845fac20b85ef5e3823ef}{\index{connection@{connection}!physical@{physical}}
+\index{physical@{physical}!connection@{connection}}
+\subsubsection[{physical}]{\setlength{\rightskip}{0pt plus 5cm}{\bf physical} connection\-::physical}}\label{structconnection_acd39e26d871845fac20b85ef5e3823ef}
+
+
+Referenced by cache\-\_\-call\-\_\-lua(), cache\-\_\-parse\-\_\-lua(), cgi\-\_\-create\-\_\-env(), connection\-\_\-handle\-\_\-errdoc\-\_\-init(), connection\-\_\-handle\-\_\-write\-\_\-prepare(), connection\-\_\-response\-\_\-reset(), deflate\-\_\-file\-\_\-to\-\_\-buffer(), deflate\-\_\-file\-\_\-to\-\_\-file(), fcgi\-\_\-check\-\_\-extension(), fcgi\-\_\-recv\-\_\-response(), http\-\_\-cgi\-\_\-headers(), http\-\_\-list\-\_\-directory\-\_\-footer(), http\-\_\-list\-\_\-directory\-\_\-header(), http\-\_\-response\-\_\-handle\-\_\-cachable(), http\-\_\-response\-\_\-prepare(), http\-\_\-response\-\_\-send\-\_\-file(), magnet\-\_\-env\-\_\-get\-\_\-buffer\-\_\-by\-\_\-id(), mod\-\_\-evhost\-\_\-uri\-\_\-handler(), mod\-\_\-simple\-\_\-vhost\-\_\-docroot(), mod\-\_\-ssi\-\_\-handle\-\_\-request(), mod\-\_\-ssi\-\_\-process\-\_\-file(), mod\-\_\-ssi\-\_\-read\-\_\-fd(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-html(), P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C(), process\-\_\-ssi\-\_\-stmt(), scgi\-\_\-check\-\_\-extension(), S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C(), and webdav\-\_\-get\-\_\-live\-\_\-property().
+
+\hypertarget{structconnection_a50b86ed1f96cd78db67d7178d27395ff}{\index{connection@{connection}!plugin\-\_\-ctx@{plugin\-\_\-ctx}}
+\index{plugin\-\_\-ctx@{plugin\-\_\-ctx}!connection@{connection}}
+\subsubsection[{plugin\-\_\-ctx}]{\setlength{\rightskip}{0pt plus 5cm}void$\ast$$\ast$ connection\-::plugin\-\_\-ctx}}\label{structconnection_a50b86ed1f96cd78db67d7178d27395ff}
+
+
+Referenced by cgi\-\_\-connection\-\_\-close(), cgi\-\_\-connection\-\_\-close\-\_\-callback(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), connection\-\_\-handle\-\_\-shutdown(), connection\-\_\-init(), connections\-\_\-free(), deflate\-\_\-compress\-\_\-cleanup(), fcgi\-\_\-check\-\_\-extension(), fcgi\-\_\-connection\-\_\-close(), fcgi\-\_\-connection\-\_\-reset(), fcgi\-\_\-response\-\_\-parse(), mod\-\_\-authn\-\_\-gssapi\-\_\-create\-\_\-krb5\-\_\-ccache(), mod\-\_\-deflate\-\_\-cleanup(), mod\-\_\-mysql\-\_\-vhost\-\_\-connection\-\_\-data(), mod\-\_\-proxy\-\_\-check\-\_\-extension(), mod\-\_\-proxy\-\_\-connection\-\_\-reset(), mod\-\_\-ssi\-\_\-connection\-\_\-reset(), mod\-\_\-webdav\-\_\-connection\-\_\-reset(), P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C(), proxy\-\_\-connection\-\_\-close(), scgi\-\_\-check\-\_\-extension(), scgi\-\_\-connection\-\_\-close(), scgi\-\_\-connection\-\_\-reset(), and S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structconnection_a3de703d57f7d66da8493cf8554ed3cb2}{\index{connection@{connection}!read\-\_\-idle\-\_\-ts@{read\-\_\-idle\-\_\-ts}}
+\index{read\-\_\-idle\-\_\-ts@{read\-\_\-idle\-\_\-ts}!connection@{connection}}
+\subsubsection[{read\-\_\-idle\-\_\-ts}]{\setlength{\rightskip}{0pt plus 5cm}time\-\_\-t connection\-::read\-\_\-idle\-\_\-ts}}\label{structconnection_a3de703d57f7d66da8493cf8554ed3cb2}
+
+
+Referenced by connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-state(), connection\-\_\-handle\-\_\-read\-\_\-state(), connection\-\_\-handle\-\_\-response\-\_\-end\-\_\-state(), connection\-\_\-state\-\_\-machine(), and main().
+
+\hypertarget{structconnection_a1d21a149b6145872f687bbe27b1d90d6}{\index{connection@{connection}!read\-\_\-queue@{read\-\_\-queue}}
+\index{read\-\_\-queue@{read\-\_\-queue}!connection@{connection}}
+\subsubsection[{read\-\_\-queue}]{\setlength{\rightskip}{0pt plus 5cm}{\bf chunkqueue}$\ast$ connection\-::read\-\_\-queue}}\label{structconnection_a1d21a149b6145872f687bbe27b1d90d6}
+
+
+Referenced by connection\-\_\-handle\-\_\-read(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-state(), connection\-\_\-handle\-\_\-read\-\_\-ssl(), connection\-\_\-handle\-\_\-read\-\_\-state(), connection\-\_\-init(), connection\-\_\-state\-\_\-machine(), and connections\-\_\-free().
+
+\hypertarget{structconnection_a4b3fe80fe7d59788f44466d04077b11a}{\index{connection@{connection}!request@{request}}
+\index{request@{request}!connection@{connection}}
+\subsubsection[{request}]{\setlength{\rightskip}{0pt plus 5cm}{\bf request} connection\-::request}}\label{structconnection_a4b3fe80fe7d59788f44466d04077b11a}
+
+
+Referenced by build\-\_\-ssi\-\_\-cgi\-\_\-vars(), cache\-\_\-parse\-\_\-lua(), cgi\-\_\-create\-\_\-env(), cgi\-\_\-demux\-\_\-response(), cgi\-\_\-handle\-\_\-fdevent\-\_\-send(), cgi\-\_\-write\-\_\-request(), config\-\_\-check\-\_\-cond\-\_\-nocache(), connection\-\_\-del(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-chunked(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-state(), connection\-\_\-handle\-\_\-read\-\_\-state(), connection\-\_\-handle\-\_\-response\-\_\-end\-\_\-state(), connection\-\_\-handle\-\_\-write\-\_\-prepare(), connection\-\_\-init(), connection\-\_\-reset(), connection\-\_\-state\-\_\-machine(), connections\-\_\-free(), fcgi\-\_\-check\-\_\-extension(), fcgi\-\_\-create\-\_\-env(), fcgi\-\_\-recv\-\_\-response(), http\-\_\-cgi\-\_\-headers(), http\-\_\-request\-\_\-header\-\_\-finished(), http\-\_\-request\-\_\-parse(), http\-\_\-response\-\_\-handle\-\_\-cachable(), http\-\_\-response\-\_\-parse\-\_\-range(), http\-\_\-response\-\_\-prepare(), http\-\_\-response\-\_\-send\-\_\-file(), http\-\_\-response\-\_\-write\-\_\-header(), magnet\-\_\-env\-\_\-get\-\_\-buffer\-\_\-by\-\_\-id(), magnet\-\_\-reqhdr\-\_\-get(), magnet\-\_\-reqhdr\-\_\-pairs(), main(), mod\-\_\-auth\-\_\-check\-\_\-basic(), mod\-\_\-auth\-\_\-check\-\_\-digest(), mod\-\_\-authn\-\_\-gssapi\-\_\-basic(), mod\-\_\-authn\-\_\-gssapi\-\_\-check(), mod\-\_\-authn\-\_\-gssapi\-\_\-check\-\_\-spnego(), mod\-\_\-authn\-\_\-gssapi\-\_\-create\-\_\-krb5\-\_\-ccache(), mod\-\_\-authn\-\_\-mysql\-\_\-query(), mod\-\_\-redirect\-\_\-uri\-\_\-handler(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-html(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-text(), P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C(), process\-\_\-ssi\-\_\-stmt(), proxy\-\_\-append\-\_\-header(), proxy\-\_\-create\-\_\-env(), proxy\-\_\-set\-\_\-header(), scgi\-\_\-check\-\_\-extension(), scgi\-\_\-create\-\_\-env(), S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C(), U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C(), webdav\-\_\-gen\-\_\-response\-\_\-status\-\_\-tag(), and webdav\-\_\-has\-\_\-lock().
+
+\hypertarget{structconnection_a08379ad329cc6e8f08732000d23992ec}{\index{connection@{connection}!request\-\_\-content\-\_\-queue@{request\-\_\-content\-\_\-queue}}
+\index{request\-\_\-content\-\_\-queue@{request\-\_\-content\-\_\-queue}!connection@{connection}}
+\subsubsection[{request\-\_\-content\-\_\-queue}]{\setlength{\rightskip}{0pt plus 5cm}{\bf chunkqueue}$\ast$ connection\-::request\-\_\-content\-\_\-queue}}\label{structconnection_a08379ad329cc6e8f08732000d23992ec}
+
+
+Referenced by cgi\-\_\-demux\-\_\-response(), cgi\-\_\-handle\-\_\-fdevent\-\_\-send(), cgi\-\_\-write\-\_\-request(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-state(), connection\-\_\-handle\-\_\-response\-\_\-end\-\_\-state(), connection\-\_\-init(), connection\-\_\-reset(), connection\-\_\-state\-\_\-machine(), connections\-\_\-free(), fcgi\-\_\-stdin\-\_\-append(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-html(), proxy\-\_\-create\-\_\-env(), scgi\-\_\-create\-\_\-env(), S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C(), and U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structconnection_a7607ed0216aca45cbc4d20b83b2b5102}{\index{connection@{connection}!request\-\_\-count@{request\-\_\-count}}
+\index{request\-\_\-count@{request\-\_\-count}!connection@{connection}}
+\subsubsection[{request\-\_\-count}]{\setlength{\rightskip}{0pt plus 5cm}size\-\_\-t connection\-::request\-\_\-count}}\label{structconnection_a7607ed0216aca45cbc4d20b83b2b5102}
+
+
+Referenced by connection\-\_\-handle\-\_\-read\-\_\-state(), connection\-\_\-state\-\_\-machine(), http\-\_\-request\-\_\-parse(), http\-\_\-response\-\_\-write\-\_\-header(), and main().
+
+\hypertarget{structconnection_a35ab49ce195e54eb674b504a5b82aa72}{\index{connection@{connection}!request\-\_\-start@{request\-\_\-start}}
+\index{request\-\_\-start@{request\-\_\-start}!connection@{connection}}
+\subsubsection[{request\-\_\-start}]{\setlength{\rightskip}{0pt plus 5cm}time\-\_\-t connection\-::request\-\_\-start}}\label{structconnection_a35ab49ce195e54eb674b504a5b82aa72}
+
+
+Referenced by connection\-\_\-handle\-\_\-read\-\_\-state(), connection\-\_\-handle\-\_\-response\-\_\-end\-\_\-state(), connection\-\_\-state\-\_\-machine(), and mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-html().
+
+\hypertarget{structconnection_afffa8ceb142ef540be58e430107c1601}{\index{connection@{connection}!request\-\_\-start\-\_\-hp@{request\-\_\-start\-\_\-hp}}
+\index{request\-\_\-start\-\_\-hp@{request\-\_\-start\-\_\-hp}!connection@{connection}}
+\subsubsection[{request\-\_\-start\-\_\-hp}]{\setlength{\rightskip}{0pt plus 5cm}struct timespec connection\-::request\-\_\-start\-\_\-hp}}\label{structconnection_afffa8ceb142ef540be58e430107c1601}
+
+
+Referenced by connection\-\_\-handle\-\_\-read\-\_\-state(), and connection\-\_\-state\-\_\-machine().
+
+\hypertarget{structconnection_abe43f9dc2787128011e6510fe4673081}{\index{connection@{connection}!response@{response}}
+\index{response@{response}!connection@{connection}}
+\subsubsection[{response}]{\setlength{\rightskip}{0pt plus 5cm}{\bf response} connection\-::response}}\label{structconnection_abe43f9dc2787128011e6510fe4673081}
+
+
+Referenced by cache\-\_\-parse\-\_\-lua(), cgi\-\_\-demux\-\_\-response(), cgi\-\_\-response\-\_\-parse(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), connection\-\_\-handle\-\_\-errdoc\-\_\-init(), connection\-\_\-handle\-\_\-write\-\_\-prepare(), connection\-\_\-init(), connection\-\_\-response\-\_\-reset(), connection\-\_\-state\-\_\-machine(), connections\-\_\-free(), fcgi\-\_\-demux\-\_\-response(), fcgi\-\_\-response\-\_\-parse(), http\-\_\-chunk\-\_\-append\-\_\-data(), http\-\_\-chunk\-\_\-append\-\_\-file\-\_\-fd\-\_\-range(), http\-\_\-chunk\-\_\-append\-\_\-to\-\_\-tempfile(), http\-\_\-chunk\-\_\-close(), http\-\_\-request\-\_\-parse(), http\-\_\-response\-\_\-parse\-\_\-range(), http\-\_\-response\-\_\-send\-\_\-file(), http\-\_\-response\-\_\-write\-\_\-header(), http\-\_\-response\-\_\-xsendfile(), proxy\-\_\-response\-\_\-parse(), response\-\_\-header\-\_\-append(), response\-\_\-header\-\_\-insert(), response\-\_\-header\-\_\-overwrite(), scgi\-\_\-demux\-\_\-response(), and scgi\-\_\-response\-\_\-parse().
+
+\hypertarget{structconnection_a1733a3bc86e073fd98e2dac8e2c7ed0f}{\index{connection@{connection}!server\-\_\-name@{server\-\_\-name}}
+\index{server\-\_\-name@{server\-\_\-name}!connection@{connection}}
+\subsubsection[{server\-\_\-name}]{\setlength{\rightskip}{0pt plus 5cm}{\bf buffer}$\ast$ connection\-::server\-\_\-name}}\label{structconnection_a1733a3bc86e073fd98e2dac8e2c7ed0f}
+
+
+Referenced by config\-\_\-patch\-\_\-connection(), config\-\_\-setup\-\_\-connection(), http\-\_\-cgi\-\_\-headers(), http\-\_\-response\-\_\-prepare(), mod\-\_\-simple\-\_\-vhost\-\_\-docroot(), and mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-html().
+
+\hypertarget{structconnection_a3735b8160fe578295774457191c06244}{\index{connection@{connection}!srv\-\_\-socket@{srv\-\_\-socket}}
+\index{srv\-\_\-socket@{srv\-\_\-socket}!connection@{connection}}
+\subsubsection[{srv\-\_\-socket}]{\setlength{\rightskip}{0pt plus 5cm}struct {\bf server\-\_\-socket}$\ast$ connection\-::srv\-\_\-socket}}\label{structconnection_a3735b8160fe578295774457191c06244}
+
+
+Referenced by config\-\_\-check\-\_\-cond\-\_\-nocache(), connection\-\_\-accepted(), connection\-\_\-close(), connection\-\_\-handle\-\_\-fdevent(), connection\-\_\-handle\-\_\-read(), connection\-\_\-handle\-\_\-read\-\_\-ssl(), connection\-\_\-handle\-\_\-shutdown(), http\-\_\-cgi\-\_\-headers(), http\-\_\-response\-\_\-prepare(), and network\-\_\-write\-\_\-chunkqueue().
+
+\hypertarget{structconnection_aaa1da90a3bf944e556dcf5ad7d69a20d}{\index{connection@{connection}!state@{state}}
+\index{state@{state}!connection@{connection}}
+\subsubsection[{state}]{\setlength{\rightskip}{0pt plus 5cm}{\bf connection\-\_\-state\-\_\-t} connection\-::state}}\label{structconnection_aaa1da90a3bf944e556dcf5ad7d69a20d}
+
+
+Referenced by cgi\-\_\-demux\-\_\-response(), connection\-\_\-handle\-\_\-fdevent(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-state(), connection\-\_\-handle\-\_\-response\-\_\-end\-\_\-state(), connection\-\_\-set\-\_\-state(), connection\-\_\-state\-\_\-machine(), http\-\_\-response\-\_\-backend\-\_\-done(), main(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-html(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-text(), scgi\-\_\-demux\-\_\-response(), S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C(), and U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structconnection_a5fa0f8dc5c0b893683b4b092be217f50}{\index{connection@{connection}!traffic\-\_\-limit\-\_\-reached@{traffic\-\_\-limit\-\_\-reached}}
+\index{traffic\-\_\-limit\-\_\-reached@{traffic\-\_\-limit\-\_\-reached}!connection@{connection}}
+\subsubsection[{traffic\-\_\-limit\-\_\-reached}]{\setlength{\rightskip}{0pt plus 5cm}int connection\-::traffic\-\_\-limit\-\_\-reached}}\label{structconnection_a5fa0f8dc5c0b893683b4b092be217f50}
+
+
+Referenced by connection\-\_\-state\-\_\-machine(), main(), and network\-\_\-write\-\_\-chunkqueue().
+
+\hypertarget{structconnection_a92531d3094bf5ce3af5107506702067c}{\index{connection@{connection}!uri@{uri}}
+\index{uri@{uri}!connection@{connection}}
+\subsubsection[{uri}]{\setlength{\rightskip}{0pt plus 5cm}{\bf request\-\_\-uri} connection\-::uri}}\label{structconnection_a92531d3094bf5ce3af5107506702067c}
+
+
+Referenced by cache\-\_\-call\-\_\-lua(), cache\-\_\-parse\-\_\-lua(), cgi\-\_\-demux\-\_\-response(), config\-\_\-check\-\_\-cond\-\_\-nocache(), connection\-\_\-del(), connection\-\_\-handle\-\_\-write\-\_\-prepare(), connection\-\_\-state\-\_\-machine(), deflate\-\_\-compress\-\_\-cleanup(), deflate\-\_\-file\-\_\-to\-\_\-file(), fcgi\-\_\-check\-\_\-extension(), fcgi\-\_\-demux\-\_\-response(), fcgi\-\_\-extension\-\_\-host\-\_\-get(), fcgi\-\_\-handle\-\_\-fdevent(), fcgi\-\_\-recv\-\_\-response(), http\-\_\-cgi\-\_\-headers(), http\-\_\-dirlist\-\_\-append\-\_\-js\-\_\-table\-\_\-resort(), http\-\_\-list\-\_\-directory\-\_\-header(), http\-\_\-response\-\_\-prepare(), http\-\_\-response\-\_\-redirect\-\_\-to\-\_\-directory(), http\-\_\-response\-\_\-send\-\_\-file(), magnet\-\_\-env\-\_\-get\-\_\-buffer\-\_\-by\-\_\-id(), mod\-\_\-auth\-\_\-check\-\_\-basic(), mod\-\_\-auth\-\_\-check\-\_\-digest(), mod\-\_\-auth\-\_\-uri\-\_\-handler(), mod\-\_\-authn\-\_\-gssapi\-\_\-basic(), mod\-\_\-evhost\-\_\-parse\-\_\-host(), mod\-\_\-evhost\-\_\-uri\-\_\-handler(), mod\-\_\-proxy\-\_\-check\-\_\-extension(), mod\-\_\-proxy\-\_\-extension\-\_\-host\-\_\-get(), mod\-\_\-simple\-\_\-vhost\-\_\-docroot(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-html(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-json(), mod\-\_\-status\-\_\-handler(), P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C(), process\-\_\-ssi\-\_\-stmt(), proxy\-\_\-create\-\_\-env(), proxy\-\_\-demux\-\_\-response(), scgi\-\_\-check\-\_\-extension(), scgi\-\_\-demux\-\_\-response(), scgi\-\_\-extension\-\_\-host\-\_\-get(), scgi\-\_\-handle\-\_\-fdevent(), and S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structconnection_a79b48981e863f483d429bf5b6c1af617}{\index{connection@{connection}!write\-\_\-queue@{write\-\_\-queue}}
+\index{write\-\_\-queue@{write\-\_\-queue}!connection@{connection}}
+\subsubsection[{write\-\_\-queue}]{\setlength{\rightskip}{0pt plus 5cm}{\bf chunkqueue}$\ast$ connection\-::write\-\_\-queue}}\label{structconnection_a79b48981e863f483d429bf5b6c1af617}
+
+
+Referenced by cache\-\_\-parse\-\_\-lua(), cgi\-\_\-demux\-\_\-response(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), connection\-\_\-handle\-\_\-errdoc\-\_\-init(), connection\-\_\-handle\-\_\-fdevent(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-error(), connection\-\_\-handle\-\_\-write(), connection\-\_\-handle\-\_\-write\-\_\-prepare(), connection\-\_\-init(), connection\-\_\-response\-\_\-reset(), connection\-\_\-state\-\_\-machine(), connections\-\_\-free(), deflate\-\_\-compress\-\_\-response(), deflate\-\_\-file\-\_\-to\-\_\-buffer(), fcgi\-\_\-demux\-\_\-response(), http\-\_\-chunk\-\_\-append\-\_\-data(), http\-\_\-chunk\-\_\-append\-\_\-file\-\_\-fd\-\_\-range(), http\-\_\-chunk\-\_\-append\-\_\-len(), http\-\_\-chunk\-\_\-append\-\_\-to\-\_\-tempfile(), http\-\_\-chunk\-\_\-close(), http\-\_\-list\-\_\-directory(), http\-\_\-response\-\_\-parse\-\_\-range(), http\-\_\-response\-\_\-prepare(), http\-\_\-response\-\_\-write\-\_\-header(), magnet\-\_\-attach\-\_\-content(), magnet\-\_\-attract(), mod\-\_\-ssi\-\_\-handle\-\_\-request(), mod\-\_\-ssi\-\_\-parse\-\_\-ssi\-\_\-stmt(), mod\-\_\-ssi\-\_\-read\-\_\-fd(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-config(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-statistics(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-html(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-json(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-text(), process\-\_\-ssi\-\_\-stmt(), proxy\-\_\-demux\-\_\-response(), scgi\-\_\-demux\-\_\-response(), and S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structconnection_a56f8f4cad319b1d2e3db5ac960cf09c9}{\index{connection@{connection}!write\-\_\-request\-\_\-ts@{write\-\_\-request\-\_\-ts}}
+\index{write\-\_\-request\-\_\-ts@{write\-\_\-request\-\_\-ts}!connection@{connection}}
+\subsubsection[{write\-\_\-request\-\_\-ts}]{\setlength{\rightskip}{0pt plus 5cm}time\-\_\-t connection\-::write\-\_\-request\-\_\-ts}}\label{structconnection_a56f8f4cad319b1d2e3db5ac960cf09c9}
+
+
+Referenced by connection\-\_\-handle\-\_\-write(), connection\-\_\-state\-\_\-machine(), and main().
+
+
+
+The documentation for this struct was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{base_8h}{base.\-h}\end{DoxyCompactItemize}

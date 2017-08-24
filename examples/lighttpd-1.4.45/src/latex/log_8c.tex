@@ -1,0 +1,248 @@
+\hypertarget{log_8c}{\section{log.\-c File Reference}
+\label{log_8c}\index{log.\-c@{log.\-c}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}base.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}log.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}array.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$sys/types.\-h$>$}\\*
+{\ttfamily \#include $<$errno.\-h$>$}\\*
+{\ttfamily \#include $<$fcntl.\-h$>$}\\*
+{\ttfamily \#include $<$time.\-h$>$}\\*
+{\ttfamily \#include $<$unistd.\-h$>$}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+{\ttfamily \#include $<$stdlib.\-h$>$}\\*
+{\ttfamily \#include $<$stdarg.\-h$>$}\\*
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \hyperlink{log_8c_aad754be6d665417372804239c655d9fa}{log\-\_\-clock\-\_\-gettime\-\_\-realtime} (struct timespec $\ast$ts)
+\item 
+ssize\-\_\-t \hyperlink{log_8c_a95d487ce727355bbb5f734fc5475638e}{write\-\_\-all} (int fd, const void $\ast$buf, size\-\_\-t count)
+\item 
+int \hyperlink{log_8c_a2adecaffbd3a14e09d5e230da7059931}{open\-Dev\-Null} (int fd)
+\item 
+int \hyperlink{log_8c_afb2fe44b0e29fd05827c698713596e06}{open\-\_\-logfile\-\_\-or\-\_\-pipe} (\hyperlink{structserver}{server} $\ast$srv, const char $\ast$logfile)
+\item 
+int \hyperlink{log_8c_adb3091fec36f31b380cb138a61c0d711}{log\-\_\-error\-\_\-open} (\hyperlink{structserver}{server} $\ast$srv)
+\item 
+int \hyperlink{log_8c_ad11f2572e5cd5d840391a3ccbc28256b}{log\-\_\-error\-\_\-cycle} (\hyperlink{structserver}{server} $\ast$srv)
+\item 
+int \hyperlink{log_8c_aa304a08367630e83be4db0df7129c79d}{log\-\_\-error\-\_\-close} (\hyperlink{structserver}{server} $\ast$srv)
+\item 
+static void \hyperlink{log_8c_a3e7d769bc3cf7fbc6fd4ff05ad1ad78b}{log\-\_\-buffer\-\_\-append\-\_\-printf} (\hyperlink{structbuffer}{buffer} $\ast$out, const char $\ast$fmt, va\-\_\-list ap)
+\item 
+static int \hyperlink{log_8c_a3bdaa56c39dc43854a59f8f91fc36d15}{log\-\_\-buffer\-\_\-prepare} (\hyperlink{structbuffer}{buffer} $\ast$b, \hyperlink{structserver}{server} $\ast$srv, const char $\ast$filename, unsigned int line)
+\item 
+static void \hyperlink{log_8c_a9367d69f41517bfe4f53d4eadf88660a}{log\-\_\-write} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structbuffer}{buffer} $\ast$b)
+\item 
+int \hyperlink{log_8c_a9a1b974676ae8a0fdef9081c9475616f}{log\-\_\-error\-\_\-write} (\hyperlink{structserver}{server} $\ast$srv, const char $\ast$filename, unsigned int line, const char $\ast$fmt,...)
+\item 
+int \hyperlink{log_8c_a186c081844ba3b347314217212e6790d}{log\-\_\-error\-\_\-write\-\_\-multiline\-\_\-buffer} (\hyperlink{structserver}{server} $\ast$srv, const char $\ast$filename, unsigned int line, \hyperlink{structbuffer}{buffer} $\ast$multiline, const char $\ast$fmt,...)
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\hypertarget{log_8c_a3e7d769bc3cf7fbc6fd4ff05ad1ad78b}{\index{log.\-c@{log.\-c}!log\-\_\-buffer\-\_\-append\-\_\-printf@{log\-\_\-buffer\-\_\-append\-\_\-printf}}
+\index{log\-\_\-buffer\-\_\-append\-\_\-printf@{log\-\_\-buffer\-\_\-append\-\_\-printf}!log.c@{log.\-c}}
+\subsubsection[{log\-\_\-buffer\-\_\-append\-\_\-printf}]{\setlength{\rightskip}{0pt plus 5cm}static void log\-\_\-buffer\-\_\-append\-\_\-printf (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{out, }
+\item[{const char $\ast$}]{fmt, }
+\item[{va\-\_\-list}]{ap}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{log_8c_a3e7d769bc3cf7fbc6fd4ff05ad1ad78b}
+
+
+References buffer\-\_\-append\-\_\-int(), buffer\-\_\-append\-\_\-string\-\_\-c\-\_\-escaped(), buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-append\-\_\-uint\-\_\-hex(), C\-O\-N\-S\-T\-\_\-\-B\-U\-F\-\_\-\-L\-E\-N, and C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N.
+
+
+
+Referenced by log\-\_\-error\-\_\-write(), and log\-\_\-error\-\_\-write\-\_\-multiline\-\_\-buffer().
+
+\hypertarget{log_8c_a3bdaa56c39dc43854a59f8f91fc36d15}{\index{log.\-c@{log.\-c}!log\-\_\-buffer\-\_\-prepare@{log\-\_\-buffer\-\_\-prepare}}
+\index{log\-\_\-buffer\-\_\-prepare@{log\-\_\-buffer\-\_\-prepare}!log.c@{log.\-c}}
+\subsubsection[{log\-\_\-buffer\-\_\-prepare}]{\setlength{\rightskip}{0pt plus 5cm}static int log\-\_\-buffer\-\_\-prepare (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{b, }
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{const char $\ast$}]{filename, }
+\item[{unsigned int}]{line}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{log_8c_a3bdaa56c39dc43854a59f8f91fc36d15}
+
+
+References buffer\-\_\-append\-\_\-int(), buffer\-\_\-append\-\_\-strftime(), buffer\-\_\-append\-\_\-string(), buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-copy\-\_\-buffer(), buffer\-\_\-copy\-\_\-string\-\_\-len(), buffer\-\_\-string\-\_\-prepare\-\_\-copy(), C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, server\-::cur\-\_\-ts, server\-::errorlog\-\_\-fd, server\-::errorlog\-\_\-mode, server\-::last\-\_\-generated\-\_\-debug\-\_\-ts, and server\-::ts\-\_\-debug\-\_\-str.
+
+
+
+Referenced by log\-\_\-error\-\_\-write(), and log\-\_\-error\-\_\-write\-\_\-multiline\-\_\-buffer().
+
+\hypertarget{log_8c_aad754be6d665417372804239c655d9fa}{\index{log.\-c@{log.\-c}!log\-\_\-clock\-\_\-gettime\-\_\-realtime@{log\-\_\-clock\-\_\-gettime\-\_\-realtime}}
+\index{log\-\_\-clock\-\_\-gettime\-\_\-realtime@{log\-\_\-clock\-\_\-gettime\-\_\-realtime}!log.c@{log.\-c}}
+\subsubsection[{log\-\_\-clock\-\_\-gettime\-\_\-realtime}]{\setlength{\rightskip}{0pt plus 5cm}int log\-\_\-clock\-\_\-gettime\-\_\-realtime (
+\begin{DoxyParamCaption}
+\item[{struct timespec $\ast$}]{ts}
+\end{DoxyParamCaption}
+)}}\label{log_8c_aad754be6d665417372804239c655d9fa}
+
+
+Referenced by connection\-\_\-handle\-\_\-read\-\_\-state(), connection\-\_\-state\-\_\-machine(), and R\-E\-Q\-U\-E\-S\-T\-D\-O\-N\-E\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{log_8c_aa304a08367630e83be4db0df7129c79d}{\index{log.\-c@{log.\-c}!log\-\_\-error\-\_\-close@{log\-\_\-error\-\_\-close}}
+\index{log\-\_\-error\-\_\-close@{log\-\_\-error\-\_\-close}!log.c@{log.\-c}}
+\subsubsection[{log\-\_\-error\-\_\-close}]{\setlength{\rightskip}{0pt plus 5cm}int log\-\_\-error\-\_\-close (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv}
+\end{DoxyParamCaption}
+)}}\label{log_8c_aa304a08367630e83be4db0df7129c79d}
+
+
+References server\-::errorlog\-\_\-fd, and server\-::errorlog\-\_\-mode.
+
+
+
+Referenced by main().
+
+\hypertarget{log_8c_ad11f2572e5cd5d840391a3ccbc28256b}{\index{log.\-c@{log.\-c}!log\-\_\-error\-\_\-cycle@{log\-\_\-error\-\_\-cycle}}
+\index{log\-\_\-error\-\_\-cycle@{log\-\_\-error\-\_\-cycle}!log.c@{log.\-c}}
+\subsubsection[{log\-\_\-error\-\_\-cycle}]{\setlength{\rightskip}{0pt plus 5cm}int log\-\_\-error\-\_\-cycle (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv}
+\end{DoxyParamCaption}
+)}}\label{log_8c_ad11f2572e5cd5d840391a3ccbc28256b}
+open the errorlog
+
+if the open failed, report to the user and die if no filename is given, use syslog instead 
+
+References server\-::errorlog\-\_\-fd, server\-\_\-config\-::errorlog\-\_\-file, server\-::errorlog\-\_\-mode, fd\-\_\-close\-\_\-on\-\_\-exec(), log\-\_\-error\-\_\-write(), open\-\_\-logfile\-\_\-or\-\_\-pipe(), buffer\-::ptr, and server\-::srvconf.
+
+
+
+Referenced by main().
+
+\hypertarget{log_8c_adb3091fec36f31b380cb138a61c0d711}{\index{log.\-c@{log.\-c}!log\-\_\-error\-\_\-open@{log\-\_\-error\-\_\-open}}
+\index{log\-\_\-error\-\_\-open@{log\-\_\-error\-\_\-open}!log.c@{log.\-c}}
+\subsubsection[{log\-\_\-error\-\_\-open}]{\setlength{\rightskip}{0pt plus 5cm}int log\-\_\-error\-\_\-open (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv}
+\end{DoxyParamCaption}
+)}}\label{log_8c_adb3091fec36f31b380cb138a61c0d711}
+open the errorlog
+
+we have 4 possibilities\-:
+\begin{DoxyItemize}
+\item stderr (default)
+\item syslog
+\item logfile
+\item pipe
+\end{DoxyItemize}
+
+if the open failed, report to the user and die 
+
+References server\-\_\-config\-::breakagelog\-\_\-file, buffer\-\_\-string\-\_\-is\-\_\-empty(), server\-\_\-config\-::dont\-\_\-daemonize, server\-::errorlog\-\_\-fd, server\-\_\-config\-::errorlog\-\_\-file, server\-::errorlog\-\_\-mode, server\-\_\-config\-::errorlog\-\_\-use\-\_\-syslog, fd\-\_\-close\-\_\-on\-\_\-exec(), log\-\_\-error\-\_\-write(), open\-\_\-logfile\-\_\-or\-\_\-pipe(), open\-Dev\-Null(), buffer\-::ptr, and server\-::srvconf.
+
+
+
+Referenced by main().
+
+\hypertarget{log_8c_a9a1b974676ae8a0fdef9081c9475616f}{\index{log.\-c@{log.\-c}!log\-\_\-error\-\_\-write@{log\-\_\-error\-\_\-write}}
+\index{log\-\_\-error\-\_\-write@{log\-\_\-error\-\_\-write}!log.c@{log.\-c}}
+\subsubsection[{log\-\_\-error\-\_\-write}]{\setlength{\rightskip}{0pt plus 5cm}int log\-\_\-error\-\_\-write (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{const char $\ast$}]{filename, }
+\item[{unsigned int}]{line, }
+\item[{const char $\ast$}]{fmt, }
+\item[{}]{...}
+\end{DoxyParamCaption}
+)}}\label{log_8c_a9a1b974676ae8a0fdef9081c9475616f}
+
+
+References server\-::errorlog\-\_\-buf, log\-\_\-buffer\-\_\-append\-\_\-printf(), log\-\_\-buffer\-\_\-prepare(), and log\-\_\-write().
+
+
+
+Referenced by accesslog\-\_\-parse\-\_\-format(), accesslog\-\_\-write\-\_\-all(), build\-\_\-doc\-\_\-root(), cache\-\_\-parse\-\_\-lua(), cgi\-\_\-connection\-\_\-close(), cgi\-\_\-create\-\_\-env(), cgi\-\_\-demux\-\_\-response(), cgi\-\_\-handle\-\_\-fdevent(), cgi\-\_\-handle\-\_\-fdevent\-\_\-send(), cgi\-\_\-recv\-\_\-response(), cgi\-\_\-write\-\_\-file\-\_\-chunk\-\_\-mmap(), cgi\-\_\-write\-\_\-request(), chunkqueue\-\_\-append\-\_\-mem\-\_\-to\-\_\-tempfile(), config\-\_\-addrbuf\-\_\-eq\-\_\-remote\-\_\-ip\-\_\-mask(), config\-\_\-addrstr\-\_\-eq\-\_\-remote\-\_\-ip\-\_\-mask(), config\-\_\-check\-\_\-cond(), config\-\_\-check\-\_\-cond\-\_\-cached(), config\-\_\-check\-\_\-cond\-\_\-nocache(), config\-\_\-insert(), config\-\_\-insert\-\_\-values\-\_\-internal(), config\-\_\-parse(), config\-\_\-parse\-\_\-cmd(), config\-\_\-parse\-\_\-file(), config\-\_\-parse\-\_\-file\-\_\-stream(), config\-\_\-set\-\_\-defaults(), config\-\_\-tokenizer(), connection\-\_\-accept(), connection\-\_\-accepted(), connection\-\_\-close(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), connection\-\_\-handle\-\_\-fdevent(), connection\-\_\-handle\-\_\-read(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-chunked(), connection\-\_\-handle\-\_\-read\-\_\-ssl(), connection\-\_\-handle\-\_\-read\-\_\-state(), connection\-\_\-handle\-\_\-shutdown(), connection\-\_\-handle\-\_\-write(), connection\-\_\-handle\-\_\-write\-\_\-prepare(), connection\-\_\-state\-\_\-machine(), deflate\-\_\-compress\-\_\-cleanup(), deflate\-\_\-compress\-\_\-response(), deflate\-\_\-file\-\_\-to\-\_\-buffer(), deflate\-\_\-file\-\_\-to\-\_\-file(), fastcgi\-\_\-get\-\_\-packet(), fcgi\-\_\-backend\-\_\-close(), fcgi\-\_\-check\-\_\-extension(), fcgi\-\_\-demux\-\_\-response(), fcgi\-\_\-establish\-\_\-connection(), fcgi\-\_\-extension\-\_\-host\-\_\-get(), fcgi\-\_\-handle\-\_\-fdevent(), fcgi\-\_\-host\-\_\-disable(), fcgi\-\_\-recv\-\_\-response(), fcgi\-\_\-response\-\_\-parse(), fcgi\-\_\-restart\-\_\-dead\-\_\-procs(), fcgi\-\_\-stdin\-\_\-append(), fcgi\-\_\-write\-\_\-request(), fdevent\-\_\-freebsd\-\_\-kqueue\-\_\-init(), fdevent\-\_\-init(), fdevent\-\_\-libev\-\_\-init(), fdevent\-\_\-linux\-\_\-sysepoll\-\_\-init(), fdevent\-\_\-poll\-\_\-init(), fdevent\-\_\-sched\-\_\-run(), fdevent\-\_\-solaris\-\_\-devpoll\-\_\-init(), fdevent\-\_\-solaris\-\_\-port\-\_\-init(), http\-\_\-list\-\_\-directory(), http\-\_\-request\-\_\-parse(), http\-\_\-response\-\_\-prepare(), http\-\_\-response\-\_\-redirect\-\_\-to\-\_\-directory(), http\-\_\-response\-\_\-send\-\_\-file(), http\-\_\-response\-\_\-write\-\_\-header(), http\-\_\-response\-\_\-xsendfile(), log\-\_\-error\-\_\-cycle(), log\-\_\-error\-\_\-open(), magnet\-\_\-atpanic(), magnet\-\_\-attract(), magnet\-\_\-print(), main(), mod\-\_\-auth\-\_\-check\-\_\-basic(), mod\-\_\-auth\-\_\-check\-\_\-digest(), mod\-\_\-auth\-\_\-require\-\_\-parse(), mod\-\_\-authn\-\_\-file\-\_\-htdigest\-\_\-get(), mod\-\_\-authn\-\_\-file\-\_\-htpasswd\-\_\-get(), mod\-\_\-authn\-\_\-gssapi\-\_\-basic(), mod\-\_\-authn\-\_\-gssapi\-\_\-check\-\_\-spnego(), mod\-\_\-authn\-\_\-gssapi\-\_\-create\-\_\-krb5\-\_\-ccache(), mod\-\_\-authn\-\_\-gssapi\-\_\-log\-\_\-gss\-\_\-error(), mod\-\_\-authn\-\_\-gssapi\-\_\-log\-\_\-krb5\-\_\-error(), mod\-\_\-authn\-\_\-gssapi\-\_\-verify\-\_\-krb5\-\_\-init\-\_\-creds(), mod\-\_\-authn\-\_\-ldap\-\_\-basic(), mod\-\_\-authn\-\_\-ldap\-\_\-err(), mod\-\_\-authn\-\_\-ldap\-\_\-get\-\_\-dn(), mod\-\_\-authn\-\_\-ldap\-\_\-host\-\_\-init(), mod\-\_\-authn\-\_\-ldap\-\_\-search(), mod\-\_\-authn\-\_\-mysql\-\_\-query(), mod\-\_\-authn\-\_\-mysql\-\_\-result(), mod\-\_\-authn\-\_\-mysql\-\_\-sock\-\_\-connect(), mod\-\_\-deflate\-\_\-file\-\_\-chunk(), mod\-\_\-evhost\-\_\-uri\-\_\-handler(), mod\-\_\-expire\-\_\-get\-\_\-offset(), mod\-\_\-mysql\-\_\-vhost\-\_\-connection\-\_\-data(), mod\-\_\-proxy\-\_\-check\-\_\-extension(), mod\-\_\-proxy\-\_\-extension\-\_\-host\-\_\-get(), mod\-\_\-redirect\-\_\-uri\-\_\-handler(), mod\-\_\-rrd\-\_\-create\-\_\-pipe(), mod\-\_\-rrdtool\-\_\-create\-\_\-rrd(), mod\-\_\-ssi\-\_\-process\-\_\-file(), mod\-\_\-ssi\-\_\-read\-\_\-fd(), network\-\_\-init(), network\-\_\-open\-\_\-file\-\_\-chunk(), network\-\_\-server\-\_\-handle\-\_\-fdevent(), network\-\_\-server\-\_\-init(), network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-no\-\_\-mmap(), network\-\_\-write\-\_\-mem\-\_\-chunk(), open\-\_\-logfile\-\_\-or\-\_\-pipe(), parse\-\_\-config\-\_\-entry(), pcre\-\_\-keyvalue\-\_\-buffer\-\_\-append(), P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C(), plugins\-\_\-call\-\_\-init(), plugins\-\_\-load(), process\-\_\-ssi\-\_\-stmt(), proxy\-\_\-create\-\_\-env(), proxy\-\_\-demux\-\_\-response(), proxy\-\_\-establish\-\_\-connection(), proxy\-\_\-handle\-\_\-fdevent(), proxy\-\_\-send\-\_\-request(), proxy\-\_\-write\-\_\-request(), remove\-\_\-pid\-\_\-file(), scgi\-\_\-backend\-\_\-close(), scgi\-\_\-check\-\_\-extension(), scgi\-\_\-demux\-\_\-response(), scgi\-\_\-establish\-\_\-connection(), scgi\-\_\-extension\-\_\-host\-\_\-get(), scgi\-\_\-handle\-\_\-fdevent(), scgi\-\_\-proclist\-\_\-sort\-\_\-down(), scgi\-\_\-proclist\-\_\-sort\-\_\-up(), scgi\-\_\-recv\-\_\-response(), scgi\-\_\-restart\-\_\-dead\-\_\-procs(), scgi\-\_\-send\-\_\-request(), scgi\-\_\-write\-\_\-request(), secdl\-\_\-verify\-\_\-mac(), S\-E\-R\-V\-E\-R\-\_\-\-F\-U\-N\-C(), server\-\_\-oneshot\-\_\-getsock(), server\-\_\-oneshot\-\_\-init(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), S\-I\-G\-H\-U\-P\-\_\-\-F\-U\-N\-C(), ssi\-\_\-eval\-\_\-expr(), ssi\-\_\-expr\-\_\-tokenizer(), stat\-\_\-cache\-\_\-get\-\_\-entry(), S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C(), T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C(), U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C(), and webdav\-\_\-copy\-\_\-file().
+
+\hypertarget{log_8c_a186c081844ba3b347314217212e6790d}{\index{log.\-c@{log.\-c}!log\-\_\-error\-\_\-write\-\_\-multiline\-\_\-buffer@{log\-\_\-error\-\_\-write\-\_\-multiline\-\_\-buffer}}
+\index{log\-\_\-error\-\_\-write\-\_\-multiline\-\_\-buffer@{log\-\_\-error\-\_\-write\-\_\-multiline\-\_\-buffer}!log.c@{log.\-c}}
+\subsubsection[{log\-\_\-error\-\_\-write\-\_\-multiline\-\_\-buffer}]{\setlength{\rightskip}{0pt plus 5cm}int log\-\_\-error\-\_\-write\-\_\-multiline\-\_\-buffer (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{const char $\ast$}]{filename, }
+\item[{unsigned int}]{line, }
+\item[{{\bf buffer} $\ast$}]{multiline, }
+\item[{const char $\ast$}]{fmt, }
+\item[{}]{...}
+\end{DoxyParamCaption}
+)}}\label{log_8c_a186c081844ba3b347314217212e6790d}
+
+
+References buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-string\-\_\-is\-\_\-empty(), buffer\-\_\-string\-\_\-length(), buffer\-\_\-string\-\_\-set\-\_\-length(), server\-::errorlog\-\_\-buf, log\-\_\-buffer\-\_\-append\-\_\-printf(), log\-\_\-buffer\-\_\-prepare(), log\-\_\-write(), and buffer\-::ptr.
+
+
+
+Referenced by fcgi\-\_\-demux\-\_\-response().
+
+\hypertarget{log_8c_a9367d69f41517bfe4f53d4eadf88660a}{\index{log.\-c@{log.\-c}!log\-\_\-write@{log\-\_\-write}}
+\index{log\-\_\-write@{log\-\_\-write}!log.c@{log.\-c}}
+\subsubsection[{log\-\_\-write}]{\setlength{\rightskip}{0pt plus 5cm}static void log\-\_\-write (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf buffer} $\ast$}]{b}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{log_8c_a9367d69f41517bfe4f53d4eadf88660a}
+
+
+References buffer\-\_\-append\-\_\-string\-\_\-len(), C\-O\-N\-S\-T\-\_\-\-B\-U\-F\-\_\-\-L\-E\-N, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, server\-::errorlog\-\_\-fd, server\-::errorlog\-\_\-mode, buffer\-::ptr, and write\-\_\-all().
+
+
+
+Referenced by log\-\_\-error\-\_\-write(), and log\-\_\-error\-\_\-write\-\_\-multiline\-\_\-buffer().
+
+\hypertarget{log_8c_afb2fe44b0e29fd05827c698713596e06}{\index{log.\-c@{log.\-c}!open\-\_\-logfile\-\_\-or\-\_\-pipe@{open\-\_\-logfile\-\_\-or\-\_\-pipe}}
+\index{open\-\_\-logfile\-\_\-or\-\_\-pipe@{open\-\_\-logfile\-\_\-or\-\_\-pipe}!log.c@{log.\-c}}
+\subsubsection[{open\-\_\-logfile\-\_\-or\-\_\-pipe}]{\setlength{\rightskip}{0pt plus 5cm}int open\-\_\-logfile\-\_\-or\-\_\-pipe (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{const char $\ast$}]{logfile}
+\end{DoxyParamCaption}
+)}}\label{log_8c_afb2fe44b0e29fd05827c698713596e06}
+
+
+References fd\-\_\-close\-\_\-on\-\_\-exec(), log\-\_\-error\-\_\-write(), O\-\_\-\-L\-A\-R\-G\-E\-F\-I\-L\-E, and open\-Dev\-Null().
+
+
+
+Referenced by log\-\_\-error\-\_\-cycle(), log\-\_\-error\-\_\-open(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{log_8c_a2adecaffbd3a14e09d5e230da7059931}{\index{log.\-c@{log.\-c}!open\-Dev\-Null@{open\-Dev\-Null}}
+\index{open\-Dev\-Null@{open\-Dev\-Null}!log.c@{log.\-c}}
+\subsubsection[{open\-Dev\-Null}]{\setlength{\rightskip}{0pt plus 5cm}int open\-Dev\-Null (
+\begin{DoxyParamCaption}
+\item[{int}]{fd}
+\end{DoxyParamCaption}
+)}}\label{log_8c_a2adecaffbd3a14e09d5e230da7059931}
+
+
+Referenced by log\-\_\-error\-\_\-open(), main(), and open\-\_\-logfile\-\_\-or\-\_\-pipe().
+
+\hypertarget{log_8c_a95d487ce727355bbb5f734fc5475638e}{\index{log.\-c@{log.\-c}!write\-\_\-all@{write\-\_\-all}}
+\index{write\-\_\-all@{write\-\_\-all}!log.c@{log.\-c}}
+\subsubsection[{write\-\_\-all}]{\setlength{\rightskip}{0pt plus 5cm}ssize\-\_\-t write\-\_\-all (
+\begin{DoxyParamCaption}
+\item[{int}]{fd, }
+\item[{const void $\ast$}]{buf, }
+\item[{size\-\_\-t}]{count}
+\end{DoxyParamCaption}
+)}}\label{log_8c_a95d487ce727355bbb5f734fc5475638e}
+
+
+References force\-\_\-assert.
+
+
+
+Referenced by accesslog\-\_\-write\-\_\-all(), log\-\_\-write(), main(), show\-\_\-help(), and show\-\_\-version().
+

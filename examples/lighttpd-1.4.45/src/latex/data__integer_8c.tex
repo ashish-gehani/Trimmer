@@ -1,0 +1,118 @@
+\hypertarget{data__integer_8c}{\section{data\-\_\-integer.\-c File Reference}
+\label{data__integer_8c}\index{data\-\_\-integer.\-c@{data\-\_\-integer.\-c}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}array.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$stdlib.\-h$>$}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{structdata__unset}{data\-\_\-unset} $\ast$ \hyperlink{data__integer_8c_a55a9f450fb4f544aa0108ce0731b24a3}{data\-\_\-integer\-\_\-copy} (const \hyperlink{structdata__unset}{data\-\_\-unset} $\ast$s)
+\item 
+static void \hyperlink{data__integer_8c_a49ef9770b49977e032c6addd9c5e7a7a}{data\-\_\-integer\-\_\-free} (\hyperlink{structdata__unset}{data\-\_\-unset} $\ast$d)
+\item 
+static void \hyperlink{data__integer_8c_ae3b80ca651b61110c07bd8796ec3c7ca}{data\-\_\-integer\-\_\-reset} (\hyperlink{structdata__unset}{data\-\_\-unset} $\ast$d)
+\item 
+static int \hyperlink{data__integer_8c_aa9707c7928bbfafae86c649a90b346a3}{data\-\_\-integer\-\_\-insert\-\_\-dup} (\hyperlink{structdata__unset}{data\-\_\-unset} $\ast$dst, \hyperlink{structdata__unset}{data\-\_\-unset} $\ast$src)
+\item 
+static void \hyperlink{data__integer_8c_a99263ab3b9028c50fbe6a761faea9f19}{data\-\_\-integer\-\_\-print} (const \hyperlink{structdata__unset}{data\-\_\-unset} $\ast$d, int depth)
+\item 
+\hyperlink{structdata__integer}{data\-\_\-integer} $\ast$ \hyperlink{data__integer_8c_a458d1ef2c3aef7345a6be3a30821d6ae}{data\-\_\-integer\-\_\-init} (void)
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\hypertarget{data__integer_8c_a55a9f450fb4f544aa0108ce0731b24a3}{\index{data\-\_\-integer.\-c@{data\-\_\-integer.\-c}!data\-\_\-integer\-\_\-copy@{data\-\_\-integer\-\_\-copy}}
+\index{data\-\_\-integer\-\_\-copy@{data\-\_\-integer\-\_\-copy}!data_integer.c@{data\-\_\-integer.\-c}}
+\subsubsection[{data\-\_\-integer\-\_\-copy}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf data\-\_\-unset}$\ast$ data\-\_\-integer\-\_\-copy (
+\begin{DoxyParamCaption}
+\item[{const {\bf data\-\_\-unset} $\ast$}]{s}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{data__integer_8c_a55a9f450fb4f544aa0108ce0731b24a3}
+
+
+References buffer\-\_\-copy\-\_\-buffer(), data\-\_\-integer\-\_\-init(), and data\-\_\-integer\-::value.
+
+
+
+Referenced by data\-\_\-integer\-\_\-init().
+
+\hypertarget{data__integer_8c_a49ef9770b49977e032c6addd9c5e7a7a}{\index{data\-\_\-integer.\-c@{data\-\_\-integer.\-c}!data\-\_\-integer\-\_\-free@{data\-\_\-integer\-\_\-free}}
+\index{data\-\_\-integer\-\_\-free@{data\-\_\-integer\-\_\-free}!data_integer.c@{data\-\_\-integer.\-c}}
+\subsubsection[{data\-\_\-integer\-\_\-free}]{\setlength{\rightskip}{0pt plus 5cm}static void data\-\_\-integer\-\_\-free (
+\begin{DoxyParamCaption}
+\item[{{\bf data\-\_\-unset} $\ast$}]{d}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{data__integer_8c_a49ef9770b49977e032c6addd9c5e7a7a}
+
+
+References buffer\-\_\-free().
+
+
+
+Referenced by data\-\_\-integer\-\_\-init().
+
+\hypertarget{data__integer_8c_a458d1ef2c3aef7345a6be3a30821d6ae}{\index{data\-\_\-integer.\-c@{data\-\_\-integer.\-c}!data\-\_\-integer\-\_\-init@{data\-\_\-integer\-\_\-init}}
+\index{data\-\_\-integer\-\_\-init@{data\-\_\-integer\-\_\-init}!data_integer.c@{data\-\_\-integer.\-c}}
+\subsubsection[{data\-\_\-integer\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}{\bf data\-\_\-integer}$\ast$ data\-\_\-integer\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)}}\label{data__integer_8c_a458d1ef2c3aef7345a6be3a30821d6ae}
+
+
+References buffer\-\_\-init(), data\-\_\-integer\-\_\-copy(), data\-\_\-integer\-\_\-free(), data\-\_\-integer\-\_\-insert\-\_\-dup(), data\-\_\-integer\-\_\-print(), data\-\_\-integer\-\_\-reset(), force\-\_\-assert, T\-Y\-P\-E\-\_\-\-I\-N\-T\-E\-G\-E\-R, and data\-\_\-integer\-::value.
+
+
+
+Referenced by config\-\_\-read(), data\-\_\-integer\-\_\-copy(), status\-\_\-counter\-\_\-get\-\_\-counter(), and yy\-\_\-reduce().
+
+\hypertarget{data__integer_8c_aa9707c7928bbfafae86c649a90b346a3}{\index{data\-\_\-integer.\-c@{data\-\_\-integer.\-c}!data\-\_\-integer\-\_\-insert\-\_\-dup@{data\-\_\-integer\-\_\-insert\-\_\-dup}}
+\index{data\-\_\-integer\-\_\-insert\-\_\-dup@{data\-\_\-integer\-\_\-insert\-\_\-dup}!data_integer.c@{data\-\_\-integer.\-c}}
+\subsubsection[{data\-\_\-integer\-\_\-insert\-\_\-dup}]{\setlength{\rightskip}{0pt plus 5cm}static int data\-\_\-integer\-\_\-insert\-\_\-dup (
+\begin{DoxyParamCaption}
+\item[{{\bf data\-\_\-unset} $\ast$}]{dst, }
+\item[{{\bf data\-\_\-unset} $\ast$}]{src}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{data__integer_8c_aa9707c7928bbfafae86c649a90b346a3}
+
+
+References U\-N\-U\-S\-E\-D.
+
+
+
+Referenced by data\-\_\-integer\-\_\-init().
+
+\hypertarget{data__integer_8c_a99263ab3b9028c50fbe6a761faea9f19}{\index{data\-\_\-integer.\-c@{data\-\_\-integer.\-c}!data\-\_\-integer\-\_\-print@{data\-\_\-integer\-\_\-print}}
+\index{data\-\_\-integer\-\_\-print@{data\-\_\-integer\-\_\-print}!data_integer.c@{data\-\_\-integer.\-c}}
+\subsubsection[{data\-\_\-integer\-\_\-print}]{\setlength{\rightskip}{0pt plus 5cm}static void data\-\_\-integer\-\_\-print (
+\begin{DoxyParamCaption}
+\item[{const {\bf data\-\_\-unset} $\ast$}]{d, }
+\item[{int}]{depth}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{data__integer_8c_a99263ab3b9028c50fbe6a761faea9f19}
+
+
+References U\-N\-U\-S\-E\-D, and data\-\_\-integer\-::value.
+
+
+
+Referenced by data\-\_\-integer\-\_\-init().
+
+\hypertarget{data__integer_8c_ae3b80ca651b61110c07bd8796ec3c7ca}{\index{data\-\_\-integer.\-c@{data\-\_\-integer.\-c}!data\-\_\-integer\-\_\-reset@{data\-\_\-integer\-\_\-reset}}
+\index{data\-\_\-integer\-\_\-reset@{data\-\_\-integer\-\_\-reset}!data_integer.c@{data\-\_\-integer.\-c}}
+\subsubsection[{data\-\_\-integer\-\_\-reset}]{\setlength{\rightskip}{0pt plus 5cm}static void data\-\_\-integer\-\_\-reset (
+\begin{DoxyParamCaption}
+\item[{{\bf data\-\_\-unset} $\ast$}]{d}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{data__integer_8c_ae3b80ca651b61110c07bd8796ec3c7ca}
+
+
+References buffer\-\_\-reset(), and data\-\_\-integer\-::value.
+
+
+
+Referenced by data\-\_\-integer\-\_\-init().
+

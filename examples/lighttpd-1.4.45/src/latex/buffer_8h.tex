@@ -1,0 +1,1047 @@
+\hypertarget{buffer_8h}{\section{buffer.\-h File Reference}
+\label{buffer_8h}\index{buffer.\-h@{buffer.\-h}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}settings.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$stdlib.\-h$>$}\\*
+{\ttfamily \#include $<$sys/types.\-h$>$}\\*
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$time.\-h$>$}\\*
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structbuffer}{buffer}
+\end{DoxyCompactItemize}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{buffer_8h_a8aed375a78edb9a44e2da2c43f85313d}{L\-I\-\_\-\-I\-T\-O\-S\-T\-R\-I\-N\-G\-\_\-\-L\-E\-N\-G\-T\-H}~(2 + (8 $\ast$ sizeof(intmax\-\_\-t) $\ast$ 31 + 99) / 100)
+\item 
+\#define \hyperlink{buffer_8h_a9c340060c195fff1c69c3a042d01a722}{B\-U\-F\-F\-E\-R\-\_\-\-A\-P\-P\-E\-N\-D\-\_\-\-S\-T\-R\-I\-N\-G\-\_\-\-C\-O\-N\-S\-T}(x, y)~\hyperlink{buffer_8h_a0321a93876dd9a68f52ace5ef8176c67}{buffer\-\_\-append\-\_\-string\-\_\-len}(x, y, sizeof(y) -\/ 1)
+\item 
+\#define \hyperlink{buffer_8h_a7882640825e1bb5da553050f02a37e0d}{B\-U\-F\-F\-E\-R\-\_\-\-C\-O\-P\-Y\-\_\-\-S\-T\-R\-I\-N\-G\-\_\-\-C\-O\-N\-S\-T}(x, y)~\hyperlink{buffer_8h_a145ed23cd298e8437d7fa7b7be701cdb}{buffer\-\_\-copy\-\_\-string\-\_\-len}(x, y, sizeof(y) -\/ 1)
+\item 
+\#define \hyperlink{buffer_8h_a4b8f196adbc4c0f8ad77828c9b20c779}{C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N}(x)~x, (x) ? sizeof(x) -\/ 1 \-: 0
+\item 
+\#define \hyperlink{buffer_8h_aeebf4b463702b90297a690dbade7e13a}{C\-O\-N\-S\-T\-\_\-\-B\-U\-F\-\_\-\-L\-E\-N}(x)~((x) ? (x)-\/$>$ptr \-: N\-U\-L\-L), \hyperlink{buffer_8h_aa069cb6c33241e7389d3b63e70a18b45}{buffer\-\_\-string\-\_\-length}(x)
+\item 
+\#define \hyperlink{buffer_8h_ac478d8f4bb34bf243bfe01ab8277250c}{force\-\_\-assert}(x)~do \{ if (!(x)) \hyperlink{buffer_8h_a93df32ef1d0729ca2daa1c587c0dd32d}{log\-\_\-failed\-\_\-assert}(\-\_\-\-\_\-\-F\-I\-L\-E\-\_\-\-\_\-, \-\_\-\-\_\-\-L\-I\-N\-E\-\_\-\-\_\-, \char`\"{}assertion failed\-: \char`\"{} \#x); \} while(0)
+\item 
+\#define \hyperlink{buffer_8h_af9f70d72699fb3ad59068f771148460d}{S\-E\-G\-F\-A\-U\-L\-T}()~\hyperlink{buffer_8h_a93df32ef1d0729ca2daa1c587c0dd32d}{log\-\_\-failed\-\_\-assert}(\-\_\-\-\_\-\-F\-I\-L\-E\-\_\-\-\_\-, \-\_\-\-\_\-\-L\-I\-N\-E\-\_\-\-\_\-, \char`\"{}aborted\char`\"{});
+\end{DoxyCompactItemize}
+\subsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \hyperlink{buffer_8h_a13c23faf3a5a4a05713f31c26f3ce3bc}{buffer\-\_\-encoding\-\_\-t} \{ \\*
+\hyperlink{buffer_8h_a13c23faf3a5a4a05713f31c26f3ce3bcacd38a424e143474344b4fc23315a879e}{E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-R\-E\-L\-\_\-\-U\-R\-I}, 
+\hyperlink{buffer_8h_a13c23faf3a5a4a05713f31c26f3ce3bca21dbe97ed3d9f2075a74774351f815b5}{E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-R\-E\-L\-\_\-\-U\-R\-I\-\_\-\-P\-A\-R\-T}, 
+\hyperlink{buffer_8h_a13c23faf3a5a4a05713f31c26f3ce3bca2581e2c56b82d392c656df540e29bc8c}{E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-H\-T\-M\-L}, 
+\hyperlink{buffer_8h_a13c23faf3a5a4a05713f31c26f3ce3bca796366822b39758889a58d8dedcc9651}{E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-M\-I\-N\-I\-M\-A\-L\-\_\-\-X\-M\-L}, 
+\\*
+\hyperlink{buffer_8h_a13c23faf3a5a4a05713f31c26f3ce3bcaedec5b1f9c41daa169412f11f5b94573}{E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-H\-E\-X}, 
+\hyperlink{buffer_8h_a13c23faf3a5a4a05713f31c26f3ce3bcaa5c1bcaf0528495cfa785683a7f79ee5}{E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-H\-T\-T\-P\-\_\-\-H\-E\-A\-D\-E\-R}
+ \}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{structbuffer}{buffer} $\ast$ \hyperlink{buffer_8h_af447519a12f8488d289adedb31c38086}{buffer\-\_\-init} (void)
+\item 
+\hyperlink{structbuffer}{buffer} $\ast$ \hyperlink{buffer_8h_a970d9abb211c921d516c5f9933c73556}{buffer\-\_\-init\-\_\-buffer} (const \hyperlink{structbuffer}{buffer} $\ast$src)
+\item 
+\hyperlink{structbuffer}{buffer} $\ast$ \hyperlink{buffer_8h_adbde61c285ec5d04c598f02bad81702c}{buffer\-\_\-init\-\_\-string} (const char $\ast$str)
+\item 
+void \hyperlink{buffer_8h_ad591d3747a0ec8cf335e3538b0e640b4}{buffer\-\_\-free} (\hyperlink{structbuffer}{buffer} $\ast$b)
+\item 
+void \hyperlink{buffer_8h_a21c0cf8209c5e356ed4bc97e1f7eba6f}{buffer\-\_\-reset} (\hyperlink{structbuffer}{buffer} $\ast$b)
+\item 
+void \hyperlink{buffer_8h_a522f9198ee197d840672c4b6012c76be}{buffer\-\_\-move} (\hyperlink{structbuffer}{buffer} $\ast$b, \hyperlink{structbuffer}{buffer} $\ast$src)
+\item 
+char $\ast$ \hyperlink{buffer_8h_aef333f32c1af3e9815fa70e36a958382}{buffer\-\_\-string\-\_\-prepare\-\_\-copy} (\hyperlink{structbuffer}{buffer} $\ast$b, size\-\_\-t size)
+\item 
+char $\ast$ \hyperlink{buffer_8h_a55f01ba4768d6a896bf740856f02ae22}{buffer\-\_\-string\-\_\-prepare\-\_\-append} (\hyperlink{structbuffer}{buffer} $\ast$b, size\-\_\-t size)
+\item 
+void \hyperlink{buffer_8h_a17816a97d56eb3021fb8ae2dcd239bf8}{buffer\-\_\-commit} (\hyperlink{structbuffer}{buffer} $\ast$b, size\-\_\-t size)
+\item 
+void \hyperlink{buffer_8h_a69f8a9c5de2e94fca1cbf0d5dd3e25cb}{buffer\-\_\-string\-\_\-set\-\_\-length} (\hyperlink{structbuffer}{buffer} $\ast$b, size\-\_\-t len)
+\item 
+void \hyperlink{buffer_8h_a6baf7225f0a54bdf2fc65860627ae546}{buffer\-\_\-copy\-\_\-string} (\hyperlink{structbuffer}{buffer} $\ast$b, const char $\ast$s)
+\item 
+void \hyperlink{buffer_8h_a145ed23cd298e8437d7fa7b7be701cdb}{buffer\-\_\-copy\-\_\-string\-\_\-len} (\hyperlink{structbuffer}{buffer} $\ast$b, const char $\ast$s, size\-\_\-t s\-\_\-len)
+\item 
+void \hyperlink{buffer_8h_aa2c8bd4c79082d38008a41b518fa938c}{buffer\-\_\-copy\-\_\-buffer} (\hyperlink{structbuffer}{buffer} $\ast$b, const \hyperlink{structbuffer}{buffer} $\ast$src)
+\item 
+void \hyperlink{buffer_8h_a930a82139e43c9e9198af84d04969354}{buffer\-\_\-copy\-\_\-string\-\_\-hex} (\hyperlink{structbuffer}{buffer} $\ast$b, const char $\ast$in, size\-\_\-t in\-\_\-len)
+\item 
+void \hyperlink{buffer_8h_a8d295a12e32d34ef8645d779b6e42141}{buffer\-\_\-append\-\_\-string} (\hyperlink{structbuffer}{buffer} $\ast$b, const char $\ast$s)
+\item 
+void \hyperlink{buffer_8h_a0321a93876dd9a68f52ace5ef8176c67}{buffer\-\_\-append\-\_\-string\-\_\-len} (\hyperlink{structbuffer}{buffer} $\ast$b, const char $\ast$s, size\-\_\-t s\-\_\-len)
+\item 
+void \hyperlink{buffer_8h_a8941881a6d28b2c243c94fef71da90df}{buffer\-\_\-append\-\_\-string\-\_\-buffer} (\hyperlink{structbuffer}{buffer} $\ast$b, const \hyperlink{structbuffer}{buffer} $\ast$src)
+\item 
+void \hyperlink{buffer_8h_a4a0e6af70b8f54004060118603a2bdf3}{buffer\-\_\-append\-\_\-uint\-\_\-hex} (\hyperlink{structbuffer}{buffer} $\ast$b, uintmax\-\_\-t len)
+\item 
+void \hyperlink{buffer_8h_a0e97758dab0f0b3598d9549290ecdef6}{buffer\-\_\-append\-\_\-int} (\hyperlink{structbuffer}{buffer} $\ast$b, intmax\-\_\-t val)
+\item 
+void \hyperlink{buffer_8h_a209e1a13dd24ad7a72835d941de5c719}{buffer\-\_\-copy\-\_\-int} (\hyperlink{structbuffer}{buffer} $\ast$b, intmax\-\_\-t val)
+\item 
+void \hyperlink{buffer_8h_a569dffc876bb4fc1c6b7e1c33e1df6ef}{buffer\-\_\-append\-\_\-strftime} (\hyperlink{structbuffer}{buffer} $\ast$b, const char $\ast$format, const struct tm $\ast$tm)
+\item 
+void \hyperlink{buffer_8h_a89562ebb304cb7d67b83a30d986dd5b8}{li\-\_\-itostrn} (char $\ast$buf, size\-\_\-t buf\-\_\-len, intmax\-\_\-t val)
+\item 
+void \hyperlink{buffer_8h_af7d7ad26326c4f489be127bc25688d6c}{li\-\_\-utostrn} (char $\ast$buf, size\-\_\-t buf\-\_\-len, uintmax\-\_\-t val)
+\item 
+void \hyperlink{buffer_8h_a1c1616541993699792f0693abc6d1c6a}{li\-\_\-tohex} (char $\ast$buf, size\-\_\-t buf\-\_\-len, const char $\ast$s, size\-\_\-t s\-\_\-len)
+\item 
+char $\ast$ \hyperlink{buffer_8h_ad8d7ec26b305f5014cf700926ed6d2ad}{buffer\-\_\-search\-\_\-string\-\_\-len} (\hyperlink{structbuffer}{buffer} $\ast$b, const char $\ast$needle, size\-\_\-t len)
+\item 
+int \hyperlink{buffer_8h_a02b141b68c48c167070d08ed8b2ae459}{buffer\-\_\-is\-\_\-empty} (const \hyperlink{structbuffer}{buffer} $\ast$b)
+\item 
+int \hyperlink{buffer_8h_a141f13aaa1f623c39a4b551f9b89f997}{buffer\-\_\-string\-\_\-is\-\_\-empty} (const \hyperlink{structbuffer}{buffer} $\ast$b)
+\item 
+int \hyperlink{buffer_8h_ac45bf29225ad6d8e51fbcc9e6a01d8df}{buffer\-\_\-is\-\_\-equal} (const \hyperlink{structbuffer}{buffer} $\ast$a, const \hyperlink{structbuffer}{buffer} $\ast$b)
+\item 
+int \hyperlink{buffer_8h_afc452ea383aa970adb8ba5815bf31c1d}{buffer\-\_\-is\-\_\-equal\-\_\-right\-\_\-len} (const \hyperlink{structbuffer}{buffer} $\ast$a, const \hyperlink{structbuffer}{buffer} $\ast$b, size\-\_\-t len)
+\item 
+int \hyperlink{buffer_8h_aacb5f22a7b9f69a8c2697e365305fee4}{buffer\-\_\-is\-\_\-equal\-\_\-string} (const \hyperlink{structbuffer}{buffer} $\ast$a, const char $\ast$s, size\-\_\-t b\-\_\-len)
+\item 
+int \hyperlink{buffer_8h_a6df7fc4dc3b282b8eef48721b1f2f2c9}{buffer\-\_\-is\-\_\-equal\-\_\-caseless\-\_\-string} (const \hyperlink{structbuffer}{buffer} $\ast$a, const char $\ast$s, size\-\_\-t b\-\_\-len)
+\item 
+int \hyperlink{buffer_8h_a92786864c297dc3ee740ddaaf52afdc6}{buffer\-\_\-caseless\-\_\-compare} (const char $\ast$a, size\-\_\-t a\-\_\-len, const char $\ast$b, size\-\_\-t b\-\_\-len)
+\item 
+void \hyperlink{buffer_8h_a26c188baa47028c50b4865df978c3a78}{buffer\-\_\-append\-\_\-string\-\_\-encoded} (\hyperlink{structbuffer}{buffer} $\ast$b, const char $\ast$s, size\-\_\-t s\-\_\-len, \hyperlink{buffer_8h_a13c23faf3a5a4a05713f31c26f3ce3bc}{buffer\-\_\-encoding\-\_\-t} encoding)
+\item 
+void \hyperlink{buffer_8h_afa8655869cab1d2f47c3d7b675eaaa64}{buffer\-\_\-append\-\_\-string\-\_\-c\-\_\-escaped} (\hyperlink{structbuffer}{buffer} $\ast$b, const char $\ast$s, size\-\_\-t s\-\_\-len)
+\item 
+void \hyperlink{buffer_8h_ade9f537d083cf1daa12304d0366770a9}{buffer\-\_\-copy\-\_\-string\-\_\-encoded\-\_\-cgi\-\_\-varnames} (\hyperlink{structbuffer}{buffer} $\ast$b, const char $\ast$s, size\-\_\-t s\-\_\-len, int is\-\_\-http\-\_\-header)
+\item 
+void \hyperlink{buffer_8h_af2582c1bf836c38090bc1689fbdd2fdc}{buffer\-\_\-urldecode\-\_\-path} (\hyperlink{structbuffer}{buffer} $\ast$url)
+\item 
+void \hyperlink{buffer_8h_aa58412b0cd7e3c5a75a589f25b821dba}{buffer\-\_\-urldecode\-\_\-query} (\hyperlink{structbuffer}{buffer} $\ast$url)
+\item 
+void \hyperlink{buffer_8h_af45b56e7043ca972ba96a403a7790679}{buffer\-\_\-path\-\_\-simplify} (\hyperlink{structbuffer}{buffer} $\ast$dest, \hyperlink{structbuffer}{buffer} $\ast$src)
+\item 
+void \hyperlink{buffer_8h_a7116e1580921fb11d893ee84e6c50d43}{buffer\-\_\-to\-\_\-lower} (\hyperlink{structbuffer}{buffer} $\ast$b)
+\item 
+void \hyperlink{buffer_8h_a59f0ee3d0c4c4f2971164002395db30b}{buffer\-\_\-to\-\_\-upper} (\hyperlink{structbuffer}{buffer} $\ast$b)
+\item 
+char \hyperlink{buffer_8h_a136a9a2c3476bec139efc229196efc4d}{hex2int} (unsigned char c)
+\item 
+char \hyperlink{buffer_8h_aee4e67d028b887396c659c476e882a8b}{int2hex} (char i)
+\item 
+int \hyperlink{buffer_8h_a5dbced38252283e189cc2577940af4d2}{light\-\_\-isdigit} (int c)
+\item 
+int \hyperlink{buffer_8h_a413079bb65357913afb50e6db9d25b0b}{light\-\_\-isxdigit} (int c)
+\item 
+int \hyperlink{buffer_8h_aec5549c354b6a20f86f5155e7e7a43ca}{light\-\_\-isalpha} (int c)
+\item 
+int \hyperlink{buffer_8h_a6449bc8ce2c6cd37599031c6e0a683c3}{light\-\_\-isalnum} (int c)
+\item 
+static size\-\_\-t \hyperlink{buffer_8h_aa069cb6c33241e7389d3b63e70a18b45}{buffer\-\_\-string\-\_\-length} (const \hyperlink{structbuffer}{buffer} $\ast$b)
+\item 
+static size\-\_\-t \hyperlink{buffer_8h_a85112471d90fdea2f04f42e1f33c8214}{buffer\-\_\-string\-\_\-space} (const \hyperlink{structbuffer}{buffer} $\ast$b)
+\item 
+static void \hyperlink{buffer_8h_ab02198112cfd324f06637fb1db851d65}{buffer\-\_\-append\-\_\-slash} (\hyperlink{structbuffer}{buffer} $\ast$b)
+\item 
+void \hyperlink{buffer_8h_a5606b9ef8a6227af80e8f224db20c2f7}{print\-\_\-backtrace} (F\-I\-L\-E $\ast$file)
+\item 
+void \hyperlink{buffer_8h_a93df32ef1d0729ca2daa1c587c0dd32d}{log\-\_\-failed\-\_\-assert} (const char $\ast$filename, unsigned int line, const char $\ast$msg) \hyperlink{settings_8h_a584d81beb8ea96609400021eb6d0a596}{L\-I\-\_\-\-N\-O\-R\-E\-T\-U\-R\-N}
+\end{DoxyCompactItemize}
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{buffer_8h_a9c340060c195fff1c69c3a042d01a722}{\index{buffer.\-h@{buffer.\-h}!B\-U\-F\-F\-E\-R\-\_\-\-A\-P\-P\-E\-N\-D\-\_\-\-S\-T\-R\-I\-N\-G\-\_\-\-C\-O\-N\-S\-T@{B\-U\-F\-F\-E\-R\-\_\-\-A\-P\-P\-E\-N\-D\-\_\-\-S\-T\-R\-I\-N\-G\-\_\-\-C\-O\-N\-S\-T}}
+\index{B\-U\-F\-F\-E\-R\-\_\-\-A\-P\-P\-E\-N\-D\-\_\-\-S\-T\-R\-I\-N\-G\-\_\-\-C\-O\-N\-S\-T@{B\-U\-F\-F\-E\-R\-\_\-\-A\-P\-P\-E\-N\-D\-\_\-\-S\-T\-R\-I\-N\-G\-\_\-\-C\-O\-N\-S\-T}!buffer.h@{buffer.\-h}}
+\subsubsection[{B\-U\-F\-F\-E\-R\-\_\-\-A\-P\-P\-E\-N\-D\-\_\-\-S\-T\-R\-I\-N\-G\-\_\-\-C\-O\-N\-S\-T}]{\setlength{\rightskip}{0pt plus 5cm}\#define B\-U\-F\-F\-E\-R\-\_\-\-A\-P\-P\-E\-N\-D\-\_\-\-S\-T\-R\-I\-N\-G\-\_\-\-C\-O\-N\-S\-T(
+\begin{DoxyParamCaption}
+\item[{}]{x, }
+\item[{}]{y}
+\end{DoxyParamCaption}
+)~{\bf buffer\-\_\-append\-\_\-string\-\_\-len}(x, y, sizeof(y) -\/ 1)}}\label{buffer_8h_a9c340060c195fff1c69c3a042d01a722}
+
+
+Referenced by accesslog\-\_\-append\-\_\-escaped(), buffer\-\_\-append\-\_\-slash(), and mod\-\_\-authn\-\_\-gssapi\-\_\-basic().
+
+\hypertarget{buffer_8h_a7882640825e1bb5da553050f02a37e0d}{\index{buffer.\-h@{buffer.\-h}!B\-U\-F\-F\-E\-R\-\_\-\-C\-O\-P\-Y\-\_\-\-S\-T\-R\-I\-N\-G\-\_\-\-C\-O\-N\-S\-T@{B\-U\-F\-F\-E\-R\-\_\-\-C\-O\-P\-Y\-\_\-\-S\-T\-R\-I\-N\-G\-\_\-\-C\-O\-N\-S\-T}}
+\index{B\-U\-F\-F\-E\-R\-\_\-\-C\-O\-P\-Y\-\_\-\-S\-T\-R\-I\-N\-G\-\_\-\-C\-O\-N\-S\-T@{B\-U\-F\-F\-E\-R\-\_\-\-C\-O\-P\-Y\-\_\-\-S\-T\-R\-I\-N\-G\-\_\-\-C\-O\-N\-S\-T}!buffer.h@{buffer.\-h}}
+\subsubsection[{B\-U\-F\-F\-E\-R\-\_\-\-C\-O\-P\-Y\-\_\-\-S\-T\-R\-I\-N\-G\-\_\-\-C\-O\-N\-S\-T}]{\setlength{\rightskip}{0pt plus 5cm}\#define B\-U\-F\-F\-E\-R\-\_\-\-C\-O\-P\-Y\-\_\-\-S\-T\-R\-I\-N\-G\-\_\-\-C\-O\-N\-S\-T(
+\begin{DoxyParamCaption}
+\item[{}]{x, }
+\item[{}]{y}
+\end{DoxyParamCaption}
+)~{\bf buffer\-\_\-copy\-\_\-string\-\_\-len}(x, y, sizeof(y) -\/ 1)}}\label{buffer_8h_a7882640825e1bb5da553050f02a37e0d}
+\hypertarget{buffer_8h_aeebf4b463702b90297a690dbade7e13a}{\index{buffer.\-h@{buffer.\-h}!C\-O\-N\-S\-T\-\_\-\-B\-U\-F\-\_\-\-L\-E\-N@{C\-O\-N\-S\-T\-\_\-\-B\-U\-F\-\_\-\-L\-E\-N}}
+\index{C\-O\-N\-S\-T\-\_\-\-B\-U\-F\-\_\-\-L\-E\-N@{C\-O\-N\-S\-T\-\_\-\-B\-U\-F\-\_\-\-L\-E\-N}!buffer.h@{buffer.\-h}}
+\subsubsection[{C\-O\-N\-S\-T\-\_\-\-B\-U\-F\-\_\-\-L\-E\-N}]{\setlength{\rightskip}{0pt plus 5cm}\#define C\-O\-N\-S\-T\-\_\-\-B\-U\-F\-\_\-\-L\-E\-N(
+\begin{DoxyParamCaption}
+\item[{}]{x}
+\end{DoxyParamCaption}
+)~((x) ? (x)-\/$>$ptr \-: N\-U\-L\-L), {\bf buffer\-\_\-string\-\_\-length}(x)}}\label{buffer_8h_aeebf4b463702b90297a690dbade7e13a}
+
+
+Referenced by array\-\_\-extract\-\_\-element(), array\-\_\-find\-\_\-or\-\_\-insert(), array\-\_\-get\-\_\-index(), cache\-\_\-parse\-\_\-lua(), config\-\_\-check\-\_\-cond\-\_\-nocache(), config\-\_\-parse\-\_\-cmd(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), connection\-\_\-handle\-\_\-errdoc\-\_\-init(), connection\-\_\-handle\-\_\-write\-\_\-prepare(), deflate\-\_\-file\-\_\-to\-\_\-file(), fcgi\-\_\-host\-\_\-assign(), fcgi\-\_\-host\-\_\-reset(), fcgi\-\_\-proc\-\_\-load\-\_\-dec(), fcgi\-\_\-proc\-\_\-load\-\_\-inc(), fcgi\-\_\-write\-\_\-request(), F\-R\-E\-E\-\_\-\-F\-U\-N\-C(), http\-\_\-cgi\-\_\-headers(), http\-\_\-chunk\-\_\-append\-\_\-to\-\_\-tempfile(), http\-\_\-list\-\_\-directory(), http\-\_\-list\-\_\-directory\-\_\-header(), http\-\_\-request\-\_\-parse(), http\-\_\-response\-\_\-parse\-\_\-range(), http\-\_\-response\-\_\-redirect\-\_\-to\-\_\-directory(), http\-\_\-response\-\_\-send\-\_\-file(), http\-\_\-response\-\_\-write\-\_\-header(), log\-\_\-buffer\-\_\-append\-\_\-printf(), log\-\_\-write(), magnet\-\_\-array\-\_\-next(), magnet\-\_\-cgi\-\_\-get(), magnet\-\_\-env\-\_\-get(), magnet\-\_\-env\-\_\-next(), magnet\-\_\-reqhdr\-\_\-get(), magnet\-\_\-stat(), main(), mod\-\_\-auth\-\_\-check\-\_\-basic(), mod\-\_\-auth\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-basic(), mod\-\_\-auth\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-digest(), mod\-\_\-authn\-\_\-file\-\_\-htdigest\-\_\-basic(), mod\-\_\-proxy\-\_\-extension\-\_\-host\-\_\-get(), mod\-\_\-redirect\-\_\-uri\-\_\-handler(), mod\-\_\-rrdtool\-\_\-create\-\_\-rrd(), mod\-\_\-ssi\-\_\-handle\-\_\-request(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-html(), P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C(), proc\-\_\-open\-\_\-buffer(), process\-\_\-ssi\-\_\-stmt(), R\-E\-Q\-U\-E\-S\-T\-D\-O\-N\-E\-\_\-\-F\-U\-N\-C(), secdl\-\_\-verify\-\_\-mac(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), S\-I\-G\-H\-U\-P\-\_\-\-F\-U\-N\-C(), S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C(), T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C(), U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C(), webdav\-\_\-copy\-\_\-dir(), webdav\-\_\-copy\-\_\-file(), webdav\-\_\-delete\-\_\-dir(), webdav\-\_\-delete\-\_\-file(), webdav\-\_\-get\-\_\-property(), and webdav\-\_\-has\-\_\-lock().
+
+\hypertarget{buffer_8h_a4b8f196adbc4c0f8ad77828c9b20c779}{\index{buffer.\-h@{buffer.\-h}!C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N@{C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N}}
+\index{C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N@{C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N}!buffer.h@{buffer.\-h}}
+\subsubsection[{C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N}]{\setlength{\rightskip}{0pt plus 5cm}\#define C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N(
+\begin{DoxyParamCaption}
+\item[{}]{x}
+\end{DoxyParamCaption}
+)~x, (x) ? sizeof(x) -\/ 1 \-: 0}}\label{buffer_8h_a4b8f196adbc4c0f8ad77828c9b20c779}
+
+
+Referenced by buffer\-\_\-copy\-\_\-string\-\_\-encoded\-\_\-cgi\-\_\-varnames(), cache\-\_\-parse\-\_\-lua(), cgi\-\_\-create\-\_\-env(), chunkqueue\-\_\-get\-\_\-append\-\_\-tempfile(), config\-\_\-check\-\_\-cond\-\_\-nocache(), config\-\_\-insert(), config\-\_\-insert\-\_\-values\-\_\-global(), config\-\_\-insert\-\_\-values\-\_\-internal(), config\-\_\-patch\-\_\-connection(), config\-\_\-read(), config\-\_\-tokenizer(), configparser\-\_\-remoteip\-\_\-normalize\-\_\-compat(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), connection\-\_\-handle\-\_\-errdoc\-\_\-init(), connection\-\_\-handle\-\_\-write\-\_\-prepare(), connection\-\_\-state\-\_\-machine(), data\-\_\-response\-\_\-insert\-\_\-dup(), data\-\_\-string\-\_\-insert\-\_\-dup(), deflate\-\_\-file\-\_\-to\-\_\-file(), etag\-\_\-create(), etag\-\_\-mutate(), fastcgi\-\_\-status\-\_\-copy\-\_\-procname(), fcgi\-\_\-demux\-\_\-response(), fcgi\-\_\-establish\-\_\-connection(), fcgi\-\_\-host\-\_\-assign(), fcgi\-\_\-host\-\_\-reset(), fcgi\-\_\-patch\-\_\-connection(), fcgi\-\_\-proc\-\_\-load\-\_\-dec(), fcgi\-\_\-proc\-\_\-load\-\_\-inc(), fcgi\-\_\-response\-\_\-parse(), fcgi\-\_\-write\-\_\-request(), http\-\_\-auth\-\_\-setenv(), http\-\_\-cgi\-\_\-headers(), http\-\_\-chunk\-\_\-append\-\_\-data(), http\-\_\-chunk\-\_\-append\-\_\-file\-\_\-fd\-\_\-range(), http\-\_\-chunk\-\_\-append\-\_\-len(), http\-\_\-chunk\-\_\-append\-\_\-to\-\_\-tempfile(), http\-\_\-chunk\-\_\-close(), http\-\_\-dirlist\-\_\-append\-\_\-js\-\_\-table\-\_\-resort(), http\-\_\-list\-\_\-directory(), http\-\_\-list\-\_\-directory\-\_\-footer(), http\-\_\-list\-\_\-directory\-\_\-header(), http\-\_\-list\-\_\-directory\-\_\-include\-\_\-file(), http\-\_\-request\-\_\-header\-\_\-finished(), http\-\_\-request\-\_\-host\-\_\-normalize(), http\-\_\-request\-\_\-parse(), http\-\_\-response\-\_\-parse\-\_\-range(), http\-\_\-response\-\_\-prepare(), http\-\_\-response\-\_\-redirect\-\_\-to\-\_\-directory(), http\-\_\-response\-\_\-send\-\_\-file(), http\-\_\-response\-\_\-write\-\_\-header(), log\-\_\-buffer\-\_\-append\-\_\-printf(), log\-\_\-buffer\-\_\-prepare(), log\-\_\-write(), main(), mod\-\_\-access\-\_\-patch\-\_\-connection(), mod\-\_\-accesslog\-\_\-patch\-\_\-connection(), mod\-\_\-alias\-\_\-patch\-\_\-connection(), mod\-\_\-auth\-\_\-check\-\_\-basic(), mod\-\_\-auth\-\_\-check\-\_\-digest(), mod\-\_\-auth\-\_\-patch\-\_\-connection(), mod\-\_\-auth\-\_\-require\-\_\-parse(), mod\-\_\-auth\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-basic(), mod\-\_\-auth\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-digest(), mod\-\_\-authn\-\_\-file\-\_\-htdigest\-\_\-basic(), mod\-\_\-authn\-\_\-file\-\_\-htpasswd\-\_\-basic(), mod\-\_\-authn\-\_\-file\-\_\-patch\-\_\-connection(), mod\-\_\-authn\-\_\-file\-\_\-plain\-\_\-digest(), mod\-\_\-authn\-\_\-gssapi\-\_\-check\-\_\-spnego(), mod\-\_\-authn\-\_\-gssapi\-\_\-create\-\_\-krb5\-\_\-ccache(), mod\-\_\-authn\-\_\-gssapi\-\_\-log\-\_\-gss\-\_\-error(), mod\-\_\-authn\-\_\-gssapi\-\_\-patch\-\_\-connection(), mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-basic(), mod\-\_\-authn\-\_\-gssapi\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-negotiate(), mod\-\_\-authn\-\_\-ldap\-\_\-basic(), mod\-\_\-authn\-\_\-ldap\-\_\-patch\-\_\-connection(), mod\-\_\-authn\-\_\-mysql\-\_\-patch\-\_\-connection(), mod\-\_\-cgi\-\_\-patch\-\_\-connection(), mod\-\_\-cml\-\_\-patch\-\_\-connection(), mod\-\_\-compress\-\_\-note\-\_\-ratio(), mod\-\_\-compress\-\_\-patch\-\_\-connection(), mod\-\_\-deflate\-\_\-note\-\_\-ratio(), mod\-\_\-deflate\-\_\-patch\-\_\-connection(), mod\-\_\-dirlisting\-\_\-patch\-\_\-connection(), mod\-\_\-evasive\-\_\-patch\-\_\-connection(), mod\-\_\-evhost\-\_\-parse\-\_\-host(), mod\-\_\-evhost\-\_\-patch\-\_\-connection(), mod\-\_\-evhost\-\_\-uri\-\_\-handler(), mod\-\_\-expire\-\_\-patch\-\_\-connection(), mod\-\_\-extforward\-\_\-patch\-\_\-connection(), mod\-\_\-flv\-\_\-streaming\-\_\-patch\-\_\-connection(), mod\-\_\-geoip\-\_\-patch\-\_\-connection(), mod\-\_\-indexfile\-\_\-patch\-\_\-connection(), mod\-\_\-magnet\-\_\-patch\-\_\-connection(), mod\-\_\-mysql\-\_\-vhost\-\_\-patch\-\_\-connection(), mod\-\_\-proxy\-\_\-patch\-\_\-connection(), mod\-\_\-redirect\-\_\-uri\-\_\-handler(), mod\-\_\-rrd\-\_\-patch\-\_\-connection(), mod\-\_\-rrdtool\-\_\-create\-\_\-rrd(), mod\-\_\-secdownload\-\_\-patch\-\_\-connection(), mod\-\_\-setenv\-\_\-patch\-\_\-connection(), mod\-\_\-simple\-\_\-vhost\-\_\-patch\-\_\-connection(), mod\-\_\-skeleton\-\_\-patch\-\_\-connection(), mod\-\_\-ssi\-\_\-handle\-\_\-request(), mod\-\_\-ssi\-\_\-patch\-\_\-connection(), mod\-\_\-ssi\-\_\-read\-\_\-fd(), mod\-\_\-staticfile\-\_\-patch\-\_\-connection(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-config(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-statistics(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-html(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-json(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-text(), mod\-\_\-status\-\_\-header\-\_\-append(), mod\-\_\-status\-\_\-header\-\_\-append\-\_\-sort(), mod\-\_\-status\-\_\-patch\-\_\-connection(), mod\-\_\-status\-\_\-row\-\_\-append(), mod\-\_\-trigger\-\_\-b4\-\_\-dl\-\_\-patch\-\_\-connection(), mod\-\_\-uploadprogress\-\_\-patch\-\_\-connection(), mod\-\_\-userdir\-\_\-patch\-\_\-connection(), mod\-\_\-usertrack\-\_\-patch\-\_\-connection(), mod\-\_\-webdav\-\_\-patch\-\_\-connection(), network\-\_\-init(), network\-\_\-server\-\_\-init(), P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C(), plugins\-\_\-load(), process\-\_\-ssi\-\_\-stmt(), proxy\-\_\-create\-\_\-env(), proxy\-\_\-demux\-\_\-response(), R\-E\-Q\-U\-E\-S\-T\-D\-O\-N\-E\-\_\-\-F\-U\-N\-C(), response\-\_\-header\-\_\-append(), scgi\-\_\-create\-\_\-env(), scgi\-\_\-patch\-\_\-connection(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), ssi\-\_\-expr\-\_\-tokenizer(), S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C(), test\-\_\-buffer\-\_\-path\-\_\-simplify\-\_\-with(), T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C(), U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C(), webdav\-\_\-gen\-\_\-prop\-\_\-tag(), webdav\-\_\-gen\-\_\-response\-\_\-status\-\_\-tag(), webdav\-\_\-get\-\_\-live\-\_\-property(), and yy\-\_\-reduce().
+
+\hypertarget{buffer_8h_ac478d8f4bb34bf243bfe01ab8277250c}{\index{buffer.\-h@{buffer.\-h}!force\-\_\-assert@{force\-\_\-assert}}
+\index{force\-\_\-assert@{force\-\_\-assert}!buffer.h@{buffer.\-h}}
+\subsubsection[{force\-\_\-assert}]{\setlength{\rightskip}{0pt plus 5cm}\#define force\-\_\-assert(
+\begin{DoxyParamCaption}
+\item[{}]{x}
+\end{DoxyParamCaption}
+)~do \{ if (!(x)) {\bf log\-\_\-failed\-\_\-assert}(\-\_\-\-\_\-\-F\-I\-L\-E\-\_\-\-\_\-, \-\_\-\-\_\-\-L\-I\-N\-E\-\_\-\-\_\-, \char`\"{}assertion failed\-: \char`\"{} \#x); \} while(0)}}\label{buffer_8h_ac478d8f4bb34bf243bfe01ab8277250c}
+
+
+Referenced by array\-\_\-extract\-\_\-element(), array\-\_\-find\-\_\-or\-\_\-insert(), array\-\_\-get\-\_\-element(), array\-\_\-get\-\_\-index(), array\-\_\-init(), array\-\_\-init\-\_\-array(), array\-\_\-insert\-\_\-unique(), array\-\_\-pop(), array\-\_\-replace(), buffer\-\_\-alloc(), buffer\-\_\-append\-\_\-int(), buffer\-\_\-append\-\_\-strftime(), buffer\-\_\-append\-\_\-string\-\_\-c\-\_\-escaped(), buffer\-\_\-append\-\_\-string\-\_\-encoded(), buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-commit(), buffer\-\_\-copy\-\_\-int(), buffer\-\_\-copy\-\_\-string\-\_\-encoded\-\_\-cgi\-\_\-varnames(), buffer\-\_\-copy\-\_\-string\-\_\-hex(), buffer\-\_\-copy\-\_\-string\-\_\-len(), buffer\-\_\-init(), buffer\-\_\-is\-\_\-equal(), buffer\-\_\-is\-\_\-equal\-\_\-caseless\-\_\-string(), buffer\-\_\-is\-\_\-equal\-\_\-string(), buffer\-\_\-path\-\_\-simplify(), buffer\-\_\-realloc(), buffer\-\_\-search\-\_\-string\-\_\-len(), buffer\-\_\-string\-\_\-prepare\-\_\-append(), buffer\-\_\-string\-\_\-prepare\-\_\-copy(), buffer\-\_\-string\-\_\-set\-\_\-length(), buffer\-\_\-urldecode\-\_\-internal(), build\-\_\-doc\-\_\-root(), cache\-\_\-parse\-\_\-lua(), cgi\-\_\-create\-\_\-env(), cgi\-\_\-env\-\_\-add(), cgi\-\_\-handler\-\_\-ctx\-\_\-init(), cgi\-\_\-pid\-\_\-add(), cgi\-\_\-write\-\_\-file\-\_\-chunk\-\_\-mmap(), check\-\_\-all\-\_\-len\-\_\-0(), check\-\_\-all\-\_\-len\-\_\-1(), check\-\_\-all\-\_\-len\-\_\-2(), check\-\_\-all\-\_\-len\-\_\-3(), chunk\-\_\-init(), chunk\-\_\-remaining\-\_\-length(), chunkqueue\-\_\-append\-\_\-buffer(), chunkqueue\-\_\-get\-\_\-memory(), chunkqueue\-\_\-get\-\_\-unused\-\_\-chunk(), chunkqueue\-\_\-init(), chunkqueue\-\_\-mark\-\_\-written(), chunkqueue\-\_\-prepend\-\_\-buffer(), chunkqueue\-\_\-push\-\_\-unused\-\_\-chunk(), chunkqueue\-\_\-steal(), chunkqueue\-\_\-steal\-\_\-with\-\_\-tempfiles(), chunkqueue\-\_\-use\-\_\-memory(), config\-\_\-insert(), config\-\_\-parse(), config\-\_\-read(), config\-\_\-skip\-\_\-comment(), config\-\_\-skip\-\_\-newline(), configparser\-\_\-merge\-\_\-data(), configparser\-\_\-push(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-chunked(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-cq\-\_\-compact(), connection\-\_\-init(), connections\-\_\-get\-\_\-new\-\_\-connection(), data\-\_\-array\-\_\-init(), data\-\_\-auth\-\_\-init(), data\-\_\-fastcgi\-\_\-init(), data\-\_\-integer\-\_\-init(), data\-\_\-string\-\_\-init(), env\-\_\-add(), fastcgi\-\_\-extension\-\_\-insert(), fcgi\-\_\-env\-\_\-add(), fcgi\-\_\-header(), fcgi\-\_\-restart\-\_\-dead\-\_\-procs(), fd\-\_\-close\-\_\-on\-\_\-exec(), fdevent\-\_\-init(), fdnode\-\_\-init(), fdwaitqueue\-\_\-append(), handler\-\_\-ctx\-\_\-init(), http\-\_\-auth\-\_\-backend\-\_\-set(), http\-\_\-auth\-\_\-require\-\_\-init(), http\-\_\-auth\-\_\-scheme\-\_\-set(), http\-\_\-cgi\-\_\-headers(), http\-\_\-chunk\-\_\-append\-\_\-buffer(), http\-\_\-chunk\-\_\-append\-\_\-len(), http\-\_\-chunk\-\_\-append\-\_\-mem(), http\-\_\-chunk\-\_\-close(), http\-\_\-list\-\_\-directory(), I\-N\-I\-T\-\_\-\-F\-U\-N\-C(), joblist\-\_\-append(), li\-\_\-itostrn(), li\-\_\-to\-\_\-base64(), li\-\_\-to\-\_\-base64\-\_\-no\-\_\-padding(), li\-\_\-tohex(), li\-\_\-utostrn(), lua\-\_\-to\-\_\-c\-\_\-get\-\_\-string(), lua\-\_\-to\-\_\-c\-\_\-is\-\_\-table(), magnet\-\_\-attach\-\_\-content(), magnet\-\_\-attract(), magnet\-\_\-copy\-\_\-response\-\_\-header(), mmap\-\_\-align\-\_\-offset(), mod\-\_\-auth\-\_\-check\-\_\-digest(), mod\-\_\-auth\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-digest(), mod\-\_\-deflate\-\_\-file\-\_\-chunk(), mod\-\_\-proxy\-\_\-extension\-\_\-host\-\_\-get(), mod\-\_\-ssi\-\_\-read\-\_\-fd(), network\-\_\-open\-\_\-file\-\_\-chunk(), network\-\_\-server\-\_\-init(), network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-no\-\_\-mmap(), network\-\_\-write\-\_\-mem\-\_\-chunk(), pcre\-\_\-keyvalue\-\_\-buffer\-\_\-append(), pcre\-\_\-keyvalue\-\_\-buffer\-\_\-init(), P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C(), plugin\-\_\-init(), plugins\-\_\-call\-\_\-init(), plugins\-\_\-register(), proxy\-\_\-demux\-\_\-response(), scgi\-\_\-extension\-\_\-insert(), scgi\-\_\-extensions\-\_\-init(), scgi\-\_\-process\-\_\-init(), script\-\_\-cache\-\_\-get\-\_\-script(), server\-\_\-init(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), ssi\-\_\-eval\-\_\-expr(), stat\-\_\-cache\-\_\-entry\-\_\-init(), stat\-\_\-cache\-\_\-free(), stat\-\_\-cache\-\_\-get\-\_\-entry(), stat\-\_\-cache\-\_\-init(), stat\-\_\-cache\-\_\-trigger\-\_\-cleanup(), S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C(), vector\-\_\-realloc(), webdav\-\_\-copy\-\_\-file(), write\-\_\-all(), and yy\-\_\-reduce().
+
+\hypertarget{buffer_8h_a8aed375a78edb9a44e2da2c43f85313d}{\index{buffer.\-h@{buffer.\-h}!L\-I\-\_\-\-I\-T\-O\-S\-T\-R\-I\-N\-G\-\_\-\-L\-E\-N\-G\-T\-H@{L\-I\-\_\-\-I\-T\-O\-S\-T\-R\-I\-N\-G\-\_\-\-L\-E\-N\-G\-T\-H}}
+\index{L\-I\-\_\-\-I\-T\-O\-S\-T\-R\-I\-N\-G\-\_\-\-L\-E\-N\-G\-T\-H@{L\-I\-\_\-\-I\-T\-O\-S\-T\-R\-I\-N\-G\-\_\-\-L\-E\-N\-G\-T\-H}!buffer.h@{buffer.\-h}}
+\subsubsection[{L\-I\-\_\-\-I\-T\-O\-S\-T\-R\-I\-N\-G\-\_\-\-L\-E\-N\-G\-T\-H}]{\setlength{\rightskip}{0pt plus 5cm}\#define L\-I\-\_\-\-I\-T\-O\-S\-T\-R\-I\-N\-G\-\_\-\-L\-E\-N\-G\-T\-H~(2 + (8 $\ast$ sizeof(intmax\-\_\-t) $\ast$ 31 + 99) / 100)}}\label{buffer_8h_a8aed375a78edb9a44e2da2c43f85313d}
+
+
+Referenced by buffer\-\_\-append\-\_\-int(), http\-\_\-cgi\-\_\-headers(), li\-\_\-itostrn(), li\-\_\-utostrn(), mod\-\_\-auth\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-digest(), mod\-\_\-compress\-\_\-note\-\_\-ratio(), mod\-\_\-deflate\-\_\-note\-\_\-ratio(), and U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{buffer_8h_af9f70d72699fb3ad59068f771148460d}{\index{buffer.\-h@{buffer.\-h}!S\-E\-G\-F\-A\-U\-L\-T@{S\-E\-G\-F\-A\-U\-L\-T}}
+\index{S\-E\-G\-F\-A\-U\-L\-T@{S\-E\-G\-F\-A\-U\-L\-T}!buffer.h@{buffer.\-h}}
+\subsubsection[{S\-E\-G\-F\-A\-U\-L\-T}]{\setlength{\rightskip}{0pt plus 5cm}\#define S\-E\-G\-F\-A\-U\-L\-T(
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)~{\bf log\-\_\-failed\-\_\-assert}(\-\_\-\-\_\-\-F\-I\-L\-E\-\_\-\-\_\-, \-\_\-\-\_\-\-L\-I\-N\-E\-\_\-\-\_\-, \char`\"{}aborted\char`\"{});}}\label{buffer_8h_af9f70d72699fb3ad59068f771148460d}
+
+
+Referenced by fdevent\-\_\-event\-\_\-get\-\_\-fd(), fdevent\-\_\-event\-\_\-get\-\_\-revent(), fdevent\-\_\-get\-\_\-context(), fdevent\-\_\-get\-\_\-handler(), fdevent\-\_\-poll(), mod\-\_\-rrd\-\_\-create\-\_\-pipe(), process\-\_\-ssi\-\_\-stmt(), and U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+
+
+\subsection{Enumeration Type Documentation}
+\hypertarget{buffer_8h_a13c23faf3a5a4a05713f31c26f3ce3bc}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-encoding\-\_\-t@{buffer\-\_\-encoding\-\_\-t}}
+\index{buffer\-\_\-encoding\-\_\-t@{buffer\-\_\-encoding\-\_\-t}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-encoding\-\_\-t}]{\setlength{\rightskip}{0pt plus 5cm}enum {\bf buffer\-\_\-encoding\-\_\-t}}}\label{buffer_8h_a13c23faf3a5a4a05713f31c26f3ce3bc}
+\begin{Desc}
+\item[Enumerator]\par
+\begin{description}
+\index{E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-R\-E\-L\-\_\-\-U\-R\-I@{E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-R\-E\-L\-\_\-\-U\-R\-I}!buffer.\-h@{buffer.\-h}}\index{buffer.\-h@{buffer.\-h}!E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-R\-E\-L\-\_\-\-U\-R\-I@{E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-R\-E\-L\-\_\-\-U\-R\-I}}\item[{\em 
+\hypertarget{buffer_8h_a13c23faf3a5a4a05713f31c26f3ce3bcacd38a424e143474344b4fc23315a879e}{E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-R\-E\-L\-\_\-\-U\-R\-I}\label{buffer_8h_a13c23faf3a5a4a05713f31c26f3ce3bcacd38a424e143474344b4fc23315a879e}
+}]\index{E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-R\-E\-L\-\_\-\-U\-R\-I\-\_\-\-P\-A\-R\-T@{E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-R\-E\-L\-\_\-\-U\-R\-I\-\_\-\-P\-A\-R\-T}!buffer.\-h@{buffer.\-h}}\index{buffer.\-h@{buffer.\-h}!E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-R\-E\-L\-\_\-\-U\-R\-I\-\_\-\-P\-A\-R\-T@{E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-R\-E\-L\-\_\-\-U\-R\-I\-\_\-\-P\-A\-R\-T}}\item[{\em 
+\hypertarget{buffer_8h_a13c23faf3a5a4a05713f31c26f3ce3bca21dbe97ed3d9f2075a74774351f815b5}{E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-R\-E\-L\-\_\-\-U\-R\-I\-\_\-\-P\-A\-R\-T}\label{buffer_8h_a13c23faf3a5a4a05713f31c26f3ce3bca21dbe97ed3d9f2075a74774351f815b5}
+}]\index{E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-H\-T\-M\-L@{E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-H\-T\-M\-L}!buffer.\-h@{buffer.\-h}}\index{buffer.\-h@{buffer.\-h}!E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-H\-T\-M\-L@{E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-H\-T\-M\-L}}\item[{\em 
+\hypertarget{buffer_8h_a13c23faf3a5a4a05713f31c26f3ce3bca2581e2c56b82d392c656df540e29bc8c}{E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-H\-T\-M\-L}\label{buffer_8h_a13c23faf3a5a4a05713f31c26f3ce3bca2581e2c56b82d392c656df540e29bc8c}
+}]\index{E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-M\-I\-N\-I\-M\-A\-L\-\_\-\-X\-M\-L@{E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-M\-I\-N\-I\-M\-A\-L\-\_\-\-X\-M\-L}!buffer.\-h@{buffer.\-h}}\index{buffer.\-h@{buffer.\-h}!E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-M\-I\-N\-I\-M\-A\-L\-\_\-\-X\-M\-L@{E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-M\-I\-N\-I\-M\-A\-L\-\_\-\-X\-M\-L}}\item[{\em 
+\hypertarget{buffer_8h_a13c23faf3a5a4a05713f31c26f3ce3bca796366822b39758889a58d8dedcc9651}{E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-M\-I\-N\-I\-M\-A\-L\-\_\-\-X\-M\-L}\label{buffer_8h_a13c23faf3a5a4a05713f31c26f3ce3bca796366822b39758889a58d8dedcc9651}
+}]\index{E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-H\-E\-X@{E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-H\-E\-X}!buffer.\-h@{buffer.\-h}}\index{buffer.\-h@{buffer.\-h}!E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-H\-E\-X@{E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-H\-E\-X}}\item[{\em 
+\hypertarget{buffer_8h_a13c23faf3a5a4a05713f31c26f3ce3bcaedec5b1f9c41daa169412f11f5b94573}{E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-H\-E\-X}\label{buffer_8h_a13c23faf3a5a4a05713f31c26f3ce3bcaedec5b1f9c41daa169412f11f5b94573}
+}]\index{E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-H\-T\-T\-P\-\_\-\-H\-E\-A\-D\-E\-R@{E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-H\-T\-T\-P\-\_\-\-H\-E\-A\-D\-E\-R}!buffer.\-h@{buffer.\-h}}\index{buffer.\-h@{buffer.\-h}!E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-H\-T\-T\-P\-\_\-\-H\-E\-A\-D\-E\-R@{E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-H\-T\-T\-P\-\_\-\-H\-E\-A\-D\-E\-R}}\item[{\em 
+\hypertarget{buffer_8h_a13c23faf3a5a4a05713f31c26f3ce3bcaa5c1bcaf0528495cfa785683a7f79ee5}{E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-H\-T\-T\-P\-\_\-\-H\-E\-A\-D\-E\-R}\label{buffer_8h_a13c23faf3a5a4a05713f31c26f3ce3bcaa5c1bcaf0528495cfa785683a7f79ee5}
+}]\end{description}
+\end{Desc}
+
+
+\subsection{Function Documentation}
+\hypertarget{buffer_8h_a0e97758dab0f0b3598d9549290ecdef6}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-append\-\_\-int@{buffer\-\_\-append\-\_\-int}}
+\index{buffer\-\_\-append\-\_\-int@{buffer\-\_\-append\-\_\-int}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-append\-\_\-int}]{\setlength{\rightskip}{0pt plus 5cm}void buffer\-\_\-append\-\_\-int (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{b, }
+\item[{intmax\-\_\-t}]{val}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_a0e97758dab0f0b3598d9549290ecdef6}
+
+
+References buffer\-\_\-append\-\_\-string\-\_\-len(), force\-\_\-assert, itostr(), and L\-I\-\_\-\-I\-T\-O\-S\-T\-R\-I\-N\-G\-\_\-\-L\-E\-N\-G\-T\-H.
+
+
+
+Referenced by buffer\-\_\-copy\-\_\-int(), config\-\_\-check\-\_\-cond\-\_\-nocache(), configparser\-\_\-merge\-\_\-data(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), connection\-\_\-handle\-\_\-write\-\_\-prepare(), connection\-\_\-state\-\_\-machine(), etag\-\_\-create(), etag\-\_\-mutate(), fastcgi\-\_\-status\-\_\-copy\-\_\-procname(), fcgi\-\_\-establish\-\_\-connection(), http\-\_\-request\-\_\-host\-\_\-normalize(), http\-\_\-response\-\_\-parse\-\_\-range(), http\-\_\-response\-\_\-redirect\-\_\-to\-\_\-directory(), http\-\_\-response\-\_\-write\-\_\-header(), log\-\_\-buffer\-\_\-append\-\_\-printf(), log\-\_\-buffer\-\_\-prepare(), mod\-\_\-evhost\-\_\-parse\-\_\-host(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-statistics(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-html(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-json(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-text(), network\-\_\-init(), R\-E\-Q\-U\-E\-S\-T\-D\-O\-N\-E\-\_\-\-F\-U\-N\-C(), scgi\-\_\-create\-\_\-env(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), stat\-\_\-cache\-\_\-get\-\_\-entry(), T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C(), U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C(), webdav\-\_\-gen\-\_\-response\-\_\-status\-\_\-tag(), webdav\-\_\-get\-\_\-live\-\_\-property(), and yy\-\_\-reduce().
+
+\hypertarget{buffer_8h_ab02198112cfd324f06637fb1db851d65}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-append\-\_\-slash@{buffer\-\_\-append\-\_\-slash}}
+\index{buffer\-\_\-append\-\_\-slash@{buffer\-\_\-append\-\_\-slash}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-append\-\_\-slash}]{\setlength{\rightskip}{0pt plus 5cm}static void buffer\-\_\-append\-\_\-slash (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{b}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{buffer_8h_ab02198112cfd324f06637fb1db851d65}
+
+
+References B\-U\-F\-F\-E\-R\-\_\-\-A\-P\-P\-E\-N\-D\-\_\-\-S\-T\-R\-I\-N\-G\-\_\-\-C\-O\-N\-S\-T, buffer\-\_\-string\-\_\-length(), and buffer\-::ptr.
+
+
+
+Referenced by build\-\_\-doc\-\_\-root(), chunkqueue\-\_\-get\-\_\-append\-\_\-tempfile(), config\-\_\-set\-\_\-defaults(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), deflate\-\_\-file\-\_\-to\-\_\-file(), http\-\_\-list\-\_\-directory\-\_\-footer(), http\-\_\-list\-\_\-directory\-\_\-header(), http\-\_\-response\-\_\-prepare(), mod\-\_\-evhost\-\_\-uri\-\_\-handler(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C(), U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C(), webdav\-\_\-copy\-\_\-dir(), and webdav\-\_\-delete\-\_\-dir().
+
+\hypertarget{buffer_8h_a569dffc876bb4fc1c6b7e1c33e1df6ef}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-append\-\_\-strftime@{buffer\-\_\-append\-\_\-strftime}}
+\index{buffer\-\_\-append\-\_\-strftime@{buffer\-\_\-append\-\_\-strftime}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-append\-\_\-strftime}]{\setlength{\rightskip}{0pt plus 5cm}void buffer\-\_\-append\-\_\-strftime (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{b, }
+\item[{const char $\ast$}]{format, }
+\item[{const struct tm $\ast$}]{tm}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_a569dffc876bb4fc1c6b7e1c33e1df6ef}
+
+
+References buffer\-\_\-commit(), buffer\-\_\-string\-\_\-prepare\-\_\-append(), buffer\-\_\-string\-\_\-space(), and force\-\_\-assert.
+
+
+
+Referenced by C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), http\-\_\-response\-\_\-write\-\_\-header(), log\-\_\-buffer\-\_\-prepare(), R\-E\-Q\-U\-E\-S\-T\-D\-O\-N\-E\-\_\-\-F\-U\-N\-C(), and strftime\-\_\-cache\-\_\-get().
+
+\hypertarget{buffer_8h_a8d295a12e32d34ef8645d779b6e42141}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-append\-\_\-string@{buffer\-\_\-append\-\_\-string}}
+\index{buffer\-\_\-append\-\_\-string@{buffer\-\_\-append\-\_\-string}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-append\-\_\-string}]{\setlength{\rightskip}{0pt plus 5cm}void buffer\-\_\-append\-\_\-string (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{b, }
+\item[{const char $\ast$}]{s}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_a8d295a12e32d34ef8645d779b6e42141}
+
+
+References buffer\-\_\-append\-\_\-string\-\_\-len().
+
+
+
+Referenced by cache\-\_\-parse\-\_\-lua(), config\-\_\-parse\-\_\-file(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), connection\-\_\-handle\-\_\-write\-\_\-prepare(), deflate\-\_\-file\-\_\-to\-\_\-file(), http\-\_\-list\-\_\-directory(), http\-\_\-list\-\_\-directory\-\_\-include\-\_\-file(), http\-\_\-request\-\_\-parse(), http\-\_\-response\-\_\-parse\-\_\-range(), http\-\_\-response\-\_\-redirect\-\_\-to\-\_\-directory(), http\-\_\-response\-\_\-write\-\_\-header(), log\-\_\-buffer\-\_\-prepare(), mod\-\_\-auth\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-digest(), mod\-\_\-authn\-\_\-gssapi\-\_\-basic(), mod\-\_\-authn\-\_\-gssapi\-\_\-check\-\_\-spnego(), mod\-\_\-authn\-\_\-gssapi\-\_\-log\-\_\-gss\-\_\-error(), mod\-\_\-redirect\-\_\-uri\-\_\-handler(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-html(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-json(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-text(), mod\-\_\-status\-\_\-header\-\_\-append(), mod\-\_\-status\-\_\-header\-\_\-append\-\_\-sort(), mod\-\_\-status\-\_\-row\-\_\-append(), P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C(), plugins\-\_\-load(), process\-\_\-ssi\-\_\-stmt(), proxy\-\_\-append\-\_\-header(), R\-E\-Q\-U\-E\-S\-T\-D\-O\-N\-E\-\_\-\-F\-U\-N\-C(), S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C(), U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C(), webdav\-\_\-copy\-\_\-dir(), webdav\-\_\-delete\-\_\-dir(), webdav\-\_\-gen\-\_\-prop\-\_\-tag(), webdav\-\_\-gen\-\_\-response\-\_\-status\-\_\-tag(), webdav\-\_\-get\-\_\-live\-\_\-property(), and yy\-\_\-reduce().
+
+\hypertarget{buffer_8h_a8941881a6d28b2c243c94fef71da90df}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-append\-\_\-string\-\_\-buffer@{buffer\-\_\-append\-\_\-string\-\_\-buffer}}
+\index{buffer\-\_\-append\-\_\-string\-\_\-buffer@{buffer\-\_\-append\-\_\-string\-\_\-buffer}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-append\-\_\-string\-\_\-buffer}]{\setlength{\rightskip}{0pt plus 5cm}void buffer\-\_\-append\-\_\-string\-\_\-buffer (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{b, }
+\item[{const {\bf buffer} $\ast$}]{src}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_a8941881a6d28b2c243c94fef71da90df}
+
+
+References buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-string\-\_\-length(), and buffer\-::ptr.
+
+
+
+Referenced by build\-\_\-doc\-\_\-root(), cache\-\_\-parse\-\_\-lua(), cgi\-\_\-demux\-\_\-response(), config\-\_\-set\-\_\-defaults(), configparser\-\_\-merge\-\_\-data(), configparser\-\_\-remoteip\-\_\-normalize\-\_\-compat(), data\-\_\-response\-\_\-insert\-\_\-dup(), data\-\_\-string\-\_\-insert\-\_\-dup(), deflate\-\_\-file\-\_\-to\-\_\-file(), fastcgi\-\_\-status\-\_\-copy\-\_\-procname(), fcgi\-\_\-create\-\_\-env(), fcgi\-\_\-demux\-\_\-response(), fcgi\-\_\-establish\-\_\-connection(), fcgi\-\_\-recv\-\_\-response(), http\-\_\-cgi\-\_\-headers(), http\-\_\-list\-\_\-directory(), http\-\_\-list\-\_\-directory\-\_\-footer(), http\-\_\-list\-\_\-directory\-\_\-header(), http\-\_\-response\-\_\-parse\-\_\-range(), http\-\_\-response\-\_\-prepare(), http\-\_\-response\-\_\-redirect\-\_\-to\-\_\-directory(), http\-\_\-response\-\_\-write\-\_\-header(), mod\-\_\-auth\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-basic(), mod\-\_\-auth\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-digest(), mod\-\_\-authn\-\_\-gssapi\-\_\-basic(), mod\-\_\-authn\-\_\-gssapi\-\_\-check\-\_\-spnego(), mod\-\_\-authn\-\_\-ldap\-\_\-basic(), mod\-\_\-evhost\-\_\-uri\-\_\-handler(), mod\-\_\-rrdtool\-\_\-create\-\_\-rrd(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-config(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-statistics(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-html(), process\-\_\-ssi\-\_\-stmt(), proxy\-\_\-create\-\_\-env(), R\-E\-Q\-U\-E\-S\-T\-D\-O\-N\-E\-\_\-\-F\-U\-N\-C(), scgi\-\_\-create\-\_\-env(), scgi\-\_\-demux\-\_\-response(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C(), T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C(), U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C(), webdav\-\_\-gen\-\_\-response\-\_\-status\-\_\-tag(), webdav\-\_\-get\-\_\-live\-\_\-property(), and yy\-\_\-reduce().
+
+\hypertarget{buffer_8h_afa8655869cab1d2f47c3d7b675eaaa64}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-append\-\_\-string\-\_\-c\-\_\-escaped@{buffer\-\_\-append\-\_\-string\-\_\-c\-\_\-escaped}}
+\index{buffer\-\_\-append\-\_\-string\-\_\-c\-\_\-escaped@{buffer\-\_\-append\-\_\-string\-\_\-c\-\_\-escaped}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-append\-\_\-string\-\_\-c\-\_\-escaped}]{\setlength{\rightskip}{0pt plus 5cm}void buffer\-\_\-append\-\_\-string\-\_\-c\-\_\-escaped (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{b, }
+\item[{const char $\ast$}]{s, }
+\item[{size\-\_\-t}]{s\-\_\-len}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_afa8655869cab1d2f47c3d7b675eaaa64}
+
+
+References buffer\-\_\-commit(), buffer\-\_\-string\-\_\-prepare\-\_\-append(), force\-\_\-assert, and hex\-\_\-chars.
+
+
+
+Referenced by log\-\_\-buffer\-\_\-append\-\_\-printf().
+
+\hypertarget{buffer_8h_a26c188baa47028c50b4865df978c3a78}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-append\-\_\-string\-\_\-encoded@{buffer\-\_\-append\-\_\-string\-\_\-encoded}}
+\index{buffer\-\_\-append\-\_\-string\-\_\-encoded@{buffer\-\_\-append\-\_\-string\-\_\-encoded}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-append\-\_\-string\-\_\-encoded}]{\setlength{\rightskip}{0pt plus 5cm}void buffer\-\_\-append\-\_\-string\-\_\-encoded (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{b, }
+\item[{const char $\ast$}]{s, }
+\item[{size\-\_\-t}]{s\-\_\-len, }
+\item[{{\bf buffer\-\_\-encoding\-\_\-t}}]{encoding}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_a26c188baa47028c50b4865df978c3a78}
+
+
+References buffer\-\_\-commit(), buffer\-\_\-string\-\_\-prepare\-\_\-append(), encoded\-\_\-chars\-\_\-hex, encoded\-\_\-chars\-\_\-html, encoded\-\_\-chars\-\_\-http\-\_\-header, encoded\-\_\-chars\-\_\-minimal\-\_\-xml, encoded\-\_\-chars\-\_\-rel\-\_\-uri, encoded\-\_\-chars\-\_\-rel\-\_\-uri\-\_\-part, E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-H\-E\-X, E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-H\-T\-M\-L, E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-H\-T\-T\-P\-\_\-\-H\-E\-A\-D\-E\-R, E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-M\-I\-N\-I\-M\-A\-L\-\_\-\-X\-M\-L, E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-R\-E\-L\-\_\-\-U\-R\-I, E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-R\-E\-L\-\_\-\-U\-R\-I\-\_\-\-P\-A\-R\-T, force\-\_\-assert, and hex\-\_\-chars.
+
+
+
+Referenced by http\-\_\-list\-\_\-directory(), http\-\_\-list\-\_\-directory\-\_\-header(), http\-\_\-list\-\_\-directory\-\_\-include\-\_\-file(), http\-\_\-response\-\_\-redirect\-\_\-to\-\_\-directory(), http\-\_\-response\-\_\-write\-\_\-header(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-html(), process\-\_\-ssi\-\_\-stmt(), S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C(), and U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{buffer_8h_a0321a93876dd9a68f52ace5ef8176c67}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-append\-\_\-string\-\_\-len@{buffer\-\_\-append\-\_\-string\-\_\-len}}
+\index{buffer\-\_\-append\-\_\-string\-\_\-len@{buffer\-\_\-append\-\_\-string\-\_\-len}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-append\-\_\-string\-\_\-len}]{\setlength{\rightskip}{0pt plus 5cm}void buffer\-\_\-append\-\_\-string\-\_\-len (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{b, }
+\item[{const char $\ast$}]{s, }
+\item[{size\-\_\-t}]{s\-\_\-len}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_a0321a93876dd9a68f52ace5ef8176c67}
+append a string to the end of the buffer
+
+the resulting buffer is terminated with a '\textbackslash{}0' s is treated as a un-\/terminated string (a \textbackslash{}0 is handled a normal character)
+
+
+\begin{DoxyParams}{Parameters}
+{\em b} & a buffer \\
+\hline
+{\em s} & the string \\
+\hline
+{\em s\-\_\-len} & size of the string (without the terminating \textbackslash{}0) \\
+\hline
+\end{DoxyParams}
+
+
+References buffer\-\_\-commit(), buffer\-\_\-string\-\_\-prepare\-\_\-append(), and force\-\_\-assert.
+
+
+
+Referenced by accesslog\-\_\-append\-\_\-escaped(), buffer\-\_\-append\-\_\-int(), buffer\-\_\-append\-\_\-string(), buffer\-\_\-append\-\_\-string\-\_\-buffer(), build\-\_\-doc\-\_\-root(), chunkqueue\-\_\-get\-\_\-append\-\_\-tempfile(), config\-\_\-append\-\_\-cond\-\_\-match\-\_\-buffer(), config\-\_\-check\-\_\-cond\-\_\-nocache(), config\-\_\-tokenizer(), configparser\-\_\-remoteip\-\_\-normalize\-\_\-compat(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-cq\-\_\-compact(), connection\-\_\-handle\-\_\-read\-\_\-state(), connection\-\_\-handle\-\_\-write\-\_\-prepare(), data\-\_\-response\-\_\-insert\-\_\-dup(), data\-\_\-string\-\_\-insert\-\_\-dup(), deflate\-\_\-file\-\_\-to\-\_\-file(), etag\-\_\-create(), etag\-\_\-mutate(), fastcgi\-\_\-get\-\_\-packet(), fastcgi\-\_\-status\-\_\-copy\-\_\-procname(), fcgi\-\_\-create\-\_\-env(), fcgi\-\_\-env\-\_\-add(), fcgi\-\_\-establish\-\_\-connection(), fcgi\-\_\-host\-\_\-assign(), fcgi\-\_\-host\-\_\-reset(), fcgi\-\_\-proc\-\_\-load\-\_\-dec(), fcgi\-\_\-proc\-\_\-load\-\_\-inc(), fcgi\-\_\-write\-\_\-request(), http\-\_\-chunk\-\_\-append\-\_\-len(), http\-\_\-chunk\-\_\-append\-\_\-to\-\_\-tempfile(), http\-\_\-dirlist\-\_\-append\-\_\-js\-\_\-table\-\_\-resort(), http\-\_\-list\-\_\-directory(), http\-\_\-list\-\_\-directory\-\_\-footer(), http\-\_\-list\-\_\-directory\-\_\-header(), http\-\_\-list\-\_\-directory\-\_\-include\-\_\-file(), http\-\_\-request\-\_\-host\-\_\-normalize(), http\-\_\-response\-\_\-parse\-\_\-range(), http\-\_\-response\-\_\-prepare(), http\-\_\-response\-\_\-redirect\-\_\-to\-\_\-directory(), http\-\_\-response\-\_\-write\-\_\-header(), log\-\_\-buffer\-\_\-append\-\_\-printf(), log\-\_\-buffer\-\_\-prepare(), log\-\_\-error\-\_\-write\-\_\-multiline\-\_\-buffer(), log\-\_\-write(), main(), mod\-\_\-auth\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-basic(), mod\-\_\-auth\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-digest(), mod\-\_\-authn\-\_\-gssapi\-\_\-basic(), mod\-\_\-authn\-\_\-gssapi\-\_\-check\-\_\-spnego(), mod\-\_\-authn\-\_\-gssapi\-\_\-log\-\_\-gss\-\_\-error(), mod\-\_\-authn\-\_\-ldap\-\_\-basic(), mod\-\_\-evhost\-\_\-uri\-\_\-handler(), mod\-\_\-redirect\-\_\-uri\-\_\-handler(), mod\-\_\-rrdtool\-\_\-create\-\_\-rrd(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-config(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-statistics(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-html(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-json(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-text(), mod\-\_\-status\-\_\-header\-\_\-append(), mod\-\_\-status\-\_\-header\-\_\-append\-\_\-sort(), mod\-\_\-status\-\_\-row\-\_\-append(), network\-\_\-init(), P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C(), plugins\-\_\-load(), process\-\_\-ssi\-\_\-stmt(), proxy\-\_\-create\-\_\-env(), proxy\-\_\-demux\-\_\-response(), R\-E\-Q\-U\-E\-S\-T\-D\-O\-N\-E\-\_\-\-F\-U\-N\-C(), response\-\_\-header\-\_\-append(), scgi\-\_\-create\-\_\-env(), scgi\-\_\-env\-\_\-add\-\_\-scgi(), scgi\-\_\-env\-\_\-add\-\_\-uwsgi(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C(), T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C(), U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C(), webdav\-\_\-gen\-\_\-prop\-\_\-tag(), webdav\-\_\-gen\-\_\-response\-\_\-status\-\_\-tag(), webdav\-\_\-get\-\_\-live\-\_\-property(), and yy\-\_\-reduce().
+
+\hypertarget{buffer_8h_a4a0e6af70b8f54004060118603a2bdf3}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-append\-\_\-uint\-\_\-hex@{buffer\-\_\-append\-\_\-uint\-\_\-hex}}
+\index{buffer\-\_\-append\-\_\-uint\-\_\-hex@{buffer\-\_\-append\-\_\-uint\-\_\-hex}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-append\-\_\-uint\-\_\-hex}]{\setlength{\rightskip}{0pt plus 5cm}void buffer\-\_\-append\-\_\-uint\-\_\-hex (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{b, }
+\item[{uintmax\-\_\-t}]{len}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_a4a0e6af70b8f54004060118603a2bdf3}
+
+
+References buffer\-\_\-commit(), buffer\-\_\-string\-\_\-prepare\-\_\-append(), and hex\-\_\-chars.
+
+
+
+Referenced by connection\-\_\-handle\-\_\-write\-\_\-prepare(), http\-\_\-chunk\-\_\-append\-\_\-len(), http\-\_\-chunk\-\_\-append\-\_\-to\-\_\-tempfile(), log\-\_\-buffer\-\_\-append\-\_\-printf(), and mod\-\_\-auth\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-digest().
+
+\hypertarget{buffer_8h_a92786864c297dc3ee740ddaaf52afdc6}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-caseless\-\_\-compare@{buffer\-\_\-caseless\-\_\-compare}}
+\index{buffer\-\_\-caseless\-\_\-compare@{buffer\-\_\-caseless\-\_\-compare}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-caseless\-\_\-compare}]{\setlength{\rightskip}{0pt plus 5cm}int buffer\-\_\-caseless\-\_\-compare (
+\begin{DoxyParamCaption}
+\item[{const char $\ast$}]{a, }
+\item[{size\-\_\-t}]{a\-\_\-len, }
+\item[{const char $\ast$}]{b, }
+\item[{size\-\_\-t}]{b\-\_\-len}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_a92786864c297dc3ee740ddaaf52afdc6}
+
+
+Referenced by array\-\_\-get\-\_\-index(), and http\-\_\-request\-\_\-parse().
+
+\hypertarget{buffer_8h_a17816a97d56eb3021fb8ae2dcd239bf8}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-commit@{buffer\-\_\-commit}}
+\index{buffer\-\_\-commit@{buffer\-\_\-commit}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-commit}]{\setlength{\rightskip}{0pt plus 5cm}void buffer\-\_\-commit (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{b, }
+\item[{size\-\_\-t}]{size}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_a17816a97d56eb3021fb8ae2dcd239bf8}
+
+
+References force\-\_\-assert, buffer\-::ptr, buffer\-::size, and buffer\-::used.
+
+
+
+Referenced by buffer\-\_\-append\-\_\-base64\-\_\-decode(), buffer\-\_\-append\-\_\-base64\-\_\-encode(), buffer\-\_\-append\-\_\-base64\-\_\-encode\-\_\-no\-\_\-padding(), buffer\-\_\-append\-\_\-strftime(), buffer\-\_\-append\-\_\-string\-\_\-c\-\_\-escaped(), buffer\-\_\-append\-\_\-string\-\_\-encoded(), buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-append\-\_\-uint\-\_\-hex(), buffer\-\_\-copy\-\_\-string\-\_\-len(), cgi\-\_\-demux\-\_\-response(), chunkqueue\-\_\-use\-\_\-memory(), config\-\_\-read(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), mod\-\_\-rrdtool\-\_\-create\-\_\-rrd(), proc\-\_\-read\-\_\-fd\-\_\-to\-\_\-buffer(), proxy\-\_\-demux\-\_\-response(), scgi\-\_\-create\-\_\-env(), scgi\-\_\-demux\-\_\-response(), and T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{buffer_8h_aa2c8bd4c79082d38008a41b518fa938c}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-copy\-\_\-buffer@{buffer\-\_\-copy\-\_\-buffer}}
+\index{buffer\-\_\-copy\-\_\-buffer@{buffer\-\_\-copy\-\_\-buffer}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-copy\-\_\-buffer}]{\setlength{\rightskip}{0pt plus 5cm}void buffer\-\_\-copy\-\_\-buffer (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{b, }
+\item[{const {\bf buffer} $\ast$}]{src}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_aa2c8bd4c79082d38008a41b518fa938c}
+
+
+References buffer\-\_\-copy\-\_\-string\-\_\-len(), buffer\-\_\-string\-\_\-length(), buffer\-\_\-string\-\_\-prepare\-\_\-copy(), buffer\-::ptr, and buffer\-::used.
+
+
+
+Referenced by buffer\-\_\-init\-\_\-buffer(), build\-\_\-doc\-\_\-root(), cache\-\_\-call\-\_\-lua(), cache\-\_\-parse\-\_\-lua(), cgi\-\_\-demux\-\_\-response(), cgi\-\_\-response\-\_\-parse(), chunkqueue\-\_\-append\-\_\-file(), chunkqueue\-\_\-append\-\_\-file\-\_\-fd(), chunkqueue\-\_\-get\-\_\-append\-\_\-tempfile(), config\-\_\-check\-\_\-cond\-\_\-nocache(), config\-\_\-insert\-\_\-values\-\_\-global(), config\-\_\-insert\-\_\-values\-\_\-internal(), config\-\_\-parse(), config\-\_\-patch\-\_\-connection(), config\-\_\-set\-\_\-defaults(), config\-\_\-setup\-\_\-connection(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), connection\-\_\-handle\-\_\-write\-\_\-prepare(), connection\-\_\-map\-\_\-insert(), connection\-\_\-state\-\_\-machine(), data\-\_\-array\-\_\-copy(), data\-\_\-config\-\_\-copy(), data\-\_\-fastcgi\-\_\-copy(), data\-\_\-integer\-\_\-copy(), data\-\_\-response\-\_\-insert\-\_\-dup(), data\-\_\-string\-\_\-copy(), data\-\_\-string\-\_\-insert\-\_\-dup(), deflate\-\_\-file\-\_\-to\-\_\-file(), excludes\-\_\-buffer\-\_\-append(), fastcgi\-\_\-extension\-\_\-insert(), fcgi\-\_\-recv\-\_\-response(), http\-\_\-cgi\-\_\-headers(), http\-\_\-list\-\_\-directory\-\_\-footer(), http\-\_\-list\-\_\-directory\-\_\-header(), http\-\_\-request\-\_\-parse(), http\-\_\-response\-\_\-prepare(), http\-\_\-response\-\_\-redirect\-\_\-to\-\_\-directory(), log\-\_\-buffer\-\_\-prepare(), mod\-\_\-evhost\-\_\-uri\-\_\-handler(), mod\-\_\-redirect\-\_\-uri\-\_\-handler(), mod\-\_\-simple\-\_\-vhost\-\_\-docroot(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-config(), network\-\_\-init(), network\-\_\-server\-\_\-init(), P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C(), plugins\-\_\-load(), process\-\_\-ssi\-\_\-stmt(), proxy\-\_\-response\-\_\-parse(), run\-\_\-buffer\-\_\-path\-\_\-simplify(), scgi\-\_\-extension\-\_\-insert(), scgi\-\_\-response\-\_\-parse(), script\-\_\-cache\-\_\-get\-\_\-script(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), ssi\-\_\-expr\-\_\-tokenizer(), stat\-\_\-cache\-\_\-get\-\_\-entry(), S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C(), T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C(), U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C(), webdav\-\_\-copy\-\_\-dir(), webdav\-\_\-delete\-\_\-dir(), and yy\-\_\-reduce().
+
+\hypertarget{buffer_8h_a209e1a13dd24ad7a72835d941de5c719}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-copy\-\_\-int@{buffer\-\_\-copy\-\_\-int}}
+\index{buffer\-\_\-copy\-\_\-int@{buffer\-\_\-copy\-\_\-int}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-copy\-\_\-int}]{\setlength{\rightskip}{0pt plus 5cm}void buffer\-\_\-copy\-\_\-int (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{b, }
+\item[{intmax\-\_\-t}]{val}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_a209e1a13dd24ad7a72835d941de5c719}
+
+
+References buffer\-\_\-append\-\_\-int(), force\-\_\-assert, and buffer\-::used.
+
+
+
+Referenced by array\-\_\-find\-\_\-or\-\_\-insert(), connection\-\_\-handle\-\_\-write\-\_\-prepare(), fcgi\-\_\-response\-\_\-parse(), main(), process\-\_\-ssi\-\_\-stmt(), and yy\-\_\-reduce().
+
+\hypertarget{buffer_8h_a6baf7225f0a54bdf2fc65860627ae546}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-copy\-\_\-string@{buffer\-\_\-copy\-\_\-string}}
+\index{buffer\-\_\-copy\-\_\-string@{buffer\-\_\-copy\-\_\-string}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-copy\-\_\-string}]{\setlength{\rightskip}{0pt plus 5cm}void buffer\-\_\-copy\-\_\-string (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{b, }
+\item[{const char $\ast$}]{s}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_a6baf7225f0a54bdf2fc65860627ae546}
+
+
+References buffer\-\_\-copy\-\_\-string\-\_\-len().
+
+
+
+Referenced by buffer\-\_\-init\-\_\-string(), cache\-\_\-parse\-\_\-lua(), cgi\-\_\-response\-\_\-parse(), config\-\_\-check\-\_\-cond\-\_\-nocache(), config\-\_\-parse\-\_\-file(), config\-\_\-set\-\_\-defaults(), connection\-\_\-accepted(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), fcgi\-\_\-check\-\_\-extension(), fcgi\-\_\-response\-\_\-parse(), http\-\_\-request\-\_\-host\-\_\-normalize(), http\-\_\-response\-\_\-prepare(), lua\-\_\-to\-\_\-c\-\_\-get\-\_\-string(), magnet\-\_\-env\-\_\-get\-\_\-buffer\-\_\-by\-\_\-id(), main(), mod\-\_\-authn\-\_\-gssapi\-\_\-check\-\_\-spnego(), plugins\-\_\-load(), process\-\_\-ssi\-\_\-stmt(), proxy\-\_\-append\-\_\-header(), proxy\-\_\-create\-\_\-env(), proxy\-\_\-response\-\_\-parse(), proxy\-\_\-set\-\_\-header(), response\-\_\-header\-\_\-overwrite(), scgi\-\_\-check\-\_\-extension(), scgi\-\_\-response\-\_\-parse(), S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C(), test\-\_\-configfile\-\_\-addrbuf\-\_\-eq\-\_\-remote\-\_\-ip\-\_\-mask(), and U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{buffer_8h_ade9f537d083cf1daa12304d0366770a9}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-copy\-\_\-string\-\_\-encoded\-\_\-cgi\-\_\-varnames@{buffer\-\_\-copy\-\_\-string\-\_\-encoded\-\_\-cgi\-\_\-varnames}}
+\index{buffer\-\_\-copy\-\_\-string\-\_\-encoded\-\_\-cgi\-\_\-varnames@{buffer\-\_\-copy\-\_\-string\-\_\-encoded\-\_\-cgi\-\_\-varnames}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-copy\-\_\-string\-\_\-encoded\-\_\-cgi\-\_\-varnames}]{\setlength{\rightskip}{0pt plus 5cm}void buffer\-\_\-copy\-\_\-string\-\_\-encoded\-\_\-cgi\-\_\-varnames (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{b, }
+\item[{const char $\ast$}]{s, }
+\item[{size\-\_\-t}]{s\-\_\-len, }
+\item[{int}]{is\-\_\-http\-\_\-header}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_ade9f537d083cf1daa12304d0366770a9}
+
+
+References buffer\-\_\-copy\-\_\-string\-\_\-len(), buffer\-\_\-reset(), buffer\-\_\-string\-\_\-length(), buffer\-\_\-string\-\_\-prepare\-\_\-append(), C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, force\-\_\-assert, light\-\_\-isalpha(), light\-\_\-isdigit(), buffer\-::ptr, and buffer\-::used.
+
+
+
+Referenced by http\-\_\-cgi\-\_\-headers().
+
+\hypertarget{buffer_8h_a930a82139e43c9e9198af84d04969354}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-copy\-\_\-string\-\_\-hex@{buffer\-\_\-copy\-\_\-string\-\_\-hex}}
+\index{buffer\-\_\-copy\-\_\-string\-\_\-hex@{buffer\-\_\-copy\-\_\-string\-\_\-hex}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-copy\-\_\-string\-\_\-hex}]{\setlength{\rightskip}{0pt plus 5cm}void buffer\-\_\-copy\-\_\-string\-\_\-hex (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{b, }
+\item[{const char $\ast$}]{in, }
+\item[{size\-\_\-t}]{in\-\_\-len}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_a930a82139e43c9e9198af84d04969354}
+
+
+References buffer\-\_\-string\-\_\-length(), buffer\-\_\-string\-\_\-set\-\_\-length(), force\-\_\-assert, li\-\_\-tohex(), and buffer\-::ptr.
+
+\hypertarget{buffer_8h_a145ed23cd298e8437d7fa7b7be701cdb}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-copy\-\_\-string\-\_\-len@{buffer\-\_\-copy\-\_\-string\-\_\-len}}
+\index{buffer\-\_\-copy\-\_\-string\-\_\-len@{buffer\-\_\-copy\-\_\-string\-\_\-len}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-copy\-\_\-string\-\_\-len}]{\setlength{\rightskip}{0pt plus 5cm}void buffer\-\_\-copy\-\_\-string\-\_\-len (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{b, }
+\item[{const char $\ast$}]{s, }
+\item[{size\-\_\-t}]{s\-\_\-len}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_a145ed23cd298e8437d7fa7b7be701cdb}
+
+
+References buffer\-\_\-commit(), buffer\-\_\-string\-\_\-prepare\-\_\-copy(), force\-\_\-assert, and buffer\-::ptr.
+
+
+
+Referenced by accesslog\-\_\-parse\-\_\-format(), array\-\_\-set\-\_\-key\-\_\-value(), buffer\-\_\-copy\-\_\-buffer(), buffer\-\_\-copy\-\_\-string(), buffer\-\_\-copy\-\_\-string\-\_\-encoded\-\_\-cgi\-\_\-varnames(), cgi\-\_\-response\-\_\-parse(), chunkqueue\-\_\-append\-\_\-mem(), config\-\_\-check\-\_\-cond\-\_\-nocache(), config\-\_\-insert(), config\-\_\-insert\-\_\-values\-\_\-global(), config\-\_\-read(), config\-\_\-tokenizer(), configparser\-\_\-remoteip\-\_\-normalize\-\_\-compat(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), connection\-\_\-handle\-\_\-write\-\_\-prepare(), connection\-\_\-state\-\_\-machine(), etag\-\_\-mutate(), fastcgi\-\_\-status\-\_\-copy\-\_\-procname(), fcgi\-\_\-create\-\_\-env(), fcgi\-\_\-demux\-\_\-response(), fcgi\-\_\-establish\-\_\-connection(), fcgi\-\_\-response\-\_\-parse(), http\-\_\-auth\-\_\-setenv(), http\-\_\-list\-\_\-directory(), http\-\_\-request\-\_\-parse(), http\-\_\-request\-\_\-split\-\_\-value(), http\-\_\-response\-\_\-parse\-\_\-range(), http\-\_\-response\-\_\-prepare(), http\-\_\-response\-\_\-write\-\_\-header(), log\-\_\-buffer\-\_\-prepare(), magnet\-\_\-checkbuffer(), magnet\-\_\-env\-\_\-set(), mod\-\_\-auth\-\_\-check\-\_\-digest(), mod\-\_\-auth\-\_\-require\-\_\-parse(), mod\-\_\-auth\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-basic(), mod\-\_\-auth\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-digest(), mod\-\_\-authn\-\_\-file\-\_\-htpasswd\-\_\-get(), mod\-\_\-evhost\-\_\-parse\-\_\-host(), mod\-\_\-evhost\-\_\-parse\-\_\-pattern(), mod\-\_\-rrdtool\-\_\-create\-\_\-rrd(), mod\-\_\-ssi\-\_\-handle\-\_\-request(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-config(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-html(), P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C(), process\-\_\-ssi\-\_\-stmt(), proxy\-\_\-response\-\_\-parse(), put\-\_\-string\-\_\-into\-\_\-array\-\_\-len(), R\-E\-Q\-U\-E\-S\-T\-D\-O\-N\-E\-\_\-\-F\-U\-N\-C(), response\-\_\-header\-\_\-insert(), run\-\_\-buffer\-\_\-path\-\_\-simplify(), scgi\-\_\-response\-\_\-parse(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), split\-\_\-get\-\_\-params(), ssi\-\_\-env\-\_\-add(), ssi\-\_\-expr\-\_\-tokenizer(), status\-\_\-counter\-\_\-get\-\_\-counter(), S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C(), T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C(), U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C(), and webdav\-\_\-gen\-\_\-response\-\_\-status\-\_\-tag().
+
+\hypertarget{buffer_8h_ad591d3747a0ec8cf335e3538b0e640b4}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-free@{buffer\-\_\-free}}
+\index{buffer\-\_\-free@{buffer\-\_\-free}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-free}]{\setlength{\rightskip}{0pt plus 5cm}void buffer\-\_\-free (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{b}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_ad591d3747a0ec8cf335e3538b0e640b4}
+
+
+References buffer\-::ptr.
+
+
+
+Referenced by cache\-\_\-parse\-\_\-lua(), cgi\-\_\-handler\-\_\-ctx\-\_\-free(), check\-\_\-all\-\_\-len\-\_\-0(), check\-\_\-all\-\_\-len\-\_\-1(), check\-\_\-all\-\_\-len\-\_\-2(), check\-\_\-all\-\_\-len\-\_\-3(), chunk\-\_\-free(), chunkqueue\-\_\-get\-\_\-append\-\_\-tempfile(), config\-\_\-insert(), config\-\_\-parse(), config\-\_\-parse\-\_\-cmd(), config\-\_\-parse\-\_\-file(), config\-\_\-read(), configparser\-\_\-remoteip\-\_\-normalize\-\_\-compat(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), connection\-\_\-handle\-\_\-errdoc\-\_\-init(), connection\-\_\-handle\-\_\-write\-\_\-prepare(), connection\-\_\-map\-\_\-free(), context\-\_\-free(), data\-\_\-array\-\_\-free(), data\-\_\-auth\-\_\-free(), data\-\_\-config\-\_\-free(), data\-\_\-fastcgi\-\_\-free(), data\-\_\-integer\-\_\-free(), data\-\_\-string\-\_\-free(), excludes\-\_\-buffer\-\_\-free(), fastcgi\-\_\-extensions\-\_\-free(), fastcgi\-\_\-get\-\_\-packet(), fastcgi\-\_\-host\-\_\-free(), fastcgi\-\_\-process\-\_\-free(), fcgi\-\_\-create\-\_\-env(), fcgi\-\_\-demux\-\_\-response(), F\-R\-E\-E\-\_\-\-F\-U\-N\-C(), handler\-\_\-ctx\-\_\-free(), http\-\_\-auth\-\_\-require\-\_\-free(), http\-\_\-list\-\_\-directory(), http\-\_\-request\-\_\-parse(), http\-\_\-response\-\_\-parse\-\_\-range(), http\-\_\-response\-\_\-redirect\-\_\-to\-\_\-directory(), http\-\_\-response\-\_\-write\-\_\-header(), magnet\-\_\-atpanic(), magnet\-\_\-attach\-\_\-content(), magnet\-\_\-print(), magnet\-\_\-stat(), mod\-\_\-auth\-\_\-check\-\_\-basic(), mod\-\_\-auth\-\_\-check\-\_\-digest(), mod\-\_\-authn\-\_\-file\-\_\-htdigest\-\_\-digest(), mod\-\_\-authn\-\_\-file\-\_\-htpasswd\-\_\-basic(), mod\-\_\-authn\-\_\-file\-\_\-plain\-\_\-basic(), mod\-\_\-authn\-\_\-file\-\_\-plain\-\_\-digest(), mod\-\_\-authn\-\_\-gssapi\-\_\-basic(), mod\-\_\-authn\-\_\-gssapi\-\_\-check\-\_\-spnego(), mod\-\_\-authn\-\_\-gssapi\-\_\-create\-\_\-krb5\-\_\-ccache(), mod\-\_\-authn\-\_\-gssapi\-\_\-log\-\_\-gss\-\_\-error(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-config(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-statistics(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-html(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-json(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-text(), network\-\_\-close(), network\-\_\-init(), network\-\_\-server\-\_\-init(), pcre\-\_\-keyvalue\-\_\-buffer\-\_\-free(), plugin\-\_\-free(), proc\-\_\-open\-\_\-buffer(), process\-\_\-ssi\-\_\-stmt(), proxy\-\_\-create\-\_\-env(), R\-E\-Q\-U\-E\-S\-T\-D\-O\-N\-E\-\_\-\-F\-U\-N\-C(), scgi\-\_\-create\-\_\-env(), scgi\-\_\-extensions\-\_\-free(), scgi\-\_\-host\-\_\-free(), scgi\-\_\-process\-\_\-free(), script\-\_\-free(), server\-\_\-free(), S\-E\-R\-V\-E\-R\-\_\-\-F\-U\-N\-C(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), ssi\-\_\-eval\-\_\-expr(), ssi\-\_\-val\-\_\-free(), stat\-\_\-cache\-\_\-entry\-\_\-free(), stat\-\_\-cache\-\_\-free(), stat\-\_\-cache\-\_\-get\-\_\-entry(), S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C(), test\-\_\-buffer\-\_\-path\-\_\-simplify(), test\-\_\-configfile\-\_\-addrbuf\-\_\-eq\-\_\-remote\-\_\-ip\-\_\-mask(), U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C(), webdav\-\_\-copy\-\_\-dir(), webdav\-\_\-delete\-\_\-dir(), yy\-\_\-destructor(), and yy\-\_\-reduce().
+
+\hypertarget{buffer_8h_af447519a12f8488d289adedb31c38086}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-init@{buffer\-\_\-init}}
+\index{buffer\-\_\-init@{buffer\-\_\-init}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}{\bf buffer}$\ast$ buffer\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_af447519a12f8488d289adedb31c38086}
+init the buffer 
+
+References force\-\_\-assert, buffer\-::ptr, buffer\-::size, and buffer\-::used.
+
+
+
+Referenced by accesslog\-\_\-parse\-\_\-format(), buffer\-\_\-init\-\_\-buffer(), buffer\-\_\-init\-\_\-string(), cache\-\_\-parse\-\_\-lua(), cgi\-\_\-handler\-\_\-ctx\-\_\-init(), check\-\_\-all\-\_\-len\-\_\-0(), check\-\_\-all\-\_\-len\-\_\-1(), check\-\_\-all\-\_\-len\-\_\-2(), check\-\_\-all\-\_\-len\-\_\-3(), chunk\-\_\-init(), config\-\_\-insert(), config\-\_\-parse(), config\-\_\-parse\-\_\-cmd(), configparser\-\_\-remoteip\-\_\-normalize\-\_\-compat(), connection\-\_\-handle\-\_\-write\-\_\-prepare(), connection\-\_\-map\-\_\-insert(), context\-\_\-init(), data\-\_\-array\-\_\-init(), data\-\_\-auth\-\_\-init(), data\-\_\-config\-\_\-init(), data\-\_\-fastcgi\-\_\-init(), data\-\_\-integer\-\_\-init(), data\-\_\-string\-\_\-init(), excludes\-\_\-buffer\-\_\-append(), fastcgi\-\_\-extension\-\_\-insert(), fastcgi\-\_\-get\-\_\-packet(), fastcgi\-\_\-host\-\_\-init(), fastcgi\-\_\-process\-\_\-init(), fcgi\-\_\-create\-\_\-env(), handler\-\_\-ctx\-\_\-init(), http\-\_\-auth\-\_\-require\-\_\-init(), http\-\_\-list\-\_\-directory(), http\-\_\-request\-\_\-parse(), http\-\_\-response\-\_\-parse\-\_\-range(), http\-\_\-response\-\_\-redirect\-\_\-to\-\_\-directory(), http\-\_\-response\-\_\-write\-\_\-header(), I\-N\-I\-T\-\_\-\-F\-U\-N\-C(), magnet\-\_\-checkbuffer(), magnet\-\_\-stat(), mod\-\_\-auth\-\_\-check\-\_\-basic(), mod\-\_\-auth\-\_\-check\-\_\-digest(), mod\-\_\-authn\-\_\-file\-\_\-htpasswd\-\_\-basic(), mod\-\_\-authn\-\_\-file\-\_\-plain\-\_\-basic(), mod\-\_\-authn\-\_\-file\-\_\-plain\-\_\-digest(), mod\-\_\-authn\-\_\-gssapi\-\_\-check\-\_\-spnego(), mod\-\_\-evhost\-\_\-parse\-\_\-pattern(), mod\-\_\-mysql\-\_\-vhost\-\_\-connection\-\_\-data(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-config(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-statistics(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-html(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-json(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-text(), network\-\_\-init(), network\-\_\-server\-\_\-init(), proc\-\_\-open\-\_\-buffer(), process\-\_\-ssi\-\_\-stmt(), proxy\-\_\-create\-\_\-env(), R\-E\-Q\-U\-E\-S\-T\-D\-O\-N\-E\-\_\-\-F\-U\-N\-C(), scgi\-\_\-create\-\_\-env(), scgi\-\_\-extension\-\_\-insert(), scgi\-\_\-host\-\_\-init(), scgi\-\_\-process\-\_\-init(), script\-\_\-init(), S\-E\-R\-V\-E\-R\-\_\-\-F\-U\-N\-C(), server\-\_\-init(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), ssi\-\_\-eval\-\_\-expr(), stat\-\_\-cache\-\_\-entry\-\_\-init(), stat\-\_\-cache\-\_\-get\-\_\-entry(), stat\-\_\-cache\-\_\-init(), S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C(), test\-\_\-buffer\-\_\-path\-\_\-simplify(), test\-\_\-configfile\-\_\-addrbuf\-\_\-eq\-\_\-remote\-\_\-ip\-\_\-mask(), U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C(), webdav\-\_\-copy\-\_\-dir(), webdav\-\_\-delete\-\_\-dir(), and yy\-\_\-reduce().
+
+\hypertarget{buffer_8h_a970d9abb211c921d516c5f9933c73556}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-init\-\_\-buffer@{buffer\-\_\-init\-\_\-buffer}}
+\index{buffer\-\_\-init\-\_\-buffer@{buffer\-\_\-init\-\_\-buffer}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-init\-\_\-buffer}]{\setlength{\rightskip}{0pt plus 5cm}{\bf buffer}$\ast$ buffer\-\_\-init\-\_\-buffer (
+\begin{DoxyParamCaption}
+\item[{const {\bf buffer} $\ast$}]{src}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_a970d9abb211c921d516c5f9933c73556}
+
+
+References buffer\-\_\-copy\-\_\-buffer(), and buffer\-\_\-init().
+
+
+
+Referenced by config\-\_\-insert(), config\-\_\-parse\-\_\-file(), connection\-\_\-handle\-\_\-errdoc\-\_\-init(), mod\-\_\-authn\-\_\-gssapi\-\_\-basic(), mod\-\_\-authn\-\_\-gssapi\-\_\-check\-\_\-spnego(), process\-\_\-ssi\-\_\-stmt(), and yy\-\_\-reduce().
+
+\hypertarget{buffer_8h_adbde61c285ec5d04c598f02bad81702c}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-init\-\_\-string@{buffer\-\_\-init\-\_\-string}}
+\index{buffer\-\_\-init\-\_\-string@{buffer\-\_\-init\-\_\-string}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-init\-\_\-string}]{\setlength{\rightskip}{0pt plus 5cm}{\bf buffer}$\ast$ buffer\-\_\-init\-\_\-string (
+\begin{DoxyParamCaption}
+\item[{const char $\ast$}]{str}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_adbde61c285ec5d04c598f02bad81702c}
+
+
+References buffer\-\_\-copy\-\_\-string(), and buffer\-\_\-init().
+
+
+
+Referenced by chunkqueue\-\_\-get\-\_\-append\-\_\-tempfile(), config\-\_\-insert(), config\-\_\-parse(), config\-\_\-parse\-\_\-cmd(), config\-\_\-parse\-\_\-file(), config\-\_\-read(), mod\-\_\-access\-\_\-plugin\-\_\-init(), mod\-\_\-accesslog\-\_\-plugin\-\_\-init(), mod\-\_\-alias\-\_\-plugin\-\_\-init(), mod\-\_\-auth\-\_\-plugin\-\_\-init(), mod\-\_\-authn\-\_\-file\-\_\-htdigest\-\_\-digest(), mod\-\_\-authn\-\_\-file\-\_\-plain\-\_\-digest(), mod\-\_\-authn\-\_\-file\-\_\-plugin\-\_\-init(), mod\-\_\-authn\-\_\-gssapi\-\_\-create\-\_\-krb5\-\_\-ccache(), mod\-\_\-authn\-\_\-gssapi\-\_\-log\-\_\-gss\-\_\-error(), mod\-\_\-authn\-\_\-gssapi\-\_\-plugin\-\_\-init(), mod\-\_\-authn\-\_\-ldap\-\_\-plugin\-\_\-init(), mod\-\_\-authn\-\_\-mysql\-\_\-plugin\-\_\-init(), mod\-\_\-cgi\-\_\-plugin\-\_\-init(), mod\-\_\-cml\-\_\-plugin\-\_\-init(), mod\-\_\-compress\-\_\-plugin\-\_\-init(), mod\-\_\-deflate\-\_\-plugin\-\_\-init(), mod\-\_\-dirlisting\-\_\-plugin\-\_\-init(), mod\-\_\-evasive\-\_\-plugin\-\_\-init(), mod\-\_\-evhost\-\_\-plugin\-\_\-init(), mod\-\_\-expire\-\_\-plugin\-\_\-init(), mod\-\_\-extforward\-\_\-plugin\-\_\-init(), mod\-\_\-fastcgi\-\_\-plugin\-\_\-init(), mod\-\_\-flv\-\_\-streaming\-\_\-plugin\-\_\-init(), mod\-\_\-geoip\-\_\-plugin\-\_\-init(), mod\-\_\-indexfile\-\_\-plugin\-\_\-init(), mod\-\_\-magnet\-\_\-plugin\-\_\-init(), mod\-\_\-mysql\-\_\-vhost\-\_\-plugin\-\_\-init(), mod\-\_\-proxy\-\_\-plugin\-\_\-init(), mod\-\_\-redirect\-\_\-plugin\-\_\-init(), mod\-\_\-rewrite\-\_\-plugin\-\_\-init(), mod\-\_\-rrdtool\-\_\-plugin\-\_\-init(), mod\-\_\-scgi\-\_\-plugin\-\_\-init(), mod\-\_\-secdownload\-\_\-plugin\-\_\-init(), mod\-\_\-setenv\-\_\-plugin\-\_\-init(), mod\-\_\-simple\-\_\-vhost\-\_\-plugin\-\_\-init(), mod\-\_\-skeleton\-\_\-plugin\-\_\-init(), mod\-\_\-ssi\-\_\-plugin\-\_\-init(), mod\-\_\-staticfile\-\_\-plugin\-\_\-init(), mod\-\_\-status\-\_\-plugin\-\_\-init(), mod\-\_\-trigger\-\_\-b4\-\_\-dl\-\_\-plugin\-\_\-init(), mod\-\_\-uploadprogress\-\_\-plugin\-\_\-init(), mod\-\_\-userdir\-\_\-plugin\-\_\-init(), mod\-\_\-usertrack\-\_\-plugin\-\_\-init(), mod\-\_\-webdav\-\_\-plugin\-\_\-init(), pcre\-\_\-keyvalue\-\_\-buffer\-\_\-append(), server\-\_\-init(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), and yy\-\_\-reduce().
+
+\hypertarget{buffer_8h_a02b141b68c48c167070d08ed8b2ae459}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-is\-\_\-empty@{buffer\-\_\-is\-\_\-empty}}
+\index{buffer\-\_\-is\-\_\-empty@{buffer\-\_\-is\-\_\-empty}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-is\-\_\-empty}]{\setlength{\rightskip}{0pt plus 5cm}int buffer\-\_\-is\-\_\-empty (
+\begin{DoxyParamCaption}
+\item[{const {\bf buffer} $\ast$}]{b}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_a02b141b68c48c167070d08ed8b2ae459}
+
+
+References buffer\-::used.
+
+
+
+Referenced by accesslog\-\_\-parse\-\_\-format(), array\-\_\-find\-\_\-or\-\_\-insert(), cgi\-\_\-get\-\_\-handler(), configparser\-\_\-merge\-\_\-data(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), data\-\_\-response\-\_\-insert\-\_\-dup(), data\-\_\-string\-\_\-insert\-\_\-dup(), fcgi\-\_\-check\-\_\-extension(), http\-\_\-cgi\-\_\-headers(), http\-\_\-list\-\_\-directory(), http\-\_\-list\-\_\-directory\-\_\-footer(), http\-\_\-request\-\_\-parse(), http\-\_\-response\-\_\-prepare(), http\-\_\-response\-\_\-redirect\-\_\-to\-\_\-directory(), http\-\_\-response\-\_\-write\-\_\-header(), magnet\-\_\-array\-\_\-next(), magnet\-\_\-cgi\-\_\-get(), magnet\-\_\-env\-\_\-get(), magnet\-\_\-env\-\_\-next(), magnet\-\_\-reqhdr\-\_\-get(), mod\-\_\-auth\-\_\-check\-\_\-basic(), mod\-\_\-auth\-\_\-check\-\_\-digest(), mod\-\_\-authn\-\_\-file\-\_\-htdigest\-\_\-get(), mod\-\_\-authn\-\_\-file\-\_\-htpasswd\-\_\-get(), mod\-\_\-authn\-\_\-gssapi\-\_\-basic(), mod\-\_\-authn\-\_\-gssapi\-\_\-check(), mod\-\_\-authn\-\_\-gssapi\-\_\-check\-\_\-spnego(), mod\-\_\-proxy\-\_\-check\-\_\-extension(), network\-\_\-server\-\_\-init(), P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C(), proxy\-\_\-create\-\_\-env(), R\-E\-Q\-U\-E\-S\-T\-D\-O\-N\-E\-\_\-\-F\-U\-N\-C(), scgi\-\_\-check\-\_\-extension(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), stat\-\_\-cache\-\_\-get\-\_\-entry(), S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C(), U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C(), webdav\-\_\-get\-\_\-live\-\_\-property(), and yy\-\_\-reduce().
+
+\hypertarget{buffer_8h_ac45bf29225ad6d8e51fbcc9e6a01d8df}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-is\-\_\-equal@{buffer\-\_\-is\-\_\-equal}}
+\index{buffer\-\_\-is\-\_\-equal@{buffer\-\_\-is\-\_\-equal}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-is\-\_\-equal}]{\setlength{\rightskip}{0pt plus 5cm}int buffer\-\_\-is\-\_\-equal (
+\begin{DoxyParamCaption}
+\item[{const {\bf buffer} $\ast$}]{a, }
+\item[{const {\bf buffer} $\ast$}]{b}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_ac45bf29225ad6d8e51fbcc9e6a01d8df}
+check if two buffer contain the same data
+
+H\-I\-S\-T\-O\-R\-Y\-: this function was pretty much optimized, but didn't handled alignment properly. 
+
+References force\-\_\-assert, buffer\-::ptr, and buffer\-::used.
+
+
+
+Referenced by config\-\_\-check\-\_\-cond\-\_\-nocache(), config\-\_\-set\-\_\-defaults(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), connection\-\_\-map\-\_\-get\-\_\-connection(), fastcgi\-\_\-extension\-\_\-insert(), fcgi\-\_\-check\-\_\-extension(), http\-\_\-cgi\-\_\-headers(), http\-\_\-response\-\_\-send\-\_\-file(), mod\-\_\-simple\-\_\-vhost\-\_\-docroot(), mod\-\_\-status\-\_\-handler(), network\-\_\-init(), P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C(), plugins\-\_\-load(), process\-\_\-ssi\-\_\-stmt(), scgi\-\_\-extension\-\_\-insert(), script\-\_\-cache\-\_\-get\-\_\-script(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), stat\-\_\-cache\-\_\-get\-\_\-entry(), S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C(), unixsocket\-\_\-is\-\_\-dup(), and U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{buffer_8h_a6df7fc4dc3b282b8eef48721b1f2f2c9}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-is\-\_\-equal\-\_\-caseless\-\_\-string@{buffer\-\_\-is\-\_\-equal\-\_\-caseless\-\_\-string}}
+\index{buffer\-\_\-is\-\_\-equal\-\_\-caseless\-\_\-string@{buffer\-\_\-is\-\_\-equal\-\_\-caseless\-\_\-string}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-is\-\_\-equal\-\_\-caseless\-\_\-string}]{\setlength{\rightskip}{0pt plus 5cm}int buffer\-\_\-is\-\_\-equal\-\_\-caseless\-\_\-string (
+\begin{DoxyParamCaption}
+\item[{const {\bf buffer} $\ast$}]{a, }
+\item[{const char $\ast$}]{s, }
+\item[{size\-\_\-t}]{b\-\_\-len}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_a6df7fc4dc3b282b8eef48721b1f2f2c9}
+
+
+References force\-\_\-assert, buffer\-::ptr, and buffer\-::used.
+
+
+
+Referenced by http\-\_\-cgi\-\_\-headers(), http\-\_\-response\-\_\-redirect\-\_\-to\-\_\-directory(), proxy\-\_\-create\-\_\-env(), and U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{buffer_8h_afc452ea383aa970adb8ba5815bf31c1d}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-is\-\_\-equal\-\_\-right\-\_\-len@{buffer\-\_\-is\-\_\-equal\-\_\-right\-\_\-len}}
+\index{buffer\-\_\-is\-\_\-equal\-\_\-right\-\_\-len@{buffer\-\_\-is\-\_\-equal\-\_\-right\-\_\-len}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-is\-\_\-equal\-\_\-right\-\_\-len}]{\setlength{\rightskip}{0pt plus 5cm}int buffer\-\_\-is\-\_\-equal\-\_\-right\-\_\-len (
+\begin{DoxyParamCaption}
+\item[{const {\bf buffer} $\ast$}]{a, }
+\item[{const {\bf buffer} $\ast$}]{b, }
+\item[{size\-\_\-t}]{len}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_afc452ea383aa970adb8ba5815bf31c1d}
+
+
+References buffer\-::ptr, and buffer\-::used.
+
+
+
+Referenced by process\-\_\-ssi\-\_\-stmt(), S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C(), U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C(), and webdav\-\_\-get\-\_\-live\-\_\-property().
+
+\hypertarget{buffer_8h_aacb5f22a7b9f69a8c2697e365305fee4}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-is\-\_\-equal\-\_\-string@{buffer\-\_\-is\-\_\-equal\-\_\-string}}
+\index{buffer\-\_\-is\-\_\-equal\-\_\-string@{buffer\-\_\-is\-\_\-equal\-\_\-string}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-is\-\_\-equal\-\_\-string}]{\setlength{\rightskip}{0pt plus 5cm}int buffer\-\_\-is\-\_\-equal\-\_\-string (
+\begin{DoxyParamCaption}
+\item[{const {\bf buffer} $\ast$}]{a, }
+\item[{const char $\ast$}]{s, }
+\item[{size\-\_\-t}]{b\-\_\-len}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_aacb5f22a7b9f69a8c2697e365305fee4}
+
+
+References force\-\_\-assert, buffer\-::ptr, and buffer\-::used.
+
+
+
+Referenced by check\-\_\-all\-\_\-len\-\_\-0(), check\-\_\-all\-\_\-len\-\_\-1(), check\-\_\-all\-\_\-len\-\_\-2(), check\-\_\-all\-\_\-len\-\_\-3(), config\-\_\-insert(), config\-\_\-insert\-\_\-values\-\_\-internal(), config\-\_\-patch\-\_\-connection(), fcgi\-\_\-patch\-\_\-connection(), http\-\_\-auth\-\_\-array\-\_\-contains(), mod\-\_\-access\-\_\-patch\-\_\-connection(), mod\-\_\-accesslog\-\_\-patch\-\_\-connection(), mod\-\_\-alias\-\_\-patch\-\_\-connection(), mod\-\_\-auth\-\_\-check\-\_\-digest(), mod\-\_\-auth\-\_\-patch\-\_\-connection(), mod\-\_\-auth\-\_\-require\-\_\-parse(), mod\-\_\-authn\-\_\-file\-\_\-patch\-\_\-connection(), mod\-\_\-authn\-\_\-file\-\_\-plain\-\_\-basic(), mod\-\_\-authn\-\_\-gssapi\-\_\-patch\-\_\-connection(), mod\-\_\-authn\-\_\-ldap\-\_\-patch\-\_\-connection(), mod\-\_\-authn\-\_\-mysql\-\_\-patch\-\_\-connection(), mod\-\_\-cgi\-\_\-patch\-\_\-connection(), mod\-\_\-cml\-\_\-patch\-\_\-connection(), mod\-\_\-compress\-\_\-patch\-\_\-connection(), mod\-\_\-deflate\-\_\-patch\-\_\-connection(), mod\-\_\-dirlisting\-\_\-patch\-\_\-connection(), mod\-\_\-evasive\-\_\-patch\-\_\-connection(), mod\-\_\-evhost\-\_\-patch\-\_\-connection(), mod\-\_\-expire\-\_\-patch\-\_\-connection(), mod\-\_\-extforward\-\_\-patch\-\_\-connection(), mod\-\_\-flv\-\_\-streaming\-\_\-patch\-\_\-connection(), mod\-\_\-geoip\-\_\-patch\-\_\-connection(), mod\-\_\-indexfile\-\_\-patch\-\_\-connection(), mod\-\_\-magnet\-\_\-patch\-\_\-connection(), mod\-\_\-mysql\-\_\-vhost\-\_\-patch\-\_\-connection(), mod\-\_\-proxy\-\_\-patch\-\_\-connection(), mod\-\_\-rrd\-\_\-patch\-\_\-connection(), mod\-\_\-secdownload\-\_\-patch\-\_\-connection(), mod\-\_\-setenv\-\_\-patch\-\_\-connection(), mod\-\_\-simple\-\_\-vhost\-\_\-patch\-\_\-connection(), mod\-\_\-skeleton\-\_\-patch\-\_\-connection(), mod\-\_\-ssi\-\_\-patch\-\_\-connection(), mod\-\_\-staticfile\-\_\-patch\-\_\-connection(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status(), mod\-\_\-status\-\_\-patch\-\_\-connection(), mod\-\_\-trigger\-\_\-b4\-\_\-dl\-\_\-patch\-\_\-connection(), mod\-\_\-uploadprogress\-\_\-patch\-\_\-connection(), mod\-\_\-userdir\-\_\-patch\-\_\-connection(), mod\-\_\-usertrack\-\_\-patch\-\_\-connection(), mod\-\_\-webdav\-\_\-patch\-\_\-connection(), network\-\_\-init(), network\-\_\-server\-\_\-init(), run\-\_\-buffer\-\_\-path\-\_\-simplify(), scgi\-\_\-patch\-\_\-connection(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), and yy\-\_\-reduce().
+
+\hypertarget{buffer_8h_a522f9198ee197d840672c4b6012c76be}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-move@{buffer\-\_\-move}}
+\index{buffer\-\_\-move@{buffer\-\_\-move}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-move}]{\setlength{\rightskip}{0pt plus 5cm}void buffer\-\_\-move (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{b, }
+\item[{{\bf buffer} $\ast$}]{src}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_a522f9198ee197d840672c4b6012c76be}
+
+
+References buffer\-\_\-reset().
+
+
+
+Referenced by chunkqueue\-\_\-append\-\_\-buffer(), and chunkqueue\-\_\-prepend\-\_\-buffer().
+
+\hypertarget{buffer_8h_af45b56e7043ca972ba96a403a7790679}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-path\-\_\-simplify@{buffer\-\_\-path\-\_\-simplify}}
+\index{buffer\-\_\-path\-\_\-simplify@{buffer\-\_\-path\-\_\-simplify}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-path\-\_\-simplify}]{\setlength{\rightskip}{0pt plus 5cm}void buffer\-\_\-path\-\_\-simplify (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{dest, }
+\item[{{\bf buffer} $\ast$}]{src}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_af45b56e7043ca972ba96a403a7790679}
+
+
+References buffer\-\_\-string\-\_\-is\-\_\-empty(), buffer\-\_\-string\-\_\-length(), buffer\-\_\-string\-\_\-prepare\-\_\-append(), buffer\-\_\-string\-\_\-prepare\-\_\-copy(), buffer\-\_\-string\-\_\-set\-\_\-length(), force\-\_\-assert, buffer\-::ptr, and buffer\-::used.
+
+
+
+Referenced by fcgi\-\_\-response\-\_\-parse(), http\-\_\-response\-\_\-prepare(), http\-\_\-response\-\_\-xsendfile(), process\-\_\-ssi\-\_\-stmt(), run\-\_\-buffer\-\_\-path\-\_\-simplify(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), and S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{buffer_8h_a21c0cf8209c5e356ed4bc97e1f7eba6f}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-reset@{buffer\-\_\-reset}}
+\index{buffer\-\_\-reset@{buffer\-\_\-reset}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-reset}]{\setlength{\rightskip}{0pt plus 5cm}void buffer\-\_\-reset (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{b}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_a21c0cf8209c5e356ed4bc97e1f7eba6f}
+
+
+References B\-U\-F\-F\-E\-R\-\_\-\-M\-A\-X\-\_\-\-R\-E\-U\-S\-E\-\_\-\-S\-I\-Z\-E, buffer\-::ptr, buffer\-::size, and buffer\-::used.
+
+
+
+Referenced by buffer\-\_\-copy\-\_\-string\-\_\-encoded\-\_\-cgi\-\_\-varnames(), buffer\-\_\-move(), cache\-\_\-parse\-\_\-lua(), check\-\_\-all\-\_\-len\-\_\-0(), check\-\_\-all\-\_\-len\-\_\-1(), check\-\_\-all\-\_\-len\-\_\-2(), check\-\_\-all\-\_\-len\-\_\-3(), chunk\-\_\-reset(), chunkqueue\-\_\-use\-\_\-memory(), config\-\_\-set\-\_\-defaults(), connection\-\_\-del(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), connection\-\_\-handle\-\_\-errdoc\-\_\-init(), connection\-\_\-handle\-\_\-read\-\_\-state(), connection\-\_\-handle\-\_\-write\-\_\-prepare(), connection\-\_\-map\-\_\-remove\-\_\-connection(), connection\-\_\-response\-\_\-reset(), connection\-\_\-state\-\_\-machine(), data\-\_\-array\-\_\-reset(), data\-\_\-config\-\_\-reset(), data\-\_\-fastcgi\-\_\-reset(), data\-\_\-integer\-\_\-reset(), data\-\_\-string\-\_\-reset(), deflate\-\_\-file\-\_\-to\-\_\-buffer(), deflate\-\_\-file\-\_\-to\-\_\-file(), etag\-\_\-create(), etag\-\_\-mutate(), handler\-\_\-ctx\-\_\-clear(), http\-\_\-request\-\_\-parse(), http\-\_\-response\-\_\-prepare(), http\-\_\-response\-\_\-xsendfile(), magnet\-\_\-env\-\_\-set(), main(), mod\-\_\-evhost\-\_\-uri\-\_\-handler(), mod\-\_\-redirect\-\_\-uri\-\_\-handler(), mod\-\_\-ssi\-\_\-handle\-\_\-request(), plugins\-\_\-load(), proxy\-\_\-demux\-\_\-response(), R\-E\-Q\-U\-E\-S\-T\-D\-O\-N\-E\-\_\-\-F\-U\-N\-C(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), S\-I\-G\-H\-U\-P\-\_\-\-F\-U\-N\-C(), stat\-\_\-cache\-\_\-get\-\_\-entry(), S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C(), U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C(), and webdav\-\_\-get\-\_\-live\-\_\-property().
+
+\hypertarget{buffer_8h_ad8d7ec26b305f5014cf700926ed6d2ad}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-search\-\_\-string\-\_\-len@{buffer\-\_\-search\-\_\-string\-\_\-len}}
+\index{buffer\-\_\-search\-\_\-string\-\_\-len@{buffer\-\_\-search\-\_\-string\-\_\-len}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-search\-\_\-string\-\_\-len}]{\setlength{\rightskip}{0pt plus 5cm}char$\ast$ buffer\-\_\-search\-\_\-string\-\_\-len (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{b, }
+\item[{const char $\ast$}]{needle, }
+\item[{size\-\_\-t}]{len}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_ad8d7ec26b305f5014cf700926ed6d2ad}
+
+
+References force\-\_\-assert, buffer\-::ptr, and buffer\-::used.
+
+
+
+Referenced by fcgi\-\_\-demux\-\_\-response(), and proxy\-\_\-demux\-\_\-response().
+
+\hypertarget{buffer_8h_a141f13aaa1f623c39a4b551f9b89f997}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-string\-\_\-is\-\_\-empty@{buffer\-\_\-string\-\_\-is\-\_\-empty}}
+\index{buffer\-\_\-string\-\_\-is\-\_\-empty@{buffer\-\_\-string\-\_\-is\-\_\-empty}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-string\-\_\-is\-\_\-empty}]{\setlength{\rightskip}{0pt plus 5cm}int buffer\-\_\-string\-\_\-is\-\_\-empty (
+\begin{DoxyParamCaption}
+\item[{const {\bf buffer} $\ast$}]{b}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_a141f13aaa1f623c39a4b551f9b89f997}
+
+
+References buffer\-\_\-string\-\_\-length().
+
+
+
+Referenced by accesslog\-\_\-append\-\_\-escaped(), algorithm\-\_\-from\-\_\-string(), buffer\-\_\-path\-\_\-simplify(), buffer\-\_\-string\-\_\-prepare\-\_\-append(), buffer\-\_\-urldecode\-\_\-internal(), build\-\_\-doc\-\_\-root(), cache\-\_\-parse\-\_\-lua(), cgi\-\_\-create\-\_\-env(), cgi\-\_\-handle\-\_\-fdevent(), chunk\-\_\-reset(), chunkqueue\-\_\-append\-\_\-buffer(), chunkqueue\-\_\-get\-\_\-memory(), chunkqueue\-\_\-prepend\-\_\-buffer(), chunkqueue\-\_\-use\-\_\-memory(), config\-\_\-check\-\_\-cond\-\_\-nocache(), config\-\_\-insert(), config\-\_\-parse\-\_\-cmd(), config\-\_\-set\-\_\-defaults(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), connection\-\_\-handle\-\_\-write\-\_\-prepare(), connection\-\_\-state\-\_\-machine(), data\-\_\-string\-\_\-print(), etag\-\_\-is\-\_\-equal(), extract\-\_\-forward\-\_\-array(), fcgi\-\_\-check\-\_\-extension(), fcgi\-\_\-demux\-\_\-response(), fcgi\-\_\-establish\-\_\-connection(), fcgi\-\_\-recv\-\_\-response(), fcgi\-\_\-restart\-\_\-dead\-\_\-procs(), F\-R\-E\-E\-\_\-\-F\-U\-N\-C(), http\-\_\-cgi\-\_\-headers(), http\-\_\-dirlist\-\_\-append\-\_\-js\-\_\-table\-\_\-resort(), http\-\_\-list\-\_\-directory(), http\-\_\-list\-\_\-directory\-\_\-footer(), http\-\_\-list\-\_\-directory\-\_\-header(), http\-\_\-request\-\_\-parse(), http\-\_\-request\-\_\-split\-\_\-value(), http\-\_\-response\-\_\-prepare(), http\-\_\-response\-\_\-redirect\-\_\-to\-\_\-directory(), http\-\_\-response\-\_\-send\-\_\-file(), http\-\_\-response\-\_\-write\-\_\-header(), log\-\_\-error\-\_\-open(), log\-\_\-error\-\_\-write\-\_\-multiline\-\_\-buffer(), magnet\-\_\-attract\-\_\-array(), magnet\-\_\-stat(), main(), mod\-\_\-authn\-\_\-file\-\_\-htdigest\-\_\-get(), mod\-\_\-authn\-\_\-file\-\_\-htpasswd\-\_\-get(), mod\-\_\-authn\-\_\-ldap\-\_\-basic(), mod\-\_\-authn\-\_\-ldap\-\_\-host\-\_\-init(), mod\-\_\-authn\-\_\-ldap\-\_\-search(), mod\-\_\-authn\-\_\-mysql\-\_\-query(), mod\-\_\-authn\-\_\-mysql\-\_\-sock\-\_\-connect(), mod\-\_\-evhost\-\_\-uri\-\_\-handler(), mod\-\_\-expire\-\_\-get\-\_\-offset(), mod\-\_\-proxy\-\_\-check\-\_\-extension(), mod\-\_\-simple\-\_\-vhost\-\_\-docroot(), mod\-\_\-ssi\-\_\-handle\-\_\-request(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-html(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-text(), mod\-\_\-status\-\_\-handler(), network\-\_\-init(), P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C(), proc\-\_\-open\-\_\-buffer(), process\-\_\-ssi\-\_\-stmt(), proxy\-\_\-create\-\_\-env(), remove\-\_\-pid\-\_\-file(), R\-E\-Q\-U\-E\-S\-T\-D\-O\-N\-E\-\_\-\-F\-U\-N\-C(), scgi\-\_\-check\-\_\-extension(), scgi\-\_\-establish\-\_\-connection(), S\-E\-R\-V\-E\-R\-\_\-\-F\-U\-N\-C(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), S\-I\-G\-H\-U\-P\-\_\-\-F\-U\-N\-C(), ssi\-\_\-val\-\_\-tobool(), stat\-\_\-cache\-\_\-get\-\_\-entry(), S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C(), T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C(), unixsocket\-\_\-is\-\_\-dup(), and U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{buffer_8h_aa069cb6c33241e7389d3b63e70a18b45}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-string\-\_\-length@{buffer\-\_\-string\-\_\-length}}
+\index{buffer\-\_\-string\-\_\-length@{buffer\-\_\-string\-\_\-length}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-string\-\_\-length}]{\setlength{\rightskip}{0pt plus 5cm}static size\-\_\-t buffer\-\_\-string\-\_\-length (
+\begin{DoxyParamCaption}
+\item[{const {\bf buffer} $\ast$}]{b}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{buffer_8h_aa069cb6c33241e7389d3b63e70a18b45}
+
+
+References buffer\-::used.
+
+
+
+Referenced by accesslog\-\_\-append\-\_\-escaped(), accesslog\-\_\-parse\-\_\-format(), buffer\-\_\-append\-\_\-slash(), buffer\-\_\-append\-\_\-string\-\_\-buffer(), buffer\-\_\-copy\-\_\-buffer(), buffer\-\_\-copy\-\_\-string\-\_\-encoded\-\_\-cgi\-\_\-varnames(), buffer\-\_\-copy\-\_\-string\-\_\-hex(), buffer\-\_\-path\-\_\-simplify(), buffer\-\_\-string\-\_\-is\-\_\-empty(), build\-\_\-doc\-\_\-root(), cache\-\_\-call\-\_\-lua(), cache\-\_\-export\-\_\-get\-\_\-params(), cgi\-\_\-demux\-\_\-response(), cgi\-\_\-get\-\_\-handler(), cgi\-\_\-write\-\_\-request(), chunk\-\_\-remaining\-\_\-length(), chunkqueue\-\_\-get\-\_\-memory(), config\-\_\-set\-\_\-defaults(), configparser\-\_\-remoteip\-\_\-normalize\-\_\-compat(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-chunked(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-chunked\-\_\-crlf(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-cq\-\_\-compact(), connection\-\_\-handle\-\_\-read\-\_\-state(), data\-\_\-string\-\_\-print(), deflate\-\_\-compress\-\_\-response(), deflate\-\_\-file\-\_\-to\-\_\-buffer(), deflate\-\_\-file\-\_\-to\-\_\-file(), etag\-\_\-mutate(), fastcgi\-\_\-get\-\_\-packet(), fcgi\-\_\-check\-\_\-extension(), fcgi\-\_\-create\-\_\-env(), fcgi\-\_\-demux\-\_\-response(), fcgi\-\_\-env\-\_\-add(), fcgi\-\_\-establish\-\_\-connection(), fcgi\-\_\-response\-\_\-parse(), http\-\_\-cgi\-\_\-headers(), http\-\_\-chunk\-\_\-append\-\_\-buffer(), http\-\_\-list\-\_\-directory(), http\-\_\-request\-\_\-header\-\_\-finished(), http\-\_\-request\-\_\-host\-\_\-normalize(), http\-\_\-request\-\_\-parse(), http\-\_\-request\-\_\-split\-\_\-value(), http\-\_\-response\-\_\-parse\-\_\-range(), http\-\_\-response\-\_\-prepare(), http\-\_\-response\-\_\-write\-\_\-header(), http\-\_\-response\-\_\-xsendfile(), log\-\_\-error\-\_\-write\-\_\-multiline\-\_\-buffer(), mod\-\_\-auth\-\_\-check\-\_\-basic(), mod\-\_\-auth\-\_\-check\-\_\-digest(), mod\-\_\-auth\-\_\-uri\-\_\-handler(), mod\-\_\-authn\-\_\-file\-\_\-htdigest\-\_\-get(), mod\-\_\-authn\-\_\-file\-\_\-htpasswd\-\_\-basic(), mod\-\_\-authn\-\_\-file\-\_\-htpasswd\-\_\-get(), mod\-\_\-authn\-\_\-file\-\_\-plain\-\_\-digest(), mod\-\_\-authn\-\_\-gssapi\-\_\-check\-\_\-spnego(), mod\-\_\-authn\-\_\-gssapi\-\_\-create\-\_\-krb5\-\_\-ccache(), mod\-\_\-authn\-\_\-ldap\-\_\-basic(), mod\-\_\-evhost\-\_\-parse\-\_\-host(), mod\-\_\-evhost\-\_\-uri\-\_\-handler(), mod\-\_\-proxy\-\_\-check\-\_\-extension(), mod\-\_\-redirect\-\_\-uri\-\_\-handler(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-json(), network\-\_\-server\-\_\-init(), network\-\_\-write\-\_\-mem\-\_\-chunk(), parse\-\_\-binpath(), P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C(), proc\-\_\-read\-\_\-fd\-\_\-to\-\_\-buffer(), process\-\_\-ssi\-\_\-stmt(), proxy\-\_\-create\-\_\-env(), proxy\-\_\-demux\-\_\-response(), proxy\-\_\-establish\-\_\-connection(), request\-\_\-check\-\_\-hostname(), R\-E\-Q\-U\-E\-S\-T\-D\-O\-N\-E\-\_\-\-F\-U\-N\-C(), scgi\-\_\-check\-\_\-extension(), scgi\-\_\-create\-\_\-env(), scgi\-\_\-demux\-\_\-response(), scgi\-\_\-establish\-\_\-connection(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), split\-\_\-get\-\_\-params(), stat\-\_\-cache\-\_\-get\-\_\-entry(), S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C(), U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C(), webdav\-\_\-get\-\_\-live\-\_\-property(), and yy\-\_\-reduce().
+
+\hypertarget{buffer_8h_a55f01ba4768d6a896bf740856f02ae22}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-string\-\_\-prepare\-\_\-append@{buffer\-\_\-string\-\_\-prepare\-\_\-append}}
+\index{buffer\-\_\-string\-\_\-prepare\-\_\-append@{buffer\-\_\-string\-\_\-prepare\-\_\-append}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-string\-\_\-prepare\-\_\-append}]{\setlength{\rightskip}{0pt plus 5cm}char$\ast$ buffer\-\_\-string\-\_\-prepare\-\_\-append (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{b, }
+\item[{size\-\_\-t}]{size}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_a55f01ba4768d6a896bf740856f02ae22}
+
+
+References buffer\-\_\-realloc(), buffer\-\_\-string\-\_\-is\-\_\-empty(), buffer\-\_\-string\-\_\-prepare\-\_\-copy(), force\-\_\-assert, buffer\-::ptr, and buffer\-::used.
+
+
+
+Referenced by accesslog\-\_\-append\-\_\-escaped(), buffer\-\_\-append\-\_\-base64\-\_\-decode(), buffer\-\_\-append\-\_\-base64\-\_\-encode(), buffer\-\_\-append\-\_\-base64\-\_\-encode\-\_\-no\-\_\-padding(), buffer\-\_\-append\-\_\-strftime(), buffer\-\_\-append\-\_\-string\-\_\-c\-\_\-escaped(), buffer\-\_\-append\-\_\-string\-\_\-encoded(), buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-append\-\_\-uint\-\_\-hex(), buffer\-\_\-copy\-\_\-string\-\_\-encoded\-\_\-cgi\-\_\-varnames(), buffer\-\_\-path\-\_\-simplify(), chunkqueue\-\_\-get\-\_\-memory(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), fcgi\-\_\-env\-\_\-add(), proc\-\_\-read\-\_\-fd\-\_\-to\-\_\-buffer(), proxy\-\_\-demux\-\_\-response(), scgi\-\_\-env\-\_\-add\-\_\-scgi(), and scgi\-\_\-env\-\_\-add\-\_\-uwsgi().
+
+\hypertarget{buffer_8h_aef333f32c1af3e9815fa70e36a958382}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-string\-\_\-prepare\-\_\-copy@{buffer\-\_\-string\-\_\-prepare\-\_\-copy}}
+\index{buffer\-\_\-string\-\_\-prepare\-\_\-copy@{buffer\-\_\-string\-\_\-prepare\-\_\-copy}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-string\-\_\-prepare\-\_\-copy}]{\setlength{\rightskip}{0pt plus 5cm}char$\ast$ buffer\-\_\-string\-\_\-prepare\-\_\-copy (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{b, }
+\item[{size\-\_\-t}]{size}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_aef333f32c1af3e9815fa70e36a958382}
+
+
+References buffer\-\_\-alloc(), force\-\_\-assert, buffer\-::ptr, and buffer\-::used.
+
+
+
+Referenced by buffer\-\_\-copy\-\_\-buffer(), buffer\-\_\-copy\-\_\-string\-\_\-len(), buffer\-\_\-path\-\_\-simplify(), buffer\-\_\-string\-\_\-prepare\-\_\-append(), build\-\_\-doc\-\_\-root(), cgi\-\_\-demux\-\_\-response(), chunkqueue\-\_\-get\-\_\-memory(), config\-\_\-read(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), fcgi\-\_\-create\-\_\-env(), http\-\_\-response\-\_\-write\-\_\-header(), I\-N\-I\-T\-\_\-\-F\-U\-N\-C(), log\-\_\-buffer\-\_\-prepare(), mod\-\_\-rrdtool\-\_\-create\-\_\-rrd(), network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-no\-\_\-mmap(), proxy\-\_\-demux\-\_\-response(), R\-E\-Q\-U\-E\-S\-T\-D\-O\-N\-E\-\_\-\-F\-U\-N\-C(), scgi\-\_\-create\-\_\-env(), scgi\-\_\-demux\-\_\-response(), strftime\-\_\-cache\-\_\-get(), and T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{buffer_8h_a69f8a9c5de2e94fca1cbf0d5dd3e25cb}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-string\-\_\-set\-\_\-length@{buffer\-\_\-string\-\_\-set\-\_\-length}}
+\index{buffer\-\_\-string\-\_\-set\-\_\-length@{buffer\-\_\-string\-\_\-set\-\_\-length}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-string\-\_\-set\-\_\-length}]{\setlength{\rightskip}{0pt plus 5cm}void buffer\-\_\-string\-\_\-set\-\_\-length (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{b, }
+\item[{size\-\_\-t}]{len}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_a69f8a9c5de2e94fca1cbf0d5dd3e25cb}
+
+
+References buffer\-\_\-realloc(), force\-\_\-assert, buffer\-::ptr, and buffer\-::used.
+
+
+
+Referenced by buffer\-\_\-copy\-\_\-string\-\_\-hex(), buffer\-\_\-path\-\_\-simplify(), cache\-\_\-call\-\_\-lua(), cgi\-\_\-demux\-\_\-response(), config\-\_\-set\-\_\-defaults(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), connection\-\_\-handle\-\_\-write\-\_\-prepare(), fastcgi\-\_\-get\-\_\-packet(), fcgi\-\_\-check\-\_\-extension(), fcgi\-\_\-demux\-\_\-response(), http\-\_\-chunk\-\_\-append\-\_\-len(), http\-\_\-chunk\-\_\-append\-\_\-to\-\_\-tempfile(), http\-\_\-request\-\_\-host\-\_\-normalize(), http\-\_\-response\-\_\-prepare(), log\-\_\-error\-\_\-write\-\_\-multiline\-\_\-buffer(), mod\-\_\-auth\-\_\-check\-\_\-basic(), mod\-\_\-authn\-\_\-ldap\-\_\-basic(), request\-\_\-check\-\_\-hostname(), R\-E\-Q\-U\-E\-S\-T\-D\-O\-N\-E\-\_\-\-F\-U\-N\-C(), scgi\-\_\-check\-\_\-extension(), scgi\-\_\-demux\-\_\-response(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), stat\-\_\-cache\-\_\-get\-\_\-entry(), and yy\-\_\-reduce().
+
+\hypertarget{buffer_8h_a85112471d90fdea2f04f42e1f33c8214}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-string\-\_\-space@{buffer\-\_\-string\-\_\-space}}
+\index{buffer\-\_\-string\-\_\-space@{buffer\-\_\-string\-\_\-space}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-string\-\_\-space}]{\setlength{\rightskip}{0pt plus 5cm}static size\-\_\-t buffer\-\_\-string\-\_\-space (
+\begin{DoxyParamCaption}
+\item[{const {\bf buffer} $\ast$}]{b}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{buffer_8h_a85112471d90fdea2f04f42e1f33c8214}
+
+
+References buffer\-::size, and buffer\-::used.
+
+
+
+Referenced by buffer\-\_\-append\-\_\-strftime(), chunkqueue\-\_\-get\-\_\-memory(), proc\-\_\-read\-\_\-fd\-\_\-to\-\_\-buffer(), and proxy\-\_\-demux\-\_\-response().
+
+\hypertarget{buffer_8h_a7116e1580921fb11d893ee84e6c50d43}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-to\-\_\-lower@{buffer\-\_\-to\-\_\-lower}}
+\index{buffer\-\_\-to\-\_\-lower@{buffer\-\_\-to\-\_\-lower}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-to\-\_\-lower}]{\setlength{\rightskip}{0pt plus 5cm}void buffer\-\_\-to\-\_\-lower (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{b}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_a7116e1580921fb11d893ee84e6c50d43}
+
+
+References buffer\-::ptr, and buffer\-::used.
+
+
+
+Referenced by config\-\_\-set\-\_\-defaults(), fcgi\-\_\-response\-\_\-parse(), http\-\_\-response\-\_\-prepare(), http\-\_\-response\-\_\-xsendfile(), process\-\_\-ssi\-\_\-stmt(), S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C(), and U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{buffer_8h_a59f0ee3d0c4c4f2971164002395db30b}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-to\-\_\-upper@{buffer\-\_\-to\-\_\-upper}}
+\index{buffer\-\_\-to\-\_\-upper@{buffer\-\_\-to\-\_\-upper}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-to\-\_\-upper}]{\setlength{\rightskip}{0pt plus 5cm}void buffer\-\_\-to\-\_\-upper (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{b}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_a59f0ee3d0c4c4f2971164002395db30b}
+
+
+References buffer\-::ptr, and buffer\-::used.
+
+
+
+Referenced by config\-\_\-set\-\_\-defaults().
+
+\hypertarget{buffer_8h_af2582c1bf836c38090bc1689fbdd2fdc}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-urldecode\-\_\-path@{buffer\-\_\-urldecode\-\_\-path}}
+\index{buffer\-\_\-urldecode\-\_\-path@{buffer\-\_\-urldecode\-\_\-path}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-urldecode\-\_\-path}]{\setlength{\rightskip}{0pt plus 5cm}void buffer\-\_\-urldecode\-\_\-path (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{url}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_af2582c1bf836c38090bc1689fbdd2fdc}
+
+
+References buffer\-\_\-urldecode\-\_\-internal().
+
+
+
+Referenced by fcgi\-\_\-response\-\_\-parse(), http\-\_\-response\-\_\-prepare(), http\-\_\-response\-\_\-xsendfile(), process\-\_\-ssi\-\_\-stmt(), and S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{buffer_8h_aa58412b0cd7e3c5a75a589f25b821dba}{\index{buffer.\-h@{buffer.\-h}!buffer\-\_\-urldecode\-\_\-query@{buffer\-\_\-urldecode\-\_\-query}}
+\index{buffer\-\_\-urldecode\-\_\-query@{buffer\-\_\-urldecode\-\_\-query}!buffer.h@{buffer.\-h}}
+\subsubsection[{buffer\-\_\-urldecode\-\_\-query}]{\setlength{\rightskip}{0pt plus 5cm}void buffer\-\_\-urldecode\-\_\-query (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{url}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_aa58412b0cd7e3c5a75a589f25b821dba}
+
+
+References buffer\-\_\-urldecode\-\_\-internal().
+
+\hypertarget{buffer_8h_a136a9a2c3476bec139efc229196efc4d}{\index{buffer.\-h@{buffer.\-h}!hex2int@{hex2int}}
+\index{hex2int@{hex2int}!buffer.h@{buffer.\-h}}
+\subsubsection[{hex2int}]{\setlength{\rightskip}{0pt plus 5cm}char hex2int (
+\begin{DoxyParamCaption}
+\item[{unsigned char}]{c}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_a136a9a2c3476bec139efc229196efc4d}
+deprecated 
+
+Referenced by buffer\-\_\-urldecode\-\_\-internal(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-chunked(), mod\-\_\-auth\-\_\-check\-\_\-digest(), and U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{buffer_8h_aee4e67d028b887396c659c476e882a8b}{\index{buffer.\-h@{buffer.\-h}!int2hex@{int2hex}}
+\index{int2hex@{int2hex}!buffer.h@{buffer.\-h}}
+\subsubsection[{int2hex}]{\setlength{\rightskip}{0pt plus 5cm}char int2hex (
+\begin{DoxyParamCaption}
+\item[{char}]{i}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_aee4e67d028b887396c659c476e882a8b}
+
+
+References hex\-\_\-chars.
+
+\hypertarget{buffer_8h_a89562ebb304cb7d67b83a30d986dd5b8}{\index{buffer.\-h@{buffer.\-h}!li\-\_\-itostrn@{li\-\_\-itostrn}}
+\index{li\-\_\-itostrn@{li\-\_\-itostrn}!buffer.h@{buffer.\-h}}
+\subsubsection[{li\-\_\-itostrn}]{\setlength{\rightskip}{0pt plus 5cm}void li\-\_\-itostrn (
+\begin{DoxyParamCaption}
+\item[{char $\ast$}]{buf, }
+\item[{size\-\_\-t}]{buf\-\_\-len, }
+\item[{intmax\-\_\-t}]{val}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_a89562ebb304cb7d67b83a30d986dd5b8}
+
+
+References force\-\_\-assert, itostr(), and L\-I\-\_\-\-I\-T\-O\-S\-T\-R\-I\-N\-G\-\_\-\-L\-E\-N\-G\-T\-H.
+
+
+
+Referenced by http\-\_\-cgi\-\_\-headers(), http\-\_\-list\-\_\-directory\-\_\-sizefmt(), mod\-\_\-auth\-\_\-send\-\_\-401\-\_\-unauthorized\-\_\-digest(), mod\-\_\-compress\-\_\-note\-\_\-ratio(), mod\-\_\-deflate\-\_\-note\-\_\-ratio(), and U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{buffer_8h_a1c1616541993699792f0693abc6d1c6a}{\index{buffer.\-h@{buffer.\-h}!li\-\_\-tohex@{li\-\_\-tohex}}
+\index{li\-\_\-tohex@{li\-\_\-tohex}!buffer.h@{buffer.\-h}}
+\subsubsection[{li\-\_\-tohex}]{\setlength{\rightskip}{0pt plus 5cm}void li\-\_\-tohex (
+\begin{DoxyParamCaption}
+\item[{char $\ast$}]{buf, }
+\item[{size\-\_\-t}]{buf\-\_\-len, }
+\item[{const char $\ast$}]{s, }
+\item[{size\-\_\-t}]{s\-\_\-len}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_a1c1616541993699792f0693abc6d1c6a}
+
+
+References force\-\_\-assert, and hex\-\_\-chars.
+
+
+
+Referenced by buffer\-\_\-copy\-\_\-string\-\_\-hex(), Cvt\-Hex(), f\-\_\-crypto\-\_\-md5(), mod\-\_\-authn\-\_\-file\-\_\-htpasswd\-\_\-basic(), and secdl\-\_\-verify\-\_\-mac().
+
+\hypertarget{buffer_8h_af7d7ad26326c4f489be127bc25688d6c}{\index{buffer.\-h@{buffer.\-h}!li\-\_\-utostrn@{li\-\_\-utostrn}}
+\index{li\-\_\-utostrn@{li\-\_\-utostrn}!buffer.h@{buffer.\-h}}
+\subsubsection[{li\-\_\-utostrn}]{\setlength{\rightskip}{0pt plus 5cm}void li\-\_\-utostrn (
+\begin{DoxyParamCaption}
+\item[{char $\ast$}]{buf, }
+\item[{size\-\_\-t}]{buf\-\_\-len, }
+\item[{uintmax\-\_\-t}]{val}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_af7d7ad26326c4f489be127bc25688d6c}
+
+
+References force\-\_\-assert, L\-I\-\_\-\-I\-T\-O\-S\-T\-R\-I\-N\-G\-\_\-\-L\-E\-N\-G\-T\-H, and utostr().
+
+
+
+Referenced by http\-\_\-cgi\-\_\-headers().
+
+\hypertarget{buffer_8h_a6449bc8ce2c6cd37599031c6e0a683c3}{\index{buffer.\-h@{buffer.\-h}!light\-\_\-isalnum@{light\-\_\-isalnum}}
+\index{light\-\_\-isalnum@{light\-\_\-isalnum}!buffer.h@{buffer.\-h}}
+\subsubsection[{light\-\_\-isalnum}]{\setlength{\rightskip}{0pt plus 5cm}int light\-\_\-isalnum (
+\begin{DoxyParamCaption}
+\item[{int}]{c}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_a6449bc8ce2c6cd37599031c6e0a683c3}
+
+
+References light\-\_\-isalpha(), and light\-\_\-isdigit().
+
+
+
+Referenced by mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-json(), and request\-\_\-check\-\_\-hostname().
+
+\hypertarget{buffer_8h_aec5549c354b6a20f86f5155e7e7a43ca}{\index{buffer.\-h@{buffer.\-h}!light\-\_\-isalpha@{light\-\_\-isalpha}}
+\index{light\-\_\-isalpha@{light\-\_\-isalpha}!buffer.h@{buffer.\-h}}
+\subsubsection[{light\-\_\-isalpha}]{\setlength{\rightskip}{0pt plus 5cm}int light\-\_\-isalpha (
+\begin{DoxyParamCaption}
+\item[{int}]{c}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_aec5549c354b6a20f86f5155e7e7a43ca}
+
+
+Referenced by buffer\-\_\-copy\-\_\-string\-\_\-encoded\-\_\-cgi\-\_\-varnames(), light\-\_\-isalnum(), mod\-\_\-ssi\-\_\-parse\-\_\-ssi\-\_\-stmt\-\_\-offlen(), and mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-json().
+
+\hypertarget{buffer_8h_a5dbced38252283e189cc2577940af4d2}{\index{buffer.\-h@{buffer.\-h}!light\-\_\-isdigit@{light\-\_\-isdigit}}
+\index{light\-\_\-isdigit@{light\-\_\-isdigit}!buffer.h@{buffer.\-h}}
+\subsubsection[{light\-\_\-isdigit}]{\setlength{\rightskip}{0pt plus 5cm}int light\-\_\-isdigit (
+\begin{DoxyParamCaption}
+\item[{int}]{c}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_a5dbced38252283e189cc2577940af4d2}
+
+
+Referenced by buffer\-\_\-copy\-\_\-string\-\_\-encoded\-\_\-cgi\-\_\-varnames(), http\-\_\-request\-\_\-host\-\_\-normalize(), light\-\_\-isalnum(), light\-\_\-isxdigit(), mod\-\_\-evhost\-\_\-parse\-\_\-pattern(), and request\-\_\-check\-\_\-hostname().
+
+\hypertarget{buffer_8h_a413079bb65357913afb50e6db9d25b0b}{\index{buffer.\-h@{buffer.\-h}!light\-\_\-isxdigit@{light\-\_\-isxdigit}}
+\index{light\-\_\-isxdigit@{light\-\_\-isxdigit}!buffer.h@{buffer.\-h}}
+\subsubsection[{light\-\_\-isxdigit}]{\setlength{\rightskip}{0pt plus 5cm}int light\-\_\-isxdigit (
+\begin{DoxyParamCaption}
+\item[{int}]{c}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_a413079bb65357913afb50e6db9d25b0b}
+
+
+References light\-\_\-isdigit().
+
+
+
+Referenced by mod\-\_\-auth\-\_\-check\-\_\-digest(), request\-\_\-check\-\_\-hostname(), and U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{buffer_8h_a93df32ef1d0729ca2daa1c587c0dd32d}{\index{buffer.\-h@{buffer.\-h}!log\-\_\-failed\-\_\-assert@{log\-\_\-failed\-\_\-assert}}
+\index{log\-\_\-failed\-\_\-assert@{log\-\_\-failed\-\_\-assert}!buffer.h@{buffer.\-h}}
+\subsubsection[{log\-\_\-failed\-\_\-assert}]{\setlength{\rightskip}{0pt plus 5cm}void log\-\_\-failed\-\_\-assert (
+\begin{DoxyParamCaption}
+\item[{const char $\ast$}]{filename, }
+\item[{unsigned int}]{line, }
+\item[{const char $\ast$}]{msg}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_a93df32ef1d0729ca2daa1c587c0dd32d}
+
+
+References print\-\_\-backtrace().
+
+\hypertarget{buffer_8h_a5606b9ef8a6227af80e8f224db20c2f7}{\index{buffer.\-h@{buffer.\-h}!print\-\_\-backtrace@{print\-\_\-backtrace}}
+\index{print\-\_\-backtrace@{print\-\_\-backtrace}!buffer.h@{buffer.\-h}}
+\subsubsection[{print\-\_\-backtrace}]{\setlength{\rightskip}{0pt plus 5cm}void print\-\_\-backtrace (
+\begin{DoxyParamCaption}
+\item[{F\-I\-L\-E $\ast$}]{file}
+\end{DoxyParamCaption}
+)}}\label{buffer_8h_a5606b9ef8a6227af80e8f224db20c2f7}
+
+
+References U\-N\-U\-S\-E\-D.
+
+
+
+Referenced by log\-\_\-failed\-\_\-assert().
+

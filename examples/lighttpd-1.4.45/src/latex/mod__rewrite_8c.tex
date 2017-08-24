@@ -1,0 +1,82 @@
+\hypertarget{mod__rewrite_8c}{\section{mod\-\_\-rewrite.\-c File Reference}
+\label{mod__rewrite_8c}\index{mod\-\_\-rewrite.\-c@{mod\-\_\-rewrite.\-c}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}base.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}log.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}buffer.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}plugin.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}stat\-\_\-cache.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ctype.\-h$>$}\\*
+{\ttfamily \#include $<$stdlib.\-h$>$}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{mod__rewrite_8c_a476cb5f7d9949f22e4c852f977e66a64}{parse\-\_\-config\-\_\-entry}(srv, ca, x, option, y)~parse\-\_\-config\-\_\-entry(srv, ca, option)
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+static int \hyperlink{mod__rewrite_8c_ab38e9ad10fcf7cce50014bd68e63ae33}{parse\-\_\-config\-\_\-entry} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structarray}{array} $\ast$ca, const char $\ast$option)
+\item 
+\hyperlink{mod__rewrite_8c_a7fd80fe61027195b13952c800be599a0}{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C} (mod\-\_\-rewrite\-\_\-set\-\_\-defaults)
+\item 
+int \hyperlink{mod__rewrite_8c_ae200bd5f4cab77c0b36613df807db7e7}{mod\-\_\-rewrite\-\_\-plugin\-\_\-init} (\hyperlink{structplugin}{plugin} $\ast$p)
+\end{DoxyCompactItemize}
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{mod__rewrite_8c_a476cb5f7d9949f22e4c852f977e66a64}{\index{mod\-\_\-rewrite.\-c@{mod\-\_\-rewrite.\-c}!parse\-\_\-config\-\_\-entry@{parse\-\_\-config\-\_\-entry}}
+\index{parse\-\_\-config\-\_\-entry@{parse\-\_\-config\-\_\-entry}!mod_rewrite.c@{mod\-\_\-rewrite.\-c}}
+\subsubsection[{parse\-\_\-config\-\_\-entry}]{\setlength{\rightskip}{0pt plus 5cm}\#define parse\-\_\-config\-\_\-entry(
+\begin{DoxyParamCaption}
+\item[{}]{srv, }
+\item[{}]{ca, }
+\item[{}]{x, }
+\item[{}]{option, }
+\item[{}]{y}
+\end{DoxyParamCaption}
+)~parse\-\_\-config\-\_\-entry(srv, ca, option)}}\label{mod__rewrite_8c_a476cb5f7d9949f22e4c852f977e66a64}
+
+
+Referenced by S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+
+
+\subsection{Function Documentation}
+\hypertarget{mod__rewrite_8c_ae200bd5f4cab77c0b36613df807db7e7}{\index{mod\-\_\-rewrite.\-c@{mod\-\_\-rewrite.\-c}!mod\-\_\-rewrite\-\_\-plugin\-\_\-init@{mod\-\_\-rewrite\-\_\-plugin\-\_\-init}}
+\index{mod\-\_\-rewrite\-\_\-plugin\-\_\-init@{mod\-\_\-rewrite\-\_\-plugin\-\_\-init}!mod_rewrite.c@{mod\-\_\-rewrite.\-c}}
+\subsubsection[{mod\-\_\-rewrite\-\_\-plugin\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}int mod\-\_\-rewrite\-\_\-plugin\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{{\bf plugin} $\ast$}]{p}
+\end{DoxyParamCaption}
+)}}\label{mod__rewrite_8c_ae200bd5f4cab77c0b36613df807db7e7}
+
+
+References buffer\-\_\-init\-\_\-string(), plugin\-::cleanup, plugin\-::connection\-\_\-reset, plugin\-::data, plugin\-::handle\-\_\-physical, plugin\-::handle\-\_\-uri\-\_\-raw, plugin\-::init, plugin\-::name, plugin\-::set\-\_\-defaults, and plugin\-::version.
+
+\hypertarget{mod__rewrite_8c_ab38e9ad10fcf7cce50014bd68e63ae33}{\index{mod\-\_\-rewrite.\-c@{mod\-\_\-rewrite.\-c}!parse\-\_\-config\-\_\-entry@{parse\-\_\-config\-\_\-entry}}
+\index{parse\-\_\-config\-\_\-entry@{parse\-\_\-config\-\_\-entry}!mod_rewrite.c@{mod\-\_\-rewrite.\-c}}
+\subsubsection[{parse\-\_\-config\-\_\-entry}]{\setlength{\rightskip}{0pt plus 5cm}static int parse\-\_\-config\-\_\-entry (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf array} $\ast$}]{ca, }
+\item[{const char $\ast$}]{option}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__rewrite_8c_ab38e9ad10fcf7cce50014bd68e63ae33}
+
+
+References array\-\_\-get\-\_\-element(), and log\-\_\-error\-\_\-write().
+
+\hypertarget{mod__rewrite_8c_a7fd80fe61027195b13952c800be599a0}{\index{mod\-\_\-rewrite.\-c@{mod\-\_\-rewrite.\-c}!S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C@{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}}
+\index{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C@{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}!mod_rewrite.c@{mod\-\_\-rewrite.\-c}}
+\subsubsection[{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-rewrite\-\_\-set\-\_\-defaults}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__rewrite_8c_a7fd80fe61027195b13952c800be599a0}
+
+
+References server\-::config\-\_\-context, config\-\_\-insert\-\_\-values\-\_\-global(), plugin\-\_\-data\-::config\-\_\-storage, array\-::data, H\-A\-N\-D\-L\-E\-R\-\_\-\-E\-R\-R\-O\-R, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, parse\-\_\-config\-\_\-entry, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-L\-O\-C\-A\-L, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T\-I\-O\-N, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-S\-E\-R\-V\-E\-R, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-U\-N\-S\-E\-T, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-U\-N\-S\-E\-T, U\-N\-U\-S\-E\-D, array\-::used, and data\-\_\-config\-::value.
+

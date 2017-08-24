@@ -1,0 +1,248 @@
+\hypertarget{connections_8h}{\section{connections.\-h File Reference}
+\label{connections_8h}\index{connections.\-h@{connections.\-h}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}server.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}fdevent.\-h\char`\"{}}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{structconnection}{connection} $\ast$ \hyperlink{connections_8h_a37bd032b3c4b092ec32937f7ecc83f4b}{connection\-\_\-init} (\hyperlink{structserver}{server} $\ast$srv)
+\item 
+int \hyperlink{connections_8h_a22ff93513b16402d878728427b531310}{connection\-\_\-reset} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con)
+\item 
+void \hyperlink{connections_8h_a8421fc2ae87d6ff4d502019985ce8b12}{connections\-\_\-free} (\hyperlink{structserver}{server} $\ast$srv)
+\item 
+\hyperlink{structconnection}{connection} $\ast$ \hyperlink{connections_8h_a5b3d8d695bf14fce0de003d6fe9babe3}{connection\-\_\-accept} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structserver__socket}{server\-\_\-socket} $\ast$srv\-\_\-sock)
+\item 
+\hyperlink{structconnection}{connection} $\ast$ \hyperlink{connections_8h_a6f4ecb9695bc4eec57b0ac17f303e53e}{connection\-\_\-accepted} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structserver__socket}{server\-\_\-socket} $\ast$srv\-\_\-socket, \hyperlink{unionsock__addr}{sock\-\_\-addr} $\ast$cnt\-\_\-addr, int cnt)
+\item 
+int \hyperlink{connections_8h_a911b2fc2c18deac454281071a8370148}{connection\-\_\-set\-\_\-state} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{base_8h_a4a3875c10232b606f19a1e9f9d2a698a}{connection\-\_\-state\-\_\-t} \hyperlink{structstate}{state})
+\item 
+const char $\ast$ \hyperlink{connections_8h_aecc5e14b252546ad8a0b70416827b241}{connection\-\_\-get\-\_\-state} (\hyperlink{base_8h_a4a3875c10232b606f19a1e9f9d2a698a}{connection\-\_\-state\-\_\-t} \hyperlink{structstate}{state})
+\item 
+const char $\ast$ \hyperlink{connections_8h_aa7a72c77a3b4ae4befbcd460592b26da}{connection\-\_\-get\-\_\-short\-\_\-state} (\hyperlink{base_8h_a4a3875c10232b606f19a1e9f9d2a698a}{connection\-\_\-state\-\_\-t} \hyperlink{structstate}{state})
+\item 
+int \hyperlink{connections_8h_ab0a802eb02738ce1f4b93a9caeac9564}{connection\-\_\-state\-\_\-machine} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con)
+\item 
+int \hyperlink{connections_8h_ae1be0fded1c8418f1f288a43394056e9}{connection\-\_\-handle\-\_\-read} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con)
+\item 
+\hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t} \hyperlink{connections_8h_abb65305d17ae301b3915439c4954d7ca}{connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-state} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con)
+\item 
+\hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t} \hyperlink{connections_8h_a17d0ce247758815fb8093f25640bebfa}{connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-error} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, int \hyperlink{keyvalue_8c_ac8f113d23cb95a5a68052ef8dcee7ed9}{http\-\_\-status})
+\item 
+void \hyperlink{connections_8h_a1ef9918c250385b796f937acac866d7f}{connection\-\_\-response\-\_\-reset} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con)
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\hypertarget{connections_8h_a5b3d8d695bf14fce0de003d6fe9babe3}{\index{connections.\-h@{connections.\-h}!connection\-\_\-accept@{connection\-\_\-accept}}
+\index{connection\-\_\-accept@{connection\-\_\-accept}!connections.h@{connections.\-h}}
+\subsubsection[{connection\-\_\-accept}]{\setlength{\rightskip}{0pt plus 5cm}{\bf connection}$\ast$ connection\-\_\-accept (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf server\-\_\-socket} $\ast$}]{srv\-\_\-sock}
+\end{DoxyParamCaption}
+)}}\label{connections_8h_a5b3d8d695bf14fce0de003d6fe9babe3}
+check if we can still open a new connections
+
+see \#1216
+
+References connection\-\_\-accepted(), server\-::conns, server\-\_\-socket\-::fd, log\-\_\-error\-\_\-write(), server\-::max\-\_\-conns, network\-\_\-accept\-\_\-tcp\-\_\-nagle\-\_\-disable(), sock\-\_\-addr\-::plain, and connections\-::used.
+
+
+
+Referenced by network\-\_\-server\-\_\-handle\-\_\-fdevent().
+
+\hypertarget{connections_8h_a6f4ecb9695bc4eec57b0ac17f303e53e}{\index{connections.\-h@{connections.\-h}!connection\-\_\-accepted@{connection\-\_\-accepted}}
+\index{connection\-\_\-accepted@{connection\-\_\-accepted}!connections.h@{connections.\-h}}
+\subsubsection[{connection\-\_\-accepted}]{\setlength{\rightskip}{0pt plus 5cm}{\bf connection}$\ast$ connection\-\_\-accepted (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf server\-\_\-socket} $\ast$}]{srv\-\_\-socket, }
+\item[{{\bf sock\-\_\-addr} $\ast$}]{cnt\-\_\-addr, }
+\item[{int}]{cnt}
+\end{DoxyParamCaption}
+)}}\label{connections_8h_a6f4ecb9695bc4eec57b0ac17f303e53e}
+
+
+References buffer\-\_\-copy\-\_\-string(), server\-::con\-\_\-opened, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-S\-T\-A\-R\-T, connection\-\_\-close(), connection\-\_\-handle\-\_\-fdevent(), connection\-\_\-set\-\_\-state(), connection\-::connection\-\_\-start, connections\-\_\-get\-\_\-new\-\_\-connection(), server\-::cur\-\_\-fds, server\-::cur\-\_\-ts, connection\-::dst\-\_\-addr, connection\-::dst\-\_\-addr\-\_\-buf, server\-::ev, connection\-::fd, connection\-::fde\-\_\-ndx, fdevent\-\_\-fcntl\-\_\-set\-\_\-nb\-\_\-cloexec\-\_\-sock(), fdevent\-\_\-register(), inet\-\_\-ntop\-\_\-cache\-\_\-get\-\_\-ip(), server\-\_\-socket\-::is\-\_\-ssl, log\-\_\-error\-\_\-write(), and connection\-::srv\-\_\-socket.
+
+
+
+Referenced by connection\-\_\-accept(), and server\-\_\-oneshot\-\_\-init().
+
+\hypertarget{connections_8h_aa7a72c77a3b4ae4befbcd460592b26da}{\index{connections.\-h@{connections.\-h}!connection\-\_\-get\-\_\-short\-\_\-state@{connection\-\_\-get\-\_\-short\-\_\-state}}
+\index{connection\-\_\-get\-\_\-short\-\_\-state@{connection\-\_\-get\-\_\-short\-\_\-state}!connections.h@{connections.\-h}}
+\subsubsection[{connection\-\_\-get\-\_\-short\-\_\-state}]{\setlength{\rightskip}{0pt plus 5cm}const char$\ast$ connection\-\_\-get\-\_\-short\-\_\-state (
+\begin{DoxyParamCaption}
+\item[{{\bf connection\-\_\-state\-\_\-t}}]{state}
+\end{DoxyParamCaption}
+)}}\label{connections_8h_aa7a72c77a3b4ae4befbcd460592b26da}
+
+
+References C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-C\-L\-O\-S\-E, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-E\-R\-R\-O\-R, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-H\-A\-N\-D\-L\-E\-\_\-\-R\-E\-Q\-U\-E\-S\-T, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-A\-D, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-A\-D\-\_\-\-P\-O\-S\-T, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-E\-N\-D, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-S\-T\-A\-R\-T, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-S\-P\-O\-N\-S\-E\-\_\-\-E\-N\-D, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-S\-P\-O\-N\-S\-E\-\_\-\-S\-T\-A\-R\-T, and C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-W\-R\-I\-T\-E.
+
+
+
+Referenced by mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-html(), and mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-text().
+
+\hypertarget{connections_8h_aecc5e14b252546ad8a0b70416827b241}{\index{connections.\-h@{connections.\-h}!connection\-\_\-get\-\_\-state@{connection\-\_\-get\-\_\-state}}
+\index{connection\-\_\-get\-\_\-state@{connection\-\_\-get\-\_\-state}!connections.h@{connections.\-h}}
+\subsubsection[{connection\-\_\-get\-\_\-state}]{\setlength{\rightskip}{0pt plus 5cm}const char$\ast$ connection\-\_\-get\-\_\-state (
+\begin{DoxyParamCaption}
+\item[{{\bf connection\-\_\-state\-\_\-t}}]{state}
+\end{DoxyParamCaption}
+)}}\label{connections_8h_aecc5e14b252546ad8a0b70416827b241}
+
+
+References C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-C\-L\-O\-S\-E, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-E\-R\-R\-O\-R, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-H\-A\-N\-D\-L\-E\-\_\-\-R\-E\-Q\-U\-E\-S\-T, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-A\-D, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-A\-D\-\_\-\-P\-O\-S\-T, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-E\-N\-D, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-S\-T\-A\-R\-T, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-S\-P\-O\-N\-S\-E\-\_\-\-E\-N\-D, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-S\-P\-O\-N\-S\-E\-\_\-\-S\-T\-A\-R\-T, and C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-W\-R\-I\-T\-E.
+
+
+
+Referenced by cgi\-\_\-demux\-\_\-response(), cgi\-\_\-recv\-\_\-response(), connection\-\_\-state\-\_\-machine(), main(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-html(), and scgi\-\_\-demux\-\_\-response().
+
+\hypertarget{connections_8h_ae1be0fded1c8418f1f288a43394056e9}{\index{connections.\-h@{connections.\-h}!connection\-\_\-handle\-\_\-read@{connection\-\_\-handle\-\_\-read}}
+\index{connection\-\_\-handle\-\_\-read@{connection\-\_\-handle\-\_\-read}!connections.h@{connections.\-h}}
+\subsubsection[{connection\-\_\-handle\-\_\-read}]{\setlength{\rightskip}{0pt plus 5cm}int connection\-\_\-handle\-\_\-read (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con}
+\end{DoxyParamCaption}
+)}}\label{connections_8h_ae1be0fded1c8418f1f288a43394056e9}
+
+
+References connection\-::bytes\-\_\-read, chunkqueue\-\_\-get\-\_\-memory(), chunkqueue\-\_\-use\-\_\-memory(), C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-E\-R\-R\-O\-R, connection\-\_\-handle\-\_\-read\-\_\-ssl(), connection\-\_\-set\-\_\-state(), connection\-::fd, connection\-::is\-\_\-readable, server\-\_\-socket\-::is\-\_\-ssl, log\-\_\-error\-\_\-write(), M\-A\-X\-\_\-\-R\-E\-A\-D\-\_\-\-L\-I\-M\-I\-T, connection\-::read\-\_\-queue, and connection\-::srv\-\_\-socket.
+
+
+
+Referenced by connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-state(), and connection\-\_\-handle\-\_\-read\-\_\-state().
+
+\hypertarget{connections_8h_a17d0ce247758815fb8093f25640bebfa}{\index{connections.\-h@{connections.\-h}!connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-error@{connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-error}}
+\index{connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-error@{connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-error}!connections.h@{connections.\-h}}
+\subsubsection[{connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-error}]{\setlength{\rightskip}{0pt plus 5cm}{\bf handler\-\_\-t} connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-error (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{int}]{http\-\_\-status}
+\end{DoxyParamCaption}
+)}}\label{connections_8h_a17d0ce247758815fb8093f25640bebfa}
+
+
+References connection\-::bytes\-\_\-header, chunkqueue\-\_\-reset(), D\-I\-R\-E\-C\-T, H\-A\-N\-D\-L\-E\-R\-\_\-\-E\-R\-R\-O\-R, H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-I\-N\-I\-S\-H\-E\-D, http\-\_\-status, connection\-::http\-\_\-status, connection\-::keep\-\_\-alive, connection\-::mode, U\-N\-U\-S\-E\-D, and connection\-::write\-\_\-queue.
+
+
+
+Referenced by connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-chunked(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-state(), and S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{connections_8h_abb65305d17ae301b3915439c4954d7ca}{\index{connections.\-h@{connections.\-h}!connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-state@{connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-state}}
+\index{connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-state@{connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-state}!connections.h@{connections.\-h}}
+\subsubsection[{connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-state}]{\setlength{\rightskip}{0pt plus 5cm}{\bf handler\-\_\-t} connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-state (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con}
+\end{DoxyParamCaption}
+)}}\label{connections_8h_abb65305d17ae301b3915439c4954d7ca}
+
+
+References chunkqueue\-::bytes\-\_\-in, chunkqueue\-\_\-remove\-\_\-finished\-\_\-chunks(), chunkqueue\-\_\-steal(), chunkqueue\-\_\-steal\-\_\-with\-\_\-tempfiles(), C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-H\-A\-N\-D\-L\-E\-\_\-\-R\-E\-Q\-U\-E\-S\-T, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-A\-D\-\_\-\-P\-O\-S\-T, connection\-::conf, connection\-\_\-handle\-\_\-read(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-chunked(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-error(), connection\-\_\-set\-\_\-state(), request\-::content\-\_\-length, server\-::cur\-\_\-ts, F\-D\-E\-V\-E\-N\-T\-\_\-\-S\-T\-R\-E\-A\-M\-\_\-\-R\-E\-Q\-U\-E\-S\-T, F\-D\-E\-V\-E\-N\-T\-\_\-\-S\-T\-R\-E\-A\-M\-\_\-\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-P\-O\-L\-L\-I\-N, H\-A\-N\-D\-L\-E\-R\-\_\-\-E\-R\-R\-O\-R, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, H\-A\-N\-D\-L\-E\-R\-\_\-\-W\-A\-I\-T\-\_\-\-F\-O\-R\-\_\-\-E\-V\-E\-N\-T, connection\-::is\-\_\-readable, connection\-::read\-\_\-idle\-\_\-ts, connection\-::read\-\_\-queue, connection\-::request, connection\-::request\-\_\-content\-\_\-queue, connection\-::state, and specific\-\_\-config\-::stream\-\_\-request\-\_\-body.
+
+
+
+Referenced by S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{connections_8h_a37bd032b3c4b092ec32937f7ecc83f4b}{\index{connections.\-h@{connections.\-h}!connection\-\_\-init@{connection\-\_\-init}}
+\index{connection\-\_\-init@{connection\-\_\-init}!connections.h@{connections.\-h}}
+\subsubsection[{connection\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}{\bf connection}$\ast$ connection\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv}
+\end{DoxyParamCaption}
+)}}\label{connections_8h_a37bd032b3c4b092ec32937f7ecc83f4b}
+
+
+References array\-\_\-init(), physical\-::basedir, connection\-::bytes\-\_\-header, connection\-::bytes\-\_\-read, connection\-::bytes\-\_\-written, chunkqueue\-\_\-init(), C\-L\-E\-A\-N, connection\-::cond\-\_\-cache, server\-::config\-\_\-context, config\-\_\-setup\-\_\-connection(), physical\-::doc\-\_\-root, connection\-::environment, physical\-::etag, connection\-::fd, connection\-::fde\-\_\-ndx, force\-\_\-assert, request\-::headers, response\-::headers, connection\-::loops\-\_\-per\-\_\-request, connection\-::ndx, request\-::orig\-\_\-uri, physical\-::path, request\-::pathinfo, connection\-::plugin\-\_\-ctx, server\-::plugins, connection\-::read\-\_\-queue, physical\-::rel\-\_\-path, request\-::request, connection\-::request, connection\-::request\-\_\-content\-\_\-queue, request\-::request\-\_\-line, connection\-::response, U\-N\-U\-S\-E\-D, request\-::uri, array\-::used, buffer\-\_\-plugin\-::used, and connection\-::write\-\_\-queue.
+
+
+
+Referenced by connections\-\_\-get\-\_\-new\-\_\-connection().
+
+\hypertarget{connections_8h_a22ff93513b16402d878728427b531310}{\index{connections.\-h@{connections.\-h}!connection\-\_\-reset@{connection\-\_\-reset}}
+\index{connection\-\_\-reset@{connection\-\_\-reset}!connections.h@{connections.\-h}}
+\subsubsection[{connection\-\_\-reset}]{\setlength{\rightskip}{0pt plus 5cm}int connection\-\_\-reset (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con}
+\end{DoxyParamCaption}
+)}}\label{connections_8h_a22ff93513b16402d878728427b531310}
+
+
+References array\-\_\-reset(), connection\-::bytes\-\_\-header, connection\-::bytes\-\_\-read, connection\-::bytes\-\_\-written, connection\-::bytes\-\_\-written\-\_\-cur\-\_\-second, chunkqueue\-\_\-reset(), C\-L\-E\-A\-N, config\-\_\-setup\-\_\-connection(), connection\-\_\-response\-\_\-reset(), request\-::content\-\_\-length, connection\-::environment, connection\-::error\-\_\-handler\-\_\-saved\-\_\-status, connection\-::header\-\_\-len, request\-::headers, request\-::http\-\_\-if\-\_\-modified\-\_\-since, request\-::http\-\_\-if\-\_\-none\-\_\-match, request\-::http\-\_\-method, H\-T\-T\-P\-\_\-\-M\-E\-T\-H\-O\-D\-\_\-\-U\-N\-S\-E\-T, request\-::http\-\_\-version, H\-T\-T\-P\-\_\-\-V\-E\-R\-S\-I\-O\-N\-\_\-\-U\-N\-S\-E\-T, connection\-::is\-\_\-readable, connection\-::loops\-\_\-per\-\_\-request, request\-::pathinfo, plugins\-\_\-call\-\_\-connection\-\_\-reset(), request\-::request, connection\-::request, connection\-::request\-\_\-content\-\_\-queue, request\-::request\-\_\-line, request\-::te\-\_\-chunked, and request\-::uri.
+
+
+
+Referenced by connection\-\_\-handle\-\_\-response\-\_\-end\-\_\-state(), connection\-\_\-handle\-\_\-shutdown(), connections\-\_\-free(), connections\-\_\-get\-\_\-new\-\_\-connection(), and plugins\-\_\-call\-\_\-init().
+
+\hypertarget{connections_8h_a1ef9918c250385b796f937acac866d7f}{\index{connections.\-h@{connections.\-h}!connection\-\_\-response\-\_\-reset@{connection\-\_\-response\-\_\-reset}}
+\index{connection\-\_\-response\-\_\-reset@{connection\-\_\-response\-\_\-reset}!connections.h@{connections.\-h}}
+\subsubsection[{connection\-\_\-response\-\_\-reset}]{\setlength{\rightskip}{0pt plus 5cm}void connection\-\_\-response\-\_\-reset (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con}
+\end{DoxyParamCaption}
+)}}\label{connections_8h_a1ef9918c250385b796f937acac866d7f}
+
+
+References array\-\_\-reset(), physical\-::basedir, buffer\-\_\-reset(), chunkqueue\-\_\-reset(), response\-::content\-\_\-length, D\-I\-R\-E\-C\-T, physical\-::doc\-\_\-root, physical\-::etag, connection\-::file\-\_\-finished, connection\-::file\-\_\-started, connection\-::got\-\_\-response, response\-::headers, connection\-::http\-\_\-status, connection\-::is\-\_\-writable, response\-::keep\-\_\-alive, connection\-::mode, connection\-::parsed\-\_\-response, physical\-::path, connection\-::physical, physical\-::rel\-\_\-path, connection\-::response, response\-::transfer\-\_\-encoding, U\-N\-U\-S\-E\-D, and connection\-::write\-\_\-queue.
+
+
+
+Referenced by cgi\-\_\-demux\-\_\-response(), connection\-\_\-reset(), and fcgi\-\_\-recv\-\_\-response().
+
+\hypertarget{connections_8h_a911b2fc2c18deac454281071a8370148}{\index{connections.\-h@{connections.\-h}!connection\-\_\-set\-\_\-state@{connection\-\_\-set\-\_\-state}}
+\index{connection\-\_\-set\-\_\-state@{connection\-\_\-set\-\_\-state}!connections.h@{connections.\-h}}
+\subsubsection[{connection\-\_\-set\-\_\-state}]{\setlength{\rightskip}{0pt plus 5cm}int connection\-\_\-set\-\_\-state (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf connection\-\_\-state\-\_\-t}}]{state}
+\end{DoxyParamCaption}
+)}}\label{connections_8h_a911b2fc2c18deac454281071a8370148}
+
+
+References connection\-::state, and U\-N\-U\-S\-E\-D.
+
+
+
+Referenced by connection\-\_\-accepted(), connection\-\_\-close(), connection\-\_\-handle\-\_\-fdevent(), connection\-\_\-handle\-\_\-read(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-state(), connection\-\_\-handle\-\_\-read\-\_\-ssl(), connection\-\_\-handle\-\_\-read\-\_\-state(), connection\-\_\-handle\-\_\-response\-\_\-end\-\_\-state(), connection\-\_\-handle\-\_\-shutdown(), connection\-\_\-handle\-\_\-write(), connection\-\_\-state\-\_\-machine(), and main().
+
+\hypertarget{connections_8h_ab0a802eb02738ce1f4b93a9caeac9564}{\index{connections.\-h@{connections.\-h}!connection\-\_\-state\-\_\-machine@{connection\-\_\-state\-\_\-machine}}
+\index{connection\-\_\-state\-\_\-machine@{connection\-\_\-state\-\_\-machine}!connections.h@{connections.\-h}}
+\subsubsection[{connection\-\_\-state\-\_\-machine}]{\setlength{\rightskip}{0pt plus 5cm}int connection\-\_\-state\-\_\-machine (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con}
+\end{DoxyParamCaption}
+)}}\label{connections_8h_ab0a802eb02738ce1f4b93a9caeac9564}
+
+
+References array\-\_\-get\-\_\-unused\-\_\-element(), array\-\_\-insert\-\_\-unique(), request\-\_\-uri\-::authority, buffer\-\_\-append\-\_\-int(), buffer\-\_\-copy\-\_\-buffer(), buffer\-\_\-copy\-\_\-string\-\_\-len(), buffer\-\_\-reset(), buffer\-\_\-string\-\_\-is\-\_\-empty(), chunkqueue\-::bytes\-\_\-in, chunkqueue\-\_\-is\-\_\-empty(), chunkqueue\-\_\-reset(), C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-C\-L\-O\-S\-E, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-E\-R\-R\-O\-R, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-H\-A\-N\-D\-L\-E\-\_\-\-R\-E\-Q\-U\-E\-S\-T, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-A\-D, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-A\-D\-\_\-\-P\-O\-S\-T, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-E\-N\-D, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-S\-T\-A\-R\-T, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-S\-P\-O\-N\-S\-E\-\_\-\-E\-N\-D, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-S\-P\-O\-N\-S\-E\-\_\-\-S\-T\-A\-R\-T, C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-W\-R\-I\-T\-E, connection\-::conf, connection\-\_\-get\-\_\-state(), connection\-\_\-handle\-\_\-close\-\_\-state(), connection\-\_\-handle\-\_\-errdoc\-\_\-init(), connection\-\_\-handle\-\_\-read\-\_\-state(), connection\-\_\-handle\-\_\-response\-\_\-end\-\_\-state(), connection\-\_\-handle\-\_\-write(), connection\-\_\-handle\-\_\-write\-\_\-prepare(), connection\-\_\-set\-\_\-state(), C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, request\-::content\-\_\-length, response\-::content\-\_\-length, server\-::cur\-\_\-ts, data\-\_\-string\-\_\-init(), D\-I\-R\-E\-C\-T, connection\-::environment, specific\-\_\-config\-::error\-\_\-handler, specific\-\_\-config\-::error\-\_\-handler\-\_\-404, connection\-::error\-\_\-handler\-\_\-saved\-\_\-method, connection\-::error\-\_\-handler\-\_\-saved\-\_\-status, server\-::ev, connection\-::fd, connection\-::fde\-\_\-ndx, fdevent\-\_\-event\-\_\-get\-\_\-interest, fdevent\-\_\-event\-\_\-set(), F\-D\-E\-V\-E\-N\-T\-\_\-\-I\-N, F\-D\-E\-V\-E\-N\-T\-\_\-\-O\-U\-T, F\-D\-E\-V\-E\-N\-T\-\_\-\-S\-T\-R\-E\-A\-M\-\_\-\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-P\-O\-L\-L\-I\-N, fdwaitqueue\-\_\-append(), connection\-::file\-\_\-finished, connection\-::file\-\_\-started, connection\-::got\-\_\-response, H\-A\-N\-D\-L\-E\-R\-\_\-\-C\-O\-M\-E\-B\-A\-C\-K, H\-A\-N\-D\-L\-E\-R\-\_\-\-E\-R\-R\-O\-R, H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-I\-N\-I\-S\-H\-E\-D, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, H\-A\-N\-D\-L\-E\-R\-\_\-\-W\-A\-I\-T\-\_\-\-F\-O\-R\-\_\-\-E\-V\-E\-N\-T, H\-A\-N\-D\-L\-E\-R\-\_\-\-W\-A\-I\-T\-\_\-\-F\-O\-R\-\_\-\-F\-D, specific\-\_\-config\-::high\-\_\-precision\-\_\-timestamps, request\-::http\-\_\-method, H\-T\-T\-P\-\_\-\-M\-E\-T\-H\-O\-D\-\_\-\-G\-E\-T, http\-\_\-request\-\_\-parse(), http\-\_\-response\-\_\-prepare(), connection\-::http\-\_\-status, connection\-::is\-\_\-readable, connection\-::is\-\_\-writable, response\-::keep\-\_\-alive, connection\-::keep\-\_\-alive, log\-\_\-clock\-\_\-gettime\-\_\-realtime(), log\-\_\-error\-\_\-write(), server\-\_\-config\-::log\-\_\-state\-\_\-handling, connection\-::loops\-\_\-per\-\_\-request, connection\-::mode, request\-::orig\-\_\-uri, connection\-::parsed\-\_\-response, request\-\_\-uri\-::path, plugins\-\_\-call\-\_\-connection\-\_\-reset(), plugins\-\_\-call\-\_\-handle\-\_\-subrequest(), request\-\_\-uri\-::query, connection\-::read\-\_\-idle\-\_\-ts, connection\-::read\-\_\-queue, connection\-::request, connection\-::request\-\_\-content\-\_\-queue, connection\-::request\-\_\-count, connection\-::request\-\_\-start, connection\-::request\-\_\-start\-\_\-hp, connection\-::response, server\-::srvconf, connection\-::state, specific\-\_\-config\-::stream\-\_\-request\-\_\-body, specific\-\_\-config\-::stream\-\_\-response\-\_\-body, connection\-::traffic\-\_\-limit\-\_\-reached, response\-::transfer\-\_\-encoding, T\-Y\-P\-E\-\_\-\-S\-T\-R\-I\-N\-G, request\-::uri, connection\-::uri, data\-\_\-string\-::value, server\-::want\-\_\-fds, connection\-::write\-\_\-queue, and connection\-::write\-\_\-request\-\_\-ts.
+
+
+
+Referenced by main(), network\-\_\-server\-\_\-handle\-\_\-fdevent(), and server\-\_\-oneshot\-\_\-init().
+
+\hypertarget{connections_8h_a8421fc2ae87d6ff4d502019985ce8b12}{\index{connections.\-h@{connections.\-h}!connections\-\_\-free@{connections\-\_\-free}}
+\index{connections\-\_\-free@{connections\-\_\-free}!connections.h@{connections.\-h}}
+\subsubsection[{connections\-\_\-free}]{\setlength{\rightskip}{0pt plus 5cm}void connections\-\_\-free (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv}
+\end{DoxyParamCaption}
+)}}\label{connections_8h_a8421fc2ae87d6ff4d502019985ce8b12}
+
+
+References array\-\_\-free(), physical\-::basedir, chunkqueue\-\_\-free(), C\-L\-E\-A\-N, connection\-::cond\-\_\-cache, connection\-\_\-reset(), server\-::conns, physical\-::doc\-\_\-root, connection\-::environment, physical\-::etag, request\-::headers, response\-::headers, request\-::orig\-\_\-uri, physical\-::path, request\-::pathinfo, connection\-::plugin\-\_\-ctx, connections\-::ptr, connection\-::read\-\_\-queue, physical\-::rel\-\_\-path, request\-::request, connection\-::request, connection\-::request\-\_\-content\-\_\-queue, request\-::request\-\_\-line, connection\-::response, connections\-::size, request\-::uri, and connection\-::write\-\_\-queue.
+
+
+
+Referenced by main().
+

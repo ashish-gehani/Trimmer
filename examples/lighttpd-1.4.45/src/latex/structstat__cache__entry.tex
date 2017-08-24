@@ -1,0 +1,63 @@
+\hypertarget{structstat__cache__entry}{\section{stat\-\_\-cache\-\_\-entry Struct Reference}
+\label{structstat__cache__entry}\index{stat\-\_\-cache\-\_\-entry@{stat\-\_\-cache\-\_\-entry}}
+}
+
+
+{\ttfamily \#include $<$base.\-h$>$}
+
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{structbuffer}{buffer} $\ast$ \hyperlink{structstat__cache__entry_afbc3b1fcadd4ac484e039c742dd29c83}{name}
+\item 
+\hyperlink{structbuffer}{buffer} $\ast$ \hyperlink{structstat__cache__entry_abe2703eb4d75aa483b12133ca4f608ea}{etag}
+\item 
+struct stat \hyperlink{structstat__cache__entry_a6a8f35128e25cbae3f682e5481894037}{st}
+\item 
+time\-\_\-t \hyperlink{structstat__cache__entry_a78ae66597db0f86aebfd4f8595057704}{stat\-\_\-ts}
+\item 
+\hyperlink{structbuffer}{buffer} $\ast$ \hyperlink{structstat__cache__entry_abbfccd58128a259c6506766e501d3768}{content\-\_\-type}
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{structstat__cache__entry_abbfccd58128a259c6506766e501d3768}{\index{stat\-\_\-cache\-\_\-entry@{stat\-\_\-cache\-\_\-entry}!content\-\_\-type@{content\-\_\-type}}
+\index{content\-\_\-type@{content\-\_\-type}!stat_cache_entry@{stat\-\_\-cache\-\_\-entry}}
+\subsubsection[{content\-\_\-type}]{\setlength{\rightskip}{0pt plus 5cm}{\bf buffer}$\ast$ stat\-\_\-cache\-\_\-entry\-::content\-\_\-type}}\label{structstat__cache__entry_abbfccd58128a259c6506766e501d3768}
+
+
+Referenced by connection\-\_\-handle\-\_\-write\-\_\-prepare(), http\-\_\-response\-\_\-send\-\_\-file(), magnet\-\_\-stat(), P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C(), stat\-\_\-cache\-\_\-entry\-\_\-free(), stat\-\_\-cache\-\_\-entry\-\_\-init(), and stat\-\_\-cache\-\_\-get\-\_\-entry().
+
+\hypertarget{structstat__cache__entry_abe2703eb4d75aa483b12133ca4f608ea}{\index{stat\-\_\-cache\-\_\-entry@{stat\-\_\-cache\-\_\-entry}!etag@{etag}}
+\index{etag@{etag}!stat_cache_entry@{stat\-\_\-cache\-\_\-entry}}
+\subsubsection[{etag}]{\setlength{\rightskip}{0pt plus 5cm}{\bf buffer}$\ast$ stat\-\_\-cache\-\_\-entry\-::etag}}\label{structstat__cache__entry_abe2703eb4d75aa483b12133ca4f608ea}
+
+
+Referenced by deflate\-\_\-file\-\_\-to\-\_\-file(), http\-\_\-response\-\_\-send\-\_\-file(), magnet\-\_\-stat(), P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C(), script\-\_\-cache\-\_\-get\-\_\-script(), stat\-\_\-cache\-\_\-entry\-\_\-free(), stat\-\_\-cache\-\_\-entry\-\_\-init(), and stat\-\_\-cache\-\_\-get\-\_\-entry().
+
+\hypertarget{structstat__cache__entry_afbc3b1fcadd4ac484e039c742dd29c83}{\index{stat\-\_\-cache\-\_\-entry@{stat\-\_\-cache\-\_\-entry}!name@{name}}
+\index{name@{name}!stat_cache_entry@{stat\-\_\-cache\-\_\-entry}}
+\subsubsection[{name}]{\setlength{\rightskip}{0pt plus 5cm}{\bf buffer}$\ast$ stat\-\_\-cache\-\_\-entry\-::name}}\label{structstat__cache__entry_afbc3b1fcadd4ac484e039c742dd29c83}
+
+
+Referenced by http\-\_\-response\-\_\-send\-\_\-file(), stat\-\_\-cache\-\_\-entry\-\_\-free(), stat\-\_\-cache\-\_\-entry\-\_\-init(), and stat\-\_\-cache\-\_\-get\-\_\-entry().
+
+\hypertarget{structstat__cache__entry_a6a8f35128e25cbae3f682e5481894037}{\index{stat\-\_\-cache\-\_\-entry@{stat\-\_\-cache\-\_\-entry}!st@{st}}
+\index{st@{st}!stat_cache_entry@{stat\-\_\-cache\-\_\-entry}}
+\subsubsection[{st}]{\setlength{\rightskip}{0pt plus 5cm}struct stat stat\-\_\-cache\-\_\-entry\-::st}}\label{structstat__cache__entry_a6a8f35128e25cbae3f682e5481894037}
+
+
+Referenced by build\-\_\-doc\-\_\-root(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), deflate\-\_\-file\-\_\-to\-\_\-buffer(), deflate\-\_\-file\-\_\-to\-\_\-file(), fcgi\-\_\-response\-\_\-parse(), http\-\_\-response\-\_\-parse\-\_\-range(), http\-\_\-response\-\_\-prepare(), http\-\_\-response\-\_\-send\-\_\-file(), magnet\-\_\-stat(), mod\-\_\-evhost\-\_\-uri\-\_\-handler(), P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C(), stat\-\_\-cache\-\_\-get\-\_\-entry(), S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C(), U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C(), and webdav\-\_\-get\-\_\-live\-\_\-property().
+
+\hypertarget{structstat__cache__entry_a78ae66597db0f86aebfd4f8595057704}{\index{stat\-\_\-cache\-\_\-entry@{stat\-\_\-cache\-\_\-entry}!stat\-\_\-ts@{stat\-\_\-ts}}
+\index{stat\-\_\-ts@{stat\-\_\-ts}!stat_cache_entry@{stat\-\_\-cache\-\_\-entry}}
+\subsubsection[{stat\-\_\-ts}]{\setlength{\rightskip}{0pt plus 5cm}time\-\_\-t stat\-\_\-cache\-\_\-entry\-::stat\-\_\-ts}}\label{structstat__cache__entry_a78ae66597db0f86aebfd4f8595057704}
+
+
+Referenced by stat\-\_\-cache\-\_\-get\-\_\-entry(), and stat\-\_\-cache\-\_\-tag\-\_\-old\-\_\-entries().
+
+
+
+The documentation for this struct was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{base_8h}{base.\-h}\end{DoxyCompactItemize}

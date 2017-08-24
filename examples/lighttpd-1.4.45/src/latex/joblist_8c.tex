@@ -1,0 +1,105 @@
+\hypertarget{joblist_8c}{\section{joblist.\-c File Reference}
+\label{joblist_8c}\index{joblist.\-c@{joblist.\-c}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}base.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}joblist.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}log.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$stdlib.\-h$>$}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \hyperlink{joblist_8c_a36dff24dcaa8109703ad3bd896b90e52}{joblist\-\_\-append} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con)
+\item 
+void \hyperlink{joblist_8c_aeee047faae39c6df68317bc0f65b5f2b}{joblist\-\_\-free} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnections}{connections} $\ast$joblist)
+\item 
+\hyperlink{structconnection}{connection} $\ast$ \hyperlink{joblist_8c_a8f64a60cbbb8117d9b5c703a3565005e}{fdwaitqueue\-\_\-unshift} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnections}{connections} $\ast$fdwaitqueue)
+\item 
+int \hyperlink{joblist_8c_ad18395b95c62d5885eaeddf8f179ad0f}{fdwaitqueue\-\_\-append} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con)
+\item 
+void \hyperlink{joblist_8c_a8ceb1518f1b4251ebcd3575352e9bc61}{fdwaitqueue\-\_\-free} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnections}{connections} $\ast$fdwaitqueue)
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\hypertarget{joblist_8c_ad18395b95c62d5885eaeddf8f179ad0f}{\index{joblist.\-c@{joblist.\-c}!fdwaitqueue\-\_\-append@{fdwaitqueue\-\_\-append}}
+\index{fdwaitqueue\-\_\-append@{fdwaitqueue\-\_\-append}!joblist.c@{joblist.\-c}}
+\subsubsection[{fdwaitqueue\-\_\-append}]{\setlength{\rightskip}{0pt plus 5cm}int fdwaitqueue\-\_\-append (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con}
+\end{DoxyParamCaption}
+)}}\label{joblist_8c_ad18395b95c62d5885eaeddf8f179ad0f}
+
+
+References server\-::fdwaitqueue, force\-\_\-assert, connections\-::ptr, connections\-::size, and connections\-::used.
+
+
+
+Referenced by connection\-\_\-state\-\_\-machine().
+
+\hypertarget{joblist_8c_a8ceb1518f1b4251ebcd3575352e9bc61}{\index{joblist.\-c@{joblist.\-c}!fdwaitqueue\-\_\-free@{fdwaitqueue\-\_\-free}}
+\index{fdwaitqueue\-\_\-free@{fdwaitqueue\-\_\-free}!joblist.c@{joblist.\-c}}
+\subsubsection[{fdwaitqueue\-\_\-free}]{\setlength{\rightskip}{0pt plus 5cm}void fdwaitqueue\-\_\-free (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connections} $\ast$}]{fdwaitqueue}
+\end{DoxyParamCaption}
+)}}\label{joblist_8c_a8ceb1518f1b4251ebcd3575352e9bc61}
+
+
+References connections\-::ptr, and U\-N\-U\-S\-E\-D.
+
+
+
+Referenced by server\-\_\-free().
+
+\hypertarget{joblist_8c_a8f64a60cbbb8117d9b5c703a3565005e}{\index{joblist.\-c@{joblist.\-c}!fdwaitqueue\-\_\-unshift@{fdwaitqueue\-\_\-unshift}}
+\index{fdwaitqueue\-\_\-unshift@{fdwaitqueue\-\_\-unshift}!joblist.c@{joblist.\-c}}
+\subsubsection[{fdwaitqueue\-\_\-unshift}]{\setlength{\rightskip}{0pt plus 5cm}{\bf connection}$\ast$ fdwaitqueue\-\_\-unshift (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connections} $\ast$}]{fdwaitqueue}
+\end{DoxyParamCaption}
+)}}\label{joblist_8c_a8f64a60cbbb8117d9b5c703a3565005e}
+
+
+References connections\-::ptr, U\-N\-U\-S\-E\-D, and connections\-::used.
+
+
+
+Referenced by main().
+
+\hypertarget{joblist_8c_a36dff24dcaa8109703ad3bd896b90e52}{\index{joblist.\-c@{joblist.\-c}!joblist\-\_\-append@{joblist\-\_\-append}}
+\index{joblist\-\_\-append@{joblist\-\_\-append}!joblist.c@{joblist.\-c}}
+\subsubsection[{joblist\-\_\-append}]{\setlength{\rightskip}{0pt plus 5cm}int joblist\-\_\-append (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con}
+\end{DoxyParamCaption}
+)}}\label{joblist_8c_a36dff24dcaa8109703ad3bd896b90e52}
+
+
+References force\-\_\-assert, connection\-::in\-\_\-joblist, server\-::joblist, connections\-::ptr, connections\-::size, and connections\-::used.
+
+
+
+Referenced by cgi\-\_\-handle\-\_\-fdevent(), cgi\-\_\-handle\-\_\-fdevent\-\_\-send(), connection\-\_\-handle\-\_\-fdevent(), fcgi\-\_\-handle\-\_\-fdevent(), proxy\-\_\-handle\-\_\-fdevent(), and scgi\-\_\-handle\-\_\-fdevent().
+
+\hypertarget{joblist_8c_aeee047faae39c6df68317bc0f65b5f2b}{\index{joblist.\-c@{joblist.\-c}!joblist\-\_\-free@{joblist\-\_\-free}}
+\index{joblist\-\_\-free@{joblist\-\_\-free}!joblist.c@{joblist.\-c}}
+\subsubsection[{joblist\-\_\-free}]{\setlength{\rightskip}{0pt plus 5cm}void joblist\-\_\-free (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connections} $\ast$}]{joblist}
+\end{DoxyParamCaption}
+)}}\label{joblist_8c_aeee047faae39c6df68317bc0f65b5f2b}
+
+
+References connections\-::ptr, and U\-N\-U\-S\-E\-D.
+
+
+
+Referenced by server\-\_\-free().
+

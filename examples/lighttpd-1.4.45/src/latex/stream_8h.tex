@@ -1,0 +1,51 @@
+\hypertarget{stream_8h}{\section{stream.\-h File Reference}
+\label{stream_8h}\index{stream.\-h@{stream.\-h}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}buffer.\-h\char`\"{}}\\*
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structstream}{stream}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \hyperlink{stream_8h_ad6dfb45ba27af7dd8892445fc4012496}{stream\-\_\-open} (\hyperlink{structstream}{stream} $\ast$f, const \hyperlink{structbuffer}{buffer} $\ast$fn)
+\item 
+int \hyperlink{stream_8h_a4c391a33e54e5d095819e989457fe5de}{stream\-\_\-close} (\hyperlink{structstream}{stream} $\ast$f)
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\hypertarget{stream_8h_a4c391a33e54e5d095819e989457fe5de}{\index{stream.\-h@{stream.\-h}!stream\-\_\-close@{stream\-\_\-close}}
+\index{stream\-\_\-close@{stream\-\_\-close}!stream.h@{stream.\-h}}
+\subsubsection[{stream\-\_\-close}]{\setlength{\rightskip}{0pt plus 5cm}int stream\-\_\-close (
+\begin{DoxyParamCaption}
+\item[{{\bf stream} $\ast$}]{f}
+\end{DoxyParamCaption}
+)}}\label{stream_8h_a4c391a33e54e5d095819e989457fe5de}
+
+
+References stream\-::mapped, munmap, stream\-::size, and stream\-::start.
+
+
+
+Referenced by config\-\_\-parse\-\_\-file\-\_\-stream().
+
+\hypertarget{stream_8h_ad6dfb45ba27af7dd8892445fc4012496}{\index{stream.\-h@{stream.\-h}!stream\-\_\-open@{stream\-\_\-open}}
+\index{stream\-\_\-open@{stream\-\_\-open}!stream.h@{stream.\-h}}
+\subsubsection[{stream\-\_\-open}]{\setlength{\rightskip}{0pt plus 5cm}int stream\-\_\-open (
+\begin{DoxyParamCaption}
+\item[{{\bf stream} $\ast$}]{f, }
+\item[{const {\bf buffer} $\ast$}]{fn}
+\end{DoxyParamCaption}
+)}}\label{stream_8h_ad6dfb45ba27af7dd8892445fc4012496}
+
+
+References F\-I\-F\-O\-\_\-\-N\-O\-N\-B\-L\-O\-C\-K, M\-A\-P\-\_\-\-F\-A\-I\-L\-E\-D, M\-A\-P\-\_\-\-S\-H\-A\-R\-E\-D, stream\-::mapped, mmap, O\-\_\-\-B\-I\-N\-A\-R\-Y, P\-R\-O\-T\-\_\-\-R\-E\-A\-D, buffer\-::ptr, stream\-::size, and stream\-::start.
+
+
+
+Referenced by config\-\_\-parse\-\_\-file\-\_\-stream().
+

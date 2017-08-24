@@ -1,0 +1,115 @@
+\hypertarget{structconfig}{\section{config Struct Reference}
+\label{structconfig}\index{config@{config}}
+}
+\subsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+enum \{ \hyperlink{structconfig_a3c18b366a1f919f2f9f27c814376259fa30b3ac7763c70e948cc9cdd60551ec07}{C\-O\-M\-P\-L\-E\-T\-E}, 
+\hyperlink{structconfig_a3c18b366a1f919f2f9f27c814376259fa829cdb4c4ba84323cb0a2f4ca2217f7c}{I\-N\-C\-O\-M\-P\-L\-E\-T\-E}
+ \}
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structrule}{rule} $\ast$ \hyperlink{structconfig_a8e5c72aa9b4dbdfcda9cc9a33aa1ac59}{rp}
+\item 
+int \hyperlink{structconfig_aa628525de6016f3bd01f49499ef05cb3}{dot}
+\item 
+char $\ast$ \hyperlink{structconfig_ae14004c0e734d7865cf064a96361918f}{fws}
+\item 
+struct \hyperlink{structplink}{plink} $\ast$ \hyperlink{structconfig_ab9b1fbd290f96b7eeed8bd650258f128}{fplp}
+\item 
+struct \hyperlink{structplink}{plink} $\ast$ \hyperlink{structconfig_ad90a39b67a446352a0557937a4e65d1c}{bplp}
+\item 
+struct \hyperlink{structstate}{state} $\ast$ \hyperlink{structconfig_a1a4d98b23408bb047054579dd46c70e2}{stp}
+\item 
+enum config\-:: \{ ... \}  \hyperlink{structconfig_a51ab487668f5595d78e72ab9a78cbfb9}{status}
+\item 
+struct \hyperlink{structconfig}{config} $\ast$ \hyperlink{structconfig_a80193cbd04fe719812dc0afb71a33664}{next}
+\item 
+struct \hyperlink{structconfig}{config} $\ast$ \hyperlink{structconfig_a3b790fb1757e3950f7a4cfca10e2b8a7}{bp}
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Enumeration Documentation}
+\hypertarget{structconfig_a3c18b366a1f919f2f9f27c814376259f}{\subsubsection[{anonymous enum}]{\setlength{\rightskip}{0pt plus 5cm}anonymous enum}}\label{structconfig_a3c18b366a1f919f2f9f27c814376259f}
+\begin{Desc}
+\item[Enumerator]\par
+\begin{description}
+\index{C\-O\-M\-P\-L\-E\-T\-E@{C\-O\-M\-P\-L\-E\-T\-E}!config@{config}}\index{config@{config}!C\-O\-M\-P\-L\-E\-T\-E@{C\-O\-M\-P\-L\-E\-T\-E}}\item[{\em 
+\hypertarget{structconfig_a3c18b366a1f919f2f9f27c814376259fa30b3ac7763c70e948cc9cdd60551ec07}{C\-O\-M\-P\-L\-E\-T\-E}\label{structconfig_a3c18b366a1f919f2f9f27c814376259fa30b3ac7763c70e948cc9cdd60551ec07}
+}]\index{I\-N\-C\-O\-M\-P\-L\-E\-T\-E@{I\-N\-C\-O\-M\-P\-L\-E\-T\-E}!config@{config}}\index{config@{config}!I\-N\-C\-O\-M\-P\-L\-E\-T\-E@{I\-N\-C\-O\-M\-P\-L\-E\-T\-E}}\item[{\em 
+\hypertarget{structconfig_a3c18b366a1f919f2f9f27c814376259fa829cdb4c4ba84323cb0a2f4ca2217f7c}{I\-N\-C\-O\-M\-P\-L\-E\-T\-E}\label{structconfig_a3c18b366a1f919f2f9f27c814376259fa829cdb4c4ba84323cb0a2f4ca2217f7c}
+}]\end{description}
+\end{Desc}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{structconfig_a3b790fb1757e3950f7a4cfca10e2b8a7}{\index{config@{config}!bp@{bp}}
+\index{bp@{bp}!config@{config}}
+\subsubsection[{bp}]{\setlength{\rightskip}{0pt plus 5cm}struct {\bf config}$\ast$ config\-::bp}}\label{structconfig_a3b790fb1757e3950f7a4cfca10e2b8a7}
+
+
+Referenced by Configlist\-\_\-add(), Configlist\-\_\-addbasis(), Configlist\-\_\-sortbasis(), getstate(), Report\-Output(), and statecmp().
+
+\hypertarget{structconfig_ad90a39b67a446352a0557937a4e65d1c}{\index{config@{config}!bplp@{bplp}}
+\index{bplp@{bplp}!config@{config}}
+\subsubsection[{bplp}]{\setlength{\rightskip}{0pt plus 5cm}struct {\bf plink}$\ast$ config\-::bplp}}\label{structconfig_ad90a39b67a446352a0557937a4e65d1c}
+
+
+Referenced by Configlist\-\_\-add(), Configlist\-\_\-addbasis(), Find\-Links(), getstate(), and Report\-Output().
+
+\hypertarget{structconfig_aa628525de6016f3bd01f49499ef05cb3}{\index{config@{config}!dot@{dot}}
+\index{dot@{dot}!config@{config}}
+\subsubsection[{dot}]{\setlength{\rightskip}{0pt plus 5cm}int config\-::dot}}\label{structconfig_aa628525de6016f3bd01f49499ef05cb3}
+
+
+Referenced by buildshifts(), Configcmp(), Configlist\-\_\-add(), Configlist\-\_\-addbasis(), Configlist\-\_\-closure(), Config\-Print(), Find\-Actions(), and Report\-Output().
+
+\hypertarget{structconfig_ab9b1fbd290f96b7eeed8bd650258f128}{\index{config@{config}!fplp@{fplp}}
+\index{fplp@{fplp}!config@{config}}
+\subsubsection[{fplp}]{\setlength{\rightskip}{0pt plus 5cm}struct {\bf plink}$\ast$ config\-::fplp}}\label{structconfig_ab9b1fbd290f96b7eeed8bd650258f128}
+
+
+Referenced by Configlist\-\_\-add(), Configlist\-\_\-addbasis(), Configlist\-\_\-closure(), Find\-Follow\-Sets(), Find\-Links(), getstate(), and Report\-Output().
+
+\hypertarget{structconfig_ae14004c0e734d7865cf064a96361918f}{\index{config@{config}!fws@{fws}}
+\index{fws@{fws}!config@{config}}
+\subsubsection[{fws}]{\setlength{\rightskip}{0pt plus 5cm}char$\ast$ config\-::fws}}\label{structconfig_ae14004c0e734d7865cf064a96361918f}
+
+
+Referenced by Configlist\-\_\-add(), Configlist\-\_\-addbasis(), Configlist\-\_\-closure(), Find\-Actions(), Find\-Follow\-Sets(), Find\-States(), and Report\-Output().
+
+\hypertarget{structconfig_a80193cbd04fe719812dc0afb71a33664}{\index{config@{config}!next@{next}}
+\index{next@{next}!config@{config}}
+\subsubsection[{next}]{\setlength{\rightskip}{0pt plus 5cm}struct {\bf config}$\ast$ config\-::next}}\label{structconfig_a80193cbd04fe719812dc0afb71a33664}
+
+
+Referenced by buildshifts(), Configlist\-\_\-add(), Configlist\-\_\-addbasis(), Configlist\-\_\-closure(), Configlist\-\_\-eat(), Configlist\-\_\-sort(), deleteconfig(), Find\-Actions(), Find\-Follow\-Sets(), Find\-Links(), newconfig(), and Report\-Output().
+
+\hypertarget{structconfig_a8e5c72aa9b4dbdfcda9cc9a33aa1ac59}{\index{config@{config}!rp@{rp}}
+\index{rp@{rp}!config@{config}}
+\subsubsection[{rp}]{\setlength{\rightskip}{0pt plus 5cm}struct {\bf rule}$\ast$ config\-::rp}}\label{structconfig_a8e5c72aa9b4dbdfcda9cc9a33aa1ac59}
+
+
+Referenced by buildshifts(), Configcmp(), confighash(), Configlist\-\_\-add(), Configlist\-\_\-addbasis(), Configlist\-\_\-closure(), Config\-Print(), Find\-Actions(), Report\-Output(), statecmp(), and statehash().
+
+\hypertarget{structconfig_a51ab487668f5595d78e72ab9a78cbfb9}{\index{config@{config}!status@{status}}
+\index{status@{status}!config@{config}}
+\subsubsection[{status}]{\setlength{\rightskip}{0pt plus 5cm}enum \{ ... \}   config\-::status}}\label{structconfig_a51ab487668f5595d78e72ab9a78cbfb9}
+
+
+Referenced by buildshifts(), and Find\-Follow\-Sets().
+
+\hypertarget{structconfig_a1a4d98b23408bb047054579dd46c70e2}{\index{config@{config}!stp@{stp}}
+\index{stp@{stp}!config@{config}}
+\subsubsection[{stp}]{\setlength{\rightskip}{0pt plus 5cm}struct {\bf state}$\ast$ config\-::stp}}\label{structconfig_a1a4d98b23408bb047054579dd46c70e2}
+
+
+Referenced by Configlist\-\_\-add(), Configlist\-\_\-addbasis(), Find\-Links(), and getstate().
+
+
+
+The documentation for this struct was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{lemon_8c}{lemon.\-c}\end{DoxyCompactItemize}

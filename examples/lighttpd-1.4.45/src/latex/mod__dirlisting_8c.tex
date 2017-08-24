@@ -1,0 +1,517 @@
+\hypertarget{mod__dirlisting_8c}{\section{mod\-\_\-dirlisting.\-c File Reference}
+\label{mod__dirlisting_8c}\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}base.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}log.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}buffer.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}plugin.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}response.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}stat\-\_\-cache.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ctype.\-h$>$}\\*
+{\ttfamily \#include $<$stdlib.\-h$>$}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+{\ttfamily \#include $<$dirent.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include $<$errno.\-h$>$}\\*
+{\ttfamily \#include $<$fcntl.\-h$>$}\\*
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$unistd.\-h$>$}\\*
+{\ttfamily \#include $<$time.\-h$>$}\\*
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structexcludes}{excludes}
+\item 
+struct \hyperlink{structexcludes__buffer}{excludes\-\_\-buffer}
+\item 
+struct \hyperlink{structplugin__config}{plugin\-\_\-config}
+\item 
+struct \hyperlink{structplugin__data}{plugin\-\_\-data}
+\item 
+struct \hyperlink{structdirls__entry__t}{dirls\-\_\-entry\-\_\-t}
+\item 
+struct \hyperlink{structdirls__list__t}{dirls\-\_\-list\-\_\-t}
+\end{DoxyCompactItemize}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{mod__dirlisting_8c_a4c284b4f27513be591a17aad9ed0f66d}{C\-O\-N\-F\-I\-G\-\_\-\-E\-X\-C\-L\-U\-D\-E}~\char`\"{}dir-\/listing.\-exclude\char`\"{}
+\item 
+\#define \hyperlink{mod__dirlisting_8c_a922991bfad954730545335780c094fb7}{C\-O\-N\-F\-I\-G\-\_\-\-A\-C\-T\-I\-V\-A\-T\-E}~\char`\"{}dir-\/listing.\-activate\char`\"{}
+\item 
+\#define \hyperlink{mod__dirlisting_8c_a835e490bc550e88b8e621dde36a84463}{C\-O\-N\-F\-I\-G\-\_\-\-H\-I\-D\-E\-\_\-\-D\-O\-T\-F\-I\-L\-E\-S}~\char`\"{}dir-\/listing.\-hide-\/dotfiles\char`\"{}
+\item 
+\#define \hyperlink{mod__dirlisting_8c_ad9ae47f62846d4ac35c8a4f1ff710c84}{C\-O\-N\-F\-I\-G\-\_\-\-E\-X\-T\-E\-R\-N\-A\-L\-\_\-\-C\-S\-S}~\char`\"{}dir-\/listing.\-external-\/css\char`\"{}
+\item 
+\#define \hyperlink{mod__dirlisting_8c_a02523f422103d2271f62ca0fabb99de4}{C\-O\-N\-F\-I\-G\-\_\-\-E\-X\-T\-E\-R\-N\-A\-L\-\_\-\-J\-S}~\char`\"{}dir-\/listing.\-external-\/js\char`\"{}
+\item 
+\#define \hyperlink{mod__dirlisting_8c_ab6a4b97636978b71fadc17c0c42b43a8}{C\-O\-N\-F\-I\-G\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G}~\char`\"{}dir-\/listing.\-encoding\char`\"{}
+\item 
+\#define \hyperlink{mod__dirlisting_8c_ade19624ab631a1dcc4348da19d45e23f}{C\-O\-N\-F\-I\-G\-\_\-\-S\-H\-O\-W\-\_\-\-R\-E\-A\-D\-M\-E}~\char`\"{}dir-\/listing.\-show-\/readme\char`\"{}
+\item 
+\#define \hyperlink{mod__dirlisting_8c_ab939cfff2eb744956b1c87eade663dc6}{C\-O\-N\-F\-I\-G\-\_\-\-H\-I\-D\-E\-\_\-\-R\-E\-A\-D\-M\-E\-\_\-\-F\-I\-L\-E}~\char`\"{}dir-\/listing.\-hide-\/readme-\/file\char`\"{}
+\item 
+\#define \hyperlink{mod__dirlisting_8c_a1f6b44df85a28cae52060bbb1fa858d2}{C\-O\-N\-F\-I\-G\-\_\-\-S\-H\-O\-W\-\_\-\-H\-E\-A\-D\-E\-R}~\char`\"{}dir-\/listing.\-show-\/header\char`\"{}
+\item 
+\#define \hyperlink{mod__dirlisting_8c_ad1616d61f371685ec92f566a03e8fa79}{C\-O\-N\-F\-I\-G\-\_\-\-H\-I\-D\-E\-\_\-\-H\-E\-A\-D\-E\-R\-\_\-\-F\-I\-L\-E}~\char`\"{}dir-\/listing.\-hide-\/header-\/file\char`\"{}
+\item 
+\#define \hyperlink{mod__dirlisting_8c_a8d5989c4b5eb3f51da86ffb6ff4c1352}{C\-O\-N\-F\-I\-G\-\_\-\-D\-I\-R\-\_\-\-L\-I\-S\-T\-I\-N\-G}~\char`\"{}server.\-dir-\/listing\char`\"{}
+\item 
+\#define \hyperlink{mod__dirlisting_8c_a53f9a49221c6f8cc207191ccb0776aff}{C\-O\-N\-F\-I\-G\-\_\-\-S\-E\-T\-\_\-\-F\-O\-O\-T\-E\-R}~\char`\"{}dir-\/listing.\-set-\/footer\char`\"{}
+\item 
+\#define \hyperlink{mod__dirlisting_8c_a9beaae01b65aa0d5813d157fa91b2123}{C\-O\-N\-F\-I\-G\-\_\-\-E\-N\-C\-O\-D\-E\-\_\-\-R\-E\-A\-D\-M\-E}~\char`\"{}dir-\/listing.\-encode-\/readme\char`\"{}
+\item 
+\#define \hyperlink{mod__dirlisting_8c_aac5944eec3647217d3bde18ff3889993}{C\-O\-N\-F\-I\-G\-\_\-\-E\-N\-C\-O\-D\-E\-\_\-\-H\-E\-A\-D\-E\-R}~\char`\"{}dir-\/listing.\-encode-\/header\char`\"{}
+\item 
+\#define \hyperlink{mod__dirlisting_8c_a7a93c912643299098267b1efed741237}{C\-O\-N\-F\-I\-G\-\_\-\-A\-U\-T\-O\-\_\-\-L\-A\-Y\-O\-U\-T}~\char`\"{}dir-\/listing.\-auto-\/layout\char`\"{}
+\item 
+\#define \hyperlink{mod__dirlisting_8c_a20876ec7c0c844d0e0c1628528bbb8da}{P\-A\-T\-C\-H}(x)~p-\/$>$conf.\-x = s-\/$>$x;
+\item 
+\#define \hyperlink{mod__dirlisting_8c_a1edf642e271f29401d6520920ea6dbc2}{D\-I\-R\-L\-I\-S\-T\-\_\-\-E\-N\-T\-\_\-\-N\-A\-M\-E}(ent)~((char$\ast$)(ent) + sizeof(\hyperlink{structdirls__entry__t}{dirls\-\_\-entry\-\_\-t}))
+\item 
+\#define \hyperlink{mod__dirlisting_8c_ab72ce46c8c8a6661e1a92fb1deb5e8fb}{D\-I\-R\-L\-I\-S\-T\-\_\-\-B\-L\-O\-B\-\_\-\-S\-I\-Z\-E}~16
+\item 
+\#define \hyperlink{mod__dirlisting_8c_a7b5e319a1ee00890041e7311384f8392}{F\-I\-F\-O\-\_\-\-N\-O\-N\-B\-L\-O\-C\-K}~0
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{structexcludes__buffer}{excludes\-\_\-buffer} $\ast$ \hyperlink{mod__dirlisting_8c_a266133dccb8694213e507d8b0a4cb680}{excludes\-\_\-buffer\-\_\-init} (void)
+\item 
+static int \hyperlink{mod__dirlisting_8c_af20b334d9feef0a8e14e54bf0956a1d3}{excludes\-\_\-buffer\-\_\-append} (\hyperlink{structexcludes__buffer}{excludes\-\_\-buffer} $\ast$exb, \hyperlink{structbuffer}{buffer} $\ast$\hyperlink{test__configfile_8c_ae1adbce218e7a9d09164012443191d24}{string})
+\item 
+static void \hyperlink{mod__dirlisting_8c_a3da6374f605b5b9178f949829a88fc4c}{excludes\-\_\-buffer\-\_\-free} (\hyperlink{structexcludes__buffer}{excludes\-\_\-buffer} $\ast$exb)
+\item 
+\hyperlink{mod__dirlisting_8c_a4fec70dabca0e1e65ad5c9d8e573449b}{I\-N\-I\-T\-\_\-\-F\-U\-N\-C} (mod\-\_\-dirlisting\-\_\-init)
+\item 
+\hyperlink{mod__dirlisting_8c_ae4316da5b8c771ea6cbc5c5c62767eb4}{F\-R\-E\-E\-\_\-\-F\-U\-N\-C} (mod\-\_\-dirlisting\-\_\-free)
+\item 
+\hyperlink{mod__dirlisting_8c_a066a670f7670389760497dfab8a60a50}{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C} (mod\-\_\-dirlisting\-\_\-set\-\_\-defaults)
+\item 
+static int \hyperlink{mod__dirlisting_8c_abedd03c8805f0f6e47204ca34c2e8d12}{mod\-\_\-dirlisting\-\_\-patch\-\_\-connection} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structplugin__data}{plugin\-\_\-data} $\ast$p)
+\item 
+static void \hyperlink{mod__dirlisting_8c_a8745c1f1f02d5ea286678fc7a11bbe09}{http\-\_\-dirls\-\_\-sort} (\hyperlink{structdirls__entry__t}{dirls\-\_\-entry\-\_\-t} $\ast$$\ast$ent, int num)
+\item 
+static int \hyperlink{mod__dirlisting_8c_a402d19f3fc0fcff29b0ad0609b74a56b}{http\-\_\-list\-\_\-directory\-\_\-sizefmt} (char $\ast$buf, size\-\_\-t bufsz, off\-\_\-t size)
+\item 
+static void \hyperlink{mod__dirlisting_8c_ae02a0a4e52cc85e09d890a3de19f3972}{http\-\_\-list\-\_\-directory\-\_\-include\-\_\-file} (\hyperlink{structbuffer}{buffer} $\ast$out, \hyperlink{structbuffer}{buffer} $\ast$path, const char $\ast$classname, int encode)
+\item 
+static void \hyperlink{mod__dirlisting_8c_a7a3f52a7cd3027ed0055396350fbac54}{http\-\_\-dirlist\-\_\-append\-\_\-js\-\_\-table\-\_\-resort} (\hyperlink{structbuffer}{buffer} $\ast$b, \hyperlink{structconnection}{connection} $\ast$con)
+\item 
+static void \hyperlink{mod__dirlisting_8c_a767db7031fc5d64de7b31de595d36db4}{http\-\_\-list\-\_\-directory\-\_\-header} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structplugin__data}{plugin\-\_\-data} $\ast$p, \hyperlink{structbuffer}{buffer} $\ast$out)
+\item 
+static void \hyperlink{mod__dirlisting_8c_afc2d279e9ec3a62c08cf1e37ccad3054}{http\-\_\-list\-\_\-directory\-\_\-footer} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structplugin__data}{plugin\-\_\-data} $\ast$p, \hyperlink{structbuffer}{buffer} $\ast$out)
+\item 
+static int \hyperlink{mod__dirlisting_8c_a23f5e0b2784e8aad9d5896614361c9a6}{http\-\_\-list\-\_\-directory} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structplugin__data}{plugin\-\_\-data} $\ast$p, \hyperlink{structbuffer}{buffer} $\ast$dir)
+\item 
+\hyperlink{mod__dirlisting_8c_a4415252abe22d6912bd91a66e96be023}{U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C} (mod\-\_\-dirlisting\-\_\-subrequest)
+\item 
+int \hyperlink{mod__dirlisting_8c_a835619d9c50a2aa50fe860978a5e6234}{mod\-\_\-dirlisting\-\_\-plugin\-\_\-init} (\hyperlink{structplugin}{plugin} $\ast$p)
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+static const char \hyperlink{mod__dirlisting_8c_a8e3ea5e6a64e6d4c6e197f7271a7c58c}{js\-\_\-simple\-\_\-table\-\_\-resort} \mbox{[}$\,$\mbox{]}
+\item 
+static const char \hyperlink{mod__dirlisting_8c_a6ffa47021abf1ff3762d41676cfe45fc}{js\-\_\-simple\-\_\-table\-\_\-init\-\_\-sort} \mbox{[}$\,$\mbox{]}
+\end{DoxyCompactItemize}
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{mod__dirlisting_8c_a922991bfad954730545335780c094fb7}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!C\-O\-N\-F\-I\-G\-\_\-\-A\-C\-T\-I\-V\-A\-T\-E@{C\-O\-N\-F\-I\-G\-\_\-\-A\-C\-T\-I\-V\-A\-T\-E}}
+\index{C\-O\-N\-F\-I\-G\-\_\-\-A\-C\-T\-I\-V\-A\-T\-E@{C\-O\-N\-F\-I\-G\-\_\-\-A\-C\-T\-I\-V\-A\-T\-E}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{C\-O\-N\-F\-I\-G\-\_\-\-A\-C\-T\-I\-V\-A\-T\-E}]{\setlength{\rightskip}{0pt plus 5cm}\#define C\-O\-N\-F\-I\-G\-\_\-\-A\-C\-T\-I\-V\-A\-T\-E~\char`\"{}dir-\/listing.\-activate\char`\"{}}}\label{mod__dirlisting_8c_a922991bfad954730545335780c094fb7}
+
+
+Referenced by mod\-\_\-dirlisting\-\_\-patch\-\_\-connection(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__dirlisting_8c_a7a93c912643299098267b1efed741237}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!C\-O\-N\-F\-I\-G\-\_\-\-A\-U\-T\-O\-\_\-\-L\-A\-Y\-O\-U\-T@{C\-O\-N\-F\-I\-G\-\_\-\-A\-U\-T\-O\-\_\-\-L\-A\-Y\-O\-U\-T}}
+\index{C\-O\-N\-F\-I\-G\-\_\-\-A\-U\-T\-O\-\_\-\-L\-A\-Y\-O\-U\-T@{C\-O\-N\-F\-I\-G\-\_\-\-A\-U\-T\-O\-\_\-\-L\-A\-Y\-O\-U\-T}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{C\-O\-N\-F\-I\-G\-\_\-\-A\-U\-T\-O\-\_\-\-L\-A\-Y\-O\-U\-T}]{\setlength{\rightskip}{0pt plus 5cm}\#define C\-O\-N\-F\-I\-G\-\_\-\-A\-U\-T\-O\-\_\-\-L\-A\-Y\-O\-U\-T~\char`\"{}dir-\/listing.\-auto-\/layout\char`\"{}}}\label{mod__dirlisting_8c_a7a93c912643299098267b1efed741237}
+
+
+Referenced by mod\-\_\-dirlisting\-\_\-patch\-\_\-connection(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__dirlisting_8c_a8d5989c4b5eb3f51da86ffb6ff4c1352}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!C\-O\-N\-F\-I\-G\-\_\-\-D\-I\-R\-\_\-\-L\-I\-S\-T\-I\-N\-G@{C\-O\-N\-F\-I\-G\-\_\-\-D\-I\-R\-\_\-\-L\-I\-S\-T\-I\-N\-G}}
+\index{C\-O\-N\-F\-I\-G\-\_\-\-D\-I\-R\-\_\-\-L\-I\-S\-T\-I\-N\-G@{C\-O\-N\-F\-I\-G\-\_\-\-D\-I\-R\-\_\-\-L\-I\-S\-T\-I\-N\-G}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{C\-O\-N\-F\-I\-G\-\_\-\-D\-I\-R\-\_\-\-L\-I\-S\-T\-I\-N\-G}]{\setlength{\rightskip}{0pt plus 5cm}\#define C\-O\-N\-F\-I\-G\-\_\-\-D\-I\-R\-\_\-\-L\-I\-S\-T\-I\-N\-G~\char`\"{}server.\-dir-\/listing\char`\"{}}}\label{mod__dirlisting_8c_a8d5989c4b5eb3f51da86ffb6ff4c1352}
+
+
+Referenced by mod\-\_\-dirlisting\-\_\-patch\-\_\-connection(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__dirlisting_8c_aac5944eec3647217d3bde18ff3889993}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!C\-O\-N\-F\-I\-G\-\_\-\-E\-N\-C\-O\-D\-E\-\_\-\-H\-E\-A\-D\-E\-R@{C\-O\-N\-F\-I\-G\-\_\-\-E\-N\-C\-O\-D\-E\-\_\-\-H\-E\-A\-D\-E\-R}}
+\index{C\-O\-N\-F\-I\-G\-\_\-\-E\-N\-C\-O\-D\-E\-\_\-\-H\-E\-A\-D\-E\-R@{C\-O\-N\-F\-I\-G\-\_\-\-E\-N\-C\-O\-D\-E\-\_\-\-H\-E\-A\-D\-E\-R}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{C\-O\-N\-F\-I\-G\-\_\-\-E\-N\-C\-O\-D\-E\-\_\-\-H\-E\-A\-D\-E\-R}]{\setlength{\rightskip}{0pt plus 5cm}\#define C\-O\-N\-F\-I\-G\-\_\-\-E\-N\-C\-O\-D\-E\-\_\-\-H\-E\-A\-D\-E\-R~\char`\"{}dir-\/listing.\-encode-\/header\char`\"{}}}\label{mod__dirlisting_8c_aac5944eec3647217d3bde18ff3889993}
+
+
+Referenced by mod\-\_\-dirlisting\-\_\-patch\-\_\-connection(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__dirlisting_8c_a9beaae01b65aa0d5813d157fa91b2123}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!C\-O\-N\-F\-I\-G\-\_\-\-E\-N\-C\-O\-D\-E\-\_\-\-R\-E\-A\-D\-M\-E@{C\-O\-N\-F\-I\-G\-\_\-\-E\-N\-C\-O\-D\-E\-\_\-\-R\-E\-A\-D\-M\-E}}
+\index{C\-O\-N\-F\-I\-G\-\_\-\-E\-N\-C\-O\-D\-E\-\_\-\-R\-E\-A\-D\-M\-E@{C\-O\-N\-F\-I\-G\-\_\-\-E\-N\-C\-O\-D\-E\-\_\-\-R\-E\-A\-D\-M\-E}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{C\-O\-N\-F\-I\-G\-\_\-\-E\-N\-C\-O\-D\-E\-\_\-\-R\-E\-A\-D\-M\-E}]{\setlength{\rightskip}{0pt plus 5cm}\#define C\-O\-N\-F\-I\-G\-\_\-\-E\-N\-C\-O\-D\-E\-\_\-\-R\-E\-A\-D\-M\-E~\char`\"{}dir-\/listing.\-encode-\/readme\char`\"{}}}\label{mod__dirlisting_8c_a9beaae01b65aa0d5813d157fa91b2123}
+
+
+Referenced by mod\-\_\-dirlisting\-\_\-patch\-\_\-connection(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__dirlisting_8c_ab6a4b97636978b71fadc17c0c42b43a8}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!C\-O\-N\-F\-I\-G\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G@{C\-O\-N\-F\-I\-G\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G}}
+\index{C\-O\-N\-F\-I\-G\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G@{C\-O\-N\-F\-I\-G\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{C\-O\-N\-F\-I\-G\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G}]{\setlength{\rightskip}{0pt plus 5cm}\#define C\-O\-N\-F\-I\-G\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G~\char`\"{}dir-\/listing.\-encoding\char`\"{}}}\label{mod__dirlisting_8c_ab6a4b97636978b71fadc17c0c42b43a8}
+
+
+Referenced by mod\-\_\-dirlisting\-\_\-patch\-\_\-connection(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__dirlisting_8c_a4c284b4f27513be591a17aad9ed0f66d}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!C\-O\-N\-F\-I\-G\-\_\-\-E\-X\-C\-L\-U\-D\-E@{C\-O\-N\-F\-I\-G\-\_\-\-E\-X\-C\-L\-U\-D\-E}}
+\index{C\-O\-N\-F\-I\-G\-\_\-\-E\-X\-C\-L\-U\-D\-E@{C\-O\-N\-F\-I\-G\-\_\-\-E\-X\-C\-L\-U\-D\-E}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{C\-O\-N\-F\-I\-G\-\_\-\-E\-X\-C\-L\-U\-D\-E}]{\setlength{\rightskip}{0pt plus 5cm}\#define C\-O\-N\-F\-I\-G\-\_\-\-E\-X\-C\-L\-U\-D\-E~\char`\"{}dir-\/listing.\-exclude\char`\"{}}}\label{mod__dirlisting_8c_a4c284b4f27513be591a17aad9ed0f66d}
+
+
+Referenced by mod\-\_\-dirlisting\-\_\-patch\-\_\-connection(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__dirlisting_8c_ad9ae47f62846d4ac35c8a4f1ff710c84}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!C\-O\-N\-F\-I\-G\-\_\-\-E\-X\-T\-E\-R\-N\-A\-L\-\_\-\-C\-S\-S@{C\-O\-N\-F\-I\-G\-\_\-\-E\-X\-T\-E\-R\-N\-A\-L\-\_\-\-C\-S\-S}}
+\index{C\-O\-N\-F\-I\-G\-\_\-\-E\-X\-T\-E\-R\-N\-A\-L\-\_\-\-C\-S\-S@{C\-O\-N\-F\-I\-G\-\_\-\-E\-X\-T\-E\-R\-N\-A\-L\-\_\-\-C\-S\-S}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{C\-O\-N\-F\-I\-G\-\_\-\-E\-X\-T\-E\-R\-N\-A\-L\-\_\-\-C\-S\-S}]{\setlength{\rightskip}{0pt plus 5cm}\#define C\-O\-N\-F\-I\-G\-\_\-\-E\-X\-T\-E\-R\-N\-A\-L\-\_\-\-C\-S\-S~\char`\"{}dir-\/listing.\-external-\/css\char`\"{}}}\label{mod__dirlisting_8c_ad9ae47f62846d4ac35c8a4f1ff710c84}
+
+
+Referenced by mod\-\_\-dirlisting\-\_\-patch\-\_\-connection(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__dirlisting_8c_a02523f422103d2271f62ca0fabb99de4}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!C\-O\-N\-F\-I\-G\-\_\-\-E\-X\-T\-E\-R\-N\-A\-L\-\_\-\-J\-S@{C\-O\-N\-F\-I\-G\-\_\-\-E\-X\-T\-E\-R\-N\-A\-L\-\_\-\-J\-S}}
+\index{C\-O\-N\-F\-I\-G\-\_\-\-E\-X\-T\-E\-R\-N\-A\-L\-\_\-\-J\-S@{C\-O\-N\-F\-I\-G\-\_\-\-E\-X\-T\-E\-R\-N\-A\-L\-\_\-\-J\-S}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{C\-O\-N\-F\-I\-G\-\_\-\-E\-X\-T\-E\-R\-N\-A\-L\-\_\-\-J\-S}]{\setlength{\rightskip}{0pt plus 5cm}\#define C\-O\-N\-F\-I\-G\-\_\-\-E\-X\-T\-E\-R\-N\-A\-L\-\_\-\-J\-S~\char`\"{}dir-\/listing.\-external-\/js\char`\"{}}}\label{mod__dirlisting_8c_a02523f422103d2271f62ca0fabb99de4}
+
+
+Referenced by mod\-\_\-dirlisting\-\_\-patch\-\_\-connection(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__dirlisting_8c_a835e490bc550e88b8e621dde36a84463}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!C\-O\-N\-F\-I\-G\-\_\-\-H\-I\-D\-E\-\_\-\-D\-O\-T\-F\-I\-L\-E\-S@{C\-O\-N\-F\-I\-G\-\_\-\-H\-I\-D\-E\-\_\-\-D\-O\-T\-F\-I\-L\-E\-S}}
+\index{C\-O\-N\-F\-I\-G\-\_\-\-H\-I\-D\-E\-\_\-\-D\-O\-T\-F\-I\-L\-E\-S@{C\-O\-N\-F\-I\-G\-\_\-\-H\-I\-D\-E\-\_\-\-D\-O\-T\-F\-I\-L\-E\-S}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{C\-O\-N\-F\-I\-G\-\_\-\-H\-I\-D\-E\-\_\-\-D\-O\-T\-F\-I\-L\-E\-S}]{\setlength{\rightskip}{0pt plus 5cm}\#define C\-O\-N\-F\-I\-G\-\_\-\-H\-I\-D\-E\-\_\-\-D\-O\-T\-F\-I\-L\-E\-S~\char`\"{}dir-\/listing.\-hide-\/dotfiles\char`\"{}}}\label{mod__dirlisting_8c_a835e490bc550e88b8e621dde36a84463}
+
+
+Referenced by mod\-\_\-dirlisting\-\_\-patch\-\_\-connection(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__dirlisting_8c_ad1616d61f371685ec92f566a03e8fa79}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!C\-O\-N\-F\-I\-G\-\_\-\-H\-I\-D\-E\-\_\-\-H\-E\-A\-D\-E\-R\-\_\-\-F\-I\-L\-E@{C\-O\-N\-F\-I\-G\-\_\-\-H\-I\-D\-E\-\_\-\-H\-E\-A\-D\-E\-R\-\_\-\-F\-I\-L\-E}}
+\index{C\-O\-N\-F\-I\-G\-\_\-\-H\-I\-D\-E\-\_\-\-H\-E\-A\-D\-E\-R\-\_\-\-F\-I\-L\-E@{C\-O\-N\-F\-I\-G\-\_\-\-H\-I\-D\-E\-\_\-\-H\-E\-A\-D\-E\-R\-\_\-\-F\-I\-L\-E}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{C\-O\-N\-F\-I\-G\-\_\-\-H\-I\-D\-E\-\_\-\-H\-E\-A\-D\-E\-R\-\_\-\-F\-I\-L\-E}]{\setlength{\rightskip}{0pt plus 5cm}\#define C\-O\-N\-F\-I\-G\-\_\-\-H\-I\-D\-E\-\_\-\-H\-E\-A\-D\-E\-R\-\_\-\-F\-I\-L\-E~\char`\"{}dir-\/listing.\-hide-\/header-\/file\char`\"{}}}\label{mod__dirlisting_8c_ad1616d61f371685ec92f566a03e8fa79}
+
+
+Referenced by mod\-\_\-dirlisting\-\_\-patch\-\_\-connection(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__dirlisting_8c_ab939cfff2eb744956b1c87eade663dc6}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!C\-O\-N\-F\-I\-G\-\_\-\-H\-I\-D\-E\-\_\-\-R\-E\-A\-D\-M\-E\-\_\-\-F\-I\-L\-E@{C\-O\-N\-F\-I\-G\-\_\-\-H\-I\-D\-E\-\_\-\-R\-E\-A\-D\-M\-E\-\_\-\-F\-I\-L\-E}}
+\index{C\-O\-N\-F\-I\-G\-\_\-\-H\-I\-D\-E\-\_\-\-R\-E\-A\-D\-M\-E\-\_\-\-F\-I\-L\-E@{C\-O\-N\-F\-I\-G\-\_\-\-H\-I\-D\-E\-\_\-\-R\-E\-A\-D\-M\-E\-\_\-\-F\-I\-L\-E}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{C\-O\-N\-F\-I\-G\-\_\-\-H\-I\-D\-E\-\_\-\-R\-E\-A\-D\-M\-E\-\_\-\-F\-I\-L\-E}]{\setlength{\rightskip}{0pt plus 5cm}\#define C\-O\-N\-F\-I\-G\-\_\-\-H\-I\-D\-E\-\_\-\-R\-E\-A\-D\-M\-E\-\_\-\-F\-I\-L\-E~\char`\"{}dir-\/listing.\-hide-\/readme-\/file\char`\"{}}}\label{mod__dirlisting_8c_ab939cfff2eb744956b1c87eade663dc6}
+
+
+Referenced by mod\-\_\-dirlisting\-\_\-patch\-\_\-connection(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__dirlisting_8c_a53f9a49221c6f8cc207191ccb0776aff}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!C\-O\-N\-F\-I\-G\-\_\-\-S\-E\-T\-\_\-\-F\-O\-O\-T\-E\-R@{C\-O\-N\-F\-I\-G\-\_\-\-S\-E\-T\-\_\-\-F\-O\-O\-T\-E\-R}}
+\index{C\-O\-N\-F\-I\-G\-\_\-\-S\-E\-T\-\_\-\-F\-O\-O\-T\-E\-R@{C\-O\-N\-F\-I\-G\-\_\-\-S\-E\-T\-\_\-\-F\-O\-O\-T\-E\-R}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{C\-O\-N\-F\-I\-G\-\_\-\-S\-E\-T\-\_\-\-F\-O\-O\-T\-E\-R}]{\setlength{\rightskip}{0pt plus 5cm}\#define C\-O\-N\-F\-I\-G\-\_\-\-S\-E\-T\-\_\-\-F\-O\-O\-T\-E\-R~\char`\"{}dir-\/listing.\-set-\/footer\char`\"{}}}\label{mod__dirlisting_8c_a53f9a49221c6f8cc207191ccb0776aff}
+
+
+Referenced by mod\-\_\-dirlisting\-\_\-patch\-\_\-connection(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__dirlisting_8c_a1f6b44df85a28cae52060bbb1fa858d2}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!C\-O\-N\-F\-I\-G\-\_\-\-S\-H\-O\-W\-\_\-\-H\-E\-A\-D\-E\-R@{C\-O\-N\-F\-I\-G\-\_\-\-S\-H\-O\-W\-\_\-\-H\-E\-A\-D\-E\-R}}
+\index{C\-O\-N\-F\-I\-G\-\_\-\-S\-H\-O\-W\-\_\-\-H\-E\-A\-D\-E\-R@{C\-O\-N\-F\-I\-G\-\_\-\-S\-H\-O\-W\-\_\-\-H\-E\-A\-D\-E\-R}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{C\-O\-N\-F\-I\-G\-\_\-\-S\-H\-O\-W\-\_\-\-H\-E\-A\-D\-E\-R}]{\setlength{\rightskip}{0pt plus 5cm}\#define C\-O\-N\-F\-I\-G\-\_\-\-S\-H\-O\-W\-\_\-\-H\-E\-A\-D\-E\-R~\char`\"{}dir-\/listing.\-show-\/header\char`\"{}}}\label{mod__dirlisting_8c_a1f6b44df85a28cae52060bbb1fa858d2}
+
+
+Referenced by mod\-\_\-dirlisting\-\_\-patch\-\_\-connection(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__dirlisting_8c_ade19624ab631a1dcc4348da19d45e23f}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!C\-O\-N\-F\-I\-G\-\_\-\-S\-H\-O\-W\-\_\-\-R\-E\-A\-D\-M\-E@{C\-O\-N\-F\-I\-G\-\_\-\-S\-H\-O\-W\-\_\-\-R\-E\-A\-D\-M\-E}}
+\index{C\-O\-N\-F\-I\-G\-\_\-\-S\-H\-O\-W\-\_\-\-R\-E\-A\-D\-M\-E@{C\-O\-N\-F\-I\-G\-\_\-\-S\-H\-O\-W\-\_\-\-R\-E\-A\-D\-M\-E}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{C\-O\-N\-F\-I\-G\-\_\-\-S\-H\-O\-W\-\_\-\-R\-E\-A\-D\-M\-E}]{\setlength{\rightskip}{0pt plus 5cm}\#define C\-O\-N\-F\-I\-G\-\_\-\-S\-H\-O\-W\-\_\-\-R\-E\-A\-D\-M\-E~\char`\"{}dir-\/listing.\-show-\/readme\char`\"{}}}\label{mod__dirlisting_8c_ade19624ab631a1dcc4348da19d45e23f}
+
+
+Referenced by mod\-\_\-dirlisting\-\_\-patch\-\_\-connection(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__dirlisting_8c_ab72ce46c8c8a6661e1a92fb1deb5e8fb}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!D\-I\-R\-L\-I\-S\-T\-\_\-\-B\-L\-O\-B\-\_\-\-S\-I\-Z\-E@{D\-I\-R\-L\-I\-S\-T\-\_\-\-B\-L\-O\-B\-\_\-\-S\-I\-Z\-E}}
+\index{D\-I\-R\-L\-I\-S\-T\-\_\-\-B\-L\-O\-B\-\_\-\-S\-I\-Z\-E@{D\-I\-R\-L\-I\-S\-T\-\_\-\-B\-L\-O\-B\-\_\-\-S\-I\-Z\-E}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{D\-I\-R\-L\-I\-S\-T\-\_\-\-B\-L\-O\-B\-\_\-\-S\-I\-Z\-E}]{\setlength{\rightskip}{0pt plus 5cm}\#define D\-I\-R\-L\-I\-S\-T\-\_\-\-B\-L\-O\-B\-\_\-\-S\-I\-Z\-E~16}}\label{mod__dirlisting_8c_ab72ce46c8c8a6661e1a92fb1deb5e8fb}
+
+
+Referenced by http\-\_\-list\-\_\-directory().
+
+\hypertarget{mod__dirlisting_8c_a1edf642e271f29401d6520920ea6dbc2}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!D\-I\-R\-L\-I\-S\-T\-\_\-\-E\-N\-T\-\_\-\-N\-A\-M\-E@{D\-I\-R\-L\-I\-S\-T\-\_\-\-E\-N\-T\-\_\-\-N\-A\-M\-E}}
+\index{D\-I\-R\-L\-I\-S\-T\-\_\-\-E\-N\-T\-\_\-\-N\-A\-M\-E@{D\-I\-R\-L\-I\-S\-T\-\_\-\-E\-N\-T\-\_\-\-N\-A\-M\-E}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{D\-I\-R\-L\-I\-S\-T\-\_\-\-E\-N\-T\-\_\-\-N\-A\-M\-E}]{\setlength{\rightskip}{0pt plus 5cm}\#define D\-I\-R\-L\-I\-S\-T\-\_\-\-E\-N\-T\-\_\-\-N\-A\-M\-E(
+\begin{DoxyParamCaption}
+\item[{}]{ent}
+\end{DoxyParamCaption}
+)~((char$\ast$)(ent) + sizeof({\bf dirls\-\_\-entry\-\_\-t}))}}\label{mod__dirlisting_8c_a1edf642e271f29401d6520920ea6dbc2}
+
+
+Referenced by http\-\_\-dirls\-\_\-sort(), and http\-\_\-list\-\_\-directory().
+
+\hypertarget{mod__dirlisting_8c_a7b5e319a1ee00890041e7311384f8392}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!F\-I\-F\-O\-\_\-\-N\-O\-N\-B\-L\-O\-C\-K@{F\-I\-F\-O\-\_\-\-N\-O\-N\-B\-L\-O\-C\-K}}
+\index{F\-I\-F\-O\-\_\-\-N\-O\-N\-B\-L\-O\-C\-K@{F\-I\-F\-O\-\_\-\-N\-O\-N\-B\-L\-O\-C\-K}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{F\-I\-F\-O\-\_\-\-N\-O\-N\-B\-L\-O\-C\-K}]{\setlength{\rightskip}{0pt plus 5cm}\#define F\-I\-F\-O\-\_\-\-N\-O\-N\-B\-L\-O\-C\-K~0}}\label{mod__dirlisting_8c_a7b5e319a1ee00890041e7311384f8392}
+
+
+Referenced by http\-\_\-list\-\_\-directory\-\_\-include\-\_\-file().
+
+\hypertarget{mod__dirlisting_8c_a20876ec7c0c844d0e0c1628528bbb8da}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!P\-A\-T\-C\-H@{P\-A\-T\-C\-H}}
+\index{P\-A\-T\-C\-H@{P\-A\-T\-C\-H}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{P\-A\-T\-C\-H}]{\setlength{\rightskip}{0pt plus 5cm}\#define P\-A\-T\-C\-H(
+\begin{DoxyParamCaption}
+\item[{}]{x}
+\end{DoxyParamCaption}
+)~p-\/$>$conf.\-x = s-\/$>$x;}}\label{mod__dirlisting_8c_a20876ec7c0c844d0e0c1628528bbb8da}
+
+
+Referenced by mod\-\_\-dirlisting\-\_\-patch\-\_\-connection().
+
+
+
+\subsection{Function Documentation}
+\hypertarget{mod__dirlisting_8c_af20b334d9feef0a8e14e54bf0956a1d3}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!excludes\-\_\-buffer\-\_\-append@{excludes\-\_\-buffer\-\_\-append}}
+\index{excludes\-\_\-buffer\-\_\-append@{excludes\-\_\-buffer\-\_\-append}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{excludes\-\_\-buffer\-\_\-append}]{\setlength{\rightskip}{0pt plus 5cm}static int excludes\-\_\-buffer\-\_\-append (
+\begin{DoxyParamCaption}
+\item[{{\bf excludes\-\_\-buffer} $\ast$}]{exb, }
+\item[{{\bf buffer} $\ast$}]{string}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__dirlisting_8c_af20b334d9feef0a8e14e54bf0956a1d3}
+
+
+References buffer\-\_\-copy\-\_\-buffer(), buffer\-\_\-init(), buffer\-::ptr, excludes\-\_\-buffer\-::ptr, excludes\-\_\-buffer\-::size, excludes\-::string, U\-N\-U\-S\-E\-D, and excludes\-\_\-buffer\-::used.
+
+
+
+Referenced by S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__dirlisting_8c_a3da6374f605b5b9178f949829a88fc4c}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!excludes\-\_\-buffer\-\_\-free@{excludes\-\_\-buffer\-\_\-free}}
+\index{excludes\-\_\-buffer\-\_\-free@{excludes\-\_\-buffer\-\_\-free}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{excludes\-\_\-buffer\-\_\-free}]{\setlength{\rightskip}{0pt plus 5cm}static void excludes\-\_\-buffer\-\_\-free (
+\begin{DoxyParamCaption}
+\item[{{\bf excludes\-\_\-buffer} $\ast$}]{exb}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__dirlisting_8c_a3da6374f605b5b9178f949829a88fc4c}
+
+
+References buffer\-\_\-free(), excludes\-\_\-buffer\-::ptr, excludes\-\_\-buffer\-::size, and excludes\-::string.
+
+
+
+Referenced by F\-R\-E\-E\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__dirlisting_8c_a266133dccb8694213e507d8b0a4cb680}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!excludes\-\_\-buffer\-\_\-init@{excludes\-\_\-buffer\-\_\-init}}
+\index{excludes\-\_\-buffer\-\_\-init@{excludes\-\_\-buffer\-\_\-init}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{excludes\-\_\-buffer\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf excludes\-\_\-buffer}$\ast$ excludes\-\_\-buffer\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__dirlisting_8c_a266133dccb8694213e507d8b0a4cb680}
+
+
+Referenced by S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__dirlisting_8c_ae4316da5b8c771ea6cbc5c5c62767eb4}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!F\-R\-E\-E\-\_\-\-F\-U\-N\-C@{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}}
+\index{F\-R\-E\-E\-\_\-\-F\-U\-N\-C@{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}F\-R\-E\-E\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-dirlisting\-\_\-free}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__dirlisting_8c_ae4316da5b8c771ea6cbc5c5c62767eb4}
+
+
+References buffer\-\_\-free(), plugin\-\_\-data\-::config\-\_\-storage, plugin\-\_\-data\-::content\-\_\-charset, plugin\-\_\-config\-::encoding, plugin\-\_\-config\-::excludes, excludes\-\_\-buffer\-\_\-free(), plugin\-\_\-config\-::external\-\_\-css, plugin\-\_\-config\-::external\-\_\-js, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, plugin\-\_\-config\-::set\-\_\-footer, plugin\-\_\-config\-::show\-\_\-header, plugin\-\_\-config\-::show\-\_\-readme, plugin\-\_\-data\-::tmp\-\_\-buf, and U\-N\-U\-S\-E\-D.
+
+\hypertarget{mod__dirlisting_8c_a7a3f52a7cd3027ed0055396350fbac54}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!http\-\_\-dirlist\-\_\-append\-\_\-js\-\_\-table\-\_\-resort@{http\-\_\-dirlist\-\_\-append\-\_\-js\-\_\-table\-\_\-resort}}
+\index{http\-\_\-dirlist\-\_\-append\-\_\-js\-\_\-table\-\_\-resort@{http\-\_\-dirlist\-\_\-append\-\_\-js\-\_\-table\-\_\-resort}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{http\-\_\-dirlist\-\_\-append\-\_\-js\-\_\-table\-\_\-resort}]{\setlength{\rightskip}{0pt plus 5cm}static void http\-\_\-dirlist\-\_\-append\-\_\-js\-\_\-table\-\_\-resort (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{b, }
+\item[{{\bf connection} $\ast$}]{con}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__dirlisting_8c_a7a3f52a7cd3027ed0055396350fbac54}
+
+
+References buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-string\-\_\-is\-\_\-empty(), C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, js\-\_\-simple\-\_\-table\-\_\-init\-\_\-sort, js\-\_\-simple\-\_\-table\-\_\-resort, buffer\-::ptr, request\-\_\-uri\-::query, and connection\-::uri.
+
+
+
+Referenced by http\-\_\-list\-\_\-directory\-\_\-footer().
+
+\hypertarget{mod__dirlisting_8c_a8745c1f1f02d5ea286678fc7a11bbe09}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!http\-\_\-dirls\-\_\-sort@{http\-\_\-dirls\-\_\-sort}}
+\index{http\-\_\-dirls\-\_\-sort@{http\-\_\-dirls\-\_\-sort}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{http\-\_\-dirls\-\_\-sort}]{\setlength{\rightskip}{0pt plus 5cm}static void http\-\_\-dirls\-\_\-sort (
+\begin{DoxyParamCaption}
+\item[{{\bf dirls\-\_\-entry\-\_\-t} $\ast$$\ast$}]{ent, }
+\item[{int}]{num}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__dirlisting_8c_a8745c1f1f02d5ea286678fc7a11bbe09}
+
+
+References D\-I\-R\-L\-I\-S\-T\-\_\-\-E\-N\-T\-\_\-\-N\-A\-M\-E.
+
+
+
+Referenced by http\-\_\-list\-\_\-directory().
+
+\hypertarget{mod__dirlisting_8c_a23f5e0b2784e8aad9d5896614361c9a6}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!http\-\_\-list\-\_\-directory@{http\-\_\-list\-\_\-directory}}
+\index{http\-\_\-list\-\_\-directory@{http\-\_\-list\-\_\-directory}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{http\-\_\-list\-\_\-directory}]{\setlength{\rightskip}{0pt plus 5cm}static int http\-\_\-list\-\_\-directory (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf plugin\-\_\-data} $\ast$}]{p, }
+\item[{{\bf buffer} $\ast$}]{dir}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__dirlisting_8c_a23f5e0b2784e8aad9d5896614361c9a6}
+
+
+References buffer\-\_\-append\-\_\-string(), buffer\-\_\-append\-\_\-string\-\_\-buffer(), buffer\-\_\-append\-\_\-string\-\_\-encoded(), buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-copy\-\_\-string\-\_\-len(), buffer\-\_\-free(), buffer\-\_\-init(), buffer\-\_\-is\-\_\-empty(), buffer\-\_\-string\-\_\-is\-\_\-empty(), buffer\-\_\-string\-\_\-length(), chunkqueue\-\_\-append\-\_\-buffer(), plugin\-\_\-data\-::conf, connection\-::conf, C\-O\-N\-S\-T\-\_\-\-B\-U\-F\-\_\-\-L\-E\-N, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, plugin\-\_\-data\-::content\-\_\-charset, array\-::data, D\-I\-R\-L\-I\-S\-T\-\_\-\-B\-L\-O\-B\-\_\-\-S\-I\-Z\-E, D\-I\-R\-L\-I\-S\-T\-\_\-\-E\-N\-T\-\_\-\-N\-A\-M\-E, plugin\-\_\-config\-::encoding, E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-M\-I\-N\-I\-M\-A\-L\-\_\-\-X\-M\-L, E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-R\-E\-L\-\_\-\-U\-R\-I\-\_\-\-P\-A\-R\-T, dirls\-\_\-list\-\_\-t\-::ent, plugin\-\_\-config\-::excludes, connection\-::file\-\_\-finished, force\-\_\-assert, plugin\-\_\-config\-::hide\-\_\-dot\-\_\-files, plugin\-\_\-config\-::hide\-\_\-header\-\_\-file, plugin\-\_\-config\-::hide\-\_\-readme\-\_\-file, http\-\_\-dirls\-\_\-sort(), http\-\_\-list\-\_\-directory\-\_\-footer(), http\-\_\-list\-\_\-directory\-\_\-header(), http\-\_\-list\-\_\-directory\-\_\-sizefmt(), log\-\_\-error\-\_\-write(), specific\-\_\-config\-::mimetypes, dirls\-\_\-entry\-\_\-t\-::mtime, dirls\-\_\-entry\-\_\-t\-::namelen, buffer\-::ptr, excludes\-\_\-buffer\-::ptr, response\-\_\-header\-\_\-overwrite(), plugin\-\_\-config\-::show\-\_\-header, plugin\-\_\-config\-::show\-\_\-readme, dirls\-\_\-entry\-\_\-t\-::size, dirls\-\_\-list\-\_\-t\-::size, server\-::srvconf, specific\-\_\-config\-::use\-\_\-xattr, array\-::used, excludes\-\_\-buffer\-::used, dirls\-\_\-list\-\_\-t\-::used, data\-\_\-string\-::value, connection\-::write\-\_\-queue, and server\-\_\-config\-::xattr\-\_\-name.
+
+
+
+Referenced by U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__dirlisting_8c_afc2d279e9ec3a62c08cf1e37ccad3054}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!http\-\_\-list\-\_\-directory\-\_\-footer@{http\-\_\-list\-\_\-directory\-\_\-footer}}
+\index{http\-\_\-list\-\_\-directory\-\_\-footer@{http\-\_\-list\-\_\-directory\-\_\-footer}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{http\-\_\-list\-\_\-directory\-\_\-footer}]{\setlength{\rightskip}{0pt plus 5cm}static void http\-\_\-list\-\_\-directory\-\_\-footer (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf plugin\-\_\-data} $\ast$}]{p, }
+\item[{{\bf buffer} $\ast$}]{out}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__dirlisting_8c_afc2d279e9ec3a62c08cf1e37ccad3054}
+
+
+References plugin\-\_\-config\-::auto\-\_\-layout, buffer\-\_\-append\-\_\-slash(), buffer\-\_\-append\-\_\-string\-\_\-buffer(), buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-copy\-\_\-buffer(), buffer\-\_\-is\-\_\-empty(), buffer\-\_\-string\-\_\-is\-\_\-empty(), plugin\-\_\-data\-::conf, connection\-::conf, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, plugin\-\_\-config\-::encode\-\_\-readme, plugin\-\_\-config\-::external\-\_\-js, http\-\_\-dirlist\-\_\-append\-\_\-js\-\_\-table\-\_\-resort(), http\-\_\-list\-\_\-directory\-\_\-include\-\_\-file(), physical\-::path, connection\-::physical, specific\-\_\-config\-::server\-\_\-tag, plugin\-\_\-config\-::set\-\_\-footer, plugin\-\_\-config\-::show\-\_\-readme, plugin\-\_\-data\-::tmp\-\_\-buf, and U\-N\-U\-S\-E\-D.
+
+
+
+Referenced by http\-\_\-list\-\_\-directory().
+
+\hypertarget{mod__dirlisting_8c_a767db7031fc5d64de7b31de595d36db4}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!http\-\_\-list\-\_\-directory\-\_\-header@{http\-\_\-list\-\_\-directory\-\_\-header}}
+\index{http\-\_\-list\-\_\-directory\-\_\-header@{http\-\_\-list\-\_\-directory\-\_\-header}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{http\-\_\-list\-\_\-directory\-\_\-header}]{\setlength{\rightskip}{0pt plus 5cm}static void http\-\_\-list\-\_\-directory\-\_\-header (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf plugin\-\_\-data} $\ast$}]{p, }
+\item[{{\bf buffer} $\ast$}]{out}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__dirlisting_8c_a767db7031fc5d64de7b31de595d36db4}
+
+
+References plugin\-\_\-config\-::auto\-\_\-layout, buffer\-\_\-append\-\_\-slash(), buffer\-\_\-append\-\_\-string\-\_\-buffer(), buffer\-\_\-append\-\_\-string\-\_\-encoded(), buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-copy\-\_\-buffer(), buffer\-\_\-string\-\_\-is\-\_\-empty(), plugin\-\_\-data\-::conf, C\-O\-N\-S\-T\-\_\-\-B\-U\-F\-\_\-\-L\-E\-N, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, plugin\-\_\-config\-::encode\-\_\-header, plugin\-\_\-config\-::encoding, E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-M\-I\-N\-I\-M\-A\-L\-\_\-\-X\-M\-L, plugin\-\_\-config\-::external\-\_\-css, http\-\_\-list\-\_\-directory\-\_\-include\-\_\-file(), request\-\_\-uri\-::path, physical\-::path, connection\-::physical, plugin\-\_\-config\-::show\-\_\-header, plugin\-\_\-data\-::tmp\-\_\-buf, U\-N\-U\-S\-E\-D, and connection\-::uri.
+
+
+
+Referenced by http\-\_\-list\-\_\-directory().
+
+\hypertarget{mod__dirlisting_8c_ae02a0a4e52cc85e09d890a3de19f3972}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!http\-\_\-list\-\_\-directory\-\_\-include\-\_\-file@{http\-\_\-list\-\_\-directory\-\_\-include\-\_\-file}}
+\index{http\-\_\-list\-\_\-directory\-\_\-include\-\_\-file@{http\-\_\-list\-\_\-directory\-\_\-include\-\_\-file}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{http\-\_\-list\-\_\-directory\-\_\-include\-\_\-file}]{\setlength{\rightskip}{0pt plus 5cm}static void http\-\_\-list\-\_\-directory\-\_\-include\-\_\-file (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{out, }
+\item[{{\bf buffer} $\ast$}]{path, }
+\item[{const char $\ast$}]{classname, }
+\item[{int}]{encode}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__dirlisting_8c_ae02a0a4e52cc85e09d890a3de19f3972}
+
+
+References buffer\-\_\-append\-\_\-string(), buffer\-\_\-append\-\_\-string\-\_\-encoded(), buffer\-\_\-append\-\_\-string\-\_\-len(), C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, E\-N\-C\-O\-D\-I\-N\-G\-\_\-\-M\-I\-N\-I\-M\-A\-L\-\_\-\-X\-M\-L, F\-I\-F\-O\-\_\-\-N\-O\-N\-B\-L\-O\-C\-K, and buffer\-::ptr.
+
+
+
+Referenced by http\-\_\-list\-\_\-directory\-\_\-footer(), and http\-\_\-list\-\_\-directory\-\_\-header().
+
+\hypertarget{mod__dirlisting_8c_a402d19f3fc0fcff29b0ad0609b74a56b}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!http\-\_\-list\-\_\-directory\-\_\-sizefmt@{http\-\_\-list\-\_\-directory\-\_\-sizefmt}}
+\index{http\-\_\-list\-\_\-directory\-\_\-sizefmt@{http\-\_\-list\-\_\-directory\-\_\-sizefmt}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{http\-\_\-list\-\_\-directory\-\_\-sizefmt}]{\setlength{\rightskip}{0pt plus 5cm}static int http\-\_\-list\-\_\-directory\-\_\-sizefmt (
+\begin{DoxyParamCaption}
+\item[{char $\ast$}]{buf, }
+\item[{size\-\_\-t}]{bufsz, }
+\item[{off\-\_\-t}]{size}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__dirlisting_8c_a402d19f3fc0fcff29b0ad0609b74a56b}
+
+
+References li\-\_\-itostrn().
+
+
+
+Referenced by http\-\_\-list\-\_\-directory().
+
+\hypertarget{mod__dirlisting_8c_a4fec70dabca0e1e65ad5c9d8e573449b}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!I\-N\-I\-T\-\_\-\-F\-U\-N\-C@{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}}
+\index{I\-N\-I\-T\-\_\-\-F\-U\-N\-C@{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}I\-N\-I\-T\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-dirlisting\-\_\-init}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__dirlisting_8c_a4fec70dabca0e1e65ad5c9d8e573449b}
+
+
+References buffer\-\_\-init(), plugin\-\_\-data\-::content\-\_\-charset, and plugin\-\_\-data\-::tmp\-\_\-buf.
+
+\hypertarget{mod__dirlisting_8c_abedd03c8805f0f6e47204ca34c2e8d12}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!mod\-\_\-dirlisting\-\_\-patch\-\_\-connection@{mod\-\_\-dirlisting\-\_\-patch\-\_\-connection}}
+\index{mod\-\_\-dirlisting\-\_\-patch\-\_\-connection@{mod\-\_\-dirlisting\-\_\-patch\-\_\-connection}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{mod\-\_\-dirlisting\-\_\-patch\-\_\-connection}]{\setlength{\rightskip}{0pt plus 5cm}static int mod\-\_\-dirlisting\-\_\-patch\-\_\-connection (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf plugin\-\_\-data} $\ast$}]{p}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__dirlisting_8c_abedd03c8805f0f6e47204ca34c2e8d12}
+
+
+References buffer\-\_\-is\-\_\-equal\-\_\-string(), C\-O\-N\-F\-I\-G\-\_\-\-A\-C\-T\-I\-V\-A\-T\-E, C\-O\-N\-F\-I\-G\-\_\-\-A\-U\-T\-O\-\_\-\-L\-A\-Y\-O\-U\-T, config\-\_\-check\-\_\-cond(), server\-::config\-\_\-context, C\-O\-N\-F\-I\-G\-\_\-\-D\-I\-R\-\_\-\-L\-I\-S\-T\-I\-N\-G, C\-O\-N\-F\-I\-G\-\_\-\-E\-N\-C\-O\-D\-E\-\_\-\-H\-E\-A\-D\-E\-R, C\-O\-N\-F\-I\-G\-\_\-\-E\-N\-C\-O\-D\-E\-\_\-\-R\-E\-A\-D\-M\-E, C\-O\-N\-F\-I\-G\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G, C\-O\-N\-F\-I\-G\-\_\-\-E\-X\-C\-L\-U\-D\-E, C\-O\-N\-F\-I\-G\-\_\-\-E\-X\-T\-E\-R\-N\-A\-L\-\_\-\-C\-S\-S, C\-O\-N\-F\-I\-G\-\_\-\-E\-X\-T\-E\-R\-N\-A\-L\-\_\-\-J\-S, C\-O\-N\-F\-I\-G\-\_\-\-H\-I\-D\-E\-\_\-\-D\-O\-T\-F\-I\-L\-E\-S, C\-O\-N\-F\-I\-G\-\_\-\-H\-I\-D\-E\-\_\-\-H\-E\-A\-D\-E\-R\-\_\-\-F\-I\-L\-E, C\-O\-N\-F\-I\-G\-\_\-\-H\-I\-D\-E\-\_\-\-R\-E\-A\-D\-M\-E\-\_\-\-F\-I\-L\-E, C\-O\-N\-F\-I\-G\-\_\-\-S\-E\-T\-\_\-\-F\-O\-O\-T\-E\-R, C\-O\-N\-F\-I\-G\-\_\-\-S\-H\-O\-W\-\_\-\-H\-E\-A\-D\-E\-R, C\-O\-N\-F\-I\-G\-\_\-\-S\-H\-O\-W\-\_\-\-R\-E\-A\-D\-M\-E, plugin\-\_\-data\-::config\-\_\-storage, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, array\-::data, P\-A\-T\-C\-H, array\-::used, and data\-\_\-config\-::value.
+
+
+
+Referenced by U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__dirlisting_8c_a835619d9c50a2aa50fe860978a5e6234}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!mod\-\_\-dirlisting\-\_\-plugin\-\_\-init@{mod\-\_\-dirlisting\-\_\-plugin\-\_\-init}}
+\index{mod\-\_\-dirlisting\-\_\-plugin\-\_\-init@{mod\-\_\-dirlisting\-\_\-plugin\-\_\-init}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{mod\-\_\-dirlisting\-\_\-plugin\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}int mod\-\_\-dirlisting\-\_\-plugin\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{{\bf plugin} $\ast$}]{p}
+\end{DoxyParamCaption}
+)}}\label{mod__dirlisting_8c_a835619d9c50a2aa50fe860978a5e6234}
+
+
+References buffer\-\_\-init\-\_\-string(), plugin\-::cleanup, plugin\-::data, plugin\-::handle\-\_\-subrequest\-\_\-start, plugin\-::init, plugin\-::name, plugin\-::set\-\_\-defaults, and plugin\-::version.
+
+\hypertarget{mod__dirlisting_8c_a066a670f7670389760497dfab8a60a50}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C@{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}}
+\index{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C@{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-dirlisting\-\_\-set\-\_\-defaults}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__dirlisting_8c_a066a670f7670389760497dfab8a60a50}
+
+
+References array\-\_\-get\-\_\-element(), buffer\-\_\-copy\-\_\-string\-\_\-len(), buffer\-\_\-init(), buffer\-\_\-is\-\_\-equal\-\_\-string(), buffer\-\_\-string\-\_\-is\-\_\-empty(), buffer\-\_\-string\-\_\-set\-\_\-length(), C\-O\-N\-F\-I\-G\-\_\-\-A\-C\-T\-I\-V\-A\-T\-E, C\-O\-N\-F\-I\-G\-\_\-\-A\-U\-T\-O\-\_\-\-L\-A\-Y\-O\-U\-T, C\-O\-N\-F\-I\-G\-\_\-\-D\-I\-R\-\_\-\-L\-I\-S\-T\-I\-N\-G, C\-O\-N\-F\-I\-G\-\_\-\-E\-N\-C\-O\-D\-E\-\_\-\-H\-E\-A\-D\-E\-R, C\-O\-N\-F\-I\-G\-\_\-\-E\-N\-C\-O\-D\-E\-\_\-\-R\-E\-A\-D\-M\-E, C\-O\-N\-F\-I\-G\-\_\-\-E\-N\-C\-O\-D\-I\-N\-G, C\-O\-N\-F\-I\-G\-\_\-\-E\-X\-C\-L\-U\-D\-E, C\-O\-N\-F\-I\-G\-\_\-\-E\-X\-T\-E\-R\-N\-A\-L\-\_\-\-C\-S\-S, C\-O\-N\-F\-I\-G\-\_\-\-E\-X\-T\-E\-R\-N\-A\-L\-\_\-\-J\-S, C\-O\-N\-F\-I\-G\-\_\-\-H\-I\-D\-E\-\_\-\-D\-O\-T\-F\-I\-L\-E\-S, C\-O\-N\-F\-I\-G\-\_\-\-H\-I\-D\-E\-\_\-\-H\-E\-A\-D\-E\-R\-\_\-\-F\-I\-L\-E, C\-O\-N\-F\-I\-G\-\_\-\-H\-I\-D\-E\-\_\-\-R\-E\-A\-D\-M\-E\-\_\-\-F\-I\-L\-E, config\-\_\-insert\-\_\-values\-\_\-global(), C\-O\-N\-F\-I\-G\-\_\-\-S\-E\-T\-\_\-\-F\-O\-O\-T\-E\-R, C\-O\-N\-F\-I\-G\-\_\-\-S\-H\-O\-W\-\_\-\-H\-E\-A\-D\-E\-R, C\-O\-N\-F\-I\-G\-\_\-\-S\-H\-O\-W\-\_\-\-R\-E\-A\-D\-M\-E, plugin\-\_\-data\-::config\-\_\-storage, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, array\-::data, config\-\_\-values\-\_\-t\-::destination, excludes\-\_\-buffer\-\_\-append(), excludes\-\_\-buffer\-\_\-init(), H\-A\-N\-D\-L\-E\-R\-\_\-\-E\-R\-R\-O\-R, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, log\-\_\-error\-\_\-write(), T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-B\-O\-O\-L\-E\-A\-N, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-L\-O\-C\-A\-L, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T\-I\-O\-N, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-S\-E\-R\-V\-E\-R, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-U\-N\-S\-E\-T, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-T\-R\-I\-N\-G, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-U\-N\-S\-E\-T, T\-Y\-P\-E\-\_\-\-A\-R\-R\-A\-Y, T\-Y\-P\-E\-\_\-\-S\-T\-R\-I\-N\-G, array\-::used, and data\-\_\-config\-::value.
+
+\hypertarget{mod__dirlisting_8c_a4415252abe22d6912bd91a66e96be023}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C@{U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C}}
+\index{U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C@{U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-dirlisting\-\_\-subrequest}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__dirlisting_8c_a4415252abe22d6912bd91a66e96be023}
+
+
+References buffer\-\_\-is\-\_\-empty(), buffer\-\_\-reset(), buffer\-\_\-string\-\_\-length(), plugin\-\_\-data\-::conf, plugin\-\_\-config\-::dir\-\_\-listing, D\-I\-R\-E\-C\-T, H\-A\-N\-D\-L\-E\-R\-\_\-\-E\-R\-R\-O\-R, H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-I\-N\-I\-S\-H\-E\-D, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, http\-\_\-list\-\_\-directory(), H\-T\-T\-P\-\_\-\-M\-E\-T\-H\-O\-D\-\_\-\-G\-E\-T, H\-T\-T\-P\-\_\-\-M\-E\-T\-H\-O\-D\-\_\-\-H\-E\-A\-D, log\-\_\-error\-\_\-write(), mod\-\_\-dirlisting\-\_\-patch\-\_\-connection(), physical\-::path, plugin\-\_\-data\-::physical, S\-E\-G\-F\-A\-U\-L\-T, stat\-\_\-cache\-\_\-entry\-::st, stat\-\_\-cache\-\_\-get\-\_\-entry(), and U\-N\-U\-S\-E\-D.
+
+
+
+\subsection{Variable Documentation}
+\hypertarget{mod__dirlisting_8c_a6ffa47021abf1ff3762d41676cfe45fc}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!js\-\_\-simple\-\_\-table\-\_\-init\-\_\-sort@{js\-\_\-simple\-\_\-table\-\_\-init\-\_\-sort}}
+\index{js\-\_\-simple\-\_\-table\-\_\-init\-\_\-sort@{js\-\_\-simple\-\_\-table\-\_\-init\-\_\-sort}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{js\-\_\-simple\-\_\-table\-\_\-init\-\_\-sort}]{\setlength{\rightskip}{0pt plus 5cm}const char js\-\_\-simple\-\_\-table\-\_\-init\-\_\-sort\mbox{[}$\,$\mbox{]}\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__dirlisting_8c_a6ffa47021abf1ff3762d41676cfe45fc}
+
+
+Referenced by http\-\_\-dirlist\-\_\-append\-\_\-js\-\_\-table\-\_\-resort().
+
+\hypertarget{mod__dirlisting_8c_a8e3ea5e6a64e6d4c6e197f7271a7c58c}{\index{mod\-\_\-dirlisting.\-c@{mod\-\_\-dirlisting.\-c}!js\-\_\-simple\-\_\-table\-\_\-resort@{js\-\_\-simple\-\_\-table\-\_\-resort}}
+\index{js\-\_\-simple\-\_\-table\-\_\-resort@{js\-\_\-simple\-\_\-table\-\_\-resort}!mod_dirlisting.c@{mod\-\_\-dirlisting.\-c}}
+\subsubsection[{js\-\_\-simple\-\_\-table\-\_\-resort}]{\setlength{\rightskip}{0pt plus 5cm}const char js\-\_\-simple\-\_\-table\-\_\-resort\mbox{[}$\,$\mbox{]}\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__dirlisting_8c_a8e3ea5e6a64e6d4c6e197f7271a7c58c}
+
+
+Referenced by http\-\_\-dirlist\-\_\-append\-\_\-js\-\_\-table\-\_\-resort().
+

@@ -1,0 +1,81 @@
+\hypertarget{test__buffer_8c}{\section{test\-\_\-buffer.\-c File Reference}
+\label{test__buffer_8c}\index{test\-\_\-buffer.\-c@{test\-\_\-buffer.\-c}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}buffer.\-h\char`\"{}}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+static void \hyperlink{test__buffer_8c_ae099ef9e085cf6087664af4b86aedc6c}{run\-\_\-buffer\-\_\-path\-\_\-simplify} (\hyperlink{structbuffer}{buffer} $\ast$psrc, \hyperlink{structbuffer}{buffer} $\ast$pdest, const char $\ast$in, size\-\_\-t in\-\_\-len, const char $\ast$out, size\-\_\-t out\-\_\-len)
+\item 
+static void \hyperlink{test__buffer_8c_a54e667aa9d4c39c6348d447b563a6c68}{test\-\_\-buffer\-\_\-path\-\_\-simplify\-\_\-with} (\hyperlink{structbuffer}{buffer} $\ast$psrc, \hyperlink{structbuffer}{buffer} $\ast$pdest)
+\item 
+static void \hyperlink{test__buffer_8c_a456430968a136b89bb30f8b40824bec2}{test\-\_\-buffer\-\_\-path\-\_\-simplify} ()
+\item 
+int \hyperlink{test__buffer_8c_ae66f6b31b5ad750f1fe042a706a4e3d4}{main} ()
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\hypertarget{test__buffer_8c_ae66f6b31b5ad750f1fe042a706a4e3d4}{\index{test\-\_\-buffer.\-c@{test\-\_\-buffer.\-c}!main@{main}}
+\index{main@{main}!test_buffer.c@{test\-\_\-buffer.\-c}}
+\subsubsection[{main}]{\setlength{\rightskip}{0pt plus 5cm}int main (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)}}\label{test__buffer_8c_ae66f6b31b5ad750f1fe042a706a4e3d4}
+
+
+References test\-\_\-buffer\-\_\-path\-\_\-simplify().
+
+\hypertarget{test__buffer_8c_ae099ef9e085cf6087664af4b86aedc6c}{\index{test\-\_\-buffer.\-c@{test\-\_\-buffer.\-c}!run\-\_\-buffer\-\_\-path\-\_\-simplify@{run\-\_\-buffer\-\_\-path\-\_\-simplify}}
+\index{run\-\_\-buffer\-\_\-path\-\_\-simplify@{run\-\_\-buffer\-\_\-path\-\_\-simplify}!test_buffer.c@{test\-\_\-buffer.\-c}}
+\subsubsection[{run\-\_\-buffer\-\_\-path\-\_\-simplify}]{\setlength{\rightskip}{0pt plus 5cm}static void run\-\_\-buffer\-\_\-path\-\_\-simplify (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{psrc, }
+\item[{{\bf buffer} $\ast$}]{pdest, }
+\item[{const char $\ast$}]{in, }
+\item[{size\-\_\-t}]{in\-\_\-len, }
+\item[{const char $\ast$}]{out, }
+\item[{size\-\_\-t}]{out\-\_\-len}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{test__buffer_8c_ae099ef9e085cf6087664af4b86aedc6c}
+
+
+References buffer\-\_\-copy\-\_\-buffer(), buffer\-\_\-copy\-\_\-string\-\_\-len(), buffer\-\_\-is\-\_\-equal\-\_\-string(), buffer\-\_\-path\-\_\-simplify(), and buffer\-::ptr.
+
+
+
+Referenced by test\-\_\-buffer\-\_\-path\-\_\-simplify\-\_\-with().
+
+\hypertarget{test__buffer_8c_a456430968a136b89bb30f8b40824bec2}{\index{test\-\_\-buffer.\-c@{test\-\_\-buffer.\-c}!test\-\_\-buffer\-\_\-path\-\_\-simplify@{test\-\_\-buffer\-\_\-path\-\_\-simplify}}
+\index{test\-\_\-buffer\-\_\-path\-\_\-simplify@{test\-\_\-buffer\-\_\-path\-\_\-simplify}!test_buffer.c@{test\-\_\-buffer.\-c}}
+\subsubsection[{test\-\_\-buffer\-\_\-path\-\_\-simplify}]{\setlength{\rightskip}{0pt plus 5cm}static void test\-\_\-buffer\-\_\-path\-\_\-simplify (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{test__buffer_8c_a456430968a136b89bb30f8b40824bec2}
+
+
+References buffer\-\_\-free(), buffer\-\_\-init(), and test\-\_\-buffer\-\_\-path\-\_\-simplify\-\_\-with().
+
+
+
+Referenced by main().
+
+\hypertarget{test__buffer_8c_a54e667aa9d4c39c6348d447b563a6c68}{\index{test\-\_\-buffer.\-c@{test\-\_\-buffer.\-c}!test\-\_\-buffer\-\_\-path\-\_\-simplify\-\_\-with@{test\-\_\-buffer\-\_\-path\-\_\-simplify\-\_\-with}}
+\index{test\-\_\-buffer\-\_\-path\-\_\-simplify\-\_\-with@{test\-\_\-buffer\-\_\-path\-\_\-simplify\-\_\-with}!test_buffer.c@{test\-\_\-buffer.\-c}}
+\subsubsection[{test\-\_\-buffer\-\_\-path\-\_\-simplify\-\_\-with}]{\setlength{\rightskip}{0pt plus 5cm}static void test\-\_\-buffer\-\_\-path\-\_\-simplify\-\_\-with (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{psrc, }
+\item[{{\bf buffer} $\ast$}]{pdest}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{test__buffer_8c_a54e667aa9d4c39c6348d447b563a6c68}
+
+
+References C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, and run\-\_\-buffer\-\_\-path\-\_\-simplify().
+
+
+
+Referenced by test\-\_\-buffer\-\_\-path\-\_\-simplify().
+

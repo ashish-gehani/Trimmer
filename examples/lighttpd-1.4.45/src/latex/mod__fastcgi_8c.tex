@@ -1,0 +1,1073 @@
+\hypertarget{mod__fastcgi_8c}{\section{mod\-\_\-fastcgi.\-c File Reference}
+\label{mod__fastcgi_8c}\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}buffer.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}server.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}keyvalue.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}log.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}http\-\_\-chunk.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}fdevent.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}connections.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}response.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}joblist.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}plugin.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}inet\-\_\-ntop\-\_\-cache.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}stat\-\_\-cache.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}status\-\_\-counter.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$sys/types.\-h$>$}\\*
+{\ttfamily \#include $<$unistd.\-h$>$}\\*
+{\ttfamily \#include $<$errno.\-h$>$}\\*
+{\ttfamily \#include $<$fcntl.\-h$>$}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+{\ttfamily \#include $<$stdlib.\-h$>$}\\*
+{\ttfamily \#include $<$ctype.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include $<$signal.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}fastcgi.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}sys-\/socket.\-h\char`\"{}}\\*
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structfcgi__proc}{fcgi\-\_\-proc}
+\item 
+struct \hyperlink{structfcgi__extension__host}{fcgi\-\_\-extension\-\_\-host}
+\item 
+struct \hyperlink{structfcgi__extension}{fcgi\-\_\-extension}
+\item 
+struct \hyperlink{structfcgi__exts}{fcgi\-\_\-exts}
+\item 
+struct \hyperlink{structplugin__config}{plugin\-\_\-config}
+\item 
+struct \hyperlink{structchar__array}{char\-\_\-array}
+\item 
+struct \hyperlink{structplugin__data}{plugin\-\_\-data}
+\item 
+struct \hyperlink{structhandler__ctx}{handler\-\_\-ctx}
+\item 
+struct \hyperlink{structfastcgi__response__packet}{fastcgi\-\_\-response\-\_\-packet}
+\end{DoxyCompactItemize}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{mod__fastcgi_8c_a05b3586abd20197117285bc6f4e89394}{C\-L\-E\-A\-N}(x)
+\item 
+\#define \hyperlink{mod__fastcgi_8c_a05b3586abd20197117285bc6f4e89394}{C\-L\-E\-A\-N}(x)
+\item 
+\#define \hyperlink{mod__fastcgi_8c_a20876ec7c0c844d0e0c1628528bbb8da}{P\-A\-T\-C\-H}(x)~p-\/$>$conf.\-x = s-\/$>$x;
+\end{DoxyCompactItemize}
+\subsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef struct \hyperlink{structfcgi__proc}{fcgi\-\_\-proc} \hyperlink{mod__fastcgi_8c_a85424edf2eeb2e4c56cedb3f8f7ec13a}{fcgi\-\_\-proc}
+\end{DoxyCompactItemize}
+\subsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \hyperlink{mod__fastcgi_8c_ae48bdc9b28eb89e9a2ae3df707989f34}{fcgi\-\_\-connection\-\_\-state\-\_\-t} \{ \\*
+\hyperlink{mod__fastcgi_8c_ae48bdc9b28eb89e9a2ae3df707989f34a59a5847c9f06ac3cf726555836fc3aa3}{F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-I\-N\-I\-T}, 
+\hyperlink{mod__fastcgi_8c_ae48bdc9b28eb89e9a2ae3df707989f34a505cd7ecbb1cd5fe9ad74912cb2e0c4d}{F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T\-\_\-\-D\-E\-L\-A\-Y\-E\-D}, 
+\hyperlink{mod__fastcgi_8c_ae48bdc9b28eb89e9a2ae3df707989f34a456c67034a89f55eee50a8f758360bd1}{F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-P\-R\-E\-P\-A\-R\-E\-\_\-\-W\-R\-I\-T\-E}, 
+\hyperlink{mod__fastcgi_8c_ae48bdc9b28eb89e9a2ae3df707989f34ac692f84112e1208ed041ca34ab4b3a99}{F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-W\-R\-I\-T\-E}, 
+\\*
+\hyperlink{mod__fastcgi_8c_ae48bdc9b28eb89e9a2ae3df707989f34a9a6d899ed2b4a386061478afd4bfaa3d}{F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-A\-D}
+ \}
+\item 
+enum \hyperlink{mod__fastcgi_8c_a72cb82a52bc19a44e183b87aceadfcbf}{connection\-\_\-result\-\_\-t} \{ \hyperlink{mod__fastcgi_8c_a72cb82a52bc19a44e183b87aceadfcbfab8811f3a367f582c9071275be5319914}{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-O\-K}, 
+\hyperlink{mod__fastcgi_8c_a72cb82a52bc19a44e183b87aceadfcbfa8d820dd1871eebfdcbccab1e536c467c}{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-D\-E\-L\-A\-Y\-E\-D}, 
+\hyperlink{mod__fastcgi_8c_a72cb82a52bc19a44e183b87aceadfcbfa0c433348cae2af05b8f31478876a83f2}{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-O\-V\-E\-R\-L\-O\-A\-D\-E\-D}, 
+\hyperlink{mod__fastcgi_8c_a72cb82a52bc19a44e183b87aceadfcbfa20d0165794aed675b080dc329c96032e}{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-D\-E\-A\-D}
+ \}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t} \hyperlink{mod__fastcgi_8c_a99996a7b31b69b6f7866e066b66be6ed}{fcgi\-\_\-handle\-\_\-fdevent} (\hyperlink{structserver}{server} $\ast$srv, void $\ast$ctx, int revents)
+\item 
+static void \hyperlink{mod__fastcgi_8c_a0454163937b9c23e8f275611f31323c6}{reset\-\_\-signals} (void)
+\item 
+static void \hyperlink{mod__fastcgi_8c_a2db33494cf9e08926ff8842368f33ea6}{fastcgi\-\_\-status\-\_\-copy\-\_\-procname} (\hyperlink{structbuffer}{buffer} $\ast$b, \hyperlink{structfcgi__extension__host}{fcgi\-\_\-extension\-\_\-host} $\ast$host, \hyperlink{structfcgi__proc}{fcgi\-\_\-proc} $\ast$proc)
+\item 
+static void \hyperlink{mod__fastcgi_8c_a5840f4f3fc629a61707674f79e0b5eb0}{fcgi\-\_\-proc\-\_\-load\-\_\-inc} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx)
+\item 
+static void \hyperlink{mod__fastcgi_8c_a3543f911781397866c126b7fc082130f}{fcgi\-\_\-proc\-\_\-load\-\_\-dec} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx)
+\item 
+static void \hyperlink{mod__fastcgi_8c_a898fc7b2e7c7d0a5595dc09c303cdc26}{fcgi\-\_\-host\-\_\-assign} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx, \hyperlink{structfcgi__extension__host}{fcgi\-\_\-extension\-\_\-host} $\ast$host)
+\item 
+static void \hyperlink{mod__fastcgi_8c_a097c269b9e3fe359cca2233fa30a1031}{fcgi\-\_\-host\-\_\-reset} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx)
+\item 
+static void \hyperlink{mod__fastcgi_8c_a0055fa839c87447b90a9bd64e61f6c54}{fcgi\-\_\-host\-\_\-disable} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx)
+\item 
+static int \hyperlink{mod__fastcgi_8c_aa71fa97de80ba98f34af11164111779b}{fastcgi\-\_\-status\-\_\-init} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structbuffer}{buffer} $\ast$b, \hyperlink{structfcgi__extension__host}{fcgi\-\_\-extension\-\_\-host} $\ast$host, \hyperlink{structfcgi__proc}{fcgi\-\_\-proc} $\ast$proc)
+\item 
+static \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$ \hyperlink{mod__fastcgi_8c_ad4882f71dc486b383f74029b751ce1a2}{handler\-\_\-ctx\-\_\-init} (void)
+\item 
+static void \hyperlink{mod__fastcgi_8c_af9f2bc62e505066048458b2893d9c111}{handler\-\_\-ctx\-\_\-free} (\hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx)
+\item 
+static void \hyperlink{mod__fastcgi_8c_a827cf83fadd66f04e51a310073ce8bff}{handler\-\_\-ctx\-\_\-clear} (\hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx)
+\item 
+static \hyperlink{structfcgi__proc}{fcgi\-\_\-proc} $\ast$ \hyperlink{mod__fastcgi_8c_af71c879aa65b487de051685b4d0aef6b}{fastcgi\-\_\-process\-\_\-init} (void)
+\item 
+static void \hyperlink{mod__fastcgi_8c_ad096f55645c10025c7514504adc3f942}{fastcgi\-\_\-process\-\_\-free} (\hyperlink{structfcgi__proc}{fcgi\-\_\-proc} $\ast$f)
+\item 
+static \hyperlink{structfcgi__extension__host}{fcgi\-\_\-extension\-\_\-host} $\ast$ \hyperlink{mod__fastcgi_8c_a67766a2fa8bb22b2d7b78460364bfc8d}{fastcgi\-\_\-host\-\_\-init} (void)
+\item 
+static void \hyperlink{mod__fastcgi_8c_a1e1d6ade1230f7d7925f222fb47cb07b}{fastcgi\-\_\-host\-\_\-free} (\hyperlink{structfcgi__extension__host}{fcgi\-\_\-extension\-\_\-host} $\ast$h)
+\item 
+static \hyperlink{structfcgi__exts}{fcgi\-\_\-exts} $\ast$ \hyperlink{mod__fastcgi_8c_aed4775b0717d8ec2a03c2f0cfb4f72d5}{fastcgi\-\_\-extensions\-\_\-init} (void)
+\item 
+static void \hyperlink{mod__fastcgi_8c_a866cfbc9ebd2da7cd3c7b5957ed26d31}{fastcgi\-\_\-extensions\-\_\-free} (\hyperlink{structfcgi__exts}{fcgi\-\_\-exts} $\ast$f)
+\item 
+static int \hyperlink{mod__fastcgi_8c_ab86a382f741d9709af4bbb4d6dcf9ba7}{fastcgi\-\_\-extension\-\_\-insert} (\hyperlink{structfcgi__exts}{fcgi\-\_\-exts} $\ast$ext, \hyperlink{structbuffer}{buffer} $\ast$key, \hyperlink{structfcgi__extension__host}{fcgi\-\_\-extension\-\_\-host} $\ast$fh)
+\item 
+\hyperlink{mod__fastcgi_8c_a8dc395ccd86d56a353b9b6d748eed429}{I\-N\-I\-T\-\_\-\-F\-U\-N\-C} (mod\-\_\-fastcgi\-\_\-init)
+\item 
+\hyperlink{mod__fastcgi_8c_aa93ce4b0d84d1b53ce1ec3de920f6b01}{F\-R\-E\-E\-\_\-\-F\-U\-N\-C} (mod\-\_\-fastcgi\-\_\-free)
+\item 
+static int \hyperlink{mod__fastcgi_8c_af93cfcd7dbb36cb3c70ae556bd74e307}{env\-\_\-add} (\hyperlink{structchar__array}{char\-\_\-array} $\ast$env, const char $\ast$key, size\-\_\-t key\-\_\-len, const char $\ast$val, size\-\_\-t val\-\_\-len)
+\item 
+static int \hyperlink{mod__fastcgi_8c_aa0e609393e8cf8f7a585e91d1522329a}{parse\-\_\-binpath} (\hyperlink{structchar__array}{char\-\_\-array} $\ast$env, \hyperlink{structbuffer}{buffer} $\ast$b)
+\item 
+static int \hyperlink{mod__fastcgi_8c_ab55f0a9187e8a54264f71412f1683daa}{fcgi\-\_\-spawn\-\_\-connection} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structplugin__data}{plugin\-\_\-data} $\ast$p, \hyperlink{structfcgi__extension__host}{fcgi\-\_\-extension\-\_\-host} $\ast$host, \hyperlink{structfcgi__proc}{fcgi\-\_\-proc} $\ast$proc)
+\item 
+static \hyperlink{structfcgi__extension__host}{fcgi\-\_\-extension\-\_\-host} $\ast$ \hyperlink{mod__fastcgi_8c_a14d8409b42462b44a3f035a512d1b730}{unixsocket\-\_\-is\-\_\-dup} (\hyperlink{structplugin__data}{plugin\-\_\-data} $\ast$p, size\-\_\-t used, \hyperlink{structbuffer}{buffer} $\ast$unixsocket)
+\item 
+\hyperlink{mod__fastcgi_8c_a37f837f51dd51668341c8c0d0cca99f8}{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C} (mod\-\_\-fastcgi\-\_\-set\-\_\-defaults)
+\item 
+static int \hyperlink{mod__fastcgi_8c_a6e0280c740f4fa0aa1dc74833b6647f3}{fcgi\-\_\-set\-\_\-state} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx, \hyperlink{mod__fastcgi_8c_ae48bdc9b28eb89e9a2ae3df707989f34}{fcgi\-\_\-connection\-\_\-state\-\_\-t} \hyperlink{structstate}{state})
+\item 
+static void \hyperlink{mod__fastcgi_8c_a08533210acc91f6eeb6daa3d9e097465}{fcgi\-\_\-backend\-\_\-close} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx)
+\item 
+static \hyperlink{structfcgi__extension__host}{fcgi\-\_\-extension\-\_\-host} $\ast$ \hyperlink{mod__fastcgi_8c_af4efe3bf81c5bf2bf1ed559075bc8bc7}{fcgi\-\_\-extension\-\_\-host\-\_\-get} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structplugin__data}{plugin\-\_\-data} $\ast$p, \hyperlink{structfcgi__extension}{fcgi\-\_\-extension} $\ast$extension)
+\item 
+static void \hyperlink{mod__fastcgi_8c_a24c897031be840accd2acec18e5d5ff5}{fcgi\-\_\-connection\-\_\-close} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx)
+\item 
+static \hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t} \hyperlink{mod__fastcgi_8c_a71046b69ac2abbb79623d3947935c2ef}{fcgi\-\_\-reconnect} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx)
+\item 
+static \hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t} \hyperlink{mod__fastcgi_8c_af8f9c25e0ce53074dee5e11958f6f2bf}{fcgi\-\_\-connection\-\_\-reset} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, void $\ast$p\-\_\-d)
+\item 
+static int \hyperlink{mod__fastcgi_8c_af49b829c8b9614a940366849b9fd689b}{fcgi\-\_\-env\-\_\-add} (void $\ast$venv, const char $\ast$key, size\-\_\-t key\-\_\-len, const char $\ast$val, size\-\_\-t val\-\_\-len)
+\item 
+static int \hyperlink{mod__fastcgi_8c_a81becc93d4e0e3c93a2efc7451e8c4b9}{fcgi\-\_\-header} (\hyperlink{structFCGI__Header}{F\-C\-G\-I\-\_\-\-Header} $\ast$header, unsigned char type, int request\-\_\-id, int content\-Length, unsigned char padding\-Length)
+\item 
+static \hyperlink{mod__fastcgi_8c_a72cb82a52bc19a44e183b87aceadfcbf}{connection\-\_\-result\-\_\-t} \hyperlink{mod__fastcgi_8c_a61b96cfcaa48b024d20f352ff84315c1}{fcgi\-\_\-establish\-\_\-connection} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx)
+\item 
+static void \hyperlink{mod__fastcgi_8c_ae811cecee7e4c48355e81a2e05cd6357}{fcgi\-\_\-stdin\-\_\-append} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx, int request\-\_\-id)
+\item 
+static int \hyperlink{mod__fastcgi_8c_aaeb1132f61f68a8a10efcd9ac9c8f81e}{fcgi\-\_\-create\-\_\-env} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx, int request\-\_\-id)
+\item 
+static int \hyperlink{mod__fastcgi_8c_a57037bd1346b8adaa4e1f713528caa24}{fcgi\-\_\-response\-\_\-parse} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structplugin__data}{plugin\-\_\-data} $\ast$p, \hyperlink{structbuffer}{buffer} $\ast$in)
+\item 
+static int \hyperlink{mod__fastcgi_8c_a70e196ddaa0bb1046bd3b9a020897124}{fastcgi\-\_\-get\-\_\-packet} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx, \hyperlink{structfastcgi__response__packet}{fastcgi\-\_\-response\-\_\-packet} $\ast$packet)
+\item 
+static int \hyperlink{mod__fastcgi_8c_a053a6d286ef8f6921d719a438b3c7a35}{fcgi\-\_\-demux\-\_\-response} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx)
+\item 
+static int \hyperlink{mod__fastcgi_8c_a0c80c76e46b736d7fe9b13f5a7040de0}{fcgi\-\_\-restart\-\_\-dead\-\_\-procs} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structplugin__data}{plugin\-\_\-data} $\ast$p, \hyperlink{structfcgi__extension__host}{fcgi\-\_\-extension\-\_\-host} $\ast$host)
+\item 
+static \hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t} \hyperlink{mod__fastcgi_8c_a622bbdd963e4fdad4c7db7a179c9655f}{fcgi\-\_\-write\-\_\-request} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx)
+\item 
+static \hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t} \hyperlink{mod__fastcgi_8c_ad8145cae063e9ddcaf47ca526866c9e0}{fcgi\-\_\-send\-\_\-request} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx)
+\item 
+static \hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t} \hyperlink{mod__fastcgi_8c_afd5df1cc8684d0a16a4e13b1114a008b}{fcgi\-\_\-recv\-\_\-response} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx)
+\item 
+\hyperlink{mod__fastcgi_8c_a807a2ec3eb617c7377de2182752d580c}{S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C} (mod\-\_\-fastcgi\-\_\-handle\-\_\-subrequest)
+\item 
+static int \hyperlink{mod__fastcgi_8c_a0f078f3bbb5c2c20225d1b899c07e86f}{fcgi\-\_\-patch\-\_\-connection} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structplugin__data}{plugin\-\_\-data} $\ast$p)
+\item 
+static \hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t} \hyperlink{mod__fastcgi_8c_a3f938e49323a82a8fd9d5a7035dc079c}{fcgi\-\_\-check\-\_\-extension} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, void $\ast$p\-\_\-d, int uri\-\_\-path\-\_\-handler)
+\item 
+static \hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t} \hyperlink{mod__fastcgi_8c_a32872ec7f1c63401f6eae86fc8c7911c}{fcgi\-\_\-check\-\_\-extension\-\_\-1} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, void $\ast$p\-\_\-d)
+\item 
+static \hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t} \hyperlink{mod__fastcgi_8c_ad7e149df7cf6869b235cca76831595d0}{fcgi\-\_\-check\-\_\-extension\-\_\-2} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, void $\ast$p\-\_\-d)
+\item 
+\hyperlink{mod__fastcgi_8c_aa5b72764ba2faa5571774762eccf9100}{T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C} (mod\-\_\-fastcgi\-\_\-handle\-\_\-trigger)
+\item 
+int \hyperlink{mod__fastcgi_8c_a4c801ae224900581883a950915b1ba6c}{mod\-\_\-fastcgi\-\_\-plugin\-\_\-init} (\hyperlink{structplugin}{plugin} $\ast$p)
+\end{DoxyCompactItemize}
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{mod__fastcgi_8c_a05b3586abd20197117285bc6f4e89394}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!C\-L\-E\-A\-N@{C\-L\-E\-A\-N}}
+\index{C\-L\-E\-A\-N@{C\-L\-E\-A\-N}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{C\-L\-E\-A\-N}]{\setlength{\rightskip}{0pt plus 5cm}\#define C\-L\-E\-A\-N(
+\begin{DoxyParamCaption}
+\item[{}]{x}
+\end{DoxyParamCaption}
+)}}\label{mod__fastcgi_8c_a05b3586abd20197117285bc6f4e89394}
+{\bfseries Value\-:}
+\begin{DoxyCode}
+\hyperlink{mod__fastcgi_8c_a2db33494cf9e08926ff8842368f33ea6}{fastcgi\_status\_copy\_procname}(b, host, proc); \hyperlink{buffer_8c_a0321a93876dd9a68f52ace5ef8176c67}{\(\backslash\)}
+\hyperlink{buffer_8c_a0321a93876dd9a68f52ace5ef8176c67}{    buffer\_append\_string\_len}(b, \hyperlink{buffer_8h_a4b8f196adbc4c0f8ad77828c9b20c779}{CONST\_STR\_LEN}(x)); 
+      \hyperlink{status__counter_8c_a1f8c1638f76665a0e8d0c460f80cc9d4}{\(\backslash\)}
+\hyperlink{status__counter_8c_a1f8c1638f76665a0e8d0c460f80cc9d4}{    status\_counter\_set}(srv, \hyperlink{buffer_8h_aeebf4b463702b90297a690dbade7e13a}{CONST\_BUF\_LEN}(b), 0);
+\end{DoxyCode}
+
+
+Referenced by fastcgi\-\_\-status\-\_\-init().
+
+\hypertarget{mod__fastcgi_8c_a05b3586abd20197117285bc6f4e89394}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!C\-L\-E\-A\-N@{C\-L\-E\-A\-N}}
+\index{C\-L\-E\-A\-N@{C\-L\-E\-A\-N}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{C\-L\-E\-A\-N}]{\setlength{\rightskip}{0pt plus 5cm}\#define C\-L\-E\-A\-N(
+\begin{DoxyParamCaption}
+\item[{}]{x}
+\end{DoxyParamCaption}
+)}}\label{mod__fastcgi_8c_a05b3586abd20197117285bc6f4e89394}
+{\bfseries Value\-:}
+\begin{DoxyCode}
+\hyperlink{mod__fastcgi_8c_a2db33494cf9e08926ff8842368f33ea6}{fastcgi\_status\_copy\_procname}(b, host, NULL); \hyperlink{buffer_8c_a0321a93876dd9a68f52ace5ef8176c67}{\(\backslash\)}
+\hyperlink{buffer_8c_a0321a93876dd9a68f52ace5ef8176c67}{    buffer\_append\_string\_len}(b, \hyperlink{buffer_8h_a4b8f196adbc4c0f8ad77828c9b20c779}{CONST\_STR\_LEN}(x)); 
+      \hyperlink{status__counter_8c_a1f8c1638f76665a0e8d0c460f80cc9d4}{\(\backslash\)}
+\hyperlink{status__counter_8c_a1f8c1638f76665a0e8d0c460f80cc9d4}{    status\_counter\_set}(srv, \hyperlink{buffer_8h_aeebf4b463702b90297a690dbade7e13a}{CONST\_BUF\_LEN}(b), 0);
+\end{DoxyCode}
+\hypertarget{mod__fastcgi_8c_a20876ec7c0c844d0e0c1628528bbb8da}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!P\-A\-T\-C\-H@{P\-A\-T\-C\-H}}
+\index{P\-A\-T\-C\-H@{P\-A\-T\-C\-H}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{P\-A\-T\-C\-H}]{\setlength{\rightskip}{0pt plus 5cm}\#define P\-A\-T\-C\-H(
+\begin{DoxyParamCaption}
+\item[{}]{x}
+\end{DoxyParamCaption}
+)~p-\/$>$conf.\-x = s-\/$>$x;}}\label{mod__fastcgi_8c_a20876ec7c0c844d0e0c1628528bbb8da}
+
+
+Referenced by fcgi\-\_\-patch\-\_\-connection().
+
+
+
+\subsection{Typedef Documentation}
+\hypertarget{mod__fastcgi_8c_a85424edf2eeb2e4c56cedb3f8f7ec13a}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fcgi\-\_\-proc@{fcgi\-\_\-proc}}
+\index{fcgi\-\_\-proc@{fcgi\-\_\-proc}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fcgi\-\_\-proc}]{\setlength{\rightskip}{0pt plus 5cm}typedef struct {\bf fcgi\-\_\-proc}  {\bf fcgi\-\_\-proc}}}\label{mod__fastcgi_8c_a85424edf2eeb2e4c56cedb3f8f7ec13a}
+
+
+\subsection{Enumeration Type Documentation}
+\hypertarget{mod__fastcgi_8c_a72cb82a52bc19a44e183b87aceadfcbf}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!connection\-\_\-result\-\_\-t@{connection\-\_\-result\-\_\-t}}
+\index{connection\-\_\-result\-\_\-t@{connection\-\_\-result\-\_\-t}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{connection\-\_\-result\-\_\-t}]{\setlength{\rightskip}{0pt plus 5cm}enum {\bf connection\-\_\-result\-\_\-t}}}\label{mod__fastcgi_8c_a72cb82a52bc19a44e183b87aceadfcbf}
+\begin{Desc}
+\item[Enumerator]\par
+\begin{description}
+\index{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-O\-K@{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-O\-K}!mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}}\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-O\-K@{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-O\-K}}\item[{\em 
+\hypertarget{mod__fastcgi_8c_a72cb82a52bc19a44e183b87aceadfcbfab8811f3a367f582c9071275be5319914}{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-O\-K}\label{mod__fastcgi_8c_a72cb82a52bc19a44e183b87aceadfcbfab8811f3a367f582c9071275be5319914}
+}]\index{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-D\-E\-L\-A\-Y\-E\-D@{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-D\-E\-L\-A\-Y\-E\-D}!mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}}\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-D\-E\-L\-A\-Y\-E\-D@{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-D\-E\-L\-A\-Y\-E\-D}}\item[{\em 
+\hypertarget{mod__fastcgi_8c_a72cb82a52bc19a44e183b87aceadfcbfa8d820dd1871eebfdcbccab1e536c467c}{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-D\-E\-L\-A\-Y\-E\-D}\label{mod__fastcgi_8c_a72cb82a52bc19a44e183b87aceadfcbfa8d820dd1871eebfdcbccab1e536c467c}
+}]\index{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-O\-V\-E\-R\-L\-O\-A\-D\-E\-D@{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-O\-V\-E\-R\-L\-O\-A\-D\-E\-D}!mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}}\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-O\-V\-E\-R\-L\-O\-A\-D\-E\-D@{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-O\-V\-E\-R\-L\-O\-A\-D\-E\-D}}\item[{\em 
+\hypertarget{mod__fastcgi_8c_a72cb82a52bc19a44e183b87aceadfcbfa0c433348cae2af05b8f31478876a83f2}{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-O\-V\-E\-R\-L\-O\-A\-D\-E\-D}\label{mod__fastcgi_8c_a72cb82a52bc19a44e183b87aceadfcbfa0c433348cae2af05b8f31478876a83f2}
+}]\index{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-D\-E\-A\-D@{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-D\-E\-A\-D}!mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}}\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-D\-E\-A\-D@{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-D\-E\-A\-D}}\item[{\em 
+\hypertarget{mod__fastcgi_8c_a72cb82a52bc19a44e183b87aceadfcbfa20d0165794aed675b080dc329c96032e}{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-D\-E\-A\-D}\label{mod__fastcgi_8c_a72cb82a52bc19a44e183b87aceadfcbfa20d0165794aed675b080dc329c96032e}
+}]\end{description}
+\end{Desc}
+\hypertarget{mod__fastcgi_8c_ae48bdc9b28eb89e9a2ae3df707989f34}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fcgi\-\_\-connection\-\_\-state\-\_\-t@{fcgi\-\_\-connection\-\_\-state\-\_\-t}}
+\index{fcgi\-\_\-connection\-\_\-state\-\_\-t@{fcgi\-\_\-connection\-\_\-state\-\_\-t}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fcgi\-\_\-connection\-\_\-state\-\_\-t}]{\setlength{\rightskip}{0pt plus 5cm}enum {\bf fcgi\-\_\-connection\-\_\-state\-\_\-t}}}\label{mod__fastcgi_8c_ae48bdc9b28eb89e9a2ae3df707989f34}
+\begin{Desc}
+\item[Enumerator]\par
+\begin{description}
+\index{F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-I\-N\-I\-T@{F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-I\-N\-I\-T}!mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}}\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-I\-N\-I\-T@{F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-I\-N\-I\-T}}\item[{\em 
+\hypertarget{mod__fastcgi_8c_ae48bdc9b28eb89e9a2ae3df707989f34a59a5847c9f06ac3cf726555836fc3aa3}{F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-I\-N\-I\-T}\label{mod__fastcgi_8c_ae48bdc9b28eb89e9a2ae3df707989f34a59a5847c9f06ac3cf726555836fc3aa3}
+}]\index{F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T\-\_\-\-D\-E\-L\-A\-Y\-E\-D@{F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T\-\_\-\-D\-E\-L\-A\-Y\-E\-D}!mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}}\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T\-\_\-\-D\-E\-L\-A\-Y\-E\-D@{F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T\-\_\-\-D\-E\-L\-A\-Y\-E\-D}}\item[{\em 
+\hypertarget{mod__fastcgi_8c_ae48bdc9b28eb89e9a2ae3df707989f34a505cd7ecbb1cd5fe9ad74912cb2e0c4d}{F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T\-\_\-\-D\-E\-L\-A\-Y\-E\-D}\label{mod__fastcgi_8c_ae48bdc9b28eb89e9a2ae3df707989f34a505cd7ecbb1cd5fe9ad74912cb2e0c4d}
+}]\index{F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-P\-R\-E\-P\-A\-R\-E\-\_\-\-W\-R\-I\-T\-E@{F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-P\-R\-E\-P\-A\-R\-E\-\_\-\-W\-R\-I\-T\-E}!mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}}\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-P\-R\-E\-P\-A\-R\-E\-\_\-\-W\-R\-I\-T\-E@{F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-P\-R\-E\-P\-A\-R\-E\-\_\-\-W\-R\-I\-T\-E}}\item[{\em 
+\hypertarget{mod__fastcgi_8c_ae48bdc9b28eb89e9a2ae3df707989f34a456c67034a89f55eee50a8f758360bd1}{F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-P\-R\-E\-P\-A\-R\-E\-\_\-\-W\-R\-I\-T\-E}\label{mod__fastcgi_8c_ae48bdc9b28eb89e9a2ae3df707989f34a456c67034a89f55eee50a8f758360bd1}
+}]\index{F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-W\-R\-I\-T\-E@{F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-W\-R\-I\-T\-E}!mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}}\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-W\-R\-I\-T\-E@{F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-W\-R\-I\-T\-E}}\item[{\em 
+\hypertarget{mod__fastcgi_8c_ae48bdc9b28eb89e9a2ae3df707989f34ac692f84112e1208ed041ca34ab4b3a99}{F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-W\-R\-I\-T\-E}\label{mod__fastcgi_8c_ae48bdc9b28eb89e9a2ae3df707989f34ac692f84112e1208ed041ca34ab4b3a99}
+}]\index{F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-A\-D@{F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-A\-D}!mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}}\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-A\-D@{F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-A\-D}}\item[{\em 
+\hypertarget{mod__fastcgi_8c_ae48bdc9b28eb89e9a2ae3df707989f34a9a6d899ed2b4a386061478afd4bfaa3d}{F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-A\-D}\label{mod__fastcgi_8c_ae48bdc9b28eb89e9a2ae3df707989f34a9a6d899ed2b4a386061478afd4bfaa3d}
+}]\end{description}
+\end{Desc}
+
+
+\subsection{Function Documentation}
+\hypertarget{mod__fastcgi_8c_af93cfcd7dbb36cb3c70ae556bd74e307}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!env\-\_\-add@{env\-\_\-add}}
+\index{env\-\_\-add@{env\-\_\-add}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{env\-\_\-add}]{\setlength{\rightskip}{0pt plus 5cm}static int env\-\_\-add (
+\begin{DoxyParamCaption}
+\item[{{\bf char\-\_\-array} $\ast$}]{env, }
+\item[{const char $\ast$}]{key, }
+\item[{size\-\_\-t}]{key\-\_\-len, }
+\item[{const char $\ast$}]{val, }
+\item[{size\-\_\-t}]{val\-\_\-len}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_af93cfcd7dbb36cb3c70ae556bd74e307}
+
+
+References char\-\_\-array\-::ptr, char\-\_\-array\-::size, and char\-\_\-array\-::used.
+
+\hypertarget{mod__fastcgi_8c_ab86a382f741d9709af4bbb4d6dcf9ba7}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fastcgi\-\_\-extension\-\_\-insert@{fastcgi\-\_\-extension\-\_\-insert}}
+\index{fastcgi\-\_\-extension\-\_\-insert@{fastcgi\-\_\-extension\-\_\-insert}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fastcgi\-\_\-extension\-\_\-insert}]{\setlength{\rightskip}{0pt plus 5cm}static int fastcgi\-\_\-extension\-\_\-insert (
+\begin{DoxyParamCaption}
+\item[{{\bf fcgi\-\_\-exts} $\ast$}]{ext, }
+\item[{{\bf buffer} $\ast$}]{key, }
+\item[{{\bf fcgi\-\_\-extension\-\_\-host} $\ast$}]{fh}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_ab86a382f741d9709af4bbb4d6dcf9ba7}
+
+
+References buffer\-\_\-copy\-\_\-buffer(), buffer\-\_\-init(), buffer\-\_\-is\-\_\-equal(), fcgi\-\_\-exts\-::exts, force\-\_\-assert, fcgi\-\_\-extension\-::hosts, fcgi\-\_\-extension\-::key, fcgi\-\_\-extension\-::last\-\_\-used\-\_\-ndx, fcgi\-\_\-extension\-::size, fcgi\-\_\-exts\-::size, fcgi\-\_\-extension\-::used, and fcgi\-\_\-exts\-::used.
+
+
+
+Referenced by S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__fastcgi_8c_a866cfbc9ebd2da7cd3c7b5957ed26d31}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fastcgi\-\_\-extensions\-\_\-free@{fastcgi\-\_\-extensions\-\_\-free}}
+\index{fastcgi\-\_\-extensions\-\_\-free@{fastcgi\-\_\-extensions\-\_\-free}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fastcgi\-\_\-extensions\-\_\-free}]{\setlength{\rightskip}{0pt plus 5cm}static void fastcgi\-\_\-extensions\-\_\-free (
+\begin{DoxyParamCaption}
+\item[{{\bf fcgi\-\_\-exts} $\ast$}]{f}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_a866cfbc9ebd2da7cd3c7b5957ed26d31}
+
+
+References buffer\-\_\-free(), fcgi\-\_\-exts\-::exts, fastcgi\-\_\-host\-\_\-free(), fcgi\-\_\-extension\-::hosts, fcgi\-\_\-extension\-::key, fcgi\-\_\-extension\-::used, and fcgi\-\_\-exts\-::used.
+
+
+
+Referenced by F\-R\-E\-E\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__fastcgi_8c_aed4775b0717d8ec2a03c2f0cfb4f72d5}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fastcgi\-\_\-extensions\-\_\-init@{fastcgi\-\_\-extensions\-\_\-init}}
+\index{fastcgi\-\_\-extensions\-\_\-init@{fastcgi\-\_\-extensions\-\_\-init}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fastcgi\-\_\-extensions\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf fcgi\-\_\-exts}$\ast$ fastcgi\-\_\-extensions\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_aed4775b0717d8ec2a03c2f0cfb4f72d5}
+
+
+Referenced by S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__fastcgi_8c_a70e196ddaa0bb1046bd3b9a020897124}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fastcgi\-\_\-get\-\_\-packet@{fastcgi\-\_\-get\-\_\-packet}}
+\index{fastcgi\-\_\-get\-\_\-packet@{fastcgi\-\_\-get\-\_\-packet}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fastcgi\-\_\-get\-\_\-packet}]{\setlength{\rightskip}{0pt plus 5cm}static int fastcgi\-\_\-get\-\_\-packet (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx, }
+\item[{{\bf fastcgi\-\_\-response\-\_\-packet} $\ast$}]{packet}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_a70e196ddaa0bb1046bd3b9a020897124}
+
+
+References fastcgi\-\_\-response\-\_\-packet\-::b, buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-free(), buffer\-\_\-init(), buffer\-\_\-string\-\_\-length(), buffer\-\_\-string\-\_\-set\-\_\-length(), chunkqueue\-\_\-mark\-\_\-written(), handler\-\_\-ctx\-::conf, F\-C\-G\-I\-\_\-\-Header\-::content\-Length\-B0, F\-C\-G\-I\-\_\-\-Header\-::content\-Length\-B1, plugin\-\_\-config\-::debug, chunkqueue\-::first, fastcgi\-\_\-response\-\_\-packet\-::len, log\-\_\-error\-\_\-write(), chunk\-::mem, chunk\-::next, chunk\-::offset, fastcgi\-\_\-response\-\_\-packet\-::padding, F\-C\-G\-I\-\_\-\-Header\-::padding\-Length, buffer\-::ptr, handler\-\_\-ctx\-::rb, fastcgi\-\_\-response\-\_\-packet\-::request\-\_\-id, F\-C\-G\-I\-\_\-\-Header\-::request\-Id\-B0, F\-C\-G\-I\-\_\-\-Header\-::request\-Id\-B1, F\-C\-G\-I\-\_\-\-Header\-::type, and fastcgi\-\_\-response\-\_\-packet\-::type.
+
+
+
+Referenced by fcgi\-\_\-demux\-\_\-response().
+
+\hypertarget{mod__fastcgi_8c_a1e1d6ade1230f7d7925f222fb47cb07b}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fastcgi\-\_\-host\-\_\-free@{fastcgi\-\_\-host\-\_\-free}}
+\index{fastcgi\-\_\-host\-\_\-free@{fastcgi\-\_\-host\-\_\-free}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fastcgi\-\_\-host\-\_\-free}]{\setlength{\rightskip}{0pt plus 5cm}static void fastcgi\-\_\-host\-\_\-free (
+\begin{DoxyParamCaption}
+\item[{{\bf fcgi\-\_\-extension\-\_\-host} $\ast$}]{h}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_a1e1d6ade1230f7d7925f222fb47cb07b}
+
+
+References array\-\_\-free(), fcgi\-\_\-extension\-\_\-host\-::bin\-\_\-env, fcgi\-\_\-extension\-\_\-host\-::bin\-\_\-env\-\_\-copy, fcgi\-\_\-extension\-\_\-host\-::bin\-\_\-path, buffer\-\_\-free(), fcgi\-\_\-extension\-\_\-host\-::docroot, fastcgi\-\_\-process\-\_\-free(), fcgi\-\_\-extension\-\_\-host\-::first, fcgi\-\_\-extension\-\_\-host\-::host, fcgi\-\_\-extension\-\_\-host\-::id, fcgi\-\_\-extension\-\_\-host\-::refcount, fcgi\-\_\-extension\-\_\-host\-::strip\-\_\-request\-\_\-uri, fcgi\-\_\-extension\-\_\-host\-::unixsocket, fcgi\-\_\-extension\-\_\-host\-::unused\-\_\-procs, and fcgi\-\_\-extension\-\_\-host\-::xsendfile\-\_\-docroot.
+
+
+
+Referenced by fastcgi\-\_\-extensions\-\_\-free(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__fastcgi_8c_a67766a2fa8bb22b2d7b78460364bfc8d}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fastcgi\-\_\-host\-\_\-init@{fastcgi\-\_\-host\-\_\-init}}
+\index{fastcgi\-\_\-host\-\_\-init@{fastcgi\-\_\-host\-\_\-init}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fastcgi\-\_\-host\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf fcgi\-\_\-extension\-\_\-host}$\ast$ fastcgi\-\_\-host\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_a67766a2fa8bb22b2d7b78460364bfc8d}
+
+
+References array\-\_\-init(), fcgi\-\_\-extension\-\_\-host\-::bin\-\_\-env, fcgi\-\_\-extension\-\_\-host\-::bin\-\_\-env\-\_\-copy, fcgi\-\_\-extension\-\_\-host\-::bin\-\_\-path, buffer\-\_\-init(), fcgi\-\_\-extension\-\_\-host\-::docroot, fcgi\-\_\-extension\-\_\-host\-::host, fcgi\-\_\-extension\-\_\-host\-::id, fcgi\-\_\-extension\-\_\-host\-::strip\-\_\-request\-\_\-uri, fcgi\-\_\-extension\-\_\-host\-::unixsocket, and fcgi\-\_\-extension\-\_\-host\-::xsendfile\-\_\-docroot.
+
+
+
+Referenced by S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__fastcgi_8c_ad096f55645c10025c7514504adc3f942}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fastcgi\-\_\-process\-\_\-free@{fastcgi\-\_\-process\-\_\-free}}
+\index{fastcgi\-\_\-process\-\_\-free@{fastcgi\-\_\-process\-\_\-free}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fastcgi\-\_\-process\-\_\-free}]{\setlength{\rightskip}{0pt plus 5cm}static void fastcgi\-\_\-process\-\_\-free (
+\begin{DoxyParamCaption}
+\item[{{\bf fcgi\-\_\-proc} $\ast$}]{f}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_ad096f55645c10025c7514504adc3f942}
+
+
+References buffer\-\_\-free(), fcgi\-\_\-proc\-::connection\-\_\-name, fcgi\-\_\-proc\-::next, and fcgi\-\_\-proc\-::unixsocket.
+
+
+
+Referenced by fastcgi\-\_\-host\-\_\-free(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__fastcgi_8c_af71c879aa65b487de051685b4d0aef6b}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fastcgi\-\_\-process\-\_\-init@{fastcgi\-\_\-process\-\_\-init}}
+\index{fastcgi\-\_\-process\-\_\-init@{fastcgi\-\_\-process\-\_\-init}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fastcgi\-\_\-process\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf fcgi\-\_\-proc}$\ast$ fastcgi\-\_\-process\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_af71c879aa65b487de051685b4d0aef6b}
+
+
+References buffer\-\_\-init(), fcgi\-\_\-proc\-::connection\-\_\-name, fcgi\-\_\-proc\-::next, fcgi\-\_\-proc\-::prev, and fcgi\-\_\-proc\-::unixsocket.
+
+
+
+Referenced by S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__fastcgi_8c_a2db33494cf9e08926ff8842368f33ea6}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fastcgi\-\_\-status\-\_\-copy\-\_\-procname@{fastcgi\-\_\-status\-\_\-copy\-\_\-procname}}
+\index{fastcgi\-\_\-status\-\_\-copy\-\_\-procname@{fastcgi\-\_\-status\-\_\-copy\-\_\-procname}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fastcgi\-\_\-status\-\_\-copy\-\_\-procname}]{\setlength{\rightskip}{0pt plus 5cm}static void fastcgi\-\_\-status\-\_\-copy\-\_\-procname (
+\begin{DoxyParamCaption}
+\item[{{\bf buffer} $\ast$}]{b, }
+\item[{{\bf fcgi\-\_\-extension\-\_\-host} $\ast$}]{host, }
+\item[{{\bf fcgi\-\_\-proc} $\ast$}]{proc}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_a2db33494cf9e08926ff8842368f33ea6}
+
+
+References buffer\-\_\-append\-\_\-int(), buffer\-\_\-append\-\_\-string\-\_\-buffer(), buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-copy\-\_\-string\-\_\-len(), C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, fcgi\-\_\-proc\-::id, and fcgi\-\_\-extension\-\_\-host\-::id.
+
+
+
+Referenced by fcgi\-\_\-host\-\_\-assign(), fcgi\-\_\-host\-\_\-reset(), fcgi\-\_\-proc\-\_\-load\-\_\-dec(), fcgi\-\_\-proc\-\_\-load\-\_\-inc(), and fcgi\-\_\-write\-\_\-request().
+
+\hypertarget{mod__fastcgi_8c_aa71fa97de80ba98f34af11164111779b}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fastcgi\-\_\-status\-\_\-init@{fastcgi\-\_\-status\-\_\-init}}
+\index{fastcgi\-\_\-status\-\_\-init@{fastcgi\-\_\-status\-\_\-init}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fastcgi\-\_\-status\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}static int fastcgi\-\_\-status\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf buffer} $\ast$}]{b, }
+\item[{{\bf fcgi\-\_\-extension\-\_\-host} $\ast$}]{host, }
+\item[{{\bf fcgi\-\_\-proc} $\ast$}]{proc}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_aa71fa97de80ba98f34af11164111779b}
+
+
+References C\-L\-E\-A\-N.
+
+
+
+Referenced by S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__fastcgi_8c_a08533210acc91f6eeb6daa3d9e097465}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fcgi\-\_\-backend\-\_\-close@{fcgi\-\_\-backend\-\_\-close}}
+\index{fcgi\-\_\-backend\-\_\-close@{fcgi\-\_\-backend\-\_\-close}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fcgi\-\_\-backend\-\_\-close}]{\setlength{\rightskip}{0pt plus 5cm}static void fcgi\-\_\-backend\-\_\-close (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_a08533210acc91f6eeb6daa3d9e097465}
+
+
+References handler\-\_\-ctx\-::conf, fcgi\-\_\-proc\-::connection\-\_\-name, plugin\-\_\-config\-::debug, server\-::ev, fcgi\-\_\-host\-\_\-reset(), fcgi\-\_\-proc\-\_\-load\-\_\-dec(), handler\-\_\-ctx\-::fd, handler\-\_\-ctx\-::fde\-\_\-ndx, fdevent\-\_\-event\-\_\-del(), fdevent\-\_\-sched\-\_\-close(), fdevent\-\_\-unregister(), handler\-\_\-ctx\-::got\-\_\-proc, handler\-\_\-ctx\-::host, fcgi\-\_\-proc\-::load, log\-\_\-error\-\_\-write(), fcgi\-\_\-proc\-::pid, and handler\-\_\-ctx\-::proc.
+
+
+
+Referenced by fcgi\-\_\-connection\-\_\-close(), fcgi\-\_\-reconnect(), and fcgi\-\_\-recv\-\_\-response().
+
+\hypertarget{mod__fastcgi_8c_a3f938e49323a82a8fd9d5a7035dc079c}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fcgi\-\_\-check\-\_\-extension@{fcgi\-\_\-check\-\_\-extension}}
+\index{fcgi\-\_\-check\-\_\-extension@{fcgi\-\_\-check\-\_\-extension}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fcgi\-\_\-check\-\_\-extension}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf handler\-\_\-t} fcgi\-\_\-check\-\_\-extension (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{void $\ast$}]{p\-\_\-d, }
+\item[{int}]{uri\-\_\-path\-\_\-handler}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_a3f938e49323a82a8fd9d5a7035dc079c}
+
+
+References buffer\-\_\-copy\-\_\-string(), buffer\-\_\-is\-\_\-empty(), buffer\-\_\-is\-\_\-equal(), buffer\-\_\-string\-\_\-is\-\_\-empty(), buffer\-\_\-string\-\_\-length(), buffer\-\_\-string\-\_\-set\-\_\-length(), fcgi\-\_\-extension\-\_\-host\-::check\-\_\-local, plugin\-\_\-data\-::conf, handler\-\_\-ctx\-::conf, connection\-::conf, array\-::data, plugin\-\_\-config\-::debug, D\-I\-R\-E\-C\-T, handler\-\_\-ctx\-::ext, handler\-\_\-ctx\-::ext\-\_\-auth, plugin\-\_\-config\-::ext\-\_\-mapping, fcgi\-\_\-exts\-::exts, plugin\-\_\-config\-::exts, plugin\-\_\-config\-::exts\-\_\-auth, plugin\-\_\-config\-::exts\-\_\-resp, F\-C\-G\-I\-\_\-\-A\-U\-T\-H\-O\-R\-I\-Z\-E\-R, fcgi\-\_\-extension\-\_\-host\-\_\-get(), fcgi\-\_\-host\-\_\-assign(), handler\-\_\-ctx\-::fcgi\-\_\-mode, fcgi\-\_\-patch\-\_\-connection(), F\-C\-G\-I\-\_\-\-R\-E\-S\-P\-O\-N\-D\-E\-R, fcgi\-\_\-extension\-\_\-host\-::fix\-\_\-root\-\_\-path\-\_\-name, handler\-\_\-ctx\-\_\-init(), H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-I\-N\-I\-S\-H\-E\-D, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, fcgi\-\_\-extension\-::key, log\-\_\-error\-\_\-write(), specific\-\_\-config\-::log\-\_\-request\-\_\-handling, connection\-::mode, fcgi\-\_\-extension\-::note\-\_\-is\-\_\-sent, request\-\_\-uri\-::path, physical\-::path, request\-::pathinfo, connection\-::physical, connection\-::plugin\-\_\-ctx, handler\-\_\-ctx\-::plugin\-\_\-data, handler\-\_\-ctx\-::proc, buffer\-::ptr, handler\-\_\-ctx\-::remote\-\_\-conn, connection\-::request, connection\-::uri, array\-::used, fcgi\-\_\-exts\-::used, and data\-\_\-string\-::value.
+
+
+
+Referenced by fcgi\-\_\-check\-\_\-extension\-\_\-1(), and fcgi\-\_\-check\-\_\-extension\-\_\-2().
+
+\hypertarget{mod__fastcgi_8c_a32872ec7f1c63401f6eae86fc8c7911c}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fcgi\-\_\-check\-\_\-extension\-\_\-1@{fcgi\-\_\-check\-\_\-extension\-\_\-1}}
+\index{fcgi\-\_\-check\-\_\-extension\-\_\-1@{fcgi\-\_\-check\-\_\-extension\-\_\-1}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fcgi\-\_\-check\-\_\-extension\-\_\-1}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf handler\-\_\-t} fcgi\-\_\-check\-\_\-extension\-\_\-1 (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{void $\ast$}]{p\-\_\-d}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_a32872ec7f1c63401f6eae86fc8c7911c}
+
+
+References fcgi\-\_\-check\-\_\-extension().
+
+
+
+Referenced by mod\-\_\-fastcgi\-\_\-plugin\-\_\-init().
+
+\hypertarget{mod__fastcgi_8c_ad7e149df7cf6869b235cca76831595d0}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fcgi\-\_\-check\-\_\-extension\-\_\-2@{fcgi\-\_\-check\-\_\-extension\-\_\-2}}
+\index{fcgi\-\_\-check\-\_\-extension\-\_\-2@{fcgi\-\_\-check\-\_\-extension\-\_\-2}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fcgi\-\_\-check\-\_\-extension\-\_\-2}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf handler\-\_\-t} fcgi\-\_\-check\-\_\-extension\-\_\-2 (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{void $\ast$}]{p\-\_\-d}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_ad7e149df7cf6869b235cca76831595d0}
+
+
+References fcgi\-\_\-check\-\_\-extension().
+
+
+
+Referenced by mod\-\_\-fastcgi\-\_\-plugin\-\_\-init().
+
+\hypertarget{mod__fastcgi_8c_a24c897031be840accd2acec18e5d5ff5}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fcgi\-\_\-connection\-\_\-close@{fcgi\-\_\-connection\-\_\-close}}
+\index{fcgi\-\_\-connection\-\_\-close@{fcgi\-\_\-connection\-\_\-close}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fcgi\-\_\-connection\-\_\-close}]{\setlength{\rightskip}{0pt plus 5cm}static void fcgi\-\_\-connection\-\_\-close (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_a24c897031be840accd2acec18e5d5ff5}
+
+
+References fcgi\-\_\-backend\-\_\-close(), handler\-\_\-ctx\-\_\-free(), http\-\_\-response\-\_\-backend\-\_\-done(), connection\-::mode, connection\-::plugin\-\_\-ctx, handler\-\_\-ctx\-::plugin\-\_\-data, and handler\-\_\-ctx\-::remote\-\_\-conn.
+
+
+
+Referenced by fcgi\-\_\-connection\-\_\-reset(), fcgi\-\_\-handle\-\_\-fdevent(), fcgi\-\_\-recv\-\_\-response(), and fcgi\-\_\-send\-\_\-request().
+
+\hypertarget{mod__fastcgi_8c_af8f9c25e0ce53074dee5e11958f6f2bf}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fcgi\-\_\-connection\-\_\-reset@{fcgi\-\_\-connection\-\_\-reset}}
+\index{fcgi\-\_\-connection\-\_\-reset@{fcgi\-\_\-connection\-\_\-reset}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fcgi\-\_\-connection\-\_\-reset}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf handler\-\_\-t} fcgi\-\_\-connection\-\_\-reset (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{void $\ast$}]{p\-\_\-d}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_af8f9c25e0ce53074dee5e11958f6f2bf}
+
+
+References fcgi\-\_\-connection\-\_\-close(), H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, and connection\-::plugin\-\_\-ctx.
+
+
+
+Referenced by mod\-\_\-fastcgi\-\_\-plugin\-\_\-init().
+
+\hypertarget{mod__fastcgi_8c_aaeb1132f61f68a8a10efcd9ac9c8f81e}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fcgi\-\_\-create\-\_\-env@{fcgi\-\_\-create\-\_\-env}}
+\index{fcgi\-\_\-create\-\_\-env@{fcgi\-\_\-create\-\_\-env}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fcgi\-\_\-create\-\_\-env}]{\setlength{\rightskip}{0pt plus 5cm}static int fcgi\-\_\-create\-\_\-env (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx, }
+\item[{int}]{request\-\_\-id}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_aaeb1132f61f68a8a10efcd9ac9c8f81e}
+
+
+References F\-C\-G\-I\-\_\-\-Begin\-Request\-Record\-::body, fcgi\-\_\-extension\-\_\-host\-::break\-\_\-scriptfilename\-\_\-for\-\_\-php, buffer\-\_\-append\-\_\-string\-\_\-buffer(), buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-copy\-\_\-string\-\_\-len(), buffer\-\_\-free(), buffer\-\_\-init(), buffer\-\_\-string\-\_\-length(), buffer\-\_\-string\-\_\-prepare\-\_\-copy(), chunkqueue\-\_\-append\-\_\-buffer(), request\-::content\-\_\-length, fcgi\-\_\-extension\-\_\-host\-::docroot, F\-C\-G\-I\-\_\-\-A\-U\-T\-H\-O\-R\-I\-Z\-E\-R, F\-C\-G\-I\-\_\-\-B\-E\-G\-I\-N\-\_\-\-R\-E\-Q\-U\-E\-S\-T, plugin\-\_\-data\-::fcgi\-\_\-env, fcgi\-\_\-env\-\_\-add(), fcgi\-\_\-header(), handler\-\_\-ctx\-::fcgi\-\_\-mode, F\-C\-G\-I\-\_\-\-P\-A\-R\-A\-M\-S, fcgi\-\_\-stdin\-\_\-append(), F\-C\-G\-I\-\_\-\-Begin\-Request\-Body\-::flags, F\-C\-G\-I\-\_\-\-Begin\-Request\-Record\-::header, handler\-\_\-ctx\-::host, http\-\_\-cgi\-\_\-headers(), connection\-::http\-\_\-status, handler\-\_\-ctx\-::plugin\-\_\-data, handler\-\_\-ctx\-::remote\-\_\-conn, connection\-::request, F\-C\-G\-I\-\_\-\-Begin\-Request\-Body\-::reserved, F\-C\-G\-I\-\_\-\-Begin\-Request\-Body\-::role\-B0, F\-C\-G\-I\-\_\-\-Begin\-Request\-Body\-::role\-B1, fcgi\-\_\-extension\-\_\-host\-::strip\-\_\-request\-\_\-uri, handler\-\_\-ctx\-::wb, and handler\-\_\-ctx\-::wb\-\_\-reqlen.
+
+
+
+Referenced by fcgi\-\_\-write\-\_\-request().
+
+\hypertarget{mod__fastcgi_8c_a053a6d286ef8f6921d719a438b3c7a35}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fcgi\-\_\-demux\-\_\-response@{fcgi\-\_\-demux\-\_\-response}}
+\index{fcgi\-\_\-demux\-\_\-response@{fcgi\-\_\-demux\-\_\-response}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fcgi\-\_\-demux\-\_\-response}]{\setlength{\rightskip}{0pt plus 5cm}static int fcgi\-\_\-demux\-\_\-response (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_a053a6d286ef8f6921d719a438b3c7a35}
+
+
+References array\-\_\-get\-\_\-element(), fastcgi\-\_\-response\-\_\-packet\-::b, buffer\-\_\-append\-\_\-string\-\_\-buffer(), buffer\-\_\-copy\-\_\-string\-\_\-len(), buffer\-\_\-free(), buffer\-\_\-search\-\_\-string\-\_\-len(), buffer\-\_\-string\-\_\-is\-\_\-empty(), buffer\-\_\-string\-\_\-length(), buffer\-\_\-string\-\_\-set\-\_\-length(), chunkqueue\-\_\-get\-\_\-memory(), chunkqueue\-\_\-length(), chunkqueue\-\_\-use\-\_\-memory(), connection\-::conf, fcgi\-\_\-proc\-::connection\-\_\-name, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, D\-I\-R\-E\-C\-T, server\-::ev, fastcgi\-\_\-get\-\_\-packet(), F\-C\-G\-I\-\_\-\-A\-U\-T\-H\-O\-R\-I\-Z\-E\-R, F\-C\-G\-I\-\_\-\-E\-N\-D\-\_\-\-R\-E\-Q\-U\-E\-S\-T, handler\-\_\-ctx\-::fcgi\-\_\-mode, fcgi\-\_\-response\-\_\-parse(), F\-C\-G\-I\-\_\-\-S\-T\-D\-E\-R\-R, F\-C\-G\-I\-\_\-\-S\-T\-D\-O\-U\-T, handler\-\_\-ctx\-::fd, handler\-\_\-ctx\-::fde\-\_\-ndx, fdevent\-\_\-event\-\_\-add(), fdevent\-\_\-event\-\_\-clr(), F\-D\-E\-V\-E\-N\-T\-\_\-\-I\-N, F\-D\-E\-V\-E\-N\-T\-\_\-\-S\-T\-R\-E\-A\-M\-\_\-\-R\-E\-S\-P\-O\-N\-S\-E\-\_\-\-B\-U\-F\-M\-I\-N, connection\-::file\-\_\-started, response\-::headers, handler\-\_\-ctx\-::host, http\-\_\-chunk\-\_\-append\-\_\-buffer(), http\-\_\-response\-\_\-xsendfile(), connection\-::http\-\_\-status, connection\-::is\-\_\-writable, fastcgi\-\_\-response\-\_\-packet\-::len, log\-\_\-error\-\_\-write(), log\-\_\-error\-\_\-write\-\_\-multiline\-\_\-buffer(), M\-A\-X\-\_\-\-H\-T\-T\-P\-\_\-\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-H\-E\-A\-D\-E\-R, connection\-::mode, request\-\_\-uri\-::path, fcgi\-\_\-proc\-::pid, handler\-\_\-ctx\-::plugin\-\_\-data, handler\-\_\-ctx\-::proc, buffer\-::ptr, handler\-\_\-ctx\-::rb, handler\-\_\-ctx\-::remote\-\_\-conn, connection\-::response, handler\-\_\-ctx\-::response\-\_\-header, handler\-\_\-ctx\-::send\-\_\-content\-\_\-body, specific\-\_\-config\-::stream\-\_\-response\-\_\-body, fastcgi\-\_\-response\-\_\-packet\-::type, connection\-::uri, data\-\_\-string\-::value, connection\-::write\-\_\-queue, fcgi\-\_\-extension\-\_\-host\-::xsendfile\-\_\-allow, and fcgi\-\_\-extension\-\_\-host\-::xsendfile\-\_\-docroot.
+
+
+
+Referenced by fcgi\-\_\-recv\-\_\-response().
+
+\hypertarget{mod__fastcgi_8c_af49b829c8b9614a940366849b9fd689b}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fcgi\-\_\-env\-\_\-add@{fcgi\-\_\-env\-\_\-add}}
+\index{fcgi\-\_\-env\-\_\-add@{fcgi\-\_\-env\-\_\-add}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fcgi\-\_\-env\-\_\-add}]{\setlength{\rightskip}{0pt plus 5cm}static int fcgi\-\_\-env\-\_\-add (
+\begin{DoxyParamCaption}
+\item[{void $\ast$}]{venv, }
+\item[{const char $\ast$}]{key, }
+\item[{size\-\_\-t}]{key\-\_\-len, }
+\item[{const char $\ast$}]{val, }
+\item[{size\-\_\-t}]{val\-\_\-len}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_af49b829c8b9614a940366849b9fd689b}
+we can't append more headers, ignore it
+
+field length can be 31bit max
+
+H\-I\-N\-T\-: this can't happen as F\-C\-G\-I\-\_\-\-M\-A\-X\-\_\-\-L\-E\-N\-G\-T\-H is only 16bit
+
+References buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-string\-\_\-length(), buffer\-\_\-string\-\_\-prepare\-\_\-append(), F\-C\-G\-I\-\_\-\-M\-A\-X\-\_\-\-L\-E\-N\-G\-T\-H, and force\-\_\-assert.
+
+
+
+Referenced by fcgi\-\_\-create\-\_\-env().
+
+\hypertarget{mod__fastcgi_8c_a61b96cfcaa48b024d20f352ff84315c1}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fcgi\-\_\-establish\-\_\-connection@{fcgi\-\_\-establish\-\_\-connection}}
+\index{fcgi\-\_\-establish\-\_\-connection@{fcgi\-\_\-establish\-\_\-connection}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fcgi\-\_\-establish\-\_\-connection}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf connection\-\_\-result\-\_\-t} fcgi\-\_\-establish\-\_\-connection (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_a61b96cfcaa48b024d20f352ff84315c1}
+
+
+References buffer\-\_\-append\-\_\-int(), buffer\-\_\-append\-\_\-string\-\_\-buffer(), buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-copy\-\_\-string\-\_\-len(), buffer\-\_\-string\-\_\-is\-\_\-empty(), buffer\-\_\-string\-\_\-length(), handler\-\_\-ctx\-::conf, C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-D\-E\-A\-D, C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-D\-E\-L\-A\-Y\-E\-D, fcgi\-\_\-proc\-::connection\-\_\-name, C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-O\-K, C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-O\-V\-E\-R\-L\-O\-A\-D\-E\-D, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, plugin\-\_\-config\-::debug, fcgi\-\_\-extension\-\_\-host\-::family, handler\-\_\-ctx\-::fd, fcgi\-\_\-extension\-\_\-host\-::host, handler\-\_\-ctx\-::host, fcgi\-\_\-proc\-::load, log\-\_\-error\-\_\-write(), fcgi\-\_\-proc\-::port, handler\-\_\-ctx\-::proc, buffer\-::ptr, handler\-\_\-ctx\-::reconnects, and fcgi\-\_\-proc\-::unixsocket.
+
+
+
+Referenced by fcgi\-\_\-write\-\_\-request().
+
+\hypertarget{mod__fastcgi_8c_af4efe3bf81c5bf2bf1ed559075bc8bc7}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fcgi\-\_\-extension\-\_\-host\-\_\-get@{fcgi\-\_\-extension\-\_\-host\-\_\-get}}
+\index{fcgi\-\_\-extension\-\_\-host\-\_\-get@{fcgi\-\_\-extension\-\_\-host\-\_\-get}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fcgi\-\_\-extension\-\_\-host\-\_\-get}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf fcgi\-\_\-extension\-\_\-host}$\ast$ fcgi\-\_\-extension\-\_\-host\-\_\-get (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf plugin\-\_\-data} $\ast$}]{p, }
+\item[{{\bf fcgi\-\_\-extension} $\ast$}]{extension}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_af4efe3bf81c5bf2bf1ed559075bc8bc7}
+
+
+References fcgi\-\_\-extension\-\_\-host\-::active\-\_\-procs, D\-I\-R\-E\-C\-T, fcgi\-\_\-extension\-::hosts, connection\-::http\-\_\-status, fcgi\-\_\-extension\-::key, fcgi\-\_\-extension\-::last\-\_\-used\-\_\-ndx, fcgi\-\_\-extension\-\_\-host\-::load, log\-\_\-error\-\_\-write(), connection\-::mode, fcgi\-\_\-extension\-::note\-\_\-is\-\_\-sent, request\-\_\-uri\-::path, request\-\_\-uri\-::query, U\-N\-U\-S\-E\-D, connection\-::uri, and fcgi\-\_\-extension\-::used.
+
+
+
+Referenced by fcgi\-\_\-check\-\_\-extension(), and fcgi\-\_\-reconnect().
+
+\hypertarget{mod__fastcgi_8c_a99996a7b31b69b6f7866e066b66be6ed}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fcgi\-\_\-handle\-\_\-fdevent@{fcgi\-\_\-handle\-\_\-fdevent}}
+\index{fcgi\-\_\-handle\-\_\-fdevent@{fcgi\-\_\-handle\-\_\-fdevent}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fcgi\-\_\-handle\-\_\-fdevent}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf handler\-\_\-t} fcgi\-\_\-handle\-\_\-fdevent (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{void $\ast$}]{ctx, }
+\item[{int}]{revents}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_a99996a7b31b69b6f7866e066b66be6ed}
+
+
+References fcgi\-\_\-proc\-::connection\-\_\-name, fcgi\-\_\-connection\-\_\-close(), fcgi\-\_\-recv\-\_\-response(), fcgi\-\_\-send\-\_\-request(), F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T\-\_\-\-D\-E\-L\-A\-Y\-E\-D, F\-D\-E\-V\-E\-N\-T\-\_\-\-E\-R\-R, F\-D\-E\-V\-E\-N\-T\-\_\-\-H\-U\-P, F\-D\-E\-V\-E\-N\-T\-\_\-\-I\-N, F\-D\-E\-V\-E\-N\-T\-\_\-\-O\-U\-T, connection\-::file\-\_\-started, H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-I\-N\-I\-S\-H\-E\-D, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, http\-\_\-response\-\_\-backend\-\_\-error(), joblist\-\_\-append(), log\-\_\-error\-\_\-write(), request\-\_\-uri\-::path, handler\-\_\-ctx\-::proc, request\-\_\-uri\-::query, handler\-\_\-ctx\-::remote\-\_\-conn, handler\-\_\-ctx\-::state, and connection\-::uri.
+
+
+
+Referenced by fcgi\-\_\-write\-\_\-request().
+
+\hypertarget{mod__fastcgi_8c_a81becc93d4e0e3c93a2efc7451e8c4b9}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fcgi\-\_\-header@{fcgi\-\_\-header}}
+\index{fcgi\-\_\-header@{fcgi\-\_\-header}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fcgi\-\_\-header}]{\setlength{\rightskip}{0pt plus 5cm}static int fcgi\-\_\-header (
+\begin{DoxyParamCaption}
+\item[{{\bf F\-C\-G\-I\-\_\-\-Header} $\ast$}]{header, }
+\item[{unsigned char}]{type, }
+\item[{int}]{request\-\_\-id, }
+\item[{int}]{content\-Length, }
+\item[{unsigned char}]{padding\-Length}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_a81becc93d4e0e3c93a2efc7451e8c4b9}
+
+
+References F\-C\-G\-I\-\_\-\-Header\-::content\-Length\-B0, F\-C\-G\-I\-\_\-\-Header\-::content\-Length\-B1, F\-C\-G\-I\-\_\-\-M\-A\-X\-\_\-\-L\-E\-N\-G\-T\-H, F\-C\-G\-I\-\_\-\-V\-E\-R\-S\-I\-O\-N\-\_\-1, force\-\_\-assert, F\-C\-G\-I\-\_\-\-Header\-::padding\-Length, F\-C\-G\-I\-\_\-\-Header\-::request\-Id\-B0, F\-C\-G\-I\-\_\-\-Header\-::request\-Id\-B1, F\-C\-G\-I\-\_\-\-Header\-::reserved, F\-C\-G\-I\-\_\-\-Header\-::type, and F\-C\-G\-I\-\_\-\-Header\-::version.
+
+
+
+Referenced by fcgi\-\_\-create\-\_\-env(), and fcgi\-\_\-stdin\-\_\-append().
+
+\hypertarget{mod__fastcgi_8c_a898fc7b2e7c7d0a5595dc09c303cdc26}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fcgi\-\_\-host\-\_\-assign@{fcgi\-\_\-host\-\_\-assign}}
+\index{fcgi\-\_\-host\-\_\-assign@{fcgi\-\_\-host\-\_\-assign}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fcgi\-\_\-host\-\_\-assign}]{\setlength{\rightskip}{0pt plus 5cm}static void fcgi\-\_\-host\-\_\-assign (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx, }
+\item[{{\bf fcgi\-\_\-extension\-\_\-host} $\ast$}]{host}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_a898fc7b2e7c7d0a5595dc09c303cdc26}
+
+
+References buffer\-\_\-append\-\_\-string\-\_\-len(), C\-O\-N\-S\-T\-\_\-\-B\-U\-F\-\_\-\-L\-E\-N, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, fastcgi\-\_\-status\-\_\-copy\-\_\-procname(), handler\-\_\-ctx\-::host, fcgi\-\_\-extension\-\_\-host\-::load, handler\-\_\-ctx\-::plugin\-\_\-data, status\-\_\-counter\-\_\-set(), and plugin\-\_\-data\-::statuskey.
+
+
+
+Referenced by fcgi\-\_\-check\-\_\-extension(), and fcgi\-\_\-reconnect().
+
+\hypertarget{mod__fastcgi_8c_a0055fa839c87447b90a9bd64e61f6c54}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fcgi\-\_\-host\-\_\-disable@{fcgi\-\_\-host\-\_\-disable}}
+\index{fcgi\-\_\-host\-\_\-disable@{fcgi\-\_\-host\-\_\-disable}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fcgi\-\_\-host\-\_\-disable}]{\setlength{\rightskip}{0pt plus 5cm}static void fcgi\-\_\-host\-\_\-disable (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_a0055fa839c87447b90a9bd64e61f6c54}
+
+
+References fcgi\-\_\-extension\-\_\-host\-::active\-\_\-procs, handler\-\_\-ctx\-::conf, server\-::cur\-\_\-ts, plugin\-\_\-config\-::debug, fcgi\-\_\-extension\-\_\-host\-::disable\-\_\-time, fcgi\-\_\-proc\-::disabled\-\_\-until, handler\-\_\-ctx\-::host, fcgi\-\_\-proc\-::is\-\_\-local, log\-\_\-error\-\_\-write(), handler\-\_\-ctx\-::proc, and fcgi\-\_\-proc\-::state.
+
+
+
+Referenced by fcgi\-\_\-write\-\_\-request().
+
+\hypertarget{mod__fastcgi_8c_a097c269b9e3fe359cca2233fa30a1031}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fcgi\-\_\-host\-\_\-reset@{fcgi\-\_\-host\-\_\-reset}}
+\index{fcgi\-\_\-host\-\_\-reset@{fcgi\-\_\-host\-\_\-reset}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fcgi\-\_\-host\-\_\-reset}]{\setlength{\rightskip}{0pt plus 5cm}static void fcgi\-\_\-host\-\_\-reset (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_a097c269b9e3fe359cca2233fa30a1031}
+
+
+References buffer\-\_\-append\-\_\-string\-\_\-len(), C\-O\-N\-S\-T\-\_\-\-B\-U\-F\-\_\-\-L\-E\-N, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, fastcgi\-\_\-status\-\_\-copy\-\_\-procname(), handler\-\_\-ctx\-::host, fcgi\-\_\-extension\-\_\-host\-::load, handler\-\_\-ctx\-::plugin\-\_\-data, status\-\_\-counter\-\_\-set(), and plugin\-\_\-data\-::statuskey.
+
+
+
+Referenced by fcgi\-\_\-backend\-\_\-close().
+
+\hypertarget{mod__fastcgi_8c_a0f078f3bbb5c2c20225d1b899c07e86f}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fcgi\-\_\-patch\-\_\-connection@{fcgi\-\_\-patch\-\_\-connection}}
+\index{fcgi\-\_\-patch\-\_\-connection@{fcgi\-\_\-patch\-\_\-connection}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fcgi\-\_\-patch\-\_\-connection}]{\setlength{\rightskip}{0pt plus 5cm}static int fcgi\-\_\-patch\-\_\-connection (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf plugin\-\_\-data} $\ast$}]{p}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_a0f078f3bbb5c2c20225d1b899c07e86f}
+
+
+References buffer\-\_\-is\-\_\-equal\-\_\-string(), config\-\_\-check\-\_\-cond(), server\-::config\-\_\-context, plugin\-\_\-data\-::config\-\_\-storage, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, array\-::data, P\-A\-T\-C\-H, array\-::used, and data\-\_\-config\-::value.
+
+
+
+Referenced by fcgi\-\_\-check\-\_\-extension().
+
+\hypertarget{mod__fastcgi_8c_a3543f911781397866c126b7fc082130f}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fcgi\-\_\-proc\-\_\-load\-\_\-dec@{fcgi\-\_\-proc\-\_\-load\-\_\-dec}}
+\index{fcgi\-\_\-proc\-\_\-load\-\_\-dec@{fcgi\-\_\-proc\-\_\-load\-\_\-dec}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fcgi\-\_\-proc\-\_\-load\-\_\-dec}]{\setlength{\rightskip}{0pt plus 5cm}static void fcgi\-\_\-proc\-\_\-load\-\_\-dec (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_a3543f911781397866c126b7fc082130f}
+
+
+References buffer\-\_\-append\-\_\-string\-\_\-len(), C\-O\-N\-S\-T\-\_\-\-B\-U\-F\-\_\-\-L\-E\-N, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, fastcgi\-\_\-status\-\_\-copy\-\_\-procname(), handler\-\_\-ctx\-::host, fcgi\-\_\-proc\-::load, handler\-\_\-ctx\-::plugin\-\_\-data, handler\-\_\-ctx\-::proc, status\-\_\-counter\-\_\-dec(), status\-\_\-counter\-\_\-set(), and plugin\-\_\-data\-::statuskey.
+
+
+
+Referenced by fcgi\-\_\-backend\-\_\-close().
+
+\hypertarget{mod__fastcgi_8c_a5840f4f3fc629a61707674f79e0b5eb0}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fcgi\-\_\-proc\-\_\-load\-\_\-inc@{fcgi\-\_\-proc\-\_\-load\-\_\-inc}}
+\index{fcgi\-\_\-proc\-\_\-load\-\_\-inc@{fcgi\-\_\-proc\-\_\-load\-\_\-inc}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fcgi\-\_\-proc\-\_\-load\-\_\-inc}]{\setlength{\rightskip}{0pt plus 5cm}static void fcgi\-\_\-proc\-\_\-load\-\_\-inc (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_a5840f4f3fc629a61707674f79e0b5eb0}
+
+
+References buffer\-\_\-append\-\_\-string\-\_\-len(), C\-O\-N\-S\-T\-\_\-\-B\-U\-F\-\_\-\-L\-E\-N, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, fastcgi\-\_\-status\-\_\-copy\-\_\-procname(), handler\-\_\-ctx\-::host, fcgi\-\_\-proc\-::load, handler\-\_\-ctx\-::plugin\-\_\-data, handler\-\_\-ctx\-::proc, status\-\_\-counter\-\_\-inc(), status\-\_\-counter\-\_\-set(), and plugin\-\_\-data\-::statuskey.
+
+
+
+Referenced by fcgi\-\_\-write\-\_\-request().
+
+\hypertarget{mod__fastcgi_8c_a71046b69ac2abbb79623d3947935c2ef}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fcgi\-\_\-reconnect@{fcgi\-\_\-reconnect}}
+\index{fcgi\-\_\-reconnect@{fcgi\-\_\-reconnect}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fcgi\-\_\-reconnect}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf handler\-\_\-t} fcgi\-\_\-reconnect (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_a71046b69ac2abbb79623d3947935c2ef}
+
+
+References handler\-\_\-ctx\-::ext, fcgi\-\_\-backend\-\_\-close(), fcgi\-\_\-extension\-\_\-host\-\_\-get(), fcgi\-\_\-host\-\_\-assign(), fcgi\-\_\-set\-\_\-state(), F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-I\-N\-I\-T, H\-A\-N\-D\-L\-E\-R\-\_\-\-C\-O\-M\-E\-B\-A\-C\-K, H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-I\-N\-I\-S\-H\-E\-D, handler\-\_\-ctx\-::host, handler\-\_\-ctx\-::plugin\-\_\-data, handler\-\_\-ctx\-::remote\-\_\-conn, and handler\-\_\-ctx\-::request\-\_\-id.
+
+
+
+Referenced by fcgi\-\_\-recv\-\_\-response(), and fcgi\-\_\-send\-\_\-request().
+
+\hypertarget{mod__fastcgi_8c_afd5df1cc8684d0a16a4e13b1114a008b}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fcgi\-\_\-recv\-\_\-response@{fcgi\-\_\-recv\-\_\-response}}
+\index{fcgi\-\_\-recv\-\_\-response@{fcgi\-\_\-recv\-\_\-response}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fcgi\-\_\-recv\-\_\-response}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf handler\-\_\-t} fcgi\-\_\-recv\-\_\-response (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_afd5df1cc8684d0a16a4e13b1114a008b}
+
+
+References physical\-::basedir, buffer\-\_\-append\-\_\-string\-\_\-buffer(), buffer\-\_\-copy\-\_\-buffer(), buffer\-\_\-string\-\_\-is\-\_\-empty(), chunkqueue\-::bytes\-\_\-out, handler\-\_\-ctx\-::conf, fcgi\-\_\-proc\-::connection\-\_\-name, connection\-\_\-response\-\_\-reset(), plugin\-\_\-config\-::debug, D\-I\-R\-E\-C\-T, physical\-::doc\-\_\-root, fcgi\-\_\-extension\-\_\-host\-::docroot, F\-C\-G\-I\-\_\-\-A\-U\-T\-H\-O\-R\-I\-Z\-E\-R, fcgi\-\_\-backend\-\_\-close(), fcgi\-\_\-connection\-\_\-close(), fcgi\-\_\-demux\-\_\-response(), handler\-\_\-ctx\-::fcgi\-\_\-mode, fcgi\-\_\-reconnect(), fcgi\-\_\-spawn\-\_\-connection(), connection\-::file\-\_\-started, H\-A\-N\-D\-L\-E\-R\-\_\-\-C\-O\-M\-E\-B\-A\-C\-K, handler\-\_\-ctx\-\_\-clear(), H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-I\-N\-I\-S\-H\-E\-D, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, handler\-\_\-ctx\-::host, http\-\_\-response\-\_\-backend\-\_\-error(), connection\-::http\-\_\-status, log\-\_\-error\-\_\-write(), connection\-::loops\-\_\-per\-\_\-request, fcgi\-\_\-extension\-\_\-host\-::max\-\_\-procs, connection\-::mode, request\-::orig\-\_\-uri, request\-\_\-uri\-::path, physical\-::path, connection\-::physical, fcgi\-\_\-proc\-::pid, handler\-\_\-ctx\-::plugin\-\_\-data, handler\-\_\-ctx\-::proc, request\-\_\-uri\-::query, handler\-\_\-ctx\-::reconnects, handler\-\_\-ctx\-::remote\-\_\-conn, connection\-::request, fcgi\-\_\-proc\-::state, connection\-::uri, and handler\-\_\-ctx\-::wb.
+
+
+
+Referenced by fcgi\-\_\-handle\-\_\-fdevent(), and S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__fastcgi_8c_a57037bd1346b8adaa4e1f713528caa24}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fcgi\-\_\-response\-\_\-parse@{fcgi\-\_\-response\-\_\-parse}}
+\index{fcgi\-\_\-response\-\_\-parse@{fcgi\-\_\-response\-\_\-parse}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fcgi\-\_\-response\-\_\-parse}]{\setlength{\rightskip}{0pt plus 5cm}static int fcgi\-\_\-response\-\_\-parse (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf plugin\-\_\-data} $\ast$}]{p, }
+\item[{{\bf buffer} $\ast$}]{in}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_a57037bd1346b8adaa4e1f713528caa24}
+
+
+References array\-\_\-get\-\_\-unused\-\_\-element(), array\-\_\-insert\-\_\-unique(), array\-\_\-replace(), buffer\-\_\-copy\-\_\-int(), buffer\-\_\-copy\-\_\-string(), buffer\-\_\-copy\-\_\-string\-\_\-len(), buffer\-\_\-path\-\_\-simplify(), buffer\-\_\-string\-\_\-length(), buffer\-\_\-to\-\_\-lower(), buffer\-\_\-urldecode\-\_\-path(), handler\-\_\-ctx\-::conf, connection\-::conf, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, response\-::content\-\_\-length, array\-::data, data\-\_\-response\-\_\-init(), plugin\-\_\-config\-::debug, connection\-::environment, F\-C\-G\-I\-\_\-\-A\-U\-T\-H\-O\-R\-I\-Z\-E\-R, handler\-\_\-ctx\-::fcgi\-\_\-mode, specific\-\_\-config\-::force\-\_\-lowercase\-\_\-filenames, H\-A\-N\-D\-L\-E\-R\-\_\-\-E\-R\-R\-O\-R, response\-::headers, handler\-\_\-ctx\-::host, http\-\_\-chunk\-\_\-append\-\_\-file\-\_\-range(), H\-T\-T\-P\-\_\-\-C\-O\-N\-N\-E\-C\-T\-I\-O\-N, H\-T\-T\-P\-\_\-\-C\-O\-N\-T\-E\-N\-T\-\_\-\-L\-E\-N\-G\-T\-H, H\-T\-T\-P\-\_\-\-D\-A\-T\-E, H\-T\-T\-P\-\_\-\-L\-O\-C\-A\-T\-I\-O\-N, H\-T\-T\-P\-\_\-\-S\-T\-A\-T\-U\-S, connection\-::http\-\_\-status, response\-::keep\-\_\-alive, log\-\_\-error\-\_\-write(), connection\-::parsed\-\_\-response, connection\-::plugin\-\_\-ctx, buffer\-::ptr, connection\-::response, handler\-\_\-ctx\-::send\-\_\-content\-\_\-body, stat\-\_\-cache\-\_\-entry\-::st, stat\-\_\-cache\-\_\-get\-\_\-entry(), server\-::tmp\-\_\-buf, T\-Y\-P\-E\-\_\-\-S\-T\-R\-I\-N\-G, U\-N\-U\-S\-E\-D, array\-::used, data\-\_\-string\-::value, fcgi\-\_\-extension\-\_\-host\-::xsendfile\-\_\-allow, and fcgi\-\_\-extension\-\_\-host\-::xsendfile\-\_\-docroot.
+
+
+
+Referenced by fcgi\-\_\-demux\-\_\-response().
+
+\hypertarget{mod__fastcgi_8c_a0c80c76e46b736d7fe9b13f5a7040de0}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fcgi\-\_\-restart\-\_\-dead\-\_\-procs@{fcgi\-\_\-restart\-\_\-dead\-\_\-procs}}
+\index{fcgi\-\_\-restart\-\_\-dead\-\_\-procs@{fcgi\-\_\-restart\-\_\-dead\-\_\-procs}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fcgi\-\_\-restart\-\_\-dead\-\_\-procs}]{\setlength{\rightskip}{0pt plus 5cm}static int fcgi\-\_\-restart\-\_\-dead\-\_\-procs (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf plugin\-\_\-data} $\ast$}]{p, }
+\item[{{\bf fcgi\-\_\-extension\-\_\-host} $\ast$}]{host}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_a0c80c76e46b736d7fe9b13f5a7040de0}
+
+
+References fcgi\-\_\-extension\-\_\-host\-::active\-\_\-procs, fcgi\-\_\-extension\-\_\-host\-::bin\-\_\-path, buffer\-\_\-string\-\_\-is\-\_\-empty(), plugin\-\_\-data\-::conf, fcgi\-\_\-proc\-::connection\-\_\-name, server\-::cur\-\_\-ts, plugin\-\_\-config\-::debug, fcgi\-\_\-proc\-::disabled\-\_\-until, fcgi\-\_\-spawn\-\_\-connection(), fcgi\-\_\-extension\-\_\-host\-::first, force\-\_\-assert, H\-A\-N\-D\-L\-E\-R\-\_\-\-E\-R\-R\-O\-R, fcgi\-\_\-extension\-\_\-host\-::host, fcgi\-\_\-proc\-::is\-\_\-local, fcgi\-\_\-proc\-::load, log\-\_\-error\-\_\-write(), fcgi\-\_\-extension\-\_\-host\-::max\-\_\-procs, fcgi\-\_\-proc\-::next, fcgi\-\_\-proc\-::pid, fcgi\-\_\-extension\-\_\-host\-::port, fcgi\-\_\-proc\-::state, and fcgi\-\_\-extension\-\_\-host\-::unixsocket.
+
+
+
+Referenced by fcgi\-\_\-send\-\_\-request(), and T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__fastcgi_8c_ad8145cae063e9ddcaf47ca526866c9e0}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fcgi\-\_\-send\-\_\-request@{fcgi\-\_\-send\-\_\-request}}
+\index{fcgi\-\_\-send\-\_\-request@{fcgi\-\_\-send\-\_\-request}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fcgi\-\_\-send\-\_\-request}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf handler\-\_\-t} fcgi\-\_\-send\-\_\-request (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_ad8145cae063e9ddcaf47ca526866c9e0}
+
+
+References fcgi\-\_\-connection\-\_\-close(), fcgi\-\_\-reconnect(), fcgi\-\_\-restart\-\_\-dead\-\_\-procs(), F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T\-\_\-\-D\-E\-L\-A\-Y\-E\-D, F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-I\-N\-I\-T, fcgi\-\_\-write\-\_\-request(), H\-A\-N\-D\-L\-E\-R\-\_\-\-E\-R\-R\-O\-R, H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-I\-N\-I\-S\-H\-E\-D, handler\-\_\-ctx\-::host, connection\-::http\-\_\-status, handler\-\_\-ctx\-::plugin\-\_\-data, handler\-\_\-ctx\-::reconnects, handler\-\_\-ctx\-::remote\-\_\-conn, and handler\-\_\-ctx\-::state.
+
+
+
+Referenced by fcgi\-\_\-handle\-\_\-fdevent(), and S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__fastcgi_8c_a6e0280c740f4fa0aa1dc74833b6647f3}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fcgi\-\_\-set\-\_\-state@{fcgi\-\_\-set\-\_\-state}}
+\index{fcgi\-\_\-set\-\_\-state@{fcgi\-\_\-set\-\_\-state}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fcgi\-\_\-set\-\_\-state}]{\setlength{\rightskip}{0pt plus 5cm}static int fcgi\-\_\-set\-\_\-state (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx, }
+\item[{{\bf fcgi\-\_\-connection\-\_\-state\-\_\-t}}]{state}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_a6e0280c740f4fa0aa1dc74833b6647f3}
+
+
+References server\-::cur\-\_\-ts, handler\-\_\-ctx\-::state, and handler\-\_\-ctx\-::state\-\_\-timestamp.
+
+
+
+Referenced by fcgi\-\_\-reconnect(), and fcgi\-\_\-write\-\_\-request().
+
+\hypertarget{mod__fastcgi_8c_ab55f0a9187e8a54264f71412f1683daa}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fcgi\-\_\-spawn\-\_\-connection@{fcgi\-\_\-spawn\-\_\-connection}}
+\index{fcgi\-\_\-spawn\-\_\-connection@{fcgi\-\_\-spawn\-\_\-connection}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fcgi\-\_\-spawn\-\_\-connection}]{\setlength{\rightskip}{0pt plus 5cm}static int fcgi\-\_\-spawn\-\_\-connection (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf plugin\-\_\-data} $\ast$}]{p, }
+\item[{{\bf fcgi\-\_\-extension\-\_\-host} $\ast$}]{host, }
+\item[{{\bf fcgi\-\_\-proc} $\ast$}]{proc}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_ab55f0a9187e8a54264f71412f1683daa}
+
+
+References U\-N\-U\-S\-E\-D.
+
+
+
+Referenced by fcgi\-\_\-recv\-\_\-response(), fcgi\-\_\-restart\-\_\-dead\-\_\-procs(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__fastcgi_8c_ae811cecee7e4c48355e81a2e05cd6357}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fcgi\-\_\-stdin\-\_\-append@{fcgi\-\_\-stdin\-\_\-append}}
+\index{fcgi\-\_\-stdin\-\_\-append@{fcgi\-\_\-stdin\-\_\-append}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fcgi\-\_\-stdin\-\_\-append}]{\setlength{\rightskip}{0pt plus 5cm}static void fcgi\-\_\-stdin\-\_\-append (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx, }
+\item[{int}]{request\-\_\-id}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_ae811cecee7e4c48355e81a2e05cd6357}
+
+
+References chunkqueue\-::bytes\-\_\-in, chunkqueue\-::bytes\-\_\-out, chunkqueue\-\_\-append\-\_\-mem(), chunkqueue\-\_\-steal(), handler\-\_\-ctx\-::conf, plugin\-\_\-config\-::debug, fcgi\-\_\-header(), F\-C\-G\-I\-\_\-\-M\-A\-X\-\_\-\-L\-E\-N\-G\-T\-H, F\-C\-G\-I\-\_\-\-S\-T\-D\-I\-N, log\-\_\-error\-\_\-write(), connection\-::request\-\_\-content\-\_\-queue, handler\-\_\-ctx\-::wb, and handler\-\_\-ctx\-::wb\-\_\-reqlen.
+
+
+
+Referenced by fcgi\-\_\-create\-\_\-env(), and S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__fastcgi_8c_a622bbdd963e4fdad4c7db7a179c9655f}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!fcgi\-\_\-write\-\_\-request@{fcgi\-\_\-write\-\_\-request}}
+\index{fcgi\-\_\-write\-\_\-request@{fcgi\-\_\-write\-\_\-request}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{fcgi\-\_\-write\-\_\-request}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf handler\-\_\-t} fcgi\-\_\-write\-\_\-request (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_a622bbdd963e4fdad4c7db7a179c9655f}
+
+
+References fcgi\-\_\-extension\-\_\-host\-::active\-\_\-procs, buffer\-\_\-append\-\_\-string\-\_\-len(), chunkqueue\-::bytes\-\_\-in, chunkqueue\-::bytes\-\_\-out, chunkqueue\-\_\-remove\-\_\-finished\-\_\-chunks(), handler\-\_\-ctx\-::conf, connection\-::conf, C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-D\-E\-A\-D, C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-D\-E\-L\-A\-Y\-E\-D, fcgi\-\_\-proc\-::connection\-\_\-name, C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-O\-K, C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-O\-V\-E\-R\-L\-O\-A\-D\-E\-D, C\-O\-N\-S\-T\-\_\-\-B\-U\-F\-\_\-\-L\-E\-N, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, server\-::cur\-\_\-fds, server\-::cur\-\_\-ts, plugin\-\_\-config\-::debug, fcgi\-\_\-extension\-\_\-host\-::disable\-\_\-time, fcgi\-\_\-proc\-::disabled\-\_\-until, server\-::ev, fcgi\-\_\-extension\-\_\-host\-::family, fastcgi\-\_\-status\-\_\-copy\-\_\-procname(), fcgi\-\_\-create\-\_\-env(), fcgi\-\_\-establish\-\_\-connection(), fcgi\-\_\-handle\-\_\-fdevent(), fcgi\-\_\-host\-\_\-disable(), fcgi\-\_\-proc\-\_\-load\-\_\-inc(), fcgi\-\_\-set\-\_\-state(), F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T\-\_\-\-D\-E\-L\-A\-Y\-E\-D, F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-I\-N\-I\-T, F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-P\-R\-E\-P\-A\-R\-E\-\_\-\-W\-R\-I\-T\-E, F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-A\-D, F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-W\-R\-I\-T\-E, handler\-\_\-ctx\-::fd, connection\-::fd, handler\-\_\-ctx\-::fde\-\_\-ndx, fdevent\-\_\-event\-\_\-add(), fdevent\-\_\-event\-\_\-clr(), fdevent\-\_\-event\-\_\-set(), fdevent\-\_\-fcntl\-\_\-set(), F\-D\-E\-V\-E\-N\-T\-\_\-\-I\-N, F\-D\-E\-V\-E\-N\-T\-\_\-\-O\-U\-T, fdevent\-\_\-register(), fdevent\-\_\-socket\-\_\-nb\-\_\-cloexec(), F\-D\-E\-V\-E\-N\-T\-\_\-\-S\-T\-R\-E\-A\-M\-\_\-\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-P\-O\-L\-L\-I\-N, fcgi\-\_\-extension\-\_\-host\-::first, handler\-\_\-ctx\-::got\-\_\-proc, H\-A\-N\-D\-L\-E\-R\-\_\-\-E\-R\-R\-O\-R, H\-A\-N\-D\-L\-E\-R\-\_\-\-W\-A\-I\-T\-\_\-\-F\-O\-R\-\_\-\-E\-V\-E\-N\-T, H\-A\-N\-D\-L\-E\-R\-\_\-\-W\-A\-I\-T\-\_\-\-F\-O\-R\-\_\-\-F\-D, handler\-\_\-ctx\-::host, fcgi\-\_\-proc\-::is\-\_\-local, connection\-::is\-\_\-readable, fcgi\-\_\-proc\-::load, fcgi\-\_\-extension\-\_\-host\-::load, log\-\_\-error\-\_\-write(), server\-::max\-\_\-fds, M\-A\-X\-\_\-\-W\-R\-I\-T\-E\-\_\-\-L\-I\-M\-I\-T, server\-::network\-\_\-backend\-\_\-write, fcgi\-\_\-proc\-::next, fcgi\-\_\-proc\-::pid, handler\-\_\-ctx\-::pid, handler\-\_\-ctx\-::plugin\-\_\-data, handler\-\_\-ctx\-::proc, handler\-\_\-ctx\-::reconnects, handler\-\_\-ctx\-::remote\-\_\-conn, handler\-\_\-ctx\-::request\-\_\-id, fcgi\-\_\-proc\-::state, handler\-\_\-ctx\-::state, status\-\_\-counter\-\_\-inc(), plugin\-\_\-data\-::statuskey, specific\-\_\-config\-::stream\-\_\-request\-\_\-body, handler\-\_\-ctx\-::wb, and handler\-\_\-ctx\-::wb\-\_\-reqlen.
+
+
+
+Referenced by fcgi\-\_\-send\-\_\-request().
+
+\hypertarget{mod__fastcgi_8c_aa93ce4b0d84d1b53ce1ec3de920f6b01}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!F\-R\-E\-E\-\_\-\-F\-U\-N\-C@{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}}
+\index{F\-R\-E\-E\-\_\-\-F\-U\-N\-C@{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}F\-R\-E\-E\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-fastcgi\-\_\-free}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__fastcgi_8c_aa93ce4b0d84d1b53ce1ec3de920f6b01}
+
+
+References array\-\_\-free(), buffer\-\_\-free(), buffer\-\_\-string\-\_\-is\-\_\-empty(), plugin\-\_\-data\-::config\-\_\-storage, plugin\-\_\-config\-::ext\-\_\-mapping, fcgi\-\_\-exts\-::exts, plugin\-\_\-config\-::exts, plugin\-\_\-config\-::exts\-\_\-auth, plugin\-\_\-config\-::exts\-\_\-resp, fastcgi\-\_\-extensions\-\_\-free(), plugin\-\_\-data\-::fcgi\-\_\-env, fcgi\-\_\-extension\-\_\-host\-::first, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, fcgi\-\_\-extension\-::hosts, fcgi\-\_\-proc\-::is\-\_\-local, fcgi\-\_\-extension\-\_\-host\-::kill\-\_\-signal, fcgi\-\_\-proc\-::next, fcgi\-\_\-proc\-::pid, buffer\-::ptr, plugin\-\_\-data\-::statuskey, fcgi\-\_\-proc\-::unixsocket, U\-N\-U\-S\-E\-D, fcgi\-\_\-extension\-\_\-host\-::unused\-\_\-procs, fcgi\-\_\-extension\-::used, and fcgi\-\_\-exts\-::used.
+
+\hypertarget{mod__fastcgi_8c_a827cf83fadd66f04e51a310073ce8bff}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!handler\-\_\-ctx\-\_\-clear@{handler\-\_\-ctx\-\_\-clear}}
+\index{handler\-\_\-ctx\-\_\-clear@{handler\-\_\-ctx\-\_\-clear}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{handler\-\_\-ctx\-\_\-clear}]{\setlength{\rightskip}{0pt plus 5cm}static void handler\-\_\-ctx\-\_\-clear (
+\begin{DoxyParamCaption}
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_a827cf83fadd66f04e51a310073ce8bff}
+
+
+References buffer\-\_\-reset(), chunkqueue\-\_\-reset(), handler\-\_\-ctx\-::ext, handler\-\_\-ctx\-::fcgi\-\_\-mode, F\-C\-G\-I\-\_\-\-R\-E\-S\-P\-O\-N\-D\-E\-R, F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-I\-N\-I\-T, handler\-\_\-ctx\-::fd, handler\-\_\-ctx\-::fde\-\_\-ndx, handler\-\_\-ctx\-::got\-\_\-proc, handler\-\_\-ctx\-::host, handler\-\_\-ctx\-::proc, handler\-\_\-ctx\-::rb, handler\-\_\-ctx\-::reconnects, handler\-\_\-ctx\-::request\-\_\-id, handler\-\_\-ctx\-::response\-\_\-header, handler\-\_\-ctx\-::send\-\_\-content\-\_\-body, handler\-\_\-ctx\-::state, handler\-\_\-ctx\-::wb, and handler\-\_\-ctx\-::wb\-\_\-reqlen.
+
+
+
+Referenced by fcgi\-\_\-recv\-\_\-response().
+
+\hypertarget{mod__fastcgi_8c_af9f2bc62e505066048458b2893d9c111}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!handler\-\_\-ctx\-\_\-free@{handler\-\_\-ctx\-\_\-free}}
+\index{handler\-\_\-ctx\-\_\-free@{handler\-\_\-ctx\-\_\-free}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{handler\-\_\-ctx\-\_\-free}]{\setlength{\rightskip}{0pt plus 5cm}static void handler\-\_\-ctx\-\_\-free (
+\begin{DoxyParamCaption}
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_af9f2bc62e505066048458b2893d9c111}
+
+
+References buffer\-\_\-free(), chunkqueue\-\_\-free(), handler\-\_\-ctx\-::rb, handler\-\_\-ctx\-::response\-\_\-header, and handler\-\_\-ctx\-::wb.
+
+
+
+Referenced by fcgi\-\_\-connection\-\_\-close().
+
+\hypertarget{mod__fastcgi_8c_ad4882f71dc486b383f74029b751ce1a2}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!handler\-\_\-ctx\-\_\-init@{handler\-\_\-ctx\-\_\-init}}
+\index{handler\-\_\-ctx\-\_\-init@{handler\-\_\-ctx\-\_\-init}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{handler\-\_\-ctx\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf handler\-\_\-ctx}$\ast$ handler\-\_\-ctx\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_ad4882f71dc486b383f74029b751ce1a2}
+
+
+References buffer\-\_\-init(), chunkqueue\-\_\-init(), handler\-\_\-ctx\-::fcgi\-\_\-mode, F\-C\-G\-I\-\_\-\-R\-E\-S\-P\-O\-N\-D\-E\-R, F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-I\-N\-I\-T, handler\-\_\-ctx\-::fd, handler\-\_\-ctx\-::fde\-\_\-ndx, force\-\_\-assert, handler\-\_\-ctx\-::proc, handler\-\_\-ctx\-::rb, handler\-\_\-ctx\-::reconnects, handler\-\_\-ctx\-::request\-\_\-id, handler\-\_\-ctx\-::response\-\_\-header, handler\-\_\-ctx\-::send\-\_\-content\-\_\-body, handler\-\_\-ctx\-::state, handler\-\_\-ctx\-::wb, and handler\-\_\-ctx\-::wb\-\_\-reqlen.
+
+
+
+Referenced by fcgi\-\_\-check\-\_\-extension().
+
+\hypertarget{mod__fastcgi_8c_a8dc395ccd86d56a353b9b6d748eed429}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!I\-N\-I\-T\-\_\-\-F\-U\-N\-C@{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}}
+\index{I\-N\-I\-T\-\_\-\-F\-U\-N\-C@{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}I\-N\-I\-T\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-fastcgi\-\_\-init}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__fastcgi_8c_a8dc395ccd86d56a353b9b6d748eed429}
+
+
+References buffer\-\_\-init(), plugin\-\_\-data\-::fcgi\-\_\-env, and plugin\-\_\-data\-::statuskey.
+
+\hypertarget{mod__fastcgi_8c_a4c801ae224900581883a950915b1ba6c}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!mod\-\_\-fastcgi\-\_\-plugin\-\_\-init@{mod\-\_\-fastcgi\-\_\-plugin\-\_\-init}}
+\index{mod\-\_\-fastcgi\-\_\-plugin\-\_\-init@{mod\-\_\-fastcgi\-\_\-plugin\-\_\-init}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{mod\-\_\-fastcgi\-\_\-plugin\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}int mod\-\_\-fastcgi\-\_\-plugin\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{{\bf plugin} $\ast$}]{p}
+\end{DoxyParamCaption}
+)}}\label{mod__fastcgi_8c_a4c801ae224900581883a950915b1ba6c}
+
+
+References buffer\-\_\-init\-\_\-string(), plugin\-::cleanup, plugin\-::connection\-\_\-reset, plugin\-::data, fcgi\-\_\-check\-\_\-extension\-\_\-1(), fcgi\-\_\-check\-\_\-extension\-\_\-2(), fcgi\-\_\-connection\-\_\-reset(), plugin\-::handle\-\_\-connection\-\_\-close, plugin\-::handle\-\_\-subrequest, plugin\-::handle\-\_\-subrequest\-\_\-start, plugin\-::handle\-\_\-trigger, plugin\-::handle\-\_\-uri\-\_\-clean, plugin\-::init, plugin\-::name, plugin\-::set\-\_\-defaults, and plugin\-::version.
+
+\hypertarget{mod__fastcgi_8c_aa0e609393e8cf8f7a585e91d1522329a}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!parse\-\_\-binpath@{parse\-\_\-binpath}}
+\index{parse\-\_\-binpath@{parse\-\_\-binpath}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{parse\-\_\-binpath}]{\setlength{\rightskip}{0pt plus 5cm}static int parse\-\_\-binpath (
+\begin{DoxyParamCaption}
+\item[{{\bf char\-\_\-array} $\ast$}]{env, }
+\item[{{\bf buffer} $\ast$}]{b}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_aa0e609393e8cf8f7a585e91d1522329a}
+
+
+References buffer\-\_\-string\-\_\-length(), buffer\-::ptr, char\-\_\-array\-::ptr, char\-\_\-array\-::size, and char\-\_\-array\-::used.
+
+\hypertarget{mod__fastcgi_8c_a0454163937b9c23e8f275611f31323c6}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!reset\-\_\-signals@{reset\-\_\-signals}}
+\index{reset\-\_\-signals@{reset\-\_\-signals}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{reset\-\_\-signals}]{\setlength{\rightskip}{0pt plus 5cm}static void reset\-\_\-signals (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_a0454163937b9c23e8f275611f31323c6}
+\hypertarget{mod__fastcgi_8c_a37f837f51dd51668341c8c0d0cca99f8}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C@{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}}
+\index{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C@{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-fastcgi\-\_\-set\-\_\-defaults}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__fastcgi_8c_a37f837f51dd51668341c8c0d0cca99f8}
+
+
+References fcgi\-\_\-extension\-\_\-host\-::active\-\_\-procs, array\-\_\-get\-\_\-element(), array\-\_\-init(), fcgi\-\_\-extension\-\_\-host\-::bin\-\_\-env, fcgi\-\_\-extension\-\_\-host\-::bin\-\_\-env\-\_\-copy, fcgi\-\_\-extension\-\_\-host\-::bin\-\_\-path, fcgi\-\_\-extension\-\_\-host\-::break\-\_\-scriptfilename\-\_\-for\-\_\-php, buffer\-\_\-append\-\_\-int(), buffer\-\_\-append\-\_\-slash(), buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-copy\-\_\-buffer(), buffer\-\_\-init(), buffer\-\_\-is\-\_\-equal(), buffer\-\_\-path\-\_\-simplify(), buffer\-\_\-reset(), buffer\-\_\-string\-\_\-is\-\_\-empty(), buffer\-\_\-string\-\_\-length(), fcgi\-\_\-extension\-\_\-host\-::check\-\_\-local, server\-::config\-\_\-context, config\-\_\-insert\-\_\-values\-\_\-global(), config\-\_\-insert\-\_\-values\-\_\-internal(), plugin\-\_\-data\-::config\-\_\-storage, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, array\-::data, config\-\_\-values\-\_\-t\-::destination, fcgi\-\_\-extension\-\_\-host\-::disable\-\_\-time, fcgi\-\_\-extension\-\_\-host\-::docroot, plugin\-\_\-config\-::exts, fcgi\-\_\-extension\-\_\-host\-::family, fastcgi\-\_\-extension\-\_\-insert(), fastcgi\-\_\-extensions\-\_\-init(), fastcgi\-\_\-host\-\_\-free(), fastcgi\-\_\-host\-\_\-init(), fastcgi\-\_\-process\-\_\-free(), fastcgi\-\_\-process\-\_\-init(), fastcgi\-\_\-status\-\_\-init(), F\-C\-G\-I\-\_\-\-A\-U\-T\-H\-O\-R\-I\-Z\-E\-R, F\-C\-G\-I\-\_\-\-R\-E\-S\-P\-O\-N\-D\-E\-R, fcgi\-\_\-spawn\-\_\-connection(), fcgi\-\_\-extension\-\_\-host\-::first, fcgi\-\_\-extension\-\_\-host\-::fix\-\_\-root\-\_\-path\-\_\-name, fcgi\-\_\-extension\-\_\-host\-::host, fcgi\-\_\-proc\-::id, fcgi\-\_\-extension\-\_\-host\-::id, fcgi\-\_\-extension\-\_\-host\-::kill\-\_\-signal, fcgi\-\_\-extension\-\_\-host\-::listen\-\_\-backlog, log\-\_\-error\-\_\-write(), fcgi\-\_\-extension\-\_\-host\-::max\-\_\-id, fcgi\-\_\-extension\-\_\-host\-::max\-\_\-procs, fcgi\-\_\-proc\-::next, fcgi\-\_\-extension\-\_\-host\-::num\-\_\-procs, fcgi\-\_\-proc\-::port, fcgi\-\_\-extension\-\_\-host\-::port, server\-\_\-config\-::preflight\-\_\-check, fcgi\-\_\-proc\-::prev, buffer\-::ptr, fcgi\-\_\-extension\-\_\-host\-::refcount, server\-::srvconf, fcgi\-\_\-proc\-::state, plugin\-\_\-data\-::statuskey, fcgi\-\_\-extension\-\_\-host\-::strip\-\_\-request\-\_\-uri, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-A\-R\-R\-A\-Y, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-B\-O\-O\-L\-E\-A\-N, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-I\-N\-T, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-L\-O\-C\-A\-L, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T\-I\-O\-N, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-S\-E\-R\-V\-E\-R, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-U\-N\-S\-E\-T, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-H\-O\-R\-T, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-T\-R\-I\-N\-G, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-U\-N\-S\-E\-T, T\-Y\-P\-E\-\_\-\-A\-R\-R\-A\-Y, T\-Y\-P\-E\-\_\-\-S\-T\-R\-I\-N\-G, fcgi\-\_\-proc\-::unixsocket, fcgi\-\_\-extension\-\_\-host\-::unixsocket, unixsocket\-\_\-is\-\_\-dup(), array\-::used, data\-\_\-string\-::value, data\-\_\-array\-::value, data\-\_\-config\-::value, fcgi\-\_\-extension\-\_\-host\-::xsendfile\-\_\-allow, and fcgi\-\_\-extension\-\_\-host\-::xsendfile\-\_\-docroot.
+
+\hypertarget{mod__fastcgi_8c_a807a2ec3eb617c7377de2182752d580c}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C@{S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C}}
+\index{S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C@{S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-fastcgi\-\_\-handle\-\_\-subrequest}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__fastcgi_8c_a807a2ec3eb617c7377de2182752d580c}
+
+
+References chunkqueue\-::bytes\-\_\-in, chunkqueue\-::bytes\-\_\-out, chunkqueue\-\_\-is\-\_\-empty(), chunkqueue\-\_\-length(), C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-A\-D\-\_\-\-P\-O\-S\-T, connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-error(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-state(), server\-::ev, F\-C\-G\-I\-\_\-\-A\-U\-T\-H\-O\-R\-I\-Z\-E\-R, handler\-\_\-ctx\-::fcgi\-\_\-mode, fcgi\-\_\-recv\-\_\-response(), fcgi\-\_\-send\-\_\-request(), F\-C\-G\-I\-\_\-\-S\-T\-A\-T\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T\-\_\-\-D\-E\-L\-A\-Y\-E\-D, fcgi\-\_\-stdin\-\_\-append(), handler\-\_\-ctx\-::fd, handler\-\_\-ctx\-::fde\-\_\-ndx, fdevent\-\_\-event\-\_\-clr(), fdevent\-\_\-event\-\_\-get\-\_\-interest, F\-D\-E\-V\-E\-N\-T\-\_\-\-I\-N, F\-D\-E\-V\-E\-N\-T\-\_\-\-O\-U\-T, F\-D\-E\-V\-E\-N\-T\-\_\-\-S\-T\-R\-E\-A\-M\-\_\-\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-B\-U\-F\-M\-I\-N, F\-D\-E\-V\-E\-N\-T\-\_\-\-S\-T\-R\-E\-A\-M\-\_\-\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-P\-O\-L\-L\-I\-N, F\-D\-E\-V\-E\-N\-T\-\_\-\-S\-T\-R\-E\-A\-M\-\_\-\-R\-E\-S\-P\-O\-N\-S\-E\-\_\-\-B\-U\-F\-M\-I\-N, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, H\-A\-N\-D\-L\-E\-R\-\_\-\-W\-A\-I\-T\-\_\-\-F\-O\-R\-\_\-\-E\-V\-E\-N\-T, handler\-\_\-ctx\-::request\-\_\-id, handler\-\_\-ctx\-::state, handler\-\_\-ctx\-::wb, and handler\-\_\-ctx\-::wb\-\_\-reqlen.
+
+\hypertarget{mod__fastcgi_8c_aa5b72764ba2faa5571774762eccf9100}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C@{T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C}}
+\index{T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C@{T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-fastcgi\-\_\-handle\-\_\-trigger}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__fastcgi_8c_aa5b72764ba2faa5571774762eccf9100}
+
+
+References fcgi\-\_\-extension\-\_\-host\-::active\-\_\-procs, server\-::config\-\_\-context, plugin\-\_\-data\-::config\-\_\-storage, fcgi\-\_\-proc\-::connection\-\_\-name, fcgi\-\_\-exts\-::exts, plugin\-\_\-config\-::exts, fcgi\-\_\-restart\-\_\-dead\-\_\-procs(), fcgi\-\_\-extension\-\_\-host\-::first, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, fcgi\-\_\-extension\-::hosts, log\-\_\-error\-\_\-write(), fcgi\-\_\-extension\-\_\-host\-::max\-\_\-id, fcgi\-\_\-proc\-::next, fcgi\-\_\-proc\-::pid, fcgi\-\_\-proc\-::state, fcgi\-\_\-extension\-\_\-host\-::unused\-\_\-procs, array\-::used, fcgi\-\_\-extension\-::used, and fcgi\-\_\-exts\-::used.
+
+\hypertarget{mod__fastcgi_8c_a14d8409b42462b44a3f035a512d1b730}{\index{mod\-\_\-fastcgi.\-c@{mod\-\_\-fastcgi.\-c}!unixsocket\-\_\-is\-\_\-dup@{unixsocket\-\_\-is\-\_\-dup}}
+\index{unixsocket\-\_\-is\-\_\-dup@{unixsocket\-\_\-is\-\_\-dup}!mod_fastcgi.c@{mod\-\_\-fastcgi.\-c}}
+\subsubsection[{unixsocket\-\_\-is\-\_\-dup}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf fcgi\-\_\-extension\-\_\-host}$\ast$ unixsocket\-\_\-is\-\_\-dup (
+\begin{DoxyParamCaption}
+\item[{{\bf plugin\-\_\-data} $\ast$}]{p, }
+\item[{size\-\_\-t}]{used, }
+\item[{{\bf buffer} $\ast$}]{unixsocket}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__fastcgi_8c_a14d8409b42462b44a3f035a512d1b730}
+
+
+References fcgi\-\_\-extension\-\_\-host\-::bin\-\_\-path, buffer\-\_\-is\-\_\-equal(), buffer\-\_\-string\-\_\-is\-\_\-empty(), plugin\-\_\-data\-::config\-\_\-storage, fcgi\-\_\-exts\-::exts, plugin\-\_\-config\-::exts, fcgi\-\_\-extension\-::hosts, fcgi\-\_\-extension\-\_\-host\-::unixsocket, fcgi\-\_\-extension\-::used, and fcgi\-\_\-exts\-::used.
+
+
+
+Referenced by S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+

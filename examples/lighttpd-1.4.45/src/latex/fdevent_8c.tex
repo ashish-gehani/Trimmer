@@ -1,0 +1,536 @@
+\hypertarget{fdevent_8c}{\section{fdevent.\-c File Reference}
+\label{fdevent_8c}\index{fdevent.\-c@{fdevent.\-c}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}base.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}log.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$sys/types.\-h$>$}\\*
+{\ttfamily \#include $<$unistd.\-h$>$}\\*
+{\ttfamily \#include $<$stdlib.\-h$>$}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+{\ttfamily \#include $<$errno.\-h$>$}\\*
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$fcntl.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include $<$netinet/tcp.\-h$>$}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{fdevent_8c_a2e375ab32c7ef4581b026be28e4cc116}{O\-\_\-\-N\-O\-C\-T\-T\-Y}~0
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{structfdevents}{fdevents} $\ast$ \hyperlink{fdevent_8c_a7b944c9c20e7cbb6e8c5382a3b84abb7}{fdevent\-\_\-init} (\hyperlink{structserver}{server} $\ast$srv, size\-\_\-t maxfds, \hyperlink{fdevent_8h_a7a31a5c15ba485676406291b6298e9a1}{fdevent\-\_\-handler\-\_\-t} type)
+\item 
+void \hyperlink{fdevent_8c_a07c5f9447d37ab08debd3706278d6b26}{fdevent\-\_\-free} (\hyperlink{structfdevents}{fdevents} $\ast$ev)
+\item 
+int \hyperlink{fdevent_8c_aeaed331ce8541b3a7a2dc919fbb1d506}{fdevent\-\_\-reset} (\hyperlink{structfdevents}{fdevents} $\ast$ev)
+\item 
+static \hyperlink{fdevent_8h_af5298a6dd5999718aa2721646fe31949}{fdnode} $\ast$ \hyperlink{fdevent_8c_aa9b1cf8338ab82663349871949f9c1d7}{fdnode\-\_\-init} (void)
+\item 
+static void \hyperlink{fdevent_8c_a7825804c884edd24b106b3844e32a508}{fdnode\-\_\-free} (\hyperlink{fdevent_8h_af5298a6dd5999718aa2721646fe31949}{fdnode} $\ast$fdn)
+\item 
+int \hyperlink{fdevent_8c_a5da3b3f6a7a52ade98e901b48e095e74}{fdevent\-\_\-register} (\hyperlink{structfdevents}{fdevents} $\ast$ev, int fd, \hyperlink{fdevent_8h_a3897a2cae3216b96b6845a004b9816e9}{fdevent\-\_\-handler} handler, void $\ast$ctx)
+\item 
+int \hyperlink{fdevent_8c_ac9823cbb89183168d2dd9210b4ca6e22}{fdevent\-\_\-unregister} (\hyperlink{structfdevents}{fdevents} $\ast$ev, int fd)
+\item 
+void \hyperlink{fdevent_8c_aa1e7289917dd222472707226c2cf44f6}{fdevent\-\_\-sched\-\_\-close} (\hyperlink{structfdevents}{fdevents} $\ast$ev, int fd, int issock)
+\item 
+void \hyperlink{fdevent_8c_ac543e614439f59dd0d6b115ac1c8895b}{fdevent\-\_\-sched\-\_\-run} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structfdevents}{fdevents} $\ast$ev)
+\item 
+void \hyperlink{fdevent_8c_a8d9b05f2e64f6f0618e28c5d7be40650}{fdevent\-\_\-event\-\_\-del} (\hyperlink{structfdevents}{fdevents} $\ast$ev, int $\ast$fde\-\_\-ndx, int fd)
+\item 
+void \hyperlink{fdevent_8c_a5789a3adb58d51814daf41900892aa84}{fdevent\-\_\-event\-\_\-set} (\hyperlink{structfdevents}{fdevents} $\ast$ev, int $\ast$fde\-\_\-ndx, int fd, int events)
+\item 
+void \hyperlink{fdevent_8c_a16d51368a0d1bbebb47e2f04c81badc6}{fdevent\-\_\-event\-\_\-add} (\hyperlink{structfdevents}{fdevents} $\ast$ev, int $\ast$fde\-\_\-ndx, int fd, int event)
+\item 
+void \hyperlink{fdevent_8c_a9a1ceac49478035c650b13f484401301}{fdevent\-\_\-event\-\_\-clr} (\hyperlink{structfdevents}{fdevents} $\ast$ev, int $\ast$fde\-\_\-ndx, int fd, int event)
+\item 
+int \hyperlink{fdevent_8c_add6dc67eb7cdf678cc979dcddd67abf6}{fdevent\-\_\-poll} (\hyperlink{structfdevents}{fdevents} $\ast$ev, int timeout\-\_\-ms)
+\item 
+int \hyperlink{fdevent_8c_affe7e75729b9699fb3e6b4a2c6970b3f}{fdevent\-\_\-event\-\_\-get\-\_\-revent} (\hyperlink{structfdevents}{fdevents} $\ast$ev, size\-\_\-t ndx)
+\item 
+int \hyperlink{fdevent_8c_a3f8de76bb5cddbb987b539b82ac20cce}{fdevent\-\_\-event\-\_\-get\-\_\-fd} (\hyperlink{structfdevents}{fdevents} $\ast$ev, size\-\_\-t ndx)
+\item 
+\hyperlink{fdevent_8h_a3897a2cae3216b96b6845a004b9816e9}{fdevent\-\_\-handler} \hyperlink{fdevent_8c_aa44e9207be7c936ad5ff43f08e06090b}{fdevent\-\_\-get\-\_\-handler} (\hyperlink{structfdevents}{fdevents} $\ast$ev, int fd)
+\item 
+void $\ast$ \hyperlink{fdevent_8c_a677a4b82a4ff9612ce040475ec8f6bce}{fdevent\-\_\-get\-\_\-context} (\hyperlink{structfdevents}{fdevents} $\ast$ev, int fd)
+\item 
+void \hyperlink{fdevent_8c_ae4766c1a8c07aabe1900324dac356351}{fd\-\_\-close\-\_\-on\-\_\-exec} (int fd)
+\item 
+int \hyperlink{fdevent_8c_ab26212fd656d2f9754da653d3b1af620}{fdevent\-\_\-fcntl\-\_\-set} (\hyperlink{structfdevents}{fdevents} $\ast$ev, int fd)
+\item 
+int \hyperlink{fdevent_8c_a9fc722e77205f196304cea62e1c89e06}{fdevent\-\_\-fcntl\-\_\-set\-\_\-nb} (\hyperlink{structfdevents}{fdevents} $\ast$ev, int fd)
+\item 
+int \hyperlink{fdevent_8c_a1c9bd820ac741a1fe6be84e28614ff83}{fdevent\-\_\-fcntl\-\_\-set\-\_\-nb\-\_\-cloexec} (\hyperlink{structfdevents}{fdevents} $\ast$ev, int fd)
+\item 
+int \hyperlink{fdevent_8c_a1514575e2cb225e389e6846563fd351f}{fdevent\-\_\-fcntl\-\_\-set\-\_\-nb\-\_\-cloexec\-\_\-sock} (\hyperlink{structfdevents}{fdevents} $\ast$ev, int fd)
+\item 
+int \hyperlink{fdevent_8c_a7066dbb073c5c9a688cd941fac349ede}{fdevent\-\_\-socket\-\_\-cloexec} (int domain, int type, int protocol)
+\item 
+int \hyperlink{fdevent_8c_a816a2de874f14c785d6fb3fe2477c43c}{fdevent\-\_\-socket\-\_\-nb\-\_\-cloexec} (int domain, int type, int protocol)
+\item 
+int \hyperlink{fdevent_8c_ab6119131ab1b10cf653ef7ecb91b9684}{fdevent\-\_\-open\-\_\-cloexec} (const char $\ast$pathname, int flags, mode\-\_\-t mode)
+\item 
+int \hyperlink{fdevent_8c_a0e99500fff0313e55ad7c11fb532d4f7}{fdevent\-\_\-event\-\_\-next\-\_\-fdndx} (\hyperlink{structfdevents}{fdevents} $\ast$ev, int ndx)
+\item 
+int \hyperlink{fdevent_8c_adc447f331c3888991727d6e9906da533}{fdevent\-\_\-is\-\_\-tcp\-\_\-half\-\_\-closed} (int fd)
+\end{DoxyCompactItemize}
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{fdevent_8c_a2e375ab32c7ef4581b026be28e4cc116}{\index{fdevent.\-c@{fdevent.\-c}!O\-\_\-\-N\-O\-C\-T\-T\-Y@{O\-\_\-\-N\-O\-C\-T\-T\-Y}}
+\index{O\-\_\-\-N\-O\-C\-T\-T\-Y@{O\-\_\-\-N\-O\-C\-T\-T\-Y}!fdevent.c@{fdevent.\-c}}
+\subsubsection[{O\-\_\-\-N\-O\-C\-T\-T\-Y}]{\setlength{\rightskip}{0pt plus 5cm}\#define O\-\_\-\-N\-O\-C\-T\-T\-Y~0}}\label{fdevent_8c_a2e375ab32c7ef4581b026be28e4cc116}
+
+
+Referenced by fdevent\-\_\-open\-\_\-cloexec().
+
+
+
+\subsection{Function Documentation}
+\hypertarget{fdevent_8c_ae4766c1a8c07aabe1900324dac356351}{\index{fdevent.\-c@{fdevent.\-c}!fd\-\_\-close\-\_\-on\-\_\-exec@{fd\-\_\-close\-\_\-on\-\_\-exec}}
+\index{fd\-\_\-close\-\_\-on\-\_\-exec@{fd\-\_\-close\-\_\-on\-\_\-exec}!fdevent.c@{fdevent.\-c}}
+\subsubsection[{fd\-\_\-close\-\_\-on\-\_\-exec}]{\setlength{\rightskip}{0pt plus 5cm}void fd\-\_\-close\-\_\-on\-\_\-exec (
+\begin{DoxyParamCaption}
+\item[{int}]{fd}
+\end{DoxyParamCaption}
+)}}\label{fdevent_8c_ae4766c1a8c07aabe1900324dac356351}
+
+
+Referenced by chunkqueue\-\_\-get\-\_\-append\-\_\-tempfile(), fdevent\-\_\-fcntl\-\_\-set\-\_\-nb\-\_\-cloexec(), log\-\_\-error\-\_\-cycle(), log\-\_\-error\-\_\-open(), main(), mod\-\_\-rrd\-\_\-create\-\_\-pipe(), open\-\_\-logfile\-\_\-or\-\_\-pipe(), S\-E\-R\-V\-E\-R\-\_\-\-F\-U\-N\-C(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{fdevent_8c_a16d51368a0d1bbebb47e2f04c81badc6}{\index{fdevent.\-c@{fdevent.\-c}!fdevent\-\_\-event\-\_\-add@{fdevent\-\_\-event\-\_\-add}}
+\index{fdevent\-\_\-event\-\_\-add@{fdevent\-\_\-event\-\_\-add}!fdevent.c@{fdevent.\-c}}
+\subsubsection[{fdevent\-\_\-event\-\_\-add}]{\setlength{\rightskip}{0pt plus 5cm}void fdevent\-\_\-event\-\_\-add (
+\begin{DoxyParamCaption}
+\item[{{\bf fdevents} $\ast$}]{ev, }
+\item[{int $\ast$}]{fde\-\_\-ndx, }
+\item[{int}]{fd, }
+\item[{int}]{event}
+\end{DoxyParamCaption}
+)}}\label{fdevent_8c_a16d51368a0d1bbebb47e2f04c81badc6}
+
+
+References fdevents\-::event\-\_\-set, \-\_\-fdnode\-::events, and fdevents\-::fdarray.
+
+
+
+Referenced by cgi\-\_\-demux\-\_\-response(), fcgi\-\_\-demux\-\_\-response(), fcgi\-\_\-write\-\_\-request(), proxy\-\_\-demux\-\_\-response(), proxy\-\_\-write\-\_\-request(), scgi\-\_\-demux\-\_\-response(), and scgi\-\_\-write\-\_\-request().
+
+\hypertarget{fdevent_8c_a9a1ceac49478035c650b13f484401301}{\index{fdevent.\-c@{fdevent.\-c}!fdevent\-\_\-event\-\_\-clr@{fdevent\-\_\-event\-\_\-clr}}
+\index{fdevent\-\_\-event\-\_\-clr@{fdevent\-\_\-event\-\_\-clr}!fdevent.c@{fdevent.\-c}}
+\subsubsection[{fdevent\-\_\-event\-\_\-clr}]{\setlength{\rightskip}{0pt plus 5cm}void fdevent\-\_\-event\-\_\-clr (
+\begin{DoxyParamCaption}
+\item[{{\bf fdevents} $\ast$}]{ev, }
+\item[{int $\ast$}]{fde\-\_\-ndx, }
+\item[{int}]{fd, }
+\item[{int}]{event}
+\end{DoxyParamCaption}
+)}}\label{fdevent_8c_a9a1ceac49478035c650b13f484401301}
+
+
+References fdevents\-::event\-\_\-set, \-\_\-fdnode\-::events, and fdevents\-::fdarray.
+
+
+
+Referenced by cgi\-\_\-demux\-\_\-response(), fcgi\-\_\-demux\-\_\-response(), fcgi\-\_\-write\-\_\-request(), proxy\-\_\-demux\-\_\-response(), proxy\-\_\-write\-\_\-request(), scgi\-\_\-demux\-\_\-response(), scgi\-\_\-write\-\_\-request(), and S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{fdevent_8c_a8d9b05f2e64f6f0618e28c5d7be40650}{\index{fdevent.\-c@{fdevent.\-c}!fdevent\-\_\-event\-\_\-del@{fdevent\-\_\-event\-\_\-del}}
+\index{fdevent\-\_\-event\-\_\-del@{fdevent\-\_\-event\-\_\-del}!fdevent.c@{fdevent.\-c}}
+\subsubsection[{fdevent\-\_\-event\-\_\-del}]{\setlength{\rightskip}{0pt plus 5cm}void fdevent\-\_\-event\-\_\-del (
+\begin{DoxyParamCaption}
+\item[{{\bf fdevents} $\ast$}]{ev, }
+\item[{int $\ast$}]{fde\-\_\-ndx, }
+\item[{int}]{fd}
+\end{DoxyParamCaption}
+)}}\label{fdevent_8c_a8d9b05f2e64f6f0618e28c5d7be40650}
+
+
+References fdevents\-::event\-\_\-del, \-\_\-fdnode\-::events, and fdevents\-::fdarray.
+
+
+
+Referenced by cgi\-\_\-connection\-\_\-close(), cgi\-\_\-connection\-\_\-close\-\_\-fdtocgi(), connection\-\_\-close(), fcgi\-\_\-backend\-\_\-close(), main(), network\-\_\-close(), network\-\_\-server\-\_\-init(), proxy\-\_\-backend\-\_\-close(), and scgi\-\_\-backend\-\_\-close().
+
+\hypertarget{fdevent_8c_a3f8de76bb5cddbb987b539b82ac20cce}{\index{fdevent.\-c@{fdevent.\-c}!fdevent\-\_\-event\-\_\-get\-\_\-fd@{fdevent\-\_\-event\-\_\-get\-\_\-fd}}
+\index{fdevent\-\_\-event\-\_\-get\-\_\-fd@{fdevent\-\_\-event\-\_\-get\-\_\-fd}!fdevent.c@{fdevent.\-c}}
+\subsubsection[{fdevent\-\_\-event\-\_\-get\-\_\-fd}]{\setlength{\rightskip}{0pt plus 5cm}int fdevent\-\_\-event\-\_\-get\-\_\-fd (
+\begin{DoxyParamCaption}
+\item[{{\bf fdevents} $\ast$}]{ev, }
+\item[{size\-\_\-t}]{ndx}
+\end{DoxyParamCaption}
+)}}\label{fdevent_8c_a3f8de76bb5cddbb987b539b82ac20cce}
+
+
+References fdevents\-::event\-\_\-get\-\_\-fd, and S\-E\-G\-F\-A\-U\-L\-T.
+
+
+
+Referenced by main().
+
+\hypertarget{fdevent_8c_affe7e75729b9699fb3e6b4a2c6970b3f}{\index{fdevent.\-c@{fdevent.\-c}!fdevent\-\_\-event\-\_\-get\-\_\-revent@{fdevent\-\_\-event\-\_\-get\-\_\-revent}}
+\index{fdevent\-\_\-event\-\_\-get\-\_\-revent@{fdevent\-\_\-event\-\_\-get\-\_\-revent}!fdevent.c@{fdevent.\-c}}
+\subsubsection[{fdevent\-\_\-event\-\_\-get\-\_\-revent}]{\setlength{\rightskip}{0pt plus 5cm}int fdevent\-\_\-event\-\_\-get\-\_\-revent (
+\begin{DoxyParamCaption}
+\item[{{\bf fdevents} $\ast$}]{ev, }
+\item[{size\-\_\-t}]{ndx}
+\end{DoxyParamCaption}
+)}}\label{fdevent_8c_affe7e75729b9699fb3e6b4a2c6970b3f}
+
+
+References fdevents\-::event\-\_\-get\-\_\-revent, and S\-E\-G\-F\-A\-U\-L\-T.
+
+
+
+Referenced by main().
+
+\hypertarget{fdevent_8c_a0e99500fff0313e55ad7c11fb532d4f7}{\index{fdevent.\-c@{fdevent.\-c}!fdevent\-\_\-event\-\_\-next\-\_\-fdndx@{fdevent\-\_\-event\-\_\-next\-\_\-fdndx}}
+\index{fdevent\-\_\-event\-\_\-next\-\_\-fdndx@{fdevent\-\_\-event\-\_\-next\-\_\-fdndx}!fdevent.c@{fdevent.\-c}}
+\subsubsection[{fdevent\-\_\-event\-\_\-next\-\_\-fdndx}]{\setlength{\rightskip}{0pt plus 5cm}int fdevent\-\_\-event\-\_\-next\-\_\-fdndx (
+\begin{DoxyParamCaption}
+\item[{{\bf fdevents} $\ast$}]{ev, }
+\item[{int}]{ndx}
+\end{DoxyParamCaption}
+)}}\label{fdevent_8c_a0e99500fff0313e55ad7c11fb532d4f7}
+
+
+References fdevents\-::event\-\_\-next\-\_\-fdndx.
+
+
+
+Referenced by main().
+
+\hypertarget{fdevent_8c_a5789a3adb58d51814daf41900892aa84}{\index{fdevent.\-c@{fdevent.\-c}!fdevent\-\_\-event\-\_\-set@{fdevent\-\_\-event\-\_\-set}}
+\index{fdevent\-\_\-event\-\_\-set@{fdevent\-\_\-event\-\_\-set}!fdevent.c@{fdevent.\-c}}
+\subsubsection[{fdevent\-\_\-event\-\_\-set}]{\setlength{\rightskip}{0pt plus 5cm}void fdevent\-\_\-event\-\_\-set (
+\begin{DoxyParamCaption}
+\item[{{\bf fdevents} $\ast$}]{ev, }
+\item[{int $\ast$}]{fde\-\_\-ndx, }
+\item[{int}]{fd, }
+\item[{int}]{events}
+\end{DoxyParamCaption}
+)}}\label{fdevent_8c_a5789a3adb58d51814daf41900892aa84}
+
+
+References fdevents\-::event\-\_\-set, \-\_\-fdnode\-::events, and fdevents\-::fdarray.
+
+
+
+Referenced by cgi\-\_\-create\-\_\-env(), cgi\-\_\-write\-\_\-request(), connection\-\_\-state\-\_\-machine(), fcgi\-\_\-write\-\_\-request(), main(), network\-\_\-register\-\_\-fdevents(), proxy\-\_\-write\-\_\-request(), and scgi\-\_\-write\-\_\-request().
+
+\hypertarget{fdevent_8c_ab26212fd656d2f9754da653d3b1af620}{\index{fdevent.\-c@{fdevent.\-c}!fdevent\-\_\-fcntl\-\_\-set@{fdevent\-\_\-fcntl\-\_\-set}}
+\index{fdevent\-\_\-fcntl\-\_\-set@{fdevent\-\_\-fcntl\-\_\-set}!fdevent.c@{fdevent.\-c}}
+\subsubsection[{fdevent\-\_\-fcntl\-\_\-set}]{\setlength{\rightskip}{0pt plus 5cm}int fdevent\-\_\-fcntl\-\_\-set (
+\begin{DoxyParamCaption}
+\item[{{\bf fdevents} $\ast$}]{ev, }
+\item[{int}]{fd}
+\end{DoxyParamCaption}
+)}}\label{fdevent_8c_ab26212fd656d2f9754da653d3b1af620}
+
+
+References fdevents\-::fcntl\-\_\-set.
+
+
+
+Referenced by fcgi\-\_\-write\-\_\-request(), proxy\-\_\-write\-\_\-request(), and scgi\-\_\-write\-\_\-request().
+
+\hypertarget{fdevent_8c_a9fc722e77205f196304cea62e1c89e06}{\index{fdevent.\-c@{fdevent.\-c}!fdevent\-\_\-fcntl\-\_\-set\-\_\-nb@{fdevent\-\_\-fcntl\-\_\-set\-\_\-nb}}
+\index{fdevent\-\_\-fcntl\-\_\-set\-\_\-nb@{fdevent\-\_\-fcntl\-\_\-set\-\_\-nb}!fdevent.c@{fdevent.\-c}}
+\subsubsection[{fdevent\-\_\-fcntl\-\_\-set\-\_\-nb}]{\setlength{\rightskip}{0pt plus 5cm}int fdevent\-\_\-fcntl\-\_\-set\-\_\-nb (
+\begin{DoxyParamCaption}
+\item[{{\bf fdevents} $\ast$}]{ev, }
+\item[{int}]{fd}
+\end{DoxyParamCaption}
+)}}\label{fdevent_8c_a9fc722e77205f196304cea62e1c89e06}
+
+
+References fdevents\-::fcntl\-\_\-set, and O\-\_\-\-N\-O\-N\-B\-L\-O\-C\-K.
+
+
+
+Referenced by cgi\-\_\-create\-\_\-env(), fdevent\-\_\-fcntl\-\_\-set\-\_\-nb\-\_\-cloexec(), and network\-\_\-server\-\_\-init().
+
+\hypertarget{fdevent_8c_a1c9bd820ac741a1fe6be84e28614ff83}{\index{fdevent.\-c@{fdevent.\-c}!fdevent\-\_\-fcntl\-\_\-set\-\_\-nb\-\_\-cloexec@{fdevent\-\_\-fcntl\-\_\-set\-\_\-nb\-\_\-cloexec}}
+\index{fdevent\-\_\-fcntl\-\_\-set\-\_\-nb\-\_\-cloexec@{fdevent\-\_\-fcntl\-\_\-set\-\_\-nb\-\_\-cloexec}!fdevent.c@{fdevent.\-c}}
+\subsubsection[{fdevent\-\_\-fcntl\-\_\-set\-\_\-nb\-\_\-cloexec}]{\setlength{\rightskip}{0pt plus 5cm}int fdevent\-\_\-fcntl\-\_\-set\-\_\-nb\-\_\-cloexec (
+\begin{DoxyParamCaption}
+\item[{{\bf fdevents} $\ast$}]{ev, }
+\item[{int}]{fd}
+\end{DoxyParamCaption}
+)}}\label{fdevent_8c_a1c9bd820ac741a1fe6be84e28614ff83}
+
+
+References fd\-\_\-close\-\_\-on\-\_\-exec(), and fdevent\-\_\-fcntl\-\_\-set\-\_\-nb().
+
+
+
+Referenced by fdevent\-\_\-fcntl\-\_\-set\-\_\-nb\-\_\-cloexec\-\_\-sock().
+
+\hypertarget{fdevent_8c_a1514575e2cb225e389e6846563fd351f}{\index{fdevent.\-c@{fdevent.\-c}!fdevent\-\_\-fcntl\-\_\-set\-\_\-nb\-\_\-cloexec\-\_\-sock@{fdevent\-\_\-fcntl\-\_\-set\-\_\-nb\-\_\-cloexec\-\_\-sock}}
+\index{fdevent\-\_\-fcntl\-\_\-set\-\_\-nb\-\_\-cloexec\-\_\-sock@{fdevent\-\_\-fcntl\-\_\-set\-\_\-nb\-\_\-cloexec\-\_\-sock}!fdevent.c@{fdevent.\-c}}
+\subsubsection[{fdevent\-\_\-fcntl\-\_\-set\-\_\-nb\-\_\-cloexec\-\_\-sock}]{\setlength{\rightskip}{0pt plus 5cm}int fdevent\-\_\-fcntl\-\_\-set\-\_\-nb\-\_\-cloexec\-\_\-sock (
+\begin{DoxyParamCaption}
+\item[{{\bf fdevents} $\ast$}]{ev, }
+\item[{int}]{fd}
+\end{DoxyParamCaption}
+)}}\label{fdevent_8c_a1514575e2cb225e389e6846563fd351f}
+
+
+References fdevents\-::fcntl\-\_\-set, and fdevent\-\_\-fcntl\-\_\-set\-\_\-nb\-\_\-cloexec().
+
+
+
+Referenced by connection\-\_\-accepted(), and main().
+
+\hypertarget{fdevent_8c_a07c5f9447d37ab08debd3706278d6b26}{\index{fdevent.\-c@{fdevent.\-c}!fdevent\-\_\-free@{fdevent\-\_\-free}}
+\index{fdevent\-\_\-free@{fdevent\-\_\-free}!fdevent.c@{fdevent.\-c}}
+\subsubsection[{fdevent\-\_\-free}]{\setlength{\rightskip}{0pt plus 5cm}void fdevent\-\_\-free (
+\begin{DoxyParamCaption}
+\item[{{\bf fdevents} $\ast$}]{ev}
+\end{DoxyParamCaption}
+)}}\label{fdevent_8c_a07c5f9447d37ab08debd3706278d6b26}
+
+
+References fdevents\-::fdarray, fdevents\-::free, and fdevents\-::maxfds.
+
+
+
+Referenced by server\-\_\-free().
+
+\hypertarget{fdevent_8c_a677a4b82a4ff9612ce040475ec8f6bce}{\index{fdevent.\-c@{fdevent.\-c}!fdevent\-\_\-get\-\_\-context@{fdevent\-\_\-get\-\_\-context}}
+\index{fdevent\-\_\-get\-\_\-context@{fdevent\-\_\-get\-\_\-context}!fdevent.c@{fdevent.\-c}}
+\subsubsection[{fdevent\-\_\-get\-\_\-context}]{\setlength{\rightskip}{0pt plus 5cm}void$\ast$ fdevent\-\_\-get\-\_\-context (
+\begin{DoxyParamCaption}
+\item[{{\bf fdevents} $\ast$}]{ev, }
+\item[{int}]{fd}
+\end{DoxyParamCaption}
+)}}\label{fdevent_8c_a677a4b82a4ff9612ce040475ec8f6bce}
+
+
+References \-\_\-fdnode\-::ctx, \-\_\-fdnode\-::fd, fdevents\-::fdarray, and S\-E\-G\-F\-A\-U\-L\-T.
+
+
+
+Referenced by main().
+
+\hypertarget{fdevent_8c_aa44e9207be7c936ad5ff43f08e06090b}{\index{fdevent.\-c@{fdevent.\-c}!fdevent\-\_\-get\-\_\-handler@{fdevent\-\_\-get\-\_\-handler}}
+\index{fdevent\-\_\-get\-\_\-handler@{fdevent\-\_\-get\-\_\-handler}!fdevent.c@{fdevent.\-c}}
+\subsubsection[{fdevent\-\_\-get\-\_\-handler}]{\setlength{\rightskip}{0pt plus 5cm}{\bf fdevent\-\_\-handler} fdevent\-\_\-get\-\_\-handler (
+\begin{DoxyParamCaption}
+\item[{{\bf fdevents} $\ast$}]{ev, }
+\item[{int}]{fd}
+\end{DoxyParamCaption}
+)}}\label{fdevent_8c_aa44e9207be7c936ad5ff43f08e06090b}
+
+
+References \-\_\-fdnode\-::fd, fdevents\-::fdarray, \-\_\-fdnode\-::handler, and S\-E\-G\-F\-A\-U\-L\-T.
+
+
+
+Referenced by main().
+
+\hypertarget{fdevent_8c_a7b944c9c20e7cbb6e8c5382a3b84abb7}{\index{fdevent.\-c@{fdevent.\-c}!fdevent\-\_\-init@{fdevent\-\_\-init}}
+\index{fdevent\-\_\-init@{fdevent\-\_\-init}!fdevent.c@{fdevent.\-c}}
+\subsubsection[{fdevent\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}{\bf fdevents}$\ast$ fdevent\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{size\-\_\-t}]{maxfds, }
+\item[{{\bf fdevent\-\_\-handler\-\_\-t}}]{type}
+\end{DoxyParamCaption}
+)}}\label{fdevent_8c_a7b944c9c20e7cbb6e8c5382a3b84abb7}
+
+
+References fdevents\-::fdarray, fdevent\-\_\-freebsd\-\_\-kqueue\-\_\-init(), F\-D\-E\-V\-E\-N\-T\-\_\-\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-R\-E\-E\-B\-S\-D\-\_\-\-K\-Q\-U\-E\-U\-E, F\-D\-E\-V\-E\-N\-T\-\_\-\-H\-A\-N\-D\-L\-E\-R\-\_\-\-L\-I\-B\-E\-V, F\-D\-E\-V\-E\-N\-T\-\_\-\-H\-A\-N\-D\-L\-E\-R\-\_\-\-L\-I\-N\-U\-X\-\_\-\-S\-Y\-S\-E\-P\-O\-L\-L, F\-D\-E\-V\-E\-N\-T\-\_\-\-H\-A\-N\-D\-L\-E\-R\-\_\-\-P\-O\-L\-L, F\-D\-E\-V\-E\-N\-T\-\_\-\-H\-A\-N\-D\-L\-E\-R\-\_\-\-S\-E\-L\-E\-C\-T, F\-D\-E\-V\-E\-N\-T\-\_\-\-H\-A\-N\-D\-L\-E\-R\-\_\-\-S\-O\-L\-A\-R\-I\-S\-\_\-\-D\-E\-V\-P\-O\-L\-L, F\-D\-E\-V\-E\-N\-T\-\_\-\-H\-A\-N\-D\-L\-E\-R\-\_\-\-S\-O\-L\-A\-R\-I\-S\-\_\-\-P\-O\-R\-T, F\-D\-E\-V\-E\-N\-T\-\_\-\-H\-A\-N\-D\-L\-E\-R\-\_\-\-U\-N\-S\-E\-T, fdevent\-\_\-libev\-\_\-init(), fdevent\-\_\-linux\-\_\-sysepoll\-\_\-init(), fdevent\-\_\-poll\-\_\-init(), fdevent\-\_\-select\-\_\-init(), fdevent\-\_\-solaris\-\_\-devpoll\-\_\-init(), fdevent\-\_\-solaris\-\_\-port\-\_\-init(), force\-\_\-assert, fdevents\-::highfd, log\-\_\-error\-\_\-write(), fdevents\-::maxfds, and fdevents\-::srv.
+
+
+
+Referenced by main().
+
+\hypertarget{fdevent_8c_adc447f331c3888991727d6e9906da533}{\index{fdevent.\-c@{fdevent.\-c}!fdevent\-\_\-is\-\_\-tcp\-\_\-half\-\_\-closed@{fdevent\-\_\-is\-\_\-tcp\-\_\-half\-\_\-closed}}
+\index{fdevent\-\_\-is\-\_\-tcp\-\_\-half\-\_\-closed@{fdevent\-\_\-is\-\_\-tcp\-\_\-half\-\_\-closed}!fdevent.c@{fdevent.\-c}}
+\subsubsection[{fdevent\-\_\-is\-\_\-tcp\-\_\-half\-\_\-closed}]{\setlength{\rightskip}{0pt plus 5cm}int fdevent\-\_\-is\-\_\-tcp\-\_\-half\-\_\-closed (
+\begin{DoxyParamCaption}
+\item[{int}]{fd}
+\end{DoxyParamCaption}
+)}}\label{fdevent_8c_adc447f331c3888991727d6e9906da533}
+
+
+References U\-N\-U\-S\-E\-D.
+
+
+
+Referenced by connection\-\_\-handle\-\_\-fdevent().
+
+\hypertarget{fdevent_8c_ab6119131ab1b10cf653ef7ecb91b9684}{\index{fdevent.\-c@{fdevent.\-c}!fdevent\-\_\-open\-\_\-cloexec@{fdevent\-\_\-open\-\_\-cloexec}}
+\index{fdevent\-\_\-open\-\_\-cloexec@{fdevent\-\_\-open\-\_\-cloexec}!fdevent.c@{fdevent.\-c}}
+\subsubsection[{fdevent\-\_\-open\-\_\-cloexec}]{\setlength{\rightskip}{0pt plus 5cm}int fdevent\-\_\-open\-\_\-cloexec (
+\begin{DoxyParamCaption}
+\item[{const char $\ast$}]{pathname, }
+\item[{int}]{flags, }
+\item[{mode\-\_\-t}]{mode}
+\end{DoxyParamCaption}
+)}}\label{fdevent_8c_ab6119131ab1b10cf653ef7ecb91b9684}
+
+
+References O\-\_\-\-N\-O\-C\-T\-T\-Y.
+
+
+
+Referenced by cgi\-\_\-write\-\_\-file\-\_\-chunk\-\_\-mmap(), li\-\_\-rand\-\_\-device\-\_\-bytes(), main(), mod\-\_\-deflate\-\_\-file\-\_\-chunk(), network\-\_\-open\-\_\-file\-\_\-chunk(), and S\-I\-G\-H\-U\-P\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{fdevent_8c_add6dc67eb7cdf678cc979dcddd67abf6}{\index{fdevent.\-c@{fdevent.\-c}!fdevent\-\_\-poll@{fdevent\-\_\-poll}}
+\index{fdevent\-\_\-poll@{fdevent\-\_\-poll}!fdevent.c@{fdevent.\-c}}
+\subsubsection[{fdevent\-\_\-poll}]{\setlength{\rightskip}{0pt plus 5cm}int fdevent\-\_\-poll (
+\begin{DoxyParamCaption}
+\item[{{\bf fdevents} $\ast$}]{ev, }
+\item[{int}]{timeout\-\_\-ms}
+\end{DoxyParamCaption}
+)}}\label{fdevent_8c_add6dc67eb7cdf678cc979dcddd67abf6}
+
+
+References fdevents\-::poll, and S\-E\-G\-F\-A\-U\-L\-T.
+
+
+
+Referenced by main().
+
+\hypertarget{fdevent_8c_a5da3b3f6a7a52ade98e901b48e095e74}{\index{fdevent.\-c@{fdevent.\-c}!fdevent\-\_\-register@{fdevent\-\_\-register}}
+\index{fdevent\-\_\-register@{fdevent\-\_\-register}!fdevent.c@{fdevent.\-c}}
+\subsubsection[{fdevent\-\_\-register}]{\setlength{\rightskip}{0pt plus 5cm}int fdevent\-\_\-register (
+\begin{DoxyParamCaption}
+\item[{{\bf fdevents} $\ast$}]{ev, }
+\item[{int}]{fd, }
+\item[{{\bf fdevent\-\_\-handler}}]{handler, }
+\item[{void $\ast$}]{ctx}
+\end{DoxyParamCaption}
+)}}\label{fdevent_8c_a5da3b3f6a7a52ade98e901b48e095e74}
+
+
+References \-\_\-fdnode\-::ctx, \-\_\-fdnode\-::events, \-\_\-fdnode\-::fd, fdevents\-::fdarray, fdnode\-\_\-init(), \-\_\-fdnode\-::handler, and \-\_\-fdnode\-::handler\-\_\-ctx.
+
+
+
+Referenced by cgi\-\_\-create\-\_\-env(), cgi\-\_\-write\-\_\-request(), connection\-\_\-accepted(), fcgi\-\_\-write\-\_\-request(), main(), network\-\_\-register\-\_\-fdevents(), proxy\-\_\-write\-\_\-request(), and scgi\-\_\-write\-\_\-request().
+
+\hypertarget{fdevent_8c_aeaed331ce8541b3a7a2dc919fbb1d506}{\index{fdevent.\-c@{fdevent.\-c}!fdevent\-\_\-reset@{fdevent\-\_\-reset}}
+\index{fdevent\-\_\-reset@{fdevent\-\_\-reset}!fdevent.c@{fdevent.\-c}}
+\subsubsection[{fdevent\-\_\-reset}]{\setlength{\rightskip}{0pt plus 5cm}int fdevent\-\_\-reset (
+\begin{DoxyParamCaption}
+\item[{{\bf fdevents} $\ast$}]{ev}
+\end{DoxyParamCaption}
+)}}\label{fdevent_8c_aeaed331ce8541b3a7a2dc919fbb1d506}
+
+
+References fdevents\-::reset.
+
+
+
+Referenced by network\-\_\-register\-\_\-fdevents().
+
+\hypertarget{fdevent_8c_aa1e7289917dd222472707226c2cf44f6}{\index{fdevent.\-c@{fdevent.\-c}!fdevent\-\_\-sched\-\_\-close@{fdevent\-\_\-sched\-\_\-close}}
+\index{fdevent\-\_\-sched\-\_\-close@{fdevent\-\_\-sched\-\_\-close}!fdevent.c@{fdevent.\-c}}
+\subsubsection[{fdevent\-\_\-sched\-\_\-close}]{\setlength{\rightskip}{0pt plus 5cm}void fdevent\-\_\-sched\-\_\-close (
+\begin{DoxyParamCaption}
+\item[{{\bf fdevents} $\ast$}]{ev, }
+\item[{int}]{fd, }
+\item[{int}]{issock}
+\end{DoxyParamCaption}
+)}}\label{fdevent_8c_aa1e7289917dd222472707226c2cf44f6}
+
+
+References fdevents\-::fdarray, and fdevents\-::highfd.
+
+
+
+Referenced by cgi\-\_\-connection\-\_\-close(), cgi\-\_\-connection\-\_\-close\-\_\-fdtocgi(), fcgi\-\_\-backend\-\_\-close(), proxy\-\_\-backend\-\_\-close(), and scgi\-\_\-backend\-\_\-close().
+
+\hypertarget{fdevent_8c_ac543e614439f59dd0d6b115ac1c8895b}{\index{fdevent.\-c@{fdevent.\-c}!fdevent\-\_\-sched\-\_\-run@{fdevent\-\_\-sched\-\_\-run}}
+\index{fdevent\-\_\-sched\-\_\-run@{fdevent\-\_\-sched\-\_\-run}!fdevent.c@{fdevent.\-c}}
+\subsubsection[{fdevent\-\_\-sched\-\_\-run}]{\setlength{\rightskip}{0pt plus 5cm}void fdevent\-\_\-sched\-\_\-run (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf fdevents} $\ast$}]{ev}
+\end{DoxyParamCaption}
+)}}\label{fdevent_8c_ac543e614439f59dd0d6b115ac1c8895b}
+
+
+References server\-::cur\-\_\-fds, fdevents\-::fdarray, fdevents\-::highfd, and log\-\_\-error\-\_\-write().
+
+
+
+Referenced by main().
+
+\hypertarget{fdevent_8c_a7066dbb073c5c9a688cd941fac349ede}{\index{fdevent.\-c@{fdevent.\-c}!fdevent\-\_\-socket\-\_\-cloexec@{fdevent\-\_\-socket\-\_\-cloexec}}
+\index{fdevent\-\_\-socket\-\_\-cloexec@{fdevent\-\_\-socket\-\_\-cloexec}!fdevent.c@{fdevent.\-c}}
+\subsubsection[{fdevent\-\_\-socket\-\_\-cloexec}]{\setlength{\rightskip}{0pt plus 5cm}int fdevent\-\_\-socket\-\_\-cloexec (
+\begin{DoxyParamCaption}
+\item[{int}]{domain, }
+\item[{int}]{type, }
+\item[{int}]{protocol}
+\end{DoxyParamCaption}
+)}}\label{fdevent_8c_a7066dbb073c5c9a688cd941fac349ede}
+
+
+Referenced by network\-\_\-server\-\_\-init().
+
+\hypertarget{fdevent_8c_a816a2de874f14c785d6fb3fe2477c43c}{\index{fdevent.\-c@{fdevent.\-c}!fdevent\-\_\-socket\-\_\-nb\-\_\-cloexec@{fdevent\-\_\-socket\-\_\-nb\-\_\-cloexec}}
+\index{fdevent\-\_\-socket\-\_\-nb\-\_\-cloexec@{fdevent\-\_\-socket\-\_\-nb\-\_\-cloexec}!fdevent.c@{fdevent.\-c}}
+\subsubsection[{fdevent\-\_\-socket\-\_\-nb\-\_\-cloexec}]{\setlength{\rightskip}{0pt plus 5cm}int fdevent\-\_\-socket\-\_\-nb\-\_\-cloexec (
+\begin{DoxyParamCaption}
+\item[{int}]{domain, }
+\item[{int}]{type, }
+\item[{int}]{protocol}
+\end{DoxyParamCaption}
+)}}\label{fdevent_8c_a816a2de874f14c785d6fb3fe2477c43c}
+
+
+References O\-\_\-\-N\-O\-N\-B\-L\-O\-C\-K.
+
+
+
+Referenced by fcgi\-\_\-write\-\_\-request(), network\-\_\-server\-\_\-init(), proxy\-\_\-write\-\_\-request(), and scgi\-\_\-write\-\_\-request().
+
+\hypertarget{fdevent_8c_ac9823cbb89183168d2dd9210b4ca6e22}{\index{fdevent.\-c@{fdevent.\-c}!fdevent\-\_\-unregister@{fdevent\-\_\-unregister}}
+\index{fdevent\-\_\-unregister@{fdevent\-\_\-unregister}!fdevent.c@{fdevent.\-c}}
+\subsubsection[{fdevent\-\_\-unregister}]{\setlength{\rightskip}{0pt plus 5cm}int fdevent\-\_\-unregister (
+\begin{DoxyParamCaption}
+\item[{{\bf fdevents} $\ast$}]{ev, }
+\item[{int}]{fd}
+\end{DoxyParamCaption}
+)}}\label{fdevent_8c_ac9823cbb89183168d2dd9210b4ca6e22}
+
+
+References fdevents\-::fdarray, and fdnode\-\_\-free().
+
+
+
+Referenced by cgi\-\_\-connection\-\_\-close(), cgi\-\_\-connection\-\_\-close\-\_\-fdtocgi(), connection\-\_\-close(), fcgi\-\_\-backend\-\_\-close(), main(), network\-\_\-close(), network\-\_\-server\-\_\-init(), proxy\-\_\-backend\-\_\-close(), scgi\-\_\-backend\-\_\-close(), and server\-\_\-free().
+
+\hypertarget{fdevent_8c_a7825804c884edd24b106b3844e32a508}{\index{fdevent.\-c@{fdevent.\-c}!fdnode\-\_\-free@{fdnode\-\_\-free}}
+\index{fdnode\-\_\-free@{fdnode\-\_\-free}!fdevent.c@{fdevent.\-c}}
+\subsubsection[{fdnode\-\_\-free}]{\setlength{\rightskip}{0pt plus 5cm}static void fdnode\-\_\-free (
+\begin{DoxyParamCaption}
+\item[{{\bf fdnode} $\ast$}]{fdn}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{fdevent_8c_a7825804c884edd24b106b3844e32a508}
+
+
+Referenced by fdevent\-\_\-unregister().
+
+\hypertarget{fdevent_8c_aa9b1cf8338ab82663349871949f9c1d7}{\index{fdevent.\-c@{fdevent.\-c}!fdnode\-\_\-init@{fdnode\-\_\-init}}
+\index{fdnode\-\_\-init@{fdnode\-\_\-init}!fdevent.c@{fdevent.\-c}}
+\subsubsection[{fdnode\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf fdnode}$\ast$ fdnode\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{fdevent_8c_aa9b1cf8338ab82663349871949f9c1d7}
+
+
+References \-\_\-fdnode\-::fd, and force\-\_\-assert.
+
+
+
+Referenced by fdevent\-\_\-register().
+

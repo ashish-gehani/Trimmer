@@ -1,0 +1,200 @@
+\hypertarget{configfile_8h}{\section{configfile.\-h File Reference}
+\label{configfile_8h}\index{configfile.\-h@{configfile.\-h}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}array.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}buffer.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}server.\-h\char`\"{}}\\*
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structconfig__t}{config\-\_\-t}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void $\ast$ \hyperlink{configfile_8h_a575a19e796f852121c14004c4ef7720e}{configparser\-Alloc} (void $\ast$($\ast$malloc\-Proc)(size\-\_\-t))
+\item 
+void \hyperlink{configfile_8h_a459992b7bd765162993ebcb6cf43c26d}{configparser\-Free} (void $\ast$p, void($\ast$free\-Proc)(void $\ast$))
+\item 
+void \hyperlink{configfile_8h_ab589dadaf566c409ae887d6b822927ab}{configparser} (void $\ast$yyp, int yymajor, \hyperlink{structbuffer}{buffer} $\ast$yyminor, \hyperlink{structconfig__t}{config\-\_\-t} $\ast$ctx)
+\item 
+int \hyperlink{configfile_8h_a88d5fbd332a05db8f74e915675c38c84}{config\-\_\-parse\-\_\-file} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconfig__t}{config\-\_\-t} $\ast$context, const char $\ast$fn)
+\item 
+int \hyperlink{configfile_8h_a30257f685b8daf16fdfed205c81a44a7}{config\-\_\-parse\-\_\-cmd} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconfig__t}{config\-\_\-t} $\ast$context, const char $\ast$cmd)
+\item 
+\hyperlink{structdata__unset}{data\-\_\-unset} $\ast$ \hyperlink{configfile_8h_acb1d1c63bd29a68f2c3432d2400b92fb}{configparser\-\_\-merge\-\_\-data} (\hyperlink{structdata__unset}{data\-\_\-unset} $\ast$op1, const \hyperlink{structdata__unset}{data\-\_\-unset} $\ast$op2)
+\item 
+int \hyperlink{configfile_8h_ae1fa9c6a1999bfacd3213816edf1a8c8}{config\-\_\-setup\-\_\-connection} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con)
+\item 
+int \hyperlink{configfile_8h_af0a0b2d6e2f683485db4bce8470d0d46}{config\-\_\-patch\-\_\-connection} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con)
+\item 
+void \hyperlink{configfile_8h_af5d1df03eabe27b315fd81946a37807b}{config\-\_\-cond\-\_\-cache\-\_\-reset} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con)
+\item 
+void \hyperlink{configfile_8h_a9434493408b7d650ce9787ab15a3a31c}{config\-\_\-cond\-\_\-cache\-\_\-reset\-\_\-item} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{array_8h_a70eba8cb401a078bd3a4b284e5ab6b83}{comp\-\_\-key\-\_\-t} item)
+\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\hypertarget{configfile_8h_af5d1df03eabe27b315fd81946a37807b}{\index{configfile.\-h@{configfile.\-h}!config\-\_\-cond\-\_\-cache\-\_\-reset@{config\-\_\-cond\-\_\-cache\-\_\-reset}}
+\index{config\-\_\-cond\-\_\-cache\-\_\-reset@{config\-\_\-cond\-\_\-cache\-\_\-reset}!configfile.h@{configfile.\-h}}
+\subsubsection[{config\-\_\-cond\-\_\-cache\-\_\-reset}]{\setlength{\rightskip}{0pt plus 5cm}void config\-\_\-cond\-\_\-cache\-\_\-reset (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con}
+\end{DoxyParamCaption}
+)}}\label{configfile_8h_af5d1df03eabe27b315fd81946a37807b}
+reset the config cache to its initial state at connection start 
+
+References C\-O\-M\-P\-\_\-\-L\-A\-S\-T\-\_\-\-E\-L\-E\-M\-E\-N\-T, cond\-\_\-cache\-\_\-t\-::comp\-\_\-value, connection\-::cond\-\_\-cache, C\-O\-N\-D\-\_\-\-R\-E\-S\-U\-L\-T\-\_\-\-U\-N\-S\-E\-T, connection\-::conditional\-\_\-is\-\_\-valid, server\-::config\-\_\-context, cond\-\_\-cache\-\_\-t\-::local\-\_\-result, cond\-\_\-cache\-\_\-t\-::patterncount, cond\-\_\-cache\-\_\-t\-::result, and array\-::used.
+
+
+
+Referenced by http\-\_\-response\-\_\-prepare().
+
+\hypertarget{configfile_8h_a9434493408b7d650ce9787ab15a3a31c}{\index{configfile.\-h@{configfile.\-h}!config\-\_\-cond\-\_\-cache\-\_\-reset\-\_\-item@{config\-\_\-cond\-\_\-cache\-\_\-reset\-\_\-item}}
+\index{config\-\_\-cond\-\_\-cache\-\_\-reset\-\_\-item@{config\-\_\-cond\-\_\-cache\-\_\-reset\-\_\-item}!configfile.h@{configfile.\-h}}
+\subsubsection[{config\-\_\-cond\-\_\-cache\-\_\-reset\-\_\-item}]{\setlength{\rightskip}{0pt plus 5cm}void config\-\_\-cond\-\_\-cache\-\_\-reset\-\_\-item (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf comp\-\_\-key\-\_\-t}}]{item}
+\end{DoxyParamCaption}
+)}}\label{configfile_8h_a9434493408b7d650ce9787ab15a3a31c}
+reset the config-\/cache for a named item
+
+if the item is C\-O\-N\-D\-\_\-\-L\-A\-S\-T\-\_\-\-E\-L\-E\-M\-E\-N\-T we reset all items 
+
+References data\-\_\-config\-::comp, connection\-::cond\-\_\-cache, C\-O\-N\-D\-\_\-\-R\-E\-S\-U\-L\-T\-\_\-\-U\-N\-S\-E\-T, config\-\_\-cond\-\_\-clear\-\_\-node(), server\-::config\-\_\-context, array\-::data, cond\-\_\-cache\-\_\-t\-::local\-\_\-result, and array\-::used.
+
+
+
+Referenced by clean\-\_\-cond\-\_\-cache().
+
+\hypertarget{configfile_8h_a30257f685b8daf16fdfed205c81a44a7}{\index{configfile.\-h@{configfile.\-h}!config\-\_\-parse\-\_\-cmd@{config\-\_\-parse\-\_\-cmd}}
+\index{config\-\_\-parse\-\_\-cmd@{config\-\_\-parse\-\_\-cmd}!configfile.h@{configfile.\-h}}
+\subsubsection[{config\-\_\-parse\-\_\-cmd}]{\setlength{\rightskip}{0pt plus 5cm}int config\-\_\-parse\-\_\-cmd (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf config\-\_\-t} $\ast$}]{context, }
+\item[{const char $\ast$}]{cmd}
+\end{DoxyParamCaption}
+)}}\label{configfile_8h_a30257f685b8daf16fdfed205c81a44a7}
+
+
+References config\-\_\-t\-::basedir, buffer\-\_\-free(), buffer\-\_\-init(), buffer\-\_\-init\-\_\-string(), buffer\-\_\-string\-\_\-is\-\_\-empty(), config\-\_\-parse(), C\-O\-N\-S\-T\-\_\-\-B\-U\-F\-\_\-\-L\-E\-N, get\-C\-W\-D(), log\-\_\-error\-\_\-write(), proc\-\_\-open\-\_\-buffer(), buffer\-::ptr, and tokenizer\-\_\-init().
+
+
+
+Referenced by yy\-\_\-reduce().
+
+\hypertarget{configfile_8h_a88d5fbd332a05db8f74e915675c38c84}{\index{configfile.\-h@{configfile.\-h}!config\-\_\-parse\-\_\-file@{config\-\_\-parse\-\_\-file}}
+\index{config\-\_\-parse\-\_\-file@{config\-\_\-parse\-\_\-file}!configfile.h@{configfile.\-h}}
+\subsubsection[{config\-\_\-parse\-\_\-file}]{\setlength{\rightskip}{0pt plus 5cm}int config\-\_\-parse\-\_\-file (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf config\-\_\-t} $\ast$}]{context, }
+\item[{const char $\ast$}]{fn}
+\end{DoxyParamCaption}
+)}}\label{configfile_8h_a88d5fbd332a05db8f74e915675c38c84}
+
+
+References config\-\_\-t\-::basedir, buffer\-\_\-append\-\_\-string(), buffer\-\_\-copy\-\_\-string(), buffer\-\_\-free(), buffer\-\_\-init\-\_\-buffer(), buffer\-\_\-init\-\_\-string(), config\-\_\-parse\-\_\-file\-\_\-stream(), log\-\_\-error\-\_\-write(), and buffer\-::ptr.
+
+
+
+Referenced by yy\-\_\-reduce().
+
+\hypertarget{configfile_8h_af0a0b2d6e2f683485db4bce8470d0d46}{\index{configfile.\-h@{configfile.\-h}!config\-\_\-patch\-\_\-connection@{config\-\_\-patch\-\_\-connection}}
+\index{config\-\_\-patch\-\_\-connection@{config\-\_\-patch\-\_\-connection}!configfile.h@{configfile.\-h}}
+\subsubsection[{config\-\_\-patch\-\_\-connection}]{\setlength{\rightskip}{0pt plus 5cm}int config\-\_\-patch\-\_\-connection (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con}
+\end{DoxyParamCaption}
+)}}\label{configfile_8h_af0a0b2d6e2f683485db4bce8470d0d46}
+
+
+References buffer\-\_\-copy\-\_\-buffer(), buffer\-\_\-is\-\_\-equal\-\_\-string(), connection\-::conf, config\-\_\-check\-\_\-cond(), server\-::config\-\_\-context, server\-::config\-\_\-storage, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, array\-::data, connection\-::etag\-\_\-flags, E\-T\-A\-G\-\_\-\-U\-S\-E\-\_\-\-I\-N\-O\-D\-E, specific\-\_\-config\-::etag\-\_\-use\-\_\-inode, E\-T\-A\-G\-\_\-\-U\-S\-E\-\_\-\-M\-T\-I\-M\-E, specific\-\_\-config\-::etag\-\_\-use\-\_\-mtime, E\-T\-A\-G\-\_\-\-U\-S\-E\-\_\-\-S\-I\-Z\-E, specific\-\_\-config\-::etag\-\_\-use\-\_\-size, specific\-\_\-config\-::global\-\_\-bytes\-\_\-per\-\_\-second\-\_\-cnt\-\_\-ptr, P\-A\-T\-C\-H, connection\-::server\-\_\-name, array\-::used, and data\-\_\-config\-::value.
+
+
+
+Referenced by http\-\_\-response\-\_\-prepare().
+
+\hypertarget{configfile_8h_ae1fa9c6a1999bfacd3213816edf1a8c8}{\index{configfile.\-h@{configfile.\-h}!config\-\_\-setup\-\_\-connection@{config\-\_\-setup\-\_\-connection}}
+\index{config\-\_\-setup\-\_\-connection@{config\-\_\-setup\-\_\-connection}!configfile.h@{configfile.\-h}}
+\subsubsection[{config\-\_\-setup\-\_\-connection}]{\setlength{\rightskip}{0pt plus 5cm}int config\-\_\-setup\-\_\-connection (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con}
+\end{DoxyParamCaption}
+)}}\label{configfile_8h_ae1fa9c6a1999bfacd3213816edf1a8c8}
+
+
+References buffer\-\_\-copy\-\_\-buffer(), connection\-::conf, server\-::config\-\_\-storage, specific\-\_\-config\-::global\-\_\-bytes\-\_\-per\-\_\-second\-\_\-cnt, specific\-\_\-config\-::global\-\_\-bytes\-\_\-per\-\_\-second\-\_\-cnt\-\_\-ptr, P\-A\-T\-C\-H, specific\-\_\-config\-::server\-\_\-name, and connection\-::server\-\_\-name.
+
+
+
+Referenced by connection\-\_\-init(), connection\-\_\-reset(), and http\-\_\-response\-\_\-prepare().
+
+\hypertarget{configfile_8h_ab589dadaf566c409ae887d6b822927ab}{\index{configfile.\-h@{configfile.\-h}!configparser@{configparser}}
+\index{configparser@{configparser}!configfile.h@{configfile.\-h}}
+\subsubsection[{configparser}]{\setlength{\rightskip}{0pt plus 5cm}void configparser (
+\begin{DoxyParamCaption}
+\item[{void $\ast$}]{yyp, }
+\item[{int}]{yymajor, }
+\item[{{\bf buffer} $\ast$}]{yyminor, }
+\item[{{\bf config\-\_\-t} $\ast$}]{ctx}
+\end{DoxyParamCaption}
+)}}\label{configfile_8h_ab589dadaf566c409ae887d6b822927ab}
+
+
+Referenced by config\-\_\-parse().
+
+\hypertarget{configfile_8h_acb1d1c63bd29a68f2c3432d2400b92fb}{\index{configfile.\-h@{configfile.\-h}!configparser\-\_\-merge\-\_\-data@{configparser\-\_\-merge\-\_\-data}}
+\index{configparser\-\_\-merge\-\_\-data@{configparser\-\_\-merge\-\_\-data}!configfile.h@{configfile.\-h}}
+\subsubsection[{configparser\-\_\-merge\-\_\-data}]{\setlength{\rightskip}{0pt plus 5cm}{\bf data\-\_\-unset}$\ast$ configparser\-\_\-merge\-\_\-data (
+\begin{DoxyParamCaption}
+\item[{{\bf data\-\_\-unset} $\ast$}]{op1, }
+\item[{const {\bf data\-\_\-unset} $\ast$}]{op2}
+\end{DoxyParamCaption}
+)}}\label{configfile_8h_acb1d1c63bd29a68f2c3432d2400b92fb}
+
+
+References array\-\_\-get\-\_\-element(), array\-\_\-insert\-\_\-unique(), buffer\-\_\-append\-\_\-int(), buffer\-\_\-append\-\_\-string\-\_\-buffer(), buffer\-\_\-is\-\_\-empty(), array\-::data, data\-\_\-string\-\_\-init(), force\-\_\-assert, T\-Y\-P\-E\-\_\-\-A\-R\-R\-A\-Y, T\-Y\-P\-E\-\_\-\-I\-N\-T\-E\-G\-E\-R, T\-Y\-P\-E\-\_\-\-S\-T\-R\-I\-N\-G, array\-::used, and data\-\_\-string\-::value.
+
+
+
+Referenced by yy\-\_\-reduce().
+
+\hypertarget{configfile_8h_a575a19e796f852121c14004c4ef7720e}{\index{configfile.\-h@{configfile.\-h}!configparser\-Alloc@{configparser\-Alloc}}
+\index{configparser\-Alloc@{configparser\-Alloc}!configfile.h@{configfile.\-h}}
+\subsubsection[{configparser\-Alloc}]{\setlength{\rightskip}{0pt plus 5cm}void$\ast$ configparser\-Alloc (
+\begin{DoxyParamCaption}
+\item[{void $\ast$($\ast$)(size\-\_\-t)}]{malloc\-Proc}
+\end{DoxyParamCaption}
+)}}\label{configfile_8h_a575a19e796f852121c14004c4ef7720e}
+
+
+References yy\-Parser\-::yyidx.
+
+
+
+Referenced by config\-\_\-parse().
+
+\hypertarget{configfile_8h_a459992b7bd765162993ebcb6cf43c26d}{\index{configfile.\-h@{configfile.\-h}!configparser\-Free@{configparser\-Free}}
+\index{configparser\-Free@{configparser\-Free}!configfile.h@{configfile.\-h}}
+\subsubsection[{configparser\-Free}]{\setlength{\rightskip}{0pt plus 5cm}void configparser\-Free (
+\begin{DoxyParamCaption}
+\item[{void $\ast$}]{p, }
+\item[{void($\ast$)(void $\ast$)}]{free\-Proc}
+\end{DoxyParamCaption}
+)}}\label{configfile_8h_a459992b7bd765162993ebcb6cf43c26d}
+
+
+References yy\-\_\-pop\-\_\-parser\-\_\-stack(), and yy\-Parser\-::yyidx.
+
+
+
+Referenced by config\-\_\-parse().
+

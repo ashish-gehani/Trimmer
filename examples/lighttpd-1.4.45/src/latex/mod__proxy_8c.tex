@@ -1,0 +1,618 @@
+\hypertarget{mod__proxy_8c}{\section{mod\-\_\-proxy.\-c File Reference}
+\label{mod__proxy_8c}\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}buffer.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}server.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}keyvalue.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}log.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}http\-\_\-chunk.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}fdevent.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}connections.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}response.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}joblist.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}plugin.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}inet\-\_\-ntop\-\_\-cache.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}crc32.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$sys/types.\-h$>$}\\*
+{\ttfamily \#include $<$unistd.\-h$>$}\\*
+{\ttfamily \#include $<$errno.\-h$>$}\\*
+{\ttfamily \#include $<$fcntl.\-h$>$}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+{\ttfamily \#include $<$stdlib.\-h$>$}\\*
+{\ttfamily \#include $<$ctype.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}sys-\/socket.\-h\char`\"{}}\\*
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structplugin__config}{plugin\-\_\-config}
+\item 
+struct \hyperlink{structplugin__data}{plugin\-\_\-data}
+\item 
+struct \hyperlink{structhandler__ctx}{handler\-\_\-ctx}
+\end{DoxyCompactItemize}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{mod__proxy_8c_aee2339951c17205bed17e9ef9b3fee9b}{data\-\_\-proxy}~\hyperlink{structdata__fastcgi}{data\-\_\-fastcgi}
+\item 
+\#define \hyperlink{mod__proxy_8c_af2486edcb83992f133c72b32a049e740}{data\-\_\-proxy\-\_\-init}~\hyperlink{data__fastcgi_8c_a446ffb3bf524aeea5ab36c1ba6ae9f6f}{data\-\_\-fastcgi\-\_\-init}
+\item 
+\#define \hyperlink{mod__proxy_8c_a6f476ed3d6bc659efc524ffd76cd550c}{P\-R\-O\-X\-Y\-\_\-\-R\-E\-T\-R\-Y\-\_\-\-T\-I\-M\-E\-O\-U\-T}~60
+\item 
+\#define \hyperlink{mod__proxy_8c_a20876ec7c0c844d0e0c1628528bbb8da}{P\-A\-T\-C\-H}(x)~p-\/$>$conf.\-x = s-\/$>$x;
+\end{DoxyCompactItemize}
+\subsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \hyperlink{mod__proxy_8c_ae54bc193c86f32ceb0fca16535239ae9}{proxy\-\_\-balance\-\_\-t} \{ \\*
+\hyperlink{mod__proxy_8c_ae54bc193c86f32ceb0fca16535239ae9a1b04d5aea203dae373945d064f99aa1f}{P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-U\-N\-S\-E\-T}, 
+\hyperlink{mod__proxy_8c_ae54bc193c86f32ceb0fca16535239ae9aa1dab27f9bb5b9f52418a8482566f006}{P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-F\-A\-I\-R}, 
+\hyperlink{mod__proxy_8c_ae54bc193c86f32ceb0fca16535239ae9a7e2f9b59670417c5ee1c949c0745a77d}{P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-H\-A\-S\-H}, 
+\hyperlink{mod__proxy_8c_ae54bc193c86f32ceb0fca16535239ae9a58a867ca6b8a888e3ee76c22d330cd19}{P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-R\-R}, 
+\\*
+\hyperlink{mod__proxy_8c_ae54bc193c86f32ceb0fca16535239ae9adae232eac87531ad0815ffb820d8f92d}{P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-S\-T\-I\-C\-K\-Y}
+ \}
+\item 
+enum \hyperlink{mod__proxy_8c_a02dc6a96fad1fa4cc37f695206e40381}{proxy\-\_\-connection\-\_\-state\-\_\-t} \{ \\*
+\hyperlink{mod__proxy_8c_a02dc6a96fad1fa4cc37f695206e40381a4e35d79a72ecabd4e857babeb2248966}{P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-I\-N\-I\-T}, 
+\hyperlink{mod__proxy_8c_a02dc6a96fad1fa4cc37f695206e40381a50dab4f79e862d485d4e41ef496fc6f5}{P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T}, 
+\hyperlink{mod__proxy_8c_a02dc6a96fad1fa4cc37f695206e40381a6756bd216e6908bad82de00d0ddb2fce}{P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-P\-R\-E\-P\-A\-R\-E\-\_\-\-W\-R\-I\-T\-E}, 
+\hyperlink{mod__proxy_8c_a02dc6a96fad1fa4cc37f695206e40381afd8bfad3c56c2b7307219ce3235ebd3c}{P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-W\-R\-I\-T\-E}, 
+\\*
+\hyperlink{mod__proxy_8c_a02dc6a96fad1fa4cc37f695206e40381a2ffb04f1dae448656c147043a23917fd}{P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-A\-D}
+ \}
+\item 
+enum \{ \hyperlink{mod__proxy_8c_af9bdc3014f3d54c426b6d2df10de4960ad066c9c99a38b7029eb60f059ebe2ac1}{P\-R\-O\-X\-Y\-\_\-\-S\-T\-D\-O\-U\-T}, 
+\hyperlink{mod__proxy_8c_af9bdc3014f3d54c426b6d2df10de4960a15f5638a8c972534296f2a47812249a7}{P\-R\-O\-X\-Y\-\_\-\-E\-N\-D\-\_\-\-R\-E\-Q\-U\-E\-S\-T}
+ \}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t} \hyperlink{mod__proxy_8c_aaa5ac9077881c024087cb01a58fa194f}{proxy\-\_\-handle\-\_\-fdevent} (\hyperlink{structserver}{server} $\ast$srv, void $\ast$ctx, int revents)
+\item 
+static \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$ \hyperlink{mod__proxy_8c_ad4882f71dc486b383f74029b751ce1a2}{handler\-\_\-ctx\-\_\-init} (void)
+\item 
+static void \hyperlink{mod__proxy_8c_af9f2bc62e505066048458b2893d9c111}{handler\-\_\-ctx\-\_\-free} (\hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx)
+\item 
+\hyperlink{mod__proxy_8c_a8a08a216a81085f2cb0aa0814eae8eee}{I\-N\-I\-T\-\_\-\-F\-U\-N\-C} (mod\-\_\-proxy\-\_\-init)
+\item 
+\hyperlink{mod__proxy_8c_a9bde696250692155d55d04a475e1f78d}{F\-R\-E\-E\-\_\-\-F\-U\-N\-C} (mod\-\_\-proxy\-\_\-free)
+\item 
+\hyperlink{mod__proxy_8c_a07ca95b3df56f7e71b3b3b63cc692c56}{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C} (mod\-\_\-proxy\-\_\-set\-\_\-defaults)
+\item 
+static void \hyperlink{mod__proxy_8c_a43f9a67336328abd05a11290ad1db9b0}{proxy\-\_\-backend\-\_\-close} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx)
+\item 
+static \hyperlink{mod__proxy_8c_aee2339951c17205bed17e9ef9b3fee9b}{data\-\_\-proxy} $\ast$ \hyperlink{mod__proxy_8c_ae8e4eaa37354e2ed9c1ffa902f58a610}{mod\-\_\-proxy\-\_\-extension\-\_\-host\-\_\-get} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structdata__array}{data\-\_\-array} $\ast$extension, \hyperlink{mod__proxy_8c_ae54bc193c86f32ceb0fca16535239ae9}{proxy\-\_\-balance\-\_\-t} balance, int debug)
+\item 
+static void \hyperlink{mod__proxy_8c_af9bac1f3b2ae2f3ab9c90fd88a614640}{proxy\-\_\-connection\-\_\-close} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx)
+\item 
+static \hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t} \hyperlink{mod__proxy_8c_a58075d59944551ddd33f83f3ff82472a}{proxy\-\_\-reconnect} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx)
+\item 
+static int \hyperlink{mod__proxy_8c_a96fcf904172a4e93b76d73656b551ae8}{proxy\-\_\-establish\-\_\-connection} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx)
+\item 
+static void \hyperlink{mod__proxy_8c_a885b2639318c83431cb4fac373d77700}{proxy\-\_\-set\-\_\-header} (\hyperlink{structconnection}{connection} $\ast$con, const char $\ast$key, const char $\ast$value)
+\item 
+static void \hyperlink{mod__proxy_8c_a4ca4e855a7cc30646341256f14595b1b}{proxy\-\_\-append\-\_\-header} (\hyperlink{structconnection}{connection} $\ast$con, const char $\ast$key, const char $\ast$value)
+\item 
+static int \hyperlink{mod__proxy_8c_a4586c2ddad69d2980487e43c464acfa1}{proxy\-\_\-create\-\_\-env} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx)
+\item 
+static int \hyperlink{mod__proxy_8c_a94fc6b121a544a6ea67962a0651eb557}{proxy\-\_\-set\-\_\-state} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx, \hyperlink{mod__proxy_8c_a02dc6a96fad1fa4cc37f695206e40381}{proxy\-\_\-connection\-\_\-state\-\_\-t} \hyperlink{structstate}{state})
+\item 
+static int \hyperlink{mod__proxy_8c_a449e22b38d2a4cd07f7aeeaa4cb2a7fa}{proxy\-\_\-response\-\_\-parse} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structplugin__data}{plugin\-\_\-data} $\ast$p, \hyperlink{structbuffer}{buffer} $\ast$in)
+\item 
+static int \hyperlink{mod__proxy_8c_a31646d1fc9eaa790a7d630d093e5fe41}{proxy\-\_\-demux\-\_\-response} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx)
+\item 
+static \hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t} \hyperlink{mod__proxy_8c_a4db99ddf2c8352fd7beb850acdd9fc00}{proxy\-\_\-write\-\_\-request} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx)
+\item 
+static int \hyperlink{mod__proxy_8c_afd33245abb9e86cccdf88df40a5df396}{mod\-\_\-proxy\-\_\-patch\-\_\-connection} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structplugin__data}{plugin\-\_\-data} $\ast$p)
+\item 
+static \hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t} \hyperlink{mod__proxy_8c_a46a4ac734419ca3fa4f510484db4de23}{proxy\-\_\-send\-\_\-request} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx)
+\item 
+static \hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t} \hyperlink{mod__proxy_8c_a197c9cad466e2c5765de03ffbdbc0f8c}{proxy\-\_\-recv\-\_\-response} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structhandler__ctx}{handler\-\_\-ctx} $\ast$hctx)
+\item 
+\hyperlink{mod__proxy_8c_a90898dd7adac6346ad103fce82d7900b}{S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C} (mod\-\_\-proxy\-\_\-handle\-\_\-subrequest)
+\item 
+static \hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t} \hyperlink{mod__proxy_8c_a363df97c8aa6043d7e5c02e47de51ce8}{mod\-\_\-proxy\-\_\-check\-\_\-extension} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, void $\ast$p\-\_\-d)
+\item 
+static \hyperlink{settings_8h_a2a8ffc3e29980db202f39ab85ab7e98e}{handler\-\_\-t} \hyperlink{mod__proxy_8c_af3115941d478a0b4e14bc8123da8ea20}{mod\-\_\-proxy\-\_\-connection\-\_\-reset} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, void $\ast$p\-\_\-d)
+\item 
+\hyperlink{mod__proxy_8c_a982f56bf9c6e14d939c7c76800fcd767}{T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C} (mod\-\_\-proxy\-\_\-trigger)
+\item 
+int \hyperlink{mod__proxy_8c_a195bf741744ca2a93fe6d2d291e30fdf}{mod\-\_\-proxy\-\_\-plugin\-\_\-init} (\hyperlink{structplugin}{plugin} $\ast$p)
+\end{DoxyCompactItemize}
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{mod__proxy_8c_aee2339951c17205bed17e9ef9b3fee9b}{\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!data\-\_\-proxy@{data\-\_\-proxy}}
+\index{data\-\_\-proxy@{data\-\_\-proxy}!mod_proxy.c@{mod\-\_\-proxy.\-c}}
+\subsubsection[{data\-\_\-proxy}]{\setlength{\rightskip}{0pt plus 5cm}\#define data\-\_\-proxy~{\bf data\-\_\-fastcgi}}}\label{mod__proxy_8c_aee2339951c17205bed17e9ef9b3fee9b}
+
+
+Referenced by mod\-\_\-proxy\-\_\-check\-\_\-extension(), mod\-\_\-proxy\-\_\-extension\-\_\-host\-\_\-get(), proxy\-\_\-establish\-\_\-connection(), proxy\-\_\-send\-\_\-request(), proxy\-\_\-write\-\_\-request(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), and T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__proxy_8c_af2486edcb83992f133c72b32a049e740}{\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!data\-\_\-proxy\-\_\-init@{data\-\_\-proxy\-\_\-init}}
+\index{data\-\_\-proxy\-\_\-init@{data\-\_\-proxy\-\_\-init}!mod_proxy.c@{mod\-\_\-proxy.\-c}}
+\subsubsection[{data\-\_\-proxy\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}\#define data\-\_\-proxy\-\_\-init~{\bf data\-\_\-fastcgi\-\_\-init}}}\label{mod__proxy_8c_af2486edcb83992f133c72b32a049e740}
+
+
+Referenced by S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__proxy_8c_a20876ec7c0c844d0e0c1628528bbb8da}{\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!P\-A\-T\-C\-H@{P\-A\-T\-C\-H}}
+\index{P\-A\-T\-C\-H@{P\-A\-T\-C\-H}!mod_proxy.c@{mod\-\_\-proxy.\-c}}
+\subsubsection[{P\-A\-T\-C\-H}]{\setlength{\rightskip}{0pt plus 5cm}\#define P\-A\-T\-C\-H(
+\begin{DoxyParamCaption}
+\item[{}]{x}
+\end{DoxyParamCaption}
+)~p-\/$>$conf.\-x = s-\/$>$x;}}\label{mod__proxy_8c_a20876ec7c0c844d0e0c1628528bbb8da}
+
+
+Referenced by mod\-\_\-proxy\-\_\-patch\-\_\-connection().
+
+\hypertarget{mod__proxy_8c_a6f476ed3d6bc659efc524ffd76cd550c}{\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!P\-R\-O\-X\-Y\-\_\-\-R\-E\-T\-R\-Y\-\_\-\-T\-I\-M\-E\-O\-U\-T@{P\-R\-O\-X\-Y\-\_\-\-R\-E\-T\-R\-Y\-\_\-\-T\-I\-M\-E\-O\-U\-T}}
+\index{P\-R\-O\-X\-Y\-\_\-\-R\-E\-T\-R\-Y\-\_\-\-T\-I\-M\-E\-O\-U\-T@{P\-R\-O\-X\-Y\-\_\-\-R\-E\-T\-R\-Y\-\_\-\-T\-I\-M\-E\-O\-U\-T}!mod_proxy.c@{mod\-\_\-proxy.\-c}}
+\subsubsection[{P\-R\-O\-X\-Y\-\_\-\-R\-E\-T\-R\-Y\-\_\-\-T\-I\-M\-E\-O\-U\-T}]{\setlength{\rightskip}{0pt plus 5cm}\#define P\-R\-O\-X\-Y\-\_\-\-R\-E\-T\-R\-Y\-\_\-\-T\-I\-M\-E\-O\-U\-T~60}}\label{mod__proxy_8c_a6f476ed3d6bc659efc524ffd76cd550c}
+
+
+\subsection{Enumeration Type Documentation}
+\hypertarget{mod__proxy_8c_af9bdc3014f3d54c426b6d2df10de4960}{\subsubsection[{anonymous enum}]{\setlength{\rightskip}{0pt plus 5cm}anonymous enum}}\label{mod__proxy_8c_af9bdc3014f3d54c426b6d2df10de4960}
+\begin{Desc}
+\item[Enumerator]\par
+\begin{description}
+\index{P\-R\-O\-X\-Y\-\_\-\-S\-T\-D\-O\-U\-T@{P\-R\-O\-X\-Y\-\_\-\-S\-T\-D\-O\-U\-T}!mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}}\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!P\-R\-O\-X\-Y\-\_\-\-S\-T\-D\-O\-U\-T@{P\-R\-O\-X\-Y\-\_\-\-S\-T\-D\-O\-U\-T}}\item[{\em 
+\hypertarget{mod__proxy_8c_af9bdc3014f3d54c426b6d2df10de4960ad066c9c99a38b7029eb60f059ebe2ac1}{P\-R\-O\-X\-Y\-\_\-\-S\-T\-D\-O\-U\-T}\label{mod__proxy_8c_af9bdc3014f3d54c426b6d2df10de4960ad066c9c99a38b7029eb60f059ebe2ac1}
+}]\index{P\-R\-O\-X\-Y\-\_\-\-E\-N\-D\-\_\-\-R\-E\-Q\-U\-E\-S\-T@{P\-R\-O\-X\-Y\-\_\-\-E\-N\-D\-\_\-\-R\-E\-Q\-U\-E\-S\-T}!mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}}\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!P\-R\-O\-X\-Y\-\_\-\-E\-N\-D\-\_\-\-R\-E\-Q\-U\-E\-S\-T@{P\-R\-O\-X\-Y\-\_\-\-E\-N\-D\-\_\-\-R\-E\-Q\-U\-E\-S\-T}}\item[{\em 
+\hypertarget{mod__proxy_8c_af9bdc3014f3d54c426b6d2df10de4960a15f5638a8c972534296f2a47812249a7}{P\-R\-O\-X\-Y\-\_\-\-E\-N\-D\-\_\-\-R\-E\-Q\-U\-E\-S\-T}\label{mod__proxy_8c_af9bdc3014f3d54c426b6d2df10de4960a15f5638a8c972534296f2a47812249a7}
+}]\end{description}
+\end{Desc}
+\hypertarget{mod__proxy_8c_ae54bc193c86f32ceb0fca16535239ae9}{\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!proxy\-\_\-balance\-\_\-t@{proxy\-\_\-balance\-\_\-t}}
+\index{proxy\-\_\-balance\-\_\-t@{proxy\-\_\-balance\-\_\-t}!mod_proxy.c@{mod\-\_\-proxy.\-c}}
+\subsubsection[{proxy\-\_\-balance\-\_\-t}]{\setlength{\rightskip}{0pt plus 5cm}enum {\bf proxy\-\_\-balance\-\_\-t}}}\label{mod__proxy_8c_ae54bc193c86f32ceb0fca16535239ae9}
+the proxy module is based on the fastcgi module
+
+28.\-06.\-2004 Jan Kneschke The first release 01.\-07.\-2004 Evgeny Rodichev Several bugfixes and cleanups
+\begin{DoxyItemize}
+\item co-\/ordinate up-\/ and downstream flows correctly (proxy\-\_\-demux\-\_\-response and proxy\-\_\-handle\-\_\-fdevent)
+\item correctly transfer upstream http\-\_\-response\-\_\-status;
+\item some unused structures removed.
+\end{DoxyItemize}
+
+T\-O\-D\-O\-: -\/ delay upstream read if write\-\_\-queue is too large (to prevent memory eating, like in apache). Shoud be configurable).
+\begin{DoxyItemize}
+\item persistent connection with upstream servers
+\item H\-T\-T\-P/1.\-1 
+\end{DoxyItemize}\begin{Desc}
+\item[Enumerator]\par
+\begin{description}
+\index{P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-U\-N\-S\-E\-T@{P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-U\-N\-S\-E\-T}!mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}}\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-U\-N\-S\-E\-T@{P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-U\-N\-S\-E\-T}}\item[{\em 
+\hypertarget{mod__proxy_8c_ae54bc193c86f32ceb0fca16535239ae9a1b04d5aea203dae373945d064f99aa1f}{P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-U\-N\-S\-E\-T}\label{mod__proxy_8c_ae54bc193c86f32ceb0fca16535239ae9a1b04d5aea203dae373945d064f99aa1f}
+}]\index{P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-F\-A\-I\-R@{P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-F\-A\-I\-R}!mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}}\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-F\-A\-I\-R@{P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-F\-A\-I\-R}}\item[{\em 
+\hypertarget{mod__proxy_8c_ae54bc193c86f32ceb0fca16535239ae9aa1dab27f9bb5b9f52418a8482566f006}{P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-F\-A\-I\-R}\label{mod__proxy_8c_ae54bc193c86f32ceb0fca16535239ae9aa1dab27f9bb5b9f52418a8482566f006}
+}]\index{P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-H\-A\-S\-H@{P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-H\-A\-S\-H}!mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}}\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-H\-A\-S\-H@{P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-H\-A\-S\-H}}\item[{\em 
+\hypertarget{mod__proxy_8c_ae54bc193c86f32ceb0fca16535239ae9a7e2f9b59670417c5ee1c949c0745a77d}{P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-H\-A\-S\-H}\label{mod__proxy_8c_ae54bc193c86f32ceb0fca16535239ae9a7e2f9b59670417c5ee1c949c0745a77d}
+}]\index{P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-R\-R@{P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-R\-R}!mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}}\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-R\-R@{P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-R\-R}}\item[{\em 
+\hypertarget{mod__proxy_8c_ae54bc193c86f32ceb0fca16535239ae9a58a867ca6b8a888e3ee76c22d330cd19}{P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-R\-R}\label{mod__proxy_8c_ae54bc193c86f32ceb0fca16535239ae9a58a867ca6b8a888e3ee76c22d330cd19}
+}]\index{P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-S\-T\-I\-C\-K\-Y@{P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-S\-T\-I\-C\-K\-Y}!mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}}\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-S\-T\-I\-C\-K\-Y@{P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-S\-T\-I\-C\-K\-Y}}\item[{\em 
+\hypertarget{mod__proxy_8c_ae54bc193c86f32ceb0fca16535239ae9adae232eac87531ad0815ffb820d8f92d}{P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-S\-T\-I\-C\-K\-Y}\label{mod__proxy_8c_ae54bc193c86f32ceb0fca16535239ae9adae232eac87531ad0815ffb820d8f92d}
+}]\end{description}
+\end{Desc}
+\hypertarget{mod__proxy_8c_a02dc6a96fad1fa4cc37f695206e40381}{\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!proxy\-\_\-connection\-\_\-state\-\_\-t@{proxy\-\_\-connection\-\_\-state\-\_\-t}}
+\index{proxy\-\_\-connection\-\_\-state\-\_\-t@{proxy\-\_\-connection\-\_\-state\-\_\-t}!mod_proxy.c@{mod\-\_\-proxy.\-c}}
+\subsubsection[{proxy\-\_\-connection\-\_\-state\-\_\-t}]{\setlength{\rightskip}{0pt plus 5cm}enum {\bf proxy\-\_\-connection\-\_\-state\-\_\-t}}}\label{mod__proxy_8c_a02dc6a96fad1fa4cc37f695206e40381}
+\begin{Desc}
+\item[Enumerator]\par
+\begin{description}
+\index{P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-I\-N\-I\-T@{P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-I\-N\-I\-T}!mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}}\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-I\-N\-I\-T@{P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-I\-N\-I\-T}}\item[{\em 
+\hypertarget{mod__proxy_8c_a02dc6a96fad1fa4cc37f695206e40381a4e35d79a72ecabd4e857babeb2248966}{P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-I\-N\-I\-T}\label{mod__proxy_8c_a02dc6a96fad1fa4cc37f695206e40381a4e35d79a72ecabd4e857babeb2248966}
+}]\index{P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T@{P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T}!mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}}\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T@{P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T}}\item[{\em 
+\hypertarget{mod__proxy_8c_a02dc6a96fad1fa4cc37f695206e40381a50dab4f79e862d485d4e41ef496fc6f5}{P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T}\label{mod__proxy_8c_a02dc6a96fad1fa4cc37f695206e40381a50dab4f79e862d485d4e41ef496fc6f5}
+}]\index{P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-P\-R\-E\-P\-A\-R\-E\-\_\-\-W\-R\-I\-T\-E@{P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-P\-R\-E\-P\-A\-R\-E\-\_\-\-W\-R\-I\-T\-E}!mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}}\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-P\-R\-E\-P\-A\-R\-E\-\_\-\-W\-R\-I\-T\-E@{P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-P\-R\-E\-P\-A\-R\-E\-\_\-\-W\-R\-I\-T\-E}}\item[{\em 
+\hypertarget{mod__proxy_8c_a02dc6a96fad1fa4cc37f695206e40381a6756bd216e6908bad82de00d0ddb2fce}{P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-P\-R\-E\-P\-A\-R\-E\-\_\-\-W\-R\-I\-T\-E}\label{mod__proxy_8c_a02dc6a96fad1fa4cc37f695206e40381a6756bd216e6908bad82de00d0ddb2fce}
+}]\index{P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-W\-R\-I\-T\-E@{P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-W\-R\-I\-T\-E}!mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}}\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-W\-R\-I\-T\-E@{P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-W\-R\-I\-T\-E}}\item[{\em 
+\hypertarget{mod__proxy_8c_a02dc6a96fad1fa4cc37f695206e40381afd8bfad3c56c2b7307219ce3235ebd3c}{P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-W\-R\-I\-T\-E}\label{mod__proxy_8c_a02dc6a96fad1fa4cc37f695206e40381afd8bfad3c56c2b7307219ce3235ebd3c}
+}]\index{P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-A\-D@{P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-A\-D}!mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}}\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-A\-D@{P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-A\-D}}\item[{\em 
+\hypertarget{mod__proxy_8c_a02dc6a96fad1fa4cc37f695206e40381a2ffb04f1dae448656c147043a23917fd}{P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-A\-D}\label{mod__proxy_8c_a02dc6a96fad1fa4cc37f695206e40381a2ffb04f1dae448656c147043a23917fd}
+}]\end{description}
+\end{Desc}
+
+
+\subsection{Function Documentation}
+\hypertarget{mod__proxy_8c_a9bde696250692155d55d04a475e1f78d}{\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!F\-R\-E\-E\-\_\-\-F\-U\-N\-C@{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}}
+\index{F\-R\-E\-E\-\_\-\-F\-U\-N\-C@{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}!mod_proxy.c@{mod\-\_\-proxy.\-c}}
+\subsubsection[{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}F\-R\-E\-E\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-proxy\-\_\-free}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__proxy_8c_a9bde696250692155d55d04a475e1f78d}
+
+
+References array\-\_\-free(), plugin\-\_\-data\-::balance\-\_\-buf, buffer\-\_\-free(), plugin\-\_\-data\-::config\-\_\-storage, plugin\-\_\-config\-::extensions, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, plugin\-\_\-data\-::parse\-\_\-response, and U\-N\-U\-S\-E\-D.
+
+\hypertarget{mod__proxy_8c_af9f2bc62e505066048458b2893d9c111}{\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!handler\-\_\-ctx\-\_\-free@{handler\-\_\-ctx\-\_\-free}}
+\index{handler\-\_\-ctx\-\_\-free@{handler\-\_\-ctx\-\_\-free}!mod_proxy.c@{mod\-\_\-proxy.\-c}}
+\subsubsection[{handler\-\_\-ctx\-\_\-free}]{\setlength{\rightskip}{0pt plus 5cm}static void handler\-\_\-ctx\-\_\-free (
+\begin{DoxyParamCaption}
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__proxy_8c_af9f2bc62e505066048458b2893d9c111}
+
+
+References buffer\-\_\-free(), chunkqueue\-\_\-free(), handler\-\_\-ctx\-::response, handler\-\_\-ctx\-::response\-\_\-header, and handler\-\_\-ctx\-::wb.
+
+
+
+Referenced by proxy\-\_\-connection\-\_\-close().
+
+\hypertarget{mod__proxy_8c_ad4882f71dc486b383f74029b751ce1a2}{\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!handler\-\_\-ctx\-\_\-init@{handler\-\_\-ctx\-\_\-init}}
+\index{handler\-\_\-ctx\-\_\-init@{handler\-\_\-ctx\-\_\-init}!mod_proxy.c@{mod\-\_\-proxy.\-c}}
+\subsubsection[{handler\-\_\-ctx\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf handler\-\_\-ctx}$\ast$ handler\-\_\-ctx\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__proxy_8c_ad4882f71dc486b383f74029b751ce1a2}
+
+
+References buffer\-\_\-init(), chunkqueue\-\_\-init(), handler\-\_\-ctx\-::fd, handler\-\_\-ctx\-::fde\-\_\-ndx, handler\-\_\-ctx\-::host, P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-I\-N\-I\-T, handler\-\_\-ctx\-::response, handler\-\_\-ctx\-::response\-\_\-header, handler\-\_\-ctx\-::state, handler\-\_\-ctx\-::wb, and handler\-\_\-ctx\-::wb\-\_\-reqlen.
+
+
+
+Referenced by mod\-\_\-proxy\-\_\-check\-\_\-extension().
+
+\hypertarget{mod__proxy_8c_a8a08a216a81085f2cb0aa0814eae8eee}{\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!I\-N\-I\-T\-\_\-\-F\-U\-N\-C@{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}}
+\index{I\-N\-I\-T\-\_\-\-F\-U\-N\-C@{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}!mod_proxy.c@{mod\-\_\-proxy.\-c}}
+\subsubsection[{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}I\-N\-I\-T\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-proxy\-\_\-init}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__proxy_8c_a8a08a216a81085f2cb0aa0814eae8eee}
+
+
+References plugin\-\_\-data\-::balance\-\_\-buf, buffer\-\_\-init(), and plugin\-\_\-data\-::parse\-\_\-response.
+
+\hypertarget{mod__proxy_8c_a363df97c8aa6043d7e5c02e47de51ce8}{\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!mod\-\_\-proxy\-\_\-check\-\_\-extension@{mod\-\_\-proxy\-\_\-check\-\_\-extension}}
+\index{mod\-\_\-proxy\-\_\-check\-\_\-extension@{mod\-\_\-proxy\-\_\-check\-\_\-extension}!mod_proxy.c@{mod\-\_\-proxy.\-c}}
+\subsubsection[{mod\-\_\-proxy\-\_\-check\-\_\-extension}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf handler\-\_\-t} mod\-\_\-proxy\-\_\-check\-\_\-extension (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{void $\ast$}]{p\-\_\-d}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__proxy_8c_a363df97c8aa6043d7e5c02e47de51ce8}
+
+
+References plugin\-\_\-config\-::balance, buffer\-\_\-is\-\_\-empty(), buffer\-\_\-string\-\_\-is\-\_\-empty(), buffer\-\_\-string\-\_\-length(), plugin\-\_\-data\-::conf, handler\-\_\-ctx\-::conf, array\-::data, data\-\_\-proxy, plugin\-\_\-config\-::debug, D\-I\-R\-E\-C\-T, handler\-\_\-ctx\-::ext, plugin\-\_\-config\-::extensions, connection\-::file\-\_\-started, handler\-\_\-ctx\-\_\-init(), H\-A\-N\-D\-L\-E\-R\-\_\-\-E\-R\-R\-O\-R, H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-I\-N\-I\-S\-H\-E\-D, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, handler\-\_\-ctx\-::host, log\-\_\-error\-\_\-write(), mod\-\_\-proxy\-\_\-extension\-\_\-host\-\_\-get(), mod\-\_\-proxy\-\_\-patch\-\_\-connection(), connection\-::mode, request\-\_\-uri\-::path, connection\-::plugin\-\_\-ctx, handler\-\_\-ctx\-::plugin\-\_\-data, buffer\-::ptr, handler\-\_\-ctx\-::remote\-\_\-conn, plugin\-\_\-config\-::replace\-\_\-http\-\_\-host, connection\-::uri, and array\-::used.
+
+
+
+Referenced by mod\-\_\-proxy\-\_\-plugin\-\_\-init().
+
+\hypertarget{mod__proxy_8c_af3115941d478a0b4e14bc8123da8ea20}{\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!mod\-\_\-proxy\-\_\-connection\-\_\-reset@{mod\-\_\-proxy\-\_\-connection\-\_\-reset}}
+\index{mod\-\_\-proxy\-\_\-connection\-\_\-reset@{mod\-\_\-proxy\-\_\-connection\-\_\-reset}!mod_proxy.c@{mod\-\_\-proxy.\-c}}
+\subsubsection[{mod\-\_\-proxy\-\_\-connection\-\_\-reset}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf handler\-\_\-t} mod\-\_\-proxy\-\_\-connection\-\_\-reset (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{void $\ast$}]{p\-\_\-d}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__proxy_8c_af3115941d478a0b4e14bc8123da8ea20}
+
+
+References H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, connection\-::plugin\-\_\-ctx, and proxy\-\_\-connection\-\_\-close().
+
+
+
+Referenced by mod\-\_\-proxy\-\_\-plugin\-\_\-init().
+
+\hypertarget{mod__proxy_8c_ae8e4eaa37354e2ed9c1ffa902f58a610}{\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!mod\-\_\-proxy\-\_\-extension\-\_\-host\-\_\-get@{mod\-\_\-proxy\-\_\-extension\-\_\-host\-\_\-get}}
+\index{mod\-\_\-proxy\-\_\-extension\-\_\-host\-\_\-get@{mod\-\_\-proxy\-\_\-extension\-\_\-host\-\_\-get}!mod_proxy.c@{mod\-\_\-proxy.\-c}}
+\subsubsection[{mod\-\_\-proxy\-\_\-extension\-\_\-host\-\_\-get}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf data\-\_\-proxy}$\ast$ mod\-\_\-proxy\-\_\-extension\-\_\-host\-\_\-get (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf data\-\_\-array} $\ast$}]{extension, }
+\item[{{\bf proxy\-\_\-balance\-\_\-t}}]{balance, }
+\item[{int}]{debug}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__proxy_8c_ae8e4eaa37354e2ed9c1ffa902f58a610}
+
+
+References request\-\_\-uri\-::authority, C\-O\-N\-S\-T\-\_\-\-B\-U\-F\-\_\-\-L\-E\-N, array\-::data, data\-\_\-proxy, D\-I\-R\-E\-C\-T, connection\-::dst\-\_\-addr\-\_\-buf, force\-\_\-assert, generate\-\_\-crc32c(), connection\-::http\-\_\-status, log\-\_\-error\-\_\-write(), connection\-::mode, request\-\_\-uri\-::path, P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-F\-A\-I\-R, P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-H\-A\-S\-H, P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-R\-R, P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-S\-T\-I\-C\-K\-Y, connection\-::uri, array\-::used, and data\-\_\-array\-::value.
+
+
+
+Referenced by mod\-\_\-proxy\-\_\-check\-\_\-extension(), and proxy\-\_\-reconnect().
+
+\hypertarget{mod__proxy_8c_afd33245abb9e86cccdf88df40a5df396}{\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!mod\-\_\-proxy\-\_\-patch\-\_\-connection@{mod\-\_\-proxy\-\_\-patch\-\_\-connection}}
+\index{mod\-\_\-proxy\-\_\-patch\-\_\-connection@{mod\-\_\-proxy\-\_\-patch\-\_\-connection}!mod_proxy.c@{mod\-\_\-proxy.\-c}}
+\subsubsection[{mod\-\_\-proxy\-\_\-patch\-\_\-connection}]{\setlength{\rightskip}{0pt plus 5cm}static int mod\-\_\-proxy\-\_\-patch\-\_\-connection (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf plugin\-\_\-data} $\ast$}]{p}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__proxy_8c_afd33245abb9e86cccdf88df40a5df396}
+
+
+References buffer\-\_\-is\-\_\-equal\-\_\-string(), config\-\_\-check\-\_\-cond(), server\-::config\-\_\-context, plugin\-\_\-data\-::config\-\_\-storage, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, array\-::data, P\-A\-T\-C\-H, array\-::used, and data\-\_\-config\-::value.
+
+
+
+Referenced by mod\-\_\-proxy\-\_\-check\-\_\-extension().
+
+\hypertarget{mod__proxy_8c_a195bf741744ca2a93fe6d2d291e30fdf}{\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!mod\-\_\-proxy\-\_\-plugin\-\_\-init@{mod\-\_\-proxy\-\_\-plugin\-\_\-init}}
+\index{mod\-\_\-proxy\-\_\-plugin\-\_\-init@{mod\-\_\-proxy\-\_\-plugin\-\_\-init}!mod_proxy.c@{mod\-\_\-proxy.\-c}}
+\subsubsection[{mod\-\_\-proxy\-\_\-plugin\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}int mod\-\_\-proxy\-\_\-plugin\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{{\bf plugin} $\ast$}]{p}
+\end{DoxyParamCaption}
+)}}\label{mod__proxy_8c_a195bf741744ca2a93fe6d2d291e30fdf}
+
+
+References buffer\-\_\-init\-\_\-string(), plugin\-::cleanup, plugin\-::connection\-\_\-reset, plugin\-::data, plugin\-::handle\-\_\-connection\-\_\-close, plugin\-::handle\-\_\-subrequest, plugin\-::handle\-\_\-trigger, plugin\-::handle\-\_\-uri\-\_\-clean, plugin\-::init, mod\-\_\-proxy\-\_\-check\-\_\-extension(), mod\-\_\-proxy\-\_\-connection\-\_\-reset(), plugin\-::name, plugin\-::set\-\_\-defaults, and plugin\-::version.
+
+\hypertarget{mod__proxy_8c_a4ca4e855a7cc30646341256f14595b1b}{\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!proxy\-\_\-append\-\_\-header@{proxy\-\_\-append\-\_\-header}}
+\index{proxy\-\_\-append\-\_\-header@{proxy\-\_\-append\-\_\-header}!mod_proxy.c@{mod\-\_\-proxy.\-c}}
+\subsubsection[{proxy\-\_\-append\-\_\-header}]{\setlength{\rightskip}{0pt plus 5cm}static void proxy\-\_\-append\-\_\-header (
+\begin{DoxyParamCaption}
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{const char $\ast$}]{key, }
+\item[{const char $\ast$}]{value}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__proxy_8c_a4ca4e855a7cc30646341256f14595b1b}
+
+
+References array\-\_\-get\-\_\-unused\-\_\-element(), array\-\_\-insert\-\_\-unique(), buffer\-\_\-append\-\_\-string(), buffer\-\_\-copy\-\_\-string(), data\-\_\-string\-\_\-init(), request\-::headers, connection\-::request, T\-Y\-P\-E\-\_\-\-S\-T\-R\-I\-N\-G, and data\-\_\-string\-::value.
+
+
+
+Referenced by proxy\-\_\-create\-\_\-env().
+
+\hypertarget{mod__proxy_8c_a43f9a67336328abd05a11290ad1db9b0}{\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!proxy\-\_\-backend\-\_\-close@{proxy\-\_\-backend\-\_\-close}}
+\index{proxy\-\_\-backend\-\_\-close@{proxy\-\_\-backend\-\_\-close}!mod_proxy.c@{mod\-\_\-proxy.\-c}}
+\subsubsection[{proxy\-\_\-backend\-\_\-close}]{\setlength{\rightskip}{0pt plus 5cm}static void proxy\-\_\-backend\-\_\-close (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__proxy_8c_a43f9a67336328abd05a11290ad1db9b0}
+
+
+References server\-::ev, handler\-\_\-ctx\-::fd, handler\-\_\-ctx\-::fde\-\_\-ndx, fdevent\-\_\-event\-\_\-del(), fdevent\-\_\-sched\-\_\-close(), fdevent\-\_\-unregister(), and handler\-\_\-ctx\-::host.
+
+
+
+Referenced by proxy\-\_\-connection\-\_\-close(), and proxy\-\_\-reconnect().
+
+\hypertarget{mod__proxy_8c_af9bac1f3b2ae2f3ab9c90fd88a614640}{\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!proxy\-\_\-connection\-\_\-close@{proxy\-\_\-connection\-\_\-close}}
+\index{proxy\-\_\-connection\-\_\-close@{proxy\-\_\-connection\-\_\-close}!mod_proxy.c@{mod\-\_\-proxy.\-c}}
+\subsubsection[{proxy\-\_\-connection\-\_\-close}]{\setlength{\rightskip}{0pt plus 5cm}static void proxy\-\_\-connection\-\_\-close (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__proxy_8c_af9bac1f3b2ae2f3ab9c90fd88a614640}
+
+
+References handler\-\_\-ctx\-\_\-free(), http\-\_\-response\-\_\-backend\-\_\-done(), connection\-::mode, connection\-::plugin\-\_\-ctx, handler\-\_\-ctx\-::plugin\-\_\-data, proxy\-\_\-backend\-\_\-close(), and handler\-\_\-ctx\-::remote\-\_\-conn.
+
+
+
+Referenced by mod\-\_\-proxy\-\_\-connection\-\_\-reset(), proxy\-\_\-handle\-\_\-fdevent(), and proxy\-\_\-recv\-\_\-response().
+
+\hypertarget{mod__proxy_8c_a4586c2ddad69d2980487e43c464acfa1}{\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!proxy\-\_\-create\-\_\-env@{proxy\-\_\-create\-\_\-env}}
+\index{proxy\-\_\-create\-\_\-env@{proxy\-\_\-create\-\_\-env}!mod_proxy.c@{mod\-\_\-proxy.\-c}}
+\subsubsection[{proxy\-\_\-create\-\_\-env}]{\setlength{\rightskip}{0pt plus 5cm}static int proxy\-\_\-create\-\_\-env (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__proxy_8c_a4586c2ddad69d2980487e43c464acfa1}
+
+
+References buffer\-\_\-append\-\_\-string\-\_\-buffer(), buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-copy\-\_\-string(), buffer\-\_\-free(), buffer\-\_\-init(), buffer\-\_\-is\-\_\-empty(), buffer\-\_\-is\-\_\-equal\-\_\-caseless\-\_\-string(), buffer\-\_\-string\-\_\-is\-\_\-empty(), buffer\-\_\-string\-\_\-length(), chunkqueue\-\_\-append\-\_\-buffer(), chunkqueue\-\_\-append\-\_\-chunkqueue(), handler\-\_\-ctx\-::conf, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, request\-::content\-\_\-length, array\-::data, plugin\-\_\-config\-::debug, connection\-::dst\-\_\-addr, get\-\_\-http\-\_\-method\-\_\-name(), request\-::headers, handler\-\_\-ctx\-::host, request\-::http\-\_\-host, request\-::http\-\_\-method, inet\-\_\-ntop\-\_\-cache\-\_\-get\-\_\-ip(), log\-\_\-error\-\_\-write(), proxy\-\_\-append\-\_\-header(), proxy\-\_\-set\-\_\-header(), buffer\-::ptr, handler\-\_\-ctx\-::remote\-\_\-conn, plugin\-\_\-config\-::replace\-\_\-http\-\_\-host, connection\-::request, connection\-::request\-\_\-content\-\_\-queue, request\-\_\-uri\-::scheme, request\-::uri, connection\-::uri, array\-::used, data\-\_\-string\-::value, handler\-\_\-ctx\-::wb, and handler\-\_\-ctx\-::wb\-\_\-reqlen.
+
+
+
+Referenced by proxy\-\_\-write\-\_\-request().
+
+\hypertarget{mod__proxy_8c_a31646d1fc9eaa790a7d630d093e5fe41}{\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!proxy\-\_\-demux\-\_\-response@{proxy\-\_\-demux\-\_\-response}}
+\index{proxy\-\_\-demux\-\_\-response@{proxy\-\_\-demux\-\_\-response}!mod_proxy.c@{mod\-\_\-proxy.\-c}}
+\subsubsection[{proxy\-\_\-demux\-\_\-response}]{\setlength{\rightskip}{0pt plus 5cm}static int proxy\-\_\-demux\-\_\-response (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__proxy_8c_a31646d1fc9eaa790a7d630d093e5fe41}
+
+
+References buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-commit(), buffer\-\_\-reset(), buffer\-\_\-search\-\_\-string\-\_\-len(), buffer\-\_\-string\-\_\-length(), buffer\-\_\-string\-\_\-prepare\-\_\-append(), buffer\-\_\-string\-\_\-prepare\-\_\-copy(), buffer\-\_\-string\-\_\-space(), chunkqueue\-\_\-length(), handler\-\_\-ctx\-::conf, connection\-::conf, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, plugin\-\_\-config\-::debug, D\-I\-R\-E\-C\-T, server\-::ev, handler\-\_\-ctx\-::fd, handler\-\_\-ctx\-::fde\-\_\-ndx, fdevent\-\_\-event\-\_\-add(), fdevent\-\_\-event\-\_\-clr(), F\-D\-E\-V\-E\-N\-T\-\_\-\-I\-N, F\-D\-E\-V\-E\-N\-T\-\_\-\-S\-T\-R\-E\-A\-M\-\_\-\-R\-E\-S\-P\-O\-N\-S\-E\-\_\-\-B\-U\-F\-M\-I\-N, connection\-::file\-\_\-started, force\-\_\-assert, connection\-::got\-\_\-response, http\-\_\-chunk\-\_\-append\-\_\-buffer(), http\-\_\-chunk\-\_\-append\-\_\-mem(), connection\-::http\-\_\-status, connection\-::is\-\_\-writable, log\-\_\-error\-\_\-write(), M\-A\-X\-\_\-\-H\-T\-T\-P\-\_\-\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-H\-E\-A\-D\-E\-R, connection\-::mode, request\-\_\-uri\-::path, handler\-\_\-ctx\-::plugin\-\_\-data, proxy\-\_\-response\-\_\-parse(), buffer\-::ptr, handler\-\_\-ctx\-::remote\-\_\-conn, handler\-\_\-ctx\-::response, handler\-\_\-ctx\-::response\-\_\-header, specific\-\_\-config\-::stream\-\_\-response\-\_\-body, connection\-::uri, buffer\-::used, and connection\-::write\-\_\-queue.
+
+
+
+Referenced by proxy\-\_\-recv\-\_\-response().
+
+\hypertarget{mod__proxy_8c_a96fcf904172a4e93b76d73656b551ae8}{\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!proxy\-\_\-establish\-\_\-connection@{proxy\-\_\-establish\-\_\-connection}}
+\index{proxy\-\_\-establish\-\_\-connection@{proxy\-\_\-establish\-\_\-connection}!mod_proxy.c@{mod\-\_\-proxy.\-c}}
+\subsubsection[{proxy\-\_\-establish\-\_\-connection}]{\setlength{\rightskip}{0pt plus 5cm}static int proxy\-\_\-establish\-\_\-connection (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__proxy_8c_a96fcf904172a4e93b76d73656b551ae8}
+
+
+References buffer\-\_\-string\-\_\-length(), handler\-\_\-ctx\-::conf, data\-\_\-proxy, plugin\-\_\-config\-::debug, handler\-\_\-ctx\-::fd, handler\-\_\-ctx\-::host, and log\-\_\-error\-\_\-write().
+
+
+
+Referenced by proxy\-\_\-write\-\_\-request().
+
+\hypertarget{mod__proxy_8c_aaa5ac9077881c024087cb01a58fa194f}{\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!proxy\-\_\-handle\-\_\-fdevent@{proxy\-\_\-handle\-\_\-fdevent}}
+\index{proxy\-\_\-handle\-\_\-fdevent@{proxy\-\_\-handle\-\_\-fdevent}!mod_proxy.c@{mod\-\_\-proxy.\-c}}
+\subsubsection[{proxy\-\_\-handle\-\_\-fdevent}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf handler\-\_\-t} proxy\-\_\-handle\-\_\-fdevent (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{void $\ast$}]{ctx, }
+\item[{int}]{revents}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__proxy_8c_aaa5ac9077881c024087cb01a58fa194f}
+
+
+References F\-D\-E\-V\-E\-N\-T\-\_\-\-E\-R\-R, F\-D\-E\-V\-E\-N\-T\-\_\-\-H\-U\-P, F\-D\-E\-V\-E\-N\-T\-\_\-\-I\-N, F\-D\-E\-V\-E\-N\-T\-\_\-\-O\-U\-T, connection\-::file\-\_\-started, H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-I\-N\-I\-S\-H\-E\-D, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, http\-\_\-response\-\_\-backend\-\_\-error(), joblist\-\_\-append(), log\-\_\-error\-\_\-write(), proxy\-\_\-connection\-\_\-close(), proxy\-\_\-recv\-\_\-response(), proxy\-\_\-send\-\_\-request(), P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T, handler\-\_\-ctx\-::remote\-\_\-conn, and handler\-\_\-ctx\-::state.
+
+
+
+Referenced by proxy\-\_\-write\-\_\-request().
+
+\hypertarget{mod__proxy_8c_a58075d59944551ddd33f83f3ff82472a}{\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!proxy\-\_\-reconnect@{proxy\-\_\-reconnect}}
+\index{proxy\-\_\-reconnect@{proxy\-\_\-reconnect}!mod_proxy.c@{mod\-\_\-proxy.\-c}}
+\subsubsection[{proxy\-\_\-reconnect}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf handler\-\_\-t} proxy\-\_\-reconnect (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__proxy_8c_a58075d59944551ddd33f83f3ff82472a}
+
+
+References plugin\-\_\-config\-::balance, handler\-\_\-ctx\-::conf, plugin\-\_\-config\-::debug, handler\-\_\-ctx\-::ext, H\-A\-N\-D\-L\-E\-R\-\_\-\-C\-O\-M\-E\-B\-A\-C\-K, H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-I\-N\-I\-S\-H\-E\-D, handler\-\_\-ctx\-::host, mod\-\_\-proxy\-\_\-extension\-\_\-host\-\_\-get(), proxy\-\_\-backend\-\_\-close(), P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-I\-N\-I\-T, handler\-\_\-ctx\-::remote\-\_\-conn, and handler\-\_\-ctx\-::state.
+
+
+
+Referenced by proxy\-\_\-send\-\_\-request().
+
+\hypertarget{mod__proxy_8c_a197c9cad466e2c5765de03ffbdbc0f8c}{\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!proxy\-\_\-recv\-\_\-response@{proxy\-\_\-recv\-\_\-response}}
+\index{proxy\-\_\-recv\-\_\-response@{proxy\-\_\-recv\-\_\-response}!mod_proxy.c@{mod\-\_\-proxy.\-c}}
+\subsubsection[{proxy\-\_\-recv\-\_\-response}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf handler\-\_\-t} proxy\-\_\-recv\-\_\-response (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__proxy_8c_a197c9cad466e2c5765de03ffbdbc0f8c}
+
+
+References H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-I\-N\-I\-S\-H\-E\-D, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, http\-\_\-response\-\_\-backend\-\_\-error(), proxy\-\_\-connection\-\_\-close(), proxy\-\_\-demux\-\_\-response(), and handler\-\_\-ctx\-::remote\-\_\-conn.
+
+
+
+Referenced by proxy\-\_\-handle\-\_\-fdevent(), and S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__proxy_8c_a449e22b38d2a4cd07f7aeeaa4cb2a7fa}{\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!proxy\-\_\-response\-\_\-parse@{proxy\-\_\-response\-\_\-parse}}
+\index{proxy\-\_\-response\-\_\-parse@{proxy\-\_\-response\-\_\-parse}!mod_proxy.c@{mod\-\_\-proxy.\-c}}
+\subsubsection[{proxy\-\_\-response\-\_\-parse}]{\setlength{\rightskip}{0pt plus 5cm}static int proxy\-\_\-response\-\_\-parse (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf plugin\-\_\-data} $\ast$}]{p, }
+\item[{{\bf buffer} $\ast$}]{in}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__proxy_8c_a449e22b38d2a4cd07f7aeeaa4cb2a7fa}
+
+
+References array\-\_\-get\-\_\-unused\-\_\-element(), array\-\_\-insert\-\_\-unique(), buffer\-\_\-copy\-\_\-buffer(), buffer\-\_\-copy\-\_\-string(), buffer\-\_\-copy\-\_\-string\-\_\-len(), response\-::content\-\_\-length, data\-\_\-response\-\_\-init(), response\-::headers, H\-T\-T\-P\-\_\-\-C\-O\-N\-T\-E\-N\-T\-\_\-\-L\-E\-N\-G\-T\-H, H\-T\-T\-P\-\_\-\-D\-A\-T\-E, H\-T\-T\-P\-\_\-\-L\-O\-C\-A\-T\-I\-O\-N, H\-T\-T\-P\-\_\-\-S\-T\-A\-T\-U\-S, connection\-::http\-\_\-status, plugin\-\_\-data\-::parse\-\_\-response, connection\-::parsed\-\_\-response, buffer\-::ptr, connection\-::response, T\-Y\-P\-E\-\_\-\-S\-T\-R\-I\-N\-G, U\-N\-U\-S\-E\-D, and data\-\_\-string\-::value.
+
+
+
+Referenced by proxy\-\_\-demux\-\_\-response().
+
+\hypertarget{mod__proxy_8c_a46a4ac734419ca3fa4f510484db4de23}{\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!proxy\-\_\-send\-\_\-request@{proxy\-\_\-send\-\_\-request}}
+\index{proxy\-\_\-send\-\_\-request@{proxy\-\_\-send\-\_\-request}!mod_proxy.c@{mod\-\_\-proxy.\-c}}
+\subsubsection[{proxy\-\_\-send\-\_\-request}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf handler\-\_\-t} proxy\-\_\-send\-\_\-request (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__proxy_8c_a46a4ac734419ca3fa4f510484db4de23}
+
+
+References server\-::cur\-\_\-ts, data\-\_\-proxy, handler\-\_\-ctx\-::fd, H\-A\-N\-D\-L\-E\-R\-\_\-\-E\-R\-R\-O\-R, handler\-\_\-ctx\-::host, log\-\_\-error\-\_\-write(), proxy\-\_\-reconnect(), and proxy\-\_\-write\-\_\-request().
+
+
+
+Referenced by proxy\-\_\-handle\-\_\-fdevent(), and S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__proxy_8c_a885b2639318c83431cb4fac373d77700}{\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!proxy\-\_\-set\-\_\-header@{proxy\-\_\-set\-\_\-header}}
+\index{proxy\-\_\-set\-\_\-header@{proxy\-\_\-set\-\_\-header}!mod_proxy.c@{mod\-\_\-proxy.\-c}}
+\subsubsection[{proxy\-\_\-set\-\_\-header}]{\setlength{\rightskip}{0pt plus 5cm}static void proxy\-\_\-set\-\_\-header (
+\begin{DoxyParamCaption}
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{const char $\ast$}]{key, }
+\item[{const char $\ast$}]{value}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__proxy_8c_a885b2639318c83431cb4fac373d77700}
+
+
+References array\-\_\-get\-\_\-unused\-\_\-element(), array\-\_\-insert\-\_\-unique(), buffer\-\_\-copy\-\_\-string(), data\-\_\-string\-\_\-init(), request\-::headers, connection\-::request, T\-Y\-P\-E\-\_\-\-S\-T\-R\-I\-N\-G, and data\-\_\-string\-::value.
+
+
+
+Referenced by proxy\-\_\-create\-\_\-env().
+
+\hypertarget{mod__proxy_8c_a94fc6b121a544a6ea67962a0651eb557}{\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!proxy\-\_\-set\-\_\-state@{proxy\-\_\-set\-\_\-state}}
+\index{proxy\-\_\-set\-\_\-state@{proxy\-\_\-set\-\_\-state}!mod_proxy.c@{mod\-\_\-proxy.\-c}}
+\subsubsection[{proxy\-\_\-set\-\_\-state}]{\setlength{\rightskip}{0pt plus 5cm}static int proxy\-\_\-set\-\_\-state (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx, }
+\item[{{\bf proxy\-\_\-connection\-\_\-state\-\_\-t}}]{state}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__proxy_8c_a94fc6b121a544a6ea67962a0651eb557}
+
+
+References server\-::cur\-\_\-ts, handler\-\_\-ctx\-::state, and handler\-\_\-ctx\-::state\-\_\-timestamp.
+
+
+
+Referenced by proxy\-\_\-write\-\_\-request().
+
+\hypertarget{mod__proxy_8c_a4db99ddf2c8352fd7beb850acdd9fc00}{\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!proxy\-\_\-write\-\_\-request@{proxy\-\_\-write\-\_\-request}}
+\index{proxy\-\_\-write\-\_\-request@{proxy\-\_\-write\-\_\-request}!mod_proxy.c@{mod\-\_\-proxy.\-c}}
+\subsubsection[{proxy\-\_\-write\-\_\-request}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf handler\-\_\-t} proxy\-\_\-write\-\_\-request (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf handler\-\_\-ctx} $\ast$}]{hctx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__proxy_8c_a4db99ddf2c8352fd7beb850acdd9fc00}
+
+
+References chunkqueue\-::bytes\-\_\-in, chunkqueue\-::bytes\-\_\-out, chunkqueue\-\_\-remove\-\_\-finished\-\_\-chunks(), handler\-\_\-ctx\-::conf, connection\-::conf, server\-::cur\-\_\-fds, data\-\_\-proxy, plugin\-\_\-config\-::debug, server\-::ev, handler\-\_\-ctx\-::fd, handler\-\_\-ctx\-::fde\-\_\-ndx, fdevent\-\_\-event\-\_\-add(), fdevent\-\_\-event\-\_\-clr(), fdevent\-\_\-event\-\_\-set(), fdevent\-\_\-fcntl\-\_\-set(), F\-D\-E\-V\-E\-N\-T\-\_\-\-I\-N, F\-D\-E\-V\-E\-N\-T\-\_\-\-O\-U\-T, fdevent\-\_\-register(), fdevent\-\_\-socket\-\_\-nb\-\_\-cloexec(), F\-D\-E\-V\-E\-N\-T\-\_\-\-S\-T\-R\-E\-A\-M\-\_\-\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-P\-O\-L\-L\-I\-N, H\-A\-N\-D\-L\-E\-R\-\_\-\-E\-R\-R\-O\-R, H\-A\-N\-D\-L\-E\-R\-\_\-\-W\-A\-I\-T\-\_\-\-F\-O\-R\-\_\-\-E\-V\-E\-N\-T, handler\-\_\-ctx\-::host, connection\-::is\-\_\-readable, log\-\_\-error\-\_\-write(), M\-A\-X\-\_\-\-W\-R\-I\-T\-E\-\_\-\-L\-I\-M\-I\-T, server\-::network\-\_\-backend\-\_\-write, fcgi\-\_\-extension\-\_\-host\-::port, proxy\-\_\-create\-\_\-env(), proxy\-\_\-establish\-\_\-connection(), proxy\-\_\-handle\-\_\-fdevent(), proxy\-\_\-set\-\_\-state(), P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T, P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-I\-N\-I\-T, P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-P\-R\-E\-P\-A\-R\-E\-\_\-\-W\-R\-I\-T\-E, P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-A\-D, P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-W\-R\-I\-T\-E, handler\-\_\-ctx\-::remote\-\_\-conn, handler\-\_\-ctx\-::state, specific\-\_\-config\-::stream\-\_\-request\-\_\-body, handler\-\_\-ctx\-::wb, and handler\-\_\-ctx\-::wb\-\_\-reqlen.
+
+
+
+Referenced by proxy\-\_\-send\-\_\-request().
+
+\hypertarget{mod__proxy_8c_a07ca95b3df56f7e71b3b3b63cc692c56}{\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C@{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}}
+\index{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C@{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}!mod_proxy.c@{mod\-\_\-proxy.\-c}}
+\subsubsection[{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-proxy\-\_\-set\-\_\-defaults}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__proxy_8c_a07ca95b3df56f7e71b3b3b63cc692c56}
+
+
+References array\-\_\-get\-\_\-element(), array\-\_\-init(), array\-\_\-insert\-\_\-unique(), plugin\-\_\-data\-::balance\-\_\-buf, buffer\-\_\-copy\-\_\-buffer(), buffer\-\_\-is\-\_\-equal\-\_\-string(), buffer\-\_\-reset(), buffer\-\_\-string\-\_\-is\-\_\-empty(), config\-\_\-insert\-\_\-values\-\_\-global(), config\-\_\-insert\-\_\-values\-\_\-internal(), plugin\-\_\-data\-::config\-\_\-storage, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, array\-::data, data\-\_\-array\-\_\-init(), data\-\_\-proxy, data\-\_\-proxy\-\_\-init, config\-\_\-values\-\_\-t\-::destination, plugin\-\_\-config\-::extensions, H\-A\-N\-D\-L\-E\-R\-\_\-\-E\-R\-R\-O\-R, log\-\_\-error\-\_\-write(), P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-F\-A\-I\-R, P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-H\-A\-S\-H, P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-R\-R, P\-R\-O\-X\-Y\-\_\-\-B\-A\-L\-A\-N\-C\-E\-\_\-\-S\-T\-I\-C\-K\-Y, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-B\-O\-O\-L\-E\-A\-N, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-L\-O\-C\-A\-L, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T\-I\-O\-N, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-S\-E\-R\-V\-E\-R, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-U\-N\-S\-E\-T, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-H\-O\-R\-T, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-T\-R\-I\-N\-G, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-U\-N\-S\-E\-T, T\-Y\-P\-E\-\_\-\-A\-R\-R\-A\-Y, array\-::used, data\-\_\-array\-::value, and data\-\_\-config\-::value.
+
+\hypertarget{mod__proxy_8c_a90898dd7adac6346ad103fce82d7900b}{\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C@{S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C}}
+\index{S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C@{S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C}!mod_proxy.c@{mod\-\_\-proxy.\-c}}
+\subsubsection[{S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-proxy\-\_\-handle\-\_\-subrequest}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__proxy_8c_a90898dd7adac6346ad103fce82d7900b}
+
+
+References chunkqueue\-::bytes\-\_\-in, chunkqueue\-::bytes\-\_\-out, chunkqueue\-\_\-append\-\_\-chunkqueue(), chunkqueue\-\_\-is\-\_\-empty(), chunkqueue\-\_\-length(), C\-O\-N\-\_\-\-S\-T\-A\-T\-E\-\_\-\-R\-E\-A\-D\-\_\-\-P\-O\-S\-T, connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-error(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-state(), handler\-\_\-ctx\-::fd, handler\-\_\-ctx\-::fde\-\_\-ndx, fdevent\-\_\-event\-\_\-clr(), fdevent\-\_\-event\-\_\-get\-\_\-interest, F\-D\-E\-V\-E\-N\-T\-\_\-\-I\-N, F\-D\-E\-V\-E\-N\-T\-\_\-\-O\-U\-T, F\-D\-E\-V\-E\-N\-T\-\_\-\-S\-T\-R\-E\-A\-M\-\_\-\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-B\-U\-F\-M\-I\-N, F\-D\-E\-V\-E\-N\-T\-\_\-\-S\-T\-R\-E\-A\-M\-\_\-\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-P\-O\-L\-L\-I\-N, F\-D\-E\-V\-E\-N\-T\-\_\-\-S\-T\-R\-E\-A\-M\-\_\-\-R\-E\-S\-P\-O\-N\-S\-E\-\_\-\-B\-U\-F\-M\-I\-N, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, H\-A\-N\-D\-L\-E\-R\-\_\-\-W\-A\-I\-T\-\_\-\-F\-O\-R\-\_\-\-E\-V\-E\-N\-T, proxy\-\_\-recv\-\_\-response(), proxy\-\_\-send\-\_\-request(), P\-R\-O\-X\-Y\-\_\-\-S\-T\-A\-T\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T, handler\-\_\-ctx\-::state, handler\-\_\-ctx\-::wb, and handler\-\_\-ctx\-::wb\-\_\-reqlen.
+
+\hypertarget{mod__proxy_8c_a982f56bf9c6e14d939c7c76800fcd767}{\index{mod\-\_\-proxy.\-c@{mod\-\_\-proxy.\-c}!T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C@{T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C}}
+\index{T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C@{T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C}!mod_proxy.c@{mod\-\_\-proxy.\-c}}
+\subsubsection[{T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-proxy\-\_\-trigger}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__proxy_8c_a982f56bf9c6e14d939c7c76800fcd767}
+the trigger re-\/enables the disabled connections after the timeout is over 
+
+References plugin\-\_\-data\-::config\-\_\-storage, array\-::data, data\-\_\-proxy, plugin\-\_\-config\-::extensions, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, log\-\_\-error\-\_\-write(), array\-::used, and data\-\_\-array\-::value.
+

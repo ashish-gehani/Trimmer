@@ -1,0 +1,150 @@
+\hypertarget{mod__expire_8c}{\section{mod\-\_\-expire.\-c File Reference}
+\label{mod__expire_8c}\index{mod\-\_\-expire.\-c@{mod\-\_\-expire.\-c}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}base.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}log.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}buffer.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}response.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}plugin.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}stat\-\_\-cache.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$ctype.\-h$>$}\\*
+{\ttfamily \#include $<$stdlib.\-h$>$}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+{\ttfamily \#include $<$time.\-h$>$}\\*
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structplugin__config}{plugin\-\_\-config}
+\item 
+struct \hyperlink{structplugin__data}{plugin\-\_\-data}
+\end{DoxyCompactItemize}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{mod__expire_8c_a20876ec7c0c844d0e0c1628528bbb8da}{P\-A\-T\-C\-H}(x)~p-\/$>$conf.\-x = s-\/$>$x;
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{mod__expire_8c_a1ff3cad0dabcd663a46af117f2861929}{I\-N\-I\-T\-\_\-\-F\-U\-N\-C} (mod\-\_\-expire\-\_\-init)
+\item 
+\hyperlink{mod__expire_8c_a945c233cfaa9afd2fb8799bf77fed61e}{F\-R\-E\-E\-\_\-\-F\-U\-N\-C} (mod\-\_\-expire\-\_\-free)
+\item 
+static int \hyperlink{mod__expire_8c_af19307086f6778bf3ef1a175b877e164}{mod\-\_\-expire\-\_\-get\-\_\-offset} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structplugin__data}{plugin\-\_\-data} $\ast$p, \hyperlink{structbuffer}{buffer} $\ast$expire, time\-\_\-t $\ast$offset)
+\item 
+\hyperlink{mod__expire_8c_a27477557a507618b4271febe3cff5e90}{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C} (mod\-\_\-expire\-\_\-set\-\_\-defaults)
+\item 
+static int \hyperlink{mod__expire_8c_ad862766bc0e6630f9737996b7367aaeb}{mod\-\_\-expire\-\_\-patch\-\_\-connection} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structplugin__data}{plugin\-\_\-data} $\ast$p)
+\item 
+\hyperlink{mod__expire_8c_ad59fd29adcc991c4fd9412bb43e053d9}{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C} (mod\-\_\-expire\-\_\-handler)
+\item 
+int \hyperlink{mod__expire_8c_a86bb0915af26547971ccda4d5463f196}{mod\-\_\-expire\-\_\-plugin\-\_\-init} (\hyperlink{structplugin}{plugin} $\ast$p)
+\end{DoxyCompactItemize}
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{mod__expire_8c_a20876ec7c0c844d0e0c1628528bbb8da}{\index{mod\-\_\-expire.\-c@{mod\-\_\-expire.\-c}!P\-A\-T\-C\-H@{P\-A\-T\-C\-H}}
+\index{P\-A\-T\-C\-H@{P\-A\-T\-C\-H}!mod_expire.c@{mod\-\_\-expire.\-c}}
+\subsubsection[{P\-A\-T\-C\-H}]{\setlength{\rightskip}{0pt plus 5cm}\#define P\-A\-T\-C\-H(
+\begin{DoxyParamCaption}
+\item[{}]{x}
+\end{DoxyParamCaption}
+)~p-\/$>$conf.\-x = s-\/$>$x;}}\label{mod__expire_8c_a20876ec7c0c844d0e0c1628528bbb8da}
+
+
+Referenced by mod\-\_\-expire\-\_\-patch\-\_\-connection().
+
+
+
+\subsection{Function Documentation}
+\hypertarget{mod__expire_8c_ad59fd29adcc991c4fd9412bb43e053d9}{\index{mod\-\_\-expire.\-c@{mod\-\_\-expire.\-c}!C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C@{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C}}
+\index{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C@{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C}!mod_expire.c@{mod\-\_\-expire.\-c}}
+\subsubsection[{C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-expire\-\_\-handler}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__expire_8c_ad59fd29adcc991c4fd9412bb43e053d9}
+
+
+References array\-\_\-get\-\_\-element(), buffer\-\_\-append\-\_\-int(), buffer\-\_\-append\-\_\-strftime(), buffer\-\_\-copy\-\_\-string\-\_\-len(), buffer\-\_\-is\-\_\-empty(), buffer\-\_\-string\-\_\-is\-\_\-empty(), buffer\-\_\-string\-\_\-length(), buffer\-\_\-string\-\_\-prepare\-\_\-copy(), plugin\-\_\-data\-::conf, C\-O\-N\-S\-T\-\_\-\-B\-U\-F\-\_\-\-L\-E\-N, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, array\-::data, plugin\-\_\-config\-::expire\-\_\-mimetypes, plugin\-\_\-data\-::expire\-\_\-tstmp, plugin\-\_\-config\-::expire\-\_\-url, H\-A\-N\-D\-L\-E\-R\-\_\-\-E\-R\-R\-O\-R, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, H\-T\-T\-P\-\_\-\-M\-E\-T\-H\-O\-D\-\_\-\-G\-E\-T, H\-T\-T\-P\-\_\-\-M\-E\-T\-H\-O\-D\-\_\-\-H\-E\-A\-D, mod\-\_\-expire\-\_\-get\-\_\-offset(), mod\-\_\-expire\-\_\-patch\-\_\-connection(), buffer\-::ptr, response\-\_\-header\-\_\-append(), response\-\_\-header\-\_\-overwrite(), stat\-\_\-cache\-\_\-entry\-::st, stat\-\_\-cache\-\_\-get\-\_\-entry(), array\-::used, and data\-\_\-string\-::value.
+
+\hypertarget{mod__expire_8c_a945c233cfaa9afd2fb8799bf77fed61e}{\index{mod\-\_\-expire.\-c@{mod\-\_\-expire.\-c}!F\-R\-E\-E\-\_\-\-F\-U\-N\-C@{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}}
+\index{F\-R\-E\-E\-\_\-\-F\-U\-N\-C@{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}!mod_expire.c@{mod\-\_\-expire.\-c}}
+\subsubsection[{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}F\-R\-E\-E\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-expire\-\_\-free}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__expire_8c_a945c233cfaa9afd2fb8799bf77fed61e}
+
+
+References array\-\_\-free(), buffer\-\_\-free(), plugin\-\_\-data\-::config\-\_\-storage, plugin\-\_\-config\-::expire\-\_\-mimetypes, plugin\-\_\-data\-::expire\-\_\-tstmp, plugin\-\_\-config\-::expire\-\_\-url, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, and U\-N\-U\-S\-E\-D.
+
+\hypertarget{mod__expire_8c_a1ff3cad0dabcd663a46af117f2861929}{\index{mod\-\_\-expire.\-c@{mod\-\_\-expire.\-c}!I\-N\-I\-T\-\_\-\-F\-U\-N\-C@{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}}
+\index{I\-N\-I\-T\-\_\-\-F\-U\-N\-C@{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}!mod_expire.c@{mod\-\_\-expire.\-c}}
+\subsubsection[{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}I\-N\-I\-T\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-expire\-\_\-init}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__expire_8c_a1ff3cad0dabcd663a46af117f2861929}
+
+
+References buffer\-\_\-init(), buffer\-\_\-string\-\_\-prepare\-\_\-copy(), and plugin\-\_\-data\-::expire\-\_\-tstmp.
+
+\hypertarget{mod__expire_8c_af19307086f6778bf3ef1a175b877e164}{\index{mod\-\_\-expire.\-c@{mod\-\_\-expire.\-c}!mod\-\_\-expire\-\_\-get\-\_\-offset@{mod\-\_\-expire\-\_\-get\-\_\-offset}}
+\index{mod\-\_\-expire\-\_\-get\-\_\-offset@{mod\-\_\-expire\-\_\-get\-\_\-offset}!mod_expire.c@{mod\-\_\-expire.\-c}}
+\subsubsection[{mod\-\_\-expire\-\_\-get\-\_\-offset}]{\setlength{\rightskip}{0pt plus 5cm}static int mod\-\_\-expire\-\_\-get\-\_\-offset (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf plugin\-\_\-data} $\ast$}]{p, }
+\item[{{\bf buffer} $\ast$}]{expire, }
+\item[{time\-\_\-t $\ast$}]{offset}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__expire_8c_af19307086f6778bf3ef1a175b877e164}
+
+
+References buffer\-\_\-string\-\_\-is\-\_\-empty(), log\-\_\-error\-\_\-write(), buffer\-::ptr, and U\-N\-U\-S\-E\-D.
+
+
+
+Referenced by C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__expire_8c_ad862766bc0e6630f9737996b7367aaeb}{\index{mod\-\_\-expire.\-c@{mod\-\_\-expire.\-c}!mod\-\_\-expire\-\_\-patch\-\_\-connection@{mod\-\_\-expire\-\_\-patch\-\_\-connection}}
+\index{mod\-\_\-expire\-\_\-patch\-\_\-connection@{mod\-\_\-expire\-\_\-patch\-\_\-connection}!mod_expire.c@{mod\-\_\-expire.\-c}}
+\subsubsection[{mod\-\_\-expire\-\_\-patch\-\_\-connection}]{\setlength{\rightskip}{0pt plus 5cm}static int mod\-\_\-expire\-\_\-patch\-\_\-connection (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf plugin\-\_\-data} $\ast$}]{p}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__expire_8c_ad862766bc0e6630f9737996b7367aaeb}
+
+
+References buffer\-\_\-is\-\_\-equal\-\_\-string(), config\-\_\-check\-\_\-cond(), server\-::config\-\_\-context, plugin\-\_\-data\-::config\-\_\-storage, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, array\-::data, P\-A\-T\-C\-H, array\-::used, and data\-\_\-config\-::value.
+
+
+
+Referenced by C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__expire_8c_a86bb0915af26547971ccda4d5463f196}{\index{mod\-\_\-expire.\-c@{mod\-\_\-expire.\-c}!mod\-\_\-expire\-\_\-plugin\-\_\-init@{mod\-\_\-expire\-\_\-plugin\-\_\-init}}
+\index{mod\-\_\-expire\-\_\-plugin\-\_\-init@{mod\-\_\-expire\-\_\-plugin\-\_\-init}!mod_expire.c@{mod\-\_\-expire.\-c}}
+\subsubsection[{mod\-\_\-expire\-\_\-plugin\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}int mod\-\_\-expire\-\_\-plugin\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{{\bf plugin} $\ast$}]{p}
+\end{DoxyParamCaption}
+)}}\label{mod__expire_8c_a86bb0915af26547971ccda4d5463f196}
+
+
+References buffer\-\_\-init\-\_\-string(), plugin\-::cleanup, plugin\-::data, plugin\-::handle\-\_\-response\-\_\-start, plugin\-::init, plugin\-::name, plugin\-::set\-\_\-defaults, and plugin\-::version.
+
+\hypertarget{mod__expire_8c_a27477557a507618b4271febe3cff5e90}{\index{mod\-\_\-expire.\-c@{mod\-\_\-expire.\-c}!S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C@{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}}
+\index{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C@{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}!mod_expire.c@{mod\-\_\-expire.\-c}}
+\subsubsection[{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-expire\-\_\-set\-\_\-defaults}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__expire_8c_a27477557a507618b4271febe3cff5e90}
+
+
+References array\-\_\-init(), config\-\_\-insert\-\_\-values\-\_\-global(), plugin\-\_\-data\-::config\-\_\-storage, config\-\_\-values\-\_\-t\-::destination, plugin\-\_\-config\-::expire\-\_\-url, H\-A\-N\-D\-L\-E\-R\-\_\-\-E\-R\-R\-O\-R, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, log\-\_\-error\-\_\-write(), mod\-\_\-expire\-\_\-get\-\_\-offset(), T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-A\-R\-R\-A\-Y, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T\-I\-O\-N, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-S\-E\-R\-V\-E\-R, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-U\-N\-S\-E\-T, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-U\-N\-S\-E\-T, data\-\_\-string\-::value, and data\-\_\-config\-::value.
+

@@ -1,0 +1,593 @@
+\hypertarget{chunk_8c}{\section{chunk.\-c File Reference}
+\label{chunk_8c}\index{chunk.\-c@{chunk.\-c}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}chunk.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}base.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}log.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$sys/types.\-h$>$}\\*
+{\ttfamily \#include $<$sys/stat.\-h$>$}\\*
+{\ttfamily \#include \char`\"{}sys-\/mmap.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$stdlib.\-h$>$}\\*
+{\ttfamily \#include $<$fcntl.\-h$>$}\\*
+{\ttfamily \#include $<$unistd.\-h$>$}\\*
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$errno.\-h$>$}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{chunk_8c_a5032a87467be9fa5233bfde7a36c816b}{D\-E\-F\-A\-U\-L\-T\-\_\-\-T\-E\-M\-P\-F\-I\-L\-E\-\_\-\-S\-I\-Z\-E}~(1 $\ast$ 1024 $\ast$ 1024)
+\item 
+\#define \hyperlink{chunk_8c_a60e4e4cf11ae7764f2893984f9fa6254}{M\-A\-X\-\_\-\-T\-E\-M\-P\-F\-I\-L\-E\-\_\-\-S\-I\-Z\-E}~(128 $\ast$ 1024 $\ast$ 1024)
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{structchunkqueue}{chunkqueue} $\ast$ \hyperlink{chunk_8c_a765155e0f48afc8e89166bf5b3e866ba}{chunkqueue\-\_\-init} (void)
+\item 
+static \hyperlink{structchunk}{chunk} $\ast$ \hyperlink{chunk_8c_aadd634347200ed566c6bd8ec9a76dd7e}{chunk\-\_\-init} (void)
+\item 
+static void \hyperlink{chunk_8c_afb6de40959cfca7a2cf146674b358397}{chunk\-\_\-reset} (\hyperlink{structchunk}{chunk} $\ast$c)
+\item 
+static void \hyperlink{chunk_8c_a7c8b9374a4d38c89ed1c646dd8503e77}{chunk\-\_\-free} (\hyperlink{structchunk}{chunk} $\ast$c)
+\item 
+static off\-\_\-t \hyperlink{chunk_8c_a63e010289181c0f218e207617e5d4d95}{chunk\-\_\-remaining\-\_\-length} (const \hyperlink{structchunk}{chunk} $\ast$c)
+\item 
+void \hyperlink{chunk_8c_a395be718954e9212a658dac01f095f8e}{chunkqueue\-\_\-free} (\hyperlink{structchunkqueue}{chunkqueue} $\ast$cq)
+\item 
+static void \hyperlink{chunk_8c_a8681c21755aa66050ada991d5a234aa8}{chunkqueue\-\_\-push\-\_\-unused\-\_\-chunk} (\hyperlink{structchunkqueue}{chunkqueue} $\ast$cq, \hyperlink{structchunk}{chunk} $\ast$c)
+\item 
+static \hyperlink{structchunk}{chunk} $\ast$ \hyperlink{chunk_8c_a592a672186ab86843110049b7084a8a9}{chunkqueue\-\_\-get\-\_\-unused\-\_\-chunk} (\hyperlink{structchunkqueue}{chunkqueue} $\ast$cq)
+\item 
+static void \hyperlink{chunk_8c_a2d4955c797a26dfea610b108d8d0633f}{chunkqueue\-\_\-prepend\-\_\-chunk} (\hyperlink{structchunkqueue}{chunkqueue} $\ast$cq, \hyperlink{structchunk}{chunk} $\ast$c)
+\item 
+static void \hyperlink{chunk_8c_a000ee60beb7ffd039ae986e87d0fba33}{chunkqueue\-\_\-append\-\_\-chunk} (\hyperlink{structchunkqueue}{chunkqueue} $\ast$cq, \hyperlink{structchunk}{chunk} $\ast$c)
+\item 
+void \hyperlink{chunk_8c_a562ee5041ab310ca2a7d7c05d2af835f}{chunkqueue\-\_\-reset} (\hyperlink{structchunkqueue}{chunkqueue} $\ast$cq)
+\item 
+void \hyperlink{chunk_8c_ac7f67bc863a4326ffa73d400a171a855}{chunkqueue\-\_\-append\-\_\-file\-\_\-fd} (\hyperlink{structchunkqueue}{chunkqueue} $\ast$cq, \hyperlink{structbuffer}{buffer} $\ast$fn, int fd, off\-\_\-t offset, off\-\_\-t len)
+\item 
+void \hyperlink{chunk_8c_a0797ee1757bd9e1cd32bc49039b9c3d3}{chunkqueue\-\_\-append\-\_\-file} (\hyperlink{structchunkqueue}{chunkqueue} $\ast$cq, \hyperlink{structbuffer}{buffer} $\ast$fn, off\-\_\-t offset, off\-\_\-t len)
+\item 
+void \hyperlink{chunk_8c_a79562a4e9488e53de027ff89eee60968}{chunkqueue\-\_\-append\-\_\-buffer} (\hyperlink{structchunkqueue}{chunkqueue} $\ast$cq, \hyperlink{structbuffer}{buffer} $\ast$mem)
+\item 
+void \hyperlink{chunk_8c_a354d29310b9479a86388b4b8469541c6}{chunkqueue\-\_\-prepend\-\_\-buffer} (\hyperlink{structchunkqueue}{chunkqueue} $\ast$cq, \hyperlink{structbuffer}{buffer} $\ast$mem)
+\item 
+void \hyperlink{chunk_8c_a2fa47d25755c4b81ca812f8d18e8f8ed}{chunkqueue\-\_\-append\-\_\-mem} (\hyperlink{structchunkqueue}{chunkqueue} $\ast$cq, const char $\ast$mem, size\-\_\-t len)
+\item 
+void \hyperlink{chunk_8c_a521dba67d6667b32306cef3dc5c1260e}{chunkqueue\-\_\-append\-\_\-chunkqueue} (\hyperlink{structchunkqueue}{chunkqueue} $\ast$cq, \hyperlink{structchunkqueue}{chunkqueue} $\ast$src)
+\item 
+void \hyperlink{chunk_8c_a98a3cefed942c8481cf2470d117ad0bd}{chunkqueue\-\_\-get\-\_\-memory} (\hyperlink{structchunkqueue}{chunkqueue} $\ast$cq, char $\ast$$\ast$mem, size\-\_\-t $\ast$len, size\-\_\-t min\-\_\-size, size\-\_\-t alloc\-\_\-size)
+\item 
+void \hyperlink{chunk_8c_a0470f582cf7fba28750956f176a0c1ab}{chunkqueue\-\_\-use\-\_\-memory} (\hyperlink{structchunkqueue}{chunkqueue} $\ast$cq, size\-\_\-t len)
+\item 
+void \hyperlink{chunk_8c_aa81a5d8e989afea1910625ce0ab12b5b}{chunkqueue\-\_\-set\-\_\-tempdirs\-\_\-default} (\hyperlink{structarray}{array} $\ast$tempdirs, unsigned int upload\-\_\-temp\-\_\-file\-\_\-size)
+\item 
+void \hyperlink{chunk_8c_ae4014c8df4752dc1976c453480fd2b98}{chunkqueue\-\_\-steal} (\hyperlink{structchunkqueue}{chunkqueue} $\ast$dest, \hyperlink{structchunkqueue}{chunkqueue} $\ast$src, off\-\_\-t len)
+\item 
+static \hyperlink{structchunk}{chunk} $\ast$ \hyperlink{chunk_8c_a0401cec1a25bfb4c6a0b150a12060739}{chunkqueue\-\_\-get\-\_\-append\-\_\-tempfile} (\hyperlink{structchunkqueue}{chunkqueue} $\ast$cq)
+\item 
+static void \hyperlink{chunk_8c_aa3a64c516fc22fb8697d03531f264067}{chunkqueue\-\_\-remove\-\_\-empty\-\_\-chunks} (\hyperlink{structchunkqueue}{chunkqueue} $\ast$cq)
+\item 
+int \hyperlink{chunk_8c_a4d558da64921d90049aa28a2fcdbdaaa}{chunkqueue\-\_\-append\-\_\-mem\-\_\-to\-\_\-tempfile} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structchunkqueue}{chunkqueue} $\ast$dest, const char $\ast$mem, size\-\_\-t len)
+\item 
+int \hyperlink{chunk_8c_a0f14c8f408297c2a2f5bd8b742d169a8}{chunkqueue\-\_\-steal\-\_\-with\-\_\-tempfiles} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structchunkqueue}{chunkqueue} $\ast$dest, \hyperlink{structchunkqueue}{chunkqueue} $\ast$src, off\-\_\-t len)
+\item 
+off\-\_\-t \hyperlink{chunk_8c_a7bdb172e6dd587dc4126e12790e2ca39}{chunkqueue\-\_\-length} (\hyperlink{structchunkqueue}{chunkqueue} $\ast$cq)
+\item 
+int \hyperlink{chunk_8c_ac52cda8d804192baf76fd82019ff40ce}{chunkqueue\-\_\-is\-\_\-empty} (\hyperlink{structchunkqueue}{chunkqueue} $\ast$cq)
+\item 
+void \hyperlink{chunk_8c_aed68be3517557b547bd37f585f6d0183}{chunkqueue\-\_\-mark\-\_\-written} (\hyperlink{structchunkqueue}{chunkqueue} $\ast$cq, off\-\_\-t len)
+\item 
+void \hyperlink{chunk_8c_ae4848d6d0fe8f5ced4f9c21c39ede1c3}{chunkqueue\-\_\-remove\-\_\-finished\-\_\-chunks} (\hyperlink{structchunkqueue}{chunkqueue} $\ast$cq)
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{structarray}{array} $\ast$ \hyperlink{chunk_8c_ae236ff847e9c441d64210b1a30a51b72}{chunkqueue\-\_\-default\-\_\-tempdirs} = N\-U\-L\-L
+\item 
+static unsigned int \hyperlink{chunk_8c_ac40087d703beb5266b662d78a69b6ae7}{chunkqueue\-\_\-default\-\_\-tempfile\-\_\-size} = \hyperlink{chunk_8c_a5032a87467be9fa5233bfde7a36c816b}{D\-E\-F\-A\-U\-L\-T\-\_\-\-T\-E\-M\-P\-F\-I\-L\-E\-\_\-\-S\-I\-Z\-E}
+\end{DoxyCompactItemize}
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{chunk_8c_a5032a87467be9fa5233bfde7a36c816b}{\index{chunk.\-c@{chunk.\-c}!D\-E\-F\-A\-U\-L\-T\-\_\-\-T\-E\-M\-P\-F\-I\-L\-E\-\_\-\-S\-I\-Z\-E@{D\-E\-F\-A\-U\-L\-T\-\_\-\-T\-E\-M\-P\-F\-I\-L\-E\-\_\-\-S\-I\-Z\-E}}
+\index{D\-E\-F\-A\-U\-L\-T\-\_\-\-T\-E\-M\-P\-F\-I\-L\-E\-\_\-\-S\-I\-Z\-E@{D\-E\-F\-A\-U\-L\-T\-\_\-\-T\-E\-M\-P\-F\-I\-L\-E\-\_\-\-S\-I\-Z\-E}!chunk.c@{chunk.\-c}}
+\subsubsection[{D\-E\-F\-A\-U\-L\-T\-\_\-\-T\-E\-M\-P\-F\-I\-L\-E\-\_\-\-S\-I\-Z\-E}]{\setlength{\rightskip}{0pt plus 5cm}\#define D\-E\-F\-A\-U\-L\-T\-\_\-\-T\-E\-M\-P\-F\-I\-L\-E\-\_\-\-S\-I\-Z\-E~(1 $\ast$ 1024 $\ast$ 1024)}}\label{chunk_8c_a5032a87467be9fa5233bfde7a36c816b}
+the network chunk-\/\-A\-P\-I 
+
+Referenced by chunkqueue\-\_\-set\-\_\-tempdirs\-\_\-default().
+
+\hypertarget{chunk_8c_a60e4e4cf11ae7764f2893984f9fa6254}{\index{chunk.\-c@{chunk.\-c}!M\-A\-X\-\_\-\-T\-E\-M\-P\-F\-I\-L\-E\-\_\-\-S\-I\-Z\-E@{M\-A\-X\-\_\-\-T\-E\-M\-P\-F\-I\-L\-E\-\_\-\-S\-I\-Z\-E}}
+\index{M\-A\-X\-\_\-\-T\-E\-M\-P\-F\-I\-L\-E\-\_\-\-S\-I\-Z\-E@{M\-A\-X\-\_\-\-T\-E\-M\-P\-F\-I\-L\-E\-\_\-\-S\-I\-Z\-E}!chunk.c@{chunk.\-c}}
+\subsubsection[{M\-A\-X\-\_\-\-T\-E\-M\-P\-F\-I\-L\-E\-\_\-\-S\-I\-Z\-E}]{\setlength{\rightskip}{0pt plus 5cm}\#define M\-A\-X\-\_\-\-T\-E\-M\-P\-F\-I\-L\-E\-\_\-\-S\-I\-Z\-E~(128 $\ast$ 1024 $\ast$ 1024)}}\label{chunk_8c_a60e4e4cf11ae7764f2893984f9fa6254}
+
+
+Referenced by chunkqueue\-\_\-set\-\_\-tempdirs\-\_\-default().
+
+
+
+\subsection{Function Documentation}
+\hypertarget{chunk_8c_a7c8b9374a4d38c89ed1c646dd8503e77}{\index{chunk.\-c@{chunk.\-c}!chunk\-\_\-free@{chunk\-\_\-free}}
+\index{chunk\-\_\-free@{chunk\-\_\-free}!chunk.c@{chunk.\-c}}
+\subsubsection[{chunk\-\_\-free}]{\setlength{\rightskip}{0pt plus 5cm}static void chunk\-\_\-free (
+\begin{DoxyParamCaption}
+\item[{{\bf chunk} $\ast$}]{c}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{chunk_8c_a7c8b9374a4d38c89ed1c646dd8503e77}
+
+
+References buffer\-\_\-free(), chunk\-\_\-reset(), chunk\-::file, chunk\-::mem, and chunk\-::name.
+
+
+
+Referenced by chunkqueue\-\_\-free(), and chunkqueue\-\_\-push\-\_\-unused\-\_\-chunk().
+
+\hypertarget{chunk_8c_aadd634347200ed566c6bd8ec9a76dd7e}{\index{chunk.\-c@{chunk.\-c}!chunk\-\_\-init@{chunk\-\_\-init}}
+\index{chunk\-\_\-init@{chunk\-\_\-init}!chunk.c@{chunk.\-c}}
+\subsubsection[{chunk\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf chunk}$\ast$ chunk\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{chunk_8c_aadd634347200ed566c6bd8ec9a76dd7e}
+
+
+References buffer\-\_\-init(), chunk\-::fd, chunk\-::file, force\-\_\-assert, chunk\-::is\-\_\-temp, chunk\-::length, M\-A\-P\-\_\-\-F\-A\-I\-L\-E\-D, chunk\-::mem, chunk\-::mmap, chunk\-::name, chunk\-::next, chunk\-::offset, chunk\-::start, and chunk\-::type.
+
+
+
+Referenced by chunkqueue\-\_\-get\-\_\-unused\-\_\-chunk().
+
+\hypertarget{chunk_8c_a63e010289181c0f218e207617e5d4d95}{\index{chunk.\-c@{chunk.\-c}!chunk\-\_\-remaining\-\_\-length@{chunk\-\_\-remaining\-\_\-length}}
+\index{chunk\-\_\-remaining\-\_\-length@{chunk\-\_\-remaining\-\_\-length}!chunk.c@{chunk.\-c}}
+\subsubsection[{chunk\-\_\-remaining\-\_\-length}]{\setlength{\rightskip}{0pt plus 5cm}static off\-\_\-t chunk\-\_\-remaining\-\_\-length (
+\begin{DoxyParamCaption}
+\item[{const {\bf chunk} $\ast$}]{c}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{chunk_8c_a63e010289181c0f218e207617e5d4d95}
+
+
+References buffer\-\_\-string\-\_\-length(), chunk\-::file, force\-\_\-assert, chunk\-::length, chunk\-::mem, chunk\-::offset, and chunk\-::type.
+
+
+
+Referenced by chunkqueue\-\_\-append\-\_\-chunk(), chunkqueue\-\_\-append\-\_\-mem\-\_\-to\-\_\-tempfile(), chunkqueue\-\_\-length(), chunkqueue\-\_\-mark\-\_\-written(), chunkqueue\-\_\-prepend\-\_\-chunk(), chunkqueue\-\_\-remove\-\_\-empty\-\_\-chunks(), chunkqueue\-\_\-remove\-\_\-finished\-\_\-chunks(), chunkqueue\-\_\-steal(), and chunkqueue\-\_\-steal\-\_\-with\-\_\-tempfiles().
+
+\hypertarget{chunk_8c_afb6de40959cfca7a2cf146674b358397}{\index{chunk.\-c@{chunk.\-c}!chunk\-\_\-reset@{chunk\-\_\-reset}}
+\index{chunk\-\_\-reset@{chunk\-\_\-reset}!chunk.c@{chunk.\-c}}
+\subsubsection[{chunk\-\_\-reset}]{\setlength{\rightskip}{0pt plus 5cm}static void chunk\-\_\-reset (
+\begin{DoxyParamCaption}
+\item[{{\bf chunk} $\ast$}]{c}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{chunk_8c_afb6de40959cfca7a2cf146674b358397}
+
+
+References buffer\-\_\-reset(), buffer\-\_\-string\-\_\-is\-\_\-empty(), chunk\-::fd, chunk\-::file, chunk\-::is\-\_\-temp, chunk\-::length, M\-A\-P\-\_\-\-F\-A\-I\-L\-E\-D, chunk\-::mem, chunk\-::mmap, munmap, chunk\-::name, chunk\-::next, chunk\-::offset, buffer\-::ptr, chunk\-::start, and chunk\-::type.
+
+
+
+Referenced by chunk\-\_\-free(), and chunkqueue\-\_\-push\-\_\-unused\-\_\-chunk().
+
+\hypertarget{chunk_8c_a79562a4e9488e53de027ff89eee60968}{\index{chunk.\-c@{chunk.\-c}!chunkqueue\-\_\-append\-\_\-buffer@{chunkqueue\-\_\-append\-\_\-buffer}}
+\index{chunkqueue\-\_\-append\-\_\-buffer@{chunkqueue\-\_\-append\-\_\-buffer}!chunk.c@{chunk.\-c}}
+\subsubsection[{chunkqueue\-\_\-append\-\_\-buffer}]{\setlength{\rightskip}{0pt plus 5cm}void chunkqueue\-\_\-append\-\_\-buffer (
+\begin{DoxyParamCaption}
+\item[{{\bf chunkqueue} $\ast$}]{cq, }
+\item[{{\bf buffer} $\ast$}]{mem}
+\end{DoxyParamCaption}
+)}}\label{chunk_8c_a79562a4e9488e53de027ff89eee60968}
+
+
+References buffer\-\_\-move(), buffer\-\_\-string\-\_\-is\-\_\-empty(), chunkqueue\-\_\-append\-\_\-chunk(), chunkqueue\-\_\-get\-\_\-unused\-\_\-chunk(), force\-\_\-assert, chunk\-::mem, and chunk\-::type.
+
+
+
+Referenced by deflate\-\_\-file\-\_\-to\-\_\-buffer(), fcgi\-\_\-create\-\_\-env(), http\-\_\-chunk\-\_\-append\-\_\-data(), http\-\_\-chunk\-\_\-append\-\_\-len(), http\-\_\-list\-\_\-directory(), http\-\_\-response\-\_\-parse\-\_\-range(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-config(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-statistics(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-html(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-json(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-text(), process\-\_\-ssi\-\_\-stmt(), proxy\-\_\-create\-\_\-env(), scgi\-\_\-create\-\_\-env(), S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C(), and U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{chunk_8c_a000ee60beb7ffd039ae986e87d0fba33}{\index{chunk.\-c@{chunk.\-c}!chunkqueue\-\_\-append\-\_\-chunk@{chunkqueue\-\_\-append\-\_\-chunk}}
+\index{chunkqueue\-\_\-append\-\_\-chunk@{chunkqueue\-\_\-append\-\_\-chunk}!chunk.c@{chunk.\-c}}
+\subsubsection[{chunkqueue\-\_\-append\-\_\-chunk}]{\setlength{\rightskip}{0pt plus 5cm}static void chunkqueue\-\_\-append\-\_\-chunk (
+\begin{DoxyParamCaption}
+\item[{{\bf chunkqueue} $\ast$}]{cq, }
+\item[{{\bf chunk} $\ast$}]{c}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{chunk_8c_a000ee60beb7ffd039ae986e87d0fba33}
+
+
+References chunkqueue\-::bytes\-\_\-in, chunk\-\_\-remaining\-\_\-length(), chunkqueue\-::first, chunkqueue\-::last, and chunk\-::next.
+
+
+
+Referenced by chunkqueue\-\_\-append\-\_\-buffer(), chunkqueue\-\_\-append\-\_\-file(), chunkqueue\-\_\-append\-\_\-file\-\_\-fd(), chunkqueue\-\_\-append\-\_\-mem(), chunkqueue\-\_\-get\-\_\-append\-\_\-tempfile(), chunkqueue\-\_\-get\-\_\-memory(), chunkqueue\-\_\-steal(), and chunkqueue\-\_\-steal\-\_\-with\-\_\-tempfiles().
+
+\hypertarget{chunk_8c_a521dba67d6667b32306cef3dc5c1260e}{\index{chunk.\-c@{chunk.\-c}!chunkqueue\-\_\-append\-\_\-chunkqueue@{chunkqueue\-\_\-append\-\_\-chunkqueue}}
+\index{chunkqueue\-\_\-append\-\_\-chunkqueue@{chunkqueue\-\_\-append\-\_\-chunkqueue}!chunk.c@{chunk.\-c}}
+\subsubsection[{chunkqueue\-\_\-append\-\_\-chunkqueue}]{\setlength{\rightskip}{0pt plus 5cm}void chunkqueue\-\_\-append\-\_\-chunkqueue (
+\begin{DoxyParamCaption}
+\item[{{\bf chunkqueue} $\ast$}]{cq, }
+\item[{{\bf chunkqueue} $\ast$}]{src}
+\end{DoxyParamCaption}
+)}}\label{chunk_8c_a521dba67d6667b32306cef3dc5c1260e}
+
+
+References chunkqueue\-::bytes\-\_\-in, chunkqueue\-::bytes\-\_\-out, chunkqueue\-::first, chunkqueue\-::last, and chunk\-::next.
+
+
+
+Referenced by deflate\-\_\-compress\-\_\-response(), proxy\-\_\-create\-\_\-env(), scgi\-\_\-create\-\_\-env(), and S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{chunk_8c_a0797ee1757bd9e1cd32bc49039b9c3d3}{\index{chunk.\-c@{chunk.\-c}!chunkqueue\-\_\-append\-\_\-file@{chunkqueue\-\_\-append\-\_\-file}}
+\index{chunkqueue\-\_\-append\-\_\-file@{chunkqueue\-\_\-append\-\_\-file}!chunk.c@{chunk.\-c}}
+\subsubsection[{chunkqueue\-\_\-append\-\_\-file}]{\setlength{\rightskip}{0pt plus 5cm}void chunkqueue\-\_\-append\-\_\-file (
+\begin{DoxyParamCaption}
+\item[{{\bf chunkqueue} $\ast$}]{cq, }
+\item[{{\bf buffer} $\ast$}]{fn, }
+\item[{off\-\_\-t}]{offset, }
+\item[{off\-\_\-t}]{len}
+\end{DoxyParamCaption}
+)}}\label{chunk_8c_a0797ee1757bd9e1cd32bc49039b9c3d3}
+
+
+References buffer\-\_\-copy\-\_\-buffer(), chunkqueue\-\_\-append\-\_\-chunk(), chunkqueue\-\_\-get\-\_\-unused\-\_\-chunk(), chunk\-::file, chunk\-::length, chunk\-::name, chunk\-::offset, chunk\-::start, and chunk\-::type.
+
+
+
+Referenced by chunkqueue\-\_\-steal(), chunkqueue\-\_\-steal\-\_\-with\-\_\-tempfiles(), http\-\_\-response\-\_\-parse\-\_\-range(), and process\-\_\-ssi\-\_\-stmt().
+
+\hypertarget{chunk_8c_ac7f67bc863a4326ffa73d400a171a855}{\index{chunk.\-c@{chunk.\-c}!chunkqueue\-\_\-append\-\_\-file\-\_\-fd@{chunkqueue\-\_\-append\-\_\-file\-\_\-fd}}
+\index{chunkqueue\-\_\-append\-\_\-file\-\_\-fd@{chunkqueue\-\_\-append\-\_\-file\-\_\-fd}!chunk.c@{chunk.\-c}}
+\subsubsection[{chunkqueue\-\_\-append\-\_\-file\-\_\-fd}]{\setlength{\rightskip}{0pt plus 5cm}void chunkqueue\-\_\-append\-\_\-file\-\_\-fd (
+\begin{DoxyParamCaption}
+\item[{{\bf chunkqueue} $\ast$}]{cq, }
+\item[{{\bf buffer} $\ast$}]{fn, }
+\item[{int}]{fd, }
+\item[{off\-\_\-t}]{offset, }
+\item[{off\-\_\-t}]{len}
+\end{DoxyParamCaption}
+)}}\label{chunk_8c_ac7f67bc863a4326ffa73d400a171a855}
+
+
+References buffer\-\_\-copy\-\_\-buffer(), chunkqueue\-\_\-append\-\_\-chunk(), chunkqueue\-\_\-get\-\_\-unused\-\_\-chunk(), chunk\-::fd, chunk\-::file, chunk\-::length, chunk\-::name, chunk\-::offset, chunk\-::start, and chunk\-::type.
+
+
+
+Referenced by cache\-\_\-parse\-\_\-lua(), and http\-\_\-chunk\-\_\-append\-\_\-file\-\_\-fd\-\_\-range().
+
+\hypertarget{chunk_8c_a2fa47d25755c4b81ca812f8d18e8f8ed}{\index{chunk.\-c@{chunk.\-c}!chunkqueue\-\_\-append\-\_\-mem@{chunkqueue\-\_\-append\-\_\-mem}}
+\index{chunkqueue\-\_\-append\-\_\-mem@{chunkqueue\-\_\-append\-\_\-mem}!chunk.c@{chunk.\-c}}
+\subsubsection[{chunkqueue\-\_\-append\-\_\-mem}]{\setlength{\rightskip}{0pt plus 5cm}void chunkqueue\-\_\-append\-\_\-mem (
+\begin{DoxyParamCaption}
+\item[{{\bf chunkqueue} $\ast$}]{cq, }
+\item[{const char $\ast$}]{mem, }
+\item[{size\-\_\-t}]{len}
+\end{DoxyParamCaption}
+)}}\label{chunk_8c_a2fa47d25755c4b81ca812f8d18e8f8ed}
+
+
+References buffer\-\_\-copy\-\_\-string\-\_\-len(), chunkqueue\-\_\-append\-\_\-chunk(), chunkqueue\-\_\-get\-\_\-unused\-\_\-chunk(), chunk\-::mem, and chunk\-::type.
+
+
+
+Referenced by chunkqueue\-\_\-steal(), connection\-\_\-handle\-\_\-write\-\_\-prepare(), fcgi\-\_\-stdin\-\_\-append(), http\-\_\-chunk\-\_\-append\-\_\-data(), http\-\_\-chunk\-\_\-append\-\_\-file\-\_\-fd\-\_\-range(), http\-\_\-chunk\-\_\-close(), magnet\-\_\-attach\-\_\-content(), mod\-\_\-ssi\-\_\-parse\-\_\-ssi\-\_\-stmt(), mod\-\_\-ssi\-\_\-read\-\_\-fd(), process\-\_\-ssi\-\_\-stmt(), and U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{chunk_8c_a4d558da64921d90049aa28a2fcdbdaaa}{\index{chunk.\-c@{chunk.\-c}!chunkqueue\-\_\-append\-\_\-mem\-\_\-to\-\_\-tempfile@{chunkqueue\-\_\-append\-\_\-mem\-\_\-to\-\_\-tempfile}}
+\index{chunkqueue\-\_\-append\-\_\-mem\-\_\-to\-\_\-tempfile@{chunkqueue\-\_\-append\-\_\-mem\-\_\-to\-\_\-tempfile}!chunk.c@{chunk.\-c}}
+\subsubsection[{chunkqueue\-\_\-append\-\_\-mem\-\_\-to\-\_\-tempfile}]{\setlength{\rightskip}{0pt plus 5cm}int chunkqueue\-\_\-append\-\_\-mem\-\_\-to\-\_\-tempfile (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf chunkqueue} $\ast$}]{dest, }
+\item[{const char $\ast$}]{mem, }
+\item[{size\-\_\-t}]{len}
+\end{DoxyParamCaption}
+)}}\label{chunk_8c_a4d558da64921d90049aa28a2fcdbdaaa}
+
+
+References chunkqueue\-::bytes\-\_\-in, chunk\-\_\-remaining\-\_\-length(), chunkqueue\-\_\-get\-\_\-append\-\_\-tempfile(), chunkqueue\-\_\-remove\-\_\-empty\-\_\-chunks(), chunk\-::fd, chunk\-::file, chunk\-::is\-\_\-temp, chunkqueue\-::last, chunk\-::length, log\-\_\-error\-\_\-write(), chunk\-::name, chunk\-::offset, chunkqueue\-::tempdir\-\_\-idx, chunkqueue\-::tempdirs, chunk\-::type, chunkqueue\-::upload\-\_\-temp\-\_\-file\-\_\-size, and array\-::used.
+
+
+
+Referenced by chunkqueue\-\_\-steal\-\_\-with\-\_\-tempfiles(), and http\-\_\-chunk\-\_\-append\-\_\-to\-\_\-tempfile().
+
+\hypertarget{chunk_8c_a395be718954e9212a658dac01f095f8e}{\index{chunk.\-c@{chunk.\-c}!chunkqueue\-\_\-free@{chunkqueue\-\_\-free}}
+\index{chunkqueue\-\_\-free@{chunkqueue\-\_\-free}!chunk.c@{chunk.\-c}}
+\subsubsection[{chunkqueue\-\_\-free}]{\setlength{\rightskip}{0pt plus 5cm}void chunkqueue\-\_\-free (
+\begin{DoxyParamCaption}
+\item[{{\bf chunkqueue} $\ast$}]{cq}
+\end{DoxyParamCaption}
+)}}\label{chunk_8c_a395be718954e9212a658dac01f095f8e}
+
+
+References chunk\-\_\-free(), chunkqueue\-::first, chunk\-::next, and chunkqueue\-::unused.
+
+
+
+Referenced by connections\-\_\-free(), and handler\-\_\-ctx\-\_\-free().
+
+\hypertarget{chunk_8c_a0401cec1a25bfb4c6a0b150a12060739}{\index{chunk.\-c@{chunk.\-c}!chunkqueue\-\_\-get\-\_\-append\-\_\-tempfile@{chunkqueue\-\_\-get\-\_\-append\-\_\-tempfile}}
+\index{chunkqueue\-\_\-get\-\_\-append\-\_\-tempfile@{chunkqueue\-\_\-get\-\_\-append\-\_\-tempfile}!chunk.c@{chunk.\-c}}
+\subsubsection[{chunkqueue\-\_\-get\-\_\-append\-\_\-tempfile}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf chunk}$\ast$ chunkqueue\-\_\-get\-\_\-append\-\_\-tempfile (
+\begin{DoxyParamCaption}
+\item[{{\bf chunkqueue} $\ast$}]{cq}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{chunk_8c_a0401cec1a25bfb4c6a0b150a12060739}
+
+
+References buffer\-\_\-append\-\_\-slash(), buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-copy\-\_\-buffer(), buffer\-\_\-free(), buffer\-\_\-init\-\_\-string(), chunkqueue\-\_\-append\-\_\-chunk(), chunkqueue\-\_\-get\-\_\-unused\-\_\-chunk(), C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, array\-::data, chunk\-::fd, fd\-\_\-close\-\_\-on\-\_\-exec(), chunk\-::file, chunk\-::is\-\_\-temp, chunk\-::length, chunk\-::name, chunkqueue\-::tempdir\-\_\-idx, chunkqueue\-::tempdirs, chunk\-::type, array\-::used, and data\-\_\-string\-::value.
+
+
+
+Referenced by chunkqueue\-\_\-append\-\_\-mem\-\_\-to\-\_\-tempfile().
+
+\hypertarget{chunk_8c_a98a3cefed942c8481cf2470d117ad0bd}{\index{chunk.\-c@{chunk.\-c}!chunkqueue\-\_\-get\-\_\-memory@{chunkqueue\-\_\-get\-\_\-memory}}
+\index{chunkqueue\-\_\-get\-\_\-memory@{chunkqueue\-\_\-get\-\_\-memory}!chunk.c@{chunk.\-c}}
+\subsubsection[{chunkqueue\-\_\-get\-\_\-memory}]{\setlength{\rightskip}{0pt plus 5cm}void chunkqueue\-\_\-get\-\_\-memory (
+\begin{DoxyParamCaption}
+\item[{{\bf chunkqueue} $\ast$}]{cq, }
+\item[{char $\ast$$\ast$}]{mem, }
+\item[{size\-\_\-t $\ast$}]{len, }
+\item[{size\-\_\-t}]{min\-\_\-size, }
+\item[{size\-\_\-t}]{alloc\-\_\-size}
+\end{DoxyParamCaption}
+)}}\label{chunk_8c_a98a3cefed942c8481cf2470d117ad0bd}
+
+
+References buffer\-\_\-string\-\_\-is\-\_\-empty(), buffer\-\_\-string\-\_\-length(), buffer\-\_\-string\-\_\-prepare\-\_\-append(), buffer\-\_\-string\-\_\-prepare\-\_\-copy(), buffer\-\_\-string\-\_\-space(), chunkqueue\-\_\-append\-\_\-chunk(), chunkqueue\-\_\-get\-\_\-unused\-\_\-chunk(), force\-\_\-assert, chunkqueue\-::last, chunk\-::mem, buffer\-::ptr, and chunk\-::type.
+
+
+
+Referenced by connection\-\_\-handle\-\_\-read(), connection\-\_\-handle\-\_\-read\-\_\-ssl(), fcgi\-\_\-demux\-\_\-response(), and process\-\_\-ssi\-\_\-stmt().
+
+\hypertarget{chunk_8c_a592a672186ab86843110049b7084a8a9}{\index{chunk.\-c@{chunk.\-c}!chunkqueue\-\_\-get\-\_\-unused\-\_\-chunk@{chunkqueue\-\_\-get\-\_\-unused\-\_\-chunk}}
+\index{chunkqueue\-\_\-get\-\_\-unused\-\_\-chunk@{chunkqueue\-\_\-get\-\_\-unused\-\_\-chunk}!chunk.c@{chunk.\-c}}
+\subsubsection[{chunkqueue\-\_\-get\-\_\-unused\-\_\-chunk}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf chunk}$\ast$ chunkqueue\-\_\-get\-\_\-unused\-\_\-chunk (
+\begin{DoxyParamCaption}
+\item[{{\bf chunkqueue} $\ast$}]{cq}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{chunk_8c_a592a672186ab86843110049b7084a8a9}
+
+
+References chunk\-\_\-init(), force\-\_\-assert, chunk\-::next, chunkqueue\-::unused, and chunkqueue\-::unused\-\_\-chunks.
+
+
+
+Referenced by chunkqueue\-\_\-append\-\_\-buffer(), chunkqueue\-\_\-append\-\_\-file(), chunkqueue\-\_\-append\-\_\-file\-\_\-fd(), chunkqueue\-\_\-append\-\_\-mem(), chunkqueue\-\_\-get\-\_\-append\-\_\-tempfile(), chunkqueue\-\_\-get\-\_\-memory(), and chunkqueue\-\_\-prepend\-\_\-buffer().
+
+\hypertarget{chunk_8c_a765155e0f48afc8e89166bf5b3e866ba}{\index{chunk.\-c@{chunk.\-c}!chunkqueue\-\_\-init@{chunkqueue\-\_\-init}}
+\index{chunkqueue\-\_\-init@{chunkqueue\-\_\-init}!chunk.c@{chunk.\-c}}
+\subsubsection[{chunkqueue\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}{\bf chunkqueue}$\ast$ chunkqueue\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)}}\label{chunk_8c_a765155e0f48afc8e89166bf5b3e866ba}
+
+
+References chunkqueue\-\_\-default\-\_\-tempdirs, chunkqueue\-\_\-default\-\_\-tempfile\-\_\-size, chunkqueue\-::first, force\-\_\-assert, chunkqueue\-::last, chunkqueue\-::tempdirs, chunkqueue\-::unused, and chunkqueue\-::upload\-\_\-temp\-\_\-file\-\_\-size.
+
+
+
+Referenced by connection\-\_\-init(), and handler\-\_\-ctx\-\_\-init().
+
+\hypertarget{chunk_8c_ac52cda8d804192baf76fd82019ff40ce}{\index{chunk.\-c@{chunk.\-c}!chunkqueue\-\_\-is\-\_\-empty@{chunkqueue\-\_\-is\-\_\-empty}}
+\index{chunkqueue\-\_\-is\-\_\-empty@{chunkqueue\-\_\-is\-\_\-empty}!chunk.c@{chunk.\-c}}
+\subsubsection[{chunkqueue\-\_\-is\-\_\-empty}]{\setlength{\rightskip}{0pt plus 5cm}int chunkqueue\-\_\-is\-\_\-empty (
+\begin{DoxyParamCaption}
+\item[{{\bf chunkqueue} $\ast$}]{cq}
+\end{DoxyParamCaption}
+)}}\label{chunk_8c_ac52cda8d804192baf76fd82019ff40ce}
+
+
+References chunkqueue\-::first.
+
+
+
+Referenced by chunkqueue\-\_\-remove\-\_\-empty\-\_\-chunks(), connection\-\_\-handle\-\_\-fdevent(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-chunked\-\_\-crlf(), connection\-\_\-handle\-\_\-read\-\_\-state(), connection\-\_\-state\-\_\-machine(), deflate\-\_\-compress\-\_\-response(), magnet\-\_\-attract(), network\-\_\-write\-\_\-chunkqueue(), and S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{chunk_8c_a7bdb172e6dd587dc4126e12790e2ca39}{\index{chunk.\-c@{chunk.\-c}!chunkqueue\-\_\-length@{chunkqueue\-\_\-length}}
+\index{chunkqueue\-\_\-length@{chunkqueue\-\_\-length}!chunk.c@{chunk.\-c}}
+\subsubsection[{chunkqueue\-\_\-length}]{\setlength{\rightskip}{0pt plus 5cm}off\-\_\-t chunkqueue\-\_\-length (
+\begin{DoxyParamCaption}
+\item[{{\bf chunkqueue} $\ast$}]{cq}
+\end{DoxyParamCaption}
+)}}\label{chunk_8c_a7bdb172e6dd587dc4126e12790e2ca39}
+
+
+References chunk\-\_\-remaining\-\_\-length(), chunkqueue\-::first, and chunk\-::next.
+
+
+
+Referenced by cgi\-\_\-demux\-\_\-response(), cgi\-\_\-handle\-\_\-fdevent\-\_\-send(), cgi\-\_\-write\-\_\-request(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), connection\-\_\-handle\-\_\-read\-\_\-state(), connection\-\_\-handle\-\_\-write\-\_\-prepare(), deflate\-\_\-compress\-\_\-response(), fcgi\-\_\-demux\-\_\-response(), mod\-\_\-status\-\_\-handle\-\_\-server\-\_\-status\-\_\-html(), proxy\-\_\-demux\-\_\-response(), scgi\-\_\-demux\-\_\-response(), and S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{chunk_8c_aed68be3517557b547bd37f585f6d0183}{\index{chunk.\-c@{chunk.\-c}!chunkqueue\-\_\-mark\-\_\-written@{chunkqueue\-\_\-mark\-\_\-written}}
+\index{chunkqueue\-\_\-mark\-\_\-written@{chunkqueue\-\_\-mark\-\_\-written}!chunk.c@{chunk.\-c}}
+\subsubsection[{chunkqueue\-\_\-mark\-\_\-written}]{\setlength{\rightskip}{0pt plus 5cm}void chunkqueue\-\_\-mark\-\_\-written (
+\begin{DoxyParamCaption}
+\item[{{\bf chunkqueue} $\ast$}]{cq, }
+\item[{off\-\_\-t}]{len}
+\end{DoxyParamCaption}
+)}}\label{chunk_8c_aed68be3517557b547bd37f585f6d0183}
+
+
+References chunkqueue\-::bytes\-\_\-out, chunk\-\_\-remaining\-\_\-length(), chunkqueue\-\_\-push\-\_\-unused\-\_\-chunk(), chunkqueue\-::first, force\-\_\-assert, chunkqueue\-::last, chunk\-::next, and chunk\-::offset.
+
+
+
+Referenced by cgi\-\_\-handle\-\_\-fdevent\-\_\-send(), cgi\-\_\-write\-\_\-file\-\_\-chunk\-\_\-mmap(), cgi\-\_\-write\-\_\-request(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-chunked(), deflate\-\_\-compress\-\_\-response(), fastcgi\-\_\-get\-\_\-packet(), network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-no\-\_\-mmap(), network\-\_\-write\-\_\-mem\-\_\-chunk(), and S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{chunk_8c_a354d29310b9479a86388b4b8469541c6}{\index{chunk.\-c@{chunk.\-c}!chunkqueue\-\_\-prepend\-\_\-buffer@{chunkqueue\-\_\-prepend\-\_\-buffer}}
+\index{chunkqueue\-\_\-prepend\-\_\-buffer@{chunkqueue\-\_\-prepend\-\_\-buffer}!chunk.c@{chunk.\-c}}
+\subsubsection[{chunkqueue\-\_\-prepend\-\_\-buffer}]{\setlength{\rightskip}{0pt plus 5cm}void chunkqueue\-\_\-prepend\-\_\-buffer (
+\begin{DoxyParamCaption}
+\item[{{\bf chunkqueue} $\ast$}]{cq, }
+\item[{{\bf buffer} $\ast$}]{mem}
+\end{DoxyParamCaption}
+)}}\label{chunk_8c_a354d29310b9479a86388b4b8469541c6}
+
+
+References buffer\-\_\-move(), buffer\-\_\-string\-\_\-is\-\_\-empty(), chunkqueue\-\_\-get\-\_\-unused\-\_\-chunk(), chunkqueue\-\_\-prepend\-\_\-chunk(), force\-\_\-assert, chunk\-::mem, and chunk\-::type.
+
+
+
+Referenced by connection\-\_\-handle\-\_\-write\-\_\-prepare(), and http\-\_\-response\-\_\-write\-\_\-header().
+
+\hypertarget{chunk_8c_a2d4955c797a26dfea610b108d8d0633f}{\index{chunk.\-c@{chunk.\-c}!chunkqueue\-\_\-prepend\-\_\-chunk@{chunkqueue\-\_\-prepend\-\_\-chunk}}
+\index{chunkqueue\-\_\-prepend\-\_\-chunk@{chunkqueue\-\_\-prepend\-\_\-chunk}!chunk.c@{chunk.\-c}}
+\subsubsection[{chunkqueue\-\_\-prepend\-\_\-chunk}]{\setlength{\rightskip}{0pt plus 5cm}static void chunkqueue\-\_\-prepend\-\_\-chunk (
+\begin{DoxyParamCaption}
+\item[{{\bf chunkqueue} $\ast$}]{cq, }
+\item[{{\bf chunk} $\ast$}]{c}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{chunk_8c_a2d4955c797a26dfea610b108d8d0633f}
+
+
+References chunkqueue\-::bytes\-\_\-in, chunk\-\_\-remaining\-\_\-length(), chunkqueue\-::first, chunkqueue\-::last, and chunk\-::next.
+
+
+
+Referenced by chunkqueue\-\_\-prepend\-\_\-buffer().
+
+\hypertarget{chunk_8c_a8681c21755aa66050ada991d5a234aa8}{\index{chunk.\-c@{chunk.\-c}!chunkqueue\-\_\-push\-\_\-unused\-\_\-chunk@{chunkqueue\-\_\-push\-\_\-unused\-\_\-chunk}}
+\index{chunkqueue\-\_\-push\-\_\-unused\-\_\-chunk@{chunkqueue\-\_\-push\-\_\-unused\-\_\-chunk}!chunk.c@{chunk.\-c}}
+\subsubsection[{chunkqueue\-\_\-push\-\_\-unused\-\_\-chunk}]{\setlength{\rightskip}{0pt plus 5cm}static void chunkqueue\-\_\-push\-\_\-unused\-\_\-chunk (
+\begin{DoxyParamCaption}
+\item[{{\bf chunkqueue} $\ast$}]{cq, }
+\item[{{\bf chunk} $\ast$}]{c}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{chunk_8c_a8681c21755aa66050ada991d5a234aa8}
+
+
+References chunk\-\_\-free(), chunk\-\_\-reset(), force\-\_\-assert, chunk\-::next, chunkqueue\-::unused, and chunkqueue\-::unused\-\_\-chunks.
+
+
+
+Referenced by chunkqueue\-\_\-mark\-\_\-written(), chunkqueue\-\_\-remove\-\_\-empty\-\_\-chunks(), chunkqueue\-\_\-remove\-\_\-finished\-\_\-chunks(), chunkqueue\-\_\-reset(), chunkqueue\-\_\-steal(), and chunkqueue\-\_\-steal\-\_\-with\-\_\-tempfiles().
+
+\hypertarget{chunk_8c_aa3a64c516fc22fb8697d03531f264067}{\index{chunk.\-c@{chunk.\-c}!chunkqueue\-\_\-remove\-\_\-empty\-\_\-chunks@{chunkqueue\-\_\-remove\-\_\-empty\-\_\-chunks}}
+\index{chunkqueue\-\_\-remove\-\_\-empty\-\_\-chunks@{chunkqueue\-\_\-remove\-\_\-empty\-\_\-chunks}!chunk.c@{chunk.\-c}}
+\subsubsection[{chunkqueue\-\_\-remove\-\_\-empty\-\_\-chunks}]{\setlength{\rightskip}{0pt plus 5cm}static void chunkqueue\-\_\-remove\-\_\-empty\-\_\-chunks (
+\begin{DoxyParamCaption}
+\item[{{\bf chunkqueue} $\ast$}]{cq}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{chunk_8c_aa3a64c516fc22fb8697d03531f264067}
+
+
+References chunk\-\_\-remaining\-\_\-length(), chunkqueue\-\_\-is\-\_\-empty(), chunkqueue\-\_\-push\-\_\-unused\-\_\-chunk(), chunkqueue\-\_\-remove\-\_\-finished\-\_\-chunks(), chunkqueue\-::first, chunkqueue\-::last, and chunk\-::next.
+
+
+
+Referenced by chunkqueue\-\_\-append\-\_\-mem\-\_\-to\-\_\-tempfile().
+
+\hypertarget{chunk_8c_ae4848d6d0fe8f5ced4f9c21c39ede1c3}{\index{chunk.\-c@{chunk.\-c}!chunkqueue\-\_\-remove\-\_\-finished\-\_\-chunks@{chunkqueue\-\_\-remove\-\_\-finished\-\_\-chunks}}
+\index{chunkqueue\-\_\-remove\-\_\-finished\-\_\-chunks@{chunkqueue\-\_\-remove\-\_\-finished\-\_\-chunks}!chunk.c@{chunk.\-c}}
+\subsubsection[{chunkqueue\-\_\-remove\-\_\-finished\-\_\-chunks}]{\setlength{\rightskip}{0pt plus 5cm}void chunkqueue\-\_\-remove\-\_\-finished\-\_\-chunks (
+\begin{DoxyParamCaption}
+\item[{{\bf chunkqueue} $\ast$}]{cq}
+\end{DoxyParamCaption}
+)}}\label{chunk_8c_ae4848d6d0fe8f5ced4f9c21c39ede1c3}
+
+
+References chunk\-\_\-remaining\-\_\-length(), chunkqueue\-\_\-push\-\_\-unused\-\_\-chunk(), chunkqueue\-::first, chunkqueue\-::last, and chunk\-::next.
+
+
+
+Referenced by cgi\-\_\-write\-\_\-file\-\_\-chunk\-\_\-mmap(), chunkqueue\-\_\-remove\-\_\-empty\-\_\-chunks(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-cq\-\_\-compact(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-state(), connection\-\_\-handle\-\_\-read\-\_\-state(), deflate\-\_\-compress\-\_\-response(), fcgi\-\_\-write\-\_\-request(), network\-\_\-write\-\_\-chunkqueue(), network\-\_\-write\-\_\-file\-\_\-chunk\-\_\-no\-\_\-mmap(), network\-\_\-write\-\_\-mem\-\_\-chunk(), proxy\-\_\-write\-\_\-request(), and scgi\-\_\-write\-\_\-request().
+
+\hypertarget{chunk_8c_a562ee5041ab310ca2a7d7c05d2af835f}{\index{chunk.\-c@{chunk.\-c}!chunkqueue\-\_\-reset@{chunkqueue\-\_\-reset}}
+\index{chunkqueue\-\_\-reset@{chunkqueue\-\_\-reset}!chunk.c@{chunk.\-c}}
+\subsubsection[{chunkqueue\-\_\-reset}]{\setlength{\rightskip}{0pt plus 5cm}void chunkqueue\-\_\-reset (
+\begin{DoxyParamCaption}
+\item[{{\bf chunkqueue} $\ast$}]{cq}
+\end{DoxyParamCaption}
+)}}\label{chunk_8c_a562ee5041ab310ca2a7d7c05d2af835f}
+
+
+References chunkqueue\-::bytes\-\_\-in, chunkqueue\-::bytes\-\_\-out, chunkqueue\-\_\-push\-\_\-unused\-\_\-chunk(), chunkqueue\-::first, chunkqueue\-::last, chunk\-::next, and chunkqueue\-::tempdir\-\_\-idx.
+
+
+
+Referenced by cache\-\_\-parse\-\_\-lua(), cgi\-\_\-demux\-\_\-response(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), connection\-\_\-handle\-\_\-errdoc\-\_\-init(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-error(), connection\-\_\-handle\-\_\-write\-\_\-prepare(), connection\-\_\-reset(), connection\-\_\-response\-\_\-reset(), connection\-\_\-state\-\_\-machine(), deflate\-\_\-file\-\_\-to\-\_\-buffer(), handler\-\_\-ctx\-\_\-clear(), http\-\_\-response\-\_\-prepare(), mod\-\_\-ssi\-\_\-handle\-\_\-request(), and U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{chunk_8c_aa81a5d8e989afea1910625ce0ab12b5b}{\index{chunk.\-c@{chunk.\-c}!chunkqueue\-\_\-set\-\_\-tempdirs\-\_\-default@{chunkqueue\-\_\-set\-\_\-tempdirs\-\_\-default}}
+\index{chunkqueue\-\_\-set\-\_\-tempdirs\-\_\-default@{chunkqueue\-\_\-set\-\_\-tempdirs\-\_\-default}!chunk.c@{chunk.\-c}}
+\subsubsection[{chunkqueue\-\_\-set\-\_\-tempdirs\-\_\-default}]{\setlength{\rightskip}{0pt plus 5cm}void chunkqueue\-\_\-set\-\_\-tempdirs\-\_\-default (
+\begin{DoxyParamCaption}
+\item[{{\bf array} $\ast$}]{tempdirs, }
+\item[{unsigned int}]{upload\-\_\-temp\-\_\-file\-\_\-size}
+\end{DoxyParamCaption}
+)}}\label{chunk_8c_aa81a5d8e989afea1910625ce0ab12b5b}
+
+
+References chunkqueue\-\_\-default\-\_\-tempfile\-\_\-size, D\-E\-F\-A\-U\-L\-T\-\_\-\-T\-E\-M\-P\-F\-I\-L\-E\-\_\-\-S\-I\-Z\-E, and M\-A\-X\-\_\-\-T\-E\-M\-P\-F\-I\-L\-E\-\_\-\-S\-I\-Z\-E.
+
+
+
+Referenced by config\-\_\-set\-\_\-defaults().
+
+\hypertarget{chunk_8c_ae4014c8df4752dc1976c453480fd2b98}{\index{chunk.\-c@{chunk.\-c}!chunkqueue\-\_\-steal@{chunkqueue\-\_\-steal}}
+\index{chunkqueue\-\_\-steal@{chunkqueue\-\_\-steal}!chunk.c@{chunk.\-c}}
+\subsubsection[{chunkqueue\-\_\-steal}]{\setlength{\rightskip}{0pt plus 5cm}void chunkqueue\-\_\-steal (
+\begin{DoxyParamCaption}
+\item[{{\bf chunkqueue} $\ast$}]{dest, }
+\item[{{\bf chunkqueue} $\ast$}]{src, }
+\item[{off\-\_\-t}]{len}
+\end{DoxyParamCaption}
+)}}\label{chunk_8c_ae4014c8df4752dc1976c453480fd2b98}
+
+
+References chunkqueue\-::bytes\-\_\-out, chunk\-\_\-remaining\-\_\-length(), chunkqueue\-\_\-append\-\_\-chunk(), chunkqueue\-\_\-append\-\_\-file(), chunkqueue\-\_\-append\-\_\-mem(), chunkqueue\-\_\-push\-\_\-unused\-\_\-chunk(), chunk\-::file, chunkqueue\-::first, force\-\_\-assert, chunkqueue\-::last, chunk\-::mem, chunk\-::name, chunk\-::next, chunk\-::offset, buffer\-::ptr, chunk\-::start, and chunk\-::type.
+
+
+
+Referenced by connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-chunked(), connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-state(), and fcgi\-\_\-stdin\-\_\-append().
+
+\hypertarget{chunk_8c_a0f14c8f408297c2a2f5bd8b742d169a8}{\index{chunk.\-c@{chunk.\-c}!chunkqueue\-\_\-steal\-\_\-with\-\_\-tempfiles@{chunkqueue\-\_\-steal\-\_\-with\-\_\-tempfiles}}
+\index{chunkqueue\-\_\-steal\-\_\-with\-\_\-tempfiles@{chunkqueue\-\_\-steal\-\_\-with\-\_\-tempfiles}!chunk.c@{chunk.\-c}}
+\subsubsection[{chunkqueue\-\_\-steal\-\_\-with\-\_\-tempfiles}]{\setlength{\rightskip}{0pt plus 5cm}int chunkqueue\-\_\-steal\-\_\-with\-\_\-tempfiles (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf chunkqueue} $\ast$}]{dest, }
+\item[{{\bf chunkqueue} $\ast$}]{src, }
+\item[{off\-\_\-t}]{len}
+\end{DoxyParamCaption}
+)}}\label{chunk_8c_a0f14c8f408297c2a2f5bd8b742d169a8}
+
+
+References chunkqueue\-::bytes\-\_\-out, chunk\-\_\-remaining\-\_\-length(), chunkqueue\-\_\-append\-\_\-chunk(), chunkqueue\-\_\-append\-\_\-file(), chunkqueue\-\_\-append\-\_\-mem\-\_\-to\-\_\-tempfile(), chunkqueue\-\_\-push\-\_\-unused\-\_\-chunk(), chunk\-::file, chunkqueue\-::first, force\-\_\-assert, chunkqueue\-::last, chunk\-::mem, chunk\-::name, chunk\-::next, chunk\-::offset, buffer\-::ptr, chunk\-::start, and chunk\-::type.
+
+
+
+Referenced by connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-chunked(), and connection\-\_\-handle\-\_\-read\-\_\-post\-\_\-state().
+
+\hypertarget{chunk_8c_a0470f582cf7fba28750956f176a0c1ab}{\index{chunk.\-c@{chunk.\-c}!chunkqueue\-\_\-use\-\_\-memory@{chunkqueue\-\_\-use\-\_\-memory}}
+\index{chunkqueue\-\_\-use\-\_\-memory@{chunkqueue\-\_\-use\-\_\-memory}!chunk.c@{chunk.\-c}}
+\subsubsection[{chunkqueue\-\_\-use\-\_\-memory}]{\setlength{\rightskip}{0pt plus 5cm}void chunkqueue\-\_\-use\-\_\-memory (
+\begin{DoxyParamCaption}
+\item[{{\bf chunkqueue} $\ast$}]{cq, }
+\item[{size\-\_\-t}]{len}
+\end{DoxyParamCaption}
+)}}\label{chunk_8c_a0470f582cf7fba28750956f176a0c1ab}
+
+
+References buffer\-\_\-commit(), buffer\-\_\-reset(), buffer\-\_\-string\-\_\-is\-\_\-empty(), chunkqueue\-::bytes\-\_\-in, force\-\_\-assert, chunkqueue\-::last, chunk\-::mem, and chunk\-::type.
+
+
+
+Referenced by connection\-\_\-handle\-\_\-read(), connection\-\_\-handle\-\_\-read\-\_\-ssl(), fcgi\-\_\-demux\-\_\-response(), and process\-\_\-ssi\-\_\-stmt().
+
+
+
+\subsection{Variable Documentation}
+\hypertarget{chunk_8c_ae236ff847e9c441d64210b1a30a51b72}{\index{chunk.\-c@{chunk.\-c}!chunkqueue\-\_\-default\-\_\-tempdirs@{chunkqueue\-\_\-default\-\_\-tempdirs}}
+\index{chunkqueue\-\_\-default\-\_\-tempdirs@{chunkqueue\-\_\-default\-\_\-tempdirs}!chunk.c@{chunk.\-c}}
+\subsubsection[{chunkqueue\-\_\-default\-\_\-tempdirs}]{\setlength{\rightskip}{0pt plus 5cm}{\bf array}$\ast$ chunkqueue\-\_\-default\-\_\-tempdirs = N\-U\-L\-L\hspace{0.3cm}{\ttfamily [static]}}}\label{chunk_8c_ae236ff847e9c441d64210b1a30a51b72}
+
+
+Referenced by chunkqueue\-\_\-init().
+
+\hypertarget{chunk_8c_ac40087d703beb5266b662d78a69b6ae7}{\index{chunk.\-c@{chunk.\-c}!chunkqueue\-\_\-default\-\_\-tempfile\-\_\-size@{chunkqueue\-\_\-default\-\_\-tempfile\-\_\-size}}
+\index{chunkqueue\-\_\-default\-\_\-tempfile\-\_\-size@{chunkqueue\-\_\-default\-\_\-tempfile\-\_\-size}!chunk.c@{chunk.\-c}}
+\subsubsection[{chunkqueue\-\_\-default\-\_\-tempfile\-\_\-size}]{\setlength{\rightskip}{0pt plus 5cm}unsigned int chunkqueue\-\_\-default\-\_\-tempfile\-\_\-size = {\bf D\-E\-F\-A\-U\-L\-T\-\_\-\-T\-E\-M\-P\-F\-I\-L\-E\-\_\-\-S\-I\-Z\-E}\hspace{0.3cm}{\ttfamily [static]}}}\label{chunk_8c_ac40087d703beb5266b662d78a69b6ae7}
+
+
+Referenced by chunkqueue\-\_\-init(), and chunkqueue\-\_\-set\-\_\-tempdirs\-\_\-default().
+

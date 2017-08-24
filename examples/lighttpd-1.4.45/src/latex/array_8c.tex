@@ -1,0 +1,311 @@
+\hypertarget{array_8c}{\section{array.\-c File Reference}
+\label{array_8c}\index{array.\-c@{array.\-c}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}array.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}buffer.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$stdlib.\-h$>$}\\*
+{\ttfamily \#include $<$limits.\-h$>$}\\*
+{\ttfamily \#include $<$errno.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{array_8c_a18fd3a7fb6a2e071823070fba6646574}{A\-R\-R\-A\-Y\-\_\-\-N\-O\-T\-\_\-\-F\-O\-U\-N\-D}~((size\-\_\-t)(-\/1))
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{structarray}{array} $\ast$ \hyperlink{array_8c_a90bca88acbd6bfab18e7a5c91edc344e}{array\-\_\-init} (void)
+\item 
+\hyperlink{structarray}{array} $\ast$ \hyperlink{array_8c_ae273f4b444c77524cb5530326a5beb33}{array\-\_\-init\-\_\-array} (\hyperlink{structarray}{array} $\ast$src)
+\item 
+void \hyperlink{array_8c_a6ecc0b8fe82afcb76e18dcb854092e6a}{array\-\_\-free} (\hyperlink{structarray}{array} $\ast$a)
+\item 
+void \hyperlink{array_8c_a5f25578ce8aa8261e444a894f0a5c478}{array\-\_\-reset} (\hyperlink{structarray}{array} $\ast$a)
+\item 
+\hyperlink{structdata__unset}{data\-\_\-unset} $\ast$ \hyperlink{array_8c_ac5bf23a05d8476cba4338c29c3e47f60}{array\-\_\-pop} (\hyperlink{structarray}{array} $\ast$a)
+\item 
+static size\-\_\-t \hyperlink{array_8c_ab4a215475bf4585238e1b92b73cbd02a}{array\-\_\-get\-\_\-index} (\hyperlink{structarray}{array} $\ast$a, const char $\ast$key, size\-\_\-t keylen, size\-\_\-t $\ast$rndx)
+\item 
+\hyperlink{structdata__unset}{data\-\_\-unset} $\ast$ \hyperlink{array_8c_aa20e390ce14186005221d6e121d4e475}{array\-\_\-get\-\_\-element} (\hyperlink{structarray}{array} $\ast$a, const char $\ast$key)
+\item 
+\hyperlink{structdata__unset}{data\-\_\-unset} $\ast$ \hyperlink{array_8c_a72a1a858fa4e29c1c22e4d0db0ef152f}{array\-\_\-extract\-\_\-element} (\hyperlink{structarray}{array} $\ast$a, const char $\ast$key)
+\item 
+\hyperlink{structdata__unset}{data\-\_\-unset} $\ast$ \hyperlink{array_8c_afa11d5f418e9dc4157895fa34edfaab4}{array\-\_\-get\-\_\-unused\-\_\-element} (\hyperlink{structarray}{array} $\ast$a, \hyperlink{array_8h_a49b5dfea31023fcd165ce36384234dc5}{data\-\_\-type\-\_\-t} t)
+\item 
+void \hyperlink{array_8c_acb552b62eebf197aa226a4e180a6a500}{array\-\_\-set\-\_\-key\-\_\-value} (\hyperlink{structarray}{array} $\ast$hdrs, const char $\ast$key, size\-\_\-t key\-\_\-len, const char $\ast$value, size\-\_\-t val\-\_\-len)
+\item 
+static \hyperlink{structdata__unset}{data\-\_\-unset} $\ast$$\ast$ \hyperlink{array_8c_ac9fbcf7e776a0570f43aa3b214cf1434}{array\-\_\-find\-\_\-or\-\_\-insert} (\hyperlink{structarray}{array} $\ast$a, \hyperlink{structdata__unset}{data\-\_\-unset} $\ast$entry)
+\item 
+void \hyperlink{array_8c_a19b4a399d599fc73431ffc11d4f19f8e}{array\-\_\-replace} (\hyperlink{structarray}{array} $\ast$a, \hyperlink{structdata__unset}{data\-\_\-unset} $\ast$entry)
+\item 
+void \hyperlink{array_8c_a785bb3fb3022ccb15596be169a6e522a}{array\-\_\-insert\-\_\-unique} (\hyperlink{structarray}{array} $\ast$a, \hyperlink{structdata__unset}{data\-\_\-unset} $\ast$entry)
+\item 
+void \hyperlink{array_8c_a793a3b9b2988a64645d59694108a060b}{array\-\_\-print\-\_\-indent} (int depth)
+\item 
+size\-\_\-t \hyperlink{array_8c_a11ac90af558074d96d59b2573c6dee6e}{array\-\_\-get\-\_\-max\-\_\-key\-\_\-length} (\hyperlink{structarray}{array} $\ast$a)
+\item 
+int \hyperlink{array_8c_a7d8c3f4aa064250d52108e924a08add0}{array\-\_\-print} (\hyperlink{structarray}{array} $\ast$a, int depth)
+\end{DoxyCompactItemize}
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{array_8c_a18fd3a7fb6a2e071823070fba6646574}{\index{array.\-c@{array.\-c}!A\-R\-R\-A\-Y\-\_\-\-N\-O\-T\-\_\-\-F\-O\-U\-N\-D@{A\-R\-R\-A\-Y\-\_\-\-N\-O\-T\-\_\-\-F\-O\-U\-N\-D}}
+\index{A\-R\-R\-A\-Y\-\_\-\-N\-O\-T\-\_\-\-F\-O\-U\-N\-D@{A\-R\-R\-A\-Y\-\_\-\-N\-O\-T\-\_\-\-F\-O\-U\-N\-D}!array.c@{array.\-c}}
+\subsubsection[{A\-R\-R\-A\-Y\-\_\-\-N\-O\-T\-\_\-\-F\-O\-U\-N\-D}]{\setlength{\rightskip}{0pt plus 5cm}\#define A\-R\-R\-A\-Y\-\_\-\-N\-O\-T\-\_\-\-F\-O\-U\-N\-D~((size\-\_\-t)(-\/1))}}\label{array_8c_a18fd3a7fb6a2e071823070fba6646574}
+
+
+Referenced by array\-\_\-extract\-\_\-element(), array\-\_\-find\-\_\-or\-\_\-insert(), array\-\_\-get\-\_\-element(), and array\-\_\-get\-\_\-index().
+
+
+
+\subsection{Function Documentation}
+\hypertarget{array_8c_a72a1a858fa4e29c1c22e4d0db0ef152f}{\index{array.\-c@{array.\-c}!array\-\_\-extract\-\_\-element@{array\-\_\-extract\-\_\-element}}
+\index{array\-\_\-extract\-\_\-element@{array\-\_\-extract\-\_\-element}!array.c@{array.\-c}}
+\subsubsection[{array\-\_\-extract\-\_\-element}]{\setlength{\rightskip}{0pt plus 5cm}{\bf data\-\_\-unset}$\ast$ array\-\_\-extract\-\_\-element (
+\begin{DoxyParamCaption}
+\item[{{\bf array} $\ast$}]{a, }
+\item[{const char $\ast$}]{key}
+\end{DoxyParamCaption}
+)}}\label{array_8c_a72a1a858fa4e29c1c22e4d0db0ef152f}
+
+
+References array\-\_\-get\-\_\-index(), A\-R\-R\-A\-Y\-\_\-\-N\-O\-T\-\_\-\-F\-O\-U\-N\-D, C\-O\-N\-S\-T\-\_\-\-B\-U\-F\-\_\-\-L\-E\-N, array\-::data, force\-\_\-assert, array\-::sorted, and array\-::used.
+
+
+
+Referenced by yy\-\_\-reduce().
+
+\hypertarget{array_8c_ac9fbcf7e776a0570f43aa3b214cf1434}{\index{array.\-c@{array.\-c}!array\-\_\-find\-\_\-or\-\_\-insert@{array\-\_\-find\-\_\-or\-\_\-insert}}
+\index{array\-\_\-find\-\_\-or\-\_\-insert@{array\-\_\-find\-\_\-or\-\_\-insert}!array.c@{array.\-c}}
+\subsubsection[{array\-\_\-find\-\_\-or\-\_\-insert}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf data\-\_\-unset}$\ast$$\ast$ array\-\_\-find\-\_\-or\-\_\-insert (
+\begin{DoxyParamCaption}
+\item[{{\bf array} $\ast$}]{a, }
+\item[{{\bf data\-\_\-unset} $\ast$}]{entry}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{array_8c_ac9fbcf7e776a0570f43aa3b214cf1434}
+
+
+References array\-\_\-get\-\_\-index(), A\-R\-R\-A\-Y\-\_\-\-N\-O\-T\-\_\-\-F\-O\-U\-N\-D, buffer\-\_\-copy\-\_\-int(), buffer\-\_\-is\-\_\-empty(), C\-O\-N\-S\-T\-\_\-\-B\-U\-F\-\_\-\-L\-E\-N, array\-::data, force\-\_\-assert, array\-::size, array\-::sorted, S\-S\-I\-Z\-E\-\_\-\-M\-A\-X, array\-::unique\-\_\-ndx, and array\-::used.
+
+
+
+Referenced by array\-\_\-insert\-\_\-unique(), and array\-\_\-replace().
+
+\hypertarget{array_8c_a6ecc0b8fe82afcb76e18dcb854092e6a}{\index{array.\-c@{array.\-c}!array\-\_\-free@{array\-\_\-free}}
+\index{array\-\_\-free@{array\-\_\-free}!array.c@{array.\-c}}
+\subsubsection[{array\-\_\-free}]{\setlength{\rightskip}{0pt plus 5cm}void array\-\_\-free (
+\begin{DoxyParamCaption}
+\item[{{\bf array} $\ast$}]{a}
+\end{DoxyParamCaption}
+)}}\label{array_8c_a6ecc0b8fe82afcb76e18dcb854092e6a}
+
+
+References array\-::data, array\-::size, and array\-::sorted.
+
+
+
+Referenced by config\-\_\-insert(), connections\-\_\-free(), data\-\_\-array\-\_\-copy(), data\-\_\-array\-\_\-free(), data\-\_\-config\-\_\-copy(), data\-\_\-config\-\_\-free(), fastcgi\-\_\-host\-\_\-free(), F\-R\-E\-E\-\_\-\-F\-U\-N\-C(), http\-\_\-auth\-\_\-require\-\_\-free(), mod\-\_\-evhost\-\_\-uri\-\_\-handler(), scgi\-\_\-host\-\_\-free(), server\-\_\-free(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C(), yy\-\_\-destructor(), and yy\-\_\-reduce().
+
+\hypertarget{array_8c_aa20e390ce14186005221d6e121d4e475}{\index{array.\-c@{array.\-c}!array\-\_\-get\-\_\-element@{array\-\_\-get\-\_\-element}}
+\index{array\-\_\-get\-\_\-element@{array\-\_\-get\-\_\-element}!array.c@{array.\-c}}
+\subsubsection[{array\-\_\-get\-\_\-element}]{\setlength{\rightskip}{0pt plus 5cm}{\bf data\-\_\-unset}$\ast$ array\-\_\-get\-\_\-element (
+\begin{DoxyParamCaption}
+\item[{{\bf array} $\ast$}]{a, }
+\item[{const char $\ast$}]{key}
+\end{DoxyParamCaption}
+)}}\label{array_8c_aa20e390ce14186005221d6e121d4e475}
+
+
+References array\-\_\-get\-\_\-index(), A\-R\-R\-A\-Y\-\_\-\-N\-O\-T\-\_\-\-F\-O\-U\-N\-D, array\-::data, and force\-\_\-assert.
+
+
+
+Referenced by array\-\_\-set\-\_\-key\-\_\-value(), build\-\_\-ssi\-\_\-cgi\-\_\-vars(), cache\-\_\-parse\-\_\-lua(), cgi\-\_\-demux\-\_\-response(), config\-\_\-check\-\_\-cond\-\_\-nocache(), config\-\_\-insert\-\_\-values\-\_\-global(), config\-\_\-insert\-\_\-values\-\_\-internal(), configparser\-\_\-get\-\_\-variable(), configparser\-\_\-merge\-\_\-data(), C\-O\-N\-N\-E\-C\-T\-I\-O\-N\-\_\-\-F\-U\-N\-C(), connection\-\_\-handle\-\_\-errdoc\-\_\-init(), connection\-\_\-handle\-\_\-write\-\_\-prepare(), fcgi\-\_\-demux\-\_\-response(), http\-\_\-auth\-\_\-setenv(), http\-\_\-request\-\_\-parse(), http\-\_\-response\-\_\-parse\-\_\-range(), http\-\_\-response\-\_\-send\-\_\-file(), http\-\_\-response\-\_\-xsendfile(), is\-\_\-proxy\-\_\-trusted(), last\-\_\-not\-\_\-in\-\_\-array(), magnet\-\_\-attract\-\_\-array(), magnet\-\_\-cgi\-\_\-get(), magnet\-\_\-reqhdr\-\_\-get(), main(), mod\-\_\-auth\-\_\-check\-\_\-basic(), mod\-\_\-auth\-\_\-check\-\_\-digest(), mod\-\_\-auth\-\_\-check\-\_\-extern(), mod\-\_\-authn\-\_\-gssapi\-\_\-check(), mod\-\_\-evhost\-\_\-uri\-\_\-handler(), parse\-\_\-config\-\_\-entry(), P\-H\-Y\-S\-I\-C\-A\-L\-P\-A\-T\-H\-\_\-\-F\-U\-N\-C(), process\-\_\-ssi\-\_\-stmt(), R\-E\-Q\-U\-E\-S\-T\-D\-O\-N\-E\-\_\-\-F\-U\-N\-C(), response\-\_\-header\-\_\-append(), response\-\_\-header\-\_\-overwrite(), scgi\-\_\-demux\-\_\-response(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), ssi\-\_\-expr\-\_\-tokenizer(), status\-\_\-counter\-\_\-get\-\_\-counter(), S\-U\-B\-R\-E\-Q\-U\-E\-S\-T\-\_\-\-F\-U\-N\-C(), U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C(), webdav\-\_\-has\-\_\-lock(), and yy\-\_\-reduce().
+
+\hypertarget{array_8c_ab4a215475bf4585238e1b92b73cbd02a}{\index{array.\-c@{array.\-c}!array\-\_\-get\-\_\-index@{array\-\_\-get\-\_\-index}}
+\index{array\-\_\-get\-\_\-index@{array\-\_\-get\-\_\-index}!array.c@{array.\-c}}
+\subsubsection[{array\-\_\-get\-\_\-index}]{\setlength{\rightskip}{0pt plus 5cm}static size\-\_\-t array\-\_\-get\-\_\-index (
+\begin{DoxyParamCaption}
+\item[{{\bf array} $\ast$}]{a, }
+\item[{const char $\ast$}]{key, }
+\item[{size\-\_\-t}]{keylen, }
+\item[{size\-\_\-t $\ast$}]{rndx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{array_8c_ab4a215475bf4585238e1b92b73cbd02a}
+
+
+References A\-R\-R\-A\-Y\-\_\-\-N\-O\-T\-\_\-\-F\-O\-U\-N\-D, assert, buffer\-\_\-caseless\-\_\-compare(), C\-O\-N\-S\-T\-\_\-\-B\-U\-F\-\_\-\-L\-E\-N, array\-::data, force\-\_\-assert, array\-::sorted, S\-S\-I\-Z\-E\-\_\-\-M\-A\-X, and array\-::used.
+
+
+
+Referenced by array\-\_\-extract\-\_\-element(), array\-\_\-find\-\_\-or\-\_\-insert(), and array\-\_\-get\-\_\-element().
+
+\hypertarget{array_8c_a11ac90af558074d96d59b2573c6dee6e}{\index{array.\-c@{array.\-c}!array\-\_\-get\-\_\-max\-\_\-key\-\_\-length@{array\-\_\-get\-\_\-max\-\_\-key\-\_\-length}}
+\index{array\-\_\-get\-\_\-max\-\_\-key\-\_\-length@{array\-\_\-get\-\_\-max\-\_\-key\-\_\-length}!array.c@{array.\-c}}
+\subsubsection[{array\-\_\-get\-\_\-max\-\_\-key\-\_\-length}]{\setlength{\rightskip}{0pt plus 5cm}size\-\_\-t array\-\_\-get\-\_\-max\-\_\-key\-\_\-length (
+\begin{DoxyParamCaption}
+\item[{{\bf array} $\ast$}]{a}
+\end{DoxyParamCaption}
+)}}\label{array_8c_a11ac90af558074d96d59b2573c6dee6e}
+
+
+References array\-::data, and array\-::used.
+
+
+
+Referenced by array\-\_\-print(), and data\-\_\-config\-\_\-print().
+
+\hypertarget{array_8c_afa11d5f418e9dc4157895fa34edfaab4}{\index{array.\-c@{array.\-c}!array\-\_\-get\-\_\-unused\-\_\-element@{array\-\_\-get\-\_\-unused\-\_\-element}}
+\index{array\-\_\-get\-\_\-unused\-\_\-element@{array\-\_\-get\-\_\-unused\-\_\-element}!array.c@{array.\-c}}
+\subsubsection[{array\-\_\-get\-\_\-unused\-\_\-element}]{\setlength{\rightskip}{0pt plus 5cm}{\bf data\-\_\-unset}$\ast$ array\-\_\-get\-\_\-unused\-\_\-element (
+\begin{DoxyParamCaption}
+\item[{{\bf array} $\ast$}]{a, }
+\item[{{\bf data\-\_\-type\-\_\-t}}]{t}
+\end{DoxyParamCaption}
+)}}\label{array_8c_afa11d5f418e9dc4157895fa34edfaab4}
+
+
+References array\-::data, and array\-::used.
+
+
+
+Referenced by array\-\_\-set\-\_\-key\-\_\-value(), cgi\-\_\-response\-\_\-parse(), connection\-\_\-state\-\_\-machine(), fcgi\-\_\-response\-\_\-parse(), http\-\_\-auth\-\_\-setenv(), http\-\_\-request\-\_\-parse(), http\-\_\-request\-\_\-split\-\_\-value(), process\-\_\-ssi\-\_\-stmt(), proxy\-\_\-append\-\_\-header(), proxy\-\_\-response\-\_\-parse(), proxy\-\_\-set\-\_\-header(), response\-\_\-header\-\_\-insert(), scgi\-\_\-response\-\_\-parse(), split\-\_\-get\-\_\-params(), ssi\-\_\-env\-\_\-add(), status\-\_\-counter\-\_\-get\-\_\-counter(), and U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{array_8c_a90bca88acbd6bfab18e7a5c91edc344e}{\index{array.\-c@{array.\-c}!array\-\_\-init@{array\-\_\-init}}
+\index{array\-\_\-init@{array\-\_\-init}!array.c@{array.\-c}}
+\subsubsection[{array\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}{\bf array}$\ast$ array\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{void}]{}
+\end{DoxyParamCaption}
+)}}\label{array_8c_a90bca88acbd6bfab18e7a5c91edc344e}
+
+
+References force\-\_\-assert.
+
+
+
+Referenced by array\-\_\-init\-\_\-array(), config\-\_\-insert(), connection\-\_\-init(), data\-\_\-array\-\_\-init(), data\-\_\-config\-\_\-init(), extract\-\_\-forward\-\_\-array(), fastcgi\-\_\-host\-\_\-init(), http\-\_\-auth\-\_\-require\-\_\-init(), I\-N\-I\-T\-\_\-\-F\-U\-N\-C(), mod\-\_\-evhost\-\_\-uri\-\_\-handler(), scgi\-\_\-host\-\_\-init(), server\-\_\-init(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), and yy\-\_\-reduce().
+
+\hypertarget{array_8c_ae273f4b444c77524cb5530326a5beb33}{\index{array.\-c@{array.\-c}!array\-\_\-init\-\_\-array@{array\-\_\-init\-\_\-array}}
+\index{array\-\_\-init\-\_\-array@{array\-\_\-init\-\_\-array}!array.c@{array.\-c}}
+\subsubsection[{array\-\_\-init\-\_\-array}]{\setlength{\rightskip}{0pt plus 5cm}{\bf array}$\ast$ array\-\_\-init\-\_\-array (
+\begin{DoxyParamCaption}
+\item[{{\bf array} $\ast$}]{src}
+\end{DoxyParamCaption}
+)}}\label{array_8c_ae273f4b444c77524cb5530326a5beb33}
+
+
+References array\-\_\-init(), array\-::data, force\-\_\-assert, array\-::size, array\-::sorted, array\-::unique\-\_\-ndx, and array\-::used.
+
+
+
+Referenced by data\-\_\-array\-\_\-copy(), and data\-\_\-config\-\_\-copy().
+
+\hypertarget{array_8c_a785bb3fb3022ccb15596be169a6e522a}{\index{array.\-c@{array.\-c}!array\-\_\-insert\-\_\-unique@{array\-\_\-insert\-\_\-unique}}
+\index{array\-\_\-insert\-\_\-unique@{array\-\_\-insert\-\_\-unique}!array.c@{array.\-c}}
+\subsubsection[{array\-\_\-insert\-\_\-unique}]{\setlength{\rightskip}{0pt plus 5cm}void array\-\_\-insert\-\_\-unique (
+\begin{DoxyParamCaption}
+\item[{{\bf array} $\ast$}]{a, }
+\item[{{\bf data\-\_\-unset} $\ast$}]{entry}
+\end{DoxyParamCaption}
+)}}\label{array_8c_a785bb3fb3022ccb15596be169a6e522a}
+
+
+References array\-\_\-find\-\_\-or\-\_\-insert(), and force\-\_\-assert.
+
+
+
+Referenced by array\-\_\-set\-\_\-key\-\_\-value(), cgi\-\_\-response\-\_\-parse(), config\-\_\-insert(), config\-\_\-insert\-\_\-values\-\_\-global(), config\-\_\-insert\-\_\-values\-\_\-internal(), config\-\_\-read(), config\-\_\-set\-\_\-defaults(), configparser\-\_\-merge\-\_\-data(), configparser\-\_\-push(), connection\-\_\-state\-\_\-machine(), fcgi\-\_\-response\-\_\-parse(), http\-\_\-auth\-\_\-setenv(), http\-\_\-request\-\_\-parse(), http\-\_\-request\-\_\-split\-\_\-value(), mod\-\_\-auth\-\_\-require\-\_\-parse(), mod\-\_\-evhost\-\_\-parse\-\_\-host(), process\-\_\-ssi\-\_\-stmt(), proxy\-\_\-append\-\_\-header(), proxy\-\_\-response\-\_\-parse(), proxy\-\_\-set\-\_\-header(), put\-\_\-string\-\_\-into\-\_\-array\-\_\-len(), response\-\_\-header\-\_\-insert(), scgi\-\_\-response\-\_\-parse(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), split\-\_\-get\-\_\-params(), ssi\-\_\-env\-\_\-add(), status\-\_\-counter\-\_\-get\-\_\-counter(), U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C(), and yy\-\_\-reduce().
+
+\hypertarget{array_8c_ac5bf23a05d8476cba4338c29c3e47f60}{\index{array.\-c@{array.\-c}!array\-\_\-pop@{array\-\_\-pop}}
+\index{array\-\_\-pop@{array\-\_\-pop}!array.c@{array.\-c}}
+\subsubsection[{array\-\_\-pop}]{\setlength{\rightskip}{0pt plus 5cm}{\bf data\-\_\-unset}$\ast$ array\-\_\-pop (
+\begin{DoxyParamCaption}
+\item[{{\bf array} $\ast$}]{a}
+\end{DoxyParamCaption}
+)}}\label{array_8c_ac5bf23a05d8476cba4338c29c3e47f60}
+
+
+References array\-::data, force\-\_\-assert, array\-::sorted, and array\-::used.
+
+\hypertarget{array_8c_a7d8c3f4aa064250d52108e924a08add0}{\index{array.\-c@{array.\-c}!array\-\_\-print@{array\-\_\-print}}
+\index{array\-\_\-print@{array\-\_\-print}!array.c@{array.\-c}}
+\subsubsection[{array\-\_\-print}]{\setlength{\rightskip}{0pt plus 5cm}int array\-\_\-print (
+\begin{DoxyParamCaption}
+\item[{{\bf array} $\ast$}]{a, }
+\item[{int}]{depth}
+\end{DoxyParamCaption}
+)}}\label{array_8c_a7d8c3f4aa064250d52108e924a08add0}
+
+
+References array\-\_\-get\-\_\-max\-\_\-key\-\_\-length(), array\-\_\-print\-\_\-indent(), array\-::data, T\-Y\-P\-E\-\_\-\-I\-N\-T\-E\-G\-E\-R, T\-Y\-P\-E\-\_\-\-S\-T\-R\-I\-N\-G, and array\-::used.
+
+
+
+Referenced by configparser\-\_\-get\-\_\-variable(), and data\-\_\-array\-\_\-print().
+
+\hypertarget{array_8c_a793a3b9b2988a64645d59694108a060b}{\index{array.\-c@{array.\-c}!array\-\_\-print\-\_\-indent@{array\-\_\-print\-\_\-indent}}
+\index{array\-\_\-print\-\_\-indent@{array\-\_\-print\-\_\-indent}!array.c@{array.\-c}}
+\subsubsection[{array\-\_\-print\-\_\-indent}]{\setlength{\rightskip}{0pt plus 5cm}void array\-\_\-print\-\_\-indent (
+\begin{DoxyParamCaption}
+\item[{int}]{depth}
+\end{DoxyParamCaption}
+)}}\label{array_8c_a793a3b9b2988a64645d59694108a060b}
+
+
+Referenced by array\-\_\-print(), and data\-\_\-config\-\_\-print().
+
+\hypertarget{array_8c_a19b4a399d599fc73431ffc11d4f19f8e}{\index{array.\-c@{array.\-c}!array\-\_\-replace@{array\-\_\-replace}}
+\index{array\-\_\-replace@{array\-\_\-replace}!array.c@{array.\-c}}
+\subsubsection[{array\-\_\-replace}]{\setlength{\rightskip}{0pt plus 5cm}void array\-\_\-replace (
+\begin{DoxyParamCaption}
+\item[{{\bf array} $\ast$}]{a, }
+\item[{{\bf data\-\_\-unset} $\ast$}]{entry}
+\end{DoxyParamCaption}
+)}}\label{array_8c_a19b4a399d599fc73431ffc11d4f19f8e}
+
+
+References array\-\_\-find\-\_\-or\-\_\-insert(), and force\-\_\-assert.
+
+
+
+Referenced by fcgi\-\_\-response\-\_\-parse().
+
+\hypertarget{array_8c_a5f25578ce8aa8261e444a894f0a5c478}{\index{array.\-c@{array.\-c}!array\-\_\-reset@{array\-\_\-reset}}
+\index{array\-\_\-reset@{array\-\_\-reset}!array.c@{array.\-c}}
+\subsubsection[{array\-\_\-reset}]{\setlength{\rightskip}{0pt plus 5cm}void array\-\_\-reset (
+\begin{DoxyParamCaption}
+\item[{{\bf array} $\ast$}]{a}
+\end{DoxyParamCaption}
+)}}\label{array_8c_a5f25578ce8aa8261e444a894f0a5c478}
+
+
+References array\-::data, array\-::unique\-\_\-ndx, and array\-::used.
+
+
+
+Referenced by build\-\_\-ssi\-\_\-cgi\-\_\-vars(), connection\-\_\-handle\-\_\-errdoc\-\_\-init(), connection\-\_\-reset(), connection\-\_\-response\-\_\-reset(), data\-\_\-array\-\_\-reset(), data\-\_\-config\-\_\-reset(), http\-\_\-request\-\_\-parse(), mod\-\_\-ssi\-\_\-handle\-\_\-request(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), and U\-R\-I\-H\-A\-N\-D\-L\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{array_8c_acb552b62eebf197aa226a4e180a6a500}{\index{array.\-c@{array.\-c}!array\-\_\-set\-\_\-key\-\_\-value@{array\-\_\-set\-\_\-key\-\_\-value}}
+\index{array\-\_\-set\-\_\-key\-\_\-value@{array\-\_\-set\-\_\-key\-\_\-value}!array.c@{array.\-c}}
+\subsubsection[{array\-\_\-set\-\_\-key\-\_\-value}]{\setlength{\rightskip}{0pt plus 5cm}void array\-\_\-set\-\_\-key\-\_\-value (
+\begin{DoxyParamCaption}
+\item[{{\bf array} $\ast$}]{hdrs, }
+\item[{const char $\ast$}]{key, }
+\item[{size\-\_\-t}]{key\-\_\-len, }
+\item[{const char $\ast$}]{value, }
+\item[{size\-\_\-t}]{val\-\_\-len}
+\end{DoxyParamCaption}
+)}}\label{array_8c_acb552b62eebf197aa226a4e180a6a500}
+
+
+References array\-\_\-get\-\_\-element(), array\-\_\-get\-\_\-unused\-\_\-element(), array\-\_\-insert\-\_\-unique(), buffer\-\_\-copy\-\_\-string\-\_\-len(), data\-\_\-string\-\_\-init(), T\-Y\-P\-E\-\_\-\-S\-T\-R\-I\-N\-G, and data\-\_\-string\-::value.
+
+
+
+Referenced by magnet\-\_\-cgi\-\_\-set(), mod\-\_\-authn\-\_\-gssapi\-\_\-create\-\_\-krb5\-\_\-ccache(), mod\-\_\-compress\-\_\-note\-\_\-ratio(), and mod\-\_\-deflate\-\_\-note\-\_\-ratio().
+

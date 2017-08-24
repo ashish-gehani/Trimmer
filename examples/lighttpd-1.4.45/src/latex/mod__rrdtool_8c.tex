@@ -1,0 +1,214 @@
+\hypertarget{mod__rrdtool_8c}{\section{mod\-\_\-rrdtool.\-c File Reference}
+\label{mod__rrdtool_8c}\index{mod\-\_\-rrdtool.\-c@{mod\-\_\-rrdtool.\-c}}
+}
+{\ttfamily \#include \char`\"{}first.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}server.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}connections.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}response.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}log.\-h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}plugin.\-h\char`\"{}}\\*
+{\ttfamily \#include $<$sys/types.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include $<$fcntl.\-h$>$}\\*
+{\ttfamily \#include $<$stdlib.\-h$>$}\\*
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+{\ttfamily \#include $<$unistd.\-h$>$}\\*
+{\ttfamily \#include $<$errno.\-h$>$}\\*
+{\ttfamily \#include $<$time.\-h$>$}\\*
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structplugin__config}{plugin\-\_\-config}
+\item 
+struct \hyperlink{structplugin__data}{plugin\-\_\-data}
+\end{DoxyCompactItemize}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{mod__rrdtool_8c_a20876ec7c0c844d0e0c1628528bbb8da}{P\-A\-T\-C\-H}(x)~p-\/$>$conf.\-x = s-\/$>$x;
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{mod__rrdtool_8c_a5094d8cb363516493373469cfbd98c00}{I\-N\-I\-T\-\_\-\-F\-U\-N\-C} (mod\-\_\-rrd\-\_\-init)
+\item 
+\hyperlink{mod__rrdtool_8c_aed75e65436d968782ada07b4c04188b4}{F\-R\-E\-E\-\_\-\-F\-U\-N\-C} (mod\-\_\-rrd\-\_\-free)
+\item 
+static int \hyperlink{mod__rrdtool_8c_a3765056f4224eb1d6c8f42d43085d3c9}{mod\-\_\-rrd\-\_\-create\-\_\-pipe} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structplugin__data}{plugin\-\_\-data} $\ast$p)
+\item 
+static ssize\-\_\-t \hyperlink{mod__rrdtool_8c_a4846ba172d41fbd027762cc70c7a986c}{safe\-\_\-write} (int fd, const void $\ast$buf, size\-\_\-t count)
+\item 
+static ssize\-\_\-t \hyperlink{mod__rrdtool_8c_a7ccdd7c063a499e31a9a967bb981b30c}{safe\-\_\-read} (int fd, void $\ast$buf, size\-\_\-t count)
+\item 
+static int \hyperlink{mod__rrdtool_8c_a9362451e5ed571010b9d3e0c05548fb5}{mod\-\_\-rrdtool\-\_\-create\-\_\-rrd} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structplugin__data}{plugin\-\_\-data} $\ast$p, \hyperlink{structplugin__config}{plugin\-\_\-config} $\ast$s)
+\item 
+static int \hyperlink{mod__rrdtool_8c_a7b813755b04772de9bf7a8d1f6dd5a6a}{mod\-\_\-rrd\-\_\-patch\-\_\-connection} (\hyperlink{structserver}{server} $\ast$srv, \hyperlink{structconnection}{connection} $\ast$con, \hyperlink{structplugin__data}{plugin\-\_\-data} $\ast$p)
+\item 
+\hyperlink{mod__rrdtool_8c_aea78976af48ba4359685408b795af142}{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C} (mod\-\_\-rrd\-\_\-set\-\_\-defaults)
+\item 
+\hyperlink{mod__rrdtool_8c_a2671be283d6888fab526102ee5975516}{T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C} (mod\-\_\-rrd\-\_\-trigger)
+\item 
+\hyperlink{mod__rrdtool_8c_ac52def33ef30937576c9c56caa8b3fff}{R\-E\-Q\-U\-E\-S\-T\-D\-O\-N\-E\-\_\-\-F\-U\-N\-C} (mod\-\_\-rrd\-\_\-account)
+\item 
+int \hyperlink{mod__rrdtool_8c_a8d181b131c8d69508a6e74e991848d20}{mod\-\_\-rrdtool\-\_\-plugin\-\_\-init} (\hyperlink{structplugin}{plugin} $\ast$p)
+\end{DoxyCompactItemize}
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{mod__rrdtool_8c_a20876ec7c0c844d0e0c1628528bbb8da}{\index{mod\-\_\-rrdtool.\-c@{mod\-\_\-rrdtool.\-c}!P\-A\-T\-C\-H@{P\-A\-T\-C\-H}}
+\index{P\-A\-T\-C\-H@{P\-A\-T\-C\-H}!mod_rrdtool.c@{mod\-\_\-rrdtool.\-c}}
+\subsubsection[{P\-A\-T\-C\-H}]{\setlength{\rightskip}{0pt plus 5cm}\#define P\-A\-T\-C\-H(
+\begin{DoxyParamCaption}
+\item[{}]{x}
+\end{DoxyParamCaption}
+)~p-\/$>$conf.\-x = s-\/$>$x;}}\label{mod__rrdtool_8c_a20876ec7c0c844d0e0c1628528bbb8da}
+
+
+Referenced by mod\-\_\-rrd\-\_\-patch\-\_\-connection().
+
+
+
+\subsection{Function Documentation}
+\hypertarget{mod__rrdtool_8c_aed75e65436d968782ada07b4c04188b4}{\index{mod\-\_\-rrdtool.\-c@{mod\-\_\-rrdtool.\-c}!F\-R\-E\-E\-\_\-\-F\-U\-N\-C@{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}}
+\index{F\-R\-E\-E\-\_\-\-F\-U\-N\-C@{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}!mod_rrdtool.c@{mod\-\_\-rrdtool.\-c}}
+\subsubsection[{F\-R\-E\-E\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}F\-R\-E\-E\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-rrd\-\_\-free}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__rrdtool_8c_aed75e65436d968782ada07b4c04188b4}
+
+
+References buffer\-\_\-free(), plugin\-\_\-data\-::cmd, plugin\-\_\-data\-::config\-\_\-storage, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, plugin\-\_\-config\-::path\-\_\-rrd, plugin\-\_\-config\-::path\-\_\-rrdtool\-\_\-bin, plugin\-\_\-data\-::read\-\_\-fd, plugin\-\_\-data\-::resp, plugin\-\_\-data\-::rrdtool\-\_\-pid, and plugin\-\_\-data\-::write\-\_\-fd.
+
+\hypertarget{mod__rrdtool_8c_a5094d8cb363516493373469cfbd98c00}{\index{mod\-\_\-rrdtool.\-c@{mod\-\_\-rrdtool.\-c}!I\-N\-I\-T\-\_\-\-F\-U\-N\-C@{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}}
+\index{I\-N\-I\-T\-\_\-\-F\-U\-N\-C@{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}!mod_rrdtool.c@{mod\-\_\-rrdtool.\-c}}
+\subsubsection[{I\-N\-I\-T\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}I\-N\-I\-T\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-rrd\-\_\-init}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__rrdtool_8c_a5094d8cb363516493373469cfbd98c00}
+
+
+References buffer\-\_\-init(), plugin\-\_\-data\-::cmd, and plugin\-\_\-data\-::resp.
+
+\hypertarget{mod__rrdtool_8c_a3765056f4224eb1d6c8f42d43085d3c9}{\index{mod\-\_\-rrdtool.\-c@{mod\-\_\-rrdtool.\-c}!mod\-\_\-rrd\-\_\-create\-\_\-pipe@{mod\-\_\-rrd\-\_\-create\-\_\-pipe}}
+\index{mod\-\_\-rrd\-\_\-create\-\_\-pipe@{mod\-\_\-rrd\-\_\-create\-\_\-pipe}!mod_rrdtool.c@{mod\-\_\-rrdtool.\-c}}
+\subsubsection[{mod\-\_\-rrd\-\_\-create\-\_\-pipe}]{\setlength{\rightskip}{0pt plus 5cm}static int mod\-\_\-rrd\-\_\-create\-\_\-pipe (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf plugin\-\_\-data} $\ast$}]{p}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__rrdtool_8c_a3765056f4224eb1d6c8f42d43085d3c9}
+
+
+References plugin\-\_\-data\-::conf, fd\-\_\-close\-\_\-on\-\_\-exec(), log\-\_\-error\-\_\-write(), plugin\-\_\-config\-::path\-\_\-rrdtool\-\_\-bin, pid, buffer\-::ptr, plugin\-\_\-data\-::read\-\_\-fd, plugin\-\_\-data\-::rrdtool\-\_\-pid, S\-E\-G\-F\-A\-U\-L\-T, and plugin\-\_\-data\-::write\-\_\-fd.
+
+
+
+Referenced by S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__rrdtool_8c_a7b813755b04772de9bf7a8d1f6dd5a6a}{\index{mod\-\_\-rrdtool.\-c@{mod\-\_\-rrdtool.\-c}!mod\-\_\-rrd\-\_\-patch\-\_\-connection@{mod\-\_\-rrd\-\_\-patch\-\_\-connection}}
+\index{mod\-\_\-rrd\-\_\-patch\-\_\-connection@{mod\-\_\-rrd\-\_\-patch\-\_\-connection}!mod_rrdtool.c@{mod\-\_\-rrdtool.\-c}}
+\subsubsection[{mod\-\_\-rrd\-\_\-patch\-\_\-connection}]{\setlength{\rightskip}{0pt plus 5cm}static int mod\-\_\-rrd\-\_\-patch\-\_\-connection (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf connection} $\ast$}]{con, }
+\item[{{\bf plugin\-\_\-data} $\ast$}]{p}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__rrdtool_8c_a7b813755b04772de9bf7a8d1f6dd5a6a}
+
+
+References buffer\-\_\-is\-\_\-equal\-\_\-string(), plugin\-\_\-config\-::bytes\-\_\-read, plugin\-\_\-config\-::bytes\-\_\-read\-\_\-ptr, plugin\-\_\-config\-::bytes\-\_\-written, plugin\-\_\-config\-::bytes\-\_\-written\-\_\-ptr, plugin\-\_\-data\-::conf, config\-\_\-check\-\_\-cond(), server\-::config\-\_\-context, plugin\-\_\-data\-::config\-\_\-storage, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, array\-::data, P\-A\-T\-C\-H, plugin\-\_\-config\-::requests, plugin\-\_\-config\-::requests\-\_\-ptr, array\-::used, and data\-\_\-config\-::value.
+
+
+
+Referenced by R\-E\-Q\-U\-E\-S\-T\-D\-O\-N\-E\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__rrdtool_8c_a9362451e5ed571010b9d3e0c05548fb5}{\index{mod\-\_\-rrdtool.\-c@{mod\-\_\-rrdtool.\-c}!mod\-\_\-rrdtool\-\_\-create\-\_\-rrd@{mod\-\_\-rrdtool\-\_\-create\-\_\-rrd}}
+\index{mod\-\_\-rrdtool\-\_\-create\-\_\-rrd@{mod\-\_\-rrdtool\-\_\-create\-\_\-rrd}!mod_rrdtool.c@{mod\-\_\-rrdtool.\-c}}
+\subsubsection[{mod\-\_\-rrdtool\-\_\-create\-\_\-rrd}]{\setlength{\rightskip}{0pt plus 5cm}static int mod\-\_\-rrdtool\-\_\-create\-\_\-rrd (
+\begin{DoxyParamCaption}
+\item[{{\bf server} $\ast$}]{srv, }
+\item[{{\bf plugin\-\_\-data} $\ast$}]{p, }
+\item[{{\bf plugin\-\_\-config} $\ast$}]{s}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__rrdtool_8c_a9362451e5ed571010b9d3e0c05548fb5}
+
+
+References buffer\-\_\-append\-\_\-string\-\_\-buffer(), buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-commit(), buffer\-\_\-copy\-\_\-string\-\_\-len(), buffer\-\_\-string\-\_\-prepare\-\_\-copy(), plugin\-\_\-data\-::cmd, C\-O\-N\-S\-T\-\_\-\-B\-U\-F\-\_\-\-L\-E\-N, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, H\-A\-N\-D\-L\-E\-R\-\_\-\-E\-R\-R\-O\-R, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, log\-\_\-error\-\_\-write(), plugin\-\_\-config\-::path\-\_\-rrd, buffer\-::ptr, plugin\-\_\-data\-::read\-\_\-fd, plugin\-\_\-data\-::resp, safe\-\_\-read(), safe\-\_\-write(), buffer\-::size, and plugin\-\_\-data\-::write\-\_\-fd.
+
+
+
+Referenced by T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__rrdtool_8c_a8d181b131c8d69508a6e74e991848d20}{\index{mod\-\_\-rrdtool.\-c@{mod\-\_\-rrdtool.\-c}!mod\-\_\-rrdtool\-\_\-plugin\-\_\-init@{mod\-\_\-rrdtool\-\_\-plugin\-\_\-init}}
+\index{mod\-\_\-rrdtool\-\_\-plugin\-\_\-init@{mod\-\_\-rrdtool\-\_\-plugin\-\_\-init}!mod_rrdtool.c@{mod\-\_\-rrdtool.\-c}}
+\subsubsection[{mod\-\_\-rrdtool\-\_\-plugin\-\_\-init}]{\setlength{\rightskip}{0pt plus 5cm}int mod\-\_\-rrdtool\-\_\-plugin\-\_\-init (
+\begin{DoxyParamCaption}
+\item[{{\bf plugin} $\ast$}]{p}
+\end{DoxyParamCaption}
+)}}\label{mod__rrdtool_8c_a8d181b131c8d69508a6e74e991848d20}
+
+
+References buffer\-\_\-init\-\_\-string(), plugin\-::cleanup, plugin\-::data, plugin\-::handle\-\_\-request\-\_\-done, plugin\-::handle\-\_\-trigger, plugin\-::init, plugin\-::name, plugin\-::set\-\_\-defaults, and plugin\-::version.
+
+\hypertarget{mod__rrdtool_8c_ac52def33ef30937576c9c56caa8b3fff}{\index{mod\-\_\-rrdtool.\-c@{mod\-\_\-rrdtool.\-c}!R\-E\-Q\-U\-E\-S\-T\-D\-O\-N\-E\-\_\-\-F\-U\-N\-C@{R\-E\-Q\-U\-E\-S\-T\-D\-O\-N\-E\-\_\-\-F\-U\-N\-C}}
+\index{R\-E\-Q\-U\-E\-S\-T\-D\-O\-N\-E\-\_\-\-F\-U\-N\-C@{R\-E\-Q\-U\-E\-S\-T\-D\-O\-N\-E\-\_\-\-F\-U\-N\-C}!mod_rrdtool.c@{mod\-\_\-rrdtool.\-c}}
+\subsubsection[{R\-E\-Q\-U\-E\-S\-T\-D\-O\-N\-E\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}R\-E\-Q\-U\-E\-S\-T\-D\-O\-N\-E\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-rrd\-\_\-account}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__rrdtool_8c_ac52def33ef30937576c9c56caa8b3fff}
+
+
+References plugin\-\_\-config\-::bytes\-\_\-read\-\_\-ptr, plugin\-\_\-config\-::bytes\-\_\-written\-\_\-ptr, plugin\-\_\-data\-::conf, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, mod\-\_\-rrd\-\_\-patch\-\_\-connection(), and plugin\-\_\-config\-::requests\-\_\-ptr.
+
+\hypertarget{mod__rrdtool_8c_a7ccdd7c063a499e31a9a967bb981b30c}{\index{mod\-\_\-rrdtool.\-c@{mod\-\_\-rrdtool.\-c}!safe\-\_\-read@{safe\-\_\-read}}
+\index{safe\-\_\-read@{safe\-\_\-read}!mod_rrdtool.c@{mod\-\_\-rrdtool.\-c}}
+\subsubsection[{safe\-\_\-read}]{\setlength{\rightskip}{0pt plus 5cm}static ssize\-\_\-t safe\-\_\-read (
+\begin{DoxyParamCaption}
+\item[{int}]{fd, }
+\item[{void $\ast$}]{buf, }
+\item[{size\-\_\-t}]{count}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__rrdtool_8c_a7ccdd7c063a499e31a9a967bb981b30c}
+
+
+Referenced by mod\-\_\-rrdtool\-\_\-create\-\_\-rrd(), and T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__rrdtool_8c_a4846ba172d41fbd027762cc70c7a986c}{\index{mod\-\_\-rrdtool.\-c@{mod\-\_\-rrdtool.\-c}!safe\-\_\-write@{safe\-\_\-write}}
+\index{safe\-\_\-write@{safe\-\_\-write}!mod_rrdtool.c@{mod\-\_\-rrdtool.\-c}}
+\subsubsection[{safe\-\_\-write}]{\setlength{\rightskip}{0pt plus 5cm}static ssize\-\_\-t safe\-\_\-write (
+\begin{DoxyParamCaption}
+\item[{int}]{fd, }
+\item[{const void $\ast$}]{buf, }
+\item[{size\-\_\-t}]{count}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [static]}}}\label{mod__rrdtool_8c_a4846ba172d41fbd027762cc70c7a986c}
+
+
+Referenced by mod\-\_\-rrdtool\-\_\-create\-\_\-rrd(), and T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{mod__rrdtool_8c_aea78976af48ba4359685408b795af142}{\index{mod\-\_\-rrdtool.\-c@{mod\-\_\-rrdtool.\-c}!S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C@{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}}
+\index{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C@{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}!mod_rrdtool.c@{mod\-\_\-rrdtool.\-c}}
+\subsubsection[{S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-rrd\-\_\-set\-\_\-defaults}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__rrdtool_8c_aea78976af48ba4359685408b795af142}
+
+
+References buffer\-\_\-init(), buffer\-\_\-string\-\_\-is\-\_\-empty(), plugin\-\_\-data\-::conf, config\-\_\-insert\-\_\-values\-\_\-global(), plugin\-\_\-data\-::config\-\_\-storage, config\-\_\-values\-\_\-t\-::destination, force\-\_\-assert, H\-A\-N\-D\-L\-E\-R\-\_\-\-E\-R\-R\-O\-R, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, log\-\_\-error\-\_\-write(), mod\-\_\-rrd\-\_\-create\-\_\-pipe(), plugin\-\_\-config\-::path\-\_\-rrdtool\-\_\-bin, plugin\-\_\-data\-::rrdtool\-\_\-running, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-C\-O\-N\-N\-E\-C\-T\-I\-O\-N, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-S\-E\-R\-V\-E\-R, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-C\-O\-P\-E\-\_\-\-U\-N\-S\-E\-T, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-S\-T\-R\-I\-N\-G, T\-\_\-\-C\-O\-N\-F\-I\-G\-\_\-\-U\-N\-S\-E\-T, and data\-\_\-config\-::value.
+
+\hypertarget{mod__rrdtool_8c_a2671be283d6888fab526102ee5975516}{\index{mod\-\_\-rrdtool.\-c@{mod\-\_\-rrdtool.\-c}!T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C@{T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C}}
+\index{T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C@{T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C}!mod_rrdtool.c@{mod\-\_\-rrdtool.\-c}}
+\subsubsection[{T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C}]{\setlength{\rightskip}{0pt plus 5cm}T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C (
+\begin{DoxyParamCaption}
+\item[{mod\-\_\-rrd\-\_\-trigger}]{}
+\end{DoxyParamCaption}
+)}}\label{mod__rrdtool_8c_a2671be283d6888fab526102ee5975516}
+
+
+References buffer\-\_\-append\-\_\-int(), buffer\-\_\-append\-\_\-string\-\_\-buffer(), buffer\-\_\-append\-\_\-string\-\_\-len(), buffer\-\_\-commit(), buffer\-\_\-copy\-\_\-string\-\_\-len(), buffer\-\_\-string\-\_\-is\-\_\-empty(), buffer\-\_\-string\-\_\-prepare\-\_\-copy(), plugin\-\_\-config\-::bytes\-\_\-read, plugin\-\_\-config\-::bytes\-\_\-written, plugin\-\_\-data\-::cmd, plugin\-\_\-data\-::config\-\_\-storage, C\-O\-N\-S\-T\-\_\-\-B\-U\-F\-\_\-\-L\-E\-N, C\-O\-N\-S\-T\-\_\-\-S\-T\-R\-\_\-\-L\-E\-N, H\-A\-N\-D\-L\-E\-R\-\_\-\-E\-R\-R\-O\-R, H\-A\-N\-D\-L\-E\-R\-\_\-\-G\-O\-\_\-\-O\-N, log\-\_\-error\-\_\-write(), mod\-\_\-rrdtool\-\_\-create\-\_\-rrd(), plugin\-\_\-config\-::path\-\_\-rrd, buffer\-::ptr, plugin\-\_\-data\-::read\-\_\-fd, plugin\-\_\-config\-::requests, plugin\-\_\-data\-::resp, plugin\-\_\-data\-::rrdtool\-\_\-running, safe\-\_\-read(), safe\-\_\-write(), buffer\-::size, and plugin\-\_\-data\-::write\-\_\-fd.
+

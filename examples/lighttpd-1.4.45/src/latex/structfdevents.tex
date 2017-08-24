@@ -1,0 +1,143 @@
+\hypertarget{structfdevents}{\section{fdevents Struct Reference}
+\label{structfdevents}\index{fdevents@{fdevents}}
+}
+
+
+{\ttfamily \#include $<$fdevent.\-h$>$}
+
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structserver}{server} $\ast$ \hyperlink{structfdevents_a602f2ca1c249c833a4ecb0fc2bf00d31}{srv}
+\item 
+\hyperlink{fdevent_8h_a7a31a5c15ba485676406291b6298e9a1}{fdevent\-\_\-handler\-\_\-t} \hyperlink{structfdevents_a9656b863d74046158c2feddd57b46f01}{type}
+\item 
+\hyperlink{fdevent_8h_af5298a6dd5999718aa2721646fe31949}{fdnode} $\ast$$\ast$ \hyperlink{structfdevents_afaf0c3caf9df8add00421fc912e78ad1}{fdarray}
+\item 
+size\-\_\-t \hyperlink{structfdevents_a02f9df92b0ad5e0c79c36fdb1bc8d0a5}{maxfds}
+\item 
+int \hyperlink{structfdevents_a93aa999f3be50e2b4316e8a908d78e4c}{highfd}
+\item 
+int($\ast$ \hyperlink{structfdevents_a7b407184007244be141f57003a576fa0}{reset} )(struct \hyperlink{structfdevents}{fdevents} $\ast$ev)
+\item 
+void($\ast$ \hyperlink{structfdevents_aad6d8902685c90b08a721c508cb21a8a}{free} )(struct \hyperlink{structfdevents}{fdevents} $\ast$ev)
+\item 
+int($\ast$ \hyperlink{structfdevents_ad23c2b0f981da7d7efd43c48bf65d4d6}{event\-\_\-set} )(struct \hyperlink{structfdevents}{fdevents} $\ast$ev, int fde\-\_\-ndx, int fd, int events)
+\item 
+int($\ast$ \hyperlink{structfdevents_a3e6ae7d853075a8da89681224993234f}{event\-\_\-del} )(struct \hyperlink{structfdevents}{fdevents} $\ast$ev, int fde\-\_\-ndx, int fd)
+\item 
+int($\ast$ \hyperlink{structfdevents_a88f6a7540f1fc6703a21bc02db3ff261}{event\-\_\-get\-\_\-revent} )(struct \hyperlink{structfdevents}{fdevents} $\ast$ev, size\-\_\-t ndx)
+\item 
+int($\ast$ \hyperlink{structfdevents_a4be15b07795f319d7a52eed6020e20b9}{event\-\_\-get\-\_\-fd} )(struct \hyperlink{structfdevents}{fdevents} $\ast$ev, size\-\_\-t ndx)
+\item 
+int($\ast$ \hyperlink{structfdevents_a380325469736e86b71706677c4b58797}{event\-\_\-next\-\_\-fdndx} )(struct \hyperlink{structfdevents}{fdevents} $\ast$ev, int ndx)
+\item 
+int($\ast$ \hyperlink{structfdevents_a45c7aaf2c8b8da25827f0c8a9a0e90c8}{poll} )(struct \hyperlink{structfdevents}{fdevents} $\ast$ev, int timeout\-\_\-ms)
+\item 
+int($\ast$ \hyperlink{structfdevents_a8f9881ac88d76f35a2160903c1a839ad}{fcntl\-\_\-set} )(struct \hyperlink{structfdevents}{fdevents} $\ast$ev, int fd)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+fd-\/event handler for select(), \hyperlink{structfdevents_a45c7aaf2c8b8da25827f0c8a9a0e90c8}{poll()} and rt-\/signals on Linux 2.\-4 
+
+\subsection{Member Data Documentation}
+\hypertarget{structfdevents_a3e6ae7d853075a8da89681224993234f}{\index{fdevents@{fdevents}!event\-\_\-del@{event\-\_\-del}}
+\index{event\-\_\-del@{event\-\_\-del}!fdevents@{fdevents}}
+\subsubsection[{event\-\_\-del}]{\setlength{\rightskip}{0pt plus 5cm}int($\ast$ fdevents\-::event\-\_\-del)(struct {\bf fdevents} $\ast$ev, int fde\-\_\-ndx, int fd)}}\label{structfdevents_a3e6ae7d853075a8da89681224993234f}
+
+
+Referenced by fdevent\-\_\-event\-\_\-del().
+
+\hypertarget{structfdevents_a4be15b07795f319d7a52eed6020e20b9}{\index{fdevents@{fdevents}!event\-\_\-get\-\_\-fd@{event\-\_\-get\-\_\-fd}}
+\index{event\-\_\-get\-\_\-fd@{event\-\_\-get\-\_\-fd}!fdevents@{fdevents}}
+\subsubsection[{event\-\_\-get\-\_\-fd}]{\setlength{\rightskip}{0pt plus 5cm}int($\ast$ fdevents\-::event\-\_\-get\-\_\-fd)(struct {\bf fdevents} $\ast$ev, size\-\_\-t ndx)}}\label{structfdevents_a4be15b07795f319d7a52eed6020e20b9}
+
+
+Referenced by fdevent\-\_\-event\-\_\-get\-\_\-fd().
+
+\hypertarget{structfdevents_a88f6a7540f1fc6703a21bc02db3ff261}{\index{fdevents@{fdevents}!event\-\_\-get\-\_\-revent@{event\-\_\-get\-\_\-revent}}
+\index{event\-\_\-get\-\_\-revent@{event\-\_\-get\-\_\-revent}!fdevents@{fdevents}}
+\subsubsection[{event\-\_\-get\-\_\-revent}]{\setlength{\rightskip}{0pt plus 5cm}int($\ast$ fdevents\-::event\-\_\-get\-\_\-revent)(struct {\bf fdevents} $\ast$ev, size\-\_\-t ndx)}}\label{structfdevents_a88f6a7540f1fc6703a21bc02db3ff261}
+
+
+Referenced by fdevent\-\_\-event\-\_\-get\-\_\-revent().
+
+\hypertarget{structfdevents_a380325469736e86b71706677c4b58797}{\index{fdevents@{fdevents}!event\-\_\-next\-\_\-fdndx@{event\-\_\-next\-\_\-fdndx}}
+\index{event\-\_\-next\-\_\-fdndx@{event\-\_\-next\-\_\-fdndx}!fdevents@{fdevents}}
+\subsubsection[{event\-\_\-next\-\_\-fdndx}]{\setlength{\rightskip}{0pt plus 5cm}int($\ast$ fdevents\-::event\-\_\-next\-\_\-fdndx)(struct {\bf fdevents} $\ast$ev, int ndx)}}\label{structfdevents_a380325469736e86b71706677c4b58797}
+
+
+Referenced by fdevent\-\_\-event\-\_\-next\-\_\-fdndx().
+
+\hypertarget{structfdevents_ad23c2b0f981da7d7efd43c48bf65d4d6}{\index{fdevents@{fdevents}!event\-\_\-set@{event\-\_\-set}}
+\index{event\-\_\-set@{event\-\_\-set}!fdevents@{fdevents}}
+\subsubsection[{event\-\_\-set}]{\setlength{\rightskip}{0pt plus 5cm}int($\ast$ fdevents\-::event\-\_\-set)(struct {\bf fdevents} $\ast$ev, int fde\-\_\-ndx, int fd, int events)}}\label{structfdevents_ad23c2b0f981da7d7efd43c48bf65d4d6}
+
+
+Referenced by fdevent\-\_\-event\-\_\-add(), fdevent\-\_\-event\-\_\-clr(), and fdevent\-\_\-event\-\_\-set().
+
+\hypertarget{structfdevents_a8f9881ac88d76f35a2160903c1a839ad}{\index{fdevents@{fdevents}!fcntl\-\_\-set@{fcntl\-\_\-set}}
+\index{fcntl\-\_\-set@{fcntl\-\_\-set}!fdevents@{fdevents}}
+\subsubsection[{fcntl\-\_\-set}]{\setlength{\rightskip}{0pt plus 5cm}int($\ast$ fdevents\-::fcntl\-\_\-set)(struct {\bf fdevents} $\ast$ev, int fd)}}\label{structfdevents_a8f9881ac88d76f35a2160903c1a839ad}
+
+
+Referenced by fdevent\-\_\-fcntl\-\_\-set(), fdevent\-\_\-fcntl\-\_\-set\-\_\-nb(), and fdevent\-\_\-fcntl\-\_\-set\-\_\-nb\-\_\-cloexec\-\_\-sock().
+
+\hypertarget{structfdevents_afaf0c3caf9df8add00421fc912e78ad1}{\index{fdevents@{fdevents}!fdarray@{fdarray}}
+\index{fdarray@{fdarray}!fdevents@{fdevents}}
+\subsubsection[{fdarray}]{\setlength{\rightskip}{0pt plus 5cm}{\bf fdnode}$\ast$$\ast$ fdevents\-::fdarray}}\label{structfdevents_afaf0c3caf9df8add00421fc912e78ad1}
+
+
+Referenced by fdevent\-\_\-event\-\_\-add(), fdevent\-\_\-event\-\_\-clr(), fdevent\-\_\-event\-\_\-del(), fdevent\-\_\-event\-\_\-set(), fdevent\-\_\-free(), fdevent\-\_\-get\-\_\-context(), fdevent\-\_\-get\-\_\-handler(), fdevent\-\_\-init(), fdevent\-\_\-register(), fdevent\-\_\-sched\-\_\-close(), fdevent\-\_\-sched\-\_\-run(), and fdevent\-\_\-unregister().
+
+\hypertarget{structfdevents_aad6d8902685c90b08a721c508cb21a8a}{\index{fdevents@{fdevents}!free@{free}}
+\index{free@{free}!fdevents@{fdevents}}
+\subsubsection[{free}]{\setlength{\rightskip}{0pt plus 5cm}void($\ast$ fdevents\-::free)(struct {\bf fdevents} $\ast$ev)}}\label{structfdevents_aad6d8902685c90b08a721c508cb21a8a}
+
+
+Referenced by fdevent\-\_\-free().
+
+\hypertarget{structfdevents_a93aa999f3be50e2b4316e8a908d78e4c}{\index{fdevents@{fdevents}!highfd@{highfd}}
+\index{highfd@{highfd}!fdevents@{fdevents}}
+\subsubsection[{highfd}]{\setlength{\rightskip}{0pt plus 5cm}int fdevents\-::highfd}}\label{structfdevents_a93aa999f3be50e2b4316e8a908d78e4c}
+
+
+Referenced by fdevent\-\_\-init(), fdevent\-\_\-sched\-\_\-close(), and fdevent\-\_\-sched\-\_\-run().
+
+\hypertarget{structfdevents_a02f9df92b0ad5e0c79c36fdb1bc8d0a5}{\index{fdevents@{fdevents}!maxfds@{maxfds}}
+\index{maxfds@{maxfds}!fdevents@{fdevents}}
+\subsubsection[{maxfds}]{\setlength{\rightskip}{0pt plus 5cm}size\-\_\-t fdevents\-::maxfds}}\label{structfdevents_a02f9df92b0ad5e0c79c36fdb1bc8d0a5}
+
+
+Referenced by fdevent\-\_\-free(), and fdevent\-\_\-init().
+
+\hypertarget{structfdevents_a45c7aaf2c8b8da25827f0c8a9a0e90c8}{\index{fdevents@{fdevents}!poll@{poll}}
+\index{poll@{poll}!fdevents@{fdevents}}
+\subsubsection[{poll}]{\setlength{\rightskip}{0pt plus 5cm}int($\ast$ fdevents\-::poll)(struct {\bf fdevents} $\ast$ev, int timeout\-\_\-ms)}}\label{structfdevents_a45c7aaf2c8b8da25827f0c8a9a0e90c8}
+
+
+Referenced by fdevent\-\_\-poll().
+
+\hypertarget{structfdevents_a7b407184007244be141f57003a576fa0}{\index{fdevents@{fdevents}!reset@{reset}}
+\index{reset@{reset}!fdevents@{fdevents}}
+\subsubsection[{reset}]{\setlength{\rightskip}{0pt plus 5cm}int($\ast$ fdevents\-::reset)(struct {\bf fdevents} $\ast$ev)}}\label{structfdevents_a7b407184007244be141f57003a576fa0}
+
+
+Referenced by fdevent\-\_\-reset().
+
+\hypertarget{structfdevents_a602f2ca1c249c833a4ecb0fc2bf00d31}{\index{fdevents@{fdevents}!srv@{srv}}
+\index{srv@{srv}!fdevents@{fdevents}}
+\subsubsection[{srv}]{\setlength{\rightskip}{0pt plus 5cm}struct {\bf server}$\ast$ fdevents\-::srv}}\label{structfdevents_a602f2ca1c249c833a4ecb0fc2bf00d31}
+
+
+Referenced by fdevent\-\_\-freebsd\-\_\-kqueue\-\_\-init(), fdevent\-\_\-init(), fdevent\-\_\-libev\-\_\-init(), fdevent\-\_\-linux\-\_\-sysepoll\-\_\-init(), fdevent\-\_\-poll\-\_\-init(), fdevent\-\_\-solaris\-\_\-devpoll\-\_\-init(), and fdevent\-\_\-solaris\-\_\-port\-\_\-init().
+
+\hypertarget{structfdevents_a9656b863d74046158c2feddd57b46f01}{\index{fdevents@{fdevents}!type@{type}}
+\index{type@{type}!fdevents@{fdevents}}
+\subsubsection[{type}]{\setlength{\rightskip}{0pt plus 5cm}{\bf fdevent\-\_\-handler\-\_\-t} fdevents\-::type}}\label{structfdevents_a9656b863d74046158c2feddd57b46f01}
+
+
+The documentation for this struct was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{fdevent_8h}{fdevent.\-h}\end{DoxyCompactItemize}

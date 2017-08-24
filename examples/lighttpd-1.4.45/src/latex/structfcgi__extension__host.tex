@@ -1,0 +1,253 @@
+\hypertarget{structfcgi__extension__host}{\section{fcgi\-\_\-extension\-\_\-host Struct Reference}
+\label{structfcgi__extension__host}\index{fcgi\-\_\-extension\-\_\-host@{fcgi\-\_\-extension\-\_\-host}}
+}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{structbuffer}{buffer} $\ast$ \hyperlink{structfcgi__extension__host_a0b39658d0376f369c480f2cce166467e}{id}
+\item 
+\hyperlink{structfcgi__proc}{fcgi\-\_\-proc} $\ast$ \hyperlink{structfcgi__extension__host_abb8dfa6d141106454e5f09ae9abc9a84}{first}
+\item 
+\hyperlink{structfcgi__proc}{fcgi\-\_\-proc} $\ast$ \hyperlink{structfcgi__extension__host_abc9cc43adc180cf06b771c8a5cff0f61}{unused\-\_\-procs}
+\item 
+unsigned short \hyperlink{structfcgi__extension__host_a223dbc6acf4f59361be6c6c644af12c0}{max\-\_\-procs}
+\item 
+size\-\_\-t \hyperlink{structfcgi__extension__host_aadeb7bc043c469f865c565ba35e2ca3c}{num\-\_\-procs}
+\item 
+size\-\_\-t \hyperlink{structfcgi__extension__host_af3fda20375871a51758c52b477b0153b}{active\-\_\-procs}
+\item 
+unsigned short \hyperlink{structfcgi__extension__host_ac85fe367fe7eeb221092647c6e7cec7e}{disable\-\_\-time}
+\item 
+size\-\_\-t \hyperlink{structfcgi__extension__host_af07d55d403b8d4b2f4cbab23ad5367c2}{max\-\_\-requests\-\_\-per\-\_\-proc}
+\item 
+\hyperlink{structbuffer}{buffer} $\ast$ \hyperlink{structfcgi__extension__host_a48f3e193249fa8a3bd6492ebc965c393}{host}
+\item 
+unsigned short \hyperlink{structfcgi__extension__host_ad41957f0ebf10f9066e84a02ecd269f8}{port}
+\item 
+sa\-\_\-family\-\_\-t \hyperlink{structfcgi__extension__host_a51b5a972ef027777775dd0cc7ec24e42}{family}
+\item 
+\hyperlink{structbuffer}{buffer} $\ast$ \hyperlink{structfcgi__extension__host_a3a3daea2e667a74a3d8eca2216603c47}{unixsocket}
+\item 
+\hyperlink{structbuffer}{buffer} $\ast$ \hyperlink{structfcgi__extension__host_aafa7f5935af4080ec15eb2293b804db9}{bin\-\_\-path}
+\item 
+\hyperlink{structarray}{array} $\ast$ \hyperlink{structfcgi__extension__host_a3e08a47d9440a7629058c1ab1507f774}{bin\-\_\-env}
+\item 
+\hyperlink{structarray}{array} $\ast$ \hyperlink{structfcgi__extension__host_a78a69c7361dd17fe6be7a45498629e2b}{bin\-\_\-env\-\_\-copy}
+\item 
+\hyperlink{structbuffer}{buffer} $\ast$ \hyperlink{structfcgi__extension__host_a0dcae70a69e898c98d1bc698b1887db2}{docroot}
+\item 
+unsigned short \hyperlink{structfcgi__extension__host_ae56011c0dbe54673fe797233984514b5}{check\-\_\-local}
+\item 
+unsigned short \hyperlink{structfcgi__extension__host_ada771e3cb76cc3269daf3ce9eded13af}{break\-\_\-scriptfilename\-\_\-for\-\_\-php}
+\item 
+unsigned short \hyperlink{structfcgi__extension__host_a07b4d2b5802995d2dbc56e324d50dc1a}{fix\-\_\-root\-\_\-path\-\_\-name}
+\item 
+unsigned short \hyperlink{structfcgi__extension__host_a8c978afa31288861b2b5b9917aed34a6}{xsendfile\-\_\-allow}
+\item 
+\hyperlink{structarray}{array} $\ast$ \hyperlink{structfcgi__extension__host_a1304d5929c12516a150b78a59139a0b0}{xsendfile\-\_\-docroot}
+\item 
+ssize\-\_\-t \hyperlink{structfcgi__extension__host_aff5283f567341a8ffa727dcf83fc0254}{load}
+\item 
+size\-\_\-t \hyperlink{structfcgi__extension__host_a9748fdf000b78644fa33b92c39006166}{max\-\_\-id}
+\item 
+\hyperlink{structbuffer}{buffer} $\ast$ \hyperlink{structfcgi__extension__host_aa593d8c96001f747795610eca69cc646}{strip\-\_\-request\-\_\-uri}
+\item 
+unsigned short \hyperlink{structfcgi__extension__host_ab2ba5563fd48db1f1ceaa2b9faaebfb3}{kill\-\_\-signal}
+\item 
+int \hyperlink{structfcgi__extension__host_a3506ef25504b8bbb690cff023e584b9a}{listen\-\_\-backlog}
+\item 
+int \hyperlink{structfcgi__extension__host_a8a7d3cb5d5c201760bb5da036126ffd1}{refcount}
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{structfcgi__extension__host_af3fda20375871a51758c52b477b0153b}{\index{fcgi\-\_\-extension\-\_\-host@{fcgi\-\_\-extension\-\_\-host}!active\-\_\-procs@{active\-\_\-procs}}
+\index{active\-\_\-procs@{active\-\_\-procs}!fcgi_extension_host@{fcgi\-\_\-extension\-\_\-host}}
+\subsubsection[{active\-\_\-procs}]{\setlength{\rightskip}{0pt plus 5cm}size\-\_\-t fcgi\-\_\-extension\-\_\-host\-::active\-\_\-procs}}\label{structfcgi__extension__host_af3fda20375871a51758c52b477b0153b}
+
+
+Referenced by fcgi\-\_\-extension\-\_\-host\-\_\-get(), fcgi\-\_\-host\-\_\-disable(), fcgi\-\_\-restart\-\_\-dead\-\_\-procs(), fcgi\-\_\-write\-\_\-request(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), and T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structfcgi__extension__host_a3e08a47d9440a7629058c1ab1507f774}{\index{fcgi\-\_\-extension\-\_\-host@{fcgi\-\_\-extension\-\_\-host}!bin\-\_\-env@{bin\-\_\-env}}
+\index{bin\-\_\-env@{bin\-\_\-env}!fcgi_extension_host@{fcgi\-\_\-extension\-\_\-host}}
+\subsubsection[{bin\-\_\-env}]{\setlength{\rightskip}{0pt plus 5cm}{\bf array}$\ast$ fcgi\-\_\-extension\-\_\-host\-::bin\-\_\-env}}\label{structfcgi__extension__host_a3e08a47d9440a7629058c1ab1507f774}
+
+
+Referenced by fastcgi\-\_\-host\-\_\-free(), fastcgi\-\_\-host\-\_\-init(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structfcgi__extension__host_a78a69c7361dd17fe6be7a45498629e2b}{\index{fcgi\-\_\-extension\-\_\-host@{fcgi\-\_\-extension\-\_\-host}!bin\-\_\-env\-\_\-copy@{bin\-\_\-env\-\_\-copy}}
+\index{bin\-\_\-env\-\_\-copy@{bin\-\_\-env\-\_\-copy}!fcgi_extension_host@{fcgi\-\_\-extension\-\_\-host}}
+\subsubsection[{bin\-\_\-env\-\_\-copy}]{\setlength{\rightskip}{0pt plus 5cm}{\bf array}$\ast$ fcgi\-\_\-extension\-\_\-host\-::bin\-\_\-env\-\_\-copy}}\label{structfcgi__extension__host_a78a69c7361dd17fe6be7a45498629e2b}
+
+
+Referenced by fastcgi\-\_\-host\-\_\-free(), fastcgi\-\_\-host\-\_\-init(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structfcgi__extension__host_aafa7f5935af4080ec15eb2293b804db9}{\index{fcgi\-\_\-extension\-\_\-host@{fcgi\-\_\-extension\-\_\-host}!bin\-\_\-path@{bin\-\_\-path}}
+\index{bin\-\_\-path@{bin\-\_\-path}!fcgi_extension_host@{fcgi\-\_\-extension\-\_\-host}}
+\subsubsection[{bin\-\_\-path}]{\setlength{\rightskip}{0pt plus 5cm}{\bf buffer}$\ast$ fcgi\-\_\-extension\-\_\-host\-::bin\-\_\-path}}\label{structfcgi__extension__host_aafa7f5935af4080ec15eb2293b804db9}
+
+
+Referenced by fastcgi\-\_\-host\-\_\-free(), fastcgi\-\_\-host\-\_\-init(), fcgi\-\_\-restart\-\_\-dead\-\_\-procs(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), and unixsocket\-\_\-is\-\_\-dup().
+
+\hypertarget{structfcgi__extension__host_ada771e3cb76cc3269daf3ce9eded13af}{\index{fcgi\-\_\-extension\-\_\-host@{fcgi\-\_\-extension\-\_\-host}!break\-\_\-scriptfilename\-\_\-for\-\_\-php@{break\-\_\-scriptfilename\-\_\-for\-\_\-php}}
+\index{break\-\_\-scriptfilename\-\_\-for\-\_\-php@{break\-\_\-scriptfilename\-\_\-for\-\_\-php}!fcgi_extension_host@{fcgi\-\_\-extension\-\_\-host}}
+\subsubsection[{break\-\_\-scriptfilename\-\_\-for\-\_\-php}]{\setlength{\rightskip}{0pt plus 5cm}unsigned short fcgi\-\_\-extension\-\_\-host\-::break\-\_\-scriptfilename\-\_\-for\-\_\-php}}\label{structfcgi__extension__host_ada771e3cb76cc3269daf3ce9eded13af}
+
+
+Referenced by fcgi\-\_\-create\-\_\-env(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structfcgi__extension__host_ae56011c0dbe54673fe797233984514b5}{\index{fcgi\-\_\-extension\-\_\-host@{fcgi\-\_\-extension\-\_\-host}!check\-\_\-local@{check\-\_\-local}}
+\index{check\-\_\-local@{check\-\_\-local}!fcgi_extension_host@{fcgi\-\_\-extension\-\_\-host}}
+\subsubsection[{check\-\_\-local}]{\setlength{\rightskip}{0pt plus 5cm}unsigned short fcgi\-\_\-extension\-\_\-host\-::check\-\_\-local}}\label{structfcgi__extension__host_ae56011c0dbe54673fe797233984514b5}
+
+
+Referenced by fcgi\-\_\-check\-\_\-extension(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structfcgi__extension__host_ac85fe367fe7eeb221092647c6e7cec7e}{\index{fcgi\-\_\-extension\-\_\-host@{fcgi\-\_\-extension\-\_\-host}!disable\-\_\-time@{disable\-\_\-time}}
+\index{disable\-\_\-time@{disable\-\_\-time}!fcgi_extension_host@{fcgi\-\_\-extension\-\_\-host}}
+\subsubsection[{disable\-\_\-time}]{\setlength{\rightskip}{0pt plus 5cm}unsigned short fcgi\-\_\-extension\-\_\-host\-::disable\-\_\-time}}\label{structfcgi__extension__host_ac85fe367fe7eeb221092647c6e7cec7e}
+
+
+Referenced by fcgi\-\_\-host\-\_\-disable(), fcgi\-\_\-write\-\_\-request(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structfcgi__extension__host_a0dcae70a69e898c98d1bc698b1887db2}{\index{fcgi\-\_\-extension\-\_\-host@{fcgi\-\_\-extension\-\_\-host}!docroot@{docroot}}
+\index{docroot@{docroot}!fcgi_extension_host@{fcgi\-\_\-extension\-\_\-host}}
+\subsubsection[{docroot}]{\setlength{\rightskip}{0pt plus 5cm}{\bf buffer}$\ast$ fcgi\-\_\-extension\-\_\-host\-::docroot}}\label{structfcgi__extension__host_a0dcae70a69e898c98d1bc698b1887db2}
+
+
+Referenced by fastcgi\-\_\-host\-\_\-free(), fastcgi\-\_\-host\-\_\-init(), fcgi\-\_\-create\-\_\-env(), fcgi\-\_\-recv\-\_\-response(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structfcgi__extension__host_a51b5a972ef027777775dd0cc7ec24e42}{\index{fcgi\-\_\-extension\-\_\-host@{fcgi\-\_\-extension\-\_\-host}!family@{family}}
+\index{family@{family}!fcgi_extension_host@{fcgi\-\_\-extension\-\_\-host}}
+\subsubsection[{family}]{\setlength{\rightskip}{0pt plus 5cm}sa\-\_\-family\-\_\-t fcgi\-\_\-extension\-\_\-host\-::family}}\label{structfcgi__extension__host_a51b5a972ef027777775dd0cc7ec24e42}
+
+
+Referenced by fcgi\-\_\-establish\-\_\-connection(), fcgi\-\_\-write\-\_\-request(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structfcgi__extension__host_abb8dfa6d141106454e5f09ae9abc9a84}{\index{fcgi\-\_\-extension\-\_\-host@{fcgi\-\_\-extension\-\_\-host}!first@{first}}
+\index{first@{first}!fcgi_extension_host@{fcgi\-\_\-extension\-\_\-host}}
+\subsubsection[{first}]{\setlength{\rightskip}{0pt plus 5cm}{\bf fcgi\-\_\-proc}$\ast$ fcgi\-\_\-extension\-\_\-host\-::first}}\label{structfcgi__extension__host_abb8dfa6d141106454e5f09ae9abc9a84}
+
+
+Referenced by fastcgi\-\_\-host\-\_\-free(), fcgi\-\_\-restart\-\_\-dead\-\_\-procs(), fcgi\-\_\-write\-\_\-request(), F\-R\-E\-E\-\_\-\-F\-U\-N\-C(), scgi\-\_\-write\-\_\-request(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), and T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structfcgi__extension__host_a07b4d2b5802995d2dbc56e324d50dc1a}{\index{fcgi\-\_\-extension\-\_\-host@{fcgi\-\_\-extension\-\_\-host}!fix\-\_\-root\-\_\-path\-\_\-name@{fix\-\_\-root\-\_\-path\-\_\-name}}
+\index{fix\-\_\-root\-\_\-path\-\_\-name@{fix\-\_\-root\-\_\-path\-\_\-name}!fcgi_extension_host@{fcgi\-\_\-extension\-\_\-host}}
+\subsubsection[{fix\-\_\-root\-\_\-path\-\_\-name}]{\setlength{\rightskip}{0pt plus 5cm}unsigned short fcgi\-\_\-extension\-\_\-host\-::fix\-\_\-root\-\_\-path\-\_\-name}}\label{structfcgi__extension__host_a07b4d2b5802995d2dbc56e324d50dc1a}
+
+
+Referenced by fcgi\-\_\-check\-\_\-extension(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structfcgi__extension__host_a48f3e193249fa8a3bd6492ebc965c393}{\index{fcgi\-\_\-extension\-\_\-host@{fcgi\-\_\-extension\-\_\-host}!host@{host}}
+\index{host@{host}!fcgi_extension_host@{fcgi\-\_\-extension\-\_\-host}}
+\subsubsection[{host}]{\setlength{\rightskip}{0pt plus 5cm}{\bf buffer}$\ast$ fcgi\-\_\-extension\-\_\-host\-::host}}\label{structfcgi__extension__host_a48f3e193249fa8a3bd6492ebc965c393}
+
+
+Referenced by fastcgi\-\_\-host\-\_\-free(), fastcgi\-\_\-host\-\_\-init(), fcgi\-\_\-establish\-\_\-connection(), fcgi\-\_\-restart\-\_\-dead\-\_\-procs(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structfcgi__extension__host_a0b39658d0376f369c480f2cce166467e}{\index{fcgi\-\_\-extension\-\_\-host@{fcgi\-\_\-extension\-\_\-host}!id@{id}}
+\index{id@{id}!fcgi_extension_host@{fcgi\-\_\-extension\-\_\-host}}
+\subsubsection[{id}]{\setlength{\rightskip}{0pt plus 5cm}{\bf buffer}$\ast$ fcgi\-\_\-extension\-\_\-host\-::id}}\label{structfcgi__extension__host_a0b39658d0376f369c480f2cce166467e}
+
+
+Referenced by fastcgi\-\_\-host\-\_\-free(), fastcgi\-\_\-host\-\_\-init(), fastcgi\-\_\-status\-\_\-copy\-\_\-procname(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structfcgi__extension__host_ab2ba5563fd48db1f1ceaa2b9faaebfb3}{\index{fcgi\-\_\-extension\-\_\-host@{fcgi\-\_\-extension\-\_\-host}!kill\-\_\-signal@{kill\-\_\-signal}}
+\index{kill\-\_\-signal@{kill\-\_\-signal}!fcgi_extension_host@{fcgi\-\_\-extension\-\_\-host}}
+\subsubsection[{kill\-\_\-signal}]{\setlength{\rightskip}{0pt plus 5cm}unsigned short fcgi\-\_\-extension\-\_\-host\-::kill\-\_\-signal}}\label{structfcgi__extension__host_ab2ba5563fd48db1f1ceaa2b9faaebfb3}
+
+
+Referenced by F\-R\-E\-E\-\_\-\-F\-U\-N\-C(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structfcgi__extension__host_a3506ef25504b8bbb690cff023e584b9a}{\index{fcgi\-\_\-extension\-\_\-host@{fcgi\-\_\-extension\-\_\-host}!listen\-\_\-backlog@{listen\-\_\-backlog}}
+\index{listen\-\_\-backlog@{listen\-\_\-backlog}!fcgi_extension_host@{fcgi\-\_\-extension\-\_\-host}}
+\subsubsection[{listen\-\_\-backlog}]{\setlength{\rightskip}{0pt plus 5cm}int fcgi\-\_\-extension\-\_\-host\-::listen\-\_\-backlog}}\label{structfcgi__extension__host_a3506ef25504b8bbb690cff023e584b9a}
+
+
+Referenced by S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structfcgi__extension__host_aff5283f567341a8ffa727dcf83fc0254}{\index{fcgi\-\_\-extension\-\_\-host@{fcgi\-\_\-extension\-\_\-host}!load@{load}}
+\index{load@{load}!fcgi_extension_host@{fcgi\-\_\-extension\-\_\-host}}
+\subsubsection[{load}]{\setlength{\rightskip}{0pt plus 5cm}ssize\-\_\-t fcgi\-\_\-extension\-\_\-host\-::load}}\label{structfcgi__extension__host_aff5283f567341a8ffa727dcf83fc0254}
+
+
+Referenced by fcgi\-\_\-extension\-\_\-host\-\_\-get(), fcgi\-\_\-host\-\_\-assign(), fcgi\-\_\-host\-\_\-reset(), fcgi\-\_\-write\-\_\-request(), scgi\-\_\-backend\-\_\-close(), and scgi\-\_\-reconnect().
+
+\hypertarget{structfcgi__extension__host_a9748fdf000b78644fa33b92c39006166}{\index{fcgi\-\_\-extension\-\_\-host@{fcgi\-\_\-extension\-\_\-host}!max\-\_\-id@{max\-\_\-id}}
+\index{max\-\_\-id@{max\-\_\-id}!fcgi_extension_host@{fcgi\-\_\-extension\-\_\-host}}
+\subsubsection[{max\-\_\-id}]{\setlength{\rightskip}{0pt plus 5cm}size\-\_\-t fcgi\-\_\-extension\-\_\-host\-::max\-\_\-id}}\label{structfcgi__extension__host_a9748fdf000b78644fa33b92c39006166}
+
+
+Referenced by S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), and T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structfcgi__extension__host_a223dbc6acf4f59361be6c6c644af12c0}{\index{fcgi\-\_\-extension\-\_\-host@{fcgi\-\_\-extension\-\_\-host}!max\-\_\-procs@{max\-\_\-procs}}
+\index{max\-\_\-procs@{max\-\_\-procs}!fcgi_extension_host@{fcgi\-\_\-extension\-\_\-host}}
+\subsubsection[{max\-\_\-procs}]{\setlength{\rightskip}{0pt plus 5cm}unsigned short fcgi\-\_\-extension\-\_\-host\-::max\-\_\-procs}}\label{structfcgi__extension__host_a223dbc6acf4f59361be6c6c644af12c0}
+
+
+Referenced by fcgi\-\_\-recv\-\_\-response(), fcgi\-\_\-restart\-\_\-dead\-\_\-procs(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structfcgi__extension__host_af07d55d403b8d4b2f4cbab23ad5367c2}{\index{fcgi\-\_\-extension\-\_\-host@{fcgi\-\_\-extension\-\_\-host}!max\-\_\-requests\-\_\-per\-\_\-proc@{max\-\_\-requests\-\_\-per\-\_\-proc}}
+\index{max\-\_\-requests\-\_\-per\-\_\-proc@{max\-\_\-requests\-\_\-per\-\_\-proc}!fcgi_extension_host@{fcgi\-\_\-extension\-\_\-host}}
+\subsubsection[{max\-\_\-requests\-\_\-per\-\_\-proc}]{\setlength{\rightskip}{0pt plus 5cm}size\-\_\-t fcgi\-\_\-extension\-\_\-host\-::max\-\_\-requests\-\_\-per\-\_\-proc}}\label{structfcgi__extension__host_af07d55d403b8d4b2f4cbab23ad5367c2}
+\hypertarget{structfcgi__extension__host_aadeb7bc043c469f865c565ba35e2ca3c}{\index{fcgi\-\_\-extension\-\_\-host@{fcgi\-\_\-extension\-\_\-host}!num\-\_\-procs@{num\-\_\-procs}}
+\index{num\-\_\-procs@{num\-\_\-procs}!fcgi_extension_host@{fcgi\-\_\-extension\-\_\-host}}
+\subsubsection[{num\-\_\-procs}]{\setlength{\rightskip}{0pt plus 5cm}size\-\_\-t fcgi\-\_\-extension\-\_\-host\-::num\-\_\-procs}}\label{structfcgi__extension__host_aadeb7bc043c469f865c565ba35e2ca3c}
+
+
+Referenced by S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structfcgi__extension__host_ad41957f0ebf10f9066e84a02ecd269f8}{\index{fcgi\-\_\-extension\-\_\-host@{fcgi\-\_\-extension\-\_\-host}!port@{port}}
+\index{port@{port}!fcgi_extension_host@{fcgi\-\_\-extension\-\_\-host}}
+\subsubsection[{port}]{\setlength{\rightskip}{0pt plus 5cm}unsigned short fcgi\-\_\-extension\-\_\-host\-::port}}\label{structfcgi__extension__host_ad41957f0ebf10f9066e84a02ecd269f8}
+
+
+Referenced by fcgi\-\_\-restart\-\_\-dead\-\_\-procs(), proxy\-\_\-write\-\_\-request(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structfcgi__extension__host_a8a7d3cb5d5c201760bb5da036126ffd1}{\index{fcgi\-\_\-extension\-\_\-host@{fcgi\-\_\-extension\-\_\-host}!refcount@{refcount}}
+\index{refcount@{refcount}!fcgi_extension_host@{fcgi\-\_\-extension\-\_\-host}}
+\subsubsection[{refcount}]{\setlength{\rightskip}{0pt plus 5cm}int fcgi\-\_\-extension\-\_\-host\-::refcount}}\label{structfcgi__extension__host_a8a7d3cb5d5c201760bb5da036126ffd1}
+
+
+Referenced by fastcgi\-\_\-host\-\_\-free(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structfcgi__extension__host_aa593d8c96001f747795610eca69cc646}{\index{fcgi\-\_\-extension\-\_\-host@{fcgi\-\_\-extension\-\_\-host}!strip\-\_\-request\-\_\-uri@{strip\-\_\-request\-\_\-uri}}
+\index{strip\-\_\-request\-\_\-uri@{strip\-\_\-request\-\_\-uri}!fcgi_extension_host@{fcgi\-\_\-extension\-\_\-host}}
+\subsubsection[{strip\-\_\-request\-\_\-uri}]{\setlength{\rightskip}{0pt plus 5cm}{\bf buffer}$\ast$ fcgi\-\_\-extension\-\_\-host\-::strip\-\_\-request\-\_\-uri}}\label{structfcgi__extension__host_aa593d8c96001f747795610eca69cc646}
+
+
+Referenced by fastcgi\-\_\-host\-\_\-free(), fastcgi\-\_\-host\-\_\-init(), fcgi\-\_\-create\-\_\-env(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structfcgi__extension__host_a3a3daea2e667a74a3d8eca2216603c47}{\index{fcgi\-\_\-extension\-\_\-host@{fcgi\-\_\-extension\-\_\-host}!unixsocket@{unixsocket}}
+\index{unixsocket@{unixsocket}!fcgi_extension_host@{fcgi\-\_\-extension\-\_\-host}}
+\subsubsection[{unixsocket}]{\setlength{\rightskip}{0pt plus 5cm}{\bf buffer}$\ast$ fcgi\-\_\-extension\-\_\-host\-::unixsocket}}\label{structfcgi__extension__host_a3a3daea2e667a74a3d8eca2216603c47}
+
+
+Referenced by fastcgi\-\_\-host\-\_\-free(), fastcgi\-\_\-host\-\_\-init(), fcgi\-\_\-restart\-\_\-dead\-\_\-procs(), S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C(), and unixsocket\-\_\-is\-\_\-dup().
+
+\hypertarget{structfcgi__extension__host_abc9cc43adc180cf06b771c8a5cff0f61}{\index{fcgi\-\_\-extension\-\_\-host@{fcgi\-\_\-extension\-\_\-host}!unused\-\_\-procs@{unused\-\_\-procs}}
+\index{unused\-\_\-procs@{unused\-\_\-procs}!fcgi_extension_host@{fcgi\-\_\-extension\-\_\-host}}
+\subsubsection[{unused\-\_\-procs}]{\setlength{\rightskip}{0pt plus 5cm}{\bf fcgi\-\_\-proc}$\ast$ fcgi\-\_\-extension\-\_\-host\-::unused\-\_\-procs}}\label{structfcgi__extension__host_abc9cc43adc180cf06b771c8a5cff0f61}
+
+
+Referenced by fastcgi\-\_\-host\-\_\-free(), F\-R\-E\-E\-\_\-\-F\-U\-N\-C(), and T\-R\-I\-G\-G\-E\-R\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structfcgi__extension__host_a8c978afa31288861b2b5b9917aed34a6}{\index{fcgi\-\_\-extension\-\_\-host@{fcgi\-\_\-extension\-\_\-host}!xsendfile\-\_\-allow@{xsendfile\-\_\-allow}}
+\index{xsendfile\-\_\-allow@{xsendfile\-\_\-allow}!fcgi_extension_host@{fcgi\-\_\-extension\-\_\-host}}
+\subsubsection[{xsendfile\-\_\-allow}]{\setlength{\rightskip}{0pt plus 5cm}unsigned short fcgi\-\_\-extension\-\_\-host\-::xsendfile\-\_\-allow}}\label{structfcgi__extension__host_a8c978afa31288861b2b5b9917aed34a6}
+
+
+Referenced by fcgi\-\_\-demux\-\_\-response(), fcgi\-\_\-response\-\_\-parse(), scgi\-\_\-demux\-\_\-response(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+\hypertarget{structfcgi__extension__host_a1304d5929c12516a150b78a59139a0b0}{\index{fcgi\-\_\-extension\-\_\-host@{fcgi\-\_\-extension\-\_\-host}!xsendfile\-\_\-docroot@{xsendfile\-\_\-docroot}}
+\index{xsendfile\-\_\-docroot@{xsendfile\-\_\-docroot}!fcgi_extension_host@{fcgi\-\_\-extension\-\_\-host}}
+\subsubsection[{xsendfile\-\_\-docroot}]{\setlength{\rightskip}{0pt plus 5cm}{\bf array}$\ast$ fcgi\-\_\-extension\-\_\-host\-::xsendfile\-\_\-docroot}}\label{structfcgi__extension__host_a1304d5929c12516a150b78a59139a0b0}
+
+
+Referenced by fastcgi\-\_\-host\-\_\-free(), fastcgi\-\_\-host\-\_\-init(), fcgi\-\_\-demux\-\_\-response(), fcgi\-\_\-response\-\_\-parse(), scgi\-\_\-demux\-\_\-response(), and S\-E\-T\-D\-E\-F\-A\-U\-L\-T\-S\-\_\-\-F\-U\-N\-C().
+
+
+
+The documentation for this struct was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{mod__fastcgi_8c}{mod\-\_\-fastcgi.\-c}\end{DoxyCompactItemize}
