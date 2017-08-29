@@ -1,0 +1,13 @@
+Description: Patch lseek test-suite to ignore libc generated lseek calls.
+Author: Dimitri John Ledkov <xnox@ubuntu.com>
+
+--- strace-4.11.orig/tests/lseek.test
++++ strace-4.11/tests/lseek.test
+@@ -7,6 +7,7 @@
+ run_prog > /dev/null
+ OUT="$LOG.out"
+ run_strace -a30 -elseek $args > "$OUT"
++sed '/lseek(3/d' -i $LOG
+ match_diff "$LOG" "$OUT"
+ rm -f "$OUT"
+ 

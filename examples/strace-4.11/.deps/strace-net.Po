@@ -1,0 +1,416 @@
+strace-net.o: net.c defs.h config.h /usr/include/features.h \
+  /usr/include/stdc-predef.h /usr/include/x86_64-linux-gnu/sys/cdefs.h \
+  /usr/include/x86_64-linux-gnu/bits/wordsize.h \
+  /usr/include/x86_64-linux-gnu/gnu/stubs.h \
+  /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
+  /usr/lib/llvm-3.8/bin/../lib/clang/3.8.0/include/stdbool.h \
+  /usr/lib/llvm-3.8/bin/../lib/clang/3.8.0/include/stdint.h \
+  /usr/include/stdint.h /usr/include/x86_64-linux-gnu/bits/wchar.h \
+  /usr/lib/llvm-3.8/bin/../lib/clang/3.8.0/include/inttypes.h \
+  /usr/include/inttypes.h /usr/include/x86_64-linux-gnu/sys/types.h \
+  /usr/include/x86_64-linux-gnu/bits/types.h \
+  /usr/include/x86_64-linux-gnu/bits/typesizes.h /usr/include/time.h \
+  /usr/lib/llvm-3.8/bin/../lib/clang/3.8.0/include/stddef.h \
+  /usr/include/endian.h /usr/include/x86_64-linux-gnu/bits/endian.h \
+  /usr/include/x86_64-linux-gnu/bits/byteswap.h \
+  /usr/include/x86_64-linux-gnu/bits/byteswap-16.h \
+  /usr/include/x86_64-linux-gnu/sys/select.h \
+  /usr/include/x86_64-linux-gnu/bits/select.h \
+  /usr/include/x86_64-linux-gnu/bits/sigset.h \
+  /usr/include/x86_64-linux-gnu/bits/time.h \
+  /usr/include/x86_64-linux-gnu/sys/sysmacros.h \
+  /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h \
+  /usr/lib/llvm-3.8/bin/../lib/clang/3.8.0/include/__stddef_max_align_t.h \
+  /usr/include/unistd.h /usr/include/x86_64-linux-gnu/bits/posix_opt.h \
+  /usr/include/x86_64-linux-gnu/bits/environments.h \
+  /usr/include/x86_64-linux-gnu/bits/confname.h /usr/include/getopt.h \
+  /usr/include/stdlib.h /usr/include/x86_64-linux-gnu/bits/waitflags.h \
+  /usr/include/x86_64-linux-gnu/bits/waitstatus.h /usr/include/xlocale.h \
+  /usr/include/alloca.h \
+  /usr/include/x86_64-linux-gnu/bits/stdlib-float.h /usr/include/stdio.h \
+  /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
+  /usr/lib/llvm-3.8/bin/../lib/clang/3.8.0/include/stdarg.h \
+  /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
+  /usr/include/x86_64-linux-gnu/bits/sys_errlist.h /usr/include/string.h \
+  /usr/include/errno.h /usr/include/x86_64-linux-gnu/bits/errno.h \
+  /usr/include/linux/errno.h /usr/include/x86_64-linux-gnu/asm/errno.h \
+  /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
+  /usr/include/x86_64-linux-gnu/bits/timex.h \
+  /usr/include/x86_64-linux-gnu/sys/time.h \
+  /usr/include/x86_64-linux-gnu/sys/syscall.h \
+  /usr/include/x86_64-linux-gnu/asm/unistd.h \
+  /usr/include/x86_64-linux-gnu/asm/unistd_64.h \
+  /usr/include/x86_64-linux-gnu/bits/syscall.h mpers_type.h printers.h \
+  /usr/include/x86_64-linux-gnu/sys/stat.h \
+  /usr/include/x86_64-linux-gnu/bits/stat.h \
+  /usr/include/x86_64-linux-gnu/sys/socket.h \
+  /usr/include/x86_64-linux-gnu/sys/uio.h \
+  /usr/include/x86_64-linux-gnu/bits/uio.h \
+  /usr/include/x86_64-linux-gnu/bits/socket.h \
+  /usr/include/x86_64-linux-gnu/bits/socket_type.h \
+  /usr/include/x86_64-linux-gnu/bits/sockaddr.h \
+  /usr/include/x86_64-linux-gnu/asm/socket.h \
+  /usr/include/asm-generic/socket.h \
+  /usr/include/x86_64-linux-gnu/asm/sockios.h \
+  /usr/include/asm-generic/sockios.h \
+  /usr/include/x86_64-linux-gnu/sys/un.h /usr/include/netinet/in.h \
+  /usr/include/x86_64-linux-gnu/bits/in.h /usr/include/netinet/tcp.h \
+  /usr/include/netinet/udp.h /usr/include/arpa/inet.h \
+  /usr/include/net/if.h /usr/include/x86_64-linux-gnu/asm/types.h \
+  /usr/include/asm-generic/types.h /usr/include/asm-generic/int-ll64.h \
+  /usr/include/x86_64-linux-gnu/asm/bitsperlong.h \
+  /usr/include/asm-generic/bitsperlong.h /usr/include/netipx/ipx.h \
+  /usr/include/linux/ip_vs.h /usr/include/linux/types.h \
+  /usr/include/linux/posix_types.h /usr/include/linux/stddef.h \
+  /usr/include/x86_64-linux-gnu/asm/posix_types.h \
+  /usr/include/x86_64-linux-gnu/asm/posix_types_64.h \
+  /usr/include/asm-generic/posix_types.h /usr/include/linux/netlink.h \
+  /usr/include/linux/kernel.h /usr/include/linux/sysinfo.h \
+  /usr/include/linux/socket.h \
+  /usr/include/linux/netfilter_arp/arp_tables.h \
+  /usr/include/linux/netfilter_arp.h /usr/include/linux/netfilter.h \
+  /usr/include/linux/sysctl.h /usr/include/linux/in.h \
+  /usr/include/linux/libc-compat.h \
+  /usr/include/x86_64-linux-gnu/asm/byteorder.h \
+  /usr/include/linux/byteorder/little_endian.h /usr/include/linux/swab.h \
+  /usr/include/x86_64-linux-gnu/asm/swab.h /usr/include/linux/in6.h \
+  /usr/include/linux/netfilter/x_tables.h \
+  /usr/include/linux/netfilter_bridge/ebtables.h \
+  /usr/include/linux/netfilter_bridge.h /usr/include/linux/if_ether.h \
+  /usr/include/linux/if_vlan.h /usr/include/linux/if_pppox.h \
+  /usr/include/linux/if_pppol2tp.h \
+  /usr/include/linux/netfilter_ipv4/ip_tables.h \
+  /usr/include/linux/netfilter_ipv4.h \
+  /usr/lib/llvm-3.8/bin/../lib/clang/3.8.0/include/limits.h \
+  /usr/include/limits.h /usr/include/x86_64-linux-gnu/bits/posix1_lim.h \
+  /usr/include/x86_64-linux-gnu/bits/local_lim.h \
+  /usr/include/linux/limits.h \
+  /usr/include/x86_64-linux-gnu/bits/posix2_lim.h \
+  /usr/include/x86_64-linux-gnu/bits/xopen_lim.h \
+  /usr/include/linux/netfilter/xt_tcpudp.h \
+  /usr/include/linux/netfilter_ipv6/ip6_tables.h \
+  /usr/include/linux/netfilter_ipv6.h /usr/include/linux/if_packet.h \
+  /usr/include/linux/icmp.h xlat/domains.h xlat/addrfams.h \
+  xlat/socktypes.h xlat/sock_type_flags.h xlat/socketlayers.h \
+  xlat/inet_protocols.h xlat/netlink_protocols.h xlat/msg_flags.h \
+  xlat/af_packet_types.h xlat/scmvals.h xlat/ip_cmsg_types.h \
+  xlat/shutdown_modes.h xlat/sockoptions.h xlat/sockipoptions.h \
+  xlat/getsockipoptions.h xlat/setsockipoptions.h xlat/sockipv6options.h \
+  xlat/getsockipv6options.h xlat/setsockipv6options.h \
+  xlat/sockipxoptions.h xlat/sockrawoptions.h xlat/sockpacketoptions.h \
+  xlat/socksctpoptions.h xlat/socktcpoptions.h xlat/icmpfilterflags.h \
+  xlat/packet_mreq_type.h
+
+defs.h:
+
+config.h:
+
+/usr/include/features.h:
+
+/usr/include/stdc-predef.h:
+
+/usr/include/x86_64-linux-gnu/sys/cdefs.h:
+
+/usr/include/x86_64-linux-gnu/bits/wordsize.h:
+
+/usr/include/x86_64-linux-gnu/gnu/stubs.h:
+
+/usr/include/x86_64-linux-gnu/gnu/stubs-64.h:
+
+/usr/lib/llvm-3.8/bin/../lib/clang/3.8.0/include/stdbool.h:
+
+/usr/lib/llvm-3.8/bin/../lib/clang/3.8.0/include/stdint.h:
+
+/usr/include/stdint.h:
+
+/usr/include/x86_64-linux-gnu/bits/wchar.h:
+
+/usr/lib/llvm-3.8/bin/../lib/clang/3.8.0/include/inttypes.h:
+
+/usr/include/inttypes.h:
+
+/usr/include/x86_64-linux-gnu/sys/types.h:
+
+/usr/include/x86_64-linux-gnu/bits/types.h:
+
+/usr/include/x86_64-linux-gnu/bits/typesizes.h:
+
+/usr/include/time.h:
+
+/usr/lib/llvm-3.8/bin/../lib/clang/3.8.0/include/stddef.h:
+
+/usr/include/endian.h:
+
+/usr/include/x86_64-linux-gnu/bits/endian.h:
+
+/usr/include/x86_64-linux-gnu/bits/byteswap.h:
+
+/usr/include/x86_64-linux-gnu/bits/byteswap-16.h:
+
+/usr/include/x86_64-linux-gnu/sys/select.h:
+
+/usr/include/x86_64-linux-gnu/bits/select.h:
+
+/usr/include/x86_64-linux-gnu/bits/sigset.h:
+
+/usr/include/x86_64-linux-gnu/bits/time.h:
+
+/usr/include/x86_64-linux-gnu/sys/sysmacros.h:
+
+/usr/include/x86_64-linux-gnu/bits/pthreadtypes.h:
+
+/usr/lib/llvm-3.8/bin/../lib/clang/3.8.0/include/__stddef_max_align_t.h:
+
+/usr/include/unistd.h:
+
+/usr/include/x86_64-linux-gnu/bits/posix_opt.h:
+
+/usr/include/x86_64-linux-gnu/bits/environments.h:
+
+/usr/include/x86_64-linux-gnu/bits/confname.h:
+
+/usr/include/getopt.h:
+
+/usr/include/stdlib.h:
+
+/usr/include/x86_64-linux-gnu/bits/waitflags.h:
+
+/usr/include/x86_64-linux-gnu/bits/waitstatus.h:
+
+/usr/include/xlocale.h:
+
+/usr/include/alloca.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdlib-float.h:
+
+/usr/include/stdio.h:
+
+/usr/include/libio.h:
+
+/usr/include/_G_config.h:
+
+/usr/include/wchar.h:
+
+/usr/lib/llvm-3.8/bin/../lib/clang/3.8.0/include/stdarg.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdio_lim.h:
+
+/usr/include/x86_64-linux-gnu/bits/sys_errlist.h:
+
+/usr/include/string.h:
+
+/usr/include/errno.h:
+
+/usr/include/x86_64-linux-gnu/bits/errno.h:
+
+/usr/include/linux/errno.h:
+
+/usr/include/x86_64-linux-gnu/asm/errno.h:
+
+/usr/include/asm-generic/errno.h:
+
+/usr/include/asm-generic/errno-base.h:
+
+/usr/include/x86_64-linux-gnu/bits/timex.h:
+
+/usr/include/x86_64-linux-gnu/sys/time.h:
+
+/usr/include/x86_64-linux-gnu/sys/syscall.h:
+
+/usr/include/x86_64-linux-gnu/asm/unistd.h:
+
+/usr/include/x86_64-linux-gnu/asm/unistd_64.h:
+
+/usr/include/x86_64-linux-gnu/bits/syscall.h:
+
+mpers_type.h:
+
+printers.h:
+
+/usr/include/x86_64-linux-gnu/sys/stat.h:
+
+/usr/include/x86_64-linux-gnu/bits/stat.h:
+
+/usr/include/x86_64-linux-gnu/sys/socket.h:
+
+/usr/include/x86_64-linux-gnu/sys/uio.h:
+
+/usr/include/x86_64-linux-gnu/bits/uio.h:
+
+/usr/include/x86_64-linux-gnu/bits/socket.h:
+
+/usr/include/x86_64-linux-gnu/bits/socket_type.h:
+
+/usr/include/x86_64-linux-gnu/bits/sockaddr.h:
+
+/usr/include/x86_64-linux-gnu/asm/socket.h:
+
+/usr/include/asm-generic/socket.h:
+
+/usr/include/x86_64-linux-gnu/asm/sockios.h:
+
+/usr/include/asm-generic/sockios.h:
+
+/usr/include/x86_64-linux-gnu/sys/un.h:
+
+/usr/include/netinet/in.h:
+
+/usr/include/x86_64-linux-gnu/bits/in.h:
+
+/usr/include/netinet/tcp.h:
+
+/usr/include/netinet/udp.h:
+
+/usr/include/arpa/inet.h:
+
+/usr/include/net/if.h:
+
+/usr/include/x86_64-linux-gnu/asm/types.h:
+
+/usr/include/asm-generic/types.h:
+
+/usr/include/asm-generic/int-ll64.h:
+
+/usr/include/x86_64-linux-gnu/asm/bitsperlong.h:
+
+/usr/include/asm-generic/bitsperlong.h:
+
+/usr/include/netipx/ipx.h:
+
+/usr/include/linux/ip_vs.h:
+
+/usr/include/linux/types.h:
+
+/usr/include/linux/posix_types.h:
+
+/usr/include/linux/stddef.h:
+
+/usr/include/x86_64-linux-gnu/asm/posix_types.h:
+
+/usr/include/x86_64-linux-gnu/asm/posix_types_64.h:
+
+/usr/include/asm-generic/posix_types.h:
+
+/usr/include/linux/netlink.h:
+
+/usr/include/linux/kernel.h:
+
+/usr/include/linux/sysinfo.h:
+
+/usr/include/linux/socket.h:
+
+/usr/include/linux/netfilter_arp/arp_tables.h:
+
+/usr/include/linux/netfilter_arp.h:
+
+/usr/include/linux/netfilter.h:
+
+/usr/include/linux/sysctl.h:
+
+/usr/include/linux/in.h:
+
+/usr/include/linux/libc-compat.h:
+
+/usr/include/x86_64-linux-gnu/asm/byteorder.h:
+
+/usr/include/linux/byteorder/little_endian.h:
+
+/usr/include/linux/swab.h:
+
+/usr/include/x86_64-linux-gnu/asm/swab.h:
+
+/usr/include/linux/in6.h:
+
+/usr/include/linux/netfilter/x_tables.h:
+
+/usr/include/linux/netfilter_bridge/ebtables.h:
+
+/usr/include/linux/netfilter_bridge.h:
+
+/usr/include/linux/if_ether.h:
+
+/usr/include/linux/if_vlan.h:
+
+/usr/include/linux/if_pppox.h:
+
+/usr/include/linux/if_pppol2tp.h:
+
+/usr/include/linux/netfilter_ipv4/ip_tables.h:
+
+/usr/include/linux/netfilter_ipv4.h:
+
+/usr/lib/llvm-3.8/bin/../lib/clang/3.8.0/include/limits.h:
+
+/usr/include/limits.h:
+
+/usr/include/x86_64-linux-gnu/bits/posix1_lim.h:
+
+/usr/include/x86_64-linux-gnu/bits/local_lim.h:
+
+/usr/include/linux/limits.h:
+
+/usr/include/x86_64-linux-gnu/bits/posix2_lim.h:
+
+/usr/include/x86_64-linux-gnu/bits/xopen_lim.h:
+
+/usr/include/linux/netfilter/xt_tcpudp.h:
+
+/usr/include/linux/netfilter_ipv6/ip6_tables.h:
+
+/usr/include/linux/netfilter_ipv6.h:
+
+/usr/include/linux/if_packet.h:
+
+/usr/include/linux/icmp.h:
+
+xlat/domains.h:
+
+xlat/addrfams.h:
+
+xlat/socktypes.h:
+
+xlat/sock_type_flags.h:
+
+xlat/socketlayers.h:
+
+xlat/inet_protocols.h:
+
+xlat/netlink_protocols.h:
+
+xlat/msg_flags.h:
+
+xlat/af_packet_types.h:
+
+xlat/scmvals.h:
+
+xlat/ip_cmsg_types.h:
+
+xlat/shutdown_modes.h:
+
+xlat/sockoptions.h:
+
+xlat/sockipoptions.h:
+
+xlat/getsockipoptions.h:
+
+xlat/setsockipoptions.h:
+
+xlat/sockipv6options.h:
+
+xlat/getsockipv6options.h:
+
+xlat/setsockipv6options.h:
+
+xlat/sockipxoptions.h:
+
+xlat/sockrawoptions.h:
+
+xlat/sockpacketoptions.h:
+
+xlat/socksctpoptions.h:
+
+xlat/socktcpoptions.h:
+
+xlat/icmpfilterflags.h:
+
+xlat/packet_mreq_type.h:

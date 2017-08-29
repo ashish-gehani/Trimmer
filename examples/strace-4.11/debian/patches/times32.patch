@@ -1,0 +1,35 @@
+commit be1cb92c72267a1593d2573304101105ef2a5a3e
+Author: Dmitry V. Levin <ldv@altlinux.org>
+Date:   Thu Jan 7 14:20:17 2016 +0000
+
+    Fix printing of 32-bit times syscall return value on 64-bit architectures
+    
+    This change complements commit v4.9-359-gd93d9f8 by fixing
+    RVAL_UDECIMAL case.
+    The only syscall that appears to be affected is the times syscall.
+    
+    * syscall.c (trace_syscall_exiting): In case of RVAL_UDECIMAL,
+    when current personality is 32-bit, print 32-bit return code.
+    * NEWS: Mention this fix.
+    
+    Reported-by: Steve McIntyre <steve@einval.com>
+
+diff --git a/syscall.c b/syscall.c
+index 8d81274..b0e20ee 100644
+--- a/syscall.c
++++ b/syscall.c
+@@ -1064,7 +1064,13 @@ trace_syscall_exiting(struct tcb *tcp)
+ 				tprintf("= %#lo", tcp->u_rval);
+ 				break;
+ 			case RVAL_UDECIMAL:
+-				tprintf("= %lu", tcp->u_rval);
++#if SUPPORTED_PERSONALITIES > 1
++				if (current_wordsize < sizeof(long))
++					tprintf("= %u",
++						(unsigned int) tcp->u_rval);
++				else
++#endif
++					tprintf("= %lu", tcp->u_rval);
+ 				break;
+ 			case RVAL_DECIMAL:
+ 				tprintf("= %ld", tcp->u_rval);

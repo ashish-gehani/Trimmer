@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# Check lseek syscall decoding.
+
+. "${srcdir=.}/init.sh"
+
+run_prog > /dev/null
+OUT="$LOG.out"
+run_strace -a30 -elseek $args > "$OUT"
+sed '/lseek(3/d' -i $LOG
+match_diff "$LOG" "$OUT"
+rm -f "$OUT"
+
+exit 0
