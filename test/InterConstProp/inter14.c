@@ -22,6 +22,8 @@ void branchPruned(struct stType** obj){
     obj[0]->str[9] == 'd' &&   
     *obj[2]->coord->x == 11 &&
     *obj[2]->coord->y == 12 &&
+    *obj[3]->coord->x == 16 &&
+    *obj[3]->coord->y == 17 &&
     obj[2]->arr[1] == 14 &&
     !strcmp(obj[2]->str, "helloWorld") &&
     obj[2]->str[4] == 'o' &&
@@ -29,12 +31,10 @@ void branchPruned(struct stType** obj){
       printf("*** Branch Taken \n");      
 }
 void branchNotPruned(struct stType** obj){  
-  if(obj[0]->arr[1] == 4 &&
-  *obj[3]->coord->x == 16 &&
-  *obj[3]->coord->y == 17 &&
-  obj[3]->arr[1] == 19 &&
-  !strcmp(obj[3]->str, "helloWorld") &&
-  obj[3]->str[4] == 'o' &&
+  if(obj[0]->arr[1] == 4 ||
+  obj[3]->arr[1] == 19 ||
+  !strcmp(obj[3]->str, "helloWorld") ||
+  obj[3]->str[4] == 'o' ||
   obj[3]->str[9] == 'd')
     printf("*** Branch not Taken \n");          
 }
@@ -80,6 +80,8 @@ int main(int argc, char ** argv) {
     obj[1]->arr[2] = 10;
     memcpy(obj[1]->str, "helloWorld\0", 11);    
   }
+  obj[3]->coord->x[0] = 16;
+  obj[3]->coord->y[0] = 17;  
   memcpy(obj[0]->str, "helloWorld\0", 11);
   obj[1]->coord->x[0] = 6;
   obj[1]->coord->y[0] = 7;

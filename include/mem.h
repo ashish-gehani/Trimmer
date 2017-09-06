@@ -7,7 +7,9 @@ enum BaseType {
   charType,
   shortType, 
   intType, 
-  longType
+  floatType,
+  longType,
+  doubleType
 };
 
 enum NodeType {
@@ -38,6 +40,7 @@ public:
   ~ScalarAlloca();
   ScalarAlloca * createClone();
   bool checkConsistencyWith(ScalarAlloca * sa);
+  void deleteData();
   void setParent(AggregateAlloca * aa) {
     this->parent = aa;
   }

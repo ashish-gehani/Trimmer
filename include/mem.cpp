@@ -3,31 +3,6 @@
 using namespace llvm;
 using namespace std;
 
-unsigned getSizeOf(Type* ty) {
-  if(ty->getNumContainedTypes()) {
-    if(ArrayType* arType = dyn_cast<ArrayType>(ty)) {
-      unsigned numel = arType->getNumElements();
-      return numel * getSizeOf(ty->getContainedType(0));
-    } else if(StructType* stType = dyn_cast<StructType>(ty)) {
-      unsigned numel = stType->getNumElements();
-      unsigned size = 0;
-      for(unsigned i = 0; i < numel; i++)
-        size += getSizeOf(stType->getContainedType(i));
-      return size;        
-    } else if(isa<PointerType>(ty))
-      return 8;
-  } else {
-    if(ty->isIntegerTy(8))
-      return 1;
-    else if(ty->isIntegerTy(32))    
-      return 4;
-    else if(ty->isIntegerTy(64))
-      return 8;
-  }
-  return -1;
-}
-
-
 void ScalarAlloca::createData(Type* ty) {
 	if(ty->isIntegerTy(1)) {
 		Btype = boolType;
@@ -49,57 +24,65 @@ void ScalarAlloca::createData(Type* ty) {
 		Btype = longType;
 		data = new long[size];
 	}
+	if(ty->isFloatTy()) {
+		Btype = floatType;
+		data = new float[size];
+	}
+	if(ty->isDoubleTy()) {
+		Btype = doubleType;
+		data = new double[size];
+	}
 	memset(data, '\0', size + 1);
 }
 
 void ScalarAlloca::copyData(void * cdata, bool * cinit, int csize) {
   size = csize;
   if(Btype == boolType) {
-	data = new bool[size];
-	initialized = new bool[size];
-	bool * castData = (bool *) data;
-	bool * copyData = (bool *) cdata;
-	for(int i = 0; i < size; i++) {
-		castData[i] = copyData[i];
-		initialized[i] = cinit[i];
-	}
+		data = new bool[size];
+		initialized = new bool[size];
+		bool * castData = (bool *) data;
+		bool * copyData = (bool *) cdata;
+		for(int i = 0; i < size; i++) {
+			castData[i] = copyData[i];
+			initialized[i] = cinit[i];
+		}
   } else if(Btype == charType) {
-	data = new char[size + 1];
-	initialized = new bool[size];
-	char * castData = (char *) data;
-	char * copyData = (char *) cdata;
-	for(int i = 0; i < size; i++) {
-		castData[i] = copyData[i];
-		initialized[i] = cinit[i];
-	}
-	castData[size] = '\0';
+		data = new char[size + 1];
+		initialized = new bool[size];
+		char * castData = (char *) data;
+		char * copyData = (char *) cdata;
+		for(int i = 0; i < size; i++) {
+			castData[i] = copyData[i];
+			initialized[i] = cinit[i];
+		}
+		castData[size] = '\0';
   } else if(Btype == shortType) {
-	data = new short[size];
-	initialized = new bool[size];
-	short * castData = (short *) data;
-	short * copyData = (short *) cdata;
-	for(int i = 0; i < size; i++) {
-		castData[i] = copyData[i];
-		initialized[i] = cinit[i];
-	}
+		data = new short[size];
+		initialized = new bool[size];
+		short * castData = (short *) data;
+		short * copyData = (short *) cdata;
+		for(int i = 0; i < size; i++) {
+			castData[i] = copyData[i];
+			initialized[i] = cinit[i];
+		}
   } else if(Btype == intType) {
-	data = new int[size];
-	initialized = new bool[size];
-	int * castData = (int *) data;
-	int * copyData = (int *) cdata;
-	for(int i = 0; i < size; i++) {
-		castData[i] = copyData[i];
-		initialized[i] = cinit[i];
-	}
+		data = new int[size];
+		initialized = new bool[size];
+		int * castData = (int *) data;
+		int * copyData = (int *) cdata;
+		for(int i = 0; i < size; i++) {
+			castData[i] = copyData[i];
+			initialized[i] = cinit[i];
+		}
   } else if(Btype == longType) {
-	data = new long[size];
-	initialized = new bool[size];
-	long * castData = (long *) data;
-	long * copyData = (long *) cdata;
-	for(int i = 0; i < size; i++) {
-		castData[i] = copyData[i];
-		initialized[i] = cinit[i];
-	}
+		data = new long[size];
+		initialized = new bool[size];
+		long * castData = (long *) data;
+		long * copyData = (long *) cdata;
+		for(int i = 0; i < size; i++) {
+			castData[i] = copyData[i];
+			initialized[i] = cinit[i];
+		}
   }
 }
 
@@ -114,14 +97,12 @@ Value* ScalarAlloca::createConstVal(int offset) {
   } else if(Btype == charType) {
     char * loadData = (char*) data;
     constVal = ConstantInt::get(ty, loadData[offset]);
-    // errs() << "char loaded " << loadData[offset] << "\n";
   } else if(Btype == shortType) {
     short * loadData = (short*) data;
     constVal = ConstantInt::get(ty, loadData[offset]);    
   }  else if(Btype == intType) {
     int * loadData = (int*) data;
     constVal = ConstantInt::get(ty, loadData[offset]);
-    // errs() << "int loaded " << loadData[offset] << "\n";
   }  else if(Btype == longType) {
     long * loadData = (long*) data;
     constVal = ConstantInt::get(ty, loadData[offset]);
@@ -153,8 +134,8 @@ void ScalarAlloca::storeConstVal(int ConstVal, int offset) {
   }
 }
 
-ScalarAlloca::~ScalarAlloca() {
-  if(Btype == boolType) {
+void ScalarAlloca::deleteData() {
+	if(Btype == boolType) {
     bool * loadData = (bool*) data;
     delete [] loadData;
   } else if(Btype == charType) {
@@ -170,7 +151,12 @@ ScalarAlloca::~ScalarAlloca() {
     long * loadData = (long*) data;
     delete [] loadData;
   }
-  delete [] initialized;
+}
+
+ScalarAlloca::~ScalarAlloca() {
+	deleteData();
+	if(Btype != doubleType && Btype != floatType)
+  	delete [] initialized;
 }
 
 bool ScalarAlloca::checkConsistencyWith(ScalarAlloca * sa) {
@@ -332,8 +318,6 @@ AggregateAlloca * AggregateAlloca::createClone() {
 AggregateAlloca::~AggregateAlloca() {
 	if(alloca)
 		delete alloca;
-	for(unsigned i = 0; i < containedSize; i++)
-		delete contained[i];
 }
 
 void AggregateAlloca::checkConsistencyWith(AggregateAlloca * aa) {

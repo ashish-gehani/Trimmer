@@ -49,16 +49,18 @@ struct ConstantFolding : public ModulePass {
   bool useAnnotations;
   bool currContextIsAnnotated;
   set<Value *> AnnotationList;
+  set<Function *> whiteList;
 
   const TargetLibraryInfo *TLI;
   DataLayout * DL;
   DominatorTree * DT;
   CallGraph * CG;
-  
+
   map<Function*, FuncInfo*> FuncInfoMap;  
   map<BasicBlock *, BBInfo *> BBInfoMap;
 
   map<Instruction *, vector<CallOperand*>> replaceOperands;
+  vector<callInstPair> toReplace;
   map<Function *, SpecializedCall*> specializedCalls;
 
   BasicBlock * currBB;
@@ -73,7 +75,7 @@ struct ConstantFolding : public ModulePass {
  
   void processMemcpyInst(MemCpyInst * memcpyInst);
 
-  void processMallocInst(CallInst * mallocInst, Instruction* I);
+  void processMallocInst(unsigned totalSize, Instruction* I);
  
   void processStoreInst(StoreInst * storeInst);
 
@@ -83,11 +85,9 @@ struct ConstantFolding : public ModulePass {
 
   void processCallInst(CallInst * callInst);
 
-  void processBranchInst(BranchInst * branchInst);
-
-  void processSwitchInst(SwitchInst * switchInst);
+  void tryFolding(Instruction * I);
   
-  void VisitSuccessors(TerminatorInst * termInst);
+  void processTermInst(TerminatorInst * termInst);
   
   void processReturnInst(ReturnInst * returnInst);
  
@@ -96,34 +96,44 @@ struct ConstantFolding : public ModulePass {
   // Adding llvm::MemoryDependenceAnalysis as a required PrePass                                                         
   virtual void getAnalysisUsage(AnalysisUsage &AU) const;
 
-  // TODO: Make sure cloned functions calling other specialized routines are correctly retained
-  void replaceCallInsts();  
+  void replaceCallInsts();    
+  void replaceCallOperands();
+  void replaceUses(); 
   
-  void replaceCallOperands(); 
   void gatherFuncInfo();
   void gatherGlobals();
   bool satisfyConds(Function* F);
-
+  void addArgumentsToContext(Function * F);
+  
   void allocate(Type * ty, Value * val);
   void allocate(AggregateAlloca * aa, Value * val);
   void allocate(SSAPointer * sptr, Value * val);
   bool trackAllocas();
 
   void createAnnotationList(); 
+  void initWhiteList();
   void updateAnnotationContext(Function * F);
   void markGlobalUses(Value * val, GlobalVariable * gv);
   void propagateGlobalUses();
   void initializeGlobal(GlobalVariable * gv);  
+  void copyGlobals(ContextInfo * from, ContextInfo * to);
+  void markGlobalsAsNonConst(ContextInfo * ci);
 
   bool predecessorsVisited(BasicBlock * BB);
+  void markSuccessorsAsVisited(TerminatorInst * termInst, BasicBlock * except);
   bool mergeContext(BasicBlock * BB, BasicBlock * prev, ContextInfo * newCi);
+  void freePredecessors(BasicBlock * BB);  
   
   SSAPointer * getSSAPointer(Value * val, ContextInfo * ci);
   Function * addClonedFunction(CallInst * ci, Function * F);
 
   void markSpecialized(BasicBlock * BB);
- 
-  void runOnBB();
+  void markArgsAsNonConst(CallInst* callInst, ContextInfo * ci);
+  void handleIndirectCall(CallInst * callInst, ContextInfo * ci);
+  AggregateAlloca * runOnFunction(Function * toRun, Function * actualFunc, 
+  ContextInfo * nci, map<AggregateAlloca *, bool> tracked); 
+  void visitBB(BasicBlock * BB);
+  void runOnBB(BasicBlock * BB);
   void runOnInst(Instruction * I);
   virtual bool runOnModule(Module & module);
 

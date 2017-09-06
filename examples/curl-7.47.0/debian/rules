@@ -1,0 +1,94 @@
+#! /usr/bin/make -f
+
+# this will avoid unneded dependencies
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
+
+# this will catch miss-linking. (e.g. undefined symbols)
+#export DEB_LDFLAGS_MAINT_APPEND = -Wl,-z,defs
+
+# enable all hardening options (see #763372)
+export DEB_BUILD_MAINT_OPTIONS := hardening=+all
+
+CONFIGURE_ARGS = -- --disable-dependency-tracking		\
+	--disable-symbol-hiding --enable-versioned-symbols	\
+	--enable-threaded-resolver --with-lber-lib=lber		\
+	--with-gssapi=/usr					\
+	--with-zsh-functions-dir=/usr/share/zsh/vendor-completions
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	mkdir -p debian/build debian/build-gnutls debian/build-nss
+	# pop the last patch (nss)
+	quilt pop
+	# pop the second last patch (gnutls)
+	quilt pop
+	# get the source without nss and gnutls patches
+	tar -cf - --exclude=debian/build* --exclude=.pc . \
+		| tar -xf - -C debian/build
+	# push the second last patch which must be gnutls
+	quilt push
+	# get the source with gnutls patch applied
+	tar -cf - --exclude=debian/build* --exclude=.pc . \
+		| tar -xf - -C debian/build-gnutls
+	# push the last patch which must be nss
+	quilt push
+	# get the source with nss patch applied
+	tar -cf - --exclude=debian/build* --exclude=.pc . \
+		| tar -xf - -C debian/build-nss
+	# run buildconf and make sure to copy the patched ltmain.sh
+	for flavour in build build-gnutls build-nss; do \
+		(cd debian/$$flavour && ./buildconf && cp ../../ltmain.sh .) \
+	done
+	cd debian/build && dh_auto_configure ${CONFIGURE_ARGS}		\
+		--with-ca-path=/etc/ssl/certs				\
+		--with-ca-bundle=/etc/ssl/certs/ca-certificates.crt
+	cd debian/build-gnutls &&  dh_auto_configure ${CONFIGURE_ARGS}	\
+		--with-ca-path=/etc/ssl/certs				\
+		--with-ca-bundle=/etc/ssl/certs/ca-certificates.crt	\
+		--without-ssl --with-gnutls
+	cd debian/build-nss && dh_auto_configure ${CONFIGURE_ARGS}	\
+		--with-ca-bundle=/etc/ssl/certs/ca-certificates.crt	\
+		--without-ssl --with-nss
+
+override_dh_auto_build:
+	cd debian/build && dh_auto_build
+	cd debian/build-gnutls && dh_auto_build
+	cd debian/build-nss && dh_auto_build
+
+override_dh_auto_test:
+	-cd debian/build && dh_auto_test
+	-cd debian/build-gnutls && dh_auto_test
+	-cd debian/build-nss && dh_auto_test
+
+override_dh_install:
+	${MAKE} -C debian/build					\
+		DESTDIR=$(shell pwd)/debian/tmp install
+	${MAKE} -C debian/build-gnutls				\
+		DESTDIR=$(shell pwd)/debian/tmp-gnutls install
+	${MAKE} -C debian/build-nss				\
+		DESTDIR=$(shell pwd)/debian/tmp-nss install
+	dh_install -pcurl -plibcurl4-doc			\
+		-plibcurl3-gnutls -plibcurl4-gnutls-dev		\
+		--sourcedir=debian/tmp-gnutls
+	dh_install -plibcurl3-nss -plibcurl4-nss-dev		\
+		--sourcedir=debian/tmp-nss
+	dh_install -plibcurl3 -plibcurl4-openssl-dev		\
+		--sourcedir=debian/tmp
+	sed -i "/dependency_libs/ s/'.*'/''/" `find . -name '*.la'`
+
+override_dh_installchangelogs:
+	dh_installchangelogs CHANGES
+
+override_dh_compress:
+	dh_compress -X.pdf
+
+override_dh_strip:
+	dh_strip -plibcurl3 -plibcurl3-gnutls -plibcurl3-nss	\
+		--dbg-package=libcurl3-dbg
+	dh_strip --remaining-packages
+
+override_dh_auto_clean:
+	$(RM) -r debian/build* debian/tmp*
+	dh_auto_clean

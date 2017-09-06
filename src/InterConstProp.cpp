@@ -50,6 +50,7 @@ ASSUMPTIONS
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <fstream>
 #include <sstream>
 #include "../include/processInstructions.h"
 
@@ -82,37 +83,46 @@ void ConstantFolding::replaceCallOperands(){
   }  
   replaceOperands.clear();    
 }
- 
 
 // TODO: Make sure cloned functions calling other specialized routines are correctly retained
 void ConstantFolding::replaceCallInsts(){
   for (auto & e : specializedCalls){
     SpecializedCall * call = e.second;
     CallInst * from = call->origCall;
-    debug(Hashim) << "from = " << *from << "\n";
     CallInst * to = call->specCall;
-    if(call->used){   
-      debug(Hashim) << "Replacing " << *from << " with " << *to << "\n";
+    if(call->used)
       ReplaceInstWithInst(from, to);  
-    }
-    else{
+    else {
       debug(Hashim) << "Delecting Instruction = " << *to << "\n";
       delete to;
     }
   }  
   specializedCalls.clear();    
 } 
+ 
+void ConstantFolding::replaceUses() {
+  for(unsigned i = 0; i < toReplace.size(); i++) {
+    callInstPair cp = toReplace[i];
+    Instruction * oldI = cp.first;
+    Instruction * newI = cp.second; 
+    BasicBlock::iterator inst = BasicBlock::iterator(oldI);
+    oldI->getParent()->getInstList().insert(inst, newI);
+    oldI->replaceAllUsesWith(newI); 
+    oldI->eraseFromParent();
+  }
+}
 
 bool ConstantFolding::satisfyConds(Function* F) {
 
   if(FuncInfoMap.find(F) == FuncInfoMap.end())
     return false;
 
+  if(AnnotationList.find(F) != AnnotationList.end())
+    return true;
+
   FuncInfo* fi = FuncInfoMap[F];  
 
   bool addrTaken = fi->numAddrTaken;
-  if(AnnotationList.find(F) != AnnotationList.end())
-    addrTaken = (fi->numAddrTaken > 2);
 
   bool onlyOneCall = (fi->numCallInsts == 1);
   if(!F->arg_size() && !fi->usesGlobals)
@@ -121,7 +131,7 @@ bool ConstantFolding::satisfyConds(Function* F) {
   return !fi->calledInLoop && !addrTaken && onlyOneCall; 
 }
 
-Function * ConstantFolding::addClonedFunction(CallInst * ci, Function * F) {
+Function * ConstantFolding::addClonedFunction(CallInst * callInst, Function * F) {
   Function * clonedFunc;
   ClonedCodeInfo info;
   ValueToValueMapTy vmap;
@@ -131,16 +141,10 @@ Function * ConstantFolding::addClonedFunction(CallInst * ci, Function * F) {
   clonedFunc = llvm::CloneFunction(F, vmap, true, &info);
   clonedFunc->setName(StringRef(name + "_clone")); 
   F->getParent()->getFunctionList().push_back(clonedFunc);
-              
-  std::vector<Value*> args(ci->arg_begin(), ci->arg_end());
+  std::vector<Value*> args(callInst->arg_begin(), callInst->arg_end());
   CallInst * specCallInst = CallInst::Create(clonedFunc, args);
-  debug(Hashim) << "newCallSite = " << *specCallInst << "\n";
-  SpecializedCall * call = new SpecializedCall;
-  call->origCall = ci;
-  call->specCall = specCallInst;
-  call->used = false;
-  specializedCalls[clonedFunc] = call; // FIXIT: Re-consider current indexing on cloned function
-  
+  InsertUnique(toReplace, make_pair(callInst, specCallInst));
+
   updateBBInfo(vmap, BBInfoMap, F);    
   FuncInfoMap[clonedFunc] = copyFuncInfo(FuncInfoMap[F]);  
   
@@ -213,12 +217,15 @@ void ConstantFolding::propagateGlobalUses() {
 }
 
 void ConstantFolding::initializeGlobal(GlobalVariable * gv) {
+  
   if(!gv->hasInitializer())
     return;
+  
   ContextInfo * ci = BasicBlockContexts[currBB];
   Type * ty = gv->getType()->getContainedType(0);  
   AggregateAlloca * aa = getSSAPointer(gv, ci)->basePointer;
   Constant * initializer = gv->getInitializer();
+  
   if(isa<ConstantPointerNull>(initializer))
     return;    
   if(isa<ConstantAggregateZero>(initializer))
@@ -229,19 +236,27 @@ void ConstantFolding::initializeGlobal(GlobalVariable * gv) {
     return;
   }
 
-  ScalarAlloca * alloca = aa->getAlloca();
+  ScalarAlloca * alloca = aa->getContained(0)->getAlloca();
   alloca->storeConstVal(dyn_cast<ConstantInt>(initializer)->getZExtValue(), 0);
 }
 
 void ConstantFolding::gatherGlobals() {
   for(auto& global : M->globals()) {
     GlobalVariable *  gv = &global;
+
+    if(useAnnotations && AnnotationList.find(gv) ==
+    AnnotationList.end())
+      continue;
+
     if(gv->isConstant())
       continue;
-    allocate(gv->getType()->getContainedType(0), gv);
+    Type * ty = gv->getType();
+    allocate(ty, gv);
+    AggregateAlloca * basePointer = BasicBlockContexts[currBB]->
+      SSAPointers[gv]->basePointer;
+    basePointer->setOrInsert(0, new AggregateAlloca(ty->getContainedType(0)));
     initializeGlobal(gv);
-    unsigned id = BasicBlockContexts[currBB]->SSAPointers[gv]->
-      basePointer->getId();
+    unsigned id = basePointer->getId();
     GlobalIdPair gip = make_pair(gv, id);
     GlobalIdList.push_back(gip);
     markGlobalUses(dyn_cast<Value>(gv), gv);
@@ -249,13 +264,42 @@ void ConstantFolding::gatherGlobals() {
   propagateGlobalUses();
 }
 
+void ConstantFolding::copyGlobals(ContextInfo * from, ContextInfo * to) {
+  for(unsigned i = 0; i < GlobalIdList.size(); i++) {
+    GlobalIdPair gip = GlobalIdList[i];
+    GlobalVariable * gv = gip.first;
+    unsigned id = gip.second;
+    SSAPointer * gsptr = new SSAPointer(from->idmap[id]);
+    to->SSAPointers[gv] = gsptr;
+    InsertUnique(to->AggregateAllocas, gsptr->basePointer);
+    to->InstOrder.push_back(gv);
+    updateMap(to->idmap, gsptr->basePointer);
+  }
+}
+
+void ConstantFolding::markGlobalsAsNonConst(ContextInfo * ci) {
+  for(unsigned i = 0; i < GlobalIdList.size(); i++) {
+    GlobalIdPair gip = GlobalIdList[i];
+    unsigned id = gip.second;
+    if(ci->idmap.find(id) != ci->idmap.end())
+      ci->idmap[id]->setConstant(false);
+  }
+}
+
+void ConstantFolding::addArgumentsToContext(Function * F) {
+  unsigned index = 0;
+  for(auto it = F->arg_begin(); it != F->arg_end(); it++, index++) {
+    Value * val = getArg(F, index);
+    allocate(val->getType(), val);
+  }
+}
+
 void ConstantFolding::createAnnotationList() {
   GlobalVariable * annotVar = M->
   getGlobalVariable(StringRef("llvm.global.annotations"));
-  if(!annotVar) {
-    // errs() << "annotVar not found\n";
-    return;
-  }
+
+  assert(annotVar && "isAnnotated and annotVar not found");
+
   Constant * initializer = annotVar->getInitializer();
   ArrayType * aty = dyn_cast<ConstantArray>(initializer)->getType();
   unsigned num = aty->getNumElements();
@@ -268,13 +312,17 @@ void ConstantFolding::createAnnotationList() {
   }
 }
 
+void ConstantFolding::initWhiteList() {
+}
+
 void ConstantFolding::updateAnnotationContext(Function * F) {
   if(!useAnnotations)
     return;
   if(AnnotationList.find(F) == AnnotationList.end())
     currContextIsAnnotated = false;
-  else 
+  else {
     currContextIsAnnotated = true;
+  }
 }
 
 bool ConstantFolding::trackAllocas() {
@@ -298,9 +346,6 @@ void ConstantFolding::allocate(Type * ty, Value * val) {
 }
 
 void ConstantFolding::allocate(AggregateAlloca * aa, Value * val) {
-  
-  if(!trackAllocas())
-    return;
 
   ContextInfo * ci = BasicBlockContexts[currBB];  
   SSAPointer * sptr = new SSAPointer(aa);
@@ -312,10 +357,8 @@ void ConstantFolding::allocate(AggregateAlloca * aa, Value * val) {
 }
 
 void ConstantFolding::allocate(SSAPointer * sptr, Value * val) {
-  
   if(!trackAllocas())
     return;
-
   ContextInfo * ci = BasicBlockContexts[currBB];  
   ci->SSAPointers[val] = sptr;
   InsertUnique(ci->AggregateAllocas, sptr->basePointer);
@@ -324,7 +367,29 @@ void ConstantFolding::allocate(SSAPointer * sptr, Value * val) {
   AggregateAllocaToVal[sptr->basePointer->getId()] = val;  
 }
 
-//Assumption a basic block can have predecessors only from the same function
+void ConstantFolding::markSuccessorsAsVisited(TerminatorInst * termInst,
+ BasicBlock * except) {
+  for(unsigned int index = 0; index < termInst->getNumSuccessors(); index++) {
+    BasicBlock * successor = termInst->getSuccessor(index);
+    if(successor == except)
+      continue;
+    if(!predecessorsVisited(successor))
+      continue;
+    BasicBlockContexts[successor] = new ContextInfo(true);
+    visited.insert(successor);
+  }
+}
+
+void ConstantFolding::freePredecessors(BasicBlock * BB) {
+  for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++){
+    BasicBlock * predecessor = *it;
+    if(findInVect(BBInfoMap[BB]->loopLatchesWithEdge, predecessor))
+      continue;
+    ContextInfo * ci = BasicBlockContexts[predecessor];
+    freeBB(predecessor, ci, visited);
+  }
+}
+
 bool ConstantFolding::predecessorsVisited(BasicBlock * BB) {
   Function * F = BB->getParent();
   LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*F).getLoopInfo();
@@ -364,20 +429,61 @@ bool ConstantFolding::mergeContext(BasicBlock * BB, BasicBlock * prev,
     if(findInVect(BBInfoMap[BB]->loopLatchesWithEdge, predecessor))
       continue;        
 
-    if(BasicBlockContexts.find(predecessor) == BasicBlockContexts.end()) {
-      errs() << "basic block context not found\n";
-      exit(0);
-    }
+    assert(BasicBlockContexts.find(predecessor) != BasicBlockContexts.end() &&
+      "basic block context not found");
+
     if(predecessor == prev)
       continue;
+
     if(BasicBlockContexts[predecessor]->deleted || 
-      BasicBlockContexts[predecessor]->copyOrMain)
+      BasicBlockContexts[predecessor]->useless)
       continue;
+
     predecessorContexts.push_back(BasicBlockContexts[predecessor]);
   }
   for(unsigned i = 0; i < predecessorContexts.size(); i++)
     compareBlockContexts(newCi, predecessorContexts[i], BasicBlockContexts);
   return true;
+}
+
+void ConstantFolding::markArgsAsNonConst(CallInst* callInst, ContextInfo * ci) {
+  Function* calledFunction = callInst->getCalledFunction();
+  if(calledFunction->onlyReadsMemory())
+    return;
+  int index = 0;
+  for(auto arg = calledFunction->arg_begin(), argEnd = calledFunction->arg_end(); arg != argEnd; 
+    arg++, index++) {
+    if(arg->onlyReadsMemory()) {
+      debug(Hashim) << "!note: Argument/Function is readonly - no side effects \n";
+      continue;
+    }
+    Value * pointerArg = callInst->getOperand(index);
+    SSAPointer * sptr = getSSAPointer(pointerArg, ci);
+    if(!sptr)
+      continue;
+    AggregateAlloca * basePointer = sptr->basePointer;
+    basePointer->setConstant(false);
+    InsertUnique(ci->modifiedAllocas, basePointer->getId());
+  }
+}
+
+void ConstantFolding::handleIndirectCall(CallInst * callInst, ContextInfo * ci) {
+  Value * val = callInst->getCalledValue();
+  if(Function * calledFunction = dyn_cast<Function>(val)) {
+    if(calledFunction->onlyReadsMemory() ||
+      whiteList.find(calledFunction) != whiteList.end())
+      return;
+  }
+  markGlobalsAsNonConst(ci);
+  for(unsigned int index = 0; index < callInst->getNumArgOperands(); index++){
+    Value * pointerArg = callInst->getArgOperand(index);
+    SSAPointer * sptr = getSSAPointer(pointerArg, ci);
+    if(!sptr)
+      continue;
+    AggregateAlloca * basePointer = sptr->basePointer;
+    basePointer->setConstant(false);
+    InsertUnique(ci->modifiedAllocas, basePointer->getId());
+  }
 }
 
 SSAPointer * ConstantFolding::getSSAPointer(Value * val, ContextInfo * ci) {
@@ -397,18 +503,57 @@ SSAPointer * ConstantFolding::getSSAPointer(Value * val, ContextInfo * ci) {
   return NULL;
 }
 
-void ConstantFolding::runOnBB() {   
-  visited.insert(currBB); 
+void ConstantFolding::visitBB(BasicBlock * BB) {
   ContextInfo * ci = BasicBlockContexts[currBB];
-  ci->ancestors.push_back(currBB);
-  for (ci->inst = currBB->begin(); ci->inst != currBB->end();) {
-    Instruction * I = &(*ci->inst);
-    BasicBlockContexts[currBB]->InstOrder.push_back(I);
-    // errs() << *I << "\n";   
+  ContextInfo * nci;
+  if(visited.find(BB) != visited.end())
+    return;
+  if(!predecessorsVisited(BB))
+    return;  
+  if(!BBInfoMap[BB]->writesToMemory && BB->getUniquePredecessor())
+    nci = ci->createClone();            
+  else {
+    nci = new ContextInfo(false);
+    duplicateAllocas(nci, ci);
+  }
+  BasicBlockContexts[BB] = nci;
+  mergeContext(BB, currBB, nci);  
+  runOnBB(BB);
+}
+
+AggregateAlloca * ConstantFolding::runOnFunction(Function * toRun, Function *
+    actualFunc, ContextInfo * nci, map<AggregateAlloca *, bool> tracked) {
+
+  bool temp = currContextIsAnnotated;
+  updateAnnotationContext(actualFunc);
+  BasicBlock * entry = &toRun->getEntryBlock();
+  BasicBlockContexts[entry] = nci;
+  runOnBB(entry);
+  currContextIsAnnotated = temp;
+  FuncInfoMap[toRun]->visited = true;
+  for(auto const &ent : tracked) {
+    AggregateAlloca * aa = ent.first;
+    bool prev = ent.second;
+    aa->setBase(prev);
+  }
+  handleReturn(toRun, BasicBlockContexts);  
+  return FuncInfoMap[toRun]->returnVal;
+}
+void ConstantFolding::runOnBB(BasicBlock * BB) {  
+  BasicBlock * temp = currBB;
+  currBB = BB; 
+  visited.insert(BB); 
+  ContextInfo * ci = BasicBlockContexts[BB];
+  ci->ancestors.push_back(BB);
+  for(ci->inst = BB->begin(); ci->inst != BB->end();) {
+    Instruction * I = &*ci->inst;
+    BasicBlockContexts[BB]->InstOrder.push_back(I);
     runOnInst(I);
   }
   ci->executed = true; 
-  freeBB(currBB, ci, visited);
+  freePredecessors(BB);    
+  freeBB(BB, ci, visited);
+  currBB = temp;
 } 
 
 void ConstantFolding::runOnInst(Instruction * I) {
@@ -426,14 +571,14 @@ void ConstantFolding::runOnInst(Instruction * I) {
     processCallInst(callInst);
   } else if(GetElementPtrInst * GEPInst = dyn_cast<GetElementPtrInst>(I)) {
     processGEPInst(GEPInst);
-  } else if(BranchInst * branchInst = dyn_cast<BranchInst>(I)) {
-    processBranchInst(branchInst);
-  } else if(SwitchInst * switchInst = dyn_cast<SwitchInst>(I)) {
-    processSwitchInst(switchInst);
   } else if(BitCastInst * bitcastInst = dyn_cast<BitCastInst>(I)) {
     processBitCastInst(bitcastInst);
   } else if(ReturnInst * returnInst = dyn_cast<ReturnInst>(I)) {
     processReturnInst(returnInst);
+  } else if(TerminatorInst * termInst = dyn_cast<TerminatorInst>(I)) {
+    processTermInst(termInst);
+  } else {
+    tryFolding(I);
   }
   if(!call)
     BasicBlockContexts[currBB]->inst++;
@@ -447,8 +592,9 @@ bool ConstantFolding::runOnModule(Module & module) {
   DL = new DataLayout(&module);   
   CG = &getAnalysis<CallGraphWrapperPass>().getCallGraph();
   M = &module;
-  useAnnotations = isAnnotated;
 
+  initWhiteList();
+  useAnnotations = isAnnotated;  
   if(useAnnotations)
     createAnnotationList();
 
@@ -458,14 +604,16 @@ bool ConstantFolding::runOnModule(Module & module) {
   BasicBlockContexts[entry] = ci;
   currBB = entry;
   currContextIsAnnotated = true;
+
+  // addArgumentsToContext(func);
   gatherFuncInfo();
   gatherGlobals(); 
   updateAnnotationContext(func);
-  runOnBB();   
+  runOnBB(entry);   
     	   
   replaceCallOperands();
   replaceCallInsts();
-  
+  replaceUses();
   return true;
 }   
   

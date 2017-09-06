@@ -4,7 +4,6 @@
 
 char buffer[100];
 void branchPruned() {
-  
   int index = strcspn(buffer, "=");
   char * value = buffer + index;
   *value++ = '\0';
