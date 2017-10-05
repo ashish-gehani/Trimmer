@@ -46,19 +46,6 @@ struct SpecializedCall{
   bool used;
 };
 
-struct FuncInfo {
-  unsigned numCallInsts;
-  AggregateAlloca * returnVal;
-  vector<Function *> calledFunctions;
-  bool calledInLoop, visited, usesGlobals;
-  int numAddrTaken;
-};
-
-struct BBInfo {
-  bool writesToMemory, partOfLoop, isHeader;
-  vector<BasicBlock *> loopLatchesWithEdge;
-};
-
 typedef map<Value *, SSAPointer *> ValSSAPointerMap;
 typedef map<Value *, ScalarAlloca *> ValScalarAllocaMap;
 typedef map<Value *, AggregateAlloca *> ValAggrAllocaMap;
@@ -67,18 +54,20 @@ struct ContextInfo {
   vector<AggregateAlloca *> AggregateAllocas;
   vector<Value *> InstOrder;
   map<unsigned, AggregateAlloca *> idmap;
-  vector<unsigned> modifiedAllocas;
+  vector<unsigned> * modifiedAllocas;
   vector<BasicBlock *> ancestors;
+  bool useless;
   bool deleted;
   bool executed;
-  bool useless;
+  bool preserve;
   BasicBlock::iterator inst;
   ContextInfo(bool val) {
     deleted = false;
     executed = false;
     useless = val;
+    modifiedAllocas = new vector<unsigned>;
   }
-  ContextInfo * createClone() {
+  ContextInfo * clone() {
     ContextInfo * nci = new ContextInfo(true);
     nci->SSAPointers = SSAPointers;
     nci->AggregateAllocas = AggregateAllocas;
@@ -92,3 +81,18 @@ typedef map<BasicBlock *, ContextInfo *> BasicBlockContInfoMap;
 typedef pair<GlobalVariable *, unsigned> GlobalIdPair;
 typedef pair<CallInst *, CallInst *> callInstPair;
 map<unsigned, Value *> AggregateAllocaToVal;
+
+struct FuncInfo {
+  unsigned numCallInsts;
+  AggregateAlloca * returnVal;
+  vector<Function *> calledFunctions;
+  ContextInfo * ci;
+  bool calledInLoop, visited, usesGlobals;
+  int numAddrTaken;
+};
+
+struct BBInfo {
+  bool writesToMemory, partOfLoop, isHeader;
+  unsigned numPreds, URfrom;
+  vector<BasicBlock *> loopLatchesWithEdge, SuccsV;
+};

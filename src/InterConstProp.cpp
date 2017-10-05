@@ -10,9 +10,6 @@ TODO:
  4) Test on more examples - currently tested with mini_httpd
  5) FIXIT: Make this a function pass 
 
-ASSUMPTIONS
- 1) catering only i8* arrays
-
 */
 
 #include "llvm/Pass.h"
@@ -113,10 +110,8 @@ void ConstantFolding::replaceUses() {
 }
 
 bool ConstantFolding::satisfyConds(Function* F) {
-
   if(FuncInfoMap.find(F) == FuncInfoMap.end())
     return false;
-
   if(AnnotationList.find(F) != AnnotationList.end())
     return true;
 
@@ -127,7 +122,6 @@ bool ConstantFolding::satisfyConds(Function* F) {
   bool onlyOneCall = (fi->numCallInsts == 1);
   if(!F->arg_size() && !fi->usesGlobals)
     onlyOneCall = true;
-
   return !fi->calledInLoop && !addrTaken && onlyOneCall; 
 }
 
@@ -160,8 +154,10 @@ void ConstantFolding::gatherFuncInfo() {
     for (Function::iterator f_it = mit->begin(), f_ite = mit->end(); 
       f_it != f_ite; ++f_it) {
       BasicBlock * BB = &*f_it;
-      BBInfoMap[BB] = initializeBBInfo();
+      BBInfoMap[BB] = initializeBBInfo(BB);
       LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*currFunc).getLoopInfo();
+      if(LI.getLoopFor(BB))
+        BBInfoMap[BB]->partOfLoop = true;
       for(BasicBlock::iterator b_it = f_it->begin(), b_ite = f_it->end(); 
         b_it != b_ite; ++b_it) {
         Instruction* I = &*b_it;
@@ -174,7 +170,7 @@ void ConstantFolding::gatherFuncInfo() {
           InsertUnique(FuncInfoMap[currFunc]->calledFunctions, F);
           if(!FuncInfoMap[F])
             FuncInfoMap[F] = initializeFuncInfo(F);
-          if(LI.getLoopFor(BB))
+          if(BBInfoMap[BB]->partOfLoop)
             FuncInfoMap[F]->calledInLoop = true;
           FuncInfoMap[F]->numCallInsts++;
         }
@@ -216,28 +212,50 @@ void ConstantFolding::propagateGlobalUses() {
   } while(changed);
 }
 
-void ConstantFolding::initializeGlobal(GlobalVariable * gv) {
+void ConstantFolding::initializeGlobal(AggregateAlloca * aa, Constant * CC) {
   
-  if(!gv->hasInitializer())
-    return;
-  
-  ContextInfo * ci = BasicBlockContexts[currBB];
-  Type * ty = gv->getType()->getContainedType(0);  
-  AggregateAlloca * aa = getSSAPointer(gv, ci)->basePointer;
-  Constant * initializer = gv->getInitializer();
-  
-  if(isa<ConstantPointerNull>(initializer))
+  if(isa<ConstantPointerNull>(CC))
     return;    
-  if(isa<ConstantAggregateZero>(initializer))
+
+  if(isa<ConstantAggregateZero>(CC))
     return;
 
-  if(ty->getNumContainedTypes()) {
-    aa->setConstant(false);
+  if(!aa->isNodeTypeOf(scalarType) && !(aa->isNodeTypeOf(ptrType) &&
+    !aa->getType()->getContainedType(0)->getNumContainedTypes())) {
+    for(unsigned i = 0; i < CC->getNumOperands(); i++)
+      initializeGlobal(aa->getContained(i), CC->getAggregateElement(i));
     return;
   }
-
-  ScalarAlloca * alloca = aa->getContained(0)->getAlloca();
-  alloca->storeConstVal(dyn_cast<ConstantInt>(initializer)->getZExtValue(), 0);
+  if(aa->getType()->isIntegerTy()) {
+    ScalarAlloca * alloca = aa->getAlloca();
+    ConstantInt * CI = dyn_cast<ConstantInt>(CC);
+    alloca->storeConstVal(CI->getZExtValue(), 0);
+    alloca->setInit(0, true);
+  } else {
+    if(ConstantDataArray * CDA = dyn_cast<ConstantDataArray>(CC)) {
+      string str = CDA->getAsString().str();
+      int length = strlen(str.c_str());
+      ScalarAlloca * alloca = aa->getAlloca();
+      char * sourceBuffer = (char*) alloca->data;
+      memcpy(sourceBuffer, str.c_str(), length);
+      alloca->fillInit(0, length, true);
+    } else if(aa->isNodeTypeOf(ptrType) && isa<ConstantExpr>(CC)) {
+      Instruction * I = dyn_cast<ConstantExpr>(CC)->getAsInstruction();
+      StringRef stringRef;
+      if(getConstantStringInfo(I->getOperand(0), stringRef, 0, false)) {
+        string str = stringRef.str();
+        int length = strlen(str.c_str());
+        Type * arType = ArrayType::get(aa->getType()->getContainedType(0), length);
+        ScalarAlloca * alloca = new ScalarAlloca(arType);
+        aa->setAlloca(alloca);
+        alloca->setParent(aa);
+        aa->Ntype = scalarPtrType;
+        char * sourceBuffer = (char*) alloca->data;
+        memcpy(sourceBuffer, str.c_str(), length);        
+        alloca->fillInit(0, length, true);
+      }      
+    }
+  }
 }
 
 void ConstantFolding::gatherGlobals() {
@@ -247,15 +265,17 @@ void ConstantFolding::gatherGlobals() {
     if(useAnnotations && AnnotationList.find(gv) ==
     AnnotationList.end())
       continue;
-
-    if(gv->isConstant())
-      continue;
+    // if(gv->isConstant())
+    //   continue;
     Type * ty = gv->getType();
-    allocate(ty, gv);
+    allocate(ty->getContainedType(0), gv);
     AggregateAlloca * basePointer = BasicBlockContexts[currBB]->
       SSAPointers[gv]->basePointer;
-    basePointer->setOrInsert(0, new AggregateAlloca(ty->getContainedType(0)));
-    initializeGlobal(gv);
+    // basePointer->setOrInsert(0, new AggregateAlloca(ty->getContainedType(0)));
+    errs() << "gatherGlobals\n";
+    if(gv->hasInitializer()) 
+      initializeGlobal(basePointer, gv->getInitializer());
+    errs() << "initialized\n";
     unsigned id = basePointer->getId();
     GlobalIdPair gip = make_pair(gv, id);
     GlobalIdList.push_back(gip);
@@ -309,6 +329,9 @@ void ConstantFolding::createAnnotationList() {
     Instruction * I = dyn_cast<ConstantExpr>(t2)->getAsInstruction();
     Value * val = dyn_cast<User>(I)->getOperand(0);
     AnnotationList.insert(val);
+    StringRef stringRef;
+    getConstantStringInfo(t1->getAggregateElement((unsigned) 1), stringRef, 0, false);
+    string tag = stringRef.str();
   }
 }
 
@@ -367,16 +390,83 @@ void ConstantFolding::allocate(SSAPointer * sptr, Value * val) {
   AggregateAllocaToVal[sptr->basePointer->getId()] = val;  
 }
 
-void ConstantFolding::markSuccessorsAsVisited(TerminatorInst * termInst,
+unsigned ConstantFolding::getBBPredInfo(BasicBlock * BB,
+                                      unsigned & predsV, 
+                                      unsigned & predsUV,
+                                      unsigned & predsUR) {
+  unsigned num = 0;
+  predsV = 0;
+  predsUR = 0; 
+  predsUV = 0;
+  for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++) {
+    BasicBlock * predecessor = *it;
+    if(visited.find(predecessor) != visited.end())
+      predsV++;
+    else if(unReachable.find(predecessor) != unReachable.end())
+      predsUR++;
+    else
+      predsUV++;
+    num++;
+  }
+  return num;
+}
+/*
+conditions for not duplicating :
+- there has to be only 1 predecessor from which this is reachable
+either unique predecessor or not reachable from all others except from
+cuz otherwise 
+plus 
+1) from only has one reachable successor cuz in that case changes can be written directly to
+from's context; {handle modified allocas}
+or 
+2) it does not write to memory -in that case no harm in copying
+*/
+bool ConstantFolding::duplicate(BasicBlock * BB, BasicBlock * from, bool single) {
+  bool singlePredFrom = (BBInfoMap[BB]->URfrom == (BBInfoMap[BB]->numPreds - 1));
+  bool memWrite = !BBInfoMap[BB]->writesToMemory; 
+  return !(singlePredFrom && (memWrite || single));
+}
+
+void ConstantFolding::getVisitedPreds(BasicBlock * BB,
+  vector<BasicBlock *> & predsV) {
+  for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++) {
+    BasicBlock * predecessor = *it;
+    if(visited.find(predecessor) != visited.end())
+      predsV.push_back(predecessor);
+  }  
+}
+
+void ConstantFolding::propagateUR(BasicBlock * BB) {
+  Function * F = BB->getParent();
+  DominatorTree* DT = new DominatorTree(*F);
+  vector<BasicBlock *> worklist;
+  worklist.push_back(BB);
+  while(worklist.size()) {
+    BasicBlock * worker = worklist[0];
+    worklist.erase(worklist.begin());
+    if(unReachable.find(worker) != unReachable.end()) 
+      continue;
+    unReachable.insert(worker);
+    markSuccessorsAsUR(worker->getTerminator(), NULL);
+    const vector<DomTreeNodeBase<BasicBlock> *> children = 
+      DT->getNode(worker)->getChildren();
+    for(unsigned i = 0; i < children.size(); i++) {
+      BasicBlock * dom = children[i]->getBlock();
+      worklist.push_back(dom);
+    }
+  }
+}
+
+void ConstantFolding::markSuccessorsAsUR(TerminatorInst * termInst,
  BasicBlock * except) {
   for(unsigned int index = 0; index < termInst->getNumSuccessors(); index++) {
     BasicBlock * successor = termInst->getSuccessor(index);
     if(successor == except)
       continue;
-    if(!predecessorsVisited(successor))
+    BBInfoMap[successor]->URfrom++;
+    if(BBInfoMap[successor]->URfrom < BBInfoMap[successor]->numPreds)
       continue;
-    BasicBlockContexts[successor] = new ContextInfo(true);
-    visited.insert(successor);
+    propagateUR(successor);
   }
 }
 
@@ -385,30 +475,48 @@ void ConstantFolding::freePredecessors(BasicBlock * BB) {
     BasicBlock * predecessor = *it;
     if(findInVect(BBInfoMap[BB]->loopLatchesWithEdge, predecessor))
       continue;
+    if(unReachable.find(predecessor) != unReachable.end())
+      continue;
     ContextInfo * ci = BasicBlockContexts[predecessor];
-    freeBB(predecessor, ci, visited);
+    freeBB(predecessor, ci);
   }
+}
+
+void ConstantFolding::freeBB(BasicBlock * BB, ContextInfo * ci) {
+  if(ci->deleted || ci->useless || !ci->executed)
+    return;
+  TerminatorInst * ti = BB->getTerminator();
+  bool allVisited = true;
+  for(unsigned i = 0; i < ti->getNumSuccessors(); i++) {
+    if(unReachable.find(ti->getSuccessor(i)) != unReachable.end())
+      continue;
+    if(visited.find(ti->getSuccessor(i)) == visited.end())
+      allVisited = false;
+  }
+  if(allVisited) {
+    freeContextInfo(ci);
+    ci->deleted = true;
+  }  
 }
 
 bool ConstantFolding::predecessorsVisited(BasicBlock * BB) {
   Function * F = BB->getParent();
   LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*F).getLoopInfo();
-  vector<BasicBlock *> notVisited;
   Loop * BBLoop = LI.getLoopFor(BB);
   for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++) {
+    
     BasicBlock * predecessor = *it;
+    
+    if(unReachable.find(predecessor) != unReachable.end())
+      continue;
+
     if(visited.find(predecessor) == visited.end()) {
       Loop * predLoop = LI.getLoopFor(predecessor);
       if(predLoop && predLoop == BBLoop && BB == BBLoop->getHeader()) {
         BBInfoMap[BB]->isHeader = true;
         SmallVector<BasicBlock*, 16> LoopLatches;
         BBLoop->getLoopLatches(LoopLatches);
-        bool found = false;
-        for(unsigned i = 0; i < LoopLatches.size(); i++) {
-          if(LoopLatches[i] == predecessor)
-            found = true;
-        }
-        if(found) {
+        if(findInVect(LoopLatches, predecessor)) {
           InsertUnique(BBInfoMap[BB]->loopLatchesWithEdge, predecessor);
           continue;
         }
@@ -425,9 +533,11 @@ bool ConstantFolding::mergeContext(BasicBlock * BB, BasicBlock * prev,
   vector<ContextInfo *> predecessorContexts; 
   for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++) {
     BasicBlock * predecessor = *it;
+    if(unReachable.find(predecessor) != unReachable.end())
+      continue;
 
     if(findInVect(BBInfoMap[BB]->loopLatchesWithEdge, predecessor))
-      continue;        
+      continue;     
 
     assert(BasicBlockContexts.find(predecessor) != BasicBlockContexts.end() &&
       "basic block context not found");
@@ -435,10 +545,12 @@ bool ConstantFolding::mergeContext(BasicBlock * BB, BasicBlock * prev,
     if(predecessor == prev)
       continue;
 
-    if(BasicBlockContexts[predecessor]->deleted || 
-      BasicBlockContexts[predecessor]->useless)
+    if(BasicBlockContexts[predecessor]->deleted)
       continue;
 
+    if(straightPath(predecessor, prev, BBInfoMap))
+      continue;
+    
     predecessorContexts.push_back(BasicBlockContexts[predecessor]);
   }
   for(unsigned i = 0; i < predecessorContexts.size(); i++)
@@ -458,12 +570,12 @@ void ConstantFolding::markArgsAsNonConst(CallInst* callInst, ContextInfo * ci) {
       continue;
     }
     Value * pointerArg = callInst->getOperand(index);
-    SSAPointer * sptr = getSSAPointer(pointerArg, ci);
+    SSAPointer * sptr = getSSAPointer(pointerArg);
     if(!sptr)
       continue;
     AggregateAlloca * basePointer = sptr->basePointer;
     basePointer->setConstant(false);
-    InsertUnique(ci->modifiedAllocas, basePointer->getId());
+    InsertUnique(*ci->modifiedAllocas, basePointer->getId());
   }
 }
 
@@ -477,13 +589,17 @@ void ConstantFolding::handleIndirectCall(CallInst * callInst, ContextInfo * ci) 
   markGlobalsAsNonConst(ci);
   for(unsigned int index = 0; index < callInst->getNumArgOperands(); index++){
     Value * pointerArg = callInst->getArgOperand(index);
-    SSAPointer * sptr = getSSAPointer(pointerArg, ci);
+    SSAPointer * sptr = getSSAPointer(pointerArg);
     if(!sptr)
       continue;
     AggregateAlloca * basePointer = sptr->basePointer;
     basePointer->setConstant(false);
-    InsertUnique(ci->modifiedAllocas, basePointer->getId());
+    InsertUnique(*ci->modifiedAllocas, basePointer->getId());
   }
+}
+
+SSAPointer * ConstantFolding::getSSAPointer(Value * val) {
+  return getSSAPointer(val, BasicBlockContexts[currBB]);
 }
 
 SSAPointer * ConstantFolding::getSSAPointer(Value * val, ContextInfo * ci) {
@@ -503,26 +619,27 @@ SSAPointer * ConstantFolding::getSSAPointer(Value * val, ContextInfo * ci) {
   return NULL;
 }
 
-void ConstantFolding::visitBB(BasicBlock * BB) {
-  ContextInfo * ci = BasicBlockContexts[currBB];
-  ContextInfo * nci;
+
+void ConstantFolding::visitBB(BasicBlock * BB, BasicBlock * from, bool single) {
   if(visited.find(BB) != visited.end())
     return;
+  BBInfoMap[from]->SuccsV.push_back(BB);
   if(!predecessorsVisited(BB))
     return;  
-  if(!BBInfoMap[BB]->writesToMemory && BB->getUniquePredecessor())
-    nci = ci->createClone();            
-  else {
-    nci = new ContextInfo(false);
+  ContextInfo * ci = BasicBlockContexts[currBB];
+  if(!duplicate(BB, from, single)) {
+    BasicBlockContexts[BB] = ci->clone();            
+  } else {
+    ContextInfo * nci = new ContextInfo(false);
     duplicateAllocas(nci, ci);
-  }
-  BasicBlockContexts[BB] = nci;
-  mergeContext(BB, currBB, nci);  
+    mergeContext(BB, currBB, nci);
+    BasicBlockContexts[BB] = nci;
+  }    
   runOnBB(BB);
 }
 
 AggregateAlloca * ConstantFolding::runOnFunction(Function * toRun, Function *
-    actualFunc, ContextInfo * nci, map<AggregateAlloca *, bool> tracked) {
+    actualFunc, ContextInfo * nci) {
 
   bool temp = currContextIsAnnotated;
   updateAnnotationContext(actualFunc);
@@ -531,12 +648,9 @@ AggregateAlloca * ConstantFolding::runOnFunction(Function * toRun, Function *
   runOnBB(entry);
   currContextIsAnnotated = temp;
   FuncInfoMap[toRun]->visited = true;
-  for(auto const &ent : tracked) {
-    AggregateAlloca * aa = ent.first;
-    bool prev = ent.second;
-    aa->setBase(prev);
-  }
+  
   handleReturn(toRun, BasicBlockContexts);  
+
   return FuncInfoMap[toRun]->returnVal;
 }
 void ConstantFolding::runOnBB(BasicBlock * BB) {  
@@ -548,11 +662,12 @@ void ConstantFolding::runOnBB(BasicBlock * BB) {
   for(ci->inst = BB->begin(); ci->inst != BB->end();) {
     Instruction * I = &*ci->inst;
     BasicBlockContexts[BB]->InstOrder.push_back(I);
-    runOnInst(I);
+    errs() << *I << " " << currBB->getParent()->getName() << "\n";    
+    runOnInst(I); 
   }
   ci->executed = true; 
-  freePredecessors(BB);    
-  freeBB(BB, ci, visited);
+  freePredecessors(BB); 
+  freeBB(BB, ci);
   currBB = temp;
 } 
 
@@ -571,6 +686,8 @@ void ConstantFolding::runOnInst(Instruction * I) {
     processCallInst(callInst);
   } else if(GetElementPtrInst * GEPInst = dyn_cast<GetElementPtrInst>(I)) {
     processGEPInst(GEPInst);
+  } else if(PHINode * phiNode = dyn_cast<PHINode>(I)) {
+    processPHINode(phiNode);
   } else if(BitCastInst * bitcastInst = dyn_cast<BitCastInst>(I)) {
     processBitCastInst(bitcastInst);
   } else if(ReturnInst * returnInst = dyn_cast<ReturnInst>(I)) {

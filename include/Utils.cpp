@@ -139,22 +139,25 @@ bool hasNoSideEffects(CallInst * callInst) {
 
   // FIXIT: Extend this list to include all read-only functions from libc if required 
   string funcName = calledFunction->getName();
-  if(funcName == "atoi" || funcName == "strdup" || funcName == "printf")
+  if(funcName == "atoi" || funcName == "strdup" || funcName == "printf" ||
+    funcName == "memset")
     return true;
-  else
-    return false;
+  if(funcName.substr(0, 11) == "llvm.memset")
+    return true;
+  return false;
 }
 
 bool isStringFunction(Function * calledFunction){
 
-  if(calledFunction == NULL){
+  if(calledFunction == NULL) {
     // Indirect function call skipped
     return false;
   }
 
   string funcName = calledFunction->getName();
   if(funcName == "strcmp" || funcName == "strcasecmp" || funcName == "strcspn" 
-     || funcName == "strspn" || funcName == "strncmp")
+     || funcName == "strspn" || funcName == "strncmp" || funcName == "strlen"
+     || funcName == "strtol")
     return true;
   else
     return false;
@@ -181,13 +184,37 @@ void compareBlockContexts(ContextInfo * newCi, ContextInfo * oldCi,
     if(!findInVect(oldCi->ancestors, newCi->ancestors[i]))
       diffBBs.push_back(newCi->ancestors[i]);
   }
+  set<AggregateAlloca *> checked;
   for(unsigned j = 0; j < diffBBs.size(); j++) {
     ContextInfo * ci = bbc[diffBBs[j]];
-    for(unsigned i = 0; i < ci->modifiedAllocas.size(); i++) {
-      unsigned id = ci->modifiedAllocas[i];
+    for(unsigned i = 0; i < (*ci->modifiedAllocas).size(); i++) {
+      unsigned id = (*ci->modifiedAllocas)[i];
       AggregateAlloca * aa = oldCi->idmap[id];
       AggregateAlloca * naa = newCi->idmap[id];
       naa->checkConsistencyWith(aa);
+      checked.insert(aa);
+      vector<AggregateAlloca *> oldWL;
+      vector<AggregateAlloca *> newWL;
+      oldWL.push_back(aa);
+      newWL.push_back(naa);
+      while(oldWL.size()) {
+        AggregateAlloca * oldCurr = oldWL[0];
+        AggregateAlloca * newCurr = newWL[0];
+        if(checked.find(aa) != checked.end()) {
+          oldWL.erase(oldWL.begin());
+          newWL.erase(newWL.begin());
+          continue;
+        }
+        checked.insert(aa);
+        if(newCurr->checkConsistencyWith(aa)) {
+          for(unsigned i = 0; i < oldCurr->getNumContained(); i++) {
+            oldWL.push_back(oldCurr->getContained(i));
+            newWL.push_back(newCurr->getContained(i));
+          }
+        }
+        oldWL.erase(oldWL.begin());
+        newWL.erase(newWL.begin());        
+      }
     }
   }
   for(unsigned i = 0; i < diffBBs.size(); i++)
@@ -242,11 +269,13 @@ FuncInfo * initializeFuncInfo(Function * F) {
   return fi;
 }
 
-BBInfo * initializeBBInfo() {
+BBInfo * initializeBBInfo(BasicBlock * BB) {
   BBInfo * bbi = new BBInfo;
   bbi->writesToMemory = false;
   bbi->partOfLoop = false;
   bbi->isHeader = false;
+  bbi->URfrom = 0;
+  bbi->numPreds = distance(pred_begin(BB), pred_end(BB));
   return bbi;
 }
 
@@ -269,19 +298,45 @@ void updateMap(map<unsigned, AggregateAlloca *> & idmap, AggregateAlloca * aa) {
     idmap[curr->getId()] = curr;
     for(unsigned i = 0; i < curr->getNumContained(); i++) {
       AggregateAlloca * naa = curr->getContained(i);
-      worklist.push_back(naa);
+      if(idmap.find(naa->getId()) == idmap.end()) 
+        worklist.push_back(naa);
     }
     worklist.erase(worklist.begin());
   }
 }
 
+AggregateAlloca * dbgAA = NULL;
 void duplicateAllocas(ContextInfo * newCi, ContextInfo * oldCi) {
   for(unsigned i = 0; i < oldCi->AggregateAllocas.size(); i++) {
     AggregateAlloca * aa = oldCi->AggregateAllocas[i];
-    if(!aa->base())
+    if(newCi->idmap.find(aa->getId()) != newCi->idmap.end()) {
       continue;
-    AggregateAlloca * naa = aa->createClone();
-    updateMap(newCi->idmap, naa);
+    }
+    AggregateAlloca * naa = aa->clone();
+    vector<AggregateAlloca *> oldWL;
+    vector<AggregateAlloca *> newWL;
+    oldWL.push_back(aa);
+    newWL.push_back(naa);
+    newCi->idmap[aa->getId()] = naa;
+    while(oldWL.size()) {
+      AggregateAlloca * oldCurr = oldWL[0];
+      AggregateAlloca * newCurr = newWL[0];
+      for(unsigned i = 0; i < oldCurr->getNumContained(); i++) {
+        AggregateAlloca * oldChild = oldCurr->getContained(i);
+        if(newCi->idmap.find(oldChild->getId()) == newCi->idmap.end()) { 
+          AggregateAlloca * newChild = oldChild->clone();
+          newCi->idmap[oldChild->getId()] = newChild;
+          newCurr->setOrInsert(i, newChild);
+          oldWL.push_back(oldChild);
+          newWL.push_back(newChild);
+        } else {
+          AggregateAlloca * newChild = newCi->idmap[oldChild->getId()];
+          newCurr->setOrInsert(i, newChild);         
+        }
+      }
+      oldWL.erase(oldWL.begin());
+      newWL.erase(newWL.begin());
+    }    
     newCi->AggregateAllocas.push_back(naa);
   } 
   for(unsigned i = 0; i < oldCi->InstOrder.size(); i++) {
@@ -297,45 +352,32 @@ void duplicateAllocas(ContextInfo * newCi, ContextInfo * oldCi) {
   }
 }
 
+void freeAA(AggregateAlloca * aa, set<AggregateAlloca *> & deleted) {
+  vector<AggregateAlloca *> worklist;
+  worklist.push_back(aa);
+  while(worklist.size()) {
+    AggregateAlloca * worker = worklist[0];
+    if(deleted.find(aa) != deleted.end()) {
+      worklist.erase(worklist.begin());
+      continue;
+    }
+    for(unsigned i = 0; i < worker->getNumContained(); i++)
+      worklist.push_back(worker->getContained(i));
+    
+    deleted.insert(worker);
+    worklist.erase(worklist.begin());
+    delete worker;
+  }   
+}
+
 void freeContextInfo(ContextInfo * ci) {
   for(auto const &ent : ci->SSAPointers) {
     SSAPointer * sptr = ent.second;
     delete sptr;
   }
   set<AggregateAlloca *> deleted;
-  for(unsigned i = 0; i < ci->AggregateAllocas.size(); i++) {
-    AggregateAlloca * aa = ci->AggregateAllocas[i];
-    vector<AggregateAlloca *> worklist;
-    worklist.push_back(aa);
-    while(worklist.size()) {
-      AggregateAlloca * worker = worklist[0];
-      if(deleted.find(worker) != deleted.end()) {
-        worklist.erase(worklist.begin());
-        continue;
-      }
-      for(unsigned i = 0; i < worker->getNumContained(); i++)
-        worklist.push_back(worker->getContained(i));
-      deleted.insert(worker);
-      worklist.erase(worklist.begin());
-      delete worker;
-    } 
-  }
-}
-
-void freeBB(BasicBlock * BB, ContextInfo * ci,
-        set<BasicBlock *> visited) {
-  if(ci->deleted || ci->useless || !ci->executed)
-    return;
-  TerminatorInst * ti = BB->getTerminator();
-  bool allVisited = true;
-  for(unsigned i = 0; i < ti->getNumSuccessors(); i++) {
-    if(visited.find(ti->getSuccessor(i)) == visited.end())
-      allVisited = false;
-  }
-  if(allVisited) {
-    freeContextInfo(ci);
-    ci->deleted = true;
-  }  
+  for(unsigned i = 0; i < ci->AggregateAllocas.size(); i++)
+    freeAA(ci->AggregateAllocas[i], deleted);
 }
 
 void handleReturn(Function * F, BasicBlockContInfoMap bbc) {
@@ -353,8 +395,9 @@ void updateBBInfo(ValueToValueMapTy & vmap, map<BasicBlock *, BBInfo *> & bbimap
     BasicBlock * BB = &*f_it;
     BasicBlock * nBB = dyn_cast<BasicBlock>(vmap[BB]);
     BBInfo * bbi = bbimap[BB];
-    BBInfo * nbbi = initializeBBInfo();
+    BBInfo * nbbi = initializeBBInfo(nBB);
     nbbi->writesToMemory = bbi->writesToMemory;
+    nbbi->partOfLoop = bbi->partOfLoop;
     bbimap[nBB] = nbbi;
   } 
 } 
@@ -371,7 +414,7 @@ void replaceConstArgs(Function * F,
 BasicBlock * foldToSingleSucc(TerminatorInst * termInst) {
   if(BranchInst *  BI = dyn_cast<BranchInst>(termInst)) {
     if(!BI->isConditional())
-      return NULL;
+      return termInst->getSuccessor(0);
     if(ConstantInt * CI = dyn_cast<ConstantInt>(BI->getCondition())) {
       if(CI->getZExtValue())
         return termInst->getSuccessor(0);
@@ -383,4 +426,93 @@ BasicBlock * foldToSingleSucc(TerminatorInst * termInst) {
       return SI->findCaseValue(CI).getCaseSuccessor();
   }
   return NULL;
+}
+
+bool straightPath(BasicBlock * from, BasicBlock * to, map<BasicBlock *, BBInfo *>
+  bbi) {
+  BasicBlock * worker = from;
+  while(true) {
+    vector<BasicBlock *> sv = bbi[worker]->SuccsV;
+    if(sv.size() != 1)
+      return false;
+    if(sv[0] == to)
+      return true;
+    worker = sv[0];
+  }
+}
+
+bool onlyCmpUses(LoadInst * loadInst) {
+  for(const Use &U : loadInst->uses()) {
+    const User *LU = U.getUser();
+    if(!isa<CmpInst>(LU))
+      return false;
+  }
+  return true;
+}
+
+void replaceAndLog(Instruction * from, Value * to) {
+  from->replaceAllUsesWith(to);
+  debug(Abubakar) << "replaced with " << *to << "\n";
+}
+
+CmpInst * foldCmp(CmpInst * CI, bool isNull, LLVMContext & context) {
+  Value * oldLHS = CI->getOperand(0);
+  Value * oldRHS = CI->getOperand(1);
+  Value * newLHS;
+  Value * newRHS;
+  IntegerType * intTy = IntegerType::get(context, 1);
+  if(isa<ConstantPointerNull>(oldLHS)) {
+    newLHS = ConstantInt::get(intTy, 0);
+    newRHS = ConstantInt::get(intTy, !isNull);
+  } else if(isa<ConstantPointerNull>(oldRHS)) {
+    newLHS = ConstantInt::get(intTy, !isNull);
+    newRHS = ConstantInt::get(intTy, 0);   
+  } else
+    return NULL;
+  CmpInst * NCI = CmpInst::Create(CI->getOpcode(), CI->getPredicate(),
+                                  newLHS, newRHS);
+  NCI->insertBefore(CI);
+  debug(Abubakar) << *CI << " ";
+  replaceAndLog(CI, NCI);
+  return NCI;
+}
+
+void handleStrToL(CallInst * callInst, ContextInfo * ci, LLVMContext & context) {
+  Value * stringArg = callInst->getArgOperand(0);
+  Value * pointerArg = callInst->getArgOperand(1);
+  Value * base = callInst->getArgOperand(2);
+  ConstantInt * baseInt;
+  if(ci->SSAPointers.find(stringArg) == ci->SSAPointers.end())
+    return; 
+  if(ci->SSAPointers.find(pointerArg) == ci->SSAPointers.end())
+    return;
+  SSAPointer * ssptr = ci->SSAPointers[stringArg];
+  SSAPointer * psptr = ci->SSAPointers[pointerArg];
+  AggregateAlloca * basePointer = psptr->basePointer;
+
+  if(!(baseInt = dyn_cast<ConstantInt>(base))) {
+    basePointer->setConstant(false);
+    InsertUnique(*ci->modifiedAllocas, basePointer->getId());    
+    return;
+  }
+
+  char * str = (char *) ssptr->basePointer->getAlloca()->data;
+  debug(Abubakar) << "specializing strtol with " << str << "\n";
+  char * ptr;
+  int ret = strtol(str, &ptr, baseInt->getZExtValue());
+  IntegerType * int64Ty = IntegerType::get(context, 64);
+  replaceAndLog(callInst, ConstantInt::get(int64Ty, ret));
+
+  debug(Abubakar) << "specialized ptr is " << ptr << "\n";
+  Type * baseType = basePointer->getType()->getContainedType(0);
+  int length = strlen(ptr);
+  Type * arType = ArrayType::get(baseType, length);
+  AggregateAlloca * aa = new AggregateAlloca(arType);
+  basePointer->setOrInsert(0, aa);
+  aa->Ntype = scalarPtrType;
+  InsertUnique(*ci->modifiedAllocas, basePointer->getId());    
+
+  char * source = (char *) aa->getAlloca()->data;
+  memcpy(source, ptr, length);
+  aa->getAlloca()->fillInit(0, length, true);
 }

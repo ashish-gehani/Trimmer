@@ -1,0 +1,13 @@
+        name           O3      debloat    reduction 
+ aircrack-ng       120408       105640          12% 
+ aireplay-ng       137288       125872           8% 
+   airtun-ng        78376        72648           7% 
+       bzip2        35400        31272          12% 
+       gprof      1148424       901216          22% 
+        gzip       134776        60696          55% 
+   memcached       117920       101400          14% 
+     netstat        73608        31640          57% 
+     objdump      2315232      1834224          21% 
+         pce       175488       166624           5% 
+     readelf       537536       289456          46% 
+      strace       638136       600896           6% 

@@ -26,6 +26,24 @@ bool findInVect(vector<F> & vect, F val) {
 }
 
 template <typename F>
+bool findInVect(SmallVector<F, 16> vect, F val) {
+  for(unsigned i = 0; i < vect.size(); i++) {
+    if(vect[i] == val)
+      return true;
+  }
+  return false;
+}
+
+template <typename F>
+int findIndex(vector<F> & vect, F val) {
+  for(unsigned i = 0; i < vect.size(); i++) {
+    if(vect[i] == val)
+      return i;
+  }
+  return -1;
+}
+
+template <typename F>
 void InsertUnique(vector<F> & vect, F val) {
   if(!findInVect(vect, val))
     vect.push_back(val);
@@ -38,7 +56,7 @@ public:
   ScalarAlloca(Type* ty);
   ScalarAlloca(BaseType bt, Type * ty);
   ~ScalarAlloca();
-  ScalarAlloca * createClone();
+  ScalarAlloca * clone();
   bool checkConsistencyWith(ScalarAlloca * sa);
   void deleteData();
   void setParent(AggregateAlloca * aa) {
@@ -69,9 +87,9 @@ public:
   AggregateAlloca * getParent() {
     return parent;
   }  
-  void createData(Type* ty);
+  void createData(Type * ty);
   void copyData(void * data, bool * initialized, int size);
-  Value* createConstVal(int offset);
+  Value * createConstVal(int offset);
   void storeConstVal(int ConstVal, int offset);
   unsigned getModified(unsigned index) {
     assert(index < modified.size() && "tried to access invalid index modified");
@@ -100,8 +118,12 @@ public:
   AggregateAlloca();   
   ~AggregateAlloca(); 
   void initialize(AggregateAlloca * aa, unsigned totalSize);
-  AggregateAlloca * createClone();
-  void checkConsistencyWith(AggregateAlloca * aa);  
+  AggregateAlloca * clone();
+  AggregateAlloca * deepClone();
+  void copy(AggregateAlloca * aa);    
+  bool checkConsistencyWith(AggregateAlloca * aa);  
+  void deepCheck(AggregateAlloca * aa);
+
   void setParent(AggregateAlloca * aa, unsigned offset) {
     this->parent = aa;
     this->OffSetInParent = offset;
@@ -111,8 +133,11 @@ public:
   }
   bool isConstant() {
     bool above = true;
-    if(this->parent)
-      above = this->parent->isConstant();
+    if(this->parent) {
+      vector<AggregateAlloca *> aggrs;
+      aggrs.push_back(this);
+      above = this->parent->isConstant(aggrs);
+    }
     return this->constant && above;
   }
   void setConstant(bool val) {
@@ -144,6 +169,9 @@ public:
   ScalarAlloca* getAlloca() {
     return this->alloca;
   }
+  void setNullPointer() {
+    this->containedSize = 0;
+  }
   bool isNullPointer() {
     assert(this->Ntype == ptrType && 
       "isNullPointer : pointer operation on non-pointer Node");
@@ -152,6 +180,18 @@ public:
   AggregateAlloca * getParent() {
     return parent;
   }
+  bool isAnc(AggregateAlloca * aa, vector<AggregateAlloca *> & AncsV) {
+    if(findInVect(AncsV, this))
+      return false; 
+    AncsV.push_back(this);
+    if(this->parent) {
+      if(aa == this->parent)
+        return true;
+      else
+        return this->parent->isAnc(aa, AncsV);
+    } else
+      return false;
+  }  
   void setAlloca(ScalarAlloca * sa) {
     this->alloca = sa;
   }
@@ -164,15 +204,15 @@ public:
   bool base() {
     return isBase;
   }
-  void setBase(bool val) {
-    isBase = val;
-  }
   bool global() {
     return isGlobal;
   }
   void setGlobal(bool val) {
     isGlobal = val;
   }
+  AggregateAlloca** getContained() {
+    return this->contained;
+  }   
   NodeType Ntype;
 private:
   void initContained(unsigned size) {
@@ -199,6 +239,14 @@ private:
     this->contained[containedSize] = aa;
     this->containedSize++;    
   }
+  bool isConstant(vector<AggregateAlloca *> aggrs) {
+    bool above = true;
+    if(this->parent && !findInVect(aggrs, this->parent)) {
+      aggrs.push_back(this);
+      above = this->parent->isConstant(aggrs);
+    }
+    return this->constant && above;
+  }  
   ScalarAlloca* alloca;
   AggregateAlloca** contained;
   AggregateAlloca* parent; 
@@ -218,7 +266,6 @@ struct SSAPointer {
   Type* allocatedType;
   SSAPointer(Type * ty) {
     this->basePointer = new AggregateAlloca(ty);
-    this->basePointer->setBase(true);
     this->position = 0;
     this->allocatedType = ty;
   }
@@ -231,10 +278,5 @@ struct SSAPointer {
     this->basePointer = aa;
     this->position = 0;
     this->allocatedType = aa->getType();
-  }
-  SSAPointer * createClone() {
-    SSAPointer * sptr = new SSAPointer(this);
-    sptr->basePointer = basePointer->createClone();
-    return sptr;
   }
 };

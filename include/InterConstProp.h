@@ -66,6 +66,7 @@ struct ConstantFolding : public ModulePass {
   BasicBlock * currBB;
   BasicBlockContInfoMap BasicBlockContexts;
   set<BasicBlock *> visited;
+  set<BasicBlock *> unReachable;
 
   vector<GlobalIdPair> GlobalIdList;
 
@@ -83,6 +84,8 @@ struct ConstantFolding : public ModulePass {
 
   void processGEPInst(GetElementPtrInst * GEPInst);
 
+  void processPHINode(PHINode * phiNode);
+
   void processCallInst(CallInst * callInst);
 
   void tryFolding(Instruction * I);
@@ -90,7 +93,7 @@ struct ConstantFolding : public ModulePass {
   void processTermInst(TerminatorInst * termInst);
   
   void processReturnInst(ReturnInst * returnInst);
- 
+   
   ConstantFolding(): ModulePass(ID){}
 
   // Adding llvm::MemoryDependenceAnalysis as a required PrePass                                                         
@@ -115,24 +118,32 @@ struct ConstantFolding : public ModulePass {
   void updateAnnotationContext(Function * F);
   void markGlobalUses(Value * val, GlobalVariable * gv);
   void propagateGlobalUses();
-  void initializeGlobal(GlobalVariable * gv);  
+  void initializeGlobal(AggregateAlloca * aa, Constant * initializer);  
   void copyGlobals(ContextInfo * from, ContextInfo * to);
   void markGlobalsAsNonConst(ContextInfo * ci);
 
   bool predecessorsVisited(BasicBlock * BB);
-  void markSuccessorsAsVisited(TerminatorInst * termInst, BasicBlock * except);
+  void propagateUR(BasicBlock * BB);
+  void markSuccessorsAsUR(TerminatorInst * termInst, BasicBlock * except);
+  bool duplicate(BasicBlock * BB, BasicBlock * from, bool single);
   bool mergeContext(BasicBlock * BB, BasicBlock * prev, ContextInfo * newCi);
   void freePredecessors(BasicBlock * BB);  
-  
+  unsigned getBBPredInfo(BasicBlock * BB, unsigned & predsV, 
+                        unsigned & predsUV, unsigned & predsUR); 
+  void getVisitedPreds(BasicBlock * BB, vector<BasicBlock *> & predsV);
+  void freeBB(BasicBlock * BB, ContextInfo * ci);
+
+  SSAPointer * getSSAPointer(Value * val);
   SSAPointer * getSSAPointer(Value * val, ContextInfo * ci);
   Function * addClonedFunction(CallInst * ci, Function * F);
 
   void markSpecialized(BasicBlock * BB);
   void markArgsAsNonConst(CallInst* callInst, ContextInfo * ci);
   void handleIndirectCall(CallInst * callInst, ContextInfo * ci);
-  AggregateAlloca * runOnFunction(Function * toRun, Function * actualFunc, 
-  ContextInfo * nci, map<AggregateAlloca *, bool> tracked); 
-  void visitBB(BasicBlock * BB);
+
+  AggregateAlloca * runOnFunction(Function * toRun, Function * actualFunc, ContextInfo * nci); 
+  void visitBB(BasicBlock * BB, BasicBlock * from, bool single);
+  bool singlePredVisited(BasicBlock * BB);
   void runOnBB(BasicBlock * BB);
   void runOnInst(Instruction * I);
   virtual bool runOnModule(Module & module);

@@ -7,32 +7,38 @@ void ScalarAlloca::createData(Type* ty) {
 	if(ty->isIntegerTy(1)) {
 		Btype = boolType;
 		data = new bool[size];
+		fill((bool *) data, (bool *) data + size, false);		
 	}
 	if(ty->isIntegerTy(8)) {
 		Btype = charType;
 		data = new char[size + 1];
+		fill((char *) data, (char *) data + size + 1, false);				
 	}
 	if(ty->isIntegerTy(16)) {
 		Btype = shortType;
 		data = new short[size];
+		fill((short *) data, (short *) data + size, false);				
 	}
 	if(ty->isIntegerTy(32)) {
 		Btype = intType;
 		data = new int[size];
+		fill((int *) data, (int *) data + size, false);		
 	}
 	if(ty->isIntegerTy(64)) {
 		Btype = longType;
 		data = new long[size];
+		fill((long *) data, (long *) data + size, false);		
 	}
 	if(ty->isFloatTy()) {
 		Btype = floatType;
 		data = new float[size];
+		fill((float *) data, (float *) data + size, false);				
 	}
 	if(ty->isDoubleTy()) {
 		Btype = doubleType;
 		data = new double[size];
+		fill((double *) data, (double *) data + size, false);				
 	}
-	memset(data, '\0', size + 1);
 }
 
 void ScalarAlloca::copyData(void * cdata, bool * cinit, int csize) {
@@ -188,6 +194,7 @@ bool ScalarAlloca::checkConsistencyWith(ScalarAlloca * sa) {
 			unsigned index = modcheck[i];
 			if(initialized[index] != sa->getInit(index))
 				return false;
+			
 			if(initialized[index] && fData[index] != sData[index])
 				return false;
 		}
@@ -242,7 +249,7 @@ ScalarAlloca::ScalarAlloca(BaseType bt, Type * ty) {
 	Btype = bt;
 }
 
-ScalarAlloca * ScalarAlloca::createClone() {
+ScalarAlloca * ScalarAlloca::clone() {
 	ScalarAlloca * sa = new ScalarAlloca(Btype, allocatedType);
 	sa->copyData(data, initialized, size);
 	return sa;
@@ -301,15 +308,34 @@ void AggregateAlloca::initialize(AggregateAlloca * aa, unsigned totalSize) {
   Ntype = aa->Ntype;  
 }
 
-AggregateAlloca * AggregateAlloca::createClone() {		
+AggregateAlloca * AggregateAlloca::clone() {
+  AggregateAlloca * aa = new AggregateAlloca();
+  aa->initialize(this, totalSize);
+  if(alloca) {
+    aa->setAlloca(alloca->clone());
+    aa->getAlloca()->setParent(aa);
+  }
+  return aa;
+}	
+
+void AggregateAlloca::copy(AggregateAlloca * aa) {
+  constant = aa->isConstant();
+  contained = aa->getContained();
+  if(aa->getAlloca()) {
+    setAlloca(aa->getAlloca());
+    aa->getAlloca()->setParent(this);
+  }
+}	
+
+AggregateAlloca * AggregateAlloca::deepClone() {		
   AggregateAlloca * aa = new AggregateAlloca();
   aa->initialize(this, totalSize);
   for(unsigned i = 0; i < containedSize; i++) {
-    aa->setOrInsert(i, getContained(i)->createClone());
+    aa->setOrInsert(i, getContained(i)->deepClone());
     aa->getContained(i)->setParent(aa, i);
   }
   if(alloca) {
-    aa->setAlloca(alloca->createClone());
+    aa->setAlloca(alloca->clone());
     aa->getAlloca()->setParent(aa);
   }
   return aa;
@@ -320,7 +346,25 @@ AggregateAlloca::~AggregateAlloca() {
 		delete alloca;
 }
 
-void AggregateAlloca::checkConsistencyWith(AggregateAlloca * aa) {
+bool AggregateAlloca::checkConsistencyWith(AggregateAlloca * aa) {
+	ScalarAlloca * sa = aa->getAlloca(); 
+	if(isConstant() != aa->isConstant() ||
+	allocatedType != aa->allocatedType ||
+	containedSize != aa->getNumContained() ||
+	!aa->isNodeTypeOf(Ntype) ||
+	(!alloca && sa) || (!sa && alloca)) {
+		setConstant(false);
+		return false;
+	}
+	if(alloca && !alloca->checkConsistencyWith(sa)) {
+		setConstant(false);
+		return false;		
+	}
+	return true;
+}
+
+
+void AggregateAlloca::deepCheck(AggregateAlloca * aa) {
 	ScalarAlloca * sa = aa->getAlloca(); 
 	if(isConstant() != aa->isConstant() ||
 	allocatedType != aa->allocatedType ||
@@ -335,5 +379,5 @@ void AggregateAlloca::checkConsistencyWith(AggregateAlloca * aa) {
 		return;		
 	}
 	for(unsigned i = 0; i < containedSize; i++)
-		contained[i]->checkConsistencyWith(aa->getContained(i));
+		contained[i]->deepCheck(aa->getContained(i));
 }

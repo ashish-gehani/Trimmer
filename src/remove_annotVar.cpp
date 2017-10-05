@@ -21,6 +21,26 @@ namespace {
     Remove() : ModulePass(ID) {}
     bool runOnModule(Module& M) {
       GlobalVariable * annotVar = M.getGlobalVariable(StringRef("llvm.global.annotations"));
+      vector<Instruction *> toRemove;
+      for (Module::iterator mit = M.getFunctionList().begin(); 
+          mit != M.getFunctionList().end(); ++mit) {
+        for (Function::iterator f_it = mit->begin(), f_ite = mit->end(); 
+          f_it != f_ite; ++f_it) {
+          for(BasicBlock::iterator b_it = f_it->begin(), b_ite = f_it->end();       
+            b_it != b_ite; ++b_it) {
+            Instruction * I = &*b_it;
+            if(CallInst * ci = dyn_cast<CallInst>(I)) {
+              if(!ci->getCalledFunction())
+                continue;
+              if(ci->getCalledFunction()->getName() == "unroll_loop")
+                toRemove.push_back(I);
+            }
+          }
+        }
+      }
+      errs() << toRemove.size() << " removed\n";
+      for(unsigned i = 0; i < toRemove.size(); i++)
+        toRemove[i]->eraseFromParent();
       if(annotVar)
         annotVar->eraseFromParent();
       return true;
