@@ -59,8 +59,8 @@ else
       arg=$1;
       case $arg in #(
       *"$as_nl"*)
-	expr "X$arg" : "X\\(.*\\)$as_nl";
-	arg=`expr "X$arg" : ".*$as_nl\\(.*\\)"`;;
+  expr "X$arg" : "X\\(.*\\)$as_nl";
+  arg=`expr "X$arg" : ".*$as_nl\\(.*\\)"`;;
       esac;
       expr "X$arg" : "X\\(.*\\)" | tr -d "$as_nl"
     '
@@ -86,7 +86,7 @@ fi
 # there to prevent editors from complaining about space-tab.
 # (If _AS_PATH_WALK were called with IFS unset, it would disable word
 # splitting by setting IFS to empty value.)
-IFS=" ""	$as_nl"
+IFS=" ""  $as_nl"
 
 # Find who we are.  Look in the path if we contain no directory separator.
 as_myself=
@@ -235,22 +235,22 @@ fi
 
 as_me=`$as_basename -- "$0" ||
 $as_expr X/"$0" : '.*/\([^/][^/]*\)/*$' \| \
-	 X"$0" : 'X\(//\)$' \| \
-	 X"$0" : 'X\(/\)' \| . 2>/dev/null ||
+   X"$0" : 'X\(//\)$' \| \
+   X"$0" : 'X\(/\)' \| . 2>/dev/null ||
 $as_echo X/"$0" |
     sed '/^.*\/\([^/][^/]*\)\/*$/{
-	    s//\1/
-	    q
-	  }
-	  /^X\/\(\/\/\)$/{
-	    s//\1/
-	    q
-	  }
-	  /^X\/\(\/\).*/{
-	    s//\1/
-	    q
-	  }
-	  s/.*/./; q'`
+      s//\1/
+      q
+    }
+    /^X\/\(\/\/\)$/{
+      s//\1/
+      q
+    }
+    /^X\/\(\/\).*/{
+      s//\1/
+      q
+    }
+    s/.*/./; q'`
 
 # Avoid depending upon Character Ranges.
 as_cr_letters='abcdefghijklmnopqrstuvwxyz'
@@ -263,10 +263,10 @@ ECHO_C= ECHO_N= ECHO_T=
 case `echo -n x` in #(((((
 -n*)
   case `echo 'xy\c'` in
-  *c*) ECHO_T='	';;	# ECHO_T is single tab character.
+  *c*) ECHO_T=' ';; # ECHO_T is single tab character.
   xy)  ECHO_C='\c';;
   *)   echo `echo ksh88 bug on AIX 6.1` > /dev/null
-       ECHO_T='	';;
+       ECHO_T=' ';;
   esac;;
 *)
   ECHO_N='-n';;
@@ -319,27 +319,27 @@ as_fn_mkdir_p ()
       as_dirs="'$as_qdir' $as_dirs"
       as_dir=`$as_dirname -- "$as_dir" ||
 $as_expr X"$as_dir" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
-	 X"$as_dir" : 'X\(//\)[^/]' \| \
-	 X"$as_dir" : 'X\(//\)$' \| \
-	 X"$as_dir" : 'X\(/\)' \| . 2>/dev/null ||
+   X"$as_dir" : 'X\(//\)[^/]' \| \
+   X"$as_dir" : 'X\(//\)$' \| \
+   X"$as_dir" : 'X\(/\)' \| . 2>/dev/null ||
 $as_echo X"$as_dir" |
     sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
-	    s//\1/
-	    q
-	  }
-	  /^X\(\/\/\)[^/].*/{
-	    s//\1/
-	    q
-	  }
-	  /^X\(\/\/\)$/{
-	    s//\1/
-	    q
-	  }
-	  /^X\(\/\).*/{
-	    s//\1/
-	    q
-	  }
-	  s/.*/./; q'`
+      s//\1/
+      q
+    }
+    /^X\(\/\/\)[^/].*/{
+      s//\1/
+      q
+    }
+    /^X\(\/\/\)$/{
+      s//\1/
+      q
+    }
+    /^X\(\/\).*/{
+      s//\1/
+      q
+    }
+    s/.*/./; q'`
       test -d "$as_dir" && break
     done
     test -z "$as_dirs" || eval "mkdir $as_dirs"
@@ -437,7 +437,7 @@ Copyright (C)  Free Software Foundation, Inc.
 This config.status script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it."
 
-ac_pwd='/home/muhammad/openwrt/strace-4.11'
+ac_pwd='/home/muhammad/openwrt/strace/strace-4.11'
 srcdir='.'
 INSTALL='/usr/bin/install -c'
 MKDIR_P='/bin/mkdir -p'
@@ -648,15 +648,15 @@ S["CPP_FOR_BUILD"]="gcc -E"
 S["ac_ct_CC_FOR_BUILD"]="gcc"
 S["CC_FOR_BUILD"]="gcc"
 S["CPP"]="wllvm -E"
-S["am__fastdepCC_FALSE"]="#"
-S["am__fastdepCC_TRUE"]=""
-S["CCDEPMODE"]="depmode=gcc3"
+S["am__fastdepCC_FALSE"]=""
+S["am__fastdepCC_TRUE"]="#"
+S["CCDEPMODE"]="depmode=none"
 S["am__nodep"]="_no"
 S["AMDEPBACKSLASH"]="\\"
 S["AMDEP_FALSE"]="#"
 S["AMDEP_TRUE"]=""
 S["am__quote"]=""
-S["am__include"]="include"
+S["am__include"]="#"
 S["DEPDIR"]=".deps"
 S["OBJEXT"]="o"
 S["EXEEXT"]=""
@@ -678,24 +678,24 @@ S["MAINTAINER_MODE_FALSE"]=""
 S["MAINTAINER_MODE_TRUE"]="#"
 S["AM_BACKSLASH"]="\\"
 S["AM_DEFAULT_VERBOSITY"]="1"
-S["AM_DEFAULT_V"]="$(AM_DEFAULT_VERBOSITY)"
-S["AM_V"]="$(V)"
+S["AM_DEFAULT_V"]="1"
+S["AM_V"]="1"
 S["am__untar"]="$${TAR-tar} xf -"
 S["am__tar"]="$${TAR-tar} chof - \"$$tardir\""
 S["AMTAR"]="$${TAR-tar}"
 S["am__leading_dot"]="."
-S["SET_MAKE"]=""
+S["SET_MAKE"]="MAKE=make"
 S["AWK"]="mawk"
 S["mkdir_p"]="$(MKDIR_P)"
 S["MKDIR_P"]="/bin/mkdir -p"
 S["INSTALL_STRIP_PROGRAM"]="$(install_sh) -c -s"
 S["STRIP"]=""
-S["install_sh"]="${SHELL} /home/muhammad/openwrt/strace-4.11/install-sh"
-S["MAKEINFO"]="${SHELL} /home/muhammad/openwrt/strace-4.11/missing makeinfo"
-S["AUTOHEADER"]="${SHELL} /home/muhammad/openwrt/strace-4.11/missing autoheader"
-S["AUTOMAKE"]="${SHELL} /home/muhammad/openwrt/strace-4.11/missing automake-1.14"
-S["AUTOCONF"]="${SHELL} /home/muhammad/openwrt/strace-4.11/missing autoconf"
-S["ACLOCAL"]="${SHELL} /home/muhammad/openwrt/strace-4.11/missing aclocal-1.14"
+S["install_sh"]="${SHELL} /home/muhammad/openwrt/strace/strace-4.11/install-sh"
+S["MAKEINFO"]="${SHELL} /home/muhammad/openwrt/strace/strace-4.11/missing makeinfo"
+S["AUTOHEADER"]="${SHELL} /home/muhammad/openwrt/strace/strace-4.11/missing autoheader"
+S["AUTOMAKE"]="${SHELL} /home/muhammad/openwrt/strace/strace-4.11/missing automake-1.14"
+S["AUTOCONF"]="${SHELL} /home/muhammad/openwrt/strace/strace-4.11/missing autoconf"
+S["ACLOCAL"]="${SHELL} /home/muhammad/openwrt/strace/strace-4.11/missing aclocal-1.14"
 S["VERSION"]="4.11"
 S["PACKAGE"]="strace"
 S["CYGPATH_W"]="echo"
@@ -1351,14 +1351,14 @@ do
       case $ac_f in
       -) ac_f="$ac_tmp/stdin";;
       *) # Look for the file first in the build tree, then in the source tree
-	 # (if the path is not absolute).  The absolute path cannot be DOS-style,
-	 # because $ac_f cannot contain `:'.
-	 test -f "$ac_f" ||
-	   case $ac_f in
-	   [\\/$]*) false;;
-	   *) test -f "$srcdir/$ac_f" && ac_f="$srcdir/$ac_f";;
-	   esac ||
-	   as_fn_error 1 "cannot find input file: \`$ac_f'" "$LINENO" 5;;
+   # (if the path is not absolute).  The absolute path cannot be DOS-style,
+   # because $ac_f cannot contain `:'.
+   test -f "$ac_f" ||
+     case $ac_f in
+     [\\/$]*) false;;
+     *) test -f "$srcdir/$ac_f" && ac_f="$srcdir/$ac_f";;
+     esac ||
+     as_fn_error 1 "cannot find input file: \`$ac_f'" "$LINENO" 5;;
       esac
       case $ac_f in *\'*) ac_f=`$as_echo "$ac_f" | sed "s/'/'\\\\\\\\''/g"`;; esac
       as_fn_append ac_file_inputs " '$ac_f'"
@@ -1368,8 +1368,8 @@ do
     # use $as_me), people would be surprised to read:
     #    /* config.h.  Generated by config.status.  */
     configure_input='Generated from '`
-	  $as_echo "$*" | sed 's|^[^:]*/||;s|:[^:]*/|, |g'
-	`' by configure.'
+    $as_echo "$*" | sed 's|^[^:]*/||;s|:[^:]*/|, |g'
+  `' by configure.'
     if test x"$ac_file" != x-; then
       configure_input="$ac_file.  $configure_input"
       { $as_echo "$as_me:${as_lineno-$LINENO}: creating $ac_file" >&5
@@ -1392,27 +1392,27 @@ $as_echo "$as_me: creating $ac_file" >&6;}
 
   ac_dir=`$as_dirname -- "$ac_file" ||
 $as_expr X"$ac_file" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
-	 X"$ac_file" : 'X\(//\)[^/]' \| \
-	 X"$ac_file" : 'X\(//\)$' \| \
-	 X"$ac_file" : 'X\(/\)' \| . 2>/dev/null ||
+   X"$ac_file" : 'X\(//\)[^/]' \| \
+   X"$ac_file" : 'X\(//\)$' \| \
+   X"$ac_file" : 'X\(/\)' \| . 2>/dev/null ||
 $as_echo X"$ac_file" |
     sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
-	    s//\1/
-	    q
-	  }
-	  /^X\(\/\/\)[^/].*/{
-	    s//\1/
-	    q
-	  }
-	  /^X\(\/\/\)$/{
-	    s//\1/
-	    q
-	  }
-	  /^X\(\/\).*/{
-	    s//\1/
-	    q
-	  }
-	  s/.*/./; q'`
+      s//\1/
+      q
+    }
+    /^X\(\/\/\)[^/].*/{
+      s//\1/
+      q
+    }
+    /^X\(\/\/\)$/{
+      s//\1/
+      q
+    }
+    /^X\(\/\).*/{
+      s//\1/
+      q
+    }
+    s/.*/./; q'`
   as_dir="$ac_dir"; as_fn_mkdir_p
   ac_builddir=.
 
@@ -1490,21 +1490,21 @@ $as_echo "$as_me: WARNING: $ac_file_inputs seems to ignore the --datarootdir set
   s&@mandir@&${datarootdir}/man&g
   s&\${datarootdir}&${prefix}/share&g' ;;
 esac
-ac_sed_extra="/^[	 ]*VPATH[	 ]*=[	 ]*/{
+ac_sed_extra="/^[  ]*VPATH[  ]*=[  ]*/{
 h
 s///
 s/^/:/
-s/[	 ]*$/:/
+s/[  ]*$/:/
 s/:\$(srcdir):/:/g
 s/:\${srcdir}:/:/g
 s/:@srcdir@:/:/g
 s/^:*//
 s/:*$//
 x
-s/\(=[	 ]*\).*/\1/
+s/\(=[   ]*\).*/\1/
 G
 s/\n//
-s/^[^=]*=[	 ]*$//
+s/^[^=]*=[   ]*$//
 }
 
 :t
@@ -1528,7 +1528,7 @@ eval sed \"\$ac_sed_extra\" "$ac_file_inputs" | $AWK -f "$ac_tmp/subs.awk" \
 
 test -z "$ac_datarootdir_hack$ac_datarootdir_seen" &&
   { ac_out=`sed -n '/\${datarootdir}/p' "$ac_tmp/out"`; test -n "$ac_out"; } &&
-  { ac_out=`sed -n '/^[	 ]*datarootdir[	 ]*:*=/p' \
+  { ac_out=`sed -n '/^[  ]*datarootdir[  ]*:*=/p' \
       "$ac_tmp/out"`; test -z "$ac_out"; } &&
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $ac_file contains a reference to the variable \`datarootdir'
 which seems to be undefined.  Please make sure it is defined" >&5
@@ -1558,7 +1558,7 @@ $as_echo "$as_me: $ac_file is unchanged" >&6;}
     else
       rm -f "$ac_file"
       mv "$ac_tmp/config.h" "$ac_file" \
-	|| as_fn_error $? "could not create $ac_file" "$LINENO" 5
+  || as_fn_error $? "could not create $ac_file" "$LINENO" 5
     fi
   else
     $as_echo "/* $configure_input  */" \
@@ -1578,27 +1578,27 @@ for _am_header in $config_headers :; do
 done
 echo "timestamp for $_am_arg" >`$as_dirname -- "$_am_arg" ||
 $as_expr X"$_am_arg" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
-	 X"$_am_arg" : 'X\(//\)[^/]' \| \
-	 X"$_am_arg" : 'X\(//\)$' \| \
-	 X"$_am_arg" : 'X\(/\)' \| . 2>/dev/null ||
+   X"$_am_arg" : 'X\(//\)[^/]' \| \
+   X"$_am_arg" : 'X\(//\)$' \| \
+   X"$_am_arg" : 'X\(/\)' \| . 2>/dev/null ||
 $as_echo X"$_am_arg" |
     sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
-	    s//\1/
-	    q
-	  }
-	  /^X\(\/\/\)[^/].*/{
-	    s//\1/
-	    q
-	  }
-	  /^X\(\/\/\)$/{
-	    s//\1/
-	    q
-	  }
-	  /^X\(\/\).*/{
-	    s//\1/
-	    q
-	  }
-	  s/.*/./; q'`/stamp-h$_am_stamp_count
+      s//\1/
+      q
+    }
+    /^X\(\/\/\)[^/].*/{
+      s//\1/
+      q
+    }
+    /^X\(\/\/\)$/{
+      s//\1/
+      q
+    }
+    /^X\(\/\).*/{
+      s//\1/
+      q
+    }
+    s/.*/./; q'`/stamp-h$_am_stamp_count
  ;;
 
   :C)  { $as_echo "$as_me:${as_lineno-$LINENO}: executing $ac_file commands" >&5
@@ -1631,27 +1631,27 @@ $as_echo "$as_me: executing $ac_file commands" >&6;}
     if sed -n 's,^#.*generated by automake.*,X,p' "$mf" | grep X >/dev/null 2>&1; then
       dirpart=`$as_dirname -- "$mf" ||
 $as_expr X"$mf" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
-	 X"$mf" : 'X\(//\)[^/]' \| \
-	 X"$mf" : 'X\(//\)$' \| \
-	 X"$mf" : 'X\(/\)' \| . 2>/dev/null ||
+   X"$mf" : 'X\(//\)[^/]' \| \
+   X"$mf" : 'X\(//\)$' \| \
+   X"$mf" : 'X\(/\)' \| . 2>/dev/null ||
 $as_echo X"$mf" |
     sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
-	    s//\1/
-	    q
-	  }
-	  /^X\(\/\/\)[^/].*/{
-	    s//\1/
-	    q
-	  }
-	  /^X\(\/\/\)$/{
-	    s//\1/
-	    q
-	  }
-	  /^X\(\/\).*/{
-	    s//\1/
-	    q
-	  }
-	  s/.*/./; q'`
+      s//\1/
+      q
+    }
+    /^X\(\/\/\)[^/].*/{
+      s//\1/
+      q
+    }
+    /^X\(\/\/\)$/{
+      s//\1/
+      q
+    }
+    /^X\(\/\).*/{
+      s//\1/
+      q
+    }
+    s/.*/./; q'`
     else
       continue
     fi
@@ -1668,32 +1668,32 @@ $as_echo X"$mf" |
     # expansion.
     for file in `sed -n "
       s/^$am__include $am__quote\(.*(DEPDIR).*\)$am__quote"'$/\1/p' <"$mf" | \
-	 sed -e 's/\$(DEPDIR)/'"$DEPDIR"'/g'`; do
+   sed -e 's/\$(DEPDIR)/'"$DEPDIR"'/g'`; do
       # Make sure the directory exists.
       test -f "$dirpart/$file" && continue
       fdir=`$as_dirname -- "$file" ||
 $as_expr X"$file" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
-	 X"$file" : 'X\(//\)[^/]' \| \
-	 X"$file" : 'X\(//\)$' \| \
-	 X"$file" : 'X\(/\)' \| . 2>/dev/null ||
+   X"$file" : 'X\(//\)[^/]' \| \
+   X"$file" : 'X\(//\)$' \| \
+   X"$file" : 'X\(/\)' \| . 2>/dev/null ||
 $as_echo X"$file" |
     sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
-	    s//\1/
-	    q
-	  }
-	  /^X\(\/\/\)[^/].*/{
-	    s//\1/
-	    q
-	  }
-	  /^X\(\/\/\)$/{
-	    s//\1/
-	    q
-	  }
-	  /^X\(\/\).*/{
-	    s//\1/
-	    q
-	  }
-	  s/.*/./; q'`
+      s//\1/
+      q
+    }
+    /^X\(\/\/\)[^/].*/{
+      s//\1/
+      q
+    }
+    /^X\(\/\/\)$/{
+      s//\1/
+      q
+    }
+    /^X\(\/\).*/{
+      s//\1/
+      q
+    }
+    s/.*/./; q'`
       as_dir=$dirpart/$fdir; as_fn_mkdir_p
       # echo "creating $dirpart/$file"
       echo '# dummy' > "$dirpart/$file"

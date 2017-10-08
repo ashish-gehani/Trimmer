@@ -12,7 +12,7 @@
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.
 
-
+MAKE=make
 
 # Automake input for strace tests.
 #
@@ -457,36 +457,36 @@ xetitimer_LDADD = $(LDADD)
 xettimeofday_SOURCES = xettimeofday.c
 xettimeofday_OBJECTS = xettimeofday.$(OBJEXT)
 xettimeofday_LDADD = $(LDADD)
-AM_V_P = $(am__v_P_$(V))
-am__v_P_ = $(am__v_P_$(AM_DEFAULT_VERBOSITY))
+AM_V_P = $(am__v_P_1)
+am__v_P_ = $(am__v_P_1)
 am__v_P_0 = false
 am__v_P_1 = :
-AM_V_GEN = $(am__v_GEN_$(V))
-am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))
+AM_V_GEN = $(am__v_GEN_1)
+am__v_GEN_ = $(am__v_GEN_1)
 am__v_GEN_0 = @echo "  GEN     " $@;
 am__v_GEN_1 = 
-AM_V_at = $(am__v_at_$(V))
-am__v_at_ = $(am__v_at_$(AM_DEFAULT_VERBOSITY))
+AM_V_at = $(am__v_at_1)
+am__v_at_ = $(am__v_at_1)
 am__v_at_0 = @
 am__v_at_1 = 
 DEFAULT_INCLUDES = 
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
-AM_V_lt = $(am__v_lt_$(V))
-am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
+AM_V_lt = $(am__v_lt_1)
+am__v_lt_ = $(am__v_lt_1)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-AM_V_CC = $(am__v_CC_$(V))
-am__v_CC_ = $(am__v_CC_$(AM_DEFAULT_VERBOSITY))
+AM_V_CC = $(am__v_CC_1)
+am__v_CC_ = $(am__v_CC_1)
 am__v_CC_0 = @echo "  CC      " $@;
 am__v_CC_1 = 
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-AM_V_CCLD = $(am__v_CCLD_$(V))
-am__v_CCLD_ = $(am__v_CCLD_$(AM_DEFAULT_VERBOSITY))
+AM_V_CCLD = $(am__v_CCLD_1)
+am__v_CCLD_ = $(am__v_CCLD_1)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = _newselect.c adjtimex.c aio.c bpf.c caps.c clock_nanosleep.c \
@@ -759,17 +759,17 @@ am__set_b = \
       b='$*';; \
   esac
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} /home/muhammad/openwrt/strace-4.11/missing aclocal-1.14
+ACLOCAL = ${SHELL} /home/muhammad/openwrt/strace/strace-4.11/missing aclocal-1.14
 AMTAR = $${TAR-tar}
 AM_DEFAULT_VERBOSITY = 1
-AUTOCONF = ${SHELL} /home/muhammad/openwrt/strace-4.11/missing autoconf
-AUTOHEADER = ${SHELL} /home/muhammad/openwrt/strace-4.11/missing autoheader
-AUTOMAKE = ${SHELL} /home/muhammad/openwrt/strace-4.11/missing automake-1.14
+AUTOCONF = ${SHELL} /home/muhammad/openwrt/strace/strace-4.11/missing autoconf
+AUTOHEADER = ${SHELL} /home/muhammad/openwrt/strace/strace-4.11/missing autoheader
+AUTOMAKE = ${SHELL} /home/muhammad/openwrt/strace/strace-4.11/missing automake-1.14
 AWK = mawk
 BUILD_EXEEXT = 
 BUILD_OBJEXT = 
 CC = wllvm
-CCDEPMODE = depmode=gcc3
+CCDEPMODE = depmode=none
 CC_FOR_BUILD = gcc
 CFLAGS = -g -O0
 CFLAGS_FOR_BUILD = -g -O2
@@ -797,7 +797,7 @@ LIBOBJS =
 LIBS = 
 LTLIBOBJS = 
 MAINT = #
-MAKEINFO = ${SHELL} /home/muhammad/openwrt/strace-4.11/missing makeinfo
+MAKEINFO = ${SHELL} /home/muhammad/openwrt/strace/strace-4.11/missing makeinfo
 MKDIR_P = /bin/mkdir -p
 OBJEXT = o
 PACKAGE = strace
@@ -810,18 +810,18 @@ PACKAGE_VERSION = 4.11
 PATH_SEPARATOR = :
 PERL = /usr/bin/perl
 RANLIB = ranlib
-SET_MAKE = 
+SET_MAKE = MAKE=make
 SHELL = /bin/bash
 STRIP = 
 VERSION = 4.11
 WARN_CFLAGS =  -Wall -Wwrite-strings -Wsign-compare
-abs_builddir = /home/muhammad/openwrt/strace-4.11/tests
-abs_srcdir = /home/muhammad/openwrt/strace-4.11/tests
-abs_top_builddir = /home/muhammad/openwrt/strace-4.11
-abs_top_srcdir = /home/muhammad/openwrt/strace-4.11
+abs_builddir = /home/muhammad/openwrt/strace/strace-4.11/tests
+abs_srcdir = /home/muhammad/openwrt/strace/strace-4.11/tests
+abs_top_builddir = /home/muhammad/openwrt/strace/strace-4.11
+abs_top_srcdir = /home/muhammad/openwrt/strace/strace-4.11
 ac_ct_CC = wllvm
 ac_ct_CC_FOR_BUILD = gcc
-am__include = include
+am__include = #
 am__leading_dot = .
 am__quote = 
 am__tar = $${TAR-tar} chof - "$$tardir"
@@ -850,7 +850,7 @@ host_vendor = pc
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /home/muhammad/openwrt/strace-4.11/install-sh
+install_sh = ${SHELL} /home/muhammad/openwrt/strace/strace-4.11/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 libunwind_CPPFLAGS = 
@@ -1512,264 +1512,264 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-include ./$(DEPDIR)/_newselect.Po
-include ./$(DEPDIR)/adjtimex.Po
-include ./$(DEPDIR)/aio.Po
-include ./$(DEPDIR)/bpf.Po
-include ./$(DEPDIR)/caps.Po
-include ./$(DEPDIR)/clock_nanosleep.Po
-include ./$(DEPDIR)/clock_xettime.Po
-include ./$(DEPDIR)/epoll_create1.Po
-include ./$(DEPDIR)/eventfd.Po
-include ./$(DEPDIR)/execve.Po
-include ./$(DEPDIR)/execveat.Po
-include ./$(DEPDIR)/fanotify_mark.Po
-include ./$(DEPDIR)/fcntl.Po
-include ./$(DEPDIR)/fcntl64.Po
-include ./$(DEPDIR)/file_handle.Po
-include ./$(DEPDIR)/filter-unavailable.Po
-include ./$(DEPDIR)/fstat.Po
-include ./$(DEPDIR)/fstat64-fstat64.Po
-include ./$(DEPDIR)/fstatat64-fstatat64.Po
-include ./$(DEPDIR)/ftruncate.Po
-include ./$(DEPDIR)/ftruncate64-ftruncate64.Po
-include ./$(DEPDIR)/getdents.Po
-include ./$(DEPDIR)/getdents64.Po
-include ./$(DEPDIR)/getrandom.Po
-include ./$(DEPDIR)/inet-accept-connect-send-recv.Po
-include ./$(DEPDIR)/inet-cmsg.Po
-include ./$(DEPDIR)/ioctl.Po
-include ./$(DEPDIR)/ip_mreq.Po
-include ./$(DEPDIR)/ipc_msg.Po
-include ./$(DEPDIR)/ipc_msgbuf.Po
-include ./$(DEPDIR)/ipc_sem.Po
-include ./$(DEPDIR)/ipc_shm.Po
-include ./$(DEPDIR)/ksysent.Po
-include ./$(DEPDIR)/llseek.Po
-include ./$(DEPDIR)/lseek.Po
-include ./$(DEPDIR)/lstat.Po
-include ./$(DEPDIR)/lstat64-lstat64.Po
-include ./$(DEPDIR)/membarrier.Po
-include ./$(DEPDIR)/memfd_create.Po
-include ./$(DEPDIR)/mlock2.Po
-include ./$(DEPDIR)/mmap.Po
-include ./$(DEPDIR)/mmap64-mmap64.Po
-include ./$(DEPDIR)/mmsg.Po
-include ./$(DEPDIR)/mq.Po
-include ./$(DEPDIR)/nanosleep.Po
-include ./$(DEPDIR)/net-accept-connect.Po
-include ./$(DEPDIR)/netlink_inet_diag.Po
-include ./$(DEPDIR)/netlink_unix_diag.Po
-include ./$(DEPDIR)/newfstatat-newfstatat.Po
-include ./$(DEPDIR)/oldselect.Po
-include ./$(DEPDIR)/pc.Po
-include ./$(DEPDIR)/pipe.Po
-include ./$(DEPDIR)/ppoll.Po
-include ./$(DEPDIR)/pselect6.Po
-include ./$(DEPDIR)/readdir.Po
-include ./$(DEPDIR)/readlink.Po
-include ./$(DEPDIR)/readlinkat.Po
-include ./$(DEPDIR)/restart_syscall.Po
-include ./$(DEPDIR)/rt_sigqueueinfo.Po
-include ./$(DEPDIR)/sched_xetattr.Po
-include ./$(DEPDIR)/scm_rights.Po
-include ./$(DEPDIR)/seccomp.Po
-include ./$(DEPDIR)/select.Po
-include ./$(DEPDIR)/sendfile.Po
-include ./$(DEPDIR)/sendfile64.Po
-include ./$(DEPDIR)/set_ptracer_any.Po
-include ./$(DEPDIR)/sigaction.Po
-include ./$(DEPDIR)/sigaltstack.Po
-include ./$(DEPDIR)/signalfd.Po
-include ./$(DEPDIR)/sigreturn.Po
-include ./$(DEPDIR)/stack-fcall-0.Po
-include ./$(DEPDIR)/stack-fcall-1.Po
-include ./$(DEPDIR)/stack-fcall-2.Po
-include ./$(DEPDIR)/stack-fcall-3.Po
-include ./$(DEPDIR)/stack-fcall.Po
-include ./$(DEPDIR)/stat.Po
-include ./$(DEPDIR)/stat64-stat64.Po
-include ./$(DEPDIR)/statfs-statfs.Po
-include ./$(DEPDIR)/sysinfo.Po
-include ./$(DEPDIR)/time.Po
-include ./$(DEPDIR)/timer_create.Po
-include ./$(DEPDIR)/timer_xettime.Po
-include ./$(DEPDIR)/timerfd_xettime.Po
-include ./$(DEPDIR)/times-fail.Po
-include ./$(DEPDIR)/times.Po
-include ./$(DEPDIR)/truncate.Po
-include ./$(DEPDIR)/truncate64-truncate64.Po
-include ./$(DEPDIR)/uid.Po
-include ./$(DEPDIR)/uid16.Po
-include ./$(DEPDIR)/uid32.Po
-include ./$(DEPDIR)/uio-uio.Po
-include ./$(DEPDIR)/umount.Po
-include ./$(DEPDIR)/umount2.Po
-include ./$(DEPDIR)/umovestr.Po
-include ./$(DEPDIR)/umovestr2.Po
-include ./$(DEPDIR)/unix-pair-send-recv.Po
-include ./$(DEPDIR)/userfaultfd.Po
-include ./$(DEPDIR)/utime.Po
-include ./$(DEPDIR)/utimensat.Po
-include ./$(DEPDIR)/wait.Po
-include ./$(DEPDIR)/xattr.Po
-include ./$(DEPDIR)/xet_robust_list.Po
-include ./$(DEPDIR)/xetitimer.Po
-include ./$(DEPDIR)/xettimeofday.Po
+# ./$(DEPDIR)/_newselect.Po
+# ./$(DEPDIR)/adjtimex.Po
+# ./$(DEPDIR)/aio.Po
+# ./$(DEPDIR)/bpf.Po
+# ./$(DEPDIR)/caps.Po
+# ./$(DEPDIR)/clock_nanosleep.Po
+# ./$(DEPDIR)/clock_xettime.Po
+# ./$(DEPDIR)/epoll_create1.Po
+# ./$(DEPDIR)/eventfd.Po
+# ./$(DEPDIR)/execve.Po
+# ./$(DEPDIR)/execveat.Po
+# ./$(DEPDIR)/fanotify_mark.Po
+# ./$(DEPDIR)/fcntl.Po
+# ./$(DEPDIR)/fcntl64.Po
+# ./$(DEPDIR)/file_handle.Po
+# ./$(DEPDIR)/filter-unavailable.Po
+# ./$(DEPDIR)/fstat.Po
+# ./$(DEPDIR)/fstat64-fstat64.Po
+# ./$(DEPDIR)/fstatat64-fstatat64.Po
+# ./$(DEPDIR)/ftruncate.Po
+# ./$(DEPDIR)/ftruncate64-ftruncate64.Po
+# ./$(DEPDIR)/getdents.Po
+# ./$(DEPDIR)/getdents64.Po
+# ./$(DEPDIR)/getrandom.Po
+# ./$(DEPDIR)/inet-accept-connect-send-recv.Po
+# ./$(DEPDIR)/inet-cmsg.Po
+# ./$(DEPDIR)/ioctl.Po
+# ./$(DEPDIR)/ip_mreq.Po
+# ./$(DEPDIR)/ipc_msg.Po
+# ./$(DEPDIR)/ipc_msgbuf.Po
+# ./$(DEPDIR)/ipc_sem.Po
+# ./$(DEPDIR)/ipc_shm.Po
+# ./$(DEPDIR)/ksysent.Po
+# ./$(DEPDIR)/llseek.Po
+# ./$(DEPDIR)/lseek.Po
+# ./$(DEPDIR)/lstat.Po
+# ./$(DEPDIR)/lstat64-lstat64.Po
+# ./$(DEPDIR)/membarrier.Po
+# ./$(DEPDIR)/memfd_create.Po
+# ./$(DEPDIR)/mlock2.Po
+# ./$(DEPDIR)/mmap.Po
+# ./$(DEPDIR)/mmap64-mmap64.Po
+# ./$(DEPDIR)/mmsg.Po
+# ./$(DEPDIR)/mq.Po
+# ./$(DEPDIR)/nanosleep.Po
+# ./$(DEPDIR)/net-accept-connect.Po
+# ./$(DEPDIR)/netlink_inet_diag.Po
+# ./$(DEPDIR)/netlink_unix_diag.Po
+# ./$(DEPDIR)/newfstatat-newfstatat.Po
+# ./$(DEPDIR)/oldselect.Po
+# ./$(DEPDIR)/pc.Po
+# ./$(DEPDIR)/pipe.Po
+# ./$(DEPDIR)/ppoll.Po
+# ./$(DEPDIR)/pselect6.Po
+# ./$(DEPDIR)/readdir.Po
+# ./$(DEPDIR)/readlink.Po
+# ./$(DEPDIR)/readlinkat.Po
+# ./$(DEPDIR)/restart_syscall.Po
+# ./$(DEPDIR)/rt_sigqueueinfo.Po
+# ./$(DEPDIR)/sched_xetattr.Po
+# ./$(DEPDIR)/scm_rights.Po
+# ./$(DEPDIR)/seccomp.Po
+# ./$(DEPDIR)/select.Po
+# ./$(DEPDIR)/sendfile.Po
+# ./$(DEPDIR)/sendfile64.Po
+# ./$(DEPDIR)/set_ptracer_any.Po
+# ./$(DEPDIR)/sigaction.Po
+# ./$(DEPDIR)/sigaltstack.Po
+# ./$(DEPDIR)/signalfd.Po
+# ./$(DEPDIR)/sigreturn.Po
+# ./$(DEPDIR)/stack-fcall-0.Po
+# ./$(DEPDIR)/stack-fcall-1.Po
+# ./$(DEPDIR)/stack-fcall-2.Po
+# ./$(DEPDIR)/stack-fcall-3.Po
+# ./$(DEPDIR)/stack-fcall.Po
+# ./$(DEPDIR)/stat.Po
+# ./$(DEPDIR)/stat64-stat64.Po
+# ./$(DEPDIR)/statfs-statfs.Po
+# ./$(DEPDIR)/sysinfo.Po
+# ./$(DEPDIR)/time.Po
+# ./$(DEPDIR)/timer_create.Po
+# ./$(DEPDIR)/timer_xettime.Po
+# ./$(DEPDIR)/timerfd_xettime.Po
+# ./$(DEPDIR)/times-fail.Po
+# ./$(DEPDIR)/times.Po
+# ./$(DEPDIR)/truncate.Po
+# ./$(DEPDIR)/truncate64-truncate64.Po
+# ./$(DEPDIR)/uid.Po
+# ./$(DEPDIR)/uid16.Po
+# ./$(DEPDIR)/uid32.Po
+# ./$(DEPDIR)/uio-uio.Po
+# ./$(DEPDIR)/umount.Po
+# ./$(DEPDIR)/umount2.Po
+# ./$(DEPDIR)/umovestr.Po
+# ./$(DEPDIR)/umovestr2.Po
+# ./$(DEPDIR)/unix-pair-send-recv.Po
+# ./$(DEPDIR)/userfaultfd.Po
+# ./$(DEPDIR)/utime.Po
+# ./$(DEPDIR)/utimensat.Po
+# ./$(DEPDIR)/wait.Po
+# ./$(DEPDIR)/xattr.Po
+# ./$(DEPDIR)/xet_robust_list.Po
+# ./$(DEPDIR)/xetitimer.Po
+# ./$(DEPDIR)/xettimeofday.Po
 
 .c.o:
-	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
-#	$(AM_V_CC)source='$<' object='$@' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(COMPILE) -c -o $@ $<
+#	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+	$(AM_V_CC)source='$<' object='$@' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(COMPILE) -c -o $@ $<
 
 .c.obj:
-	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
-#	$(AM_V_CC)source='$<' object='$@' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+#	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+	$(AM_V_CC)source='$<' object='$@' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
 fstat64-fstat64.o: fstat64.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fstat64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fstat64-fstat64.o -MD -MP -MF $(DEPDIR)/fstat64-fstat64.Tpo -c -o fstat64-fstat64.o `test -f 'fstat64.c' || echo '$(srcdir)/'`fstat64.c
-	$(AM_V_at)$(am__mv) $(DEPDIR)/fstat64-fstat64.Tpo $(DEPDIR)/fstat64-fstat64.Po
-#	$(AM_V_CC)source='fstat64.c' object='fstat64-fstat64.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fstat64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fstat64-fstat64.o `test -f 'fstat64.c' || echo '$(srcdir)/'`fstat64.c
+#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fstat64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fstat64-fstat64.o -MD -MP -MF $(DEPDIR)/fstat64-fstat64.Tpo -c -o fstat64-fstat64.o `test -f 'fstat64.c' || echo '$(srcdir)/'`fstat64.c
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/fstat64-fstat64.Tpo $(DEPDIR)/fstat64-fstat64.Po
+	$(AM_V_CC)source='fstat64.c' object='fstat64-fstat64.o' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fstat64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fstat64-fstat64.o `test -f 'fstat64.c' || echo '$(srcdir)/'`fstat64.c
 
 fstat64-fstat64.obj: fstat64.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fstat64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fstat64-fstat64.obj -MD -MP -MF $(DEPDIR)/fstat64-fstat64.Tpo -c -o fstat64-fstat64.obj `if test -f 'fstat64.c'; then $(CYGPATH_W) 'fstat64.c'; else $(CYGPATH_W) '$(srcdir)/fstat64.c'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/fstat64-fstat64.Tpo $(DEPDIR)/fstat64-fstat64.Po
-#	$(AM_V_CC)source='fstat64.c' object='fstat64-fstat64.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fstat64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fstat64-fstat64.obj `if test -f 'fstat64.c'; then $(CYGPATH_W) 'fstat64.c'; else $(CYGPATH_W) '$(srcdir)/fstat64.c'; fi`
+#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fstat64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fstat64-fstat64.obj -MD -MP -MF $(DEPDIR)/fstat64-fstat64.Tpo -c -o fstat64-fstat64.obj `if test -f 'fstat64.c'; then $(CYGPATH_W) 'fstat64.c'; else $(CYGPATH_W) '$(srcdir)/fstat64.c'; fi`
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/fstat64-fstat64.Tpo $(DEPDIR)/fstat64-fstat64.Po
+	$(AM_V_CC)source='fstat64.c' object='fstat64-fstat64.obj' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fstat64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fstat64-fstat64.obj `if test -f 'fstat64.c'; then $(CYGPATH_W) 'fstat64.c'; else $(CYGPATH_W) '$(srcdir)/fstat64.c'; fi`
 
 fstatat64-fstatat64.o: fstatat64.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fstatat64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fstatat64-fstatat64.o -MD -MP -MF $(DEPDIR)/fstatat64-fstatat64.Tpo -c -o fstatat64-fstatat64.o `test -f 'fstatat64.c' || echo '$(srcdir)/'`fstatat64.c
-	$(AM_V_at)$(am__mv) $(DEPDIR)/fstatat64-fstatat64.Tpo $(DEPDIR)/fstatat64-fstatat64.Po
-#	$(AM_V_CC)source='fstatat64.c' object='fstatat64-fstatat64.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fstatat64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fstatat64-fstatat64.o `test -f 'fstatat64.c' || echo '$(srcdir)/'`fstatat64.c
+#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fstatat64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fstatat64-fstatat64.o -MD -MP -MF $(DEPDIR)/fstatat64-fstatat64.Tpo -c -o fstatat64-fstatat64.o `test -f 'fstatat64.c' || echo '$(srcdir)/'`fstatat64.c
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/fstatat64-fstatat64.Tpo $(DEPDIR)/fstatat64-fstatat64.Po
+	$(AM_V_CC)source='fstatat64.c' object='fstatat64-fstatat64.o' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fstatat64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fstatat64-fstatat64.o `test -f 'fstatat64.c' || echo '$(srcdir)/'`fstatat64.c
 
 fstatat64-fstatat64.obj: fstatat64.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fstatat64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fstatat64-fstatat64.obj -MD -MP -MF $(DEPDIR)/fstatat64-fstatat64.Tpo -c -o fstatat64-fstatat64.obj `if test -f 'fstatat64.c'; then $(CYGPATH_W) 'fstatat64.c'; else $(CYGPATH_W) '$(srcdir)/fstatat64.c'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/fstatat64-fstatat64.Tpo $(DEPDIR)/fstatat64-fstatat64.Po
-#	$(AM_V_CC)source='fstatat64.c' object='fstatat64-fstatat64.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fstatat64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fstatat64-fstatat64.obj `if test -f 'fstatat64.c'; then $(CYGPATH_W) 'fstatat64.c'; else $(CYGPATH_W) '$(srcdir)/fstatat64.c'; fi`
+#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fstatat64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fstatat64-fstatat64.obj -MD -MP -MF $(DEPDIR)/fstatat64-fstatat64.Tpo -c -o fstatat64-fstatat64.obj `if test -f 'fstatat64.c'; then $(CYGPATH_W) 'fstatat64.c'; else $(CYGPATH_W) '$(srcdir)/fstatat64.c'; fi`
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/fstatat64-fstatat64.Tpo $(DEPDIR)/fstatat64-fstatat64.Po
+	$(AM_V_CC)source='fstatat64.c' object='fstatat64-fstatat64.obj' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fstatat64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fstatat64-fstatat64.obj `if test -f 'fstatat64.c'; then $(CYGPATH_W) 'fstatat64.c'; else $(CYGPATH_W) '$(srcdir)/fstatat64.c'; fi`
 
 ftruncate64-ftruncate64.o: ftruncate64.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ftruncate64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ftruncate64-ftruncate64.o -MD -MP -MF $(DEPDIR)/ftruncate64-ftruncate64.Tpo -c -o ftruncate64-ftruncate64.o `test -f 'ftruncate64.c' || echo '$(srcdir)/'`ftruncate64.c
-	$(AM_V_at)$(am__mv) $(DEPDIR)/ftruncate64-ftruncate64.Tpo $(DEPDIR)/ftruncate64-ftruncate64.Po
-#	$(AM_V_CC)source='ftruncate64.c' object='ftruncate64-ftruncate64.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ftruncate64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ftruncate64-ftruncate64.o `test -f 'ftruncate64.c' || echo '$(srcdir)/'`ftruncate64.c
+#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ftruncate64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ftruncate64-ftruncate64.o -MD -MP -MF $(DEPDIR)/ftruncate64-ftruncate64.Tpo -c -o ftruncate64-ftruncate64.o `test -f 'ftruncate64.c' || echo '$(srcdir)/'`ftruncate64.c
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/ftruncate64-ftruncate64.Tpo $(DEPDIR)/ftruncate64-ftruncate64.Po
+	$(AM_V_CC)source='ftruncate64.c' object='ftruncate64-ftruncate64.o' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ftruncate64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ftruncate64-ftruncate64.o `test -f 'ftruncate64.c' || echo '$(srcdir)/'`ftruncate64.c
 
 ftruncate64-ftruncate64.obj: ftruncate64.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ftruncate64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ftruncate64-ftruncate64.obj -MD -MP -MF $(DEPDIR)/ftruncate64-ftruncate64.Tpo -c -o ftruncate64-ftruncate64.obj `if test -f 'ftruncate64.c'; then $(CYGPATH_W) 'ftruncate64.c'; else $(CYGPATH_W) '$(srcdir)/ftruncate64.c'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/ftruncate64-ftruncate64.Tpo $(DEPDIR)/ftruncate64-ftruncate64.Po
-#	$(AM_V_CC)source='ftruncate64.c' object='ftruncate64-ftruncate64.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ftruncate64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ftruncate64-ftruncate64.obj `if test -f 'ftruncate64.c'; then $(CYGPATH_W) 'ftruncate64.c'; else $(CYGPATH_W) '$(srcdir)/ftruncate64.c'; fi`
+#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ftruncate64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT ftruncate64-ftruncate64.obj -MD -MP -MF $(DEPDIR)/ftruncate64-ftruncate64.Tpo -c -o ftruncate64-ftruncate64.obj `if test -f 'ftruncate64.c'; then $(CYGPATH_W) 'ftruncate64.c'; else $(CYGPATH_W) '$(srcdir)/ftruncate64.c'; fi`
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/ftruncate64-ftruncate64.Tpo $(DEPDIR)/ftruncate64-ftruncate64.Po
+	$(AM_V_CC)source='ftruncate64.c' object='ftruncate64-ftruncate64.obj' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(ftruncate64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o ftruncate64-ftruncate64.obj `if test -f 'ftruncate64.c'; then $(CYGPATH_W) 'ftruncate64.c'; else $(CYGPATH_W) '$(srcdir)/ftruncate64.c'; fi`
 
 lstat64-lstat64.o: lstat64.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(lstat64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT lstat64-lstat64.o -MD -MP -MF $(DEPDIR)/lstat64-lstat64.Tpo -c -o lstat64-lstat64.o `test -f 'lstat64.c' || echo '$(srcdir)/'`lstat64.c
-	$(AM_V_at)$(am__mv) $(DEPDIR)/lstat64-lstat64.Tpo $(DEPDIR)/lstat64-lstat64.Po
-#	$(AM_V_CC)source='lstat64.c' object='lstat64-lstat64.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(lstat64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lstat64-lstat64.o `test -f 'lstat64.c' || echo '$(srcdir)/'`lstat64.c
+#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(lstat64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT lstat64-lstat64.o -MD -MP -MF $(DEPDIR)/lstat64-lstat64.Tpo -c -o lstat64-lstat64.o `test -f 'lstat64.c' || echo '$(srcdir)/'`lstat64.c
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/lstat64-lstat64.Tpo $(DEPDIR)/lstat64-lstat64.Po
+	$(AM_V_CC)source='lstat64.c' object='lstat64-lstat64.o' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(lstat64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lstat64-lstat64.o `test -f 'lstat64.c' || echo '$(srcdir)/'`lstat64.c
 
 lstat64-lstat64.obj: lstat64.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(lstat64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT lstat64-lstat64.obj -MD -MP -MF $(DEPDIR)/lstat64-lstat64.Tpo -c -o lstat64-lstat64.obj `if test -f 'lstat64.c'; then $(CYGPATH_W) 'lstat64.c'; else $(CYGPATH_W) '$(srcdir)/lstat64.c'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/lstat64-lstat64.Tpo $(DEPDIR)/lstat64-lstat64.Po
-#	$(AM_V_CC)source='lstat64.c' object='lstat64-lstat64.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(lstat64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lstat64-lstat64.obj `if test -f 'lstat64.c'; then $(CYGPATH_W) 'lstat64.c'; else $(CYGPATH_W) '$(srcdir)/lstat64.c'; fi`
+#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(lstat64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT lstat64-lstat64.obj -MD -MP -MF $(DEPDIR)/lstat64-lstat64.Tpo -c -o lstat64-lstat64.obj `if test -f 'lstat64.c'; then $(CYGPATH_W) 'lstat64.c'; else $(CYGPATH_W) '$(srcdir)/lstat64.c'; fi`
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/lstat64-lstat64.Tpo $(DEPDIR)/lstat64-lstat64.Po
+	$(AM_V_CC)source='lstat64.c' object='lstat64-lstat64.obj' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(lstat64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o lstat64-lstat64.obj `if test -f 'lstat64.c'; then $(CYGPATH_W) 'lstat64.c'; else $(CYGPATH_W) '$(srcdir)/lstat64.c'; fi`
 
 mmap64-mmap64.o: mmap64.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mmap64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT mmap64-mmap64.o -MD -MP -MF $(DEPDIR)/mmap64-mmap64.Tpo -c -o mmap64-mmap64.o `test -f 'mmap64.c' || echo '$(srcdir)/'`mmap64.c
-	$(AM_V_at)$(am__mv) $(DEPDIR)/mmap64-mmap64.Tpo $(DEPDIR)/mmap64-mmap64.Po
-#	$(AM_V_CC)source='mmap64.c' object='mmap64-mmap64.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mmap64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o mmap64-mmap64.o `test -f 'mmap64.c' || echo '$(srcdir)/'`mmap64.c
+#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mmap64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT mmap64-mmap64.o -MD -MP -MF $(DEPDIR)/mmap64-mmap64.Tpo -c -o mmap64-mmap64.o `test -f 'mmap64.c' || echo '$(srcdir)/'`mmap64.c
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/mmap64-mmap64.Tpo $(DEPDIR)/mmap64-mmap64.Po
+	$(AM_V_CC)source='mmap64.c' object='mmap64-mmap64.o' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mmap64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o mmap64-mmap64.o `test -f 'mmap64.c' || echo '$(srcdir)/'`mmap64.c
 
 mmap64-mmap64.obj: mmap64.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mmap64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT mmap64-mmap64.obj -MD -MP -MF $(DEPDIR)/mmap64-mmap64.Tpo -c -o mmap64-mmap64.obj `if test -f 'mmap64.c'; then $(CYGPATH_W) 'mmap64.c'; else $(CYGPATH_W) '$(srcdir)/mmap64.c'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/mmap64-mmap64.Tpo $(DEPDIR)/mmap64-mmap64.Po
-#	$(AM_V_CC)source='mmap64.c' object='mmap64-mmap64.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mmap64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o mmap64-mmap64.obj `if test -f 'mmap64.c'; then $(CYGPATH_W) 'mmap64.c'; else $(CYGPATH_W) '$(srcdir)/mmap64.c'; fi`
+#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mmap64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT mmap64-mmap64.obj -MD -MP -MF $(DEPDIR)/mmap64-mmap64.Tpo -c -o mmap64-mmap64.obj `if test -f 'mmap64.c'; then $(CYGPATH_W) 'mmap64.c'; else $(CYGPATH_W) '$(srcdir)/mmap64.c'; fi`
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/mmap64-mmap64.Tpo $(DEPDIR)/mmap64-mmap64.Po
+	$(AM_V_CC)source='mmap64.c' object='mmap64-mmap64.obj' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mmap64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o mmap64-mmap64.obj `if test -f 'mmap64.c'; then $(CYGPATH_W) 'mmap64.c'; else $(CYGPATH_W) '$(srcdir)/mmap64.c'; fi`
 
 newfstatat-newfstatat.o: newfstatat.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(newfstatat_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT newfstatat-newfstatat.o -MD -MP -MF $(DEPDIR)/newfstatat-newfstatat.Tpo -c -o newfstatat-newfstatat.o `test -f 'newfstatat.c' || echo '$(srcdir)/'`newfstatat.c
-	$(AM_V_at)$(am__mv) $(DEPDIR)/newfstatat-newfstatat.Tpo $(DEPDIR)/newfstatat-newfstatat.Po
-#	$(AM_V_CC)source='newfstatat.c' object='newfstatat-newfstatat.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(newfstatat_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o newfstatat-newfstatat.o `test -f 'newfstatat.c' || echo '$(srcdir)/'`newfstatat.c
+#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(newfstatat_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT newfstatat-newfstatat.o -MD -MP -MF $(DEPDIR)/newfstatat-newfstatat.Tpo -c -o newfstatat-newfstatat.o `test -f 'newfstatat.c' || echo '$(srcdir)/'`newfstatat.c
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/newfstatat-newfstatat.Tpo $(DEPDIR)/newfstatat-newfstatat.Po
+	$(AM_V_CC)source='newfstatat.c' object='newfstatat-newfstatat.o' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(newfstatat_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o newfstatat-newfstatat.o `test -f 'newfstatat.c' || echo '$(srcdir)/'`newfstatat.c
 
 newfstatat-newfstatat.obj: newfstatat.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(newfstatat_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT newfstatat-newfstatat.obj -MD -MP -MF $(DEPDIR)/newfstatat-newfstatat.Tpo -c -o newfstatat-newfstatat.obj `if test -f 'newfstatat.c'; then $(CYGPATH_W) 'newfstatat.c'; else $(CYGPATH_W) '$(srcdir)/newfstatat.c'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/newfstatat-newfstatat.Tpo $(DEPDIR)/newfstatat-newfstatat.Po
-#	$(AM_V_CC)source='newfstatat.c' object='newfstatat-newfstatat.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(newfstatat_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o newfstatat-newfstatat.obj `if test -f 'newfstatat.c'; then $(CYGPATH_W) 'newfstatat.c'; else $(CYGPATH_W) '$(srcdir)/newfstatat.c'; fi`
+#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(newfstatat_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT newfstatat-newfstatat.obj -MD -MP -MF $(DEPDIR)/newfstatat-newfstatat.Tpo -c -o newfstatat-newfstatat.obj `if test -f 'newfstatat.c'; then $(CYGPATH_W) 'newfstatat.c'; else $(CYGPATH_W) '$(srcdir)/newfstatat.c'; fi`
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/newfstatat-newfstatat.Tpo $(DEPDIR)/newfstatat-newfstatat.Po
+	$(AM_V_CC)source='newfstatat.c' object='newfstatat-newfstatat.obj' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(newfstatat_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o newfstatat-newfstatat.obj `if test -f 'newfstatat.c'; then $(CYGPATH_W) 'newfstatat.c'; else $(CYGPATH_W) '$(srcdir)/newfstatat.c'; fi`
 
 stat64-stat64.o: stat64.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(stat64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT stat64-stat64.o -MD -MP -MF $(DEPDIR)/stat64-stat64.Tpo -c -o stat64-stat64.o `test -f 'stat64.c' || echo '$(srcdir)/'`stat64.c
-	$(AM_V_at)$(am__mv) $(DEPDIR)/stat64-stat64.Tpo $(DEPDIR)/stat64-stat64.Po
-#	$(AM_V_CC)source='stat64.c' object='stat64-stat64.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(stat64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o stat64-stat64.o `test -f 'stat64.c' || echo '$(srcdir)/'`stat64.c
+#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(stat64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT stat64-stat64.o -MD -MP -MF $(DEPDIR)/stat64-stat64.Tpo -c -o stat64-stat64.o `test -f 'stat64.c' || echo '$(srcdir)/'`stat64.c
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/stat64-stat64.Tpo $(DEPDIR)/stat64-stat64.Po
+	$(AM_V_CC)source='stat64.c' object='stat64-stat64.o' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(stat64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o stat64-stat64.o `test -f 'stat64.c' || echo '$(srcdir)/'`stat64.c
 
 stat64-stat64.obj: stat64.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(stat64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT stat64-stat64.obj -MD -MP -MF $(DEPDIR)/stat64-stat64.Tpo -c -o stat64-stat64.obj `if test -f 'stat64.c'; then $(CYGPATH_W) 'stat64.c'; else $(CYGPATH_W) '$(srcdir)/stat64.c'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/stat64-stat64.Tpo $(DEPDIR)/stat64-stat64.Po
-#	$(AM_V_CC)source='stat64.c' object='stat64-stat64.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(stat64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o stat64-stat64.obj `if test -f 'stat64.c'; then $(CYGPATH_W) 'stat64.c'; else $(CYGPATH_W) '$(srcdir)/stat64.c'; fi`
+#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(stat64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT stat64-stat64.obj -MD -MP -MF $(DEPDIR)/stat64-stat64.Tpo -c -o stat64-stat64.obj `if test -f 'stat64.c'; then $(CYGPATH_W) 'stat64.c'; else $(CYGPATH_W) '$(srcdir)/stat64.c'; fi`
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/stat64-stat64.Tpo $(DEPDIR)/stat64-stat64.Po
+	$(AM_V_CC)source='stat64.c' object='stat64-stat64.obj' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(stat64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o stat64-stat64.obj `if test -f 'stat64.c'; then $(CYGPATH_W) 'stat64.c'; else $(CYGPATH_W) '$(srcdir)/stat64.c'; fi`
 
 statfs-statfs.o: statfs.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(statfs_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT statfs-statfs.o -MD -MP -MF $(DEPDIR)/statfs-statfs.Tpo -c -o statfs-statfs.o `test -f 'statfs.c' || echo '$(srcdir)/'`statfs.c
-	$(AM_V_at)$(am__mv) $(DEPDIR)/statfs-statfs.Tpo $(DEPDIR)/statfs-statfs.Po
-#	$(AM_V_CC)source='statfs.c' object='statfs-statfs.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(statfs_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o statfs-statfs.o `test -f 'statfs.c' || echo '$(srcdir)/'`statfs.c
+#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(statfs_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT statfs-statfs.o -MD -MP -MF $(DEPDIR)/statfs-statfs.Tpo -c -o statfs-statfs.o `test -f 'statfs.c' || echo '$(srcdir)/'`statfs.c
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/statfs-statfs.Tpo $(DEPDIR)/statfs-statfs.Po
+	$(AM_V_CC)source='statfs.c' object='statfs-statfs.o' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(statfs_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o statfs-statfs.o `test -f 'statfs.c' || echo '$(srcdir)/'`statfs.c
 
 statfs-statfs.obj: statfs.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(statfs_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT statfs-statfs.obj -MD -MP -MF $(DEPDIR)/statfs-statfs.Tpo -c -o statfs-statfs.obj `if test -f 'statfs.c'; then $(CYGPATH_W) 'statfs.c'; else $(CYGPATH_W) '$(srcdir)/statfs.c'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/statfs-statfs.Tpo $(DEPDIR)/statfs-statfs.Po
-#	$(AM_V_CC)source='statfs.c' object='statfs-statfs.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(statfs_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o statfs-statfs.obj `if test -f 'statfs.c'; then $(CYGPATH_W) 'statfs.c'; else $(CYGPATH_W) '$(srcdir)/statfs.c'; fi`
+#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(statfs_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT statfs-statfs.obj -MD -MP -MF $(DEPDIR)/statfs-statfs.Tpo -c -o statfs-statfs.obj `if test -f 'statfs.c'; then $(CYGPATH_W) 'statfs.c'; else $(CYGPATH_W) '$(srcdir)/statfs.c'; fi`
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/statfs-statfs.Tpo $(DEPDIR)/statfs-statfs.Po
+	$(AM_V_CC)source='statfs.c' object='statfs-statfs.obj' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(statfs_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o statfs-statfs.obj `if test -f 'statfs.c'; then $(CYGPATH_W) 'statfs.c'; else $(CYGPATH_W) '$(srcdir)/statfs.c'; fi`
 
 truncate64-truncate64.o: truncate64.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(truncate64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT truncate64-truncate64.o -MD -MP -MF $(DEPDIR)/truncate64-truncate64.Tpo -c -o truncate64-truncate64.o `test -f 'truncate64.c' || echo '$(srcdir)/'`truncate64.c
-	$(AM_V_at)$(am__mv) $(DEPDIR)/truncate64-truncate64.Tpo $(DEPDIR)/truncate64-truncate64.Po
-#	$(AM_V_CC)source='truncate64.c' object='truncate64-truncate64.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(truncate64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o truncate64-truncate64.o `test -f 'truncate64.c' || echo '$(srcdir)/'`truncate64.c
+#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(truncate64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT truncate64-truncate64.o -MD -MP -MF $(DEPDIR)/truncate64-truncate64.Tpo -c -o truncate64-truncate64.o `test -f 'truncate64.c' || echo '$(srcdir)/'`truncate64.c
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/truncate64-truncate64.Tpo $(DEPDIR)/truncate64-truncate64.Po
+	$(AM_V_CC)source='truncate64.c' object='truncate64-truncate64.o' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(truncate64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o truncate64-truncate64.o `test -f 'truncate64.c' || echo '$(srcdir)/'`truncate64.c
 
 truncate64-truncate64.obj: truncate64.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(truncate64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT truncate64-truncate64.obj -MD -MP -MF $(DEPDIR)/truncate64-truncate64.Tpo -c -o truncate64-truncate64.obj `if test -f 'truncate64.c'; then $(CYGPATH_W) 'truncate64.c'; else $(CYGPATH_W) '$(srcdir)/truncate64.c'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/truncate64-truncate64.Tpo $(DEPDIR)/truncate64-truncate64.Po
-#	$(AM_V_CC)source='truncate64.c' object='truncate64-truncate64.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(truncate64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o truncate64-truncate64.obj `if test -f 'truncate64.c'; then $(CYGPATH_W) 'truncate64.c'; else $(CYGPATH_W) '$(srcdir)/truncate64.c'; fi`
+#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(truncate64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT truncate64-truncate64.obj -MD -MP -MF $(DEPDIR)/truncate64-truncate64.Tpo -c -o truncate64-truncate64.obj `if test -f 'truncate64.c'; then $(CYGPATH_W) 'truncate64.c'; else $(CYGPATH_W) '$(srcdir)/truncate64.c'; fi`
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/truncate64-truncate64.Tpo $(DEPDIR)/truncate64-truncate64.Po
+	$(AM_V_CC)source='truncate64.c' object='truncate64-truncate64.obj' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(truncate64_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o truncate64-truncate64.obj `if test -f 'truncate64.c'; then $(CYGPATH_W) 'truncate64.c'; else $(CYGPATH_W) '$(srcdir)/truncate64.c'; fi`
 
 uio-uio.o: uio.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(uio_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT uio-uio.o -MD -MP -MF $(DEPDIR)/uio-uio.Tpo -c -o uio-uio.o `test -f 'uio.c' || echo '$(srcdir)/'`uio.c
-	$(AM_V_at)$(am__mv) $(DEPDIR)/uio-uio.Tpo $(DEPDIR)/uio-uio.Po
-#	$(AM_V_CC)source='uio.c' object='uio-uio.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(uio_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o uio-uio.o `test -f 'uio.c' || echo '$(srcdir)/'`uio.c
+#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(uio_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT uio-uio.o -MD -MP -MF $(DEPDIR)/uio-uio.Tpo -c -o uio-uio.o `test -f 'uio.c' || echo '$(srcdir)/'`uio.c
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/uio-uio.Tpo $(DEPDIR)/uio-uio.Po
+	$(AM_V_CC)source='uio.c' object='uio-uio.o' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(uio_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o uio-uio.o `test -f 'uio.c' || echo '$(srcdir)/'`uio.c
 
 uio-uio.obj: uio.c
-	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(uio_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT uio-uio.obj -MD -MP -MF $(DEPDIR)/uio-uio.Tpo -c -o uio-uio.obj `if test -f 'uio.c'; then $(CYGPATH_W) 'uio.c'; else $(CYGPATH_W) '$(srcdir)/uio.c'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/uio-uio.Tpo $(DEPDIR)/uio-uio.Po
-#	$(AM_V_CC)source='uio.c' object='uio-uio.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(uio_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o uio-uio.obj `if test -f 'uio.c'; then $(CYGPATH_W) 'uio.c'; else $(CYGPATH_W) '$(srcdir)/uio.c'; fi`
+#	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(uio_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT uio-uio.obj -MD -MP -MF $(DEPDIR)/uio-uio.Tpo -c -o uio-uio.obj `if test -f 'uio.c'; then $(CYGPATH_W) 'uio.c'; else $(CYGPATH_W) '$(srcdir)/uio.c'; fi`
+#	$(AM_V_at)$(am__mv) $(DEPDIR)/uio-uio.Tpo $(DEPDIR)/uio-uio.Po
+	$(AM_V_CC)source='uio.c' object='uio-uio.obj' libtool=no \
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+	$(AM_V_CC_no)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(uio_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o uio-uio.obj `if test -f 'uio.c'; then $(CYGPATH_W) 'uio.c'; else $(CYGPATH_W) '$(srcdir)/uio.c'; fi`
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique

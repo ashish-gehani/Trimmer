@@ -60,6 +60,7 @@ void *xcalloc(size_t nmemb, size_t size)
 
 #define HALF_SIZE_T	(((size_t) 1) << (sizeof(size_t) * 4))
 
+
 void *xreallocarray(void *ptr, size_t nmemb, size_t size)
 {
 	size_t bytes = nmemb * size;

@@ -1457,6 +1457,19 @@ get_os_release(void)
  * Don't want main() to inline us and defeat the reason
  * we have a separate function.
  */
+
+__attribute__((annotate("specializeArg")))
+char tstr[100] = "trace=all";
+
+__attribute__((annotate("specializeArg")))
+char astr[100] = "abbrev=all";
+
+__attribute__((annotate("specializeArg")))
+char vstr[100] = "verbose=all";
+
+__attribute__((annotate("specializeArg")))
+char sstr[100] = "signal=all";
+
 static void ATTRIBUTE_NOINLINE
 init(int argc, char *argv[])
 {
@@ -1489,24 +1502,13 @@ init(int argc, char *argv[])
 	shared_log = stderr;
 	set_sortby(DEFAULT_SORTBY);
 	set_personality(DEFAULT_PERSONALITY);
-
-	/*Note-Abubakar*/
-	/*
-	this function initializes the configuration
-	the list of calls to be tracked can be found in syscall.c/lookup_class()
-	function
-	these vv are the default routines, additional can be specified by the -e
-	option
-	it is defined in syscall.c
-	*/
-
-	qualify("trace=all");
-	qualify("abbrev=all");
-	qualify("verbose=all");
+	qualify(tstr);
+	qualify(astr);
+	qualify(vstr);
 #if DEFAULT_QUAL_FLAGS != (QUAL_TRACE | QUAL_ABBREV | QUAL_VERBOSE)
 # error Bug in DEFAULT_QUAL_FLAGS
 #endif
-	qualify("signal=all");
+	qualify(sstr);
 	while ((c = getopt(argc, argv,
 		"+b:cCdfFhiqrtTvVwxyz"
 #ifdef USE_LIBUNWIND

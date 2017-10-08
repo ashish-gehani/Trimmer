@@ -223,7 +223,10 @@ unsigned nerrnos = nerrnos0;
 unsigned nsignals = nsignals0;
 unsigned nioctlents = nioctlents0;
 
+__attribute__((annotate("specializeArg")))
 unsigned num_quals;
+
+__attribute__((annotate("specializeArg")))
 qualbits_t *qual_vec[SUPPORTED_PERSONALITIES];
 
 static const unsigned nsyscall_vec[SUPPORTED_PERSONALITIES] = {
@@ -360,12 +363,14 @@ update_personality(struct tcb *tcp, unsigned int personality)
 
 static int qual_syscall(), qual_signal(), qual_desc();
 
-static const struct qual_options {
+struct qual_options {
 	unsigned int bitflag;
 	const char *option_name;
 	int (*qualify)(const char *, int, int);
-	const char *argument_name;
-} qual_options[] = {
+	const char * argument_name;
+};
+__attribute__((annotate("specializeArg")))
+struct qual_options qual_options[] = {
 	{ QUAL_TRACE,	"trace",	qual_syscall,	"system call"	},
 	{ QUAL_TRACE,	"t",		qual_syscall,	"system call"	},
 	{ QUAL_ABBREV,	"abbrev",	qual_syscall,	"system call"	},
@@ -386,28 +391,45 @@ static const struct qual_options {
 	{ 0,		NULL,		NULL,		NULL		},
 };
 
-static void
-reallocate_qual(const unsigned int n)
+__attribute__((noinline)) void unroll_loop(int count) {
+  printf("unrolling loop with count %d\n", count);
+} 
+
+__attribute__((annotate("specializeArg")))
+qualbits_t * newAllocation(qualbits_t * ptr, size_t nmemb, size_t oldSize, size_t size) {
+	size_t bytes = nmemb * size;
+
+
+	qualbits_t * p = malloc(sizeof(qualbits_t) * bytes);
+	if(!ptr) 
+		memcpy(p, ptr, oldSize);
+	if (!p)
+		die_out_of_memory();
+
+	return p;	
+}
+
+__attribute__((annotate("specializeArg")))
+static void reallocate_qual(const unsigned int n)
 {
 	unsigned p;
 	qualbits_t *qp;
 	for (p = 0; p < SUPPORTED_PERSONALITIES; p++) {
-		qp = qual_vec[p] = xreallocarray(qual_vec[p], n,
-						 sizeof(qualbits_t));
+		unroll_loop(SUPPORTED_PERSONALITIES);
+		qp = qual_vec[p] = newAllocation(qual_vec[p], n, num_quals, sizeof(qualbits_t));
 		memset(&qp[num_quals], 0, (n - num_quals) * sizeof(qualbits_t));
 	}
 	num_quals = n;
 }
-
-static void
-qualify_one(const unsigned int n, unsigned int bitflag, const int not, const int pers)
+__attribute__((annotate("specializeArg")))
+static void qualify_one(const unsigned int n, unsigned int bitflag, const int not, const int pers)
 {
 	int p;
 
 	if (num_quals <= n)
 		reallocate_qual(n + 1);
-
 	for (p = 0; p < SUPPORTED_PERSONALITIES; p++) {
+		unroll_loop(SUPPORTED_PERSONALITIES);
 		if (pers == p || pers < 0) {
 			if (not)
 				qual_vec[p][n] &= ~bitflag;
@@ -502,16 +524,8 @@ lookup_class(const char *s)
 	return -1;
 }
 
-
-/*NOTE-Abubakar*/
-/*
-the global struct arrays, qual_options and qual_vec are of interest
-qual_vec is not used outside of this file but while running the program
-with gdb it was observed that qual_vec has the same address as the qual_flags
-variable
-*/
-void
-qualify(const char *s)
+__attribute__((annotate("specializeArg")))
+void qualify(const char *s)
 {
 	const struct qual_options *opt;
 	char *copy;
@@ -519,11 +533,14 @@ qualify(const char *s)
 	int not;
 	unsigned int i;
 
-	if (num_quals == 0)
+	if(num_quals == 0)
 		reallocate_qual(MIN_QUALS);
-
 	opt = &qual_options[0];
-	for (i = 0; (p = qual_options[i].option_name); i++) {
+	for (i = 0; i < 20; i++) {
+		unroll_loop(20);
+		p = qual_options[i].option_name;
+		if(!p)
+			break;
 		unsigned int len = strlen(p);
 		if (strncmp(s, p, len) == 0 && s[len] == '=') {
 			opt = &qual_options[i];
@@ -531,19 +548,19 @@ qualify(const char *s)
 			break;
 		}
 	}
-
 	not = 0;
-	if (*s == '!') {
+	if (*s == '!') { /*not taken*/
 		not = 1;
 		s++;
 	}
-	
-	if (strcmp(s, "none") == 0) {
+	if (strcmp(s, "none") == 0) { /*not taken*/
 		not = 1 - not;
 		s = "all";
 	}
-	if (strcmp(s, "all") == 0) {
-		for (i = 0; i < num_quals; i++) {
+	if (strcmp(s, "all") == 0) { /*taken*/
+		int index = 0;
+		for (i = 0; i < MIN_QUALS; i++, index++) {
+			// unroll_loop(MIN_QUALS);
 			qualify_one(i, opt->bitflag, not, -1);
 		}
 		return;
