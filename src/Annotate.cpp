@@ -33,24 +33,57 @@
 #include <vector>
 #include <fstream>
 
+#include "../include/vecUtils.h"
+#include "../include/debug.h"
+
 using namespace llvm;
 using namespace std;
 
 #define debugPrint 1
 
 
-struct Alloca{
-  Instruction *allocaInst;  
+struct Alloca {
+  Value * val;  
   Function *parentFunction;
   bool isArgv;
+
+  int arg;
+  bool global;
+  vector<Function *> loaders;
+  vector<Function *> storers;
 };
 
+Alloca * initAlloca(Value * val, Function * F, bool isArgv, int arg) {
+  Alloca * alloca = new Alloca;
+  alloca->val = val;
+  alloca->parentFunction = F;
+  alloca->isArgv = isArgv;
+  alloca->arg = arg;
+  alloca->global = isa<GlobalVariable>(val);
+  return alloca;
+}
+
+struct FuncInfo {
+  vector<Alloca *> args;
+  vector<Value *> usedGlobals;
+  vector<Alloca *> allocas;
+};
 
 struct Annotate : public ModulePass {
 
   static char ID; 
   
   Annotate(): ModulePass(ID){}
+
+  vector<Function *> loadsArgv;
+  map<Function *, FuncInfo *> FuncInfoMap;
+
+  void initFuncInfo(Function * F, unsigned size) {
+    FuncInfo * fi = new FuncInfo;
+    for(unsigned i = 0; i < size; i++)
+      fi->args.push_back(NULL);
+    FuncInfoMap[F] = fi;
+  }
 
   void getAnalysisUsage(AnalysisUsage &AU) const override {
     AU.addRequired<LoopInfoWrapperPass>();
@@ -61,131 +94,152 @@ struct Annotate : public ModulePass {
 
 
   void runOnFunction(Function *F, map<Function*, bool> & visited,
-		     map<Value*, Alloca*> pointers, map<Value*, Alloca*> &memoryObjects){
+      map<Value*, Alloca*> pointers, map<Value*, Alloca*> &memoryObjects) {
 
-    if(visited.find(F) != visited.end()){
+    if(visited.find(F) != visited.end())
       return; // Visited each function once
-    }
 
-    bool loadsArgv = false;
     visited[F] = true;
-    for(auto it = F->begin(), end = F->end(); it != end; it++){
+    for(auto it = F->begin(), end = F->end(); it != end; it++) {
       BasicBlock *BB = &*it;
 
       for (BasicBlock::iterator inst = BB->begin(), ie = BB->end(); inst != ie; ) {
-	Instruction * I = &(*inst);
-	if(AllocaInst * allocaInst = dyn_cast<AllocaInst>(&*I)){
-        
-          Alloca *alloca = new Alloca;
+        Instruction * I = &(*inst);
+        debug(Abubakar) << *I << " " << F->getName() << "\n";
+        if( AllocaInst * allocaInst = dyn_cast<AllocaInst>(&*I)) {
+          Alloca *alloca = initAlloca(I, F, false, -1);
           memoryObjects[allocaInst] = alloca;
           pointers[allocaInst] = alloca;
-     	}
+          InsertUnique(FuncInfoMap[F]->allocas, alloca);
+        } else if(GetElementPtrInst * GEPInst = dyn_cast<GetElementPtrInst>(&*I)) {
+          Value * ptr = GEPInst->getOperand(0);
+          Alloca *baseAlloca;
+          if(pointers.find(ptr) == pointers.end()) {
+            inst++; 
+            continue;
+          }
+          else
+            baseAlloca = pointers[ptr];
+          pointers[I] = baseAlloca;       
+        } else if(LoadInst * loadInst = dyn_cast<LoadInst>(&*I)) {
+          Value * ptr = loadInst->getOperand(0);
+          // Search for the pointer in map of constant pointers - pointers with constant offsets
+          if(pointers.find(ptr) == pointers.end()) {
+            inst++;
+            continue;
+          }
+          Alloca * baseAlloca = pointers[ptr]; 
+            // NOTE: Handling pointer loads
+          if(ptr->getType()->isPointerTy())
+            pointers[I] = baseAlloca;      
+          if(baseAlloca->isArgv) {
+            InsertUnique(loadsArgv, F);
+            debug(Abubakar) << "inserted from loadInst " << F->getName() << "\n";
+          } else if(baseAlloca->arg >= 0) {
+            InsertUnique(baseAlloca->loaders, F);
+          } else if(baseAlloca->global) {
+            InsertUnique(FuncInfoMap[F]->usedGlobals, baseAlloca->val);
+          }
+        } else if(StoreInst * storeInst = dyn_cast<StoreInst>(&*I)) {
+          Value * arg1 = storeInst->getOperand(0);
+          Value * arg2 = storeInst->getOperand(1); 
+          Alloca * alloca1 = pointers[arg1];
+          Alloca * alloca2 = pointers[arg2];
 
-	if(GetElementPtrInst * GEPInst = dyn_cast<GetElementPtrInst>(&*I)){
-
-	  Value * ptr = GEPInst->getOperand(0);
-	  Alloca *baseAlloca;
-	  if(pointers.find(ptr) == pointers.end()){
-	    inst++; 
-	    continue;
-	  }
-	  else
-	    baseAlloca = pointers[ptr];
-
-	  pointers[I] = baseAlloca;       
-	}
-
-	else if(LoadInst * loadInst = dyn_cast<LoadInst>(&*I)){
-
-	  Value * ptr = loadInst->getOperand(0);
-	  Alloca *baseAlloca;
-	  // Search for the pointer in map of constant pointers - pointers with constant offsets
-	  if(pointers.find(ptr) == pointers.end()){
-	    inst++;
-	    continue;
-	  }
-	  else
-	    baseAlloca = pointers[ptr]; 
-
-          // NOTE: Handling pointer loads
-          if(ptr->getType()->isPointerTy()){
-            pointers[I] = baseAlloca;
-	  }	         
-
-          if(baseAlloca->isArgv){
-            loadsArgv = true;
-            if(debugPrint) errs()<<"LoadInst = "<<*loadInst<<"\n";
-	  }
-	}
-
-	else if(StoreInst * storeInst = dyn_cast<StoreInst>(&*I)){
-
-	  Value *arg1 = storeInst->getOperand(0);
-	  Value *arg2 = storeInst->getOperand(1);     
-	  if(pointers.find(arg1) != pointers.end()){
-	    Alloca *baseAlloca = pointers[arg1];
-	    if(loadsArgv) //NOTE: If there is a load to argv in the same function  
-              if(debugPrint) errs()<< baseAlloca->allocaInst<<"\n";  
-
-            // Handling pointer assignments e.g store %ptr, %ptr2
-            if(arg1->getType()->isPointerTy()){
-              pointers[arg2] = baseAlloca; 
-	    }      
-	  }
-	}
-
-	else if(CallInst * callInst = dyn_cast<CallInst>(&*I)){
-
-	  Function * calledFunction = callInst->getCalledFunction();
-	  if(calledFunction->isDeclaration()){
-	    inst++;
-	    continue;
-	  }
-
-          for(int i = 0; i < callInst->getNumArgOperands(); i++){
-            Value *argOperand = callInst->getArgOperand(i);
-            Alloca *baseAlloca;
-	    if(pointers.find(argOperand) != pointers.end()){
-	      baseAlloca = pointers[argOperand];
+          if(alloca2) {
+            if(alloca1 && isa<CallInst>(alloca1->val)) {
+              InsertUnique(alloca2->storers, dyn_cast<CallInst>(alloca1->val)->getCalledFunction());              
+            }
+            if(alloca2->global) {
+              InsertUnique(FuncInfoMap[F]->usedGlobals, alloca2->val);
+            }                
+            InsertUnique(alloca2->storers, F);
+          }
+          if(alloca1) {
+            if(arg1->getType()->isPointerTy()) 
+              pointers[arg2] = alloca1;   
+            if(alloca1->global) {
+              InsertUnique(FuncInfoMap[F]->usedGlobals, alloca1->val);
+            } 
+            InsertUnique(alloca1->storers, F);
+          } 
+        } else if(CallInst * callInst = dyn_cast<CallInst>(&*I)) {
+          Function * calledFunction = callInst->getCalledFunction();
+          if(!calledFunction) {
+            inst++;
+            continue;            
+          }
+          if(calledFunction->isDeclaration()) {
+            inst++;
+            continue;
+          }
+          if(calledFunction->isVarArg()) {
+            inst++;
+            continue;            
+          }          
+          if(calledFunction->getName() == F->getName()) {
+            inst++;
+            continue;
+          }
+          if(FuncInfoMap.find(calledFunction) == FuncInfoMap.end()) {
+            initFuncInfo(calledFunction, callInst->getNumArgOperands());
+            for(unsigned i = 0; i < callInst->getNumArgOperands(); i++) {
               Value *funcArg = getFunctionArgument(calledFunction, i);
-              pointers[funcArg] = baseAlloca;     
-	    }  
-	  }
-
-          runOnFunction(calledFunction, visited, pointers, memoryObjects);
-	}    
-      
-	else if(BitCastInst * bitcastInst = dyn_cast<BitCastInst>(&*I)){
-
-	  Value * ptr = bitcastInst->getOperand(0);
-	  Alloca * baseAlloca;
-	  if(pointers.find(ptr) == pointers.end()){
-	    inst++;
-	    continue;
-	  }
-	  else
-	    baseAlloca = pointers[ptr];
-
-	  pointers[I] = baseAlloca; 
-	}
-
-	inst++;
+              pointers[funcArg] = initAlloca(funcArg, calledFunction, false, i); 
+              FuncInfoMap[calledFunction]->args[i] = pointers[funcArg]; 
+            }
+            runOnFunction(calledFunction, visited, pointers, memoryObjects);
+          }
+          pointers[callInst] = initAlloca(callInst, F, false, -1);
+          for(unsigned i = 0; i < callInst->getNumArgOperands(); i++) {
+            Value *argOperand = callInst->getArgOperand(i);
+            if(pointers.find(argOperand) != pointers.end()) {
+              Alloca * baseAlloca = pointers[argOperand];
+              Alloca * argAlloca = FuncInfoMap[calledFunction]->args[i];
+              if(!baseAlloca)
+                continue;
+              if(argAlloca->loaders.size()) {
+                for(unsigned i = 0; i < argAlloca->loaders.size(); i++)
+                  debug(Abubakar) << "inserted loader " << argAlloca->loaders[i]->getName() << "\n";
+                if(baseAlloca->isArgv) {
+                  InsertUnique(loadsArgv, argAlloca->loaders);
+                } else {
+                  InsertUnique(baseAlloca->loaders, argAlloca->loaders);
+                }
+              } 
+              if(argAlloca->storers.size()) {
+                for(unsigned i = 0; i < argAlloca->storers.size(); i++)
+                  debug(Abubakar) << "inserted storer " << argAlloca->storers[i]->getName() << "\n";
+                InsertUnique(baseAlloca->storers, argAlloca->storers);
+              }
+            }  
+          }          
+        } else if(BitCastInst * bitcastInst = dyn_cast<BitCastInst>(&*I)) {
+          Value * ptr = bitcastInst->getOperand(0);
+          Alloca * baseAlloca;
+          if(pointers.find(ptr) == pointers.end()){
+            inst++;
+            continue;
+          }
+          else
+            baseAlloca = pointers[ptr];
+          pointers[I] = baseAlloca; 
+        }
+        inst++;
       }
     }
   }
 
-
-  Value *getFunctionArgument(Function *F, int argIndex){
-      
+  Value *getFunctionArgument(Function *F, int argIndex) {
     int index = 0;
-    for(auto arg = F->arg_begin(); arg != F->arg_end(); arg++, index++){
+    for(auto arg = F->arg_begin(); arg != F->arg_end(); arg++, index++) {
       if(index == argIndex)
         return &*arg; 
     }
+    return NULL;
   }
-  
+
   bool runOnModule(Module & M) override {
-    
     map<Value*, Alloca*> memoryObjects;
     map<Value*, Alloca*> pointers;
     map<Function*, bool> visited;
@@ -194,15 +248,71 @@ struct Annotate : public ModulePass {
     Value *argv = getFunctionArgument(programEntry, 1);
 
     // Constructing an allocation for *argv*
-    Alloca *alloca = new Alloca;
-    alloca->allocaInst = NULL;
-    alloca->parentFunction = programEntry;
-    alloca->isArgv = true;
+    Alloca *alloca = initAlloca(argv, programEntry, true, 1);
     pointers[argv] = alloca;
     memoryObjects[argv] = alloca;    
-
+    errs() << "gathering globals\n";
+    for(auto& global : M.globals()) {
+      GlobalVariable *  gv = &global;
+      if(gv->getName() == "optarg" || gv->getName() == "optind") {
+        Alloca *alloca = initAlloca(gv, NULL, true, -1);      
+        pointers[gv] = alloca;
+        memoryObjects[gv] = alloca;         
+      }
+      if(gv->isDeclaration())
+        continue;
+      Type * ty = gv->getType()->getContainedType(0);
+      if(gv->isConstant() && isa<ArrayType>(ty) && ty->getContainedType(0)->isIntegerTy(8))
+        continue;
+      errs() << gv->getName() << "\n";
+      Alloca *alloca = initAlloca(gv, NULL, false, -1);      
+      pointers[gv] = alloca;
+      memoryObjects[gv] = alloca; 
+    }            
+    initFuncInfo(programEntry, 2);
     runOnFunction(programEntry, visited, pointers, memoryObjects);
-    
+    vector<Value *> trackedGlobals; 
+    vector<Function *> trackedFunctions;
+    InsertUnique(trackedFunctions, loadsArgv);  
+    for(unsigned i = 0; i < loadsArgv.size(); i++) {
+      debug(Abubakar) << "for function " << loadsArgv[i]->getName() << " :\n";
+      vector<Value *> globals = FuncInfoMap[loadsArgv[i]]->usedGlobals;
+      InsertUnique(trackedGlobals, FuncInfoMap[loadsArgv[i]]->usedGlobals);
+      for(unsigned j = 0; j < globals.size(); j++)
+        debug(Abubakar) << "inserted global " << globals[j]->getName() << "\n";
+      vector<Alloca *> allocas = FuncInfoMap[loadsArgv[i]]->allocas;
+      for(unsigned j = 0; j < allocas.size(); j++) {
+        InsertUnique(trackedFunctions, allocas[j]->storers);
+        debug(Abubakar) << *allocas[j]->val << " " << allocas[j]->storers.size() << "\n";
+        for(unsigned k = 0; k < allocas[j]->storers.size(); k++) {
+          debug(Abubakar) << "inserted function for allocation " << allocas[j]->storers[k]->getName() << "\n";          
+        }
+      }
+    }
+    errs() << "using namespace std;\nusing namespace llvm;\n";
+    errs() << "void getTrack(vector<string> & globs, vector<string> & funcs) {\n";
+    for(unsigned i = 0; i < trackedGlobals.size(); i++) {
+      // errs() << "* " << trackedGlobals[i]->getName() << "\n";
+      vector<Function *> storers = pointers[trackedGlobals[i]]->storers;
+      InsertUnique(trackedFunctions, storers);
+      errs() << "  globs.push_back(\"" << trackedGlobals[i]->getName() << "\");\n";
+      // for(unsigned j = 0; j < storers.size(); j++) {
+      //   debug(Abubakar) << "inserted storer " << storers[j]->getName() << "\n";
+      //   vector<Alloca *> allocas = FuncInfoMap[storers[j]]->allocas;
+      //   for(unsigned k = 0; k < allocas.size(); k++) {
+      //     InsertUnique(trackedFunctions, allocas[k]->storers);
+      //     debug(Abubakar) << *allocas[k]->val << " " << allocas[k]->storers.size() << "\n";
+      //     for(unsigned l = 0; l < allocas[k]->storers.size(); l++) {
+      //       debug(Abubakar) << "inserted function for allocation " << allocas[k]->storers[l]->getName() << "\n";          
+      //     }
+      //   }   
+      // }
+    }  
+    for(unsigned i = 0; i < trackedFunctions.size(); i++) {
+      // errs() << "* " << trackedFunctions[i]->getName() << "\n";
+      errs() << "  funcs.push_back(\"" << trackedFunctions[i]->getName() << "\");\n";
+    }
+    errs() << "}\n";
     return true;
   } 
 };
