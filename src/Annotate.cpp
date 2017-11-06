@@ -53,7 +53,10 @@ struct Alloca {
   vector<Function *> storers;
 };
 
+int AllocCount = 0;
+int FuncInfoCount = 0;
 Alloca * initAlloca(Value * val, Function * F, bool isArgv, int arg) {
+  AllocCount++;
   Alloca * alloca = new Alloca;
   alloca->val = val;
   alloca->parentFunction = F;
@@ -79,6 +82,7 @@ struct Annotate : public ModulePass {
   map<Function *, FuncInfo *> FuncInfoMap;
 
   void initFuncInfo(Function * F, unsigned size) {
+    FuncInfoCount++;
     FuncInfo * fi = new FuncInfo;
     for(unsigned i = 0; i < size; i++)
       fi->args.push_back(NULL);
@@ -129,7 +133,12 @@ struct Annotate : public ModulePass {
             continue;
           }
           Alloca * baseAlloca = pointers[ptr]; 
-            // NOTE: Handling pointer loads
+          if(!baseAlloca) {
+            inst++;
+            continue;
+          }
+
+          // NOTE: Handling pointer loads
           if(ptr->getType()->isPointerTy())
             pointers[I] = baseAlloca;      
           if(baseAlloca->isArgv) {
@@ -240,6 +249,7 @@ struct Annotate : public ModulePass {
   }
 
   bool runOnModule(Module & M) override {
+    clock_t start = clock(), diff;
     map<Value*, Alloca*> memoryObjects;
     map<Value*, Alloca*> pointers;
     map<Function*, bool> visited;
@@ -251,7 +261,6 @@ struct Annotate : public ModulePass {
     Alloca *alloca = initAlloca(argv, programEntry, true, 1);
     pointers[argv] = alloca;
     memoryObjects[argv] = alloca;    
-    errs() << "gathering globals\n";
     for(auto& global : M.globals()) {
       GlobalVariable *  gv = &global;
       if(gv->getName() == "optarg" || gv->getName() == "optind") {
@@ -264,7 +273,6 @@ struct Annotate : public ModulePass {
       Type * ty = gv->getType()->getContainedType(0);
       if(gv->isConstant() && isa<ArrayType>(ty) && ty->getContainedType(0)->isIntegerTy(8))
         continue;
-      errs() << gv->getName() << "\n";
       Alloca *alloca = initAlloca(gv, NULL, false, -1);      
       pointers[gv] = alloca;
       memoryObjects[gv] = alloca; 
@@ -295,10 +303,10 @@ struct Annotate : public ModulePass {
       // errs() << "* " << trackedGlobals[i]->getName() << "\n";
       vector<Function *> storers = pointers[trackedGlobals[i]]->storers;
       InsertUnique(trackedFunctions, storers);
-      errs() << "  globs.push_back(\"" << trackedGlobals[i]->getName() << "\");\n";
+      errs() << "  globals.push_back(\"" << trackedGlobals[i]->getName() << "\");\n";
       // for(unsigned j = 0; j < storers.size(); j++) {
       //   debug(Abubakar) << "inserted storer " << storers[j]->getName() << "\n";
-      //   vector<Alloca *> allocas = FuncInfoMap[storers[j]]->allocas;
+      //   vector<Alloca *> allocas = FuncInfoMap[storers[j]]->allocas
       //   for(unsigned k = 0; k < allocas.size(); k++) {
       //     InsertUnique(trackedFunctions, allocas[k]->storers);
       //     debug(Abubakar) << *allocas[k]->val << " " << allocas[k]->storers.size() << "\n";
@@ -313,7 +321,13 @@ struct Annotate : public ModulePass {
       errs() << "  funcs.push_back(\"" << trackedFunctions[i]->getName() << "\");\n";
     }
     errs() << "}\n";
-    return true;
+    diff = clock() - start;
+    int msec = diff * 1000 / CLOCKS_PER_SEC;
+    errs() << (msec/1000) << "." << (msec%1000) << "\n";
+    errs() <<  AllocCount << " * " << sizeof(Alloca) << "\n";
+    errs() <<  FuncInfoCount << " * " << sizeof(FuncInfo) << "\n";
+    errs() << (AllocCount * sizeof(Alloca) + FuncInfoCount * sizeof(FuncInfo)) << "\n";
+    return true;  
   } 
 };
 

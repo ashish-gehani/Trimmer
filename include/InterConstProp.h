@@ -70,6 +70,8 @@ struct ConstantFolding : public ModulePass {
 
   vector<GlobalIdPair> GlobalIdList;
 
+  vector<Function *> callStack;
+
   void processAllocaInst(AllocaInst * allocaInst);
 
   void processBitCastInst(BitCastInst * bitcastInst);
@@ -106,6 +108,8 @@ struct ConstantFolding : public ModulePass {
   void gatherFuncInfo();
   void gatherGlobals();
   bool satisfyConds(Function* F);
+  bool satisfyNumCond(Function* F, ContextInfo * ci);
+
   void addArgumentsToContext(Function * F);
   
   void allocate(Type * ty, Value * val);
@@ -114,6 +118,8 @@ struct ConstantFolding : public ModulePass {
   bool trackAllocas();
 
   void createAnnotationList(); 
+  void createAnnotationList2(); 
+
   void initWhiteList();
   void updateAnnotationContext(Function * F);
   void markGlobalUses(Value * val, GlobalVariable * gv);

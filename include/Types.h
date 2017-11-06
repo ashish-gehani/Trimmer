@@ -59,12 +59,13 @@ struct ContextInfo {
   bool useless;
   bool deleted;
   bool executed;
-  bool preserve;
+  ContextInfo * cloneOf;
   BasicBlock::iterator inst;
   ContextInfo(bool val) {
     deleted = false;
     executed = false;
     useless = val;
+    cloneOf = NULL;
     modifiedAllocas = new vector<unsigned>;
   }
   ContextInfo * clone() {
@@ -74,21 +75,24 @@ struct ContextInfo {
     nci->InstOrder = InstOrder;
     nci->idmap = idmap;
     nci->modifiedAllocas = modifiedAllocas;  
+    nci->ancestors = ancestors;
+    if(cloneOf)
+      nci->cloneOf = cloneOf;
+    else
+      nci->cloneOf = this;
     return nci;        
   }
 };
 typedef map<BasicBlock *, ContextInfo *> BasicBlockContInfoMap;
 typedef pair<GlobalVariable *, unsigned> GlobalIdPair;
 typedef pair<CallInst *, CallInst *> callInstPair;
-map<unsigned, Value *> AggregateAllocaToVal;
 
 struct FuncInfo {
-  unsigned numCallInsts;
+  unsigned numCallInsts, numVisits;
   AggregateAlloca * returnVal;
-  vector<Function *> calledFunctions;
   ContextInfo * ci;
-  bool calledInLoop, visited, usesGlobals;
-  int numAddrTaken;
+  vector<Function *> calledFunctions;
+  bool calledInLoop, contextMisMatch, usesGlobals, addrTaken;
 };
 
 struct BBInfo {
@@ -96,3 +100,5 @@ struct BBInfo {
   unsigned numPreds, URfrom;
   vector<BasicBlock *> loopLatchesWithEdge, SuccsV;
 };
+
+#define MAXRECURSION 20

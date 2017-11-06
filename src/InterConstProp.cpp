@@ -49,7 +49,10 @@ TODO:
 #include <stdio.h>
 #include <fstream>
 #include <sstream>
+#include <time.h>
+
 #include "../include/processInstructions.h"
+#include "../include/toTrack.h"
 
 using namespace llvm;
 using namespace std;
@@ -70,11 +73,11 @@ void ConstantFolding::getAnalysisUsage(AnalysisUsage &AU) const {
 void ConstantFolding::replaceCallOperands(){
 
   for (auto & e : replaceOperands){
-    debug(Hashim) << "NOTE: ***** callInst = " << *e.first << "\n";
+    debug(Abubakar) << "NOTE: ***** callInst = " << *e.first << "\n";
     vector<CallOperand*> operands = e.second;
     for(unsigned int i = 0; i < operands.size(); i++){
       CallOperand * callInfo = operands[i];
-      debug(Hashim) << "* new Operand = " << *callInfo->newOperand << "\n";
+      debug(Abubakar) << "operand " << callInfo->index << " replaced to " << *callInfo->newOperand << "\n";
       e.first->setOperand(callInfo->index, callInfo->newOperand);
     }
   }  
@@ -90,7 +93,7 @@ void ConstantFolding::replaceCallInsts(){
     if(call->used)
       ReplaceInstWithInst(from, to);  
     else {
-      debug(Hashim) << "Delecting Instruction = " << *to << "\n";
+      debug(Hashim) << "Deleting Instruction = " << *to << "\n";
       delete to;
     }
   }  
@@ -110,19 +113,44 @@ void ConstantFolding::replaceUses() {
 }
 
 bool ConstantFolding::satisfyConds(Function* F) {
+
   if(FuncInfoMap.find(F) == FuncInfoMap.end())
     return false;
-  if(AnnotationList.find(F) != AnnotationList.end())
-    return true;
 
   FuncInfo* fi = FuncInfoMap[F];  
+  fi->numVisits++;
 
-  bool addrTaken = fi->numAddrTaken;
+  if(AnnotationList.find(F) != AnnotationList.end()) { // we dont need contexts to match
+    if(!satisfyStackCond(callStack, F))
+      return false;
+    return true;
+  }
 
-  bool onlyOneCall = (fi->numCallInsts == 1);
-  if(!F->arg_size() && !fi->usesGlobals)
-    onlyOneCall = true;
-  return !fi->calledInLoop && !addrTaken && onlyOneCall; 
+  if(fi->calledInLoop || fi->addrTaken || fi->contextMisMatch) 
+    return false;
+
+  if(!satisfyStackCond(callStack, F))
+    return false;
+
+  return true;
+}
+
+bool ConstantFolding::satisfyNumCond(Function* F, ContextInfo * ci) {
+  FuncInfo* fi = FuncInfoMap[F];  
+  if(AnnotationList.find(F) != AnnotationList.end()) // we dont need contexts to match
+    return true;
+  if(fi->numCallInsts != 1) {
+    if(fi->numVisits == 1) { // if its the first visit
+      fi->ci = new ContextInfo(false);
+      duplicateAllocas(fi->ci, ci);
+    } else 
+      compareFuncContexts(fi, ci); // might set contextMisMatch
+    if(!fi->contextMisMatch &&
+      fi->numVisits == fi->numCallInsts)
+      return true;
+    return false;
+  }
+  return true;
 }
 
 Function * ConstantFolding::addClonedFunction(CallInst * callInst, Function * F) {
@@ -146,9 +174,11 @@ Function * ConstantFolding::addClonedFunction(CallInst * callInst, Function * F)
 }
 
 void ConstantFolding::gatherFuncInfo() {
-  for (Module::iterator mit = M->getFunctionList().begin(); 
+  int i = 0;
+  for(Module::iterator mit = M->getFunctionList().begin(); 
       mit != M->getFunctionList().end(); ++mit) {
     Function * currFunc = &*mit;
+    i++;  
     if(FuncInfoMap.find(currFunc) == FuncInfoMap.end())
       FuncInfoMap[currFunc] = initializeFuncInfo(currFunc);
     for (Function::iterator f_it = mit->begin(), f_ite = mit->end(); 
@@ -211,9 +241,8 @@ void ConstantFolding::propagateGlobalUses() {
     }
   } while(changed);
 }
-
 void ConstantFolding::initializeGlobal(AggregateAlloca * aa, Constant * CC) {
-  
+
   if(isa<ConstantPointerNull>(CC))
     return;    
 
@@ -222,8 +251,10 @@ void ConstantFolding::initializeGlobal(AggregateAlloca * aa, Constant * CC) {
 
   if(!aa->isNodeTypeOf(scalarType) && !(aa->isNodeTypeOf(ptrType) &&
     !aa->getType()->getContainedType(0)->getNumContainedTypes())) {
-    for(unsigned i = 0; i < CC->getNumOperands(); i++)
-      initializeGlobal(aa->getContained(i), CC->getAggregateElement(i));
+    for(unsigned i = 0; i < CC->getNumOperands(); i++) {
+      Constant * CGI = CC->getAggregateElement(i);
+      initializeGlobal(aa->getContained(i), CGI);
+    }
     return;
   }
   if(aa->getType()->isIntegerTy()) {
@@ -233,6 +264,10 @@ void ConstantFolding::initializeGlobal(AggregateAlloca * aa, Constant * CC) {
     alloca->setInit(0, true);
   } else {
     if(ConstantDataArray * CDA = dyn_cast<ConstantDataArray>(CC)) {
+      if(!CDA->isString()) {
+        aa->setConstant(false);
+        return;
+      }
       string str = CDA->getAsString().str();
       int length = strlen(str.c_str());
       ScalarAlloca * alloca = aa->getAlloca();
@@ -257,28 +292,28 @@ void ConstantFolding::initializeGlobal(AggregateAlloca * aa, Constant * CC) {
     }
   }
 }
-
 void ConstantFolding::gatherGlobals() {
   for(auto& global : M->globals()) {
     GlobalVariable *  gv = &global;
-
-    if(useAnnotations && AnnotationList.find(gv) ==
-    AnnotationList.end())
+    if(useAnnotations && AnnotationList.find(gv) == AnnotationList.end() && 
+      gv->getName() != "optarg" && gv->getName() != "optind" && gv->getName() != "test_name")
       continue;
-    // if(gv->isConstant())
-    //   continue;
-    Type * ty = gv->getType();
-    allocate(ty->getContainedType(0), gv);
+    Type * contTy = gv->getType()->getContainedType(0);
+    if(gv->isConstant() && isa<ArrayType>(contTy) && contTy->getContainedType(0)->isIntegerTy(8))
+      continue;
+    // errs() << "gatherGlobals " << gv->getName() << " " << *gv->getType()->getContainedType(0) << "\n";
+    allocate(contTy, gv);
     AggregateAlloca * basePointer = BasicBlockContexts[currBB]->
       SSAPointers[gv]->basePointer;
     // basePointer->setOrInsert(0, new AggregateAlloca(ty->getContainedType(0)));
-    errs() << "gatherGlobals\n";
     if(gv->hasInitializer()) 
       initializeGlobal(basePointer, gv->getInitializer());
-    errs() << "initialized\n";
+    if(gv->getName() == "test_name")
+      test_name = basePointer;
     unsigned id = basePointer->getId();
     GlobalIdPair gip = make_pair(gv, id);
     GlobalIdList.push_back(gip);
+    globalAggrs[id] = gv;
     markGlobalUses(dyn_cast<Value>(gv), gv);
   } 
   propagateGlobalUses();
@@ -301,8 +336,9 @@ void ConstantFolding::markGlobalsAsNonConst(ContextInfo * ci) {
   for(unsigned i = 0; i < GlobalIdList.size(); i++) {
     GlobalIdPair gip = GlobalIdList[i];
     unsigned id = gip.second;
-    if(ci->idmap.find(id) != ci->idmap.end())
+    if(ci->idmap.find(id) != ci->idmap.end()) {
       ci->idmap[id]->setConstant(false);
+    }
   }
 }
 
@@ -326,12 +362,31 @@ void ConstantFolding::createAnnotationList() {
   for(unsigned i = 0; i < num; i++) {
     Constant * t1 = initializer->getAggregateElement(i);
     Constant * t2 = t1->getAggregateElement((unsigned) 0);
-    Instruction * I = dyn_cast<ConstantExpr>(t2)->getAsInstruction();
-    Value * val = dyn_cast<User>(I)->getOperand(0);
+    Value * val;
+    if(isa<GlobalVariable>(t2))
+      val = t2;
+    else if(Instruction * I = dyn_cast<ConstantExpr>(t2)->getAsInstruction())
+      val = dyn_cast<User>(I)->getOperand(0);
+    else 
+      continue;
+    errs() << val->getName() << " will be tracked\n"; 
     AnnotationList.insert(val);
     StringRef stringRef;
     getConstantStringInfo(t1->getAggregateElement((unsigned) 1), stringRef, 0, false);
     string tag = stringRef.str();
+  }
+}
+
+void ConstantFolding::createAnnotationList2() {
+  vector<string> globs, funcs;
+  getTrack(globs, funcs);
+  for(unsigned i = 0; i < globs.size(); i++) {
+    // errs() << globs[i] << "\n";
+    AnnotationList.insert(M->getGlobalVariable(StringRef(globs[i])));
+  }
+  for(unsigned i = 0; i < funcs.size(); i++) {
+    // errs() << funcs[i] << "\n";
+    AnnotationList.insert(M->getFunction(StringRef(funcs[i])));    
   }
 }
 
@@ -380,8 +435,9 @@ void ConstantFolding::allocate(AggregateAlloca * aa, Value * val) {
 }
 
 void ConstantFolding::allocate(SSAPointer * sptr, Value * val) {
-  if(!trackAllocas())
+  if(!trackAllocas()) {
     return;
+  }
   ContextInfo * ci = BasicBlockContexts[currBB];  
   ci->SSAPointers[val] = sptr;
   InsertUnique(ci->AggregateAllocas, sptr->basePointer);
@@ -419,10 +475,22 @@ plus
 1) from only has one reachable successor cuz in that case changes can be written directly to
 from's context; {handle modified allocas}
 or 
-2) it does not write to memory -in that case no harm in copying
+2) it does not write to memory - in that case no harm in copying
 */
 bool ConstantFolding::duplicate(BasicBlock * BB, BasicBlock * from, bool single) {
-  bool singlePredFrom = (BBInfoMap[BB]->URfrom == (BBInfoMap[BB]->numPreds - 1));
+  bool singlePredFrom = true;
+  ContextInfo * ci = BasicBlockContexts[from];
+  for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++) {
+    BasicBlock * predecessor = *it;
+    if(predecessor == from)
+      continue;
+    if(visited.find(predecessor) != visited.end()) {
+      ContextInfo * oci = BasicBlockContexts[predecessor];
+      if(ci->cloneOf && (ci->cloneOf == oci->cloneOf || ci->cloneOf == oci))
+        continue;
+      singlePredFrom = false;
+    } 
+  }    
   bool memWrite = !BBInfoMap[BB]->writesToMemory; 
   return !(singlePredFrom && (memWrite || single));
 }
@@ -486,14 +554,19 @@ void ConstantFolding::freeBB(BasicBlock * BB, ContextInfo * ci) {
   if(ci->deleted || ci->useless || !ci->executed)
     return;
   TerminatorInst * ti = BB->getTerminator();
-  bool allVisited = true;
+  bool canDelete = true;
   for(unsigned i = 0; i < ti->getNumSuccessors(); i++) {
     if(unReachable.find(ti->getSuccessor(i)) != unReachable.end())
       continue;
     if(visited.find(ti->getSuccessor(i)) == visited.end())
-      allVisited = false;
+      canDelete = false;
+    else {
+      ContextInfo * succCi = BasicBlockContexts[ti->getSuccessor(i)];
+      if(succCi->cloneOf == ci)
+        canDelete = false;
+    }
   }
-  if(allVisited) {
+  if(canDelete) {
     freeContextInfo(ci);
     ci->deleted = true;
   }  
@@ -531,48 +604,53 @@ bool ConstantFolding::mergeContext(BasicBlock * BB, BasicBlock * prev,
   ContextInfo * newCi) {
   newCi->ancestors = BasicBlockContexts[prev]->ancestors;
   vector<ContextInfo *> predecessorContexts; 
+  int numPreds = 0;
   for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++) {
     BasicBlock * predecessor = *it;
-    if(unReachable.find(predecessor) != unReachable.end())
+    numPreds++;
+    if(unReachable.find(predecessor) != unReachable.end()) {
       continue;
+    }
 
-    if(findInVect(BBInfoMap[BB]->loopLatchesWithEdge, predecessor))
+    if(findInVect(BBInfoMap[BB]->loopLatchesWithEdge, predecessor)) {
       continue;     
+    }
 
     assert(BasicBlockContexts.find(predecessor) != BasicBlockContexts.end() &&
       "basic block context not found");
 
-    if(predecessor == prev)
+    if(predecessor == prev) {
       continue;
+    }
 
-    if(BasicBlockContexts[predecessor]->deleted)
+    if(BasicBlockContexts[predecessor]->deleted) {
       continue;
+    }
 
-    if(straightPath(predecessor, prev, BBInfoMap))
-      continue;
-    
     predecessorContexts.push_back(BasicBlockContexts[predecessor]);
   }
-  for(unsigned i = 0; i < predecessorContexts.size(); i++)
+  for(unsigned i = 0; i < predecessorContexts.size(); i++) {
     compareBlockContexts(newCi, predecessorContexts[i], BasicBlockContexts);
+  }
   return true;
 }
 
 void ConstantFolding::markArgsAsNonConst(CallInst* callInst, ContextInfo * ci) {
   Function* calledFunction = callInst->getCalledFunction();
-  if(calledFunction->onlyReadsMemory())
+  if(calledFunction->onlyReadsMemory()) {
     return;
+  }
   int index = 0;
   for(auto arg = calledFunction->arg_begin(), argEnd = calledFunction->arg_end(); arg != argEnd; 
     arg++, index++) {
     if(arg->onlyReadsMemory()) {
-      debug(Hashim) << "!note: Argument/Function is readonly - no side effects \n";
       continue;
     }
     Value * pointerArg = callInst->getOperand(index);
     SSAPointer * sptr = getSSAPointer(pointerArg);
-    if(!sptr)
+    if(!sptr) {
       continue;
+    }
     AggregateAlloca * basePointer = sptr->basePointer;
     basePointer->setConstant(false);
     InsertUnique(*ci->modifiedAllocas, basePointer->getId());
@@ -586,7 +664,7 @@ void ConstantFolding::handleIndirectCall(CallInst * callInst, ContextInfo * ci) 
       whiteList.find(calledFunction) != whiteList.end())
       return;
   }
-  markGlobalsAsNonConst(ci);
+  // markGlobalsAsNonConst(ci);
   for(unsigned int index = 0; index < callInst->getNumArgOperands(); index++){
     Value * pointerArg = callInst->getArgOperand(index);
     SSAPointer * sptr = getSSAPointer(pointerArg);
@@ -619,17 +697,19 @@ SSAPointer * ConstantFolding::getSSAPointer(Value * val, ContextInfo * ci) {
   return NULL;
 }
 
-
+int num_duplicated = 0;
 void ConstantFolding::visitBB(BasicBlock * BB, BasicBlock * from, bool single) {
   if(visited.find(BB) != visited.end())
     return;
-  BBInfoMap[from]->SuccsV.push_back(BB);
   if(!predecessorsVisited(BB))
     return;  
   ContextInfo * ci = BasicBlockContexts[currBB];
   if(!duplicate(BB, from, single)) {
+    debug(Abubakar) << "cloning\n";
     BasicBlockContexts[BB] = ci->clone();            
   } else {
+    num_duplicated++;
+    debug(Abubakar) << "duplicating " << num_duplicated << " * " << AggrAllocaID << "\n";
     ContextInfo * nci = new ContextInfo(false);
     duplicateAllocas(nci, ci);
     mergeContext(BB, currBB, nci);
@@ -638,19 +718,20 @@ void ConstantFolding::visitBB(BasicBlock * BB, BasicBlock * from, bool single) {
   runOnBB(BB);
 }
 
+int numfuncs = 0;
 AggregateAlloca * ConstantFolding::runOnFunction(Function * toRun, Function *
     actualFunc, ContextInfo * nci) {
-
+  numfuncs++;
+  callStack.push_back(actualFunc);     
   bool temp = currContextIsAnnotated;
   updateAnnotationContext(actualFunc);
   BasicBlock * entry = &toRun->getEntryBlock();
   BasicBlockContexts[entry] = nci;
   runOnBB(entry);
   currContextIsAnnotated = temp;
-  FuncInfoMap[toRun]->visited = true;
-  
+  callStack.pop_back();
   handleReturn(toRun, BasicBlockContexts);  
-
+  cleanUpFunc(FuncInfoMap[actualFunc]); // delete the function context
   return FuncInfoMap[toRun]->returnVal;
 }
 void ConstantFolding::runOnBB(BasicBlock * BB) {  
@@ -658,11 +739,14 @@ void ConstantFolding::runOnBB(BasicBlock * BB) {
   currBB = BB; 
   visited.insert(BB); 
   ContextInfo * ci = BasicBlockContexts[BB];
-  ci->ancestors.push_back(BB);
+  ci->ancestors.push_back(temp);
   for(ci->inst = BB->begin(); ci->inst != BB->end();) {
     Instruction * I = &*ci->inst;
     BasicBlockContexts[BB]->InstOrder.push_back(I);
-    errs() << *I << " " << currBB->getParent()->getName() << "\n";    
+    debug(Abubakar) << *I << " BB=";
+    if(debugLevel == Abubakar)
+      currBB->printAsOperand(errs(), false);
+    debug(Abubakar) << " function=" << currBB->getParent()->getName() << "\n";
     runOnInst(I); 
   }
   ci->executed = true; 
@@ -697,12 +781,14 @@ void ConstantFolding::runOnInst(Instruction * I) {
   } else {
     tryFolding(I);
   }
-  if(!call)
+  Instruction * currInst = &*(BasicBlockContexts[currBB]->inst);
+  if(!call && I == currInst)
     BasicBlockContexts[currBB]->inst++;
 }
 
 bool ConstantFolding::runOnModule(Module & module) {
 
+  clock_t start = clock(), diff;
   debug(Abubakar) << "\n\n*******---- InterConstProp -----*********\n\n";
 
   TLI = &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI();
@@ -712,9 +798,10 @@ bool ConstantFolding::runOnModule(Module & module) {
 
   initWhiteList();
   useAnnotations = isAnnotated;  
-  if(useAnnotations)
+  if(useAnnotations) {
     createAnnotationList();
-
+    // createAnnotationList2();
+  }
   Function * func = M->getFunction(StringRef("main"));
   BasicBlock * entry = &(func->getEntryBlock());
   ContextInfo * ci = new ContextInfo(true);
@@ -731,6 +818,12 @@ bool ConstantFolding::runOnModule(Module & module) {
   replaceCallOperands();
   replaceCallInsts();
   replaceUses();
+  
+  diff = clock() - start;
+  int msec = diff * 1000 / CLOCKS_PER_SEC;
+  errs() << (msec/1000) << "." << (msec%1000) << "\n";
+  errs() << numfuncs << "\n";
+  errs() << num_duplicated << "\n";
   return true;
 }   
   

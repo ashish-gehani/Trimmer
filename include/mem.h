@@ -9,7 +9,8 @@ enum BaseType {
   intType, 
   floatType,
   longType,
-  doubleType
+  doubleType,
+  undef
 };
 
 enum NodeType {
@@ -17,7 +18,8 @@ enum NodeType {
   scalarPtrType,
   structType,
   ptrType,
-  aggrArrType
+  aggrArrType,
+  funcType
 };
 
 template <typename F>
@@ -213,6 +215,12 @@ public:
   AggregateAlloca** getContained() {
     return this->contained;
   }   
+  Function * getFunction() {
+    return func;
+  }
+  void setFunction(Function * func) {
+    this->func = func;
+  }
   NodeType Ntype;
 private:
   void initContained(unsigned size) {
@@ -258,6 +266,7 @@ private:
   bool isGlobal;
   unsigned OffSetInParent;
   unsigned allocaID;
+  Function * func;
 };
 
 struct SSAPointer {

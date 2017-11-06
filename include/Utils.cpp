@@ -38,6 +38,10 @@
 using namespace llvm;
 using namespace std;
 
+map<unsigned, Value *> AggregateAllocaToVal;
+map<unsigned, Value *> globalAggrs;
+
+
 bool getConstantStringInfo(const Value *V, StringRef &Str, uint64_t Offset, bool TrimAtNul) {
    
   assert(V);
@@ -157,7 +161,7 @@ bool isStringFunction(Function * calledFunction){
   string funcName = calledFunction->getName();
   if(funcName == "strcmp" || funcName == "strcasecmp" || funcName == "strcspn" 
      || funcName == "strspn" || funcName == "strncmp" || funcName == "strlen"
-     || funcName == "strtol")
+     || funcName == "strtol" || funcName == "atoi")
     return true;
   else
     return false;
@@ -175,50 +179,39 @@ Value * getArg(Function * func, int index){
 
 void compareBlockContexts(ContextInfo * newCi, ContextInfo * oldCi, 
         BasicBlockContInfoMap bbc) {
-  vector<BasicBlock *> diffBBs;
-  for(unsigned i = 0; i < oldCi->ancestors.size(); i++) {
-    if(!findInVect(newCi->ancestors, oldCi->ancestors[i]))
-      diffBBs.push_back(oldCi->ancestors[i]);
-  }
-  for(unsigned i = 0; i < newCi->ancestors.size(); i++) {
-    if(!findInVect(oldCi->ancestors, newCi->ancestors[i]))
-      diffBBs.push_back(newCi->ancestors[i]);
-  }
   set<AggregateAlloca *> checked;
-  for(unsigned j = 0; j < diffBBs.size(); j++) {
-    ContextInfo * ci = bbc[diffBBs[j]];
-    for(unsigned i = 0; i < (*ci->modifiedAllocas).size(); i++) {
-      unsigned id = (*ci->modifiedAllocas)[i];
-      AggregateAlloca * aa = oldCi->idmap[id];
-      AggregateAlloca * naa = newCi->idmap[id];
-      naa->checkConsistencyWith(aa);
-      checked.insert(aa);
-      vector<AggregateAlloca *> oldWL;
-      vector<AggregateAlloca *> newWL;
-      oldWL.push_back(aa);
-      newWL.push_back(naa);
-      while(oldWL.size()) {
-        AggregateAlloca * oldCurr = oldWL[0];
-        AggregateAlloca * newCurr = newWL[0];
-        if(checked.find(aa) != checked.end()) {
-          oldWL.erase(oldWL.begin());
-          newWL.erase(newWL.begin());
-          continue;
-        }
-        checked.insert(aa);
-        if(newCurr->checkConsistencyWith(aa)) {
-          for(unsigned i = 0; i < oldCurr->getNumContained(); i++) {
-            oldWL.push_back(oldCurr->getContained(i));
-            newWL.push_back(newCurr->getContained(i));
-          }
-        }
+  for(unsigned i = 0; i < oldCi->AggregateAllocas.size(); i++) {
+    AggregateAlloca * aa = oldCi->AggregateAllocas[i];
+    unsigned id = aa->getId();  
+    AggregateAlloca * naa = newCi->idmap[id];
+    if(!naa)
+      continue;
+    naa->checkConsistencyWith(aa);
+    vector<AggregateAlloca *> oldWL;
+    vector<AggregateAlloca *> newWL;
+    oldWL.push_back(aa);
+    newWL.push_back(naa);
+    while(oldWL.size()) {
+      AggregateAlloca * oldCurr = oldWL[0];
+      AggregateAlloca * newCurr = newWL[0];
+      if(checked.find(oldCurr) != checked.end()) {
         oldWL.erase(oldWL.begin());
-        newWL.erase(newWL.begin());        
+        newWL.erase(newWL.begin());
+        continue;
       }
+      checked.insert(oldCurr);
+      if(newCurr->checkConsistencyWith(oldCurr)) {
+        for(unsigned i = 0; i < oldCurr->getNumContained(); i++) {
+          oldWL.push_back(oldCurr->getContained(i));
+          newWL.push_back(newCurr->getContained(i));
+        }
+      }
+      oldWL.erase(oldWL.begin());
+      newWL.erase(newWL.begin());        
     }
   }
-  for(unsigned i = 0; i < diffBBs.size(); i++)
-    InsertUnique(newCi->ancestors, diffBBs[i]);
+  // for(unsigned i = 0; i < diffBBs.size(); i++)
+  //   InsertUnique(newCi->ancestors, diffBBs[i]);
 }
 
 void handleBaseDataTypeGEP(vector<unsigned> indices, SSAPointer * bsptr,
@@ -241,33 +234,6 @@ void handleBaseDataTypeGEP(vector<unsigned> indices, AggregateAlloca * aa,
   SSAPointers[I] = sptr;
 }
 
-unsigned hasAddressTaken(Function * F) {
-  unsigned num = 0;
-  for (const Use &U : F->uses()) {
-    const User *FU = U.getUser();
-    if (isa<BlockAddress>(FU))
-      continue;
-    if (!isa<CallInst>(FU) && !isa<InvokeInst>(FU)) {
-      num++;
-      continue;
-    }
-    ImmutableCallSite CS(cast<Instruction>(FU));
-    if (!CS.isCallee(&U))
-      num++;
-  }
-  return num;
-}
-
-FuncInfo * initializeFuncInfo(Function * F) {
-  FuncInfo * fi = new FuncInfo;
-  fi->numCallInsts = 0;
-  fi->calledInLoop = false;
-  fi->numAddrTaken = F->hasAddressTaken();
-  fi->returnVal = NULL;
-  fi->visited = false;
-  fi->usesGlobals = false;
-  return fi;
-}
 
 BBInfo * initializeBBInfo(BasicBlock * BB) {
   BBInfo * bbi = new BBInfo;
@@ -275,19 +241,16 @@ BBInfo * initializeBBInfo(BasicBlock * BB) {
   bbi->partOfLoop = false;
   bbi->isHeader = false;
   bbi->URfrom = 0;
-  bbi->numPreds = distance(pred_begin(BB), pred_end(BB));
+  bbi->numPreds = 0;
+  set<BasicBlock *> preds;
+  for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++) {
+    BasicBlock * predecessor = *it;
+    if(preds.find(predecessor) == preds.end()) {
+      bbi->numPreds++;
+      preds.insert(predecessor);
+    }
+  }   
   return bbi;
-}
-
-FuncInfo * copyFuncInfo(FuncInfo * fi) {
-  FuncInfo* nfi = new FuncInfo; 
-  nfi->numCallInsts = fi->numCallInsts;
-  nfi->calledInLoop = fi->calledInLoop;
-  nfi->numAddrTaken = fi->numAddrTaken;
-  nfi->returnVal = NULL;
-  nfi->visited = fi->visited;
-  nfi->usesGlobals = fi->usesGlobals;
-  return fi;
 }
 
 void updateMap(map<unsigned, AggregateAlloca *> & idmap, AggregateAlloca * aa) {
@@ -305,7 +268,6 @@ void updateMap(map<unsigned, AggregateAlloca *> & idmap, AggregateAlloca * aa) {
   }
 }
 
-AggregateAlloca * dbgAA = NULL;
 void duplicateAllocas(ContextInfo * newCi, ContextInfo * oldCi) {
   for(unsigned i = 0; i < oldCi->AggregateAllocas.size(); i++) {
     AggregateAlloca * aa = oldCi->AggregateAllocas[i];
@@ -337,8 +299,9 @@ void duplicateAllocas(ContextInfo * newCi, ContextInfo * oldCi) {
       oldWL.erase(oldWL.begin());
       newWL.erase(newWL.begin());
     }    
-    newCi->AggregateAllocas.push_back(naa);
   } 
+  for(unsigned i = 0; i < oldCi->AggregateAllocas.size(); i++) 
+    newCi->AggregateAllocas.push_back(newCi->idmap[oldCi->AggregateAllocas[i]->getId()]);
   for(unsigned i = 0; i < oldCi->InstOrder.size(); i++) {
     Value * I = oldCi->InstOrder[i];
     if(oldCi->SSAPointers.find(I) == oldCi->SSAPointers.end())
@@ -357,7 +320,7 @@ void freeAA(AggregateAlloca * aa, set<AggregateAlloca *> & deleted) {
   worklist.push_back(aa);
   while(worklist.size()) {
     AggregateAlloca * worker = worklist[0];
-    if(deleted.find(aa) != deleted.end()) {
+    if(deleted.find(worker) != deleted.end()) {
       worklist.erase(worklist.begin());
       continue;
     }
@@ -384,7 +347,11 @@ void handleReturn(Function * F, BasicBlockContInfoMap bbc) {
   for (Function::iterator f_it = F->begin(), f_ite = F->end();
        f_it != f_ite; ++f_it) {
     BasicBlock * BB = &*f_it;
-    delete bbc[BB];
+    ContextInfo * ci = bbc[BB];
+    if(ci && !ci->deleted && !ci->useless) {
+      freeContextInfo(ci);
+    }
+    delete ci;
   }
 }
 
@@ -401,6 +368,117 @@ void updateBBInfo(ValueToValueMapTy & vmap, map<BasicBlock *, BBInfo *> & bbimap
     bbimap[nBB] = nbbi;
   } 
 } 
+
+unsigned hasAddressTaken(Function * F) {
+  unsigned num = 0;
+  for (const Use &U : F->uses()) {
+    const User *FU = U.getUser();
+    if (isa<BlockAddress>(FU))
+      continue;
+    if (!isa<CallInst>(FU) && !isa<InvokeInst>(FU)) {
+      num++;
+      continue;
+    }
+    ImmutableCallSite CS(cast<Instruction>(FU));
+    if (!CS.isCallee(&U))
+      num++;
+  }
+  return num;
+}
+
+FuncInfo * initializeFuncInfo(Function * F) {
+  FuncInfo * fi = new FuncInfo;
+  fi->numCallInsts = 0;
+  fi->calledInLoop = false;
+  fi->addrTaken = (F->hasAddressTaken() > 0);
+  fi->numVisits = 0;
+  fi->contextMisMatch = false;
+  fi->usesGlobals = false;
+
+  fi->returnVal = NULL;
+  fi->ci = NULL;
+
+  return fi;
+}
+
+
+FuncInfo * copyFuncInfo(FuncInfo * fi) {
+  FuncInfo* nfi = new FuncInfo; 
+  nfi->numCallInsts = fi->numCallInsts;
+  nfi->calledInLoop = fi->calledInLoop;
+  nfi->addrTaken = fi->addrTaken;
+  nfi->numVisits = fi->numVisits;
+  nfi->contextMisMatch = fi->contextMisMatch;
+  nfi->usesGlobals = fi->usesGlobals;
+
+  nfi->returnVal = NULL;
+  nfi->ci = NULL;
+
+  return nfi;
+}
+
+/*
+  delete contextInfo for original functions.
+  if a function is executed its contextInfo will only be NULL if
+  a) it is called once only
+  b) it is annotated
+*/
+void cleanUpFunc(FuncInfo * fi) {
+  if(fi->ci)
+    freeContextInfo(fi->ci);
+}
+
+void compareFuncContexts(FuncInfo * fi, ContextInfo * newCi) {
+  ContextInfo * oldCi;
+  set<AggregateAlloca *> checked;
+  for(unsigned i = 0; i < oldCi->AggregateAllocas.size(); i++) {
+    AggregateAlloca * aa = oldCi->AggregateAllocas[i];
+    unsigned id = aa->getId();  
+    AggregateAlloca * naa = newCi->idmap[id];
+    if(!naa)
+      goto handleFalse;
+    if(!naa->checkConsistencyWith(aa))
+      goto handleFalse;
+    vector<AggregateAlloca *> oldWL;
+    vector<AggregateAlloca *> newWL;
+    oldWL.push_back(aa);
+    newWL.push_back(naa);
+    while(oldWL.size()) {
+      AggregateAlloca * oldCurr = oldWL[0];
+      AggregateAlloca * newCurr = newWL[0];
+      if(checked.find(oldCurr) != checked.end()) {
+        oldWL.erase(oldWL.begin());
+        newWL.erase(newWL.begin());
+        continue;
+      }
+      checked.insert(oldCurr);
+      if(newCurr->checkConsistencyWith(oldCurr)) {
+        for(unsigned i = 0; i < oldCurr->getNumContained(); i++) {
+          oldWL.push_back(oldCurr->getContained(i));
+          newWL.push_back(newCurr->getContained(i));
+        }
+      } else 
+        goto handleFalse;
+      oldWL.erase(oldWL.begin());
+      newWL.erase(newWL.begin());        
+    }
+  }
+  return;
+  handleFalse:
+    fi->contextMisMatch = true;
+    cleanUpFunc(fi);
+}
+
+bool satisfyStackCond(vector<Function *> callStack, Function * F) {
+  unsigned numOnStack = 0;
+  for(unsigned i = 0; i < callStack.size(); i++) {
+    if(callStack[i] == F)
+      numOnStack++;
+  }
+  if(numOnStack > MAXRECURSION)
+    return false;
+  return true;
+}
 
 void replaceConstArgs(Function * F, 
   vector<pair<unsigned, Constant *> > constArgs) {
@@ -428,17 +506,15 @@ BasicBlock * foldToSingleSucc(TerminatorInst * termInst) {
   return NULL;
 }
 
-bool straightPath(BasicBlock * from, BasicBlock * to, map<BasicBlock *, BBInfo *>
-  bbi) {
-  BasicBlock * worker = from;
-  while(true) {
-    vector<BasicBlock *> sv = bbi[worker]->SuccsV;
-    if(sv.size() != 1)
-      return false;
-    if(sv[0] == to)
-      return true;
-    worker = sv[0];
+bool straightPath(BasicBlock * from, BasicBlock * to, BasicBlockContInfoMap bbc) {
+  if(from == to)
+    return false;
+  ContextInfo * fc = bbc[from];
+  ContextInfo * tc = bbc[to];
+  if(!findInVect(tc->ancestors, from)) {
+    return false;
   }
+  return tc->cloneOf && (tc->cloneOf == fc || tc->cloneOf == fc->cloneOf);
 }
 
 bool onlyCmpUses(LoadInst * loadInst) {
@@ -451,6 +527,8 @@ bool onlyCmpUses(LoadInst * loadInst) {
 }
 
 void replaceAndLog(Instruction * from, Value * to) {
+  if(!from || !to)
+    return;
   from->replaceAllUsesWith(to);
   debug(Abubakar) << "replaced with " << *to << "\n";
 }
@@ -515,4 +593,19 @@ void handleStrToL(CallInst * callInst, ContextInfo * ci, LLVMContext & context) 
   char * source = (char *) aa->getAlloca()->data;
   memcpy(source, ptr, length);
   aa->getAlloca()->fillInit(0, length, true);
+}
+
+void handleAtoi(CallInst * callInst, ContextInfo * ci, LLVMContext & context) {
+  Value * ptr = callInst->getArgOperand(0);
+  if(ci->SSAPointers.find(ptr) == ci->SSAPointers.end())
+    return; 
+  SSAPointer * sptr = ci->SSAPointers[ptr];
+  AggregateAlloca * basePointer = sptr->basePointer;
+  if(!basePointer->isConstant() || !basePointer->getAlloca())
+    return;
+  char * str = (char *) basePointer->getAlloca()->data;
+  int val = atoi(str);
+
+  IntegerType * int32Ty = IntegerType::get(context, 32);
+  replaceAndLog(callInst, ConstantInt::get(int32Ty, val));  
 }

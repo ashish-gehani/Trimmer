@@ -8,36 +8,32 @@ void ScalarAlloca::createData(Type* ty) {
 		Btype = boolType;
 		data = new bool[size];
 		fill((bool *) data, (bool *) data + size, false);		
-	}
-	if(ty->isIntegerTy(8)) {
+	} else if(ty->isIntegerTy(8)) {
 		Btype = charType;
 		data = new char[size + 1];
 		fill((char *) data, (char *) data + size + 1, false);				
-	}
-	if(ty->isIntegerTy(16)) {
+	} else if(ty->isIntegerTy(16)) {
 		Btype = shortType;
 		data = new short[size];
 		fill((short *) data, (short *) data + size, false);				
-	}
-	if(ty->isIntegerTy(32)) {
+	} else if(ty->isIntegerTy(32)) {
 		Btype = intType;
 		data = new int[size];
 		fill((int *) data, (int *) data + size, false);		
-	}
-	if(ty->isIntegerTy(64)) {
+	} else if(ty->isIntegerTy(64)) {
 		Btype = longType;
 		data = new long[size];
 		fill((long *) data, (long *) data + size, false);		
-	}
-	if(ty->isFloatTy()) {
+	} else if(ty->isFloatTy()) {
 		Btype = floatType;
 		data = new float[size];
 		fill((float *) data, (float *) data + size, false);				
-	}
-	if(ty->isDoubleTy()) {
+	} else if(ty->isDoubleTy()) {
 		Btype = doubleType;
 		data = new double[size];
 		fill((double *) data, (double *) data + size, false);				
+	} else {
+		Btype = undef;
 	}
 }
 
@@ -89,14 +85,14 @@ void ScalarAlloca::copyData(void * cdata, bool * cinit, int csize) {
 			castData[i] = copyData[i];
 			initialized[i] = cinit[i];
 		}
-  }
+  	}
 }
 
-Value* ScalarAlloca::createConstVal(int offset) {
+Value * ScalarAlloca::createConstVal(int offset) {
   Type * ty = allocatedType;
   if(isa<ArrayType>(ty)) // others not possible atm
     ty = ty->getContainedType(0);
-  Value* constVal;
+  Value* constVal = NULL;
   if(Btype == boolType) {
     bool * loadData = (bool*) data;
     constVal = ConstantInt::get(ty, loadData[offset]);
@@ -156,13 +152,21 @@ void ScalarAlloca::deleteData() {
   }  else if(Btype == longType) {
     long * loadData = (long*) data;
     delete [] loadData;
+  }  else if(Btype == doubleType) {
+    double * loadData = (double*) data;
+    delete [] loadData;
+  }  else if(Btype == floatType) {
+    float * loadData = (float*) data;
+    delete [] loadData;
   }
 }
 
 ScalarAlloca::~ScalarAlloca() {
+	if(Btype == doubleType || Btype == floatType)
+		return;
 	deleteData();
-	if(Btype != doubleType && Btype != floatType)
-  	delete [] initialized;
+	if(Btype != undef)
+  		delete [] initialized;
 }
 
 bool ScalarAlloca::checkConsistencyWith(ScalarAlloca * sa) {
@@ -171,17 +175,10 @@ bool ScalarAlloca::checkConsistencyWith(ScalarAlloca * sa) {
 	!sa->isBaseTypeOf(Btype))
 		return false;
 	
-	vector<unsigned> modcheck = modified;
-	vector<unsigned> secMod = sa->getModVect();
-
-	for(unsigned i = 0; i < secMod.size(); i++)
-		InsertUnique(modcheck, secMod[i]);
-	
 	if(Btype == boolType) {
 		bool * fData = (bool *) data;
 		bool * sData = (bool *) sa->data;
-		for(unsigned i = 0; i < modcheck.size(); i++) {
-			unsigned index = modcheck[i];
+		for(int index = 0; index < size; index++) {
 			if(initialized[index] != sa->getInit(index))
 				return false;
 			if(initialized[index] && fData[index] != sData[index])
@@ -190,19 +187,16 @@ bool ScalarAlloca::checkConsistencyWith(ScalarAlloca * sa) {
 	} else if(Btype == charType) {
 		char * fData = (char *) data;
 		char * sData = (char *) sa->data;
-		for(unsigned i = 0; i < modcheck.size(); i++) {
-			unsigned index = modcheck[i];
+		for(int index = 0; index < size; index++) {
 			if(initialized[index] != sa->getInit(index))
 				return false;
-			
 			if(initialized[index] && fData[index] != sData[index])
 				return false;
 		}
 	} else if(Btype == shortType) {
 		short * fData = (short *) data;
 		short * sData = (short *) sa->data;
-		for(unsigned i = 0; i < modcheck.size(); i++) {
-			unsigned index = modcheck[i];
+		for(int index = 0; index < size; index++) {
 			if(initialized[index] != sa->getInit(index))
 				return false;
 			if(initialized[index] && fData[index] != sData[index])
@@ -211,18 +205,18 @@ bool ScalarAlloca::checkConsistencyWith(ScalarAlloca * sa) {
 	}  else if(Btype == intType) {
 		int * fData = (int *) data;
 		int * sData = (int *) sa->data;
-		for(unsigned i = 0; i < modcheck.size(); i++) {
-			unsigned index = modcheck[i];
-			if(initialized[index] != sa->getInit(index))
+		for(int index = 0; index < size; index++) {
+			if(initialized[index] != sa->getInit(index)) {
 				return false;
-			if(initialized[index] && fData[index] != sData[index])
+			}
+			if(initialized[index] && fData[index] != sData[index]) {
 				return false;
+			}
 		}
 	}  else if(Btype == longType) {
 		long * fData = (long *) data;
 		long * sData = (long *) sa->data;
-		for(unsigned i = 0; i < modcheck.size(); i++) {
-			unsigned index = modcheck[i];
+		for(int index = 0; index < size; index++) {
 			if(initialized[index] != sa->getInit(index))
 				return false;
 			if(initialized[index] && fData[index] != sData[index])
@@ -236,11 +230,15 @@ ScalarAlloca::ScalarAlloca(Type* ty) {
 	size = 1;
 	if(ArrayType * arType = dyn_cast<ArrayType>(ty)) {
 		size = arType->getNumElements();
+		if(!size)
+			size = 1;
 		createData(ty->getContainedType(0));	
 	} else
 		createData(ty);		
-	initialized = new bool[size];
-	fill(initialized, initialized + size, false);
+	if(Btype != undef) {
+		initialized = new bool[size];
+		fill(initialized, initialized + size, false);
+	}
 	allocatedType = ty;
 }
 
@@ -263,6 +261,7 @@ AggregateAlloca::AggregateAlloca(Type* ty) {
 	parent = NULL;
 	constant = true;
 	isBase = false;
+	func = NULL;
 	allocaID = AggrAllocaID;
 	AggrAllocaID++;
 	if(StructType* st = dyn_cast<StructType>(ty)) {
@@ -286,6 +285,8 @@ AggregateAlloca::AggregateAlloca(Type* ty) {
 			insert(new AggregateAlloca(contTy));
 			getContained(i)->setParent(this, i);
 		}
+	} else if(isa<FunctionType>(ty)) { 
+		Ntype = funcType;
 	} else {
 		Ntype = scalarType;
 		alloca = new ScalarAlloca(ty);
@@ -304,6 +305,7 @@ void AggregateAlloca::initialize(AggregateAlloca * aa, unsigned totalSize) {
   constant = aa->isConstant();
   allocaID = aa->getId();
   isBase = aa->base();
+  func = aa->getFunction();
   initContained(totalSize);
   Ntype = aa->Ntype;  
 }
@@ -347,7 +349,7 @@ AggregateAlloca::~AggregateAlloca() {
 }
 
 bool AggregateAlloca::checkConsistencyWith(AggregateAlloca * aa) {
-	ScalarAlloca * sa = aa->getAlloca(); 
+	ScalarAlloca * sa = aa->getAlloca();
 	if(isConstant() != aa->isConstant() ||
 	allocatedType != aa->allocatedType ||
 	containedSize != aa->getNumContained() ||
