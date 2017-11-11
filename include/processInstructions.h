@@ -160,14 +160,17 @@ void ConstantFolding::processStoreInst(StoreInst * storeInst) {
     //   updateMap(ci->idmap, aa);      
     //   basePointer->setOrInsert(0, aa);
     // } else 
-    if(isa<ConstantPointerNull>(storeOp)) 
+    if(isa<ConstantPointerNull>(storeOp)) {
+      basePointer->setConstant(true);
       basePointer->setNullPointer();
-    else {
+    } else {
       SSAPointer * nsptr = getSSAPointer(storeOp);
       if(!nsptr) {
+        debug(Abubakar) << "StoreInst : setting basePointer non constant\n";
         basePointer->setConstant(false);
       } else {
         basePointer->setOrInsert(0, nsptr->basePointer);
+        basePointer->setConstant(true);
       }
     }
   } else if(basePointer->isNodeTypeOf(scalarType) ||
@@ -202,6 +205,7 @@ AggregateAlloca * config = NULL;
 void ConstantFolding::processLoadInst(LoadInst * loadInst) {
 
   if(loadInst->getParent() && BBInfoMap[loadInst->getParent()]->partOfLoop) {
+    debug(Abubakar) << "Skipping loadInst in loop\n";
     return;
   }
   ContextInfo * ci = BasicBlockContexts[currBB];
@@ -217,6 +221,7 @@ void ConstantFolding::processLoadInst(LoadInst * loadInst) {
     return;
   }
   if(basePointer->isNodeTypeOf(scalarPtrType) && isa<PointerType>(loadInst->getType())) {
+    debug(Abubakar) << "loadInst : scalarPtrType\n";
     ci->SSAPointers[loadInst] = new SSAPointer(basePointer);
   } else if(basePointer->isNodeTypeOf(ptrType)) {
     if(basePointer->isNullPointer()) {
@@ -224,6 +229,7 @@ void ConstantFolding::processLoadInst(LoadInst * loadInst) {
       ConstantPointerNull * nptr = ConstantPointerNull::get(loadedType);
       replaceAndLog(loadInst, nptr);
     } else {
+      debug(Abubakar) << "loadInst : ptrType\n";
       ci->SSAPointers[loadInst] = new SSAPointer(basePointer->getContained(0));
     }
   } else if(basePointer->isNodeTypeOf(scalarType) || 
@@ -289,6 +295,7 @@ void ConstantFolding::processGEPInst(GetElementPtrInst * GEPInst) {
 
 void ConstantFolding::processPHINode(PHINode * phiNode) {
   if(phiNode->getParent() && BBInfoMap[phiNode->getParent()]->partOfLoop) {
+    debug(Abubakar) << "Skipping phiNode in loop\n";
     return;
   }
   ContextInfo * ci = BasicBlockContexts[currBB];
@@ -534,11 +541,6 @@ void ConstantFolding::processCallInst(CallInst * callInst) {
     if(toRun) {
       replaceConstArgs(toRun, constArgs); 
       returnVal = runOnFunction(toRun, calledFunction, nci);
-      if(calledFunction->getName() == "scan_cmd_line") {
-        ScalarAlloca * alloca = test_name->getAlloca();
-        char * sourceBuffer = (char*) alloca->data;
-        memcpy(sourceBuffer, "UDP_STREAM", 100);
-      }
       // for(unsigned index = 0; index < tracked.size(); index++) {
       //   Value * pointerArg = callInst->getOperand(index);
       //   Value * pointerVal = getArg(toRun, index);
@@ -571,8 +573,10 @@ void ConstantFolding::processCallInst(CallInst * callInst) {
 }
 
 void ConstantFolding::tryFolding(Instruction * I) {
-  if(I->getParent() && BBInfoMap[I->getParent()]->partOfLoop)
+  if(I->getParent() && BBInfoMap[I->getParent()]->partOfLoop) {
+    debug(Abubakar) << "Skipping folding attempt in loop\n";
     return;
+  }
   Constant * constVal = ConstantFoldInstruction(I, *DL, TLI);
   if(constVal)
     replaceAndLog(I, constVal);

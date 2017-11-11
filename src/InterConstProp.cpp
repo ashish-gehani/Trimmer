@@ -296,7 +296,8 @@ void ConstantFolding::gatherGlobals() {
   for(auto& global : M->globals()) {
     GlobalVariable *  gv = &global;
     if(useAnnotations && AnnotationList.find(gv) == AnnotationList.end() && 
-      gv->getName() != "optarg" && gv->getName() != "optind" && gv->getName() != "test_name")
+      gv->getName() != "optarg" && gv->getName() != "optind" && 
+      gv->getName() != "test_name" && gv->getName() != "__argv_new__")
       continue;
     Type * contTy = gv->getType()->getContainedType(0);
     if(gv->isConstant() && isa<ArrayType>(contTy) && contTy->getContainedType(0)->isIntegerTy(8))
@@ -333,6 +334,7 @@ void ConstantFolding::copyGlobals(ContextInfo * from, ContextInfo * to) {
 }
 
 void ConstantFolding::markGlobalsAsNonConst(ContextInfo * ci) {
+  debug(Abubakar) << "marking globals as non constant\n";
   for(unsigned i = 0; i < GlobalIdList.size(); i++) {
     GlobalIdPair gip = GlobalIdList[i];
     unsigned id = gip.second;
@@ -652,6 +654,7 @@ void ConstantFolding::markArgsAsNonConst(CallInst* callInst, ContextInfo * ci) {
       continue;
     }
     AggregateAlloca * basePointer = sptr->basePointer;
+    debug(Abubakar) << "markArgsAsNonConst : index " << index << "\n"; 
     basePointer->setConstant(false);
     InsertUnique(*ci->modifiedAllocas, basePointer->getId());
   }
@@ -671,6 +674,7 @@ void ConstantFolding::handleIndirectCall(CallInst * callInst, ContextInfo * ci) 
     if(!sptr)
       continue;
     AggregateAlloca * basePointer = sptr->basePointer;
+    debug(Abubakar) << "handleIndirectCall : index " << index << "\n"; 
     basePointer->setConstant(false);
     InsertUnique(*ci->modifiedAllocas, basePointer->getId());
   }

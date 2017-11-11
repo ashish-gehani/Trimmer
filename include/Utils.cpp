@@ -569,6 +569,7 @@ void handleStrToL(CallInst * callInst, ContextInfo * ci, LLVMContext & context) 
   AggregateAlloca * basePointer = psptr->basePointer;
 
   if(!(baseInt = dyn_cast<ConstantInt>(base))) {
+    debug(Abubakar) << "handleStrToL : marking as non constant\n";
     basePointer->setConstant(false);
     InsertUnique(*ci->modifiedAllocas, basePointer->getId());    
     return;

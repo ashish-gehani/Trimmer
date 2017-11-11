@@ -7,7 +7,7 @@ using namespace std;
 #define All 3
 
 Instruction* debugInst;
-#define debugLevel Abubakar
+#define debugLevel None
 
 class debug {
     public:

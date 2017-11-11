@@ -135,11 +135,11 @@ public:
   }
   bool isConstant() {
     bool above = true;
-    if(this->parent) {
-      vector<AggregateAlloca *> aggrs;
-      aggrs.push_back(this);
-      above = this->parent->isConstant(aggrs);
-    }
+    // if(this->parent) {
+    //   vector<AggregateAlloca *> aggrs;
+    //   aggrs.push_back(this);
+    //   above = this->parent->isConstant(aggrs);
+    // }
     return this->constant && above;
   }
   void setConstant(bool val) {
