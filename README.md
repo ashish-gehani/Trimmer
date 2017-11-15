@@ -1,4 +1,4 @@
-# File I/O Specialization
+# TRIMMER
 
 #### Build:
       
@@ -10,14 +10,18 @@
 
 #### Run
    
-     The ./bin/run.sh script is a wrapper over the the File IO pass. 
-     It runs an llvm pass of loop unrolling prior to executing the FileIO specialisation pass. 
-     It takes the following two arguments: 
+     The ./tool/trimmer.sh script is the trimmer run script. The script takes as 
+     input the manifest file that includes path to the application bitcode, and the 
+     static configuration.
 
-     a) Input_bitcode (.bc)
-     b) Output_bitcode (.bc)
 
-     Note: flag '-o' to specify the output file is NOT required
+       !FILLME
+
+
+#### Description of manifest file 
+
+
+       !FILLME
 
 #### Examples
      
@@ -25,13 +29,9 @@
      The descrition of each example is included at the top of the corresponding source files. 
 
      An example run is as follows:
-        ./bin/run.sh  test/File_test1.bc  test/File_test2.bc
+        ./tool/trimmer.sh  test.manifest
 
+        
+        !FILLME
       
-#### Debugging:
-     
-     The debugPrint macro should be set to 0 to disable debug print messages on the console.
-
-#### Running test cases:
-     cd test/InterConstprop/ && python test.py 3 23 {run and test all cases between inter3.c and inter23.c inclusive}
-     python test.py 3 3 {only run and test inter3.c}
+      
