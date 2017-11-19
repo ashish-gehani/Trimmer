@@ -2,36 +2,52 @@
 
 #### Build:
       
-     1) Install llvm-3.8.
-     2) Install clang-3.8
-     3) Update llvm include directory in Makefile
-     4) make
- 
+    export TRIMMER_HOME=/path/to/root/directory
+    export LLVM_COMPILER=clang
+    make
+    
+    if you have non conventional names for LLVM or CLANG you will have to set certain enviornment variables.
+
+    e.g. if you have version 3.8
+    
+    export LLVM_CC_NAME=clang-3.8
+    export LLVM_CXX_NAME=clang++-3.8
+    export LLVM_LINK_NAME=llvm-link-3.8
+    export LLVM_DIS_NAME=llvm-dis-3.8
+    export LLVM_AR_NAME=llvm-ar-3.8
+    export LLVM_AS_NAME=llvm-as-3.8
+    export LLVM_LD_NAME=llvm-ld-3.8
+    export LLVM_LLC_NAME=llc-3.8
+    export LLVM_OPT_NAME=opt-3.8
+    export LLVM_NM_NAME=llvm-nm-3.8
 
 #### Run
-   
-     The ./tool/trimmer.sh script is the trimmer run script. The script takes as 
-     input the manifest file that includes path to the application bitcode, and the 
-     static configuration.
-
-
-       !FILLME
+    
+    the main run script is trimmer/tool/run.py
+    e.g. python run.py name-of-manifest-file working-directory
 
 
 #### Description of manifest file 
+    
+    the manifest file for curl is shown below
 
-
-       !FILLME
+    {
+        "binary": "curl_fin", 
+        "native_libs": [], 
+        "name": "curl", 
+        "args": ["--compress", "--http1.1", "--ipv4", "--ssl", "ftp://speedtest.tele2.net"], "modules": [], 
+        "ldflags": ["-lz", "-lcurl"], 
+        "main": "curl.bc"
+    }
 
 #### Examples
      
-     Two example test programs with sources and bitcode are added under ./test.
-     The descrition of each example is included at the top of the corresponding source files. 
+    cd tool/example/
+    mkdir work_dir
+    python ../run.py curl.manifest work_dir      
 
-     An example run is as follows:
-        ./tool/trimmer.sh  test.manifest
-
-        
-        !FILLME
-      
-      
+    To run a comparison for trimmer, occam, orig ..
+    cd experimentation/example
+    uncomment whichever programs you want to run in run.sh
+    ./run.sh
+    results are automatically written to results/exe_sizes.csv and results/funcs.csv

@@ -615,9 +615,9 @@ void split(string str, vector<string>& tokens) {
     size_t pos = str.find(';');
     size_t initialPos = 0;
     while(pos != string::npos) {
-        tokens.push_back( str.substr(initialPos, pos - initialPos + 1));
+        tokens.push_back( str.substr(initialPos, pos - initialPos));
         initialPos = pos + 1;
         pos = str.find(';', initialPos);
     }
-    tokens.push_back(str.substr(initialPos, min(pos, str.size()) - initialPos + 1));
+    tokens.push_back(str.substr(initialPos, str.size() - initialPos - 1));
 }

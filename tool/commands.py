@@ -35,6 +35,13 @@ def run_specs(tool):
 	# 	subprocess.call(Cmd, shell = True)
 	# print tool.args
 	# Add arguments to main
+
+	# annotate pass
+	# Cmd = opt + ' -load ' + build_path + 'Annotate.so -annotate ' + curr_file + ' -o ' \
+	# + annot_file
+	# print Cmd
+	# subprocess.call(Cmd, shell = True)	
+
 	Cmd = opt + ' -load ' + build_path + 'SpecializeArguments.so -specialize-args \
 	-args=' + tool.args + ' ' + curr_file + ' -o ' + add_file
 	print Cmd
@@ -53,14 +60,8 @@ def run_specs(tool):
 	print Cmd
 	subprocess.call(Cmd, shell = True)	
 	 
-	# # annotate pass
-	# Cmd = opt + ' -load ~/fileIO/lib/Annotate.so -annotate ' + libspec_file + ' -o ' \
-	# + annot_file + ' &> ~/fileIO/include/toTrack.h '
-	# print Cmd
-	# subprocess.call(Cmd, shell = True)	
-
 	# interconstprop pass
-	Cmd = opt + ' -load ~/fileIO/lib/InterConstProp.so -isAnnotated=true -mem2reg \
+	Cmd = opt + ' -load ' + build_path + 'InterConstProp.so -isAnnotated=true -mem2reg \
 	-mergereturn -simplifycfg -loop-simplify -inter-constprop ' + libspec_file + ' -o '\
 	+ constprop_file
 	print Cmd

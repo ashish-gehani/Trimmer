@@ -389,14 +389,17 @@ void ConstantFolding::createAnnotationList2() {
     ConstantDataArray * CDA = dyn_cast<ConstantDataArray>(fgv->getInitializer());
     split(CDA->getAsString(), funcs);
   }
-
   for(unsigned i = 0; i < globs.size(); i++) {
-    errs() << globs[i] << " glob\n";
-    AnnotationList.insert(M->getGlobalVariable(StringRef(globs[i])));
+    GlobalValue * gv = M->getNamedValue(StringRef(globs[i]));
+    errs() << globs[i] << ": glob " << gv << "\n";
+    AnnotationList.insert(gv);
   }
   for(unsigned i = 0; i < funcs.size(); i++) {
-    errs() << funcs[i] << " func\n";
-    AnnotationList.insert(M->getFunction(StringRef(funcs[i])));    
+    if(funcs[i] == "setExit")
+      continue;
+    GlobalValue * gv = M->getNamedValue(StringRef(funcs[i]));
+    errs() << funcs[i] << ": func " << gv << "\n";
+    AnnotationList.insert(gv);    
   }
 }
 
