@@ -52,7 +52,6 @@ TODO:
 #include <time.h>
 
 #include "../include/processInstructions.h"
-#include "../include/toTrack.h"
 
 using namespace llvm;
 using namespace std;
@@ -302,7 +301,6 @@ void ConstantFolding::gatherGlobals() {
     Type * contTy = gv->getType()->getContainedType(0);
     if(gv->isConstant() && isa<ArrayType>(contTy) && contTy->getContainedType(0)->isIntegerTy(8))
       continue;
-    // errs() << "gatherGlobals " << gv->getName() << " " << *gv->getType()->getContainedType(0) << "\n";
     allocate(contTy, gv);
     AggregateAlloca * basePointer = BasicBlockContexts[currBB]->
       SSAPointers[gv]->basePointer;
@@ -381,13 +379,23 @@ void ConstantFolding::createAnnotationList() {
 
 void ConstantFolding::createAnnotationList2() {
   vector<string> globs, funcs;
-  getTrack(globs, funcs);
+  GlobalVariable * ggv = M->getNamedGlobal("__tracked_globals__");
+  if(ggv) {
+    ConstantDataArray * CDA = dyn_cast<ConstantDataArray>(ggv->getInitializer());
+    split(CDA->getAsString(), globs);
+  }
+  GlobalVariable * fgv = M->getNamedGlobal("__tracked_funcs__");
+  if(fgv) {
+    ConstantDataArray * CDA = dyn_cast<ConstantDataArray>(fgv->getInitializer());
+    split(CDA->getAsString(), funcs);
+  }
+
   for(unsigned i = 0; i < globs.size(); i++) {
-    // errs() << globs[i] << "\n";
+    errs() << globs[i] << " glob\n";
     AnnotationList.insert(M->getGlobalVariable(StringRef(globs[i])));
   }
   for(unsigned i = 0; i < funcs.size(); i++) {
-    // errs() << funcs[i] << "\n";
+    errs() << funcs[i] << " func\n";
     AnnotationList.insert(M->getFunction(StringRef(funcs[i])));    
   }
 }
@@ -804,7 +812,7 @@ bool ConstantFolding::runOnModule(Module & module) {
   useAnnotations = isAnnotated;  
   if(useAnnotations) {
     createAnnotationList();
-    // createAnnotationList2();
+    createAnnotationList2();
   }
   Function * func = M->getFunction(StringRef("main"));
   BasicBlock * entry = &(func->getEntryBlock());

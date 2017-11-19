@@ -1,3 +1,0 @@
-times32.patch
-ptrace-error-verbosity.patch
-lseek-extra-glibc-calls.patch

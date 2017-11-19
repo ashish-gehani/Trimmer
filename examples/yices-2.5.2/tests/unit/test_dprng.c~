@@ -1,8 +1,0 @@
-/*
- * TEST OF PSEUDO-RANDOM NUMBER GENERATORS.
- */
-
-#include <stdio.h>
-
-#include "utils/dprng.h"
-
