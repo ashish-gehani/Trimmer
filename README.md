@@ -35,7 +35,8 @@
         "binary": "curl_fin", 
         "native_libs": [], 
         "name": "curl", 
-        "args": ["--compress", "--http1.1", "--ipv4", "--ssl", "ftp://speedtest.tele2.net"], "modules": [], 
+        "args": ["--compress", "--http1.1", "--ipv4", "--ssl", "ftp://speedtest.tele2.net"],
+        "modules": [], 
         "ldflags": ["-lz", "-lcurl"], 
         "main": "curl.bc"
     }
