@@ -1,7 +1,7 @@
 # TRIMMER
 
 #### Build:
-      
+    mkdir build
     export TRIMMER_HOME=/path/to/root/directory
     export LLVM_COMPILER=clang
     make
