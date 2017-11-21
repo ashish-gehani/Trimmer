@@ -48,4 +48,6 @@
     python ../run.py curl.manifest work_dir      
 
     To run a comparison for trimmer, occam, orig use the scripts in experimentation directory
-    to run en masse, run run_examples.sh in the root
+    to run en masse, run run_examples.sh in the root.
+    the results are written to results/exe_sizes.csv and results/funcs.csv
+    the pre-generated bitcode for some examples can be found in examples/name/trimmer/name
