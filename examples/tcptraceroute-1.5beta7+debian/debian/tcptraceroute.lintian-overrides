@@ -1,0 +1,1 @@
+tcptraceroute: setuid-binary usr/bin/tcptraceroute.mt 4755 root/root

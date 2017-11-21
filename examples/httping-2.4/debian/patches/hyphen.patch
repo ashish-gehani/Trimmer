@@ -1,0 +1,108 @@
+Description: Making lintian clean
+Author: Abhijith PA <abhijith@openmailbox.org>
+Last-Update: 10-10-2015
+
+--- httping-2.4.orig/httping-nl.1
++++ httping-2.4/httping-nl.1
+@@ -73,7 +73,7 @@ Hoeveel seconden (of delen daarvan) te w
+ Gebruik de ncurses gebruikers interface.
+ .TP
+ .B "\-L x"
+-In combinatie met -G zet dit een limiet op hoeveel data er binnengehaald wordt.
++In combinatie met \-G zet dit een limiet op hoeveel data er binnengehaald wordt.
+ .TP
+ .B "\-l"
+ Maak een SSL verbinding. Dit vereist een https-URL.
+@@ -199,7 +199,7 @@ Toon metingen in geel als de gemeten waa
+ Toon metingen alleen als ze hoger dan x zijn.
+ .TP
+ .B "\-\-timestamp" or "\-\-ts"
+-Voeg een een tijdstempel toe aan de uitvoer. Gebruik -v om ook een datum te zien en \-vv om ook microseconden te zien.
++Voeg een een tijdstempel toe aan de uitvoer. Gebruik \-v om ook een datum te zien en \-vv om ook microseconden te zien.
+ .TP
+ .B "\-\-tx-buffer x"
+ Configureer de grootte van de zend-buffer.
+@@ -208,10 +208,10 @@ Configureer de grootte van de zend-buffe
+ Toon versie informatie.
+ 
+ .SH UITVOER
+-In de -S mode zal iets als "tijd=0.08+24.09+23.17+15.64+0.02=62.98 ms" getoond worden. De eerste waarde is hoe lang het duurde om de systeem naam te vertalen, de 2e waarde hoe lang het duurde om te verbinden, de 3e waarde geeft aan hoe lang het duurde om het verzoek te verzenden en de 4e waarde is hoelang het duurde voordat de http-server een antwoord formuleerde en terugzond. de 5e waarde geeft aan hoelang het duurde om de socket te sluiten.
++In de \-S mode zal iets als "tijd=0.08+24.09+23.17+15.64+0.02=62.98 ms" getoond worden. De eerste waarde is hoe lang het duurde om de systeem naam te vertalen, de 2e waarde hoe lang het duurde om te verbinden, de 3e waarde geeft aan hoe lang het duurde om het verzoek te verzenden en de 4e waarde is hoelang het duurde voordat de http-server een antwoord formuleerde en terugzond. de 5e waarde geeft aan hoelang het duurde om de socket te sluiten.
+ 
+ .SH GRAFIEK
+-De grafiek in ncurses mode gebruikt een aantal kleuren. Groen: de waarde is minder dan de ondergrens. Rood: de waarde is hoger dan de bovengrens. Blauw: de waarde is gelimiteerd door '--graph-limit'. Cyaan: er is geen meetwaarde.
++De grafiek in ncurses mode gebruikt een aantal kleuren. Groen: de waarde is minder dan de ondergrens. Rood: de waarde is hoger dan de bovengrens. Blauw: de waarde is gelimiteerd door '\-\-graph\-limit'. Cyaan: er is geen meetwaarde.
+ 
+ .SH TOETSEN
+ Druk <CTRL> + <c> om het programma af te breken. Er zal dan een samenvatting getoond worden.
+--- httping-2.4.orig/httping.1
++++ httping-2.4/httping.1
+@@ -61,7 +61,7 @@ Do a GET request instead of a HEAD reque
+ This selects the url to probe. E.g.: http://localhost/
+ .TP
+ .B "\-h hostname"
+-Instead of '\-g' one can also set a hostname to probe with -h: -h localhost
++Instead of '\-g' one can also set a hostname to probe with \-h: \-h localhost
+ .TP
+ .B "\-I str"
+ UserAgent-string to send to the webserver (instead of 'HTTPing <version>').
+@@ -91,7 +91,7 @@ Switches HTTPing to Nagios-plugin mode 1
+ This selects the HTTP status-codes which are regarded as an OK-state (only with '\-m').
+ .TP
+ .B "\-p portnumber"
+--p can be used together with \-h. \-p selects the portnumber to probe.
++\-p can be used together with \-h. \-p selects the portnumber to probe.
+ .TP
+ .B "\-q"
+ Be quiet, only return an exit-code.
+@@ -124,7 +124,7 @@ Increase verbosity mode. To show standar
+ Do not abort program if resolving fails.
+ .TP
+ .B "\-X"
+-Use this switch together with '-G'. For each "ping" show the amount of data transferred (excluding the headers).
++Use this switch together with '\-G'. For each "ping" show the amount of data transferred (excluding the headers).
+ .TP
+ .B "\-x proxyhost[:port]
+ Probe using a proxyserver. Note that you're also measuring the latency of the proxyserver!
+@@ -163,7 +163,7 @@ When the server sends a cookie, it will
+ Maximum MTU to use. Cannot be larger than network interface MTU.
+ .TP
+ .B "\-\-no\-host\-header"
+-Do not put a "Host:"-header in the request header.
++Do not put a "Host:"\-header in the request header.
+ .TP
+ .B "\-\-no\-tcp\-nodelay"
+ Do not disable "tcp delay" (Naggle).
+@@ -190,16 +190,16 @@ Set the size of the receive buffer (in b
+ When the duration is x or more, show ping line in the slow log window (the middle window).
+ .TP
+ .B "\-\-threshold\-red x"
+-If the measured threshold is higher than x (and -Y is given), then the shown value is colored red. If you also use --threshold-yellow, then this value must be bigger.
++If the measured threshold is higher than x (and \-Y is given), then the shown value is colored red. If you also use \-\-threshold\-yellow, then this value must be bigger.
+ .TP
+ .B "\-\-threshold\-yellow x"
+-If the measured threshold is higher than x (and -Y is given), then the shown value is colored yellow.
++If the measured threshold is higher than x (and \-Y is given), then the shown value is colored yellow.
+ .TP
+ .B "\-\-threshold\-show x"
+ If the measured threshold is higher than x, then the result is shown (default is show always). The value x is in ms.
+ .TP
+ .B "\-\-timestamp" or "\-\-ts"
+-Put a timestamp before the result-lines. Use -v to also show a date.
++Put a timestamp before the result-lines. Use \-v to also show a date.
+ .TP
+ .B "\-\-tx-buffer x"
+ Set the size of the transmit buffer (in bytes).
+@@ -208,10 +208,10 @@ Set the size of the transmit buffer (in
+ Show the version and exit.
+ 
+ .SH OUTPUT
+-In split mode (-S) something like "time=0.08+24.09+23.17+15.64+0.02=62.98 ms" is shown. The first value is the time it took to resolve the hostname (or 'n/a' if it did not resolve in this iteration, e.g. in "resolve once" (-r) mode), then the time it took to connect (or -1 for example in persistent connection (-Q, HTTP v1.1), after that the time it took to put the request on the wire, then the time it took for the HTTP server to process the request and send it back and lastly the time it took to close the connection.
++In split mode (\-S) something like "time=0.08+24.09+23.17+15.64+0.02=62.98 ms" is shown. The first value is the time it took to resolve the hostname (or 'n/a' if it did not resolve in this iteration, e.g. in "resolve once" (\-r) mode), then the time it took to connect (or \-1 for example in persistent connection (\-Q, HTTP v1.1), after that the time it took to put the request on the wire, then the time it took for the HTTP server to process the request and send it back and lastly the time it took to close the connection.
+ 
+ .SH GRAPH
+-The graph in the ncurses uses colors to encode a meaning. Green: value is less than 1 block. Red: the value did not fit in the graph. Blue: the value was limitted by --graph-limit. Cyan: no measurement for that point in time.
++The graph in the ncurses uses colors to encode a meaning. Green: value is less than 1 block. Red: the value did not fit in the graph. Blue: the value was limitted by \-\-graph\-limit. Cyan: no measurement for that point in time.
+ 
+ .SH KEYS
+ Press <CTRL> + <c> to exit the program. It will display a summary of what was measured.

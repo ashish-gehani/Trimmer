@@ -1,0 +1,40 @@
+As of release 1.5beta1, tcptraceroute now uses GNU autoconf to ease the
+task of installation and to provide better portability.  As with all
+programs utilizing autoconf, the simplest way to compile the package is
+(quoting from the default INSTALL documentation that ships with
+autoconf):
+
+  1. `cd' to the directory containing the package's source code and type
+     `./configure' to configure the package for your system.  If you're
+     using `csh' on an old version of System V, you might need to type
+     `sh ./configure' instead to prevent `csh' from trying to execute
+     `configure' itself.
+
+     Running `configure' takes awhile.  While running, it prints some
+     messages telling which features it is checking for.
+
+  2. Type `make' to compile the package.
+
+  3. Type `make install' to install the programs and any data files and
+     documentation.
+
+  4. You can remove the program binaries and object files from the
+     source code directory by typing `make clean'.  To also remove the
+     files that `configure' created (so you can compile the package for
+     a different kind of computer), type `make distclean'.
+
+The configure scripts supports a number of command line options.  The
+ones you're most likely to use are:
+
+	  --prefix=PREFIX         install architecture-independent files in
+                                  PREFIX [/usr/local]
+	  --with-libpcap=DIR      use libpcap in DIR
+	  --with-libnet=DIR       use libnet in DIR
+	  --enable-noselect-default
+				  default to not using select(2)
+	  --enable-track-default=PORT|ID
+				  default to tracking probes by PORT or ID
+	  --enable-default-port=N default destination port
+	  --enable-static         compile staticly, if using gcc
+
+-mct, Sun May 25 11:16:48 EDT 2003

@@ -1,0 +1,12 @@
+Begin4
+Title:		tcptraceroute
+Version:	1.5beta7
+Entered-date:	2006-03-28
+Description:	A traceroute implementation using TCP packets
+Keywords:	network, traceroute, firewall
+Author:		mct@toren.net (Michael C. Toren)
+Maintained-by:	mct@toren.net (Michael C. Toren)
+Primary-site:	http://michael.toren.net/code/tcptraceroute/
+Platforms:	Requires libnet and libpcap
+Copying-policy:	GPL
+End

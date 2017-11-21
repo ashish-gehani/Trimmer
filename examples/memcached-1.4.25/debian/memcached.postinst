@@ -1,0 +1,40 @@
+#!/bin/sh
+
+set -e
+
+GROUP="memcache"
+USER="memcache"
+DATADIR="/nonexistent"
+
+# shamelessly copied from debian gearman-job-server package...
+
+case "$1" in
+configure)
+    # creating memcache group if it isn't already there
+    if ! getent group $GROUP >/dev/null ; then
+            # Adding system group
+            addgroup --system $GROUP >/dev/null
+    fi
+
+    # creating memcache user if it isn't already there
+    if ! getent passwd $USER >/dev/null ; then
+            # Adding system user
+            adduser \
+              --system \
+              --disabled-login \
+              --ingroup $GROUP \
+              --home $DATADIR \
+              --no-create-home \
+              --gecos "Memcached" \
+              --shell /bin/false \
+              $USER  >/dev/null
+    fi
+    if [ ! -e /etc/memcached.conf ]
+        then
+            mkdir -p /etc
+            cp /usr/share/memcached/memcached.conf.default /etc/memcached.conf
+    fi
+    ;;
+esac
+
+#DEBHELPER#

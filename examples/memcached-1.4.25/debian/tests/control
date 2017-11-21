@@ -1,0 +1,3 @@
+Tests: daemon client.pl
+Depends: memcached
+Restrictions: needs-root

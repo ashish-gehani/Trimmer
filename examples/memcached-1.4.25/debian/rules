@@ -1,0 +1,49 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+	NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+	MAKEFLAGS += -j$(NUMJOBS)
+endif
+
+PKGBASE=debian/memcached/usr/share/memcached
+SCRIPTS=$(PKGBASE)/scripts
+UPSTREAM_AUTOCONF_GENERATED_FILES = aclocal.m4 configure \
+	doc/Makefile
+
+override_dh_autotools-dev_updateconfig:
+	# backup upstream autotools automatically generated files
+	$(foreach var,$(UPSTREAM_AUTOCONF_GENERATED_FILES), \
+		cp -f $(var) $(var).bak;)
+	dh_autotools-dev_updateconfig
+
+override_dh_auto_configure:
+	dh_auto_configure -- --enable-sasl
+
+override_dh_auto_install:
+	dh_auto_install
+	install -m 644 $(CURDIR)/debian/memcached.conf \
+		$(CURDIR)/$(PKGBASE)/memcached.conf.default
+	install -m 744 $(CURDIR)/scripts/start-memcached $(SCRIPTS)
+	install -m 755 $(CURDIR)/debian/systemd-memcached-wrapper $(SCRIPTS)
+	install -m 744 $(CURDIR)/scripts/memcached-tool $(SCRIPTS)
+	install -m 755 $(CURDIR)/scripts/memcached-init \
+		$(CURDIR)/debian/memcached.init
+	install -m 755 $(CURDIR)/scripts/damemtop $(SCRIPTS)
+	install -m 644 $(CURDIR)/scripts/damemtop.yaml $(SCRIPTS)
+	install -m 644 $(CURDIR)/scripts/README.damemtop $(SCRIPTS)
+	install -m 755 $(CURDIR)/scripts/mc_slab_mover $(SCRIPTS)
+
+override_dh_autotools-dev_restoreconfig:
+	dh_autotools-dev_restoreconfig
+	# restore upstream autotools automatically generated files
+	$(foreach var,$(UPSTREAM_AUTOCONF_GENERATED_FILES), \
+		[ ! -f $(var).bak ] || cp -f $(var).bak $(var);)
+
+override_dh_auto_clean:
+	dh_auto_clean
+	rm --force $(CURDIR)/debian/memcached.init
+
+%:
+	dh $@ --parallel --with autotools_dev,systemd,autoreconf

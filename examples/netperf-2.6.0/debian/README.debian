@@ -1,0 +1,9 @@
+The Debian Package netperf
+----------------------------
+
+Please read netperf.{ps,pdf} first!
+You can take the scripts in example/ and modify them to your needs.
+The links mentioned in the README file are outdated. The official homepage can
+be reached at http://www.netperf.org/
+
+Erik Wenzel <erik@todo.de>, Sat, 25 Aug 2001 10:15:17 +0200

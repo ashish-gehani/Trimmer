@@ -1,0 +1,4 @@
+#!/usr/bin/dh-exec
+lib/libbz2.a /usr/lib/${DEB_HOST_MULTIARCH}
+include /usr
+usr/lib/${DEB_HOST_MULTIARCH}/libbz2.so

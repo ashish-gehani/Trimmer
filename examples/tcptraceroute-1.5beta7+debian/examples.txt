@@ -1,0 +1,249 @@
+A few real world examples of using tcptraceroute to trace through
+firewalls that traceroute(8) has trouble with.  These are all sites
+that pass TCP SYN packets on to hosts sitting on the clean side of the
+firewall, and which don't filter ICMP time exceeded messages leaving
+their network.  All examples listed below were captured on July 1st.
+
+ -- Michael C. Toren <mct@toren.net>  Sun,  1 Jul 2001 21:25:26 -0400
+
+
+pages.ebay.com, a classic firewalled webserver:
+
+    [mct@quint ~]$ traceroute -w2 -q1 -f 5 pages.ebay.com
+    traceroute to pages.ebay.com (216.32.120.133), 30 hops max, 38 byte packets
+     5  core2-abov-ds3.b2.iad.netaxs.net (207.106.127.130)  10.390 ms
+     6  core1-mae-e-gige-1.mae-e.iad.netaxs.net (207.106.127.101)  14.310 ms
+     7  core1-core3-fe-1.mae-e.iad.netaxs.net (207.106.31.28)  9.935 ms
+     8  250.ATM3-0.BR3.DCA6.ALTER.NET (137.39.92.25)  14.727 ms
+     9  0.so-3-1-0.XL1.DCA6.ALTER.NET (152.63.38.118)  18.766 ms
+    10  0.so-7-0-0.XR1.DCA6.ALTER.NET (152.63.38.86)  22.659 ms
+    11  0.so-3-0-0.TR1.DCA6.ALTER.NET (152.63.11.97)  15.002 ms
+    12  121.at-5-0-0.TR1.SAC1.ALTER.NET (152.63.2.178)  120.593 ms
+    13  297.ATM7-0.XR1.SFO4.ALTER.NET (152.63.51.5)  123.571 ms
+    14  191.ATM7-0.GW8.SJC2.ALTER.NET (152.63.49.245)  130.606 ms
+    15  *
+    16  *
+    17  *
+
+    [mct@quint ~]$ tcptraceroute -f 5 pages.ebay.com
+    Selected device eth0, address 207.8.132.210, port 1056 for outgoing packets
+    Tracing the path to pages.ebay.com (216.32.120.133) on TCP port 80 (www), 30 hops max
+     5  core2-abov-ds3.b2.iad.netaxs.net (207.106.127.130)  10.849 ms
+     6  core1-mae-e-gige-1.mae-e.iad.netaxs.net (207.106.127.101)  105.601 ms
+     7  core1-core3-fe-1.mae-e.iad.netaxs.net (207.106.31.28)  19.929 ms
+     8  250.ATM3-0.BR3.DCA6.ALTER.NET (137.39.92.25)  16.123 ms
+     9  0.so-3-1-0.XL1.DCA6.ALTER.NET (152.63.38.118)  14.717 ms
+    10  0.so-7-0-0.XR1.DCA6.ALTER.NET (152.63.38.86)  22.183 ms
+    11  0.so-3-0-0.TR1.DCA6.ALTER.NET (152.63.11.97)  18.194 ms
+    12  121.at-5-0-0.TR1.SAC1.ALTER.NET (152.63.2.178)  101.491 ms
+    13  297.ATM7-0.XR1.SFO4.ALTER.NET (152.63.51.5)  110.817 ms
+    14  191.ATM7-0.GW8.SJC2.ALTER.NET (152.63.49.245)  113.841 ms
+    15  ebay-oc12-gw.customer.alter.net (157.130.209.10)  121.632 ms
+    16  10.128.1.42 (10.128.1.42)  109.132 ms
+    17  pages.ebay.com (216.32.120.133) [open]  115.378 ms
+
+
+www.microsoft.com, another classic firewalled webserver:
+
+    [mct@quint ~]$ traceroute -w2 -q1 -f 5 www.microsoft.com
+    traceroute: Warning: www.microsoft.com has multiple addresses; using 207.46.197.100
+    traceroute to www.microsoft.akadns.net (207.46.197.100), 30 hops max, 38 byte packets
+     5  baltimore.balt-core.h0-0-45M.netaxs.net (207.106.2.18)  17.560 ms
+     6  blt-dc.dc-core.h5-0-45M.netaxs.net (207.106.2.2)  27.769 ms
+     7  core1-core3-fe-1.mae-e.iad.netaxs.net (207.106.31.28)  28.802 ms
+     8  250.ATM3-0.BR3.DCA6.ALTER.NET (137.39.92.25)  27.934 ms
+     9  0.so-3-1-0.XL2.DCA6.ALTER.NET (152.63.38.122)  24.210 ms
+    10  0.so-0-0-0.XR2.DCA6.ALTER.NET (152.63.35.117)  35.693 ms
+    11  0.so-4-0-0.TR2.DCA6.ALTER.NET (152.63.11.93)  22.170 ms
+    12  121.at-1-1-0.TR2.SEA1.ALTER.NET (146.188.140.78)  94.099 ms
+    13  0.so-1-0-0.XL2.SEA1.ALTER.NET (152.63.106.237)  101.325 ms
+    14  POS7-0.GW4.SEA1.ALTER.NET (146.188.201.53)  91.887 ms
+    15  microsoftoc48-gw.customer.alter.net (157.130.184.26)  89.536 ms
+    16  *
+    17  *
+    18  *
+    
+    [mct@quint ~]$ tcptraceroute -f 5 207.46.197.100
+    Selected device eth0, address 207.8.132.210, port 1058 for outgoing packets
+    Tracing the path to 207.46.197.100 on TCP port 80 (www), 30 hops max
+     5  baltimore.balt-core.h0-0-45M.netaxs.net (207.106.2.18)  9.430 ms
+     6  blt-dc.dc-core.h5-0-45M.netaxs.net (207.106.2.2)  17.514 ms
+     7  core1-core3-fe-1.mae-e.iad.netaxs.net (207.106.31.28)  23.256 ms
+     8  250.ATM3-0.BR3.DCA6.ALTER.NET (137.39.92.25)  30.819 ms
+     9  0.so-3-1-0.XL2.DCA6.ALTER.NET (152.63.38.122)  26.605 ms
+    10  0.so-0-0-0.XR2.DCA6.ALTER.NET (152.63.35.117)  38.700 ms
+    11  0.so-4-0-0.TR2.DCA6.ALTER.NET (152.63.11.93)  31.402 ms
+    12  121.at-1-1-0.TR2.SEA1.ALTER.NET (146.188.140.78)  93.992 ms
+    13  0.so-1-0-0.XL2.SEA1.ALTER.NET (152.63.106.237)  105.176 ms
+    14  POS7-0.GW4.SEA1.ALTER.NET (146.188.201.53)  86.524 ms
+    15  microsoftoc48-gw.customer.alter.net (157.130.184.26)  85.916 ms
+    16  207.46.129.51 (207.46.129.51)  84.920 ms
+    17  microsoft.com (207.46.197.100) [open]  85.344 ms
+
+
+odc-t.ankara.af.mil, a firewalled mail server:
+
+    [mct@quint ~]$ traceroute -w2 -q1 -f 5 odc-t.ankara.af.mil
+    traceroute to odc-t.ankara.af.mil (207.133.163.7), 30 hops max, 38 byte packets
+     5  nyc-l3.nyc-core.h3-0-45M.netaxs.net (207.106.127.18)  7.277 ms
+     6  nyc-pos-l.netaxs.net (207.106.3.133)  11.803 ms
+     7  mae-east.dc-core.netaxs.net (207.106.31.29)  18.922 ms
+     8  netaxs-core3.iad.above.net (209.249.119.233)  19.200 ms
+     9  core1-core3-oc48.iad1.above.net (209.249.203.34)  11.942 ms
+    10  sjc2-iad1-oc48.sjc2.above.net (216.200.127.26)  80.741 ms
+    11  core5-sjc2-oc48-2.sjc1.above.net (208.184.102.205)  80.829 ms
+    12  core2-sjc1-oc3.sjc6.above.net (207.126.96.106)  81.621 ms
+    13  fix-west-pilot-fddi2.disa.mil (198.32.136.88)  93.961 ms
+    14  137.209.200.207 (137.209.200.207)  99.437 ms
+    15  206.38.100.2 (206.38.100.2)  258.541 ms
+    16  140.35.16.18 (140.35.16.18)  373.297 ms
+    17  198.26.165.18 (198.26.165.18)  373.686 ms
+    18  *
+    19  *
+    20  *
+    21  *
+
+    [mct@quint ~]$ tcptraceroute -f 5 odc-t.ankara.af.mil smtp
+    Selected device eth0, address 207.8.132.210, port 1150 for outgoing packets
+    Tracing the path to odc-t.ankara.af.mil (207.133.163.7) on TCP port 25 (smtp), 30 hops max
+     5  nyc-l3.nyc-core.h3-0-45M.netaxs.net (207.106.127.18)  9.456 ms
+     6  nyc-pos-l.netaxs.net (207.106.3.133)  11.762 ms
+     7  mae-east.dc-core.netaxs.net (207.106.31.29)  11.958 ms
+     8  netaxs-core3.iad.above.net (209.249.119.233)  11.791 ms
+     9  core1-core3-oc48.iad1.above.net (209.249.203.34)  12.510 ms
+    10  sjc2-iad1-oc48.sjc2.above.net (216.200.127.26)  80.335 ms
+    11  core5-sjc2-oc48-2.sjc1.above.net (208.184.102.205)  81.364 ms
+    12  core2-sjc1-oc3.sjc6.above.net (207.126.96.106)  83.107 ms
+    13  fix-west-pilot-fddi2.disa.mil (198.32.136.88)  76.092 ms
+    14  137.209.200.207 (137.209.200.207)  99.776 ms
+    15  206.38.100.2 (206.38.100.2)  252.840 ms
+    16  140.35.16.18 (140.35.16.18)  370.720 ms
+    17  198.26.165.18 (198.26.165.18)  485.771 ms
+    18  odctfw.ankara.af.mil (207.133.163.161)  443.782 ms
+    19  odc-t.ankara.af.mil (207.133.163.7) [open]  745.611 ms
+
+
+
+
+tcptraceroute-1.3beta1 added support for controlling the SYN and ACK
+flags used in outgoing probe packets through the -S and -A command line
+arguments.  By utilizing probe packets with the ACK bit set, it is
+possible to traceroute to hosts located behind stateless firewalls that
+block all inbound TCP connections, but permit those hosts to establish
+outbound connections.  Below are two examples of such behavior,
+recorded on August 15th, 2001.
+
+ -- Michael C. Toren <mct@toren.net>  Sun, 29 Jun 2003 17:18:41 -0400
+
+
+Tracing to a host protected by a Linux 2.2 ipchains firewall:
+
+    [mct@quint ~]$ tcptraceroute -f7 -q1 argo.starforce.com
+    Selected device eth0, address 207.8.132.210, port 3738 for outgoing packets
+    Tracing the path to argo.starforce.com (216.158.56.82) on TCP port 80 (www), 30 hops max
+     7  voicenet-gw.core-1-hssi-6-0-0-50.oldcity.dca.net (207.103.28.30)  69.252 ms
+     8  node-150-eth3-0-local.oldcity.dca.net (207.245.82.150)  16.216 ms
+     9  *
+    10  *
+    11  *
+
+    [mct@quint ~]$ tcptraceroute -f7 -q1 -A argo.starforce.com
+    Selected device eth0, address 207.8.132.210, port 3747 for outgoing packets
+    Tracing the path to argo.starforce.com (216.158.56.82) on TCP port 80 (www), 30 hops max
+     7  voicenet-gw.core-1-hssi-6-0-0-50.oldcity.dca.net (207.103.28.30)  11.030 ms
+     8  node-150-eth3-0-local.oldcity.dca.net (207.245.82.150)  24.488 ms
+     9  argo.starforce.com (216.158.56.82) [closed]  1514.142 ms
+
+Tracing to falkland, a host behind jumpgate, a Cisco router with the
+following access-list:
+
+    access-list 100 permit tcp any any established
+    access-list 100 deny   ip any any
+
+
+    [mct@quint ~]$ tcptraceroute -q1 falkland
+    Selected device eth0, address 207.8.132.210, port 3771 for outgoing packets
+    Tracing the path to falkland (207.106.130.86) on TCP port 80 (www), 30 hops max
+     1  jumpgate.netisland.net (207.106.130.81) 2.111 ms
+     2  *
+     3  *
+     4  *
+
+    [mct@quint ~]$ tcptraceroute -q1 -A falkland
+    Selected device eth0, address 207.8.132.210, port 3773 for outgoing packets
+    Tracing the path to falkland (207.106.130.86) on TCP port 80 (www), 30 hops max
+     1  jumpgate.netisland.net (207.106.130.81) 2.044 ms
+     2  falkland.netisland.net (207.106.130.86) [closed]  4.635 ms
+
+
+Another example of tracing to a host protected by a stateless firewall, which
+permits hosts behind it to make outbound TCP connections:
+
+    [mct@ellesmere ~]$ tcptraceroute -q1 -f9 uunet1.fe.weather.com
+    Selected device eth0, address 209.163.107.174, port 35833 for outgoing packets
+    Tracing the path to uunet1.fe.weather.com (63.111.66.2) on TCP port 80 (www), 30 hops max
+     9  0.so-3-1-0.XL2.ATL5.ALTER.NET (152.63.0.238)  32.925 ms
+    10  0.so-7-0-0.XR2.ATL5.ALTER.NET (152.63.85.194)  32.765 ms
+    11  110.at-5-1-0.WR1.ATL5.ALTER.NET (152.63.3.58)  32.941 ms
+    12  pos6-0.ur1.atl7.web.wcom.net (157.130.216.50)  32.781 ms
+    13  198.5.128.134  32.802 ms
+    14  *
+    15  *
+    16  *
+    
+    [mct@ellesmere ~]$ tcptraceroute -q1 -f9 -A uunet1.fe.weather.com
+    Selected device eth0, address 209.163.107.174, port 35834 for outgoing packets
+    Tracing the path to uunet1.fe.weather.com (63.111.66.2) on TCP port 80 (www), 30 hops max
+     9  0.so-3-1-0.XL2.ATL5.ALTER.NET (152.63.0.238)  32.704 ms
+    10  0.so-7-0-0.XR2.ATL5.ALTER.NET (152.63.85.194)  32.665 ms
+    11  110.at-5-1-0.WR1.ATL5.ALTER.NET (152.63.3.58)  32.996 ms
+    12  pos6-0.ur1.atl7.web.wcom.net (157.130.216.50)  32.779 ms
+    13  198.5.128.134  33.122 ms
+    14  uunet1.fe.weather.com (63.111.66.2) [closed]  33.399 ms
+
+
+
+
+tcptraceroute-1.5beta6 added the --dnat detection support, to detect
+DNAT devices which do not correctly rewrite the IP address of the IP
+packets quoted in ICMP time-exceeded messages tcptraceroute solicits,
+revealing the destination IP address an outbound probe packet was NATed
+to.  Below are examples of using --dnat to determine the IP address our
+probe packets are being NATed to, recorded on March 28th, 2006.
+
+ -- Michael C. Toren <mct@toren.net>  Tue, 28 Mar 2006 23:40:54 -0500
+
+
+    [mct@ellesmere ~]$ tcptraceroute -q1 -f5 --track-port --dnat pages.ebay.com
+    Selected device eth0, address 209.163.107.174 for outgoing packets
+    Tracing the path to pages.ebay.com (66.135.192.87) on TCP port 80 (www), 30 hops max
+     5  equinix-chaz.coretel.net (209.163.107.121)  5.288 ms
+     6  gsr12012.ash.he.net (206.223.137.132)  5.610 ms
+     7  pos3-3.gsr12416.pao.he.net (216.218.254.205)  88.611 ms
+     8  pao1-br01.net.ebay.com (198.32.176.56)  88.637 ms
+     9  10.6.1.133  90.605 ms
+    10  ge2-7-snv1-xr01.net.ebay.com (66.135.207.54)  91.667 ms
+    11  10.6.1.74  92.471 ms
+          Detected DNAT to 10.6.35.86
+    12  10.6.105.8  91.187 ms
+    13  pages.ebay.com (66.135.192.87) [open]  91.908 ms
+
+
+    [mct@ellesmere ~]$ tcptraceroute -q1 -f8 --dnat magicpipe.no-ip.com 22
+    Selected device eth0, address 209.163.107.174, port 40857 for outgoing packets
+    Tracing the path to magicpipe.no-ip.com (69.142.94.59) on TCP port 22 (ssh), 30 hops max
+     8  tbr2-cl15.n54ny.ip.att.net (12.122.10.53)  12.965 ms
+     9  gar7-p390.n54ny.ip.att.net (12.123.3.85)  79.347 ms
+    10  12.118.102.22  12.430 ms
+    11  te-8-1-ar01.plainfield.nj.panjde.comcast.net (68.86.211.1)  12.425 ms
+    12  po80-ar01.audubon.nj.panjde.comcast.net (68.86.208.2)  14.968 ms
+    13  po10-ar01.wallingford.pa.panjde.comcast.net (68.86.208.26)  16.521 ms
+    14  po90-ur02.wallingford.pa.panjde.comcast.net (68.86.208.189)  16.356 ms
+    15  *
+          Detected DNAT to 192.168.1.100
+    16  c-69-142-94-59.hsd1.pa.comcast.net (69.142.94.59)  24.674 ms
+    17  c-69-142-94-59.hsd1.pa.comcast.net (69.142.94.59) [open]  25.230 ms
+
+        (The timeout on the 15th hop is normal behavior on Comcast's
+         network, and is unrelated to tcptraceroute.)
+

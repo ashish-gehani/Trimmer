@@ -1,0 +1,217 @@
+netperf (2.6.0-2) unstable; urgency=low
+
+  * [cbaabea7] [rules] removed explicit call of patchsys-quilt.mk
+  * [6a490bbf] [rules] removed clean target
+
+ -- Erik Wenzel <erik@debian.org>  Wed, 08 May 2013 23:13:13 +0200
+
+netperf (2.6.0-1) unstable; urgency=low
+
+  * [61a10974] Imported Upstream version 2.6.0
+  * [9e9f757a] [control] bumped standards version. nothing changed
+
+ -- Erik Wenzel <erik@debian.org>  Wed, 17 Apr 2013 17:22:30 +0200
+
+netperf (2.5.0-1) unstable; urgency=low
+
+  * [4174b40a] Imported Upstream version 2.5.0
+  * [3d7a224f] [patches] recreated patches using quilt
+
+ -- Erik Wenzel <erik@debian.org>  Tue, 16 Aug 2011 21:58:36 +0200
+
+netperf (2.4.5-1) unstable; urgency=low
+
+  * [b904c9b8] [init.d] removed S from default start (Closes: 493188) -
+    thanks to Rik Thies
+  * [3e156f73] [init.d] added support for /etc/default/netperf (Closes:
+    553199) - thanks to Salvatore Bonaccorso
+    <salvatore.bonaccorso@gmail.com>
+  * [865f744f] Imported Upstream version 2.4.5
+  * [5181a0d6] removed patch 300_svn_trunk_20071205.dpatch it is
+    integrated upstream
+  * [6e94df86] [init.d] moved runlevel 1 to default-stop
+  * [f7878ccc] Revert "[init.d] moved runlevel 1 to default-stop"
+  * [c4d8f1c5] [init.d] moved runlevel 1 to default-stop
+  * [20fa065d] added patch 300_bug361135.patch fixes segfault (Closes:
+    361135) - thanks to Yaroslav Halchenko
+
+ -- Erik Wenzel <erik@debian.org>  Wed, 12 May 2010 15:31:51 +0200
+
+netperf (2.4.4-6) unstable; urgency=low
+
+  * [134ff589] [control] updated build-dependency to livetex (closes:
+    575765)
+  * [b4f051a6] [init.d] added remote_fs
+  * [5330a006] [control] bumped standards-version
+  * [3628a0dc] [sources/format] fixed lintian warning missing-debian-
+    source-format
+  * [d98afee1] [control] added misc:Depends to binary section
+  * [f0f46475] [compat] updated debhelper compatibility
+  * [5d074a64] added README.source
+  * [199a0a6f] [control] updated build-debends on debhelper
+  * [e3ce0c6e] changed patch system from dpatch to quilt
+
+ -- Erik Wenzel <erik@debian.org>  Fri, 07 May 2010 14:46:15 +0200
+
+netperf (2.4.4-5) unstable; urgency=low
+
+  * please compile with --enable-demo (Closes: #476412)
+
+ -- Erik Wenzel <erik@debian.org>  Tue, 22 Apr 2008 22:26:33 +0000
+
+netperf (2.4.4-4) unstable; urgency=low
+
+  * added DebTags
+  * bumped standards-version
+  * added Homepage field to control
+  * README.debian: removed template phrase
+
+ -- Erik Wenzel <erik@debian.org>  Thu, 27 Mar 2008 22:21:14 +0000
+
+netperf (2.4.4-3) unstable; urgency=low
+
+  * 30_svn_trunk_20071205.dpatch includes all changes from svn trunk to
+    date
+  * [debian/rules] clean target uses make distclean
+
+ -- Erik Wenzel <erik@debian.org>  Wed, 05 Dec 2007 10:44:22 +0000
+
+netperf (2.4.4-2) unstable; urgency=low
+
+  * [debian/rules] removed bashism, for ubuntu buildds
+
+ -- Erik Wenzel <erik@debian.org>  Sun, 28 Oct 2007 10:19:13 +0000
+
+netperf (2.4.4-1) unstable; urgency=low
+
+  * New upstream release
+  * moved netserver debug file from /tmp to /var/log
+    fix for CVE-2007-1444 netserver logs to insecure temporary file
+
+ -- Erik Wenzel <erik@debian.org>  Thu, 18 Oct 2007 21:35:19 +0000
+
+netperf (2.4.3-8) unstable; urgency=low
+
+  * CVE-2007-1444 netserver logs to insecure temporary file
+    (Closes: #413658) Thanks to Nico Golde <nion@debian.org> for the
+    hotfix
+
+ -- Erik Wenzel <erik@debian.org>  Wed, 17 Oct 2007 08:55:57 +0000
+
+netperf (2.4.3-7) unstable; urgency=low
+
+  * misleading changelog.gz (Closes: #438146)
+  * moved examples list from rules to examples
+  * CVE-2007-1444 netserver logs to insecure temporary file (Closes:
+    #413658) Thanks Nico Golde <nion@debian.org> for the hotfix
+
+ -- Erik Wenzel <erik@debian.org>  Wed, 17 Oct 2007 04:39:28 +0000
+
+netperf (2.4.3-6) unstable; urgency=low
+
+  * Some names in manual pages are invisible (Closes: #434171)
+  * [init.d] added lsb functions
+  * misleading changelog.gz (Closes: #438146)
+
+ -- Erik Wenzel <erik@debian.org>  Wed, 17 Oct 2007 03:04:15 +0000
+
+netperf (2.4.3-5) unstable; urgency=low
+
+  * [init.d] netperf 2.4.3-3 remote install stuck (Closes: #427480)
+
+ -- Erik Wenzel <erik@debian.org>  Tue, 05 Jun 2007 08:54:54 +0000
+
+netperf (2.4.3-4) unstable; urgency=low
+
+  * [control] changed description
+
+ -- Erik Wenzel <erik@debian.org>  Sun, 18 Mar 2007 23:14:09 +0000
+
+netperf (2.4.3-3) unstable; urgency=low
+
+  * [copyright] fixed missing copyright file
+
+ -- Erik Wenzel <erik@debian.org>  Tue,  6 Mar 2007 19:08:28 +0100
+
+netperf (2.4.3-2) unstable; urgency=low
+
+  * [control] bumped standards-version to 3.7.2 (nothing changed)
+
+ -- Erik Wenzel <erik@debian.org>  Wed, 28 Feb 2007 18:08:16 +0000
+
+netperf (2.4.3-1) unstable; urgency=low
+
+  * New upstream release
+  * [watch] updated to new domain
+
+ -- Erik Wenzel <erik@debian.org>  Sun, 25 Feb 2007 10:04:57 +0000
+
+netperf (2.4.2-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Erik Wenzel <erik@debian.org>  Tue, 18 Apr 2006 08:30:12 +0200
+
+netperf (2.4.1-1) unstable; urgency=low
+
+  * examples moved from src/ to doc/ (Closes: #339385)
+  * disabled compilation of documentation in postscript
+  * cleanup of postinst, prerm and postrm
+  * updated standards-version to 3.6.2 (nothing changed)
+
+ -- Erik Wenzel <erik@debian.org>  Sat,  4 Feb 2006 22:48:27 +0100
+
+netperf (2.4.0-2) unstable; urgency=low
+
+  * added dependencies for tetex-bin (Closes: #310040)
+
+ -- Erik Wenzel <erik@debian.org>  Sat, 21 May 2005 16:43:09 +0200
+
+netperf (2.4.0-1) unstable; urgency=low
+
+  * rules is rewritten from scratch and uses debian common build system
+  * debian/init.d: netserver is in /usr/bin now.
+  * UDP Port listening is fixed in Upsteam (Closes: #309007)
+  * build documentation in the following formats: PDF, PS, HTML
+
+ -- Erik Wenzel <erik@debian.org>  Mon, 16 May 2005 16:27:13 +0200
+
+netperf (2.3-4) unstable; urgency=low
+
+  * Changed netserver manpage back to Section 8. I was confused.
+
+ -- Erik Wenzel <erik@debian.org>  Sun, 13 Mar 2005 20:09:45 +0100
+
+netperf (2.3-3) unstable; urgency=low
+
+  * Changed netserver manpage to Section 1.
+
+ -- Erik Wenzel <erik@debian.org>  Thu, 23 Dec 2004 20:44:09 +0100
+
+netperf (2.3-2) unstable; urgency=low
+
+  * enabled IPv6 Support on User-Request (Closes: #285571)
+
+ -- Erik Wenzel <erik@debian.org>  Sat, 18 Dec 2004 15:29:41 +0100
+
+netperf (2.3-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Erik Wenzel <erik@debian.org>  Mon, 28 Jun 2004 00:10:19 +0200
+
+netperf (2.2pl4-1) unstable; urgency=low
+
+  * New upstream. (Closes: #186155)
+  * fixed lintian problem in manpages
+  * updated standards-version to 3.5.9.0 (changed nothing)
+  * updated email in control
+
+ -- Erik Wenzel <erik@debian.org>  Wed, 23 Apr 2003 09:44:27 +0200
+
+netperf (2.1pl3-1) unstable; urgency=low
+
+  * Initial release.
+
+ -- Erik Wenzel <erik@todo.de>  Wed, 30 Jan 2002 10:15:17 +0200
+

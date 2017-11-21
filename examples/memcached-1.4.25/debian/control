@@ -1,0 +1,33 @@
+Source: memcached
+Section: web
+Priority: optional
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+XSBC-Original-Maintainer: David Martínez Moreno <ender@debian.org>
+Uploaders: Guillaume Delacour <gui@iroqwa.org>
+Build-Depends: debhelper (>= 9), libevent-dev, libsasl2-dev, adduser,
+               autotools-dev, dh-systemd (>= 1.5), dh-autoreconf
+Homepage: http://www.memcached.org/
+Standards-Version: 3.9.6
+Vcs-Browser: https://anonscm.debian.org/cgit/collab-maint/memcached.git
+Vcs-Git: https://anonscm.debian.org/git/collab-maint/memcached.git
+
+Package: memcached
+Architecture: any
+Depends: ${shlibs:Depends}, perl, ${misc:Depends}, lsb-base (>= 3.2-13),
+         adduser
+Suggests: libcache-memcached-perl, libmemcached, libanyevent-perl,
+          libyaml-perl, libterm-readkey-perl
+Description: high-performance memory object caching system
+ Danga Interactive developed memcached to enhance the speed of LiveJournal.com,
+ a site which was already doing 20 million+ dynamic page views per day for 1
+ million users with a bunch of webservers and a bunch of database servers.
+ memcached dropped the database load to almost nothing, yielding faster page
+ load times for users, better resource utilization, and faster access to the
+ databases on a memcache miss.
+ .
+ memcached optimizes specific high-load serving applications that are designed
+ to take advantage of its versatile no-locking memory access system. Clients
+ are available in several different programming languages, to suit the needs
+ of the specific application. Traditionally this has been used in mod_perl
+ apps to avoid storing large chunks of data in Apache memory, and to share
+ this burden across several machines.

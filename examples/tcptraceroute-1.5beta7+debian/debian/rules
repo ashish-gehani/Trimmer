@@ -1,0 +1,77 @@
+#!/usr/bin/make -f
+
+DEB_HOST_GNU_TYPE	?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+DEB_BUILD_GNU_TYPE	?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+
+ifneq ($(DEB_HOST_GNU_TYPE),$(DEB_BUILD_GNU_TYPE))
+	CROSS=CC=$(DEB_HOST_GNU_TYPE)-gcc
+else
+	CROSS=
+endif
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp
+	rm -f config.guess config.sub
+
+	[ ! -f Makefile ] || $(MAKE) distclean
+	rm -f *.o tcptraceroute
+
+	dh_clean
+
+config.status: configure
+	dh_testdir
+
+ifneq "$(wildcard /usr/share/misc/config.guess)" ""
+	cp -f /usr/share/misc/config.guess config.guess
+endif
+ifneq "$(wildcard /usr/share/misc/config.sub)" ""
+	cp -f /usr/share/misc/config.sub config.sub
+endif
+
+	./configure $(CROSS) --prefix=$(CURDIR)/debian/tcptraceroute/usr --mandir=$(CURDIR)/debian/tcptraceroute/usr/share/man CFLAGS="$(CFLAGS)" LDFLAGS="-Wl,-z,defs"
+
+build: build-stamp
+build-stamp: config.status
+	dh_testdir
+
+	$(MAKE)
+
+	touch build-stamp
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_prep
+
+	$(MAKE) install
+
+	mv debian/tcptraceroute/usr/bin/tcptraceroute debian/tcptraceroute/usr/bin/tcptraceroute.mt
+	mv debian/tcptraceroute/usr/share/man/man1/tcptraceroute.1 debian/tcptraceroute/usr/share/man/man1/tcptraceroute.mt.1
+
+	chmod 4755 debian/tcptraceroute/usr/bin/tcptraceroute.mt
+	chown root:root debian/tcptraceroute/usr/bin/tcptraceroute.mt
+
+	rm -rf debian/tcptraceroute/usr/share/doc/tcptraceroute
+
+binary: binary-arch
+
+binary-arch: install
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs ChangeLog
+	dh_installdocs
+	dh_lintian
+	dh_strip
+	dh_compress
+	dh_fixperms -Xusr/bin/tcptraceroute.mt
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary-indep:
+
+.PHONY: clean build install binary binary-arch binary-indep

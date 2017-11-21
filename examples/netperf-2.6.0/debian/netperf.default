@@ -1,0 +1,2 @@
+# Run netserver at startup?
+NETSERVER_ENABLE=YES

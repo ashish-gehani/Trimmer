@@ -34,6 +34,7 @@ def parse_args(args):
 	opt_flag = True
 	spec_flag = True
 	strip_flag = True
+	icp_flag = True
 	for i in range(2, len(args)):
 		if(args[i] == 'no-optimization'):
 			opt_flag = False
@@ -41,5 +42,7 @@ def parse_args(args):
 			spec_flag = False
 		elif(args[i] == 'no-strip'):
 			strip_flag = False
+		elif(args[i] == 'no-inter-constprop'):
+			icp_flag = False
 		else: usage()
-	return (man_data, work_dir, opt_flag, spec_flag, strip_flag)
+	return (man_data, work_dir, opt_flag, spec_flag, strip_flag, icp_flag)

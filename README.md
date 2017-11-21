@@ -47,8 +47,5 @@
     mkdir work_dir
     python ../run.py curl.manifest work_dir      
 
-    To run a comparison for trimmer, occam, orig ..
-    cd experimentation/example
-    uncomment whichever programs you want to run in run.sh
-    ./run.sh
-    results are automatically written to results/exe_sizes.csv and results/funcs.csv
+    To run a comparison for trimmer, occam, orig use the scripts in experimentation directory
+    to run en masse, run run_examples.sh in the root

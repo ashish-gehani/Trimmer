@@ -1,0 +1,10 @@
+01_init_script_additions.patch
+02_manpage_additions.patch
+03_fix_ftbfs4hurd.patch
+04_add_init_retry.patch
+06_eol_comment_handling.patch
+07_disable_tests.patch
+08_disable_slabs_test.patch
+fix-distribution.patch
+always_enable_alignment.patch
+CVE-2016-870x.patch

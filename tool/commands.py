@@ -35,12 +35,12 @@ def run_specs(tool):
 	# 	subprocess.call(Cmd, shell = True)
 	# print tool.args
 	# Add arguments to main
-
-	# annotate pass
-	# Cmd = opt + ' -load ' + build_path + 'Annotate.so -annotate ' + curr_file + ' -o ' \
-	# + annot_file
-	# print Cmd
-	# subprocess.call(Cmd, shell = True)	
+	if(tool.icp_flag):
+		# annotate pass
+		Cmd = opt + ' -load ' + build_path + 'Annotate.so -annotate ' + curr_file + ' -o ' \
+		+ curr_file
+		print Cmd
+		subprocess.call(Cmd, shell = True)	
 
 	Cmd = opt + ' -load ' + build_path + 'SpecializeArguments.so -specialize-args \
 	-args=' + tool.args + ' ' + curr_file + ' -o ' + add_file
@@ -59,27 +59,28 @@ def run_specs(tool):
 	-args=' + tool.args + ' ' + unroll_file + ' -o ' + libspec_file  
 	print Cmd
 	subprocess.call(Cmd, shell = True)	
-	 
-	# interconstprop pass
-	Cmd = opt + ' -load ' + build_path + 'InterConstProp.so -isAnnotated=true -mem2reg \
-	-mergereturn -simplifycfg -loop-simplify -inter-constprop ' + libspec_file + ' -o '\
-	+ constprop_file
-	print Cmd
-	Cmd = [opt, '-load', build_path + 'InterConstProp.so', '-isAnnotated=true', '-mem2reg',
-	'-mergereturn', '-simplifycfg', '-loop-simplify', '-inter-constprop', libspec_file, '-o',
-	constprop_file]
-	f = open(constprop_log_file, "wb")
-	print Cmd
-	subprocess.call(Cmd, stdout=f)
-	f.close()
-	# remove pass
-	Cmd = opt + ' -load ' + build_path + 'Remove.so -remove ' + constprop_file\
-	+ ' -o ' + remove_file
-	print Cmd
-	subprocess.call(Cmd, shell = True)	
+	
+	if(tool.icp_flag): 
+		# interconstprop pass
+		Cmd = opt + ' -load ' + build_path + 'InterConstProp.so -isAnnotated=true -mem2reg \
+		-mergereturn -simplifycfg -loop-simplify -inter-constprop ' + libspec_file + ' -o '\
+		+ constprop_file
+		print Cmd
+		Cmd = [opt, '-load', build_path + 'InterConstProp.so', '-isAnnotated=true', '-mem2reg',
+		'-mergereturn', '-simplifycfg', '-loop-simplify', '-inter-constprop', libspec_file, '-o',
+		constprop_file]
+		f = open(constprop_log_file, "wb")
+		print Cmd
+		subprocess.call(Cmd, stdout=f)
+		f.close()
+		# remove pass
+		Cmd = opt + ' -load ' + build_path + 'Remove.so -remove ' + constprop_file\
+		+ ' -o ' + libspec_file
+		print Cmd
+		subprocess.call(Cmd, shell = True)	
 
 	# inline pass
-	Cmd = opt + ' -always-inline ' + remove_file + ' -o ' + inline_file
+	Cmd = opt + ' -always-inline ' + libspec_file + ' -o ' + inline_file
 	print Cmd
 	subprocess.call(Cmd, shell = True)
 

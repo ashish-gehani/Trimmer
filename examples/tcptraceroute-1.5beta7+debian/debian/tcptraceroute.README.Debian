@@ -1,0 +1,19 @@
+tcptraceroute in Debian
+-----------------------
+
+Michael Toren, the upstream author, has requested that people run a small test
+suite and mail him the results.
+
+The test suite (a short perl program) and the already-reported results are at
+http://michael.toren.net/code/tcptraceroute/compatibility/
+
+He'd particularly be interested in results from system types that have not
+already been reported, and Debian users probably have lots of those, so please
+help out if you can.
+
+Thanks.
+
+More details are at
+http://lists.netisland.net/archives/tcptraceroute/tcptraceroute-2005/msg00000.html
+
+ -- David Coe <davidc@debian.org>,  Mon 14 Mar 2005 00:34:18 -0500

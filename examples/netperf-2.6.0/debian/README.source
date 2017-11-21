@@ -1,0 +1,7 @@
+Building netperf for Debian
+
+debian patches are generated using dpatch. Refer dpatch documentation for
+using it. netperf is build using git, git-buildpackage, pristine-tar and
+devscripts.
+
+-- Erik Wenzel <erik@debian.org>  Sun Apr 11 16:04:17 CEST 2010

@@ -1,0 +1,97 @@
+Source: bzip2
+Section: utils
+Priority: important
+Maintainer: Anibal Monsalve Salazar <anibal@debian.org>
+Uploaders: Santiago Ruano Rincón <santiago@debian.org>
+Standards-Version: 3.9.6
+Build-Depends: dpkg-dev (>= 1.16.0), debhelper (>= 9), dh-exec
+Build-Depends-Indep: texinfo
+Homepage: http://www.bzip.org/
+Vcs-Git: git://git.debian.org/collab-maint/bzip2.git
+Vcs-Browser: http://git.debian.org/?p=collab-maint/bzip2.git
+
+Package: libbz2-1.0
+Priority: important
+Section: libs
+Multi-Arch: same
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Pre-Depends: ${misc:Pre-Depends}
+Description: high-quality block-sorting file compressor library - runtime
+ This package contains libbzip2 which is used by the bzip2 compressor.
+ .
+ bzip2 is a freely available, patent free, high-quality data compressor.
+ It typically compresses files to within 10% to 15% of the best available
+ techniques, whilst being around twice as fast at compression and six
+ times faster at decompression.
+ .
+ bzip2 compresses files using the Burrows-Wheeler block-sorting text
+ compression algorithm, and Huffman coding. Compression is generally
+ considerably better than that achieved by more conventional
+ LZ77/LZ78-based compressors, and approaches the performance of the PPM
+ family of statistical compressors.
+ .
+ The archive file format of bzip2 (.bz2) is incompatible with that of its
+ predecessor, bzip (.bz).
+
+Package: libbz2-dev
+Priority: optional
+Section: libdevel
+Multi-Arch: same
+Architecture: any
+Depends: ${misc:Depends}, libbz2-1.0 (=${binary:Version}), libc6-dev | libc-dev
+Replaces: bzip2 (<<0.9.5d-3)
+Recommends: bzip2-doc
+Description: high-quality block-sorting file compressor library - development
+ Static libraries and include files for the bzip2 compressor library.
+ .
+ bzip2 is a freely available, patent free, high-quality data compressor.
+ It typically compresses files to within 10% to 15% of the best available
+ techniques, whilst being around twice as fast at compression and six
+ times faster at decompression.
+ .
+ bzip2 compresses files using the Burrows-Wheeler block-sorting text
+ compression algorithm, and Huffman coding.  Compression is generally
+ considerably better than that achieved by more conventional
+ LZ77/LZ78-based compressors, and approaches the performance of the PPM
+ family of statistical compressors.
+ .
+ The archive file format of bzip2 (.bz2) is incompatible with that of its
+ predecessor, bzip (.bz).
+
+Package: bzip2
+Priority: standard
+Section: utils
+Architecture: any
+Multi-Arch: foreign
+Depends: ${misc:Depends}, ${shlibs:Depends}, libbz2-1.0 (=${binary:Version})
+Suggests: bzip2-doc
+Replaces: libbz2 (<<0.9.5d-3)
+Description: high-quality block-sorting file compressor - utilities
+ bzip2 is a freely available, patent free, high-quality data compressor.
+ It typically compresses files to within 10% to 15% of the best available
+ techniques, whilst being around twice as fast at compression and six
+ times faster at decompression.
+ .
+ bzip2 compresses files using the Burrows-Wheeler block-sorting text
+ compression algorithm, and Huffman coding.  Compression is generally
+ considerably better than that achieved by more conventional
+ LZ77/LZ78-based compressors, and approaches the performance of the PPM
+ family of statistical compressors.
+ .
+ The archive file format of bzip2 (.bz2) is incompatible with that of its
+ predecessor, bzip (.bz).
+
+Package: bzip2-doc
+Priority: optional
+Section: doc
+Architecture: all
+Depends: ${misc:Depends}, dpkg (>= 1.15.4) | install-info
+Replaces: bzip2 (<< 1.0.4-0ubuntu2)
+Description: high-quality block-sorting file compressor - documentation
+ bzip2 is a freely available, patent free, high-quality data compressor. 
+ It typically compresses files to within 10% to 15% of the best available
+ techniques, whilst being around twice as fast at compression and six
+ times faster at decompression.
+ .
+ This package contains the bzip2 user manual.

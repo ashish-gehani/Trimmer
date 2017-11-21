@@ -1,0 +1,17 @@
+#!/usr/bin/make -f
+
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/class/autotools.mk
+
+DEB_CONFIGURE_EXTRA_FLAGS := --enable-demo
+
+build/netperf::
+	cd doc && make netperf.pdf netperf.html
+
+binary-post-install/netperf::
+	rm debian/$(cdbs_curpkg)/usr/share/doc/netperf/changelog
+	rm -rf debian/$(cdbs_curpkg)/usr/share/info
+	cp COPYING debian/$(cdbs_curpkg)/usr/share/doc/netperf/copyright
+	cp doc/netperf.pdf debian/$(cdbs_curpkg)/usr/share/doc/netperf/netperf.pdf
+	cp doc/netperf.html debian/$(cdbs_curpkg)/usr/share/doc/netperf/netperf.html
+

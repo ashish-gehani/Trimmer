@@ -1,0 +1,8 @@
+doc/examples/packet_byte_script
+doc/examples/sctp_stream_script
+doc/examples/snapshot_script
+doc/examples/tcp_range_script
+doc/examples/tcp_rr_script
+doc/examples/tcp_stream_script
+doc/examples/udp_rr_script
+doc/examples/udp_stream_script

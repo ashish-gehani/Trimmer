@@ -1,0 +1,110 @@
+#!/usr/bin/make -f
+# debian/rules file for building the Debian GNU/Linux package bzip2.
+# Copyright (C) 1999, 2000, 2001, 2002 Philippe Troin
+# Copyright (C) 2004-2007 Anibal Monsalve Salazar <anibal@debian.org>
+# Copyright 2014 Canonical Ltd.
+
+SHELL = /bin/bash
+
+DEB_BUILD_GNU_TYPE	:= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+DEB_HOST_GNU_TYPE	:= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+DEB_HOST_ARCH		:= $(shell dpkg-architecture -qDEB_HOST_ARCH)
+DEB_HOST_ARCH_OS	:= $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
+DEB_HOST_MULTIARCH      ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+
+ifneq ($(DEB_HOST_GNU_TYPE),$(DEB_BUILD_GNU_TYPE))
+        CROSS=CC=$(DEB_HOST_GNU_TYPE)-gcc
+        CC=$(DEB_HOST_GNU_TYPE)-gcc
+else
+        CROSS=CC=gcc
+        CC=gcc
+endif
+
+DEBCFLAGS:=`dpkg-buildflags --get CFLAGS`
+DEBCFLAGS +=`dpkg-buildflags --get CPPFLAGS`
+WGET=wget
+
+DEBVERSION:=$(shell head -n 1 debian/changelog \
+		    | sed -e 's/^[^(]*(\([^)]*\)).*/\1/')
+UPVERSION:=$(shell echo $(DEBVERSION) | sed -e 's/-[0-9.]*$$//')
+
+%:
+	dh $@
+
+build-arch: build-stamp
+build-stamp:
+	# Add here commands to compile the package.
+	dh_auto_build -- $(CROSS) DEBCFLAGS="$(DEBCFLAGS)"
+	touch build-stamp
+
+build-indep: bzip2.info
+bzip2.info: manual.texi
+	makeinfo -o bzip2.info manual.texi
+
+override_dh_auto_test:
+	dh_auto_test -- DEBCFLAGS="$(DEBCFLAGS)"
+
+# requires: docbook-xml docbook2x
+manual.texi: manual.xml
+	docbook2x-texi --to-stdout manual.xml | \
+	awk '/^@direntry/,/^@end direntry/ {if ($$0 !~ /@/) {print "* Bzip2: (bzip2).               A program and library for data compression."; next}} {print}' > manual.texi
+
+override_dh_auto_clean:
+	rm -f build*-stamp
+	# dh_auto_clean calls `make distclean', and it removes manual.{html,ps,pdf} 
+	# so we'd need to rebuild them. Call `make clean' instead
+	#dh_auto_clean
+	[ ! -f Makefile ] || $(MAKE) clean
+	rm -rf *.sho libbz2.so*
+	rm -f bzip2.info*
+
+override_dh_link:
+	dh_link
+ifneq (,$(filter $(shell dh_listpackages), bzip2-doc))
+	for i in debian/bzip2-doc/usr/share/doc/bzip2/*.{ps,texi,html}; do \
+	  b=$$(basename $$i); \
+	  ln -sf ../bzip2/$$b debian/bzip2-doc/usr/share/doc/bzip2-doc/$$b; \
+	done
+endif
+ifneq (,$(filter $(shell dh_listpackages), bzip2))
+	( cd debian/bzip2/usr/share/man/man1 && \
+	  for i in bunzip2 bzcat bzip2recover; do \
+	    ln -s bzip2.1.gz $$i.1.gz; \
+	  done )
+endif
+
+override_dh_auto_install:
+	dh_auto_install -- PREFIX=$(CURDIR)/debian/tmp
+	# Development package
+	rm debian/tmp/lib/libbz2.so
+	install -d debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)
+
+	# This isn't the soname, and nothing should be looking for this file,
+	# but leave it alone for now
+	ln -s libbz2.so.1.0.4 debian/tmp/lib/libbz2.so.1
+
+	ln -s /lib/$(DEB_HOST_MULTIARCH)/libbz2.so.1.0 debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/libbz2.so
+	ln -sf bzdiff debian/tmp/bin/bzcmp
+	ln -sf bzgrep debian/tmp/bin/bzegrep
+	ln -sf bzgrep debian/tmp/bin/bzfgrep
+	ln -sf bzmore debian/tmp/bin/bzless
+	install -d debian/tmp/usr/share
+	mv debian/tmp/man debian/tmp/usr/share/man
+
+override_dh_install:
+	dh_install --fail-missing
+
+override_dh_installdocs:
+	cat debian/copyright.in LICENSE > debian/copyright
+	dh_installdocs -plibbz2-dev --link-doc=libbz2-1.0
+	dh_installdocs -Nlibbz2-dev
+
+print-version:
+	@@echo "Debian version:          $(DEBVERSION)"
+	@@echo "Upstream version:        $(UPVERSION)"
+
+get-orig-source:
+	$(WGET) -O bzip2_$(UPVERSION).orig.tar.gz \
+	  ftp://sourceware.cygnus.com/pub/bzip2/v100/bzip2-$(UPVERSION).tar.gz
+
+.PHONY: print-version get-orig-source

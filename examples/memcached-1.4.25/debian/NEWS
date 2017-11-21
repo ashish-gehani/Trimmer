@@ -1,0 +1,7 @@
+memcached (1.4.20-1) unstable; urgency=medium
+
+    Starting with this release, a system user "memcache" will be created.
+    If you upgrade from an earlier release, you can change your configuration to
+    use it in your /etc/memcached*.conf (see the -u option).
+
+ -- Guillaume Delacour <gui@iroqwa.org>  Sat, 04 Oct 2014 15:19:45 +0200

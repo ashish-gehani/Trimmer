@@ -1,0 +1,22 @@
+Source: netperf
+Section: non-free/net
+Priority: optional
+Maintainer: Erik Wenzel <erik@debian.org>
+Homepage: http://www.netperf.org/
+Standards-Version: 3.9.4
+Build-Depends: autotools-dev, debhelper (>= 5.0.37.2), cdbs, quilt, texinfo, texlive-latex-base
+XS-Autobuild: yes
+
+Package: netperf
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Network performance benchmark
+ Netperf is a benchmark that can be used to measure the performance of many
+ different types of networking. It provides tests for both unidirecitonal
+ throughput, and end-to-end latency. The environments currently measureable by
+ netperf include:
+  * TCP and UDP via BSD Sockets
+  * DLPI
+  * Unix Domain Sockets
+  * IPv6
+Tag: admin::benchmarking, hardware::TODO, implemented-in::c, interface::commandline, network::client, network::server, protocol::ethernet, protocol::ip, protocol::ipv6, protocol::tcp, protocol::udp, role::program, scope::utility, use::TODO, use::analysing, use::checking, use::monitor, works-with::network-traffic

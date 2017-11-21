@@ -1,0 +1,543 @@
+memcached (1.4.25-2ubuntu1.2) xenial-security; urgency=medium
+
+  * SECURITY UPDATE: multiple integer overflow vulnerabilities
+    - debian/patches/CVE-2016-870x.patch: check nbytes and nkey in items.c,
+      properly handle lengths in memcached.c.
+    - CVE-2016-8704
+    - CVE-2016-8705
+    - CVE-2016-8706
+  * debian/patches/always_enable_alignment.patch: fix FTBFS on armhf.
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Wed, 02 Nov 2016 08:08:44 -0400
+
+memcached (1.4.25-2ubuntu1) xenial; urgency=medium
+
+  * Merge from Debian unstable (LP: #1556304). Remaining changes:
+    - debian/patches/fix-distribution.patch: added patch to show
+      distribution on version (updated to make merging easier)
+  * Drop:
+    - debian/patches/disable_slabs_test.patch: disable unreliable test.
+      + Merged in Debian 1.4.25-2.
+
+ -- Nishanth Aravamudan <nish.aravamudan@canonical.com>  Fri, 11 Mar 2016 14:07:54 -0800
+
+memcached (1.4.25-2) unstable; urgency=medium
+
+  * debian/patches/08_disable_slabs_test.patch: disable t/slabs-reassign2.t
+    which is unreliable and cause FTBFS, thanks Marc Deslauriers
+    (Closes: #813593)
+  * Change Vcs-{Browser,Git} to use https instead of http/git
+
+ -- Guillaume Delacour <gui@iroqwa.org>  Fri, 05 Feb 2016 13:15:26 +0100
+
+memcached (1.4.25-1ubuntu2) xenial; urgency=medium
+
+  * debian/patches/disable_slabs_test.patch: disable unreliable test.
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Tue, 26 Jan 2016 10:47:19 -0500
+
+memcached (1.4.25-1ubuntu1) xenial; urgency=medium
+
+  * Merge from Debian unstable. Remaining changes:
+    - debian/patches/fix-distribution.patch: added patch to show
+      distribution on version (updated to make merging easier)
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Fri, 22 Jan 2016 09:43:27 -0500
+
+memcached (1.4.25-1) unstable; urgency=medium
+
+  * New upstream release, refresh 02_manpage_additions.patch
+  * Use autoreconf in addition of autotools, to regenerate build system and not
+    stick on older autoreconf versions
+
+ -- Guillaume Delacour <gui@iroqwa.org>  Mon, 28 Dec 2015 18:01:46 +0100
+
+memcached (1.4.24-2ubuntu1) wily; urgency=medium
+
+  * Merge from Debian unstable. Remaining changes: (LP: #1462747)
+    - debian/patches/fix-distribution.patch: added patch to show
+      distribution on version (updated to make merging easier)
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Tue, 18 Aug 2015 08:52:11 -0400
+
+memcached (1.4.24-2) unstable; urgency=medium
+
+  * Refresh 06_eol_comment_handling.patch and debian/systemd-memcached-wrapper
+    to handle "\#" value for -D flag
+  * debian/rules: remove package generated memcached.init file
+
+ -- Guillaume Delacour <gui@iroqwa.org>  Sat, 18 Jul 2015 15:59:52 +0000
+
+memcached (1.4.24-1) unstable; urgency=medium
+
+  * New upstream release, refresh 07_disable_tests.patch
+  * debian/control: Remove XS-Testsuite as dpkg now recognize this header
+  * debian/tests: test the daemon by creating, getting, and flushing keys
+
+ -- Guillaume Delacour <gui@iroqwa.org>  Sat, 23 May 2015 16:15:23 +0200
+
+memcached (1.4.21-1.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+
+  [ Guillaume Delacour ]
+  * Provide systemd perl wrapper to load /etc/memcached.conf settings, thanks
+    Christos Trochalakis (Closes: #774087)
+
+ -- Ivo De Decker <ivodd@debian.org>  Sat, 07 Mar 2015 14:01:15 +0100
+
+memcached (1.4.21-1) unstable; urgency=medium
+
+  * New upstream release
+  * Use autotools-dev instead of dh_autoreconf, backup upstream files updated
+  * Patching configure.ac no more needed
+  * Don't run t/whitespace.t as .git in packaging report false positive
+
+ -- Guillaume Delacour <gui@iroqwa.org>  Thu, 23 Oct 2014 21:56:13 +0200
+
+memcached (1.4.20-1) unstable; urgency=medium
+
+  * New upstream release: (Closes: #733588)
+    - Includes fix for CVE-2013-7291 (Closes: #735314)
+    - Fix build for arm64 port (Closes: #761027, #721203)
+  * Add myself to Uploaders
+  * Provide scripts/damemtop, scripts/mc_slab_mover
+  * README is now README.md
+  * Suggests perl modules used by the new scripts
+  * Packaging updates:
+    - Switch to debhelper 9 and use source format 3.0
+    - remove dpkg-dev and quilt Build-Deps,
+    - add adduser dependency
+    - use all hardening options
+    - remove unnecessary debian/README.source
+    - update debian/copyring to use the machine-readable format
+  * Bumped policy version to 3.9.6 (no changes needed)
+  * Use dedicated memcache user instead of nobody, thanks Clint Byrum
+    (Closes: #587797)
+  * Use DEP-8 to test the package, thanks Yolanda Robla (Closes: #710015)
+  * Update description to remove "A" article and change Homepage
+  * Handle end of line comments in memcached.conf (Closes: #683144)
+  * Update debian/watch to track memcached.org (github has old 1.6.0-beta1)
+  * Update upstream manpage to add missing options (Closes: #685800)
+  * Add Vcs-{Git,Browser}
+  * Provide systemd support.
+  * Provide the status for several instances in scripts/memcached-init, if
+    the script is used. (Closes: #709163, LP: #1177398)
+
+  [ Ana Beatriz Guerrero Lopez ]
+  * As discussed with David by IRC, sponsor the package with Guillaume
+    co-maintaining.
+  * Add the stanza "XS-Testsuite: autopkgtest" in debian/control
+  * Acknowledge old NMUs from Arno Töll. (Closes: #641770, #672125)
+
+ -- Guillaume Delacour <gui@iroqwa.org>  Sat, 04 Oct 2014 15:19:45 +0200
+
+memcached (1.4.14-0ubuntu9) trusty; urgency=low
+
+  * SECURITY UPDATE: denial of service via large body length
+    - debian/patches/CVE-2011-4971.patch: check length in memcached.c,
+      added test to t/issue_192.t.
+    - CVE-2011-4971
+  * SECURITY UPDATE: denial of service when using -vv
+    - debian/patches/CVE-2013-0179.patch: properly format key in items.c,
+      memcached.c.
+    - CVE-2013-0179
+  * SECURITY UPDATE: SASL authentication bypass
+    - debian/patches/CVE-2013-7239.patch: explicitly record sasl auth
+      states in memcached.*, added test to t/binary-sasl.t.
+    - CVE-2013-7239
+  * debian/memcached.postinst: don't create home directory so we don't end
+    up with /nonexistent. Thanks to Dustin Lundquist for patch.
+    (LP: #1255328)
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Mon, 13 Jan 2014 15:48:48 -0500
+
+memcached (1.4.14-0ubuntu8) trusty; urgency=low
+
+  * Revert unnecessary deltas added to patches compared to Debian.
+  * Revert use of dh-autoreconf and patch configure manually to
+    match configure.ac, as this package despises modern autotools.
+
+ -- Adam Conrad <adconrad@ubuntu.com>  Thu, 14 Nov 2013 23:16:44 +0000
+
+memcached (1.4.14-0ubuntu7) trusty; urgency=low
+
+  * debian/rules: Fix the previous fixes a little harder, so they work.
+
+ -- Adam Conrad <adconrad@ubuntu.com>  Thu, 14 Nov 2013 22:49:46 +0000
+
+memcached (1.4.14-0ubuntu6) trusty; urgency=low
+
+  * debian/rules: Shuffle things around so that dh_autoreconf is always
+    run before dh_quilt_patch.  Fixes FTBFS with dpkg-buildpackage -B.
+
+ -- Barry Warsaw <barry@ubuntu.com>  Thu, 14 Nov 2013 17:05:29 -0500
+
+memcached (1.4.14-0ubuntu5) trusty; urgency=low
+
+  * debian/control: added lsb-release, dh-autoreconf to build depends
+  * debian/rules: run autoreconf
+  * debian/patches/fix-distribution.patch: added patch to show
+    distribution on version
+
+ -- Yolanda Robla <yolanda.robla@canonical.com>  Wed, 13 Nov 2013 13:50:59 +0100
+
+memcached (1.4.14-0ubuntu4) saucy; urgency=low
+
+  * Move dh_quilt_apply into configure step so that config.{sub,guess}
+    patches get applied before running configure. (LP: #1218114)
+
+ -- dann frazier <dann.frazier@canonical.com>  Thu, 29 Aug 2013 20:28:20 -0400
+
+memcached (1.4.14-0ubuntu3) saucy; urgency=low
+
+  * Update config.{guess,sub} for Aarch64.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 13 Aug 2013 13:52:58 +0200
+
+memcached (1.4.14-0ubuntu2) saucy; urgency=low
+
+  * debian/tests: Add autopkgtest.
+
+ -- Yolanda <yolanda.robla@canonical.com>  Mon, 27 May 2013 11:27:24 +0200
+
+memcached (1.4.14-0ubuntu1) quantal; urgency=low
+
+  * New upstream release.
+  * d/p/60_fix_racey_test.patch: Dropped, applied upstream.
+
+ -- Clint Byrum <clint@ubuntu.com>  Thu, 23 Aug 2012 13:52:39 -0700
+
+memcached (1.4.13-0.3) unstable; urgency=high
+
+  * Non-maintainer upload.
+  * Add 06_CVE-2011-4971.patch patch.
+    CVE-2011-4971: Fix remote denial of service. Sending a specially
+    crafted packet cause memcached to segfault. (Closes: #706426)
+  * Add 07_CVE-2013-7239.patch patch.
+    CVE-2013-7239: SASL authentication allows wrong credentials to access
+    memcache. (Closes: #733643)
+
+ -- Salvatore Bonaccorso <carnil@debian.org>  Mon, 30 Dec 2013 17:47:44 +0100
+
+memcached (1.4.13-0.2) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Add 05_fix-buffer-overrun_when_logging_keys.patch patch
+    [SECURITY] CVE-2013-0179: DoS due to buffer overrun when printing out keys
+    to be deleted in verbose mode. (Closes: #698231).
+
+ -- Salvatore Bonaccorso <carnil@debian.org>  Wed, 23 Jan 2013 21:22:09 +0100
+
+memcached (1.4.13-0.1ubuntu3) quantal; urgency=low
+
+  * d/p/start-memcached-fix-hash.patch: Change regex to make sure 
+    inline comments can function per feedback from upstream. Passing
+    "#" to arguments now requires escaping with \.
+
+ -- Clint Byrum <clint@ubuntu.com>  Tue, 31 Jul 2012 14:40:31 -0700
+
+memcached (1.4.13-0.1ubuntu2) quantal; urgency=low
+
+  * d/p/start-memcached-fix-hash.patch: Apply patch to allow passing
+    # as a value for memcached options such as -D to use # as a prefix
+    delimiter for stats collection. (LP: #1005821)
+
+ -- Clint Byrum <clint@fewbar.com>  Sun, 29 Jul 2012 00:14:09 -0700
+
+memcached (1.4.13-0.1ubuntu1) quantal; urgency=low
+
+  * Merge from Debian unstable.  Remaining changes:
+    - Run as 'memcache' user instead of nobody.
+    - Depend on adduser for preinst/postrm.
+    - Create user in postinst.
+    - d/rules: run test suite on build.
+    - d/patches/50_fix_racey_test.patch: Cherry picked patch from
+      upstream bug tracker which endeavours to avoid the race condition.
+      Thanks to Clint Byrum for this fix.
+    - d/patches/50_add_init_retry.patch: Dropped - superceeded by Debian
+      patch.
+
+ -- James Page <james.page@ubuntu.com>  Mon, 28 May 2012 15:21:53 +0100
+
+memcached (1.4.13-0.1) unstable; urgency=low
+
+   * Non-maintainer upload.
+     + Include changes of my previous NMU (filed as #641770 back then)
+   * Package new upstream release
+     + this fixes "Please package upstream version 1.4.13" (Closes: #667746)
+     + enable support for SASL authentication in debian/rules and add
+       build-dependencies accordingly (Closes: #616148)
+     + Include support for "-o maxconns_fast" which causes clients not to block
+       for a long time on busy servers
+   * Build package with hardened build flags. Thanks to Moritz Muehlenhoff for
+     providing a patch. Moreover, add a build-dependency for dpkg-dev (>=
+     1.15.7) for people considering to make a backport on very old systems
+     (Closes: #655134)
+   * Update patches:
+     + 03_fix_ftbfs4hurd.patch: Refresh hunk offsets, leave changes untouched
+     + Drop 04_fix_double_fork_in_start-memcached.patch: applied upstream
+     + Apply patch supplied by Clint Byrum as 04_add_init_retry.patch which
+       causes start-stop-daemon to wait up to 5 seconds upon termination of
+       memached (Closes: #659300)
+
+ -- Arno Töll <arno@debian.org>  Tue, 08 May 2012 19:24:27 +0200
+
+memcached (1.4.7-0.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Refresh patches, keep all changed hunks except some changes in
+    `01_init_script_additions.patch' untouched.
+  * New upstream release. Closes:
+    - "FTBFS: memcached.c:1023:16: error: dereferencing type-punned
+      pointer will break strict-aliasing rules" (Closes: #618096)
+    - "ftbfs with gcc-4.6 -Werror" (Closes: #625397)
+    - "FTBFS with libevent 2.0 in experimental" This is actually a duplicate
+      of #625397 above (Closes: #632764)
+    - Fix "please package new upstream release" (Closes: #641059)
+  * Fix "Fix FTBFS on hurd-i386" add proposed patch as
+    `03_fix_ftbfs4hurd.patch'. Thanks Svante Signell (Closes: #637695)
+  * Fix "initscript on restart ignore $ENABLE_MEMCACHED" Add a sanity check
+    to the init script (Closes: #636496)
+  * Fix "debian/watch doesn't work" Replace the watch file to match the new
+    Google Code layout (taken from the sinntp package) (Closes: #641520)
+  * Add `04_fix_double_fork_in_start-memcached.patch'. This patch causes the
+    start-memcached script to correctly write its PIDFILE, which, in turn,
+    allows the init script correct operations. This also fixes "status
+    operation on init.d not working correctly (needs to pass $PIDFILE to
+    status_of_proc)", however add the $PIDFILE argument additionally none-
+    theless as suggested (Closes: #622281)
+
+ -- Arno Töll <debian@toell.net>  Thu, 15 Sep 2011 12:43:27 +0200
+
+memcached (1.4.5-1) unstable; urgency=high
+
+  * New upstream release.  Main changes since 1.4.2 are:
+    New features:
+    - Support for SASL authentication.
+    - New script damemtop - a memcached top.
+    - Slab optimizations.
+    - New stats, for reclaimed memory and SASL events.
+    Bugs fixed:
+    - Malicious input can crash server (CVE-2010-1152).  Closes: #579913.
+    - Fixed several problems with slab handling and growth.
+    - Provide better error reporting.
+    - Fix get stats accounting.
+    - Fixed backwards compatibility with delete 0.
+    - Documentation fixes.
+    - Various build fixes, among others, fixed FTBFS with gcc-4.5 (closes:
+      #565033).
+  * Refreshed and renamed 01_init_script_compliant_with_LSB.patch.
+  * Fixed lintian warnings by adding $remote_fs to init.d script.
+  * Removed non-existent document (doc/memory_management.txt).
+  * debian/control: Bumped Standards-Version to 3.8.4 (no changes).
+  * 
+
+ -- David Martínez Moreno <ender@debian.org>  Wed, 12 May 2010 11:41:22 +0200
+
+memcached (1.4.2-1) unstable; urgency=medium
+
+  * New upstream release, primarily bugfixes, some of them critical, hence
+    the urgency:
+    - Reject keys larger than 250 bytes in the binary protocol.
+    - Bounds checking on stats cachedump.
+    - Binary protocol set+cas wasn't returning a new cas ID.
+    - Binary quitq didn't actually close the connection
+    - Slab boundary checking cleanup (bad logic in unreachable code)
+    - Get hit memory optimizations
+    - Disallow -t options that cause the server to not work
+    - Killed off incomplete slab rebalance feature.
+  * debian/patches:
+    - 01_init_script_compliant_with_LSB.patch: Remade as upstream applied a
+      whitespace cleanup script that broke the patch.
+    - 02_manpage_additions.patch: Added missing parameters to the memcached
+      manpage.
+  * Removed TODO from debian/docs.
+
+ -- David Martínez Moreno <ender@debian.org>  Fri, 16 Oct 2009 15:09:43 +0200
+
+memcached (1.4.1-1) unstable; urgency=high
+
+  * New upstream release (closes: #545883):
+    - Finally addressed CVE-2009-2415: heap-based buffer overflow in length
+      processing (closes: #540379).
+    - Boundary condition during pipelined decoding caused crash.
+    - Bad initialization during buffer realloc.
+    - Buffer overrun in stats_prefix_find.
+    - Other fixes and cleanups.
+  * Changed the default start to yes in /etc/init.d/memcached as well.
+  * debian/watch updated with new format and URL in code.google.com.  Thanks,
+    Monty Taylor.
+  * Added get-orig-source target, thanks to Monty Taylor.
+  * debian/control:
+    - Upgraded Standards-Version to 3.8.3 (no changes).
+    - Added Suggests: libmemcached.
+    - Bumped debhelper dependency and debian/compat to 6.
+    - Added Depends on quilt 0.46-7 in order to use dh_quilt_* helpers.
+  * debian/rules: Added dh_quilt_* helpers.
+  * Added direct patches to source as quilt patches.
+  * debian/README.source: Created such file to shut up lintian pedantic.
+
+ -- David Martínez Moreno <ender@debian.org>  Fri, 18 Sep 2009 02:43:54 +0200
+
+memcached (1.4.0-1) unstable; urgency=low
+
+  * New upstream release (closes: #484301, #537239):
+    - New binary protocol, supporting CAS (compare-and-swap).
+    - Non-threaded version is no longer possible, you just choose to run 1
+      thread to have similar behaviour.
+    - Lots of performance bottlenecks fixed (connection starvation,
+      contention, disabling of CAS, locks for hash table expansion...).
+    - Lots of new stats.  Main change is that stats now are per-slab where
+      possible.
+    - Code cleanup, lots of bugs fixed, added tests, enhanced documentation.
+
+ -- David Martínez Moreno <ender@debian.org>  Sat, 01 Aug 2009 23:26:45 +0200
+
+memcached (1.2.8-2) unstable; urgency=low
+
+  * After some thinking, probably making memcached starting by default is the
+    right thing to do (closes: #536524).
+  * Added status support to init.d script (closes: #528689).  Thanks, Peter!
+  * debian/control: Added dependency on lsb-base (>= 3.2-13).
+
+ -- David Martínez Moreno <ender@debian.org>  Sat, 11 Jul 2009 00:29:51 +0200
+
+memcached (1.2.8-1) unstable; urgency=high
+
+  * New upstream release, urgency=high because of two critical bugs prior
+    to this release:
+    - In 1.2.7 under multithreaded mode, memcached would never restart
+      accepting connections after hitting the maximum connection limit.
+    - Remove 'stats maps' command, as it is a potential information leak,
+      usable if versions prior to 1.2.8 ever have buffer overflows discovered
+      (CVE-2009-1494).  Closes: #526554.
+    - Make -b command (setting the TCP listen backlog) actually work.
+  * debian/rules: Removed obsolete --disable-static.
+
+ -- David Martínez Moreno <ender@debian.org>  Sat, 02 May 2009 19:15:49 +0200
+
+memcached (1.2.7-1) unstable; urgency=low
+
+  * New upstream release, released on 4/3/2009.
+    - New statistics.
+    - Added -R option. Limit the number of requests processed by a connection
+      at once. Prevents starving other threads if bulk loading.
+    - Added -b command for setting the tcp listen backlog.
+    - Many minor bugfixes.
+
+ -- David Martínez Moreno <ender@debian.org>  Sat, 02 May 2009 18:13:39 +0200
+
+memcached (1.2.6-1) unstable; urgency=low
+
+  * New upstream release (closes: #505037).  Released on 29/7/2008.
+    - Major crash fixes.
+    - DTrace support.
+    - Minor updates.
+  * debian/memcached.postrm: Now /var/log/memcached.log is removed on purge.
+    Thanks, jidanni! (closes: #447288).
+
+ -- David Martínez Moreno <ender@debian.org>  Sat, 28 Feb 2009 09:43:24 +0000
+
+memcached (1.2.5-1) unstable; urgency=low
+
+  * New upstream release, released on 3/2/2008:
+    - Minor bugfixes.
+    - Added support for Opensolaris.
+    - IPv6 support.
+    - "noreply" mode for many commands.
+    - Made "out of memory· errors more clear.
+    - Added eviction/OOM tracking per slab class.
+
+ -- David Martínez Moreno <ender@debian.org>  Fri, 27 Feb 2009 10:48:14 +0000
+
+memcached (1.2.4-1) unstable; urgency=low
+
+  * New upstream release (closes: #454699).  Released on 6/12/2007:
+    - Many bug and platform fixes since 1.2.2.
+    - New threading support for stat queries.
+    - New commands 'append', 'prepend', 'gets', and 'cas'.
+    - Updates to the manpage (closes: #441067).
+    - Now memcached has a flag -a to restrict the socket to a group (closes:
+      #446606).
+  * debian/rules: Added memcached-tool to the set of installed scripts.
+    Thanks, Cyril! (closes: #512400).
+
+ -- David Martínez Moreno <ender@debian.org>  Thu, 26 Feb 2009 12:07:03 +0000
+
+memcached (1.2.3-1) unstable; urgency=low
+
+  * Take over memcached package.
+  * New upstream release.  Mostly a documentation and warning fixing release.
+    This one was released on 6/7/2007.
+  * Added an /etc/default/memcached, thanks to Mark Ferlatte (closes:
+    #467356).
+  * debian/rules: Added --enable-threads to configure.  It's amazing how this
+    could be missing from mainstream packages in Debian.
+  * debian/control:
+    - Put myself as Maintainer.
+    - Added Homepage field.
+    - Bumped Standards-Version to 3.8.0.
+    - Added ${misc:Depends} to Depends line.
+  * debian/copyright: Added a lot of information.
+  * debian/memcached.post{inst,rm}: Added set -e in order to catch errors.
+
+ -- David Martínez Moreno <ender@debian.org>  Thu, 26 Feb 2009 09:51:46 +0000
+
+memcached (1.2.2-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Jay Bonci <jaybonci@debian.org>  Fri, 29 Jun 2007 10:18:03 -0400
+
+memcached (1.2.1-1) unstable; urgency=low
+
+  * New upstream release (Closes: #405054)
+  * Fix to logfile output so logrotate will work (Closes: #417941)
+  * Listen in on localhost by default (Closes: #383660)
+  * Default configuration suggests nobody by default (Closes: #391351)
+  * Bumped policy version to 3.7.2.2 (No other changes)
+
+ -- Jay Bonci <jaybonci@debian.org>  Wed, 02 May 2007 11:35:42 -0400
+
+memcached (1.1.12-1) unstable; urgency=low
+
+  * New upstream version
+  * Updates watchfile so uupdate will work
+
+ -- Jay Bonci <jaybonci@debian.org>  Mon, 11 Apr 2005 11:54:39 -0400
+
+memcached (1.1.11-3) unstable; urgency=low
+
+  * Rebuild against non-broken libevent
+
+ -- Jay Bonci <jaybonci@debian.org>  Fri, 18 Feb 2005 09:11:55 -0500
+
+memcached (1.1.11-2) unstable; urgency=low
+
+  * Adds debian/watch file so uscan will work
+  * Added additional paragraph to debian/control (Closes: #262069)
+
+ -- Jay Bonci <jaybonci@debian.org>  Wed, 27 Oct 2004 13:49:22 -0400
+
+memcached (1.1.11-1) unstable; urgency=low
+
+  * New upstream version
+  * Fix silly typo that kept daemon from running as www-data (Closes: #239854)
+    - Thanks to Karaszi Istvan for the report
+  * Fix to reopen fds as the logfile, adds logfile support (Closes: #243522)
+
+ -- Jay Bonci <jaybonci@debian.org>  Wed,  5 May 2004 17:25:25 -0400
+
+memcached (1.1.10-1) unstable; urgency=low
+
+  * New upstream version
+
+ -- Jay Bonci <jaybonci@debian.org>  Wed, 31 Dec 2003 10:01:27 -0500
+
+memcached (1.1.9-1) unstable; urgency=low
+
+  * Initial Release (Closes: #206268).
+
+ -- Jay Bonci <jaybonci@debian.org>  Wed, 15 Oct 2003 15:53:51 -0400
+

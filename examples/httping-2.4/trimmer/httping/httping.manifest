@@ -1,0 +1,1 @@
+{"binary": "httping_fin", "native_libs": [], "name": "httping", "args": ["-G", "-s", "-X", "-b", "-B", "_"], "modules": [], "ldflags": ["-lssl", "-lcrypto", "-lm"], "main": "httping.bc"}

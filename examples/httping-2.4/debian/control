@@ -1,0 +1,19 @@
+Source: httping
+Section: net
+Priority: optional
+Maintainer: Abhijith PA <abhijith@openmailbox.org>
+Build-Depends: debhelper (>= 9), libssl-dev, cppcheck, clang, libncursesw5-dev, libncurses5-dev, libfftw3-dev, dpkg-dev (>= 1.16.1~)
+Standards-Version: 3.9.6
+Vcs-Browser: https://anonscm.debian.org/cgit/collab-maint/httping.git
+Vcs-Git: git://anonscm.debian.org/collab-maint/httping.git
+Homepage: http://www.vanheusden.com/httping
+
+Package: httping
+Architecture: any
+Depends: ${shlibs:Depends}, openssl, ${misc:Depends}
+Description: ping-like program for http-requests
+ httping is like ping for HTTP. It sends requests to a hostname or a remote
+ URL and it shows you how long it takes to connect, send a HTTP request and
+ retrieve the reply (only the header).
+ .
+ It supports SSL as well as various different ways to use it.      

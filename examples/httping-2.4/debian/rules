@@ -1,0 +1,13 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_HARDENING=1
+include /usr/share/dpkg/buildflags.mk
+
+%:
+	dh $@
+
+override_dh_auto_install:
+	$(MAKE) install PREFIX=$(CURDIR)/debian/httping/usr
+	rm $(CURDIR)/debian/httping/usr/share/doc/httping/license.txt
+	rm $(CURDIR)/debian/httping/usr/share/doc/httping/license.OpenSSL
+

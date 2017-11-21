@@ -4,7 +4,7 @@ from shutil import copyfile
 
 class Debloat:
 	
-	def __init__(self, (man_data, work_dir, opt_flag, spec_flag, strip_flag)):
+	def __init__(self, (man_data, work_dir, opt_flag, spec_flag, strip_flag, icp_flag)):
 
 		self.name = man_data["name"]
 		self.main = man_data["main"]
@@ -17,6 +17,7 @@ class Debloat:
 		self.opt_flag = opt_flag
 		self.spec_flag = spec_flag
 		self.strip_flag = strip_flag
+		self.icp_flag = icp_flag
 		self.print_info()
 
 	def print_info(self):

@@ -1,0 +1,74 @@
+#########################################################################
+#  The Yices SMT Solver. Copyright 2014 SRI International.              #
+#                                                                       #
+#  This program may only be used subject to the noncommercial end user  #
+#  license agreement which is downloadable along with this program.     #
+#########################################################################                
+
+#
+#
+# Host-dependent configuration
+# to be included in all Makefiles
+#
+
+prefix = /usr/local
+exec_prefix = ${prefix}
+bindir = ${exec_prefix}/bin
+sbindir = ${exec_prefix}/sbin
+libexecdir = ${exec_prefix}/libexec
+datarootdir = ${prefix}/share
+datadir = ${datarootdir}
+sysconfdir = ${prefix}/etc
+sharedstatedir = ${prefix}/com
+localstatedir = ${prefix}/var
+libdir = ${exec_prefix}/lib
+infodir = ${datarootdir}/info
+mandir = ${datarootdir}/man
+includedir = ${prefix}/include
+
+#
+# Variables set by configure
+# NOTE: don't include POSIXOS here
+# (the OS is determined by the top-level Makefile)
+#
+
+EXEEXT=
+
+# tools
+SED=/bin/sed
+LN_S=ln -s
+MKDIR_P=/bin/mkdir -p
+INSTALL=/usr/bin/install -c
+EGREP=/bin/grep -E
+
+# compilation
+CC=wllvm
+CFLAGS=
+CPPFLAGS=
+LIBS=-lpoly -lgmp 
+LDFLAGS=
+LD=ld
+AR=ar
+RANLIB=ranlib
+GPERF=gperf
+STRIP=strip
+NO_STACK_PROTECTOR=-fno-stack-protector
+
+# GMP libaries
+STATIC_GMP=/usr/lib/x86_64-linux-gnu/libgmp.a
+STATIC_GMP_INCLUDE_DIR=
+
+PIC_GMP=/usr/lib/x86_64-linux-gnu/libgmp.a
+PIC_GMP_INCLUDE_DIR=
+
+# MCSAT support and libpoly
+ENABLE_MCSAT=yes
+
+STATIC_LIBPOLY=/lib/libpoly.a
+STATIC_LIBPOLY_INCLUDE_DIR=
+
+PIC_LIBPOLY=/lib/libpoly.a
+PIC_LIBPOLY_INCLUDE_DIR=
+
+
+

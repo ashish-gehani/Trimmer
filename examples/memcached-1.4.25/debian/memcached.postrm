@@ -1,0 +1,19 @@
+#!/bin/sh
+
+set -e
+
+USER=memcache
+GROUP=memcache
+
+if [ "$1" = "purge" ]
+	then
+		rm -f /etc/memcached.conf
+		rm -f /var/log/memcached.log
+
+        deluser --system $USER || true
+        delgroup --system --only-if-empty $GROUP || true
+fi
+
+	rm -f /var/run/memcached.pid
+
+#DEBHELPER#

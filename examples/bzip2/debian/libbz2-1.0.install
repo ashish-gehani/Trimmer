@@ -1,0 +1,2 @@
+#!/usr/bin/dh-exec
+lib/libbz2.so.* /lib/${DEB_HOST_MULTIARCH}
