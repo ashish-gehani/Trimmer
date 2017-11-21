@@ -1,0 +1,1 @@
+{"binary": "aircrack-ng_fin", "native_libs": ["liblinecount.a"], "name": "aircrack-ng", "args": ["-s", "-a", "2", "-w", "_", "_"], "modules": [], "ldflags": ["-lpthread", "-lssl", "-lcrypto", "-lstdc++"], "main": "aircrack-ng.bc"}
