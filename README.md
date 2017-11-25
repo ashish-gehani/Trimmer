@@ -21,11 +21,9 @@
     export LLVM_OPT_NAME=opt-3.8
     export LLVM_NM_NAME=llvm-nm-3.8
 
-#### Run
-    
-    the main run script is trimmer/tool/run.py
-    e.g. python run.py name-of-manifest-file working-directory
-
+#### Synopsis
+       
+    python tool/trimmer.py [manifest-file] [working-directory]
 
 #### Description of manifest file 
     
@@ -43,9 +41,8 @@
 
 #### Examples
      
-    cd tool/example/
-    mkdir work_dir
-    python ../run.py curl.manifest work_dir      
+    mkdir examples/tool_name/work_dir
+    python tool/trimmer.py   examples/tool_name/tool.manifest  examples/tool_name/work_dir      
 
     To run a comparison for trimmer, occam, orig use the scripts in experimentation directory
     to run en masse, run run_examples.sh in the root.
