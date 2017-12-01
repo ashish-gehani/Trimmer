@@ -117,10 +117,10 @@ namespace {
             } else {
                 errs() << "_" << i << "\n";
                 errs() << *argv << "\n";
-                Value* oldArgptr = ir.CreateConstGEP1_32(argv, copy_index);
+                Value* oldArgptr = ir.CreateConstGEP1_32(argv, i);
                 Value* load = ir.CreateLoad(oldArgptr);   
                 ir.CreateStore(load, newArgptr);                             
-                copy_index++;
+                // copy_index++;
             }
         }
         Value * lptr = ir.CreateLoad(argv_new);
