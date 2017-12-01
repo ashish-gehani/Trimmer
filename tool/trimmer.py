@@ -2,7 +2,7 @@ import os, sys
 from shutil import copyfile
 import utils, commands
 
-class Debloat:
+class Trimmer:
 	
 	def __init__(self, (man_data, work_dir, opt_flag, spec_flag, strip_flag, icp_flag)):
 
@@ -44,6 +44,6 @@ class Debloat:
 		copyfile(self.curr_file, self.work_dir + '/' + self.name + '-final.bc')
 
 def main(args):
-	Debloat(utils.parse_args(args)).run()
+	Trimmer(utils.parse_args(args)).run()
 
 main(sys.argv[1:])
