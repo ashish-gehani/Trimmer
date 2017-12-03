@@ -1,6 +1,6 @@
 import os, sys
 from shutil import copyfile
-import utils, commands
+import utils, driver
 
 # Disable debug mesages by default
 debugPrint = 0 
@@ -39,11 +39,13 @@ class Trimmer:
                 utils.exists(self.main)
                 copyfile(self.main, self.work_dir + '/' + self.main)
                 if(self.spec_flag):	
-                        commands.run_specs(self)
-                        commands.handle_libs(self)
+                        # The following driver call runs the argument specialization transform
+                        driver.run_argspec(self)
+                        driver.handle_libs(self)
                         if(self.opt_flag):
-                                commands.run_opts(self)
-                                commands.create_exe(self)
+                                # The following driver call runs all the optimization passes
+                                driver.run_opts(self)
+                                driver.create_exe(self)
                                 copyfile(self.curr_file, self.work_dir + '/' + self.name + '-final.bc')
 
 def main(args):
