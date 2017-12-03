@@ -50,7 +50,7 @@
 using namespace llvm;
 
 #define DEBUG_TYPE "loop-unroll2"
-#define debugPrint 1 // This macro enables/disables debug print messages
+#define debugPrint 0 // This macro enables/disables debug print messages
 
 static cl::opt<unsigned>
 UnrollThreshold("unroll-threshold2", cl::Hidden,
@@ -553,9 +553,9 @@ std::string resolveOpenCalls(Value * fd){
     }
 
     Value * fileNameOperand = callInst->getOperand(0);
-    errs()<<"fileNameOperand = "<<*fileNameOperand<<"\n";
+    if(debugPrint) errs()<<"fileNameOperand = "<<*fileNameOperand<<"\n";
     if(Constant * constString = dyn_cast<Constant>(&*fileNameOperand)){
-      errs()<<"File name : "<<*constString<<"\n";
+      if(debugPrint) errs()<<"File name : "<<*constString<<"\n";
       StringRef fileNameStr;
       getConstantStringInfo(fileNameOperand, fileNameStr);
       std::string fileName = fileNameStr.str();
@@ -591,7 +591,7 @@ static std::string getOpenFileName(CallInst * callInst){
   }
   else if(functionName == "fgets"){
     fd = callInst->getOperand(2);
-    errs()<<"resolving fgets "<<*fd<<"\n";
+    if(debugPrint) errs()<<"resolving fgets "<<*fd<<"\n";
     return resolveOpenCalls(fd);
   }
    
@@ -618,7 +618,6 @@ static int extractByteCount(CallInst * callInst){
     }
 
     if(ConstantInt * constInst = dyn_cast<ConstantInt>(&*byteCount)){
-      /// if(debugPrint) errs()<<"Max bytes read : "<< constInst->getZExtValue() <<"\n";
       int intByteCount = constInst->getZExtValue();
       return intByteCount;
     }
@@ -678,7 +677,8 @@ static bool tryToUnrollExplicit(Loop *L, DominatorTree &DT, LoopInfo *LI,
   }
   if(!unroll)
     return false;
-  errs() << "unrolling with count " << Count << "\n";
+
+  if(debugPrint) errs() << "unrolling with count " << Count << "\n";
   if (!UnrollLoop(L, Count, Count, false, true, 0, LI, SE, &DT,
 		  &AC, PreserveLCSSA))
     return false;
@@ -738,11 +738,13 @@ static bool tryToUnrollGetoptLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
     getConstantStringInfo(optstringOperand, optstringRef);
     optstring = optstringRef.str();
   }  
-  errs() << optstring << " is optstring\n";
+
+  if(debugPrint) errs() << optstring << " is optstring\n";
   while ((opt = getopt(argc, argv, optstring.c_str())) != -1) {
     getopt_count++;
   }
-  errs() << "unrolling loop with count " << getopt_count << "\n";
+
+  if(debugPrint) errs() << "unrolling loop with count " << getopt_count << "\n";
   unsigned Count;  
   Count = getopt_count;
   if(debugPrint) errs()<<" Unroll Count = "<<Count<<"\n --- Unrolling --- \n";
@@ -842,7 +844,7 @@ static bool tryToUnrollFileLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
   int newLineCount;
   if (numFileCalls > 0){
 
-    errs()<<"\n ----- Starting LoopUnroll ----  \n";
+    if(debugPrint) errs()<<"\n ----- Starting LoopUnroll ----  \n";
     FILE * fp = fopen(lastFileName.c_str(), "r");
     struct stat st;
     stat(lastFileName.c_str(), &st);
@@ -851,8 +853,8 @@ static bool tryToUnrollFileLoop(Loop *L, DominatorTree &DT, LoopInfo *LI,
     if (fgetsCall){
       newLineCount = countNewLine(fp);  
     }
-    errs()<<"-------newLineCount = "<<newLineCount<<"\n";
- 
+
+    if(debugPrint) errs()<<"-------newLineCount = "<<newLineCount<<"\n";
     if(debugPrint) errs()<<"FileSize : "<<fileSize <<" \n";  
   }
 

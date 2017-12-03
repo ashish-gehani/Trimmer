@@ -56,6 +56,10 @@ TODO:
 using namespace llvm;
 using namespace std;
 
+
+#define debugPrint 0
+
+
 static cl::opt<bool> isAnnotated("isAnnotated",
                   cl::desc("are annotations found or should the whole program be tracked"));
 
@@ -369,7 +373,8 @@ void ConstantFolding::createAnnotationList() {
       val = dyn_cast<User>(I)->getOperand(0);
     else 
       continue;
-    errs() << val->getName() << " will be tracked\n"; 
+    
+    if(debugPrint) errs() << val->getName() << " will be tracked\n"; 
     AnnotationList.insert(val);
     StringRef stringRef;
     getConstantStringInfo(t1->getAggregateElement((unsigned) 1), stringRef, 0, false);
@@ -391,14 +396,14 @@ void ConstantFolding::createAnnotationList2() {
   }
   for(unsigned i = 0; i < globs.size(); i++) {
     GlobalValue * gv = M->getNamedValue(StringRef(globs[i]));
-    errs() << globs[i] << ": glob " << gv << "\n";
+    if(debugPrint) errs() << globs[i] << ": glob " << gv << "\n";
     AnnotationList.insert(gv);
   }
   for(unsigned i = 0; i < funcs.size(); i++) {
     if(funcs[i] == "setExit")
       continue;
     GlobalValue * gv = M->getNamedValue(StringRef(funcs[i]));
-    errs() << funcs[i] << ": func " << gv << "\n";
+    if(debugPrint) errs() << funcs[i] << ": func " << gv << "\n";
     AnnotationList.insert(gv);    
   }
 }
@@ -836,9 +841,9 @@ bool ConstantFolding::runOnModule(Module & module) {
   
   diff = clock() - start;
   int msec = diff * 1000 / CLOCKS_PER_SEC;
-  errs() << (msec/1000) << "." << (msec%1000) << "\n";
-  errs() << numfuncs << "\n";
-  errs() << num_duplicated << "\n";
+  if(debugPrint) errs() << (msec/1000) << "." << (msec%1000) << "\n";
+  if(debugPrint) errs() << numfuncs << "\n";
+  if(debugPrint) errs() << num_duplicated << "\n";
   return true;
 }   
   

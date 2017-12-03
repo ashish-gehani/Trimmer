@@ -17,7 +17,7 @@
 using namespace llvm;
 using namespace std;
 
-#define debug 1 
+#define debugPrint 0 
 
 static cl::opt<string> args("args",
                   cl::desc("':' colon seperated argument list"));
@@ -76,7 +76,8 @@ namespace {
     Function * F = M->getFunction(StringRef("malloc"));
     CallInst * mallocInst = CallInst::Create(F->getFunctionType(), F, ArrayRef<Value*>(args),
      Twine(""), callInst);
-    errs() << *mallocInst << "\n";
+    
+    if(debugPrint) errs() << *mallocInst << "\n";
     StoreInst * storeInst = new StoreInst(mallocInst, optargVar, callInst); 
 
     LoadInst * destPtr = new LoadInst(optargVar, Twine(""), callInst);    
@@ -175,7 +176,7 @@ namespace {
         getConstantStringInfo(optstringOperand, optstringRef);
         string optstring = optstringRef.str();
         int option = getopt(argc, argv, optstring.c_str());
-        errs() << "option is " << (char) option << " optind is " << optind << "\n";
+        if(debugPrint) errs() << "option is " << (char) option << " optind is " << optind << "\n";
         if(option == -1 && !spec) {
           errs() << "no change made\n";
           return;
@@ -187,6 +188,7 @@ namespace {
           else
             initOptargRunTime(callInst, func);
         }
+
         GlobalVariable * optindVar =  M->getNamedGlobal(StringRef("optind"));
         GlobalVariable * opterrVar =  M->getNamedGlobal(StringRef("opterr"));
         GlobalVariable * optoptVar =  M->getNamedGlobal(StringRef("optopt"));
@@ -229,7 +231,7 @@ namespace {
               Function * callee = callInst->getCalledFunction();
               std::string functionName = callee->getName().str();
               if(functionName == "getopt_long" || functionName == "getopt") {
-                errs() << F.getName() << " " << spec << "\n";
+                if(debugPrint) errs() << F.getName() << " " << spec << "\n";
                 char** arr = new char*[10];
                 int argc = parse_args(args, arr);
                 initializeArgs(argc, arr);
