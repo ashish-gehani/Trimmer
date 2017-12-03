@@ -107,7 +107,7 @@ def run_argspec(tool):
 	subprocess.call(Cmd, shell = True)
 	tool.curr_file = spec_file
 
-def handle_libs(tool):
+def link_libs(tool):
 
 	fname = tool.name
 	curr_file = tool.curr_file

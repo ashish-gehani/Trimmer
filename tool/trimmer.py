@@ -41,7 +41,7 @@ class Trimmer:
                 if(self.spec_flag):	
                         # The following driver call runs the argument specialization transform
                         driver.run_argspec(self)
-                        driver.handle_libs(self)
+                        driver.link_libs(self)
                         if(self.opt_flag):
                                 # The following driver call runs all the optimization passes
                                 driver.run_opts(self)
