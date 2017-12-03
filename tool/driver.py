@@ -20,7 +20,7 @@ def printDbgMsg(msg):
         print msg
 
 
-def run_specs(tool):
+def run_argspec(tool):
 
 	fname = tool.name
 	curr_file = tool.curr_file
