@@ -48,11 +48,7 @@ void ConstantFolding::getAnalysisUsage(AnalysisUsage &AU) const {
 }
 
 void ConstantFolding::runOnInst(Instruction * I) {
-  Registers[I] = new Register(I->getType(), 1);
-  errs() << "first done\n";
   errs() << *I << " is the inst in " << I->getFunction()->getName() << "\n";
-  Registers[I] = new Register(I->getType(), 1);
-  errs() << "second done\n";
   if(AllocaInst * allocaInst = dyn_cast<AllocaInst>(I)) {
     processAllocaInst(allocaInst);  
   } else if(StoreInst * storeInst = dyn_cast<StoreInst>(I)) {
@@ -95,9 +91,6 @@ bool ConstantFolding::runOnModule(Module & M) {
 
   Function * func = module->getFunction(StringRef("main"));
   BasicBlock * entry = &(func->getEntryBlock());
-  errs() << "first\n";
-  Register * reg = new Register(NULL, 1);
-  errs() << "done\n";
   runOnBB(entry);   
 
   replaceUses();
