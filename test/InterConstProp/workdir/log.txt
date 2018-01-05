@@ -1,0 +1,1346 @@
+  ---------------- *** ----------------
+  %1 = call noalias i8* @malloc(i64 160) #5 is the inst  in BB %0 main 
+mallocInst : size 160 at address 1000001
+  %2 = bitcast i8* %1 to %struct.stType** is the inst  in BB %0 main 
+  %3 = call noalias i8* @malloc(i64 144) #5 is the inst  in BB %0 main 
+mallocInst : size 144 at address 1000162
+  %4 = bitcast i8* %3 to %struct.stType* is the inst  in BB %0 main 
+  %5 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 0 is the inst  in BB %0 main 
+  store %struct.stType* %4, %struct.stType** %5, align 8 is the inst  in BB %0 main 
+StoreInst : from register
+1
+  %6 = call noalias i8* @malloc(i64 16) #5 is the inst  in BB %0 main 
+mallocInst : size 16 at address 1000307
+  %7 = bitcast i8* %6 to %struct.COORD* is the inst  in BB %0 main 
+  %8 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 0 is the inst  in BB %0 main 
+  %9 = load %struct.stType*, %struct.stType** %8, align 8 is the inst  in BB %0 main 
+  %10 = getelementptr inbounds %struct.stType, %struct.stType* %9, i32 0, i32 0 is the inst  in BB %0 main 
+  store %struct.COORD* %7, %struct.COORD** %10, align 8 is the inst  in BB %0 main 
+StoreInst : from register
+162
+  %11 = call noalias i8* @malloc(i64 4) #5 is the inst  in BB %0 main 
+mallocInst : size 4 at address 1000324
+  %12 = bitcast i8* %11 to i32* is the inst  in BB %0 main 
+  %13 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 0 is the inst  in BB %0 main 
+  %14 = load %struct.stType*, %struct.stType** %13, align 8 is the inst  in BB %0 main 
+  %15 = getelementptr inbounds %struct.stType, %struct.stType* %14, i32 0, i32 0 is the inst  in BB %0 main 
+  %16 = load %struct.COORD*, %struct.COORD** %15, align 8 is the inst  in BB %0 main 
+  %17 = getelementptr inbounds %struct.COORD, %struct.COORD* %16, i32 0, i32 0 is the inst  in BB %0 main 
+  store i32* %12, i32** %17, align 8 is the inst  in BB %0 main 
+StoreInst : from register
+307
+  %18 = call noalias i8* @malloc(i64 4) #5 is the inst  in BB %0 main 
+mallocInst : size 4 at address 1000329
+  %19 = bitcast i8* %18 to i32* is the inst  in BB %0 main 
+  %20 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 0 is the inst  in BB %0 main 
+  %21 = load %struct.stType*, %struct.stType** %20, align 8 is the inst  in BB %0 main 
+  %22 = getelementptr inbounds %struct.stType, %struct.stType* %21, i32 0, i32 0 is the inst  in BB %0 main 
+  %23 = load %struct.COORD*, %struct.COORD** %22, align 8 is the inst  in BB %0 main 
+  %24 = getelementptr inbounds %struct.COORD, %struct.COORD* %23, i32 0, i32 1 is the inst  in BB %0 main 
+  store i32* %19, i32** %24, align 8 is the inst  in BB %0 main 
+StoreInst : from register
+315
+  %25 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 0 is the inst  in BB %0 main 
+  %26 = load %struct.stType*, %struct.stType** %25, align 8 is the inst  in BB %0 main 
+  %27 = getelementptr inbounds %struct.stType, %struct.stType* %26, i32 0, i32 0 is the inst  in BB %0 main 
+  %28 = load %struct.COORD*, %struct.COORD** %27, align 8 is the inst  in BB %0 main 
+  %29 = getelementptr inbounds %struct.COORD, %struct.COORD* %28, i32 0, i32 0 is the inst  in BB %0 main 
+  %30 = load i32*, i32** %29, align 8 is the inst  in BB %0 main 
+  %31 = getelementptr inbounds i32, i32* %30, i64 0 is the inst  in BB %0 main 
+  store i32 1, i32* %31, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 1
+324
+  %32 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 0 is the inst  in BB %0 main 
+  %33 = load %struct.stType*, %struct.stType** %32, align 8 is the inst  in BB %0 main 
+  %34 = getelementptr inbounds %struct.stType, %struct.stType* %33, i32 0, i32 0 is the inst  in BB %0 main 
+  %35 = load %struct.COORD*, %struct.COORD** %34, align 8 is the inst  in BB %0 main 
+  %36 = getelementptr inbounds %struct.COORD, %struct.COORD* %35, i32 0, i32 1 is the inst  in BB %0 main 
+  %37 = load i32*, i32** %36, align 8 is the inst  in BB %0 main 
+  %38 = getelementptr inbounds i32, i32* %37, i64 0 is the inst  in BB %0 main 
+  store i32 2, i32* %38, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 2
+329
+  %39 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 0 is the inst  in BB %0 main 
+  %40 = load %struct.stType*, %struct.stType** %39, align 8 is the inst  in BB %0 main 
+  %41 = getelementptr inbounds %struct.stType, %struct.stType* %40, i32 0, i32 2 is the inst  in BB %0 main 
+  %42 = getelementptr inbounds [8 x i32], [8 x i32]* %41, i64 0, i64 0 is the inst  in BB %0 main 
+  store i32 3, i32* %42, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 3
+270
+  %43 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 0 is the inst  in BB %0 main 
+  %44 = load %struct.stType*, %struct.stType** %43, align 8 is the inst  in BB %0 main 
+  %45 = getelementptr inbounds %struct.stType, %struct.stType* %44, i32 0, i32 2 is the inst  in BB %0 main 
+  %46 = getelementptr inbounds [8 x i32], [8 x i32]* %45, i64 0, i64 1 is the inst  in BB %0 main 
+  store i32 4, i32* %46, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 4
+274
+  %47 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 0 is the inst  in BB %0 main 
+  %48 = load %struct.stType*, %struct.stType** %47, align 8 is the inst  in BB %0 main 
+  %49 = getelementptr inbounds %struct.stType, %struct.stType* %48, i32 0, i32 2 is the inst  in BB %0 main 
+  %50 = getelementptr inbounds [8 x i32], [8 x i32]* %49, i64 0, i64 2 is the inst  in BB %0 main 
+  store i32 5, i32* %50, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 5
+278
+  %51 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 0 is the inst  in BB %0 main 
+  %52 = load %struct.stType*, %struct.stType** %51, align 8 is the inst  in BB %0 main 
+  %53 = getelementptr inbounds %struct.stType, %struct.stType* %52, i32 0, i32 1 is the inst  in BB %0 main 
+  %54 = getelementptr inbounds [100 x i8], [100 x i8]* %53, i32 0, i32 0 is the inst  in BB %0 main 
+  call void @llvm.memcpy.p0i8.p0i8.i64(i8* %54, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @.str.2, i32 0, i32 0), i64 11, i32 1, i1 false) is the inst  in BB %0 main 
+170
+  %55 = call noalias i8* @malloc(i64 144) #5 is the inst  in BB %0 main 
+mallocInst : size 144 at address 1000334
+  %56 = bitcast i8* %55 to %struct.stType* is the inst  in BB %0 main 
+  %57 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 1 is the inst  in BB %0 main 
+  store %struct.stType* %56, %struct.stType** %57, align 8 is the inst  in BB %0 main 
+StoreInst : from register
+9
+  %58 = call noalias i8* @malloc(i64 16) #5 is the inst  in BB %0 main 
+mallocInst : size 16 at address 1000479
+  %59 = bitcast i8* %58 to %struct.COORD* is the inst  in BB %0 main 
+  %60 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 1 is the inst  in BB %0 main 
+  %61 = load %struct.stType*, %struct.stType** %60, align 8 is the inst  in BB %0 main 
+  %62 = getelementptr inbounds %struct.stType, %struct.stType* %61, i32 0, i32 0 is the inst  in BB %0 main 
+  store %struct.COORD* %59, %struct.COORD** %62, align 8 is the inst  in BB %0 main 
+StoreInst : from register
+334
+  %63 = call noalias i8* @malloc(i64 4) #5 is the inst  in BB %0 main 
+mallocInst : size 4 at address 1000496
+  %64 = bitcast i8* %63 to i32* is the inst  in BB %0 main 
+  %65 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 1 is the inst  in BB %0 main 
+  %66 = load %struct.stType*, %struct.stType** %65, align 8 is the inst  in BB %0 main 
+  %67 = getelementptr inbounds %struct.stType, %struct.stType* %66, i32 0, i32 0 is the inst  in BB %0 main 
+  %68 = load %struct.COORD*, %struct.COORD** %67, align 8 is the inst  in BB %0 main 
+  %69 = getelementptr inbounds %struct.COORD, %struct.COORD* %68, i32 0, i32 0 is the inst  in BB %0 main 
+  store i32* %64, i32** %69, align 8 is the inst  in BB %0 main 
+StoreInst : from register
+479
+  %70 = call noalias i8* @malloc(i64 4) #5 is the inst  in BB %0 main 
+mallocInst : size 4 at address 1000501
+  %71 = bitcast i8* %70 to i32* is the inst  in BB %0 main 
+  %72 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 1 is the inst  in BB %0 main 
+  %73 = load %struct.stType*, %struct.stType** %72, align 8 is the inst  in BB %0 main 
+  %74 = getelementptr inbounds %struct.stType, %struct.stType* %73, i32 0, i32 0 is the inst  in BB %0 main 
+  %75 = load %struct.COORD*, %struct.COORD** %74, align 8 is the inst  in BB %0 main 
+  %76 = getelementptr inbounds %struct.COORD, %struct.COORD* %75, i32 0, i32 1 is the inst  in BB %0 main 
+  store i32* %71, i32** %76, align 8 is the inst  in BB %0 main 
+StoreInst : from register
+487
+  %77 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 1 is the inst  in BB %0 main 
+  %78 = load %struct.stType*, %struct.stType** %77, align 8 is the inst  in BB %0 main 
+  %79 = getelementptr inbounds %struct.stType, %struct.stType* %78, i32 0, i32 0 is the inst  in BB %0 main 
+  %80 = load %struct.COORD*, %struct.COORD** %79, align 8 is the inst  in BB %0 main 
+  %81 = getelementptr inbounds %struct.COORD, %struct.COORD* %80, i32 0, i32 0 is the inst  in BB %0 main 
+  %82 = load i32*, i32** %81, align 8 is the inst  in BB %0 main 
+  %83 = getelementptr inbounds i32, i32* %82, i64 0 is the inst  in BB %0 main 
+  store i32 6, i32* %83, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 6
+496
+  %84 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 1 is the inst  in BB %0 main 
+  %85 = load %struct.stType*, %struct.stType** %84, align 8 is the inst  in BB %0 main 
+  %86 = getelementptr inbounds %struct.stType, %struct.stType* %85, i32 0, i32 0 is the inst  in BB %0 main 
+  %87 = load %struct.COORD*, %struct.COORD** %86, align 8 is the inst  in BB %0 main 
+  %88 = getelementptr inbounds %struct.COORD, %struct.COORD* %87, i32 0, i32 1 is the inst  in BB %0 main 
+  %89 = load i32*, i32** %88, align 8 is the inst  in BB %0 main 
+  %90 = getelementptr inbounds i32, i32* %89, i64 0 is the inst  in BB %0 main 
+  store i32 7, i32* %90, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 7
+501
+  %91 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 1 is the inst  in BB %0 main 
+  %92 = load %struct.stType*, %struct.stType** %91, align 8 is the inst  in BB %0 main 
+  %93 = getelementptr inbounds %struct.stType, %struct.stType* %92, i32 0, i32 2 is the inst  in BB %0 main 
+  %94 = getelementptr inbounds [8 x i32], [8 x i32]* %93, i64 0, i64 0 is the inst  in BB %0 main 
+  store i32 8, i32* %94, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 8
+442
+  %95 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 1 is the inst  in BB %0 main 
+  %96 = load %struct.stType*, %struct.stType** %95, align 8 is the inst  in BB %0 main 
+  %97 = getelementptr inbounds %struct.stType, %struct.stType* %96, i32 0, i32 2 is the inst  in BB %0 main 
+  %98 = getelementptr inbounds [8 x i32], [8 x i32]* %97, i64 0, i64 1 is the inst  in BB %0 main 
+  store i32 9, i32* %98, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 9
+446
+  %99 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 1 is the inst  in BB %0 main 
+  %100 = load %struct.stType*, %struct.stType** %99, align 8 is the inst  in BB %0 main 
+  %101 = getelementptr inbounds %struct.stType, %struct.stType* %100, i32 0, i32 2 is the inst  in BB %0 main 
+  %102 = getelementptr inbounds [8 x i32], [8 x i32]* %101, i64 0, i64 2 is the inst  in BB %0 main 
+  store i32 10, i32* %102, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 10
+450
+  %103 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 1 is the inst  in BB %0 main 
+  %104 = load %struct.stType*, %struct.stType** %103, align 8 is the inst  in BB %0 main 
+  %105 = getelementptr inbounds %struct.stType, %struct.stType* %104, i32 0, i32 1 is the inst  in BB %0 main 
+  %106 = getelementptr inbounds [100 x i8], [100 x i8]* %105, i32 0, i32 0 is the inst  in BB %0 main 
+  call void @llvm.memcpy.p0i8.p0i8.i64(i8* %106, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @.str.2, i32 0, i32 0), i64 11, i32 1, i1 false) is the inst  in BB %0 main 
+342
+  %107 = call noalias i8* @malloc(i64 144) #5 is the inst  in BB %0 main 
+mallocInst : size 144 at address 1000506
+  %108 = bitcast i8* %107 to %struct.stType* is the inst  in BB %0 main 
+  %109 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 2 is the inst  in BB %0 main 
+  store %struct.stType* %108, %struct.stType** %109, align 8 is the inst  in BB %0 main 
+StoreInst : from register
+17
+  %110 = call noalias i8* @malloc(i64 16) #5 is the inst  in BB %0 main 
+mallocInst : size 16 at address 1000651
+  %111 = bitcast i8* %110 to %struct.COORD* is the inst  in BB %0 main 
+  %112 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 2 is the inst  in BB %0 main 
+  %113 = load %struct.stType*, %struct.stType** %112, align 8 is the inst  in BB %0 main 
+  %114 = getelementptr inbounds %struct.stType, %struct.stType* %113, i32 0, i32 0 is the inst  in BB %0 main 
+  store %struct.COORD* %111, %struct.COORD** %114, align 8 is the inst  in BB %0 main 
+StoreInst : from register
+506
+  %115 = call noalias i8* @malloc(i64 4) #5 is the inst  in BB %0 main 
+mallocInst : size 4 at address 1000668
+  %116 = bitcast i8* %115 to i32* is the inst  in BB %0 main 
+  %117 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 2 is the inst  in BB %0 main 
+  %118 = load %struct.stType*, %struct.stType** %117, align 8 is the inst  in BB %0 main 
+  %119 = getelementptr inbounds %struct.stType, %struct.stType* %118, i32 0, i32 0 is the inst  in BB %0 main 
+  %120 = load %struct.COORD*, %struct.COORD** %119, align 8 is the inst  in BB %0 main 
+  %121 = getelementptr inbounds %struct.COORD, %struct.COORD* %120, i32 0, i32 0 is the inst  in BB %0 main 
+  store i32* %116, i32** %121, align 8 is the inst  in BB %0 main 
+StoreInst : from register
+651
+  %122 = call noalias i8* @malloc(i64 4) #5 is the inst  in BB %0 main 
+mallocInst : size 4 at address 1000673
+  %123 = bitcast i8* %122 to i32* is the inst  in BB %0 main 
+  %124 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 2 is the inst  in BB %0 main 
+  %125 = load %struct.stType*, %struct.stType** %124, align 8 is the inst  in BB %0 main 
+  %126 = getelementptr inbounds %struct.stType, %struct.stType* %125, i32 0, i32 0 is the inst  in BB %0 main 
+  %127 = load %struct.COORD*, %struct.COORD** %126, align 8 is the inst  in BB %0 main 
+  %128 = getelementptr inbounds %struct.COORD, %struct.COORD* %127, i32 0, i32 1 is the inst  in BB %0 main 
+  store i32* %123, i32** %128, align 8 is the inst  in BB %0 main 
+StoreInst : from register
+659
+  %129 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 2 is the inst  in BB %0 main 
+  %130 = load %struct.stType*, %struct.stType** %129, align 8 is the inst  in BB %0 main 
+  %131 = getelementptr inbounds %struct.stType, %struct.stType* %130, i32 0, i32 0 is the inst  in BB %0 main 
+  %132 = load %struct.COORD*, %struct.COORD** %131, align 8 is the inst  in BB %0 main 
+  %133 = getelementptr inbounds %struct.COORD, %struct.COORD* %132, i32 0, i32 0 is the inst  in BB %0 main 
+  %134 = load i32*, i32** %133, align 8 is the inst  in BB %0 main 
+  %135 = getelementptr inbounds i32, i32* %134, i64 0 is the inst  in BB %0 main 
+  store i32 11, i32* %135, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 11
+668
+  %136 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 2 is the inst  in BB %0 main 
+  %137 = load %struct.stType*, %struct.stType** %136, align 8 is the inst  in BB %0 main 
+  %138 = getelementptr inbounds %struct.stType, %struct.stType* %137, i32 0, i32 0 is the inst  in BB %0 main 
+  %139 = load %struct.COORD*, %struct.COORD** %138, align 8 is the inst  in BB %0 main 
+  %140 = getelementptr inbounds %struct.COORD, %struct.COORD* %139, i32 0, i32 1 is the inst  in BB %0 main 
+  %141 = load i32*, i32** %140, align 8 is the inst  in BB %0 main 
+  %142 = getelementptr inbounds i32, i32* %141, i64 0 is the inst  in BB %0 main 
+  store i32 12, i32* %142, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 12
+673
+  %143 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 2 is the inst  in BB %0 main 
+  %144 = load %struct.stType*, %struct.stType** %143, align 8 is the inst  in BB %0 main 
+  %145 = getelementptr inbounds %struct.stType, %struct.stType* %144, i32 0, i32 2 is the inst  in BB %0 main 
+  %146 = getelementptr inbounds [8 x i32], [8 x i32]* %145, i64 0, i64 0 is the inst  in BB %0 main 
+  store i32 13, i32* %146, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 13
+614
+  %147 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 2 is the inst  in BB %0 main 
+  %148 = load %struct.stType*, %struct.stType** %147, align 8 is the inst  in BB %0 main 
+  %149 = getelementptr inbounds %struct.stType, %struct.stType* %148, i32 0, i32 2 is the inst  in BB %0 main 
+  %150 = getelementptr inbounds [8 x i32], [8 x i32]* %149, i64 0, i64 1 is the inst  in BB %0 main 
+  store i32 14, i32* %150, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 14
+618
+  %151 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 2 is the inst  in BB %0 main 
+  %152 = load %struct.stType*, %struct.stType** %151, align 8 is the inst  in BB %0 main 
+  %153 = getelementptr inbounds %struct.stType, %struct.stType* %152, i32 0, i32 2 is the inst  in BB %0 main 
+  %154 = getelementptr inbounds [8 x i32], [8 x i32]* %153, i64 0, i64 2 is the inst  in BB %0 main 
+  store i32 15, i32* %154, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 15
+622
+  %155 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 2 is the inst  in BB %0 main 
+  %156 = load %struct.stType*, %struct.stType** %155, align 8 is the inst  in BB %0 main 
+  %157 = getelementptr inbounds %struct.stType, %struct.stType* %156, i32 0, i32 1 is the inst  in BB %0 main 
+  %158 = getelementptr inbounds [100 x i8], [100 x i8]* %157, i32 0, i32 0 is the inst  in BB %0 main 
+  call void @llvm.memcpy.p0i8.p0i8.i64(i8* %158, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @.str.2, i32 0, i32 0), i64 11, i32 1, i1 false) is the inst  in BB %0 main 
+514
+  %159 = call noalias i8* @malloc(i64 144) #5 is the inst  in BB %0 main 
+mallocInst : size 144 at address 1000678
+  %160 = bitcast i8* %159 to %struct.stType* is the inst  in BB %0 main 
+  %161 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 3 is the inst  in BB %0 main 
+  store %struct.stType* %160, %struct.stType** %161, align 8 is the inst  in BB %0 main 
+StoreInst : from register
+25
+  %162 = call noalias i8* @malloc(i64 16) #5 is the inst  in BB %0 main 
+mallocInst : size 16 at address 1000823
+  %163 = bitcast i8* %162 to %struct.COORD* is the inst  in BB %0 main 
+  %164 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 3 is the inst  in BB %0 main 
+  %165 = load %struct.stType*, %struct.stType** %164, align 8 is the inst  in BB %0 main 
+  %166 = getelementptr inbounds %struct.stType, %struct.stType* %165, i32 0, i32 0 is the inst  in BB %0 main 
+  store %struct.COORD* %163, %struct.COORD** %166, align 8 is the inst  in BB %0 main 
+StoreInst : from register
+678
+  %167 = call noalias i8* @malloc(i64 4) #5 is the inst  in BB %0 main 
+mallocInst : size 4 at address 1000840
+  %168 = bitcast i8* %167 to i32* is the inst  in BB %0 main 
+  %169 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 3 is the inst  in BB %0 main 
+  %170 = load %struct.stType*, %struct.stType** %169, align 8 is the inst  in BB %0 main 
+  %171 = getelementptr inbounds %struct.stType, %struct.stType* %170, i32 0, i32 0 is the inst  in BB %0 main 
+  %172 = load %struct.COORD*, %struct.COORD** %171, align 8 is the inst  in BB %0 main 
+  %173 = getelementptr inbounds %struct.COORD, %struct.COORD* %172, i32 0, i32 0 is the inst  in BB %0 main 
+  store i32* %168, i32** %173, align 8 is the inst  in BB %0 main 
+StoreInst : from register
+823
+  %174 = call noalias i8* @malloc(i64 4) #5 is the inst  in BB %0 main 
+mallocInst : size 4 at address 1000845
+  %175 = bitcast i8* %174 to i32* is the inst  in BB %0 main 
+  %176 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 3 is the inst  in BB %0 main 
+  %177 = load %struct.stType*, %struct.stType** %176, align 8 is the inst  in BB %0 main 
+  %178 = getelementptr inbounds %struct.stType, %struct.stType* %177, i32 0, i32 0 is the inst  in BB %0 main 
+  %179 = load %struct.COORD*, %struct.COORD** %178, align 8 is the inst  in BB %0 main 
+  %180 = getelementptr inbounds %struct.COORD, %struct.COORD* %179, i32 0, i32 1 is the inst  in BB %0 main 
+  store i32* %175, i32** %180, align 8 is the inst  in BB %0 main 
+StoreInst : from register
+831
+  %181 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 3 is the inst  in BB %0 main 
+  %182 = load %struct.stType*, %struct.stType** %181, align 8 is the inst  in BB %0 main 
+  %183 = getelementptr inbounds %struct.stType, %struct.stType* %182, i32 0, i32 0 is the inst  in BB %0 main 
+  %184 = load %struct.COORD*, %struct.COORD** %183, align 8 is the inst  in BB %0 main 
+  %185 = getelementptr inbounds %struct.COORD, %struct.COORD* %184, i32 0, i32 0 is the inst  in BB %0 main 
+  %186 = load i32*, i32** %185, align 8 is the inst  in BB %0 main 
+  %187 = getelementptr inbounds i32, i32* %186, i64 0 is the inst  in BB %0 main 
+  store i32 16, i32* %187, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 16
+840
+  %188 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 3 is the inst  in BB %0 main 
+  %189 = load %struct.stType*, %struct.stType** %188, align 8 is the inst  in BB %0 main 
+  %190 = getelementptr inbounds %struct.stType, %struct.stType* %189, i32 0, i32 0 is the inst  in BB %0 main 
+  %191 = load %struct.COORD*, %struct.COORD** %190, align 8 is the inst  in BB %0 main 
+  %192 = getelementptr inbounds %struct.COORD, %struct.COORD* %191, i32 0, i32 1 is the inst  in BB %0 main 
+  %193 = load i32*, i32** %192, align 8 is the inst  in BB %0 main 
+  %194 = getelementptr inbounds i32, i32* %193, i64 0 is the inst  in BB %0 main 
+  store i32 17, i32* %194, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 17
+845
+  %195 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 3 is the inst  in BB %0 main 
+  %196 = load %struct.stType*, %struct.stType** %195, align 8 is the inst  in BB %0 main 
+  %197 = getelementptr inbounds %struct.stType, %struct.stType* %196, i32 0, i32 2 is the inst  in BB %0 main 
+  %198 = getelementptr inbounds [8 x i32], [8 x i32]* %197, i64 0, i64 0 is the inst  in BB %0 main 
+  store i32 18, i32* %198, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 18
+786
+  %199 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 3 is the inst  in BB %0 main 
+  %200 = load %struct.stType*, %struct.stType** %199, align 8 is the inst  in BB %0 main 
+  %201 = getelementptr inbounds %struct.stType, %struct.stType* %200, i32 0, i32 2 is the inst  in BB %0 main 
+  %202 = getelementptr inbounds [8 x i32], [8 x i32]* %201, i64 0, i64 1 is the inst  in BB %0 main 
+  store i32 19, i32* %202, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 19
+790
+  %203 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 3 is the inst  in BB %0 main 
+  %204 = load %struct.stType*, %struct.stType** %203, align 8 is the inst  in BB %0 main 
+  %205 = getelementptr inbounds %struct.stType, %struct.stType* %204, i32 0, i32 2 is the inst  in BB %0 main 
+  %206 = getelementptr inbounds [8 x i32], [8 x i32]* %205, i64 0, i64 2 is the inst  in BB %0 main 
+  store i32 20, i32* %206, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 20
+794
+  %207 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 3 is the inst  in BB %0 main 
+  %208 = load %struct.stType*, %struct.stType** %207, align 8 is the inst  in BB %0 main 
+  %209 = getelementptr inbounds %struct.stType, %struct.stType* %208, i32 0, i32 1 is the inst  in BB %0 main 
+  %210 = getelementptr inbounds [100 x i8], [100 x i8]* %209, i32 0, i32 0 is the inst  in BB %0 main 
+  call void @llvm.memcpy.p0i8.p0i8.i64(i8* %210, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @.str.2, i32 0, i32 0), i64 11, i32 1, i1 false) is the inst  in BB %0 main 
+686
+  call void @branchPruned(%struct.stType** %2) is the inst  in BB %0 main 
+  %1 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 0 is the inst  in BB %0 branchPruned_clone 
+  %2 = load %struct.stType*, %struct.stType** %1, align 8 is the inst  in BB %0 branchPruned_clone 
+  %3 = getelementptr inbounds %struct.stType, %struct.stType* %2, i32 0, i32 0 is the inst  in BB %0 branchPruned_clone 
+  %4 = load %struct.COORD*, %struct.COORD** %3, align 8 is the inst  in BB %0 branchPruned_clone 
+  %5 = getelementptr inbounds %struct.COORD, %struct.COORD* %4, i32 0, i32 0 is the inst  in BB %0 branchPruned_clone 
+  %6 = load i32*, i32** %5, align 8 is the inst  in BB %0 branchPruned_clone 
+  %7 = load i32, i32* %6, align 4 is the inst  in BB %0 branchPruned_clone 
+replaced with i32 1
+  %8 = icmp eq i32 1, 1 is the inst  in BB %0 branchPruned_clone 
+  br i1 %8, label %9, label %258 is the inst  in BB %0 branchPruned_clone 
+cloning
+  %10 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 0 is the inst  in BB %9 branchPruned_clone 
+  %11 = load %struct.stType*, %struct.stType** %10, align 8 is the inst  in BB %9 branchPruned_clone 
+  %12 = getelementptr inbounds %struct.stType, %struct.stType* %11, i32 0, i32 0 is the inst  in BB %9 branchPruned_clone 
+  %13 = load %struct.COORD*, %struct.COORD** %12, align 8 is the inst  in BB %9 branchPruned_clone 
+  %14 = getelementptr inbounds %struct.COORD, %struct.COORD* %13, i32 0, i32 1 is the inst  in BB %9 branchPruned_clone 
+  %15 = load i32*, i32** %14, align 8 is the inst  in BB %9 branchPruned_clone 
+  %16 = load i32, i32* %15, align 4 is the inst  in BB %9 branchPruned_clone 
+replaced with i32 2
+  %17 = icmp eq i32 2, 2 is the inst  in BB %9 branchPruned_clone 
+  br i1 %17, label %18, label %258 is the inst  in BB %9 branchPruned_clone 
+cloning
+  %19 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 0 is the inst  in BB %18 branchPruned_clone 
+  %20 = load %struct.stType*, %struct.stType** %19, align 8 is the inst  in BB %18 branchPruned_clone 
+  %21 = getelementptr inbounds %struct.stType, %struct.stType* %20, i32 0, i32 2 is the inst  in BB %18 branchPruned_clone 
+  %22 = getelementptr inbounds [8 x i32], [8 x i32]* %21, i64 0, i64 1 is the inst  in BB %18 branchPruned_clone 
+  %23 = load i32, i32* %22, align 4 is the inst  in BB %18 branchPruned_clone 
+replaced with i32 4
+  %24 = icmp eq i32 4, 4 is the inst  in BB %18 branchPruned_clone 
+  br i1 %24, label %25, label %258 is the inst  in BB %18 branchPruned_clone 
+cloning
+  %26 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 0 is the inst  in BB %25 branchPruned_clone 
+  %27 = load %struct.stType*, %struct.stType** %26, align 8 is the inst  in BB %25 branchPruned_clone 
+  %28 = getelementptr inbounds %struct.stType, %struct.stType* %27, i32 0, i32 1 is the inst  in BB %25 branchPruned_clone 
+  %29 = getelementptr inbounds [100 x i8], [100 x i8]* %28, i32 0, i32 0 is the inst  in BB %25 branchPruned_clone 
+  %30 = call i32 @strcmp(i8* %29, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @.str, i32 0, i32 0)) #5 is the inst  in BB %25 branchPruned_clone 
+baseStringData : helloWorld
+  <badref> = getelementptr inbounds [11 x i8], [11 x i8]* @.str, i32 0, i32 0 is the inst 
+GepInst : Not found in map
+constant string helloWorld 
+replaced with i32 0
+  %32 = icmp ne i32 0, 0 is the inst  in BB %25 branchPruned_clone 
+  br i1 %32, label %259, label %33 is the inst  in BB %25 branchPruned_clone 
+cloning
+  %34 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 0 is the inst  in BB %33 branchPruned_clone 
+  %35 = load %struct.stType*, %struct.stType** %34, align 8 is the inst  in BB %33 branchPruned_clone 
+  %36 = getelementptr inbounds %struct.stType, %struct.stType* %35, i32 0, i32 1 is the inst  in BB %33 branchPruned_clone 
+  %37 = getelementptr inbounds [100 x i8], [100 x i8]* %36, i64 0, i64 4 is the inst  in BB %33 branchPruned_clone 
+  %38 = load i8, i8* %37, align 4 is the inst  in BB %33 branchPruned_clone 
+replaced with i8 111
+  %39 = sext i8 111 to i32 is the inst  in BB %33 branchPruned_clone 
+  %40 = icmp eq i32 %39, 111 is the inst  in BB %33 branchPruned_clone 
+  br i1 %40, label %41, label %259 is the inst  in BB %33 branchPruned_clone 
+cloning
+  %42 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 0 is the inst  in BB %41 branchPruned_clone 
+  %43 = load %struct.stType*, %struct.stType** %42, align 8 is the inst  in BB %41 branchPruned_clone 
+  %44 = getelementptr inbounds %struct.stType, %struct.stType* %43, i32 0, i32 1 is the inst  in BB %41 branchPruned_clone 
+  %45 = getelementptr inbounds [100 x i8], [100 x i8]* %44, i64 0, i64 9 is the inst  in BB %41 branchPruned_clone 
+  %46 = load i8, i8* %45, align 1 is the inst  in BB %41 branchPruned_clone 
+replaced with i8 100
+  %47 = sext i8 100 to i32 is the inst  in BB %41 branchPruned_clone 
+  %48 = icmp eq i32 %47, 100 is the inst  in BB %41 branchPruned_clone 
+  br i1 %48, label %49, label %259 is the inst  in BB %41 branchPruned_clone 
+cloning
+  %50 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 1 is the inst  in BB %49 branchPruned_clone 
+  %51 = load %struct.stType*, %struct.stType** %50, align 8 is the inst  in BB %49 branchPruned_clone 
+  %52 = getelementptr inbounds %struct.stType, %struct.stType* %51, i32 0, i32 0 is the inst  in BB %49 branchPruned_clone 
+  %53 = load %struct.COORD*, %struct.COORD** %52, align 8 is the inst  in BB %49 branchPruned_clone 
+  %54 = getelementptr inbounds %struct.COORD, %struct.COORD* %53, i32 0, i32 0 is the inst  in BB %49 branchPruned_clone 
+  %55 = load i32*, i32** %54, align 8 is the inst  in BB %49 branchPruned_clone 
+  %56 = load i32, i32* %55, align 4 is the inst  in BB %49 branchPruned_clone 
+replaced with i32 6
+  %57 = icmp eq i32 6, 6 is the inst  in BB %49 branchPruned_clone 
+  br i1 %57, label %58, label %259 is the inst  in BB %49 branchPruned_clone 
+cloning
+  %59 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 1 is the inst  in BB %58 branchPruned_clone 
+  %60 = load %struct.stType*, %struct.stType** %59, align 8 is the inst  in BB %58 branchPruned_clone 
+  %61 = getelementptr inbounds %struct.stType, %struct.stType* %60, i32 0, i32 0 is the inst  in BB %58 branchPruned_clone 
+  %62 = load %struct.COORD*, %struct.COORD** %61, align 8 is the inst  in BB %58 branchPruned_clone 
+  %63 = getelementptr inbounds %struct.COORD, %struct.COORD* %62, i32 0, i32 1 is the inst  in BB %58 branchPruned_clone 
+  %64 = load i32*, i32** %63, align 8 is the inst  in BB %58 branchPruned_clone 
+  %65 = load i32, i32* %64, align 4 is the inst  in BB %58 branchPruned_clone 
+replaced with i32 7
+  %66 = icmp eq i32 7, 7 is the inst  in BB %58 branchPruned_clone 
+  br i1 %66, label %67, label %259 is the inst  in BB %58 branchPruned_clone 
+cloning
+  %68 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 1 is the inst  in BB %67 branchPruned_clone 
+  %69 = load %struct.stType*, %struct.stType** %68, align 8 is the inst  in BB %67 branchPruned_clone 
+  %70 = getelementptr inbounds %struct.stType, %struct.stType* %69, i32 0, i32 2 is the inst  in BB %67 branchPruned_clone 
+  %71 = getelementptr inbounds [8 x i32], [8 x i32]* %70, i64 0, i64 1 is the inst  in BB %67 branchPruned_clone 
+  %72 = load i32, i32* %71, align 4 is the inst  in BB %67 branchPruned_clone 
+replaced with i32 9
+  %73 = icmp eq i32 9, 9 is the inst  in BB %67 branchPruned_clone 
+  br i1 %73, label %74, label %259 is the inst  in BB %67 branchPruned_clone 
+cloning
+  %75 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 1 is the inst  in BB %74 branchPruned_clone 
+  %76 = load %struct.stType*, %struct.stType** %75, align 8 is the inst  in BB %74 branchPruned_clone 
+  %77 = getelementptr inbounds %struct.stType, %struct.stType* %76, i32 0, i32 1 is the inst  in BB %74 branchPruned_clone 
+  %78 = getelementptr inbounds [100 x i8], [100 x i8]* %77, i32 0, i32 0 is the inst  in BB %74 branchPruned_clone 
+  %79 = call i32 @strcmp(i8* %78, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @.str, i32 0, i32 0)) #5 is the inst  in BB %74 branchPruned_clone 
+baseStringData : helloWorld
+  <badref> = getelementptr inbounds [11 x i8], [11 x i8]* @.str, i32 0, i32 0 is the inst 
+GepInst : Not found in map
+constant string helloWorld 
+replaced with i32 0
+  %81 = icmp ne i32 0, 0 is the inst  in BB %74 branchPruned_clone 
+  br i1 %81, label %260, label %82 is the inst  in BB %74 branchPruned_clone 
+cloning
+  %83 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 1 is the inst  in BB %82 branchPruned_clone 
+  %84 = load %struct.stType*, %struct.stType** %83, align 8 is the inst  in BB %82 branchPruned_clone 
+  %85 = getelementptr inbounds %struct.stType, %struct.stType* %84, i32 0, i32 1 is the inst  in BB %82 branchPruned_clone 
+  %86 = getelementptr inbounds [100 x i8], [100 x i8]* %85, i64 0, i64 4 is the inst  in BB %82 branchPruned_clone 
+  %87 = load i8, i8* %86, align 4 is the inst  in BB %82 branchPruned_clone 
+replaced with i8 111
+  %88 = sext i8 111 to i32 is the inst  in BB %82 branchPruned_clone 
+  %89 = icmp eq i32 %88, 111 is the inst  in BB %82 branchPruned_clone 
+  br i1 %89, label %90, label %260 is the inst  in BB %82 branchPruned_clone 
+cloning
+  %91 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 1 is the inst  in BB %90 branchPruned_clone 
+  %92 = load %struct.stType*, %struct.stType** %91, align 8 is the inst  in BB %90 branchPruned_clone 
+  %93 = getelementptr inbounds %struct.stType, %struct.stType* %92, i32 0, i32 1 is the inst  in BB %90 branchPruned_clone 
+  %94 = getelementptr inbounds [100 x i8], [100 x i8]* %93, i64 0, i64 9 is the inst  in BB %90 branchPruned_clone 
+  %95 = load i8, i8* %94, align 1 is the inst  in BB %90 branchPruned_clone 
+replaced with i8 100
+  %96 = sext i8 100 to i32 is the inst  in BB %90 branchPruned_clone 
+  %97 = icmp eq i32 %96, 100 is the inst  in BB %90 branchPruned_clone 
+  br i1 %97, label %98, label %260 is the inst  in BB %90 branchPruned_clone 
+cloning
+  %99 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 2 is the inst  in BB %98 branchPruned_clone 
+  %100 = load %struct.stType*, %struct.stType** %99, align 8 is the inst  in BB %98 branchPruned_clone 
+  %101 = getelementptr inbounds %struct.stType, %struct.stType* %100, i32 0, i32 0 is the inst  in BB %98 branchPruned_clone 
+  %102 = load %struct.COORD*, %struct.COORD** %101, align 8 is the inst  in BB %98 branchPruned_clone 
+  %103 = getelementptr inbounds %struct.COORD, %struct.COORD* %102, i32 0, i32 0 is the inst  in BB %98 branchPruned_clone 
+  %104 = load i32*, i32** %103, align 8 is the inst  in BB %98 branchPruned_clone 
+  %105 = load i32, i32* %104, align 4 is the inst  in BB %98 branchPruned_clone 
+replaced with i32 11
+  %106 = icmp eq i32 11, 11 is the inst  in BB %98 branchPruned_clone 
+  br i1 %106, label %107, label %260 is the inst  in BB %98 branchPruned_clone 
+cloning
+  %108 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 2 is the inst  in BB %107 branchPruned_clone 
+  %109 = load %struct.stType*, %struct.stType** %108, align 8 is the inst  in BB %107 branchPruned_clone 
+  %110 = getelementptr inbounds %struct.stType, %struct.stType* %109, i32 0, i32 0 is the inst  in BB %107 branchPruned_clone 
+  %111 = load %struct.COORD*, %struct.COORD** %110, align 8 is the inst  in BB %107 branchPruned_clone 
+  %112 = getelementptr inbounds %struct.COORD, %struct.COORD* %111, i32 0, i32 1 is the inst  in BB %107 branchPruned_clone 
+  %113 = load i32*, i32** %112, align 8 is the inst  in BB %107 branchPruned_clone 
+  %114 = load i32, i32* %113, align 4 is the inst  in BB %107 branchPruned_clone 
+replaced with i32 12
+  %115 = icmp eq i32 12, 12 is the inst  in BB %107 branchPruned_clone 
+  br i1 %115, label %116, label %260 is the inst  in BB %107 branchPruned_clone 
+cloning
+  %117 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 2 is the inst  in BB %116 branchPruned_clone 
+  %118 = load %struct.stType*, %struct.stType** %117, align 8 is the inst  in BB %116 branchPruned_clone 
+  %119 = getelementptr inbounds %struct.stType, %struct.stType* %118, i32 0, i32 2 is the inst  in BB %116 branchPruned_clone 
+  %120 = getelementptr inbounds [8 x i32], [8 x i32]* %119, i64 0, i64 1 is the inst  in BB %116 branchPruned_clone 
+  %121 = load i32, i32* %120, align 4 is the inst  in BB %116 branchPruned_clone 
+replaced with i32 14
+  %122 = icmp eq i32 14, 14 is the inst  in BB %116 branchPruned_clone 
+  br i1 %122, label %123, label %260 is the inst  in BB %116 branchPruned_clone 
+cloning
+  %124 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 2 is the inst  in BB %123 branchPruned_clone 
+  %125 = load %struct.stType*, %struct.stType** %124, align 8 is the inst  in BB %123 branchPruned_clone 
+  %126 = getelementptr inbounds %struct.stType, %struct.stType* %125, i32 0, i32 1 is the inst  in BB %123 branchPruned_clone 
+  %127 = getelementptr inbounds [100 x i8], [100 x i8]* %126, i32 0, i32 0 is the inst  in BB %123 branchPruned_clone 
+  %128 = call i32 @strcmp(i8* %127, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @.str, i32 0, i32 0)) #5 is the inst  in BB %123 branchPruned_clone 
+baseStringData : helloWorld
+  <badref> = getelementptr inbounds [11 x i8], [11 x i8]* @.str, i32 0, i32 0 is the inst 
+GepInst : Not found in map
+constant string helloWorld 
+replaced with i32 0
+  %130 = icmp ne i32 0, 0 is the inst  in BB %123 branchPruned_clone 
+  br i1 %130, label %261, label %131 is the inst  in BB %123 branchPruned_clone 
+cloning
+  %132 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 2 is the inst  in BB %131 branchPruned_clone 
+  %133 = load %struct.stType*, %struct.stType** %132, align 8 is the inst  in BB %131 branchPruned_clone 
+  %134 = getelementptr inbounds %struct.stType, %struct.stType* %133, i32 0, i32 1 is the inst  in BB %131 branchPruned_clone 
+  %135 = getelementptr inbounds [100 x i8], [100 x i8]* %134, i64 0, i64 4 is the inst  in BB %131 branchPruned_clone 
+  %136 = load i8, i8* %135, align 4 is the inst  in BB %131 branchPruned_clone 
+replaced with i8 111
+  %137 = sext i8 111 to i32 is the inst  in BB %131 branchPruned_clone 
+  %138 = icmp eq i32 %137, 111 is the inst  in BB %131 branchPruned_clone 
+  br i1 %138, label %139, label %261 is the inst  in BB %131 branchPruned_clone 
+cloning
+  %140 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 2 is the inst  in BB %139 branchPruned_clone 
+  %141 = load %struct.stType*, %struct.stType** %140, align 8 is the inst  in BB %139 branchPruned_clone 
+  %142 = getelementptr inbounds %struct.stType, %struct.stType* %141, i32 0, i32 1 is the inst  in BB %139 branchPruned_clone 
+  %143 = getelementptr inbounds [100 x i8], [100 x i8]* %142, i64 0, i64 9 is the inst  in BB %139 branchPruned_clone 
+  %144 = load i8, i8* %143, align 1 is the inst  in BB %139 branchPruned_clone 
+replaced with i8 100
+  %145 = sext i8 100 to i32 is the inst  in BB %139 branchPruned_clone 
+  %146 = icmp eq i32 %145, 100 is the inst  in BB %139 branchPruned_clone 
+  br i1 %146, label %147, label %261 is the inst  in BB %139 branchPruned_clone 
+cloning
+  %148 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 3 is the inst  in BB %147 branchPruned_clone 
+  %149 = load %struct.stType*, %struct.stType** %148, align 8 is the inst  in BB %147 branchPruned_clone 
+  %150 = getelementptr inbounds %struct.stType, %struct.stType* %149, i32 0, i32 0 is the inst  in BB %147 branchPruned_clone 
+  %151 = load %struct.COORD*, %struct.COORD** %150, align 8 is the inst  in BB %147 branchPruned_clone 
+  %152 = getelementptr inbounds %struct.COORD, %struct.COORD* %151, i32 0, i32 0 is the inst  in BB %147 branchPruned_clone 
+  %153 = load i32*, i32** %152, align 8 is the inst  in BB %147 branchPruned_clone 
+  %154 = load i32, i32* %153, align 4 is the inst  in BB %147 branchPruned_clone 
+replaced with i32 16
+  %155 = icmp eq i32 16, 16 is the inst  in BB %147 branchPruned_clone 
+  br i1 %155, label %156, label %261 is the inst  in BB %147 branchPruned_clone 
+cloning
+  %157 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 3 is the inst  in BB %156 branchPruned_clone 
+  %158 = load %struct.stType*, %struct.stType** %157, align 8 is the inst  in BB %156 branchPruned_clone 
+  %159 = getelementptr inbounds %struct.stType, %struct.stType* %158, i32 0, i32 0 is the inst  in BB %156 branchPruned_clone 
+  %160 = load %struct.COORD*, %struct.COORD** %159, align 8 is the inst  in BB %156 branchPruned_clone 
+  %161 = getelementptr inbounds %struct.COORD, %struct.COORD* %160, i32 0, i32 1 is the inst  in BB %156 branchPruned_clone 
+  %162 = load i32*, i32** %161, align 8 is the inst  in BB %156 branchPruned_clone 
+  %163 = load i32, i32* %162, align 4 is the inst  in BB %156 branchPruned_clone 
+replaced with i32 17
+  %164 = icmp eq i32 17, 17 is the inst  in BB %156 branchPruned_clone 
+  br i1 %164, label %165, label %261 is the inst  in BB %156 branchPruned_clone 
+cloning
+  %166 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 3 is the inst  in BB %165 branchPruned_clone 
+  %167 = load %struct.stType*, %struct.stType** %166, align 8 is the inst  in BB %165 branchPruned_clone 
+  %168 = getelementptr inbounds %struct.stType, %struct.stType* %167, i32 0, i32 2 is the inst  in BB %165 branchPruned_clone 
+  %169 = getelementptr inbounds [8 x i32], [8 x i32]* %168, i64 0, i64 1 is the inst  in BB %165 branchPruned_clone 
+  %170 = load i32, i32* %169, align 4 is the inst  in BB %165 branchPruned_clone 
+replaced with i32 19
+  %171 = icmp eq i32 19, 19 is the inst  in BB %165 branchPruned_clone 
+  br i1 %171, label %172, label %261 is the inst  in BB %165 branchPruned_clone 
+cloning
+  %173 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 3 is the inst  in BB %172 branchPruned_clone 
+  %174 = load %struct.stType*, %struct.stType** %173, align 8 is the inst  in BB %172 branchPruned_clone 
+  %175 = getelementptr inbounds %struct.stType, %struct.stType* %174, i32 0, i32 1 is the inst  in BB %172 branchPruned_clone 
+  %176 = getelementptr inbounds [100 x i8], [100 x i8]* %175, i32 0, i32 0 is the inst  in BB %172 branchPruned_clone 
+  %177 = call i32 @strcmp(i8* %176, i8* getelementptr inbounds ([11 x i8], [11 x i8]* @.str, i32 0, i32 0)) #5 is the inst  in BB %172 branchPruned_clone 
+baseStringData : helloWorld
+  <badref> = getelementptr inbounds [11 x i8], [11 x i8]* @.str, i32 0, i32 0 is the inst 
+GepInst : Not found in map
+constant string helloWorld 
+replaced with i32 0
+  %179 = icmp ne i32 0, 0 is the inst  in BB %172 branchPruned_clone 
+  br i1 %179, label %262, label %180 is the inst  in BB %172 branchPruned_clone 
+cloning
+  %181 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 3 is the inst  in BB %180 branchPruned_clone 
+  %182 = load %struct.stType*, %struct.stType** %181, align 8 is the inst  in BB %180 branchPruned_clone 
+  %183 = getelementptr inbounds %struct.stType, %struct.stType* %182, i32 0, i32 1 is the inst  in BB %180 branchPruned_clone 
+  %184 = getelementptr inbounds [100 x i8], [100 x i8]* %183, i64 0, i64 4 is the inst  in BB %180 branchPruned_clone 
+  %185 = load i8, i8* %184, align 4 is the inst  in BB %180 branchPruned_clone 
+replaced with i8 111
+  %186 = sext i8 111 to i32 is the inst  in BB %180 branchPruned_clone 
+  %187 = icmp eq i32 %186, 111 is the inst  in BB %180 branchPruned_clone 
+  br i1 %187, label %188, label %262 is the inst  in BB %180 branchPruned_clone 
+cloning
+  %189 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 3 is the inst  in BB %188 branchPruned_clone 
+  %190 = load %struct.stType*, %struct.stType** %189, align 8 is the inst  in BB %188 branchPruned_clone 
+  %191 = getelementptr inbounds %struct.stType, %struct.stType* %190, i32 0, i32 1 is the inst  in BB %188 branchPruned_clone 
+  %192 = getelementptr inbounds [100 x i8], [100 x i8]* %191, i64 0, i64 9 is the inst  in BB %188 branchPruned_clone 
+  %193 = load i8, i8* %192, align 1 is the inst  in BB %188 branchPruned_clone 
+replaced with i8 100
+  %194 = sext i8 100 to i32 is the inst  in BB %188 branchPruned_clone 
+  %195 = icmp eq i32 %194, 100 is the inst  in BB %188 branchPruned_clone 
+  br i1 %195, label %196, label %262 is the inst  in BB %188 branchPruned_clone 
+cloning
+  %197 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 4 is the inst  in BB %196 branchPruned_clone 
+  %198 = load %struct.stType*, %struct.stType** %197, align 8 is the inst  in BB %196 branchPruned_clone 
+replaced with %struct.stType* null
+  %199 = icmp eq %struct.stType* null, null is the inst  in BB %196 branchPruned_clone 
+  br i1 %199, label %200, label %262 is the inst  in BB %196 branchPruned_clone 
+cloning
+  %201 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 5 is the inst  in BB %200 branchPruned_clone 
+  %202 = load %struct.stType*, %struct.stType** %201, align 8 is the inst  in BB %200 branchPruned_clone 
+replaced with %struct.stType* null
+  %203 = icmp eq %struct.stType* null, null is the inst  in BB %200 branchPruned_clone 
+  br i1 %203, label %204, label %262 is the inst  in BB %200 branchPruned_clone 
+cloning
+  %205 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 6 is the inst  in BB %204 branchPruned_clone 
+  %206 = load %struct.stType*, %struct.stType** %205, align 8 is the inst  in BB %204 branchPruned_clone 
+replaced with %struct.stType* null
+  %207 = icmp eq %struct.stType* null, null is the inst  in BB %204 branchPruned_clone 
+  br i1 %207, label %208, label %262 is the inst  in BB %204 branchPruned_clone 
+cloning
+  %209 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 7 is the inst  in BB %208 branchPruned_clone 
+  %210 = load %struct.stType*, %struct.stType** %209, align 8 is the inst  in BB %208 branchPruned_clone 
+replaced with %struct.stType* null
+  %211 = icmp eq %struct.stType* null, null is the inst  in BB %208 branchPruned_clone 
+  br i1 %211, label %212, label %262 is the inst  in BB %208 branchPruned_clone 
+cloning
+  %213 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 8 is the inst  in BB %212 branchPruned_clone 
+  %214 = load %struct.stType*, %struct.stType** %213, align 8 is the inst  in BB %212 branchPruned_clone 
+replaced with %struct.stType* null
+  %215 = icmp eq %struct.stType* null, null is the inst  in BB %212 branchPruned_clone 
+  br i1 %215, label %216, label %262 is the inst  in BB %212 branchPruned_clone 
+cloning
+  %217 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 9 is the inst  in BB %216 branchPruned_clone 
+  %218 = load %struct.stType*, %struct.stType** %217, align 8 is the inst  in BB %216 branchPruned_clone 
+replaced with %struct.stType* null
+  %219 = icmp eq %struct.stType* null, null is the inst  in BB %216 branchPruned_clone 
+  br i1 %219, label %220, label %262 is the inst  in BB %216 branchPruned_clone 
+cloning
+  %221 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 10 is the inst  in BB %220 branchPruned_clone 
+  %222 = load %struct.stType*, %struct.stType** %221, align 8 is the inst  in BB %220 branchPruned_clone 
+replaced with %struct.stType* null
+  %223 = icmp eq %struct.stType* null, null is the inst  in BB %220 branchPruned_clone 
+  br i1 %223, label %224, label %262 is the inst  in BB %220 branchPruned_clone 
+cloning
+  %225 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 11 is the inst  in BB %224 branchPruned_clone 
+  %226 = load %struct.stType*, %struct.stType** %225, align 8 is the inst  in BB %224 branchPruned_clone 
+replaced with %struct.stType* null
+  %227 = icmp eq %struct.stType* null, null is the inst  in BB %224 branchPruned_clone 
+  br i1 %227, label %228, label %262 is the inst  in BB %224 branchPruned_clone 
+cloning
+  %229 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 12 is the inst  in BB %228 branchPruned_clone 
+  %230 = load %struct.stType*, %struct.stType** %229, align 8 is the inst  in BB %228 branchPruned_clone 
+replaced with %struct.stType* null
+  %231 = icmp eq %struct.stType* null, null is the inst  in BB %228 branchPruned_clone 
+  br i1 %231, label %232, label %262 is the inst  in BB %228 branchPruned_clone 
+cloning
+  %233 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 13 is the inst  in BB %232 branchPruned_clone 
+  %234 = load %struct.stType*, %struct.stType** %233, align 8 is the inst  in BB %232 branchPruned_clone 
+replaced with %struct.stType* null
+  %235 = icmp eq %struct.stType* null, null is the inst  in BB %232 branchPruned_clone 
+  br i1 %235, label %236, label %262 is the inst  in BB %232 branchPruned_clone 
+cloning
+  %237 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 14 is the inst  in BB %236 branchPruned_clone 
+  %238 = load %struct.stType*, %struct.stType** %237, align 8 is the inst  in BB %236 branchPruned_clone 
+replaced with %struct.stType* null
+  %239 = icmp eq %struct.stType* null, null is the inst  in BB %236 branchPruned_clone 
+  br i1 %239, label %240, label %262 is the inst  in BB %236 branchPruned_clone 
+cloning
+  %241 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 15 is the inst  in BB %240 branchPruned_clone 
+  %242 = load %struct.stType*, %struct.stType** %241, align 8 is the inst  in BB %240 branchPruned_clone 
+replaced with %struct.stType* null
+  %243 = icmp eq %struct.stType* null, null is the inst  in BB %240 branchPruned_clone 
+  br i1 %243, label %244, label %262 is the inst  in BB %240 branchPruned_clone 
+cloning
+  %245 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 16 is the inst  in BB %244 branchPruned_clone 
+  %246 = load %struct.stType*, %struct.stType** %245, align 8 is the inst  in BB %244 branchPruned_clone 
+replaced with %struct.stType* null
+  %247 = icmp eq %struct.stType* null, null is the inst  in BB %244 branchPruned_clone 
+  br i1 %247, label %248, label %262 is the inst  in BB %244 branchPruned_clone 
+cloning
+  %249 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 17 is the inst  in BB %248 branchPruned_clone 
+  %250 = load %struct.stType*, %struct.stType** %249, align 8 is the inst  in BB %248 branchPruned_clone 
+replaced with %struct.stType* null
+  %251 = icmp eq %struct.stType* null, null is the inst  in BB %248 branchPruned_clone 
+  br i1 %251, label %252, label %262 is the inst  in BB %248 branchPruned_clone 
+cloning
+  %253 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 18 is the inst  in BB %252 branchPruned_clone 
+  %254 = load %struct.stType*, %struct.stType** %253, align 8 is the inst  in BB %252 branchPruned_clone 
+replaced with %struct.stType* null
+  %255 = icmp eq %struct.stType* null, null is the inst  in BB %252 branchPruned_clone 
+  br i1 %255, label %256, label %262 is the inst  in BB %252 branchPruned_clone 
+cloning
+  %257 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 19 is the inst  in BB %256 branchPruned_clone 
+  %258 = load %struct.stType*, %struct.stType** %257, align 8 is the inst  in BB %256 branchPruned_clone 
+replaced with %struct.stType* null
+  %259 = icmp eq %struct.stType* null, null is the inst  in BB %256 branchPruned_clone 
+  br i1 %259, label %260, label %262 is the inst  in BB %256 branchPruned_clone 
+duplicating
+  %261 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([19 x i8], [19 x i8]* @.str.1, i32 0, i32 0)) is the inst  in BB %260 branchPruned_clone 
+  br label %262 is the inst  in BB %260 branchPruned_clone 
+duplicating
+freeing BB %260
+freeing BB %256
+  ret void is the inst  in BB %262 branchPruned_clone 
+freeing BB %262
+  ret i32 0 is the inst  in BB %0 main 
+freeing BB %0
+  ---------------- *** ----------------
+  %1 = call noalias i8* @malloc(i64 160) #5 is the inst  in BB %0 main 
+mallocInst : size 160 at address 1000001
+  %2 = bitcast i8* %1 to %struct.stType** is the inst  in BB %0 main 
+  %3 = call noalias i8* @malloc(i64 144) #5 is the inst  in BB %0 main 
+mallocInst : size 144 at address 1000162
+  %4 = bitcast i8* %3 to %struct.stType* is the inst  in BB %0 main 
+  %5 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 0 is the inst  in BB %0 main 
+  store %struct.stType* %4, %struct.stType** %5, align 8 is the inst  in BB %0 main 
+StoreInst : from register
+1
+  %6 = call noalias i8* @malloc(i64 16) #5 is the inst  in BB %0 main 
+mallocInst : size 16 at address 1000307
+  %7 = bitcast i8* %6 to %struct.COORD* is the inst  in BB %0 main 
+  %8 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 0 is the inst  in BB %0 main 
+  %9 = load %struct.stType*, %struct.stType** %8, align 8 is the inst  in BB %0 main 
+  %10 = getelementptr inbounds %struct.stType, %struct.stType* %9, i32 0, i32 0 is the inst  in BB %0 main 
+  store %struct.COORD* %7, %struct.COORD** %10, align 8 is the inst  in BB %0 main 
+StoreInst : from register
+162
+  %11 = call noalias i8* @malloc(i64 4) #5 is the inst  in BB %0 main 
+mallocInst : size 4 at address 1000324
+  %12 = bitcast i8* %11 to i32* is the inst  in BB %0 main 
+  %13 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 0 is the inst  in BB %0 main 
+  %14 = load %struct.stType*, %struct.stType** %13, align 8 is the inst  in BB %0 main 
+  %15 = getelementptr inbounds %struct.stType, %struct.stType* %14, i32 0, i32 0 is the inst  in BB %0 main 
+  %16 = load %struct.COORD*, %struct.COORD** %15, align 8 is the inst  in BB %0 main 
+  %17 = getelementptr inbounds %struct.COORD, %struct.COORD* %16, i32 0, i32 0 is the inst  in BB %0 main 
+  store i32* %12, i32** %17, align 8 is the inst  in BB %0 main 
+StoreInst : from register
+307
+  %18 = call noalias i8* @malloc(i64 4) #5 is the inst  in BB %0 main 
+mallocInst : size 4 at address 1000329
+  %19 = bitcast i8* %18 to i32* is the inst  in BB %0 main 
+  %20 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 0 is the inst  in BB %0 main 
+  %21 = load %struct.stType*, %struct.stType** %20, align 8 is the inst  in BB %0 main 
+  %22 = getelementptr inbounds %struct.stType, %struct.stType* %21, i32 0, i32 0 is the inst  in BB %0 main 
+  %23 = load %struct.COORD*, %struct.COORD** %22, align 8 is the inst  in BB %0 main 
+  %24 = getelementptr inbounds %struct.COORD, %struct.COORD* %23, i32 0, i32 1 is the inst  in BB %0 main 
+  store i32* %19, i32** %24, align 8 is the inst  in BB %0 main 
+StoreInst : from register
+315
+  %25 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 0 is the inst  in BB %0 main 
+  %26 = load %struct.stType*, %struct.stType** %25, align 8 is the inst  in BB %0 main 
+  %27 = getelementptr inbounds %struct.stType, %struct.stType* %26, i32 0, i32 0 is the inst  in BB %0 main 
+  %28 = load %struct.COORD*, %struct.COORD** %27, align 8 is the inst  in BB %0 main 
+  %29 = getelementptr inbounds %struct.COORD, %struct.COORD* %28, i32 0, i32 0 is the inst  in BB %0 main 
+  %30 = load i32*, i32** %29, align 8 is the inst  in BB %0 main 
+  %31 = getelementptr inbounds i32, i32* %30, i64 0 is the inst  in BB %0 main 
+  store i32 1, i32* %31, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 1
+324
+  %32 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 0 is the inst  in BB %0 main 
+  %33 = load %struct.stType*, %struct.stType** %32, align 8 is the inst  in BB %0 main 
+  %34 = getelementptr inbounds %struct.stType, %struct.stType* %33, i32 0, i32 0 is the inst  in BB %0 main 
+  %35 = load %struct.COORD*, %struct.COORD** %34, align 8 is the inst  in BB %0 main 
+  %36 = getelementptr inbounds %struct.COORD, %struct.COORD* %35, i32 0, i32 1 is the inst  in BB %0 main 
+  %37 = load i32*, i32** %36, align 8 is the inst  in BB %0 main 
+  %38 = getelementptr inbounds i32, i32* %37, i64 0 is the inst  in BB %0 main 
+  store i32 2, i32* %38, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 2
+329
+  %39 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 0 is the inst  in BB %0 main 
+  %40 = load %struct.stType*, %struct.stType** %39, align 8 is the inst  in BB %0 main 
+  %41 = getelementptr inbounds %struct.stType, %struct.stType* %40, i32 0, i32 2 is the inst  in BB %0 main 
+  %42 = getelementptr inbounds [8 x i32], [8 x i32]* %41, i64 0, i64 0 is the inst  in BB %0 main 
+  store i32 3, i32* %42, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 3
+270
+  %43 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 0 is the inst  in BB %0 main 
+  %44 = load %struct.stType*, %struct.stType** %43, align 8 is the inst  in BB %0 main 
+  %45 = getelementptr inbounds %struct.stType, %struct.stType* %44, i32 0, i32 2 is the inst  in BB %0 main 
+  %46 = getelementptr inbounds [8 x i32], [8 x i32]* %45, i64 0, i64 1 is the inst  in BB %0 main 
+  store i32 4, i32* %46, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 4
+274
+  %47 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 0 is the inst  in BB %0 main 
+  %48 = load %struct.stType*, %struct.stType** %47, align 8 is the inst  in BB %0 main 
+  %49 = getelementptr inbounds %struct.stType, %struct.stType* %48, i32 0, i32 2 is the inst  in BB %0 main 
+  %50 = getelementptr inbounds [8 x i32], [8 x i32]* %49, i64 0, i64 2 is the inst  in BB %0 main 
+  store i32 5, i32* %50, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 5
+278
+  %51 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 0 is the inst  in BB %0 main 
+  %52 = load %struct.stType*, %struct.stType** %51, align 8 is the inst  in BB %0 main 
+  %53 = getelementptr inbounds %struct.stType, %struct.stType* %52, i32 0, i32 1 is the inst  in BB %0 main 
+  %54 = getelementptr inbounds [100 x i8], [100 x i8]* %53, i32 0, i32 0 is the inst  in BB %0 main 
+  call void @llvm.memcpy.p0i8.p0i8.i64(i8* %54, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @.str.2, i32 0, i32 0), i64 11, i32 1, i1 false) is the inst  in BB %0 main 
+170
+  %55 = call noalias i8* @malloc(i64 144) #5 is the inst  in BB %0 main 
+mallocInst : size 144 at address 1000334
+  %56 = bitcast i8* %55 to %struct.stType* is the inst  in BB %0 main 
+  %57 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 1 is the inst  in BB %0 main 
+  store %struct.stType* %56, %struct.stType** %57, align 8 is the inst  in BB %0 main 
+StoreInst : from register
+9
+  %58 = call noalias i8* @malloc(i64 16) #5 is the inst  in BB %0 main 
+mallocInst : size 16 at address 1000479
+  %59 = bitcast i8* %58 to %struct.COORD* is the inst  in BB %0 main 
+  %60 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 1 is the inst  in BB %0 main 
+  %61 = load %struct.stType*, %struct.stType** %60, align 8 is the inst  in BB %0 main 
+  %62 = getelementptr inbounds %struct.stType, %struct.stType* %61, i32 0, i32 0 is the inst  in BB %0 main 
+  store %struct.COORD* %59, %struct.COORD** %62, align 8 is the inst  in BB %0 main 
+StoreInst : from register
+334
+  %63 = call noalias i8* @malloc(i64 4) #5 is the inst  in BB %0 main 
+mallocInst : size 4 at address 1000496
+  %64 = bitcast i8* %63 to i32* is the inst  in BB %0 main 
+  %65 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 1 is the inst  in BB %0 main 
+  %66 = load %struct.stType*, %struct.stType** %65, align 8 is the inst  in BB %0 main 
+  %67 = getelementptr inbounds %struct.stType, %struct.stType* %66, i32 0, i32 0 is the inst  in BB %0 main 
+  %68 = load %struct.COORD*, %struct.COORD** %67, align 8 is the inst  in BB %0 main 
+  %69 = getelementptr inbounds %struct.COORD, %struct.COORD* %68, i32 0, i32 0 is the inst  in BB %0 main 
+  store i32* %64, i32** %69, align 8 is the inst  in BB %0 main 
+StoreInst : from register
+479
+  %70 = call noalias i8* @malloc(i64 4) #5 is the inst  in BB %0 main 
+mallocInst : size 4 at address 1000501
+  %71 = bitcast i8* %70 to i32* is the inst  in BB %0 main 
+  %72 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 1 is the inst  in BB %0 main 
+  %73 = load %struct.stType*, %struct.stType** %72, align 8 is the inst  in BB %0 main 
+  %74 = getelementptr inbounds %struct.stType, %struct.stType* %73, i32 0, i32 0 is the inst  in BB %0 main 
+  %75 = load %struct.COORD*, %struct.COORD** %74, align 8 is the inst  in BB %0 main 
+  %76 = getelementptr inbounds %struct.COORD, %struct.COORD* %75, i32 0, i32 1 is the inst  in BB %0 main 
+  store i32* %71, i32** %76, align 8 is the inst  in BB %0 main 
+StoreInst : from register
+487
+  %77 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 1 is the inst  in BB %0 main 
+  %78 = load %struct.stType*, %struct.stType** %77, align 8 is the inst  in BB %0 main 
+  %79 = getelementptr inbounds %struct.stType, %struct.stType* %78, i32 0, i32 0 is the inst  in BB %0 main 
+  %80 = load %struct.COORD*, %struct.COORD** %79, align 8 is the inst  in BB %0 main 
+  %81 = getelementptr inbounds %struct.COORD, %struct.COORD* %80, i32 0, i32 0 is the inst  in BB %0 main 
+  %82 = load i32*, i32** %81, align 8 is the inst  in BB %0 main 
+  %83 = getelementptr inbounds i32, i32* %82, i64 0 is the inst  in BB %0 main 
+  store i32 6, i32* %83, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 6
+496
+  %84 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 1 is the inst  in BB %0 main 
+  %85 = load %struct.stType*, %struct.stType** %84, align 8 is the inst  in BB %0 main 
+  %86 = getelementptr inbounds %struct.stType, %struct.stType* %85, i32 0, i32 0 is the inst  in BB %0 main 
+  %87 = load %struct.COORD*, %struct.COORD** %86, align 8 is the inst  in BB %0 main 
+  %88 = getelementptr inbounds %struct.COORD, %struct.COORD* %87, i32 0, i32 1 is the inst  in BB %0 main 
+  %89 = load i32*, i32** %88, align 8 is the inst  in BB %0 main 
+  %90 = getelementptr inbounds i32, i32* %89, i64 0 is the inst  in BB %0 main 
+  store i32 7, i32* %90, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 7
+501
+  %91 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 1 is the inst  in BB %0 main 
+  %92 = load %struct.stType*, %struct.stType** %91, align 8 is the inst  in BB %0 main 
+  %93 = getelementptr inbounds %struct.stType, %struct.stType* %92, i32 0, i32 2 is the inst  in BB %0 main 
+  %94 = getelementptr inbounds [8 x i32], [8 x i32]* %93, i64 0, i64 0 is the inst  in BB %0 main 
+  store i32 8, i32* %94, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 8
+442
+  %95 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 1 is the inst  in BB %0 main 
+  %96 = load %struct.stType*, %struct.stType** %95, align 8 is the inst  in BB %0 main 
+  %97 = getelementptr inbounds %struct.stType, %struct.stType* %96, i32 0, i32 2 is the inst  in BB %0 main 
+  %98 = getelementptr inbounds [8 x i32], [8 x i32]* %97, i64 0, i64 1 is the inst  in BB %0 main 
+  store i32 9, i32* %98, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 9
+446
+  %99 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 1 is the inst  in BB %0 main 
+  %100 = load %struct.stType*, %struct.stType** %99, align 8 is the inst  in BB %0 main 
+  %101 = getelementptr inbounds %struct.stType, %struct.stType* %100, i32 0, i32 2 is the inst  in BB %0 main 
+  %102 = getelementptr inbounds [8 x i32], [8 x i32]* %101, i64 0, i64 2 is the inst  in BB %0 main 
+  store i32 10, i32* %102, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 10
+450
+  %103 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 1 is the inst  in BB %0 main 
+  %104 = load %struct.stType*, %struct.stType** %103, align 8 is the inst  in BB %0 main 
+  %105 = getelementptr inbounds %struct.stType, %struct.stType* %104, i32 0, i32 1 is the inst  in BB %0 main 
+  %106 = getelementptr inbounds [100 x i8], [100 x i8]* %105, i32 0, i32 0 is the inst  in BB %0 main 
+  call void @llvm.memcpy.p0i8.p0i8.i64(i8* %106, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @.str.2, i32 0, i32 0), i64 11, i32 1, i1 false) is the inst  in BB %0 main 
+342
+  %107 = call noalias i8* @malloc(i64 144) #5 is the inst  in BB %0 main 
+mallocInst : size 144 at address 1000506
+  %108 = bitcast i8* %107 to %struct.stType* is the inst  in BB %0 main 
+  %109 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 2 is the inst  in BB %0 main 
+  store %struct.stType* %108, %struct.stType** %109, align 8 is the inst  in BB %0 main 
+StoreInst : from register
+17
+  %110 = call noalias i8* @malloc(i64 16) #5 is the inst  in BB %0 main 
+mallocInst : size 16 at address 1000651
+  %111 = bitcast i8* %110 to %struct.COORD* is the inst  in BB %0 main 
+  %112 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 2 is the inst  in BB %0 main 
+  %113 = load %struct.stType*, %struct.stType** %112, align 8 is the inst  in BB %0 main 
+  %114 = getelementptr inbounds %struct.stType, %struct.stType* %113, i32 0, i32 0 is the inst  in BB %0 main 
+  store %struct.COORD* %111, %struct.COORD** %114, align 8 is the inst  in BB %0 main 
+StoreInst : from register
+506
+  %115 = call noalias i8* @malloc(i64 4) #5 is the inst  in BB %0 main 
+mallocInst : size 4 at address 1000668
+  %116 = bitcast i8* %115 to i32* is the inst  in BB %0 main 
+  %117 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 2 is the inst  in BB %0 main 
+  %118 = load %struct.stType*, %struct.stType** %117, align 8 is the inst  in BB %0 main 
+  %119 = getelementptr inbounds %struct.stType, %struct.stType* %118, i32 0, i32 0 is the inst  in BB %0 main 
+  %120 = load %struct.COORD*, %struct.COORD** %119, align 8 is the inst  in BB %0 main 
+  %121 = getelementptr inbounds %struct.COORD, %struct.COORD* %120, i32 0, i32 0 is the inst  in BB %0 main 
+  store i32* %116, i32** %121, align 8 is the inst  in BB %0 main 
+StoreInst : from register
+651
+  %122 = call noalias i8* @malloc(i64 4) #5 is the inst  in BB %0 main 
+mallocInst : size 4 at address 1000673
+  %123 = bitcast i8* %122 to i32* is the inst  in BB %0 main 
+  %124 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 2 is the inst  in BB %0 main 
+  %125 = load %struct.stType*, %struct.stType** %124, align 8 is the inst  in BB %0 main 
+  %126 = getelementptr inbounds %struct.stType, %struct.stType* %125, i32 0, i32 0 is the inst  in BB %0 main 
+  %127 = load %struct.COORD*, %struct.COORD** %126, align 8 is the inst  in BB %0 main 
+  %128 = getelementptr inbounds %struct.COORD, %struct.COORD* %127, i32 0, i32 1 is the inst  in BB %0 main 
+  store i32* %123, i32** %128, align 8 is the inst  in BB %0 main 
+StoreInst : from register
+659
+  %129 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 2 is the inst  in BB %0 main 
+  %130 = load %struct.stType*, %struct.stType** %129, align 8 is the inst  in BB %0 main 
+  %131 = getelementptr inbounds %struct.stType, %struct.stType* %130, i32 0, i32 0 is the inst  in BB %0 main 
+  %132 = load %struct.COORD*, %struct.COORD** %131, align 8 is the inst  in BB %0 main 
+  %133 = getelementptr inbounds %struct.COORD, %struct.COORD* %132, i32 0, i32 0 is the inst  in BB %0 main 
+  %134 = load i32*, i32** %133, align 8 is the inst  in BB %0 main 
+  %135 = getelementptr inbounds i32, i32* %134, i64 0 is the inst  in BB %0 main 
+  store i32 11, i32* %135, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 11
+668
+  %136 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 2 is the inst  in BB %0 main 
+  %137 = load %struct.stType*, %struct.stType** %136, align 8 is the inst  in BB %0 main 
+  %138 = getelementptr inbounds %struct.stType, %struct.stType* %137, i32 0, i32 0 is the inst  in BB %0 main 
+  %139 = load %struct.COORD*, %struct.COORD** %138, align 8 is the inst  in BB %0 main 
+  %140 = getelementptr inbounds %struct.COORD, %struct.COORD* %139, i32 0, i32 1 is the inst  in BB %0 main 
+  %141 = load i32*, i32** %140, align 8 is the inst  in BB %0 main 
+  %142 = getelementptr inbounds i32, i32* %141, i64 0 is the inst  in BB %0 main 
+  store i32 12, i32* %142, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 12
+673
+  %143 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 2 is the inst  in BB %0 main 
+  %144 = load %struct.stType*, %struct.stType** %143, align 8 is the inst  in BB %0 main 
+  %145 = getelementptr inbounds %struct.stType, %struct.stType* %144, i32 0, i32 2 is the inst  in BB %0 main 
+  %146 = getelementptr inbounds [8 x i32], [8 x i32]* %145, i64 0, i64 0 is the inst  in BB %0 main 
+  store i32 13, i32* %146, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 13
+614
+  %147 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 2 is the inst  in BB %0 main 
+  %148 = load %struct.stType*, %struct.stType** %147, align 8 is the inst  in BB %0 main 
+  %149 = getelementptr inbounds %struct.stType, %struct.stType* %148, i32 0, i32 2 is the inst  in BB %0 main 
+  %150 = getelementptr inbounds [8 x i32], [8 x i32]* %149, i64 0, i64 1 is the inst  in BB %0 main 
+  store i32 14, i32* %150, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 14
+618
+  %151 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 2 is the inst  in BB %0 main 
+  %152 = load %struct.stType*, %struct.stType** %151, align 8 is the inst  in BB %0 main 
+  %153 = getelementptr inbounds %struct.stType, %struct.stType* %152, i32 0, i32 2 is the inst  in BB %0 main 
+  %154 = getelementptr inbounds [8 x i32], [8 x i32]* %153, i64 0, i64 2 is the inst  in BB %0 main 
+  store i32 15, i32* %154, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 15
+622
+  %155 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 2 is the inst  in BB %0 main 
+  %156 = load %struct.stType*, %struct.stType** %155, align 8 is the inst  in BB %0 main 
+  %157 = getelementptr inbounds %struct.stType, %struct.stType* %156, i32 0, i32 1 is the inst  in BB %0 main 
+  %158 = getelementptr inbounds [100 x i8], [100 x i8]* %157, i32 0, i32 0 is the inst  in BB %0 main 
+  call void @llvm.memcpy.p0i8.p0i8.i64(i8* %158, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @.str.2, i32 0, i32 0), i64 11, i32 1, i1 false) is the inst  in BB %0 main 
+514
+  %159 = call noalias i8* @malloc(i64 144) #5 is the inst  in BB %0 main 
+mallocInst : size 144 at address 1000678
+  %160 = bitcast i8* %159 to %struct.stType* is the inst  in BB %0 main 
+  %161 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 3 is the inst  in BB %0 main 
+  store %struct.stType* %160, %struct.stType** %161, align 8 is the inst  in BB %0 main 
+StoreInst : from register
+25
+  %162 = call noalias i8* @malloc(i64 16) #5 is the inst  in BB %0 main 
+mallocInst : size 16 at address 1000823
+  %163 = bitcast i8* %162 to %struct.COORD* is the inst  in BB %0 main 
+  %164 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 3 is the inst  in BB %0 main 
+  %165 = load %struct.stType*, %struct.stType** %164, align 8 is the inst  in BB %0 main 
+  %166 = getelementptr inbounds %struct.stType, %struct.stType* %165, i32 0, i32 0 is the inst  in BB %0 main 
+  store %struct.COORD* %163, %struct.COORD** %166, align 8 is the inst  in BB %0 main 
+StoreInst : from register
+678
+  %167 = call noalias i8* @malloc(i64 4) #5 is the inst  in BB %0 main 
+mallocInst : size 4 at address 1000840
+  %168 = bitcast i8* %167 to i32* is the inst  in BB %0 main 
+  %169 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 3 is the inst  in BB %0 main 
+  %170 = load %struct.stType*, %struct.stType** %169, align 8 is the inst  in BB %0 main 
+  %171 = getelementptr inbounds %struct.stType, %struct.stType* %170, i32 0, i32 0 is the inst  in BB %0 main 
+  %172 = load %struct.COORD*, %struct.COORD** %171, align 8 is the inst  in BB %0 main 
+  %173 = getelementptr inbounds %struct.COORD, %struct.COORD* %172, i32 0, i32 0 is the inst  in BB %0 main 
+  store i32* %168, i32** %173, align 8 is the inst  in BB %0 main 
+StoreInst : from register
+823
+  %174 = call noalias i8* @malloc(i64 4) #5 is the inst  in BB %0 main 
+mallocInst : size 4 at address 1000845
+  %175 = bitcast i8* %174 to i32* is the inst  in BB %0 main 
+  %176 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 3 is the inst  in BB %0 main 
+  %177 = load %struct.stType*, %struct.stType** %176, align 8 is the inst  in BB %0 main 
+  %178 = getelementptr inbounds %struct.stType, %struct.stType* %177, i32 0, i32 0 is the inst  in BB %0 main 
+  %179 = load %struct.COORD*, %struct.COORD** %178, align 8 is the inst  in BB %0 main 
+  %180 = getelementptr inbounds %struct.COORD, %struct.COORD* %179, i32 0, i32 1 is the inst  in BB %0 main 
+  store i32* %175, i32** %180, align 8 is the inst  in BB %0 main 
+StoreInst : from register
+831
+  %181 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 3 is the inst  in BB %0 main 
+  %182 = load %struct.stType*, %struct.stType** %181, align 8 is the inst  in BB %0 main 
+  %183 = getelementptr inbounds %struct.stType, %struct.stType* %182, i32 0, i32 0 is the inst  in BB %0 main 
+  %184 = load %struct.COORD*, %struct.COORD** %183, align 8 is the inst  in BB %0 main 
+  %185 = getelementptr inbounds %struct.COORD, %struct.COORD* %184, i32 0, i32 0 is the inst  in BB %0 main 
+  %186 = load i32*, i32** %185, align 8 is the inst  in BB %0 main 
+  %187 = getelementptr inbounds i32, i32* %186, i64 0 is the inst  in BB %0 main 
+  store i32 16, i32* %187, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 16
+840
+  %188 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 3 is the inst  in BB %0 main 
+  %189 = load %struct.stType*, %struct.stType** %188, align 8 is the inst  in BB %0 main 
+  %190 = getelementptr inbounds %struct.stType, %struct.stType* %189, i32 0, i32 0 is the inst  in BB %0 main 
+  %191 = load %struct.COORD*, %struct.COORD** %190, align 8 is the inst  in BB %0 main 
+  %192 = getelementptr inbounds %struct.COORD, %struct.COORD* %191, i32 0, i32 1 is the inst  in BB %0 main 
+  %193 = load i32*, i32** %192, align 8 is the inst  in BB %0 main 
+  %194 = getelementptr inbounds i32, i32* %193, i64 0 is the inst  in BB %0 main 
+  store i32 17, i32* %194, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 17
+845
+  %195 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 3 is the inst  in BB %0 main 
+  %196 = load %struct.stType*, %struct.stType** %195, align 8 is the inst  in BB %0 main 
+  %197 = getelementptr inbounds %struct.stType, %struct.stType* %196, i32 0, i32 2 is the inst  in BB %0 main 
+  %198 = getelementptr inbounds [8 x i32], [8 x i32]* %197, i64 0, i64 0 is the inst  in BB %0 main 
+  store i32 18, i32* %198, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 18
+786
+  %199 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 3 is the inst  in BB %0 main 
+  %200 = load %struct.stType*, %struct.stType** %199, align 8 is the inst  in BB %0 main 
+  %201 = getelementptr inbounds %struct.stType, %struct.stType* %200, i32 0, i32 2 is the inst  in BB %0 main 
+  %202 = getelementptr inbounds [8 x i32], [8 x i32]* %201, i64 0, i64 1 is the inst  in BB %0 main 
+  store i32 19, i32* %202, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 19
+790
+  %203 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 3 is the inst  in BB %0 main 
+  %204 = load %struct.stType*, %struct.stType** %203, align 8 is the inst  in BB %0 main 
+  %205 = getelementptr inbounds %struct.stType, %struct.stType* %204, i32 0, i32 2 is the inst  in BB %0 main 
+  %206 = getelementptr inbounds [8 x i32], [8 x i32]* %205, i64 0, i64 2 is the inst  in BB %0 main 
+  store i32 20, i32* %206, align 4 is the inst  in BB %0 main 
+StoreInst : from ConstantInt 20
+794
+  %207 = getelementptr inbounds %struct.stType*, %struct.stType** %2, i64 3 is the inst  in BB %0 main 
+  %208 = load %struct.stType*, %struct.stType** %207, align 8 is the inst  in BB %0 main 
+  %209 = getelementptr inbounds %struct.stType, %struct.stType* %208, i32 0, i32 1 is the inst  in BB %0 main 
+  %210 = getelementptr inbounds [100 x i8], [100 x i8]* %209, i32 0, i32 0 is the inst  in BB %0 main 
+  call void @llvm.memcpy.p0i8.p0i8.i64(i8* %210, i8* getelementptr inbounds ([12 x i8], [12 x i8]* @.str.2, i32 0, i32 0), i64 11, i32 1, i1 false) is the inst  in BB %0 main 
+686
+  call void @branchPruned_clone(%struct.stType** %2) is the inst  in BB %0 main 
+  %1 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 0 is the inst  in BB %0 branchPruned_clone_clone 
+  %2 = load %struct.stType*, %struct.stType** %1, align 8 is the inst  in BB %0 branchPruned_clone_clone 
+  %3 = getelementptr inbounds %struct.stType, %struct.stType* %2, i32 0, i32 0 is the inst  in BB %0 branchPruned_clone_clone 
+  %4 = load %struct.COORD*, %struct.COORD** %3, align 8 is the inst  in BB %0 branchPruned_clone_clone 
+  %5 = getelementptr inbounds %struct.COORD, %struct.COORD* %4, i32 0, i32 0 is the inst  in BB %0 branchPruned_clone_clone 
+  %6 = load i32*, i32** %5, align 8 is the inst  in BB %0 branchPruned_clone_clone 
+  %7 = load i32, i32* %6, align 4 is the inst  in BB %0 branchPruned_clone_clone 
+replaced with i32 1
+  br i1 true, label %8, label %210 is the inst  in BB %0 branchPruned_clone_clone 
+cloning
+  %9 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 0 is the inst  in BB %8 branchPruned_clone_clone 
+  %10 = load %struct.stType*, %struct.stType** %9, align 8 is the inst  in BB %8 branchPruned_clone_clone 
+  %11 = getelementptr inbounds %struct.stType, %struct.stType* %10, i32 0, i32 0 is the inst  in BB %8 branchPruned_clone_clone 
+  %12 = load %struct.COORD*, %struct.COORD** %11, align 8 is the inst  in BB %8 branchPruned_clone_clone 
+  %13 = getelementptr inbounds %struct.COORD, %struct.COORD* %12, i32 0, i32 1 is the inst  in BB %8 branchPruned_clone_clone 
+  %14 = load i32*, i32** %13, align 8 is the inst  in BB %8 branchPruned_clone_clone 
+  %15 = load i32, i32* %14, align 4 is the inst  in BB %8 branchPruned_clone_clone 
+replaced with i32 2
+  br i1 true, label %16, label %210 is the inst  in BB %8 branchPruned_clone_clone 
+cloning
+  %17 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 0 is the inst  in BB %16 branchPruned_clone_clone 
+  %18 = load %struct.stType*, %struct.stType** %17, align 8 is the inst  in BB %16 branchPruned_clone_clone 
+  %19 = getelementptr inbounds %struct.stType, %struct.stType* %18, i32 0, i32 2 is the inst  in BB %16 branchPruned_clone_clone 
+  %20 = getelementptr inbounds [8 x i32], [8 x i32]* %19, i64 0, i64 1 is the inst  in BB %16 branchPruned_clone_clone 
+  %21 = load i32, i32* %20, align 4 is the inst  in BB %16 branchPruned_clone_clone 
+replaced with i32 4
+  br i1 true, label %22, label %210 is the inst  in BB %16 branchPruned_clone_clone 
+cloning
+  %23 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 0 is the inst  in BB %22 branchPruned_clone_clone 
+  %24 = load %struct.stType*, %struct.stType** %23, align 8 is the inst  in BB %22 branchPruned_clone_clone 
+  %25 = getelementptr inbounds %struct.stType, %struct.stType* %24, i32 0, i32 1 is the inst  in BB %22 branchPruned_clone_clone 
+  %26 = getelementptr inbounds [100 x i8], [100 x i8]* %25, i32 0, i32 0 is the inst  in BB %22 branchPruned_clone_clone 
+  %27 = call i32 @strcmp(i8* getelementptr inbounds ([11 x i8], [11 x i8]* @0, i64 0, i64 0), i8* getelementptr inbounds ([11 x i8], [11 x i8]* @.str, i32 0, i32 0)) #5 is the inst  in BB %22 branchPruned_clone_clone 
+  br i1 false, label %210, label %28 is the inst  in BB %22 branchPruned_clone_clone 
+cloning
+  %29 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 0 is the inst  in BB %28 branchPruned_clone_clone 
+  %30 = load %struct.stType*, %struct.stType** %29, align 8 is the inst  in BB %28 branchPruned_clone_clone 
+  %31 = getelementptr inbounds %struct.stType, %struct.stType* %30, i32 0, i32 1 is the inst  in BB %28 branchPruned_clone_clone 
+  %32 = getelementptr inbounds [100 x i8], [100 x i8]* %31, i64 0, i64 4 is the inst  in BB %28 branchPruned_clone_clone 
+  %33 = load i8, i8* %32, align 4 is the inst  in BB %28 branchPruned_clone_clone 
+replaced with i8 111
+  br i1 true, label %34, label %210 is the inst  in BB %28 branchPruned_clone_clone 
+cloning
+  %35 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 0 is the inst  in BB %34 branchPruned_clone_clone 
+  %36 = load %struct.stType*, %struct.stType** %35, align 8 is the inst  in BB %34 branchPruned_clone_clone 
+  %37 = getelementptr inbounds %struct.stType, %struct.stType* %36, i32 0, i32 1 is the inst  in BB %34 branchPruned_clone_clone 
+  %38 = getelementptr inbounds [100 x i8], [100 x i8]* %37, i64 0, i64 9 is the inst  in BB %34 branchPruned_clone_clone 
+  %39 = load i8, i8* %38, align 1 is the inst  in BB %34 branchPruned_clone_clone 
+replaced with i8 100
+  br i1 true, label %40, label %210 is the inst  in BB %34 branchPruned_clone_clone 
+cloning
+  %41 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 1 is the inst  in BB %40 branchPruned_clone_clone 
+  %42 = load %struct.stType*, %struct.stType** %41, align 8 is the inst  in BB %40 branchPruned_clone_clone 
+  %43 = getelementptr inbounds %struct.stType, %struct.stType* %42, i32 0, i32 0 is the inst  in BB %40 branchPruned_clone_clone 
+  %44 = load %struct.COORD*, %struct.COORD** %43, align 8 is the inst  in BB %40 branchPruned_clone_clone 
+  %45 = getelementptr inbounds %struct.COORD, %struct.COORD* %44, i32 0, i32 0 is the inst  in BB %40 branchPruned_clone_clone 
+  %46 = load i32*, i32** %45, align 8 is the inst  in BB %40 branchPruned_clone_clone 
+  %47 = load i32, i32* %46, align 4 is the inst  in BB %40 branchPruned_clone_clone 
+replaced with i32 6
+  br i1 true, label %48, label %210 is the inst  in BB %40 branchPruned_clone_clone 
+cloning
+  %49 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 1 is the inst  in BB %48 branchPruned_clone_clone 
+  %50 = load %struct.stType*, %struct.stType** %49, align 8 is the inst  in BB %48 branchPruned_clone_clone 
+  %51 = getelementptr inbounds %struct.stType, %struct.stType* %50, i32 0, i32 0 is the inst  in BB %48 branchPruned_clone_clone 
+  %52 = load %struct.COORD*, %struct.COORD** %51, align 8 is the inst  in BB %48 branchPruned_clone_clone 
+  %53 = getelementptr inbounds %struct.COORD, %struct.COORD* %52, i32 0, i32 1 is the inst  in BB %48 branchPruned_clone_clone 
+  %54 = load i32*, i32** %53, align 8 is the inst  in BB %48 branchPruned_clone_clone 
+  %55 = load i32, i32* %54, align 4 is the inst  in BB %48 branchPruned_clone_clone 
+replaced with i32 7
+  br i1 true, label %56, label %210 is the inst  in BB %48 branchPruned_clone_clone 
+cloning
+  %57 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 1 is the inst  in BB %56 branchPruned_clone_clone 
+  %58 = load %struct.stType*, %struct.stType** %57, align 8 is the inst  in BB %56 branchPruned_clone_clone 
+  %59 = getelementptr inbounds %struct.stType, %struct.stType* %58, i32 0, i32 2 is the inst  in BB %56 branchPruned_clone_clone 
+  %60 = getelementptr inbounds [8 x i32], [8 x i32]* %59, i64 0, i64 1 is the inst  in BB %56 branchPruned_clone_clone 
+  %61 = load i32, i32* %60, align 4 is the inst  in BB %56 branchPruned_clone_clone 
+replaced with i32 9
+  br i1 true, label %62, label %210 is the inst  in BB %56 branchPruned_clone_clone 
+cloning
+  %63 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 1 is the inst  in BB %62 branchPruned_clone_clone 
+  %64 = load %struct.stType*, %struct.stType** %63, align 8 is the inst  in BB %62 branchPruned_clone_clone 
+  %65 = getelementptr inbounds %struct.stType, %struct.stType* %64, i32 0, i32 1 is the inst  in BB %62 branchPruned_clone_clone 
+  %66 = getelementptr inbounds [100 x i8], [100 x i8]* %65, i32 0, i32 0 is the inst  in BB %62 branchPruned_clone_clone 
+  %67 = call i32 @strcmp(i8* getelementptr inbounds ([11 x i8], [11 x i8]* @1, i64 0, i64 0), i8* getelementptr inbounds ([11 x i8], [11 x i8]* @.str, i32 0, i32 0)) #5 is the inst  in BB %62 branchPruned_clone_clone 
+  br i1 false, label %210, label %68 is the inst  in BB %62 branchPruned_clone_clone 
+cloning
+  %69 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 1 is the inst  in BB %68 branchPruned_clone_clone 
+  %70 = load %struct.stType*, %struct.stType** %69, align 8 is the inst  in BB %68 branchPruned_clone_clone 
+  %71 = getelementptr inbounds %struct.stType, %struct.stType* %70, i32 0, i32 1 is the inst  in BB %68 branchPruned_clone_clone 
+  %72 = getelementptr inbounds [100 x i8], [100 x i8]* %71, i64 0, i64 4 is the inst  in BB %68 branchPruned_clone_clone 
+  %73 = load i8, i8* %72, align 4 is the inst  in BB %68 branchPruned_clone_clone 
+replaced with i8 111
+  br i1 true, label %74, label %210 is the inst  in BB %68 branchPruned_clone_clone 
+cloning
+  %75 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 1 is the inst  in BB %74 branchPruned_clone_clone 
+  %76 = load %struct.stType*, %struct.stType** %75, align 8 is the inst  in BB %74 branchPruned_clone_clone 
+  %77 = getelementptr inbounds %struct.stType, %struct.stType* %76, i32 0, i32 1 is the inst  in BB %74 branchPruned_clone_clone 
+  %78 = getelementptr inbounds [100 x i8], [100 x i8]* %77, i64 0, i64 9 is the inst  in BB %74 branchPruned_clone_clone 
+  %79 = load i8, i8* %78, align 1 is the inst  in BB %74 branchPruned_clone_clone 
+replaced with i8 100
+  br i1 true, label %80, label %210 is the inst  in BB %74 branchPruned_clone_clone 
+cloning
+  %81 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 2 is the inst  in BB %80 branchPruned_clone_clone 
+  %82 = load %struct.stType*, %struct.stType** %81, align 8 is the inst  in BB %80 branchPruned_clone_clone 
+  %83 = getelementptr inbounds %struct.stType, %struct.stType* %82, i32 0, i32 0 is the inst  in BB %80 branchPruned_clone_clone 
+  %84 = load %struct.COORD*, %struct.COORD** %83, align 8 is the inst  in BB %80 branchPruned_clone_clone 
+  %85 = getelementptr inbounds %struct.COORD, %struct.COORD* %84, i32 0, i32 0 is the inst  in BB %80 branchPruned_clone_clone 
+  %86 = load i32*, i32** %85, align 8 is the inst  in BB %80 branchPruned_clone_clone 
+  %87 = load i32, i32* %86, align 4 is the inst  in BB %80 branchPruned_clone_clone 
+replaced with i32 11
+  br i1 true, label %88, label %210 is the inst  in BB %80 branchPruned_clone_clone 
+cloning
+  %89 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 2 is the inst  in BB %88 branchPruned_clone_clone 
+  %90 = load %struct.stType*, %struct.stType** %89, align 8 is the inst  in BB %88 branchPruned_clone_clone 
+  %91 = getelementptr inbounds %struct.stType, %struct.stType* %90, i32 0, i32 0 is the inst  in BB %88 branchPruned_clone_clone 
+  %92 = load %struct.COORD*, %struct.COORD** %91, align 8 is the inst  in BB %88 branchPruned_clone_clone 
+  %93 = getelementptr inbounds %struct.COORD, %struct.COORD* %92, i32 0, i32 1 is the inst  in BB %88 branchPruned_clone_clone 
+  %94 = load i32*, i32** %93, align 8 is the inst  in BB %88 branchPruned_clone_clone 
+  %95 = load i32, i32* %94, align 4 is the inst  in BB %88 branchPruned_clone_clone 
+replaced with i32 12
+  br i1 true, label %96, label %210 is the inst  in BB %88 branchPruned_clone_clone 
+cloning
+  %97 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 2 is the inst  in BB %96 branchPruned_clone_clone 
+  %98 = load %struct.stType*, %struct.stType** %97, align 8 is the inst  in BB %96 branchPruned_clone_clone 
+  %99 = getelementptr inbounds %struct.stType, %struct.stType* %98, i32 0, i32 2 is the inst  in BB %96 branchPruned_clone_clone 
+  %100 = getelementptr inbounds [8 x i32], [8 x i32]* %99, i64 0, i64 1 is the inst  in BB %96 branchPruned_clone_clone 
+  %101 = load i32, i32* %100, align 4 is the inst  in BB %96 branchPruned_clone_clone 
+replaced with i32 14
+  br i1 true, label %102, label %210 is the inst  in BB %96 branchPruned_clone_clone 
+cloning
+  %103 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 2 is the inst  in BB %102 branchPruned_clone_clone 
+  %104 = load %struct.stType*, %struct.stType** %103, align 8 is the inst  in BB %102 branchPruned_clone_clone 
+  %105 = getelementptr inbounds %struct.stType, %struct.stType* %104, i32 0, i32 1 is the inst  in BB %102 branchPruned_clone_clone 
+  %106 = getelementptr inbounds [100 x i8], [100 x i8]* %105, i32 0, i32 0 is the inst  in BB %102 branchPruned_clone_clone 
+  %107 = call i32 @strcmp(i8* getelementptr inbounds ([11 x i8], [11 x i8]* @2, i64 0, i64 0), i8* getelementptr inbounds ([11 x i8], [11 x i8]* @.str, i32 0, i32 0)) #5 is the inst  in BB %102 branchPruned_clone_clone 
+  br i1 false, label %210, label %108 is the inst  in BB %102 branchPruned_clone_clone 
+cloning
+  %109 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 2 is the inst  in BB %108 branchPruned_clone_clone 
+  %110 = load %struct.stType*, %struct.stType** %109, align 8 is the inst  in BB %108 branchPruned_clone_clone 
+  %111 = getelementptr inbounds %struct.stType, %struct.stType* %110, i32 0, i32 1 is the inst  in BB %108 branchPruned_clone_clone 
+  %112 = getelementptr inbounds [100 x i8], [100 x i8]* %111, i64 0, i64 4 is the inst  in BB %108 branchPruned_clone_clone 
+  %113 = load i8, i8* %112, align 4 is the inst  in BB %108 branchPruned_clone_clone 
+replaced with i8 111
+  br i1 true, label %114, label %210 is the inst  in BB %108 branchPruned_clone_clone 
+cloning
+  %115 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 2 is the inst  in BB %114 branchPruned_clone_clone 
+  %116 = load %struct.stType*, %struct.stType** %115, align 8 is the inst  in BB %114 branchPruned_clone_clone 
+  %117 = getelementptr inbounds %struct.stType, %struct.stType* %116, i32 0, i32 1 is the inst  in BB %114 branchPruned_clone_clone 
+  %118 = getelementptr inbounds [100 x i8], [100 x i8]* %117, i64 0, i64 9 is the inst  in BB %114 branchPruned_clone_clone 
+  %119 = load i8, i8* %118, align 1 is the inst  in BB %114 branchPruned_clone_clone 
+replaced with i8 100
+  br i1 true, label %120, label %210 is the inst  in BB %114 branchPruned_clone_clone 
+cloning
+  %121 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 3 is the inst  in BB %120 branchPruned_clone_clone 
+  %122 = load %struct.stType*, %struct.stType** %121, align 8 is the inst  in BB %120 branchPruned_clone_clone 
+  %123 = getelementptr inbounds %struct.stType, %struct.stType* %122, i32 0, i32 0 is the inst  in BB %120 branchPruned_clone_clone 
+  %124 = load %struct.COORD*, %struct.COORD** %123, align 8 is the inst  in BB %120 branchPruned_clone_clone 
+  %125 = getelementptr inbounds %struct.COORD, %struct.COORD* %124, i32 0, i32 0 is the inst  in BB %120 branchPruned_clone_clone 
+  %126 = load i32*, i32** %125, align 8 is the inst  in BB %120 branchPruned_clone_clone 
+  %127 = load i32, i32* %126, align 4 is the inst  in BB %120 branchPruned_clone_clone 
+replaced with i32 16
+  br i1 true, label %128, label %210 is the inst  in BB %120 branchPruned_clone_clone 
+cloning
+  %129 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 3 is the inst  in BB %128 branchPruned_clone_clone 
+  %130 = load %struct.stType*, %struct.stType** %129, align 8 is the inst  in BB %128 branchPruned_clone_clone 
+  %131 = getelementptr inbounds %struct.stType, %struct.stType* %130, i32 0, i32 0 is the inst  in BB %128 branchPruned_clone_clone 
+  %132 = load %struct.COORD*, %struct.COORD** %131, align 8 is the inst  in BB %128 branchPruned_clone_clone 
+  %133 = getelementptr inbounds %struct.COORD, %struct.COORD* %132, i32 0, i32 1 is the inst  in BB %128 branchPruned_clone_clone 
+  %134 = load i32*, i32** %133, align 8 is the inst  in BB %128 branchPruned_clone_clone 
+  %135 = load i32, i32* %134, align 4 is the inst  in BB %128 branchPruned_clone_clone 
+replaced with i32 17
+  br i1 true, label %136, label %210 is the inst  in BB %128 branchPruned_clone_clone 
+cloning
+  %137 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 3 is the inst  in BB %136 branchPruned_clone_clone 
+  %138 = load %struct.stType*, %struct.stType** %137, align 8 is the inst  in BB %136 branchPruned_clone_clone 
+  %139 = getelementptr inbounds %struct.stType, %struct.stType* %138, i32 0, i32 2 is the inst  in BB %136 branchPruned_clone_clone 
+  %140 = getelementptr inbounds [8 x i32], [8 x i32]* %139, i64 0, i64 1 is the inst  in BB %136 branchPruned_clone_clone 
+  %141 = load i32, i32* %140, align 4 is the inst  in BB %136 branchPruned_clone_clone 
+replaced with i32 19
+  br i1 true, label %142, label %210 is the inst  in BB %136 branchPruned_clone_clone 
+cloning
+  %143 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 3 is the inst  in BB %142 branchPruned_clone_clone 
+  %144 = load %struct.stType*, %struct.stType** %143, align 8 is the inst  in BB %142 branchPruned_clone_clone 
+  %145 = getelementptr inbounds %struct.stType, %struct.stType* %144, i32 0, i32 1 is the inst  in BB %142 branchPruned_clone_clone 
+  %146 = getelementptr inbounds [100 x i8], [100 x i8]* %145, i32 0, i32 0 is the inst  in BB %142 branchPruned_clone_clone 
+  %147 = call i32 @strcmp(i8* getelementptr inbounds ([11 x i8], [11 x i8]* @3, i64 0, i64 0), i8* getelementptr inbounds ([11 x i8], [11 x i8]* @.str, i32 0, i32 0)) #5 is the inst  in BB %142 branchPruned_clone_clone 
+  br i1 false, label %210, label %148 is the inst  in BB %142 branchPruned_clone_clone 
+cloning
+  %149 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 3 is the inst  in BB %148 branchPruned_clone_clone 
+  %150 = load %struct.stType*, %struct.stType** %149, align 8 is the inst  in BB %148 branchPruned_clone_clone 
+  %151 = getelementptr inbounds %struct.stType, %struct.stType* %150, i32 0, i32 1 is the inst  in BB %148 branchPruned_clone_clone 
+  %152 = getelementptr inbounds [100 x i8], [100 x i8]* %151, i64 0, i64 4 is the inst  in BB %148 branchPruned_clone_clone 
+  %153 = load i8, i8* %152, align 4 is the inst  in BB %148 branchPruned_clone_clone 
+replaced with i8 111
+  br i1 true, label %154, label %210 is the inst  in BB %148 branchPruned_clone_clone 
+cloning
+  %155 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 3 is the inst  in BB %154 branchPruned_clone_clone 
+  %156 = load %struct.stType*, %struct.stType** %155, align 8 is the inst  in BB %154 branchPruned_clone_clone 
+  %157 = getelementptr inbounds %struct.stType, %struct.stType* %156, i32 0, i32 1 is the inst  in BB %154 branchPruned_clone_clone 
+  %158 = getelementptr inbounds [100 x i8], [100 x i8]* %157, i64 0, i64 9 is the inst  in BB %154 branchPruned_clone_clone 
+  %159 = load i8, i8* %158, align 1 is the inst  in BB %154 branchPruned_clone_clone 
+replaced with i8 100
+  br i1 true, label %160, label %210 is the inst  in BB %154 branchPruned_clone_clone 
+cloning
+  %161 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 4 is the inst  in BB %160 branchPruned_clone_clone 
+  %162 = load %struct.stType*, %struct.stType** %161, align 8 is the inst  in BB %160 branchPruned_clone_clone 
+replaced with %struct.stType* null
+  br i1 true, label %163, label %210 is the inst  in BB %160 branchPruned_clone_clone 
+cloning
+  %164 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 5 is the inst  in BB %163 branchPruned_clone_clone 
+  %165 = load %struct.stType*, %struct.stType** %164, align 8 is the inst  in BB %163 branchPruned_clone_clone 
+replaced with %struct.stType* null
+  br i1 true, label %166, label %210 is the inst  in BB %163 branchPruned_clone_clone 
+cloning
+  %167 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 6 is the inst  in BB %166 branchPruned_clone_clone 
+  %168 = load %struct.stType*, %struct.stType** %167, align 8 is the inst  in BB %166 branchPruned_clone_clone 
+replaced with %struct.stType* null
+  br i1 true, label %169, label %210 is the inst  in BB %166 branchPruned_clone_clone 
+cloning
+  %170 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 7 is the inst  in BB %169 branchPruned_clone_clone 
+  %171 = load %struct.stType*, %struct.stType** %170, align 8 is the inst  in BB %169 branchPruned_clone_clone 
+replaced with %struct.stType* null
+  br i1 true, label %172, label %210 is the inst  in BB %169 branchPruned_clone_clone 
+cloning
+  %173 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 8 is the inst  in BB %172 branchPruned_clone_clone 
+  %174 = load %struct.stType*, %struct.stType** %173, align 8 is the inst  in BB %172 branchPruned_clone_clone 
+replaced with %struct.stType* null
+  br i1 true, label %175, label %210 is the inst  in BB %172 branchPruned_clone_clone 
+cloning
+  %176 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 9 is the inst  in BB %175 branchPruned_clone_clone 
+  %177 = load %struct.stType*, %struct.stType** %176, align 8 is the inst  in BB %175 branchPruned_clone_clone 
+replaced with %struct.stType* null
+  br i1 true, label %178, label %210 is the inst  in BB %175 branchPruned_clone_clone 
+cloning
+  %179 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 10 is the inst  in BB %178 branchPruned_clone_clone 
+  %180 = load %struct.stType*, %struct.stType** %179, align 8 is the inst  in BB %178 branchPruned_clone_clone 
+replaced with %struct.stType* null
+  br i1 true, label %181, label %210 is the inst  in BB %178 branchPruned_clone_clone 
+cloning
+  %182 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 11 is the inst  in BB %181 branchPruned_clone_clone 
+  %183 = load %struct.stType*, %struct.stType** %182, align 8 is the inst  in BB %181 branchPruned_clone_clone 
+replaced with %struct.stType* null
+  br i1 true, label %184, label %210 is the inst  in BB %181 branchPruned_clone_clone 
+cloning
+  %185 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 12 is the inst  in BB %184 branchPruned_clone_clone 
+  %186 = load %struct.stType*, %struct.stType** %185, align 8 is the inst  in BB %184 branchPruned_clone_clone 
+replaced with %struct.stType* null
+  br i1 true, label %187, label %210 is the inst  in BB %184 branchPruned_clone_clone 
+cloning
+  %188 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 13 is the inst  in BB %187 branchPruned_clone_clone 
+  %189 = load %struct.stType*, %struct.stType** %188, align 8 is the inst  in BB %187 branchPruned_clone_clone 
+replaced with %struct.stType* null
+  br i1 true, label %190, label %210 is the inst  in BB %187 branchPruned_clone_clone 
+cloning
+  %191 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 14 is the inst  in BB %190 branchPruned_clone_clone 
+  %192 = load %struct.stType*, %struct.stType** %191, align 8 is the inst  in BB %190 branchPruned_clone_clone 
+replaced with %struct.stType* null
+  br i1 true, label %193, label %210 is the inst  in BB %190 branchPruned_clone_clone 
+cloning
+  %194 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 15 is the inst  in BB %193 branchPruned_clone_clone 
+  %195 = load %struct.stType*, %struct.stType** %194, align 8 is the inst  in BB %193 branchPruned_clone_clone 
+replaced with %struct.stType* null
+  br i1 true, label %196, label %210 is the inst  in BB %193 branchPruned_clone_clone 
+cloning
+  %197 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 16 is the inst  in BB %196 branchPruned_clone_clone 
+  %198 = load %struct.stType*, %struct.stType** %197, align 8 is the inst  in BB %196 branchPruned_clone_clone 
+replaced with %struct.stType* null
+  br i1 true, label %199, label %210 is the inst  in BB %196 branchPruned_clone_clone 
+cloning
+  %200 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 17 is the inst  in BB %199 branchPruned_clone_clone 
+  %201 = load %struct.stType*, %struct.stType** %200, align 8 is the inst  in BB %199 branchPruned_clone_clone 
+replaced with %struct.stType* null
+  br i1 true, label %202, label %210 is the inst  in BB %199 branchPruned_clone_clone 
+cloning
+  %203 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 18 is the inst  in BB %202 branchPruned_clone_clone 
+  %204 = load %struct.stType*, %struct.stType** %203, align 8 is the inst  in BB %202 branchPruned_clone_clone 
+replaced with %struct.stType* null
+  br i1 true, label %205, label %210 is the inst  in BB %202 branchPruned_clone_clone 
+cloning
+  %206 = getelementptr inbounds %struct.stType*, %struct.stType** %obj, i64 19 is the inst  in BB %205 branchPruned_clone_clone 
+  %207 = load %struct.stType*, %struct.stType** %206, align 8 is the inst  in BB %205 branchPruned_clone_clone 
+replaced with %struct.stType* null
+  br i1 true, label %208, label %210 is the inst  in BB %205 branchPruned_clone_clone 
+duplicating
+  %209 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([19 x i8], [19 x i8]* @.str.1, i32 0, i32 0)) is the inst  in BB %208 branchPruned_clone_clone 
+  br label %210 is the inst  in BB %208 branchPruned_clone_clone 
+duplicating
+freeing BB %208
+freeing BB %205
+  ret void is the inst  in BB %210 branchPruned_clone_clone 
+freeing BB %210
+  ret i32 0 is the inst  in BB %0 main 
+freeing BB %0
+Test passed
+running test 11

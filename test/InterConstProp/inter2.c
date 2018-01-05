@@ -3,22 +3,33 @@
 #include<string.h>
 #include<stdlib.h>
 
+// void branchPruned(char * buffer) {
+// 	if(buffer[0] == 'i')
+// 		printf("branchPruned\n");
+// }
 
-void branchPruned(char * buffer){
-  
-  char * value = strchr(buffer, '=');
-  *value++ = '\0';
-  if(strcmp(value, "friend") == 0)
-    printf("friend\n"); 
+void branchNotPruned(char * buffer) {
+	if(buffer[1] == 'a' ||
+	buffer[1] == 'e'|| 
+	strcmp(buffer, "ielloWorld") ||
+	strcmp(buffer, "ialloWorld"))
+		printf("branchNotPruned\n");
 }
  
+void modify(char * buffer, int val, int argc) {
+	if(val == 3)
+		buffer[0] = 'i';
+	if(argc == 5)
+		buffer[1] = 'a';
+}
 
-int main(){
+char buffer[100];
+int main(int argc, char ** argv){
 
-  char buffer[100];
-  memcpy(buffer, "my=friend", 100);
-  
-  branchPruned(buffer);
+  memcpy(buffer, "helloWorld", 100);
+  modify(buffer, 3, argc);
+  // branchPruned(buffer);
+  branchNotPruned(buffer);
 
   return 0;
 }

@@ -17,18 +17,11 @@ void branchPruned(char * buf){
   }
 }
 
-void branchNotPruned(char* buffer) {
-  if(buffer[90] == '\n') {
-    printf("random check for testing node merging \n");
-  }
-}
-
 int main(){
 
   char buffer[100];
   memcpy(buffer, "my=friend", 100);
 
-  branchNotPruned(buffer);
   branchPruned(buffer);
   return 0;
 }

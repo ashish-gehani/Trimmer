@@ -1,7 +1,6 @@
 
 #include "llvm/Pass.h"
 #include "llvm/IR/Function.h"
-#include "llvm/Transforms/Utils/BasicBlockUtils.h"
 #include "llvm/Analysis/InstructionSimplify.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Analysis/CallGraph.h"
@@ -17,7 +16,6 @@
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/Transforms/Utils/SimplifyLibCalls.h"
 #include "llvm/Analysis/TargetLibraryInfo.h"
-#include "llvm/Transforms/Utils/BasicBlockUtils.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Dominators.h"
 #include "llvm/IR/ValueMap.h"
@@ -39,7 +37,9 @@
 
 #ifndef INTERCONSTPROP_H_
 #define INTERCONSTPROP_H_
-#include "mem.h"
+
+#include "debug.h"
+#include "BBOps.h"
 
 using namespace llvm;
 using namespace std;
@@ -48,17 +48,18 @@ struct ConstantFolding : public ModulePass {
 
   static char ID;  
   Module * module;  
+  BBOps bbOps;
   const TargetLibraryInfo *TLI;
   DataLayout * DL;
   DominatorTree * DT;
   CallGraph * CG;
 
-  Memory * memory;
   BasicBlock * currBB;
+  Function * currfn;
+  BasicBlockContInfoMap BasicBlockContexts;
+  FuncInfoMap fimap;
+  vector<InstPair> toReplace;
   ValToRegisterMap Registers;
-  BasicBlock::iterator inst;
-  set<BasicBlock *> visited;
-  vector<pair<Instruction *, Instruction *> > toReplace;
 
   ConstantFolding(): ModulePass(ID){}
   void getAnalysisUsage(AnalysisUsage &AU) const;
@@ -70,15 +71,39 @@ struct ConstantFolding : public ModulePass {
   void processTermInst(TerminatorInst *);   
   void processCallInst(CallInst *);
   void processMemcpyInst(MemCpyInst *);
-  
+  void processMallocInst(CallInst *);
+  void processBitCastInst(BitCastInst *);  
+  void processReturnInst(ReturnInst *);
+
   Function * addClonedFunction(CallInst *, Function *);
   bool predecessorsVisited(BasicBlock *);
   void handleStringFunction(CallInst *, Function *);
-  bool isStringFunction(Function * calledFunction);
   void replaceUses();
- 
+  void markArgsAsNonConst(CallInst* callInst);
+  void addGlobals();
+  void initializeGlobal(uint64_t&, Constant *);
+
+  void cloneContext(BasicBlock *);
+  void duplicateContext(BasicBlock *);
+  Memory * duplicateMem();
+  ContextInfo * getCurrContext();
+  void copyContext(Memory *);
+  uint64_t allocateStack(uint64_t);
+  uint64_t allocateHeap(uint64_t);
+  uint64_t loadMem(uint64_t, uint64_t);
+  void storeToMem(uint64_t, uint64_t, uint64_t);  
+  void * getActualAddr(uint64_t);
+  void setConstMem(bool, uint64_t, uint64_t);
+  void setConstContigous(bool, uint64_t);
+  uint64_t getRemainingContigousSize(uint64_t);
+  bool checkConstMem(uint64_t, uint64_t);
+  bool checkConstStr(uint64_t);
+  bool checkConstStr(uint64_t, uint64_t);
+  void addRegister(Value *, Type *, uint64_t);
+  Register * getRegister(Value *);
+
   virtual bool runOnModule(Module &);
-  void runOnFunction(Function *);
+  void runOnFunction(CallInst *, Function *);
   void runOnBB(BasicBlock *);
   void runOnInst(Instruction *);
 };

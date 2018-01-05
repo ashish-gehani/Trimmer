@@ -18,7 +18,7 @@ int main(){
   memcpy(buffer, "value=key", 100);
   char buffer2[100];
   memcpy(buffer2, "value=key", 100);
-  externalFuncbranch(buffer);
+  externalFunc(buffer);
   branchNotPruned(buffer, buffer2);
 
   return 0;

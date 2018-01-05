@@ -1,3 +1,3 @@
-cd ~/fileIO
-make build_test_pass
-make build_inter_constprop
+cd ${TRIMMER_HOME}
+make build_const_prop
+make build_test

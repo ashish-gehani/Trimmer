@@ -14,13 +14,13 @@ extern void externalFunc(char * buffer);
 //     printf("Func: Both strings are equal\n"); 
 // }
 
-void branchNotPruned(char * buffer, char * buffer2){  
+void branchPruned(char * buffer, char * buffer2){  
   if(strcmp(buffer, buffer2) == 0)
     printf("Func2: Both strings are equal\n"); 
 }
  
 
-int main(){
+int main() {
 
   char buffer[100];
   memcpy(buffer, "value=key", 100);
@@ -28,8 +28,8 @@ int main(){
   memcpy(buffer2, "value=key", 100);
 
   // func called twice - shouldn't specialize
-  branchNotPruned(buffer, buffer2);
-  branchNotPruned(buffer, buffer2);
+  branchPruned(buffer, buffer2);
+  // branchPruned(buffer, buffer2);
 
   // func2 called within loop - shouldn't specialize
   // for(int i = 0; i < 10; i++){
