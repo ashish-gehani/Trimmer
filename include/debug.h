@@ -50,6 +50,16 @@ void printMem(Memory * mem, uint64_t addr, uint64_t size) {
   errs() << "\n";
 }
 
+void printInt(Memory * mem, uint64_t addr, uint64_t size) {
+    errs() << mem->load(size, addr);
+}
+
+void printStr(Memory * mem, uint64_t addr, uint64_t ptrSize) {
+    uint64_t strAddr = mem->load(ptrSize, addr);
+    char * str = (char *) mem->getActualAddr(strAddr);
+    errs() << str; 
+}
+
 void printConstMem(Memory * mem, uint64_t addr, uint64_t size) {
   for(unsigned i = addr; i < addr + size; i++) {
     errs() << mem->checkConstant(i, 1);
@@ -58,3 +68,4 @@ void printConstMem(Memory * mem, uint64_t addr, uint64_t size) {
 }
 
 #endif
+

@@ -34,6 +34,7 @@ struct ContextInfo {
   ContextInfo * duplicate() {
     ContextInfo * nci = new ContextInfo();
     nci->memory = new Memory(*memory);
+    errs() << "returning\n";
     return nci;
   }
 };
@@ -41,20 +42,26 @@ struct ContextInfo {
 struct FuncInfo {
   Memory * context;
   Register * retReg;
-  FuncInfo() {
+  bool usedInLoop, addrTaken;
+  unsigned directCallInsts;
+  FuncInfo(Function * F) {
     context = NULL;
     retReg = NULL;
+    addrTaken = (F->hasAddressTaken() > 0);
+    usedInLoop = false;
+    directCallInsts = 0;
   }
 };
 
 struct BBInfo {
-  bool writesToMemory, partOfLoop, isHeader;
+  bool writesToMemory, partOfLoop, isHeader, singleSucc;
   unsigned numPreds, URfrom;
-  vector<BasicBlock *> loopLatchesWithEdge, SuccsV;
+  vector<BasicBlock *> loopLatchesWithEdge, ancestors;
   BBInfo(BasicBlock * BB) {
     writesToMemory = false;
     partOfLoop = false;
     isHeader = false;
+    singleSucc = false;
     URfrom = 0;
     numPreds = 0;
     set<BasicBlock *> preds;

@@ -27,6 +27,7 @@ public:
 		memset(heapConst, true,heapTotalSize);
 	}
 	Memory(Memory& from) {
+		errs() << "copy constructor\n";
 		module = from.getModule();
 		stackIndex = from.getStackIndex();
 		stackTotalSize = from.getStackTotalSize();
@@ -45,6 +46,7 @@ public:
 		memcpy(heapConst, from.getHeapConst(), heapTotalSize);
 		heapStartIndices = from.getHeapStartIndices();
 		heapStartToSizeMap = from.getHeapStartToSizeMap();
+		errs() << "copied\n";
 	}
 	~Memory() {
 		delete stack;
@@ -95,7 +97,7 @@ public:
 		uint64_t address = stackIndex;
 		stackIndex += size;
 		stackIndex++; // space of 1 between each allocation
-		if(stackIndex > stackTotalSize)
+		while(stackIndex >= stackTotalSize)
 			resize(stack, stackConst, stackTotalSize);
 		stackStartIndices.push_back(address);
 		stackStartToSizeMap[address] = size;
@@ -105,7 +107,7 @@ public:
 		uint64_t address = heapIndex;
 		heapIndex += size;
 		heapIndex++; // space of 1 between each allocation
-		if(heapIndex > heapTotalSize)
+		while(heapIndex >= heapTotalSize)
 			resize(heap, heapConst, heapTotalSize);
 		heapStartIndices.push_back(address);
 		heapStartToSizeMap[address] = size;

@@ -2,6 +2,7 @@
 #include "llvm/IR/Function.h"
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
 #include "llvm/Analysis/InstructionSimplify.h"
+#include "llvm/Analysis/ConstantFolding.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Analysis/CallGraph.h"
 #include "llvm/IR/Instruction.h"	
@@ -41,6 +42,10 @@ using namespace llvm;
 using namespace std;     
 
 void ConstantFolding::processAllocaInst(AllocaInst * ai) {
+  if(!trackAllocas()) {
+    debug(Abubakar) << "skipping untracked alloca\n";
+    return;
+  }  
   Type * ty = ai->getAllocatedType();
   unsigned size = DL->getTypeAllocSize(ty);
   uint64_t addr = allocateStack(size);
@@ -49,6 +54,10 @@ void ConstantFolding::processAllocaInst(AllocaInst * ai) {
 }
 
 void ConstantFolding::processMallocInst(CallInst * mi) {   
+  if(!trackAllocas()) {
+    debug(Abubakar) << "skipping untracked malloc\n";
+    return;
+  }
   Value * sizeVal = mi->getOperand(0);
   if(!isa<ConstantInt>(sizeVal)) {
     debug(Abubakar) << "mallocInst : size not constant\n";
@@ -96,7 +105,10 @@ void ConstantFolding::processStoreInst(StoreInst * si) {
 }
 
 void ConstantFolding::processLoadInst(LoadInst * li) {
-
+  
+  if(bbOps.partOfLoop(li))
+    return;
+  
   Value * ptr = li->getOperand(0);
 
   Register * reg = getRegister(ptr);
@@ -106,15 +118,14 @@ void ConstantFolding::processLoadInst(LoadInst * li) {
   }
 
   uint64_t addr = reg->getValue();
-  uint64_t size = DL->getTypeAllocSize(reg->getType());
-  
+  uint64_t size = DL->getTypeAllocSize(li->getType());
   if(!checkConstMem(addr, size)) {
     debug(Abubakar) << "LoadInst : skipping non constant\n";
     return;
   }
 
   uint64_t val = loadMem(size, addr);
-  handleConst(li, val, Registers);
+  handleInt(li, val, Registers);
 }
 
 void ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
@@ -176,19 +187,43 @@ void ConstantFolding::processMemcpyInst(MemCpyInst * memcpyInst) {
     return;   
   }
   char * toString = (char *) getActualAddr(reg->getValue());
+  debug(Abubakar) << "memcpy : from " << fromString << "\n";
   memcpy(toString, fromString, size);
   setConstMem(true, reg->getValue(), size);
 }
 
+void ConstantFolding::processPHINode(PHINode * phiNode) {
+  if(bbOps.partOfLoop(phiNode))
+    return;
+  Value * val = bbOps.foldPhiNode(phiNode, BasicBlockContexts);
+  if(val && replaceOrCloneRegister(phiNode, val)) {
+    debug(Abubakar) << "folded phiNode\n";
+  } else
+    debug(Abubakar) << "failed to fold phiNode\n";
+}
+
+void ConstantFolding::tryfolding(Instruction * I) {
+  if(bbOps.partOfLoop(I))
+    return;
+  if(Instruction * sI = simplifyInst(I))
+    tryfolding(sI);
+  else {
+    Constant * constVal = ConstantFoldInstruction(I, *DL, TLI);
+    if(constVal)
+      replaceAndLog(I, constVal);    
+  }
+}
+
 void ConstantFolding::processTermInst(TerminatorInst * termInst) {  
   unsigned numS = termInst->getNumSuccessors(); 
+  LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();
+  bbOps.foldToSingleSucc(termInst, LI);
   for(unsigned int index = 0; index < numS; index++) {
-    LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();
     BasicBlock * succ = termInst->getSuccessor(index);
-    if(bbOps.isVisited(succ)) 
+    
+    if(!bbOps.visitBB(succ, LI))
       continue;
-    if(!bbOps.predecessorsVisited(succ, LI))
-      continue;  
+
     if(bbOps.needToduplicate(succ, currBB, BasicBlockContexts)) {
       debug(Abubakar) << "duplicating\n";
       duplicateContext(succ);
@@ -196,7 +231,7 @@ void ConstantFolding::processTermInst(TerminatorInst * termInst) {
     } else {
       debug(Abubakar) << "cloning\n";
       cloneContext(succ);
-    }
+    }    
     if(index + 1 == numS)
       bbOps.freeBB(currBB, BasicBlockContexts);
     runOnBB(succ);   
@@ -211,17 +246,13 @@ void ConstantFolding::processReturnInst(ReturnInst * retInst) {
   fi->context = duplicateMem();  
   if(!ptr)
     return;
-  Type * ty = ptr->getType();
-  if(ConstantInt * CI = dyn_cast<ConstantInt>(ptr)) {
-    fi->retReg = new Register(ty, CI->getZExtValue());
-    debug(Abubakar) << "constantInt returned\n";
-  } else if(Register * reg = getRegister(ptr)) {
-    fi->retReg = new Register(ty, reg->getValue());    
-    debug(Abubakar) << "register returned\n";
-  }
+  if(cloneRegister(retInst, ptr))
+    fi->retReg = getRegister(retInst);    
 }
 
 void ConstantFolding::processCallInst(CallInst * callInst) {
+  if(bbOps.partOfLoop(callInst))
+    return;
   Function * calledFunction = callInst->getCalledFunction();  
   if(!calledFunction) {
     markArgsAsNonConst(callInst);
@@ -238,18 +269,20 @@ void ConstantFolding::processCallInst(CallInst * callInst) {
     markArgsAsNonConst(callInst);
     return;
   } else {
+    initializeFuncInfo(calledFunction);
+    if(!satisfyConds(calledFunction)) {
+      markArgsAsNonConst(callInst);
+      return;
+    }
     Function * clone = addClonedFunction(callInst, calledFunction);
     unsigned index = 0;
     BasicBlock * entry = &clone->getEntryBlock();
     duplicateContext(entry);
     for(auto arg = calledFunction->arg_begin(); arg != calledFunction->arg_end();
         arg++, index++) {
-      Value * calleeVal = callInst->getOperand(index);
-      Value * calledVal = getArg(clone, index);
-      if(ConstantInt * CI = dyn_cast<ConstantInt>(calleeVal))
-        handleConst(calledVal, CI->getZExtValue(), Registers);
-      else if(Register * reg = getRegister(calleeVal))  
-        handleConst(calledVal, reg->getValue(), Registers);      
+      Value * callerVal = callInst->getOperand(index);
+      Value * calleeVal = getArg(clone, index);
+      replaceOrCloneRegister(calleeVal, callerVal);
     }
     runOnFunction(callInst, clone); 
   }  

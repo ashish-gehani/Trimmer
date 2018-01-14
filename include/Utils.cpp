@@ -8,6 +8,17 @@ using namespace std;
 
 bool getConstantStringInfo(const Value *, StringRef&, uint64_t, bool);
 
+void split(string str, vector<string>& tokens) {
+    size_t pos = str.find(';');
+    size_t initialPos = 0;
+    while(pos != string::npos) {
+        tokens.push_back( str.substr(initialPos, pos - initialPos));
+        initialPos = pos + 1;
+        pos = str.find(';', initialPos);
+    }
+    tokens.push_back(str.substr(initialPos, str.size() - initialPos - 1));
+}
+
 Value * getArg(Function * func, int index){
   int i = 0;
   for(auto arg = func->arg_begin(), argEnd = func->arg_end(); arg != argEnd; arg++){
@@ -25,7 +36,7 @@ void replaceAndLog(Value * from, Value * to) {
   debug(Abubakar) << "replaced with " << *to << "\n";
 }
 
-void handleConst(Value * val, uint64_t num, 
+void handleInt(Value * val, uint64_t num, 
   ValToRegisterMap& Registers) {
   Type * ty = val->getType();
   if(ty->isPointerTy()) {
@@ -35,7 +46,7 @@ void handleConst(Value * val, uint64_t num,
     } else 
       Registers[val] = new Register(ty, num); 
   } else if(IntegerType * intTy = dyn_cast<IntegerType>(ty))
-      replaceAndLog(val, ConstantInt::get(intTy, num));
+    replaceAndLog(val, ConstantInt::get(intTy, num));
 }
 
 void cleanUpfuncBBs(Function * f, BasicBlockContInfoMap bbc) {
@@ -51,7 +62,7 @@ void cleanUpfuncBBs(Function * f, BasicBlockContInfoMap bbc) {
 }
 
 bool ignorefunc(Function * F) {
-  if(F->getName() == "printf")
+  if(F->getName() == "printf" || F->getName() == "llvm.memset.p0i8.i64")
     return true;
   return false;
 }
@@ -65,6 +76,7 @@ void ConstantFolding::copyContext(Memory * mem) {
 }
 
 uint64_t ConstantFolding::allocateStack(uint64_t size) {
+
   return BasicBlockContexts[currBB]->memory->allocateStack(size);  
 }
 
@@ -122,6 +134,45 @@ void ConstantFolding::addRegister(Value * val, Type * ty, uint64_t toStore) {
   Registers[val] = new Register(ty, toStore);
 }
 
+bool ConstantFolding::cloneRegister(Value * from, Value * with) {
+  debug(Abubakar) << "attempting to copy Register for " << *with << "\n";
+  Type * ty = from->getType();
+  if(ConstantInt * CI = dyn_cast<ConstantInt>(with)) {
+    Registers[from] = new Register(ty, CI->getZExtValue());
+    debug(Abubakar) << "constantInt Register\n";
+  } else if(isa<ConstantPointerNull>(with)) {
+    Registers[from] = new Register(ty, 0);
+    debug(Abubakar) << "Null Register\n";
+  } else if(Register * reg = getRegister(with)) {
+    Registers[from] = new Register(ty, reg->getValue()); 
+    debug(Abubakar) << "Register from Register\n";
+  } else {
+    debug(Abubakar) << "failed to create Register\n";
+    return false;
+  }
+  return true;
+}
+
+
+bool ConstantFolding::replaceOrCloneRegister(Value * from, Value * with) {
+  debug(Abubakar) << "attempting to copy Register for " << *with << "\n";
+  Type * ty = from->getType();
+  if(isa<ConstantInt>(with)) {
+    replaceAndLog(from, with);
+    debug(Abubakar) << "replaced with constantInt\n";
+  } else if(isa<ConstantPointerNull>(with)) {
+    replaceAndLog(from, with);
+    debug(Abubakar) << "replaced with NULL pointer\n";
+  } else if(Register * reg = getRegister(with)) {
+    Registers[from] = new Register(ty, reg->getValue());    
+    debug(Abubakar) << "Register from Register\n";
+  } else {
+    debug(Abubakar) << "failed to simplify\n";
+    return false;
+  }
+  return true;
+}
+
 Register * ConstantFolding::getRegister(Value * ptr) {
   if(Registers.find(ptr) != Registers.end())
     return Registers[ptr];
@@ -145,7 +196,18 @@ void ConstantFolding::cloneContext(BasicBlock * to) {
   BasicBlockContexts[to] = BasicBlockContexts[currBB]->clone();
 }
 
+void ConstantFolding::initializeBBInfo(BasicBlock * BB) {
+  LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*BB->getParent()).getLoopInfo();
+  bbOps.initialize(BB, LI);
+}
+
+void ConstantFolding::createNewContext(BasicBlock * BB) {
+  initializeBBInfo(BB);
+  BasicBlockContexts[BB] = new ContextInfo(module);
+}
+
 void ConstantFolding::duplicateContext(BasicBlock * to) {
+  initializeBBInfo(to);
   BasicBlockContexts[to] = BasicBlockContexts[currBB]->duplicate();
 }
 
@@ -179,7 +241,7 @@ void ConstantFolding::replaceUses() {
 
 void ConstantFolding::markArgsAsNonConst(CallInst * callInst) {
   Function* calledFunction = callInst->getCalledFunction();
-  if(ignorefunc(calledFunction && calledFunction))
+  if(calledFunction && ignorefunc(calledFunction))
     return;
   if(calledFunction && calledFunction->onlyReadsMemory()) {
     return;
@@ -194,9 +256,11 @@ void ConstantFolding::markArgsAsNonConst(CallInst * callInst) {
   }
 }
 
-void ConstantFolding::initializeGlobal(uint64_t& addr, Constant * CC) {
+void ConstantFolding::initializeGlobal(uint64_t addr, Constant * CC) {
 
   /* already initialize with zero */
+
+  errs() << *CC->getType() << " " << DL->getTypeAllocSize(CC->getType()) << "\n";
 
   if(isa<ConstantPointerNull>(CC))
     return;    
@@ -210,12 +274,12 @@ void ConstantFolding::initializeGlobal(uint64_t& addr, Constant * CC) {
     int size = str.size();
     memcpy(source, str.c_str(), size);
     debug(Abubakar) << "storing : size " << size << " at address " << addr << " " << *CC << "\n";
-    addr += size;
   } else if(ConstantInt * CI = dyn_cast<ConstantInt>(CC)) {
     uint64_t size = DL->getTypeAllocSize(CI->getType());
     storeToMem(CI->getZExtValue(), size, addr);    
     debug(Abubakar) << "storing : size " << size << " at address " << addr << " " << *CC << "\n";
-    addr += size;
+    printInt(getCurrContext()->memory, addr, size);
+    errs() << "\n";
   } else if(ConstantExpr * CE = dyn_cast<ConstantExpr>(CC)) {
     /* 1. either we have it in memory in which case runOnInst will work*/
     /* 2. we dont have it in memory but its a constant string - need to allocate new memory */
@@ -234,12 +298,12 @@ void ConstantFolding::initializeGlobal(uint64_t& addr, Constant * CC) {
       storeToMem(newAddr, size, addr);
       debug(Abubakar) << "created new constant string " << str << " at address " << newAddr << "\n";
       debug(Abubakar) << "storing address " << newAddr << " at pointer " << addr << " size " << size << "\n";
-      addr += size;      
     }   
   } else {
     for(unsigned i = 0; i < CC->getNumOperands(); i++) {
       Constant * CGI = CC->getAggregateElement(i);
       initializeGlobal(addr, CGI);
+      addr += DL->getTypeAllocSize(CGI->getType());
     }
   }
 }
@@ -249,15 +313,183 @@ void ConstantFolding::addGlobals() {
   for(auto& global : module->globals()) {
     GlobalVariable *  gv = &global;
     Type * contTy = gv->getType()->getContainedType(0);
-    if(gv->isConstant() && isa<ArrayType>(contTy) && contTy->getContainedType(0)->isIntegerTy(8))
-      continue;
+    if(useAnnotations && AnnotationList.find(gv) == AnnotationList.end() && 
+    gv->getName() != "optarg" && gv->getName() != "optind" &&
+    gv->getName() != "__argv_new__")
+      continue; 
+    // if(gv->isConstant() && isa<ArrayType>(contTy) && contTy->getContainedType(0)->isIntegerTy(8))
+    //   continue;
+    debug(Abubakar) << gv->getName() << "\n"; 
     uint64_t size = DL->getTypeAllocSize(contTy);
     uint64_t addr = allocateStack(size);
     debug(Abubakar) << "addGlobal : size " << size << " at address " << addr << "\n";
     addRegister(gv, contTy, addr);
     if(gv->hasInitializer()) 
       initializeGlobal(addr, gv->getInitializer());
-  }   
+  }
+  errs() << "printing memory\n";
+  for(unsigned i = 10; i < 5242; i += 24) {
+    printStr(getCurrContext()->memory, i, 8);
+    errs() << ", ";
+    printStr(getCurrContext()->memory, i + 8, 8); 
+    errs() << ", ";
+    printInt(getCurrContext()->memory, i + 16, 4);
+    errs() << "\n";
+  } 
 }
 
+bool ConstantFolding::getPointerAddr(Value * val, uint64_t& addr) {
+  if(Register * reg = getRegister(val)) {
+    addr = reg->getValue();
+    return true;
+  }
+  if(isa<ConstantPointerNull>(val)) {
+    addr = 0;
+    return true;
+  }
+  return false;
+}
+
+CmpInst * ConstantFolding::foldCmp(CmpInst * CI) {
+  Value * oldLHS = CI->getOperand(0);
+  Value * oldRHS = CI->getOperand(1);
+  uint64_t lAddr, rAddr;
+  if(getPointerAddr(oldLHS, lAddr) && 
+  getPointerAddr(oldRHS, rAddr)) {
+    IntegerType * intTy = IntegerType::get(module->getContext(), 1);
+    Value * newLHS = ConstantInt::get(intTy, lAddr);
+    Value * newRHS = ConstantInt::get(intTy, rAddr);
+    CmpInst * NCI = CmpInst::Create(CI->getOpcode(), CI->getPredicate(),
+                    newLHS, newRHS);
+    NCI->insertBefore(CI);
+    debug(Abubakar) << *CI << " ";
+    replaceAndLog(CI, NCI);
+    return NCI;
+  }
+  return NULL;
+}
+
+Instruction * ConstantFolding::simplifyInst(Instruction * I) {
+  for(unsigned i = 0; i < I->getNumOperands(); i++) {
+    Value * val = I->getOperand(i);
+    if(Register * reg = getRegister(val)) {
+      if(IntegerType * intTy = dyn_cast<IntegerType>(val->getType()))
+        replaceAndLog(val, ConstantInt::get(intTy, reg->getValue()));
+    }
+  }
+  if(isa<CmpInst>(I) &&
+  isa<PointerType>(I->getOperand(0)->getType()))     
+    return foldCmp(dyn_cast<CmpInst>(I));
+  else if(SelectInst * SI = dyn_cast<SelectInst>(I)) {
+    if(ConstantInt * CI = dyn_cast<ConstantInt>(SI->getCondition())) {
+      Value * rep = CI->getZExtValue() ? SI->getTrueValue() : SI->getFalseValue();
+      replaceOrCloneRegister(I, rep);
+    }
+  }
+  return NULL;
+}
+
+void ConstantFolding::createAnnotationList() {
+  GlobalVariable * annotVar = module->
+  getGlobalVariable(StringRef("llvm.global.annotations"));
+
+  assert(annotVar && "isAnnotated and annotVar not found");
+
+  Constant * initializer = annotVar->getInitializer();
+  ArrayType * aty = dyn_cast<ConstantArray>(initializer)->getType();
+  unsigned num = aty->getNumElements();
+  for(unsigned i = 0; i < num; i++) {
+    Constant * t1 = initializer->getAggregateElement(i);
+    Constant * t2 = t1->getAggregateElement((unsigned) 0);
+    Value * val;
+    if(isa<GlobalVariable>(t2))
+      val = t2;
+    else if(Instruction * I = dyn_cast<ConstantExpr>(t2)->getAsInstruction())
+      val = dyn_cast<User>(I)->getOperand(0);
+    else 
+      continue;
+    
+    debug(Abubakar) << val->getName() << " will be tracked\n";
+    AnnotationList.insert(val);
+    StringRef stringRef;
+    getConstantStringInfo(t1->getAggregateElement((unsigned) 1), stringRef, 0, false);
+    string tag = stringRef.str();
+  }
+}
+
+void ConstantFolding::createAnnotationList2() {
+  vector<string> globs, funcs;
+  GlobalVariable * ggv = module->getNamedGlobal("__tracked_globals__");
+  if(ggv) {
+    ConstantDataArray * CDA = dyn_cast<ConstantDataArray>(ggv->getInitializer());
+    split(CDA->getAsString(), globs);
+  }
+  GlobalVariable * fgv = module->getNamedGlobal("__tracked_funcs__");
+  if(fgv) {
+    ConstantDataArray * CDA = dyn_cast<ConstantDataArray>(fgv->getInitializer());
+    split(CDA->getAsString(), funcs);
+  }
+  for(unsigned i = 0; i < globs.size(); i++) {
+    GlobalValue * gv = module->getNamedValue(StringRef(globs[i]));
+    debug(Abubakar) << globs[i] << " : glob " << "\n";
+    AnnotationList.insert(gv);
+  }
+  for(unsigned i = 0; i < funcs.size(); i++) {
+    GlobalValue * gv = module->getNamedValue(StringRef(funcs[i]));
+    debug(Abubakar) << funcs[i] << " : func " << "\n";
+    AnnotationList.insert(gv);    
+  }
+}
+
+void ConstantFolding::updateAnnotationContext(Function * F) {
+  if(!useAnnotations)
+    return;
+  if(AnnotationList.find(F) == AnnotationList.end())
+    currContextIsAnnotated = false;
+  else {
+    currContextIsAnnotated = true;
+  }
+}
+
+bool ConstantFolding::trackAllocas() {
+  if(useAnnotations && !currContextIsAnnotated)
+    return false;
+  return true;
+}
+
+void ConstantFolding::initializeFuncInfo(Function * F) {
+  if(fimap.find(F) == fimap.end()) {
+    FuncInfo * fi = new FuncInfo(F);
+    updatefuncInfo(F, fi);
+    fimap[F] = fi;
+  }
+}
+
+void ConstantFolding::updatefuncInfo(Function * F, FuncInfo * fi) {
+  fi->directCallInsts = 0;
+  fi->usedInLoop = false;
+  for(Use &U : F->uses()) {
+    User * FU = U.getUser();
+    if(CallInst * ci = dyn_cast<CallInst>(FU)) {
+      if(!ci->getParent())
+        continue;
+      fi->directCallInsts++;
+      LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*ci->getFunction()).getLoopInfo();
+      if(LI.getLoopFor(ci->getParent()))
+        fi->usedInLoop = true;     
+    }
+  }
+}
+
+bool ConstantFolding::satisfyConds(Function * F) {
+ 
+  if(fimap.find(F) == fimap.end())
+    return false;
+
+  FuncInfo* fi = fimap[F];  
+  if(AnnotationList.find(F) != AnnotationList.end()) 
+    return true;
+
+  return !(fi->usedInLoop || fi->addrTaken || fi->directCallInsts > 1); 
+}
 #endif

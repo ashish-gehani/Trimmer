@@ -61,6 +61,10 @@ struct ConstantFolding : public ModulePass {
   vector<InstPair> toReplace;
   ValToRegisterMap Registers;
 
+  bool currContextIsAnnotated;
+  bool useAnnotations;
+  set<Value *> AnnotationList;
+
   ConstantFolding(): ModulePass(ID){}
   void getAnalysisUsage(AnalysisUsage &AU) const;
 
@@ -68,12 +72,27 @@ struct ConstantFolding : public ModulePass {
   void processStoreInst(StoreInst *);
   void processLoadInst(LoadInst *);
   void processGEPInst(GetElementPtrInst *);
-  void processTermInst(TerminatorInst *);   
   void processCallInst(CallInst *);
   void processMemcpyInst(MemCpyInst *);
   void processMallocInst(CallInst *);
   void processBitCastInst(BitCastInst *);  
+  void processPHINode(PHINode *);
   void processReturnInst(ReturnInst *);
+  void processTermInst(TerminatorInst *);   
+  void tryfolding(Instruction *);
+
+  void createAnnotationList();
+  void createAnnotationList2();
+  void updateAnnotationContext(Function * F);
+  bool trackAllocas();
+  
+  void initializeFuncInfo(Function *);
+  void updatefuncInfo(Function *, FuncInfo *);
+  bool satisfyConds(Function *);
+  
+  Instruction * simplifyInst(Instruction *);
+  CmpInst * foldCmp(CmpInst *);
+  bool getPointerAddr(Value *, uint64_t&);
 
   Function * addClonedFunction(CallInst *, Function *);
   bool predecessorsVisited(BasicBlock *);
@@ -81,10 +100,12 @@ struct ConstantFolding : public ModulePass {
   void replaceUses();
   void markArgsAsNonConst(CallInst* callInst);
   void addGlobals();
-  void initializeGlobal(uint64_t&, Constant *);
+  void initializeGlobal(uint64_t, Constant *);
 
-  void cloneContext(BasicBlock *);
+  void createNewContext(BasicBlock * BB);
+  void cloneContext(BasicBlock *);  
   void duplicateContext(BasicBlock *);
+  void initializeBBInfo(BasicBlock * BB);
   Memory * duplicateMem();
   ContextInfo * getCurrContext();
   void copyContext(Memory *);
@@ -100,6 +121,8 @@ struct ConstantFolding : public ModulePass {
   bool checkConstStr(uint64_t);
   bool checkConstStr(uint64_t, uint64_t);
   void addRegister(Value *, Type *, uint64_t);
+  bool cloneRegister(Value *, Value *);
+  bool replaceOrCloneRegister(Value * from, Value *);
   Register * getRegister(Value *);
 
   virtual bool runOnModule(Module &);

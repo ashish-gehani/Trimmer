@@ -9,7 +9,6 @@ using namespace llvm;
 class BBOps {
 public:
 	BBOps() {
-
   }
   void initialize(BasicBlock * BB, LoopInfo& LI) {
     if(BBInfoMap.find(BB) != BBInfoMap.end())
@@ -22,6 +21,11 @@ public:
         bbi->writesToMemory = true;
     }
     BBInfoMap[BB] = bbi; 
+  }
+  bool partOfLoop(Value * val) {
+    if(isa<Instruction>(val) && dyn_cast<Instruction>(val)->getParent())
+      return partOfLoop(dyn_cast<Instruction>(val)->getParent());
+    return true;
   }
   bool partOfLoop(BasicBlock * BB) {
     assert(BBInfoMap.find(BB) != BBInfoMap.end());
@@ -39,6 +43,7 @@ public:
   }
   bool needToduplicate(BasicBlock * BB, BasicBlock * from,
   BasicBlockContInfoMap bbc) {
+
     bool singlePredFrom = true;
     ContextInfo * ci = bbc[from];
     for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++) {
@@ -51,12 +56,36 @@ public:
           continue;
         singlePredFrom = false;
       } 
-    }    
+    }
     bool noMemWrite = !BBInfoMap[BB]->writesToMemory; 
-    return !(singlePredFrom && noMemWrite);
+    bool singleSuccTo = BBInfoMap[from]->singleSucc;
+    return !(singlePredFrom && (noMemWrite || singleSuccTo));
+  }
+
+  void addAncestor(BasicBlock * succ, BasicBlock * anc) {
+    assert(BBInfoMap.find(anc) != BBInfoMap.end());
+    assert(BBInfoMap.find(succ) != BBInfoMap.end());
+    BBInfoMap[succ]->ancestors = BBInfoMap[anc]->ancestors;
+    BBInfoMap[succ]->ancestors.push_back(anc);
+  }
+  
+  bool visitBB(BasicBlock * BB, LoopInfo& LI) {
+    
+    if(isVisited(BB)) 
+      return false;
+
+    if(unReachable.find(BB) != unReachable.end())
+      return false;
+
+    initialize(BB, LI);
+    
+    if(!predecessorsVisited(BB, LI))
+      return false;  
+
+    return true;
   }
   bool predecessorsVisited(BasicBlock * BB, LoopInfo &LI) {
-    initialize(BB, LI);
+    assert(BBInfoMap.find(BB) != BBInfoMap.end());
     Loop * BBLoop = LI.getLoopFor(BB);
 
     for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++) {
@@ -84,6 +113,9 @@ public:
   }
   bool mergeContext(BasicBlock * BB, BasicBlock * prev,
     BasicBlockContInfoMap bbc) {
+    errs() << "merging context ";
+    BB->printAsOperand(errs(), false);
+    errs() << "\n";
     vector<ContextInfo *> predConts; 
     for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++) {
       BasicBlock * predecessor = *it;
@@ -105,9 +137,16 @@ public:
         continue;
       }
       predConts.push_back(bbc[predecessor]);
+      errs() << predConts.size() << " ";
+      predecessor->printAsOperand(errs(), false);
+      errs() << "\n";
     }
-    for(unsigned i = 0; i < predConts.size(); i++) 
+    errs() << "compareWithing\n";
+    for(unsigned i = 0; i < predConts.size(); i++) {
+      errs() << "comparing " << (i + 1) << "\n";
       bbc[BB]->memory->compareWith(predConts[i]->memory);
+    }
+    errs() << "merged\n";
     return true;
   }  
   void freePredecessors(BasicBlock * BB, BasicBlockContInfoMap bbc) {
@@ -149,7 +188,119 @@ public:
     else
       ci->deleted = true;  
     freePredecessors(BB, bbc);
+  }
+  void propagateUR(BasicBlock * BB, LoopInfo& LI) {
+    Function * F = BB->getParent();
+    DominatorTree * DT = new DominatorTree(*F);
+    vector<BasicBlock *> worklist;
+    worklist.push_back(BB);
+    while(worklist.size()) {
+      BasicBlock * worker = worklist[0];
+      worklist.erase(worklist.begin());
+      if(unReachable.find(worker) != unReachable.end()) 
+        continue;
+      unReachable.insert(worker);
+      markSuccessorsAsUR(worker->getTerminator(), NULL, LI);
+      const vector<DomTreeNodeBase<BasicBlock> *> children = 
+        DT->getNode(worker)->getChildren();
+      for(unsigned i = 0; i < children.size(); i++) {
+        BasicBlock * dom = children[i]->getBlock();
+        worklist.push_back(dom);
+      }
+    }
   }  
+  void markSuccessorsAsUR(TerminatorInst * termInst,
+   BasicBlock * except, LoopInfo& LI) {
+    for(unsigned int index = 0; index < termInst->getNumSuccessors(); index++) {
+      BasicBlock * successor = termInst->getSuccessor(index);
+      if(successor == except)
+        continue;
+      initialize(successor, LI);      
+      BBInfoMap[successor]->URfrom++;
+      if(BBInfoMap[successor]->URfrom < BBInfoMap[successor]->numPreds)
+        continue;
+      propagateUR(successor, LI);
+    }
+  }  
+  BasicBlock * foldToSingleSucc(TerminatorInst * termInst, LoopInfo& LI) {
+    BasicBlock * single = NULL;
+    if(BranchInst *  BI = dyn_cast<BranchInst>(termInst)) {
+      if(!BI->isConditional())
+        single = termInst->getSuccessor(0);
+      else if(ConstantInt * CI = dyn_cast<ConstantInt>(BI->getCondition())) {
+        if(CI->getZExtValue())
+          single = termInst->getSuccessor(0);
+        else 
+          single = termInst->getSuccessor(1);
+      }
+    } else if(SwitchInst * SI = dyn_cast<SwitchInst>(termInst)) {
+      if(ConstantInt * CI = dyn_cast<ConstantInt>(SI->getCondition()))
+        single = SI->findCaseValue(CI).getCaseSuccessor();
+    }
+    if(single) {
+      debug(Abubakar) << "folded to single successor ";
+      if(debugLevel == Abubakar)
+        single->printAsOperand(errs(), false);
+      debug(Abubakar) << "\n";
+      markSuccessorsAsUR(termInst, single, LI);
+      BBInfoMap[termInst->getParent()]->singleSucc = true;
+    }
+    return single;
+  }
+  bool straightPath(BasicBlock * from, BasicBlock * to, 
+  BasicBlockContInfoMap bbc) {
+    if(from == to)
+      return false;
+    if(!findInVect(BBInfoMap[to]->ancestors, from)) {
+      return false;
+    }
+    ContextInfo * fc = bbc[from];
+    ContextInfo * tc = bbc[to];
+    return tc->cloneOf && (tc->cloneOf == fc || tc->cloneOf == fc->cloneOf);
+  }  
+  Value * foldPhiNode(PHINode * phiNode, 
+  BasicBlockContInfoMap bbc) {
+    vector<unsigned> incV;
+    for(unsigned i = 0; i < phiNode->getNumIncomingValues(); i++) {
+      BasicBlock * BB = phiNode->getIncomingBlock(i);
+      if(visited.find(BB) == visited.end())
+        continue;
+      incV.push_back(i);
+    }
+    for(unsigned i = 0; i < incV.size(); i++) {
+      BasicBlock * first = phiNode->getIncomingBlock(incV[i]);
+      for(unsigned j = 0; j < incV.size(); j++) {
+        BasicBlock * second = phiNode->getIncomingBlock(incV[j]);
+        if((first == second && j != i)
+        || straightPath(second, first, bbc)) {
+          incV.erase(incV.begin() + j);
+          if(j < i)
+            i--;
+          j--;
+        }
+      }
+    }
+    Value * val = NULL; 
+    for(unsigned i = 0; i < incV.size(); i++) {
+      if(val && val != phiNode->getIncomingValue(incV[i])) {
+        debug(Abubakar) << "phiNode not constant\n";
+        return NULL;
+      }
+      val = phiNode->getIncomingValue(incV[i]);
+    }
+    return val;
+  }
+  // void tryUnrollingLoop(BasicBlock * BB, LoopInfo& LI) {
+  //   if(!BBInfoMap[BB]->partOfLoop)
+  //     return;
+  //   Loop * L = LI.getLoopFor(BB);
+  //   bool PreserveLCSSA = mustPreserveAnalysisID(LCSSAID);
+  //   if (!UnrollLoop(L, 10, 10, false, true, 0, LI, SE, &DT,
+  //       &AC, PreserveLCSSA))  
+  //     errs() << "failed to unroll loop\n";
+  //   else
+  //     errs() << "succeeded in unrolling loop\n";
+  // }
 private:
   map<BasicBlock *, BBInfo *> BBInfoMap;
   set<BasicBlock *> visited;

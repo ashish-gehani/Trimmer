@@ -3,10 +3,10 @@
 #include<string.h>
 #include<stdlib.h>
 
-// void branchPruned(char * buffer) {
-// 	if(buffer[0] == 'i')
-// 		printf("branchPruned\n");
-// }
+void branchPruned(char * buffer) {
+	if(buffer[0] == 'i')
+		printf("branchPruned\n");
+}
 
 void branchNotPruned(char * buffer) {
 	if(buffer[1] == 'a' ||
@@ -28,7 +28,7 @@ int main(int argc, char ** argv){
 
   memcpy(buffer, "helloWorld", 100);
   modify(buffer, 3, argc);
-  // branchPruned(buffer);
+  branchPruned(buffer);
   branchNotPruned(buffer);
 
   return 0;
