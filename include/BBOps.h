@@ -113,9 +113,7 @@ public:
   }
   bool mergeContext(BasicBlock * BB, BasicBlock * prev,
     BasicBlockContInfoMap bbc) {
-    errs() << "merging context ";
-    BB->printAsOperand(errs(), false);
-    errs() << "\n";
+    printBB("merging context for ", BB, "\n", Abubakar);
     vector<ContextInfo *> predConts; 
     for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++) {
       BasicBlock * predecessor = *it;
@@ -137,16 +135,10 @@ public:
         continue;
       }
       predConts.push_back(bbc[predecessor]);
-      errs() << predConts.size() << " ";
-      predecessor->printAsOperand(errs(), false);
-      errs() << "\n";
     }
-    errs() << "compareWithing\n";
     for(unsigned i = 0; i < predConts.size(); i++) {
-      errs() << "comparing " << (i + 1) << "\n";
       bbc[BB]->memory->compareWith(predConts[i]->memory);
     }
-    errs() << "merged\n";
     return true;
   }  
   void freePredecessors(BasicBlock * BB, BasicBlockContInfoMap bbc) {
@@ -163,7 +155,7 @@ public:
     ContextInfo * ci = bbc[BB];
     if(ci->deleted)
       return;
-    if(ci->cloneOf && ci->cloneOf->deleted)
+    if(ci->cloneOf) // Todo : not efficient we should be able to delete it midway
       return;
     TerminatorInst * ti = BB->getTerminator();
     for(unsigned i = 0; i < ti->getNumSuccessors(); i++) {
@@ -178,10 +170,7 @@ public:
           return;
       }
     }
-    debug(Abubakar) << "freeing BB ";
-    if(debugLevel == Abubakar)
-      BB->printAsOperand(errs(), false);
-    debug(Abubakar) << "\n";    
+    printBB("freeing BB ", BB, "\n", Abubakar); 
     delete ci->memory;
     if(ci->cloneOf)
       ci->cloneOf->deleted = true;
@@ -238,10 +227,7 @@ public:
         single = SI->findCaseValue(CI).getCaseSuccessor();
     }
     if(single) {
-      debug(Abubakar) << "folded to single successor ";
-      if(debugLevel == Abubakar)
-        single->printAsOperand(errs(), false);
-      debug(Abubakar) << "\n";
+      printBB("folded to single successor ", single, "\n", Abubakar);
       markSuccessorsAsUR(termInst, single, LI);
       BBInfoMap[termInst->getParent()]->singleSucc = true;
     }
@@ -290,17 +276,6 @@ public:
     }
     return val;
   }
-  // void tryUnrollingLoop(BasicBlock * BB, LoopInfo& LI) {
-  //   if(!BBInfoMap[BB]->partOfLoop)
-  //     return;
-  //   Loop * L = LI.getLoopFor(BB);
-  //   bool PreserveLCSSA = mustPreserveAnalysisID(LCSSAID);
-  //   if (!UnrollLoop(L, 10, 10, false, true, 0, LI, SE, &DT,
-  //       &AC, PreserveLCSSA))  
-  //     errs() << "failed to unroll loop\n";
-  //   else
-  //     errs() << "succeeded in unrolling loop\n";
-  // }
 private:
   map<BasicBlock *, BBInfo *> BBInfoMap;
   set<BasicBlock *> visited;

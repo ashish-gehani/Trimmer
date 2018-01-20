@@ -42,6 +42,23 @@ void initDebugLevel() {
         debugLevel = All;
 }
 
+void printBB(string before, BasicBlock * BB, string after, int level) {
+    debug(level) << before;
+    if(debugLevel == All || level == debugLevel || level == All)
+        BB->printAsOperand(errs(), false);        
+    debug(level) << after;
+}
+
+void printInst(Instruction * I, int level) {
+  debug(level) << *I << " is the inst "; 
+  if(I->getParent()) {
+    printBB(" in BB ", I->getParent(), "", level); 
+    if(I->getFunction())
+      debug(level) << " " << I->getFunction()->getName() << " ";
+  }
+  debug(level) << "\n";
+}
+
 void printMem(Memory * mem, uint64_t addr, uint64_t size) {
     char * cmem = (char *) mem->getActualAddr(addr);
   for(unsigned i = 0; i < size; i++) {

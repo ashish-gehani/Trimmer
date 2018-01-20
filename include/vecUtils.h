@@ -39,6 +39,21 @@ void InsertUnique(vector<F> & vect1, vector<F> vect2) {
     InsertUnique(vect1, vect2[i]);
 }
 
+template <typename F>
+void push_back(vector<F> & vect) {
+  F val;
+  vect.push_back(val);
+}
+
+
+template <typename F>
+F pop_back(vector<F> & vect) {
+  F val = vect[vect.size() - 1];
+  vect.pop_back();
+  return val;
+}
+
+
 unsigned binarySearchIndices(vector<unsigned> indices, unsigned lo, unsigned hi, unsigned val) {
   
   assert(hi < indices.size() && lo < indices.size());

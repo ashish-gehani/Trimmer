@@ -8,27 +8,29 @@ static cl::opt<bool> isAnnotated("isAnnotated",
                   cl::desc("are annotations found or should the whole program be tracked"));
 
 void ConstantFolding::getAnalysisUsage(AnalysisUsage &AU) const { 
-  //AU.addRequired<MemoryDependenceAnalysis>();
-  AU.addRequired<DominatorTreeWrapperPass>();
   AU.addRequired<TargetLibraryInfoWrapperPass>();
   AU.addRequired<CallGraphWrapperPass>();
+  AU.addRequired<DominatorTreeWrapperPass>();
   AU.addRequired<LoopInfoWrapperPass>();
+  AU.addPreserved<LoopInfoWrapperPass>();
+  AU.addRequiredID(LoopSimplifyID);
+  AU.addPreservedID(LoopSimplifyID);
+  AU.addRequiredID(LCSSAID);
+  AU.addPreservedID(LCSSAID);
+  AU.addRequired<ScalarEvolutionWrapperPass>();
+  AU.addPreserved<ScalarEvolutionWrapperPass>();
+  AU.addRequired<TargetTransformInfoWrapperPass>();
+  // FIXME: Loop unroll requires LCSSA. And LCSSA requires dom info.
+  // If loop unroll does not preserve dom info then LCSSA pass on next
+  // loop will receive invalid dom info.
+  // For now, recreate dom info, if loop is unrolled.
+  AU.addPreserved<DominatorTreeWrapperPass>();
+
 }
 
 
 void ConstantFolding::runOnInst(Instruction * I) {
-  // printMem(BasicBlockContexts[currBB]->memory, 1, 20);
-  // printConstMem(BasicBlockContexts[currBB]->memory, 1, 20);
-
-  debug(Abubakar) << *I << " is the inst "; 
-  if(I->getParent()) {
-    debug(Abubakar) << " in BB ";
-    if(debugLevel == Abubakar)
-      currBB->printAsOperand(errs(), false);
-    if(I->getFunction())
-      debug(Abubakar) << " " << I->getFunction()->getName() << " ";
-  }
-  debug(Abubakar) << "\n";
+  printInst(I, Abubakar);
   if(AllocaInst * allocaInst = dyn_cast<AllocaInst>(I)) {
     processAllocaInst(allocaInst);  
   } else if(BitCastInst * bitCastInst = dyn_cast<BitCastInst>(I)) {
@@ -47,6 +49,8 @@ void ConstantFolding::runOnInst(Instruction * I) {
     processTermInst(termInst);
   } else if(MemCpyInst * memcpyInst = dyn_cast<MemCpyInst>(I)) {
     processMemcpyInst(memcpyInst);
+  } else if(MemSetInst * memsetInst = dyn_cast<MemSetInst>(I)) {
+    processMemSetInst(memsetInst);
   } else if(CallInst * callInst = dyn_cast<CallInst>(I)) {
     processCallInst(callInst);
   } else 
@@ -62,32 +66,50 @@ void ConstantFolding::runOnBB(BasicBlock * BB) {
   for(ci->inst = BB->begin(); ci->inst != BB->end(); ci->inst++) {
     Instruction * I = &*(ci->inst);
     runOnInst(I);
-  }
+    if(terminateBB) { // loop peeled and as a result this inst has changed
+      terminateBB = false;
+      break;
+    } 
+  }  
   currBB = temp;
   bbOps.freeBB(BB, BasicBlockContexts);
 }
 
 void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
+
+  if(!ci) assert(toRun->getName().str() == "main" && "callInst not given");
+
+  push_back(funcValStack);
+
   bool tempAnnot = currContextIsAnnotated;
   Function * temp = currfn;
-  if(ci)
-    updateAnnotationContext(ci->getCalledFunction());
+  if(ci) {
+    Function * calledFunction = ci->getCalledFunction();
+    unsigned index = 0;
+    for(auto arg = calledFunction->arg_begin(); arg != calledFunction->arg_end();
+        arg++, index++) {
+      Value * callerVal = ci->getOperand(index);
+      Value * calleeVal = getArg(toRun, index);
+      replaceOrCloneRegister(calleeVal, callerVal);
+    }
+    updateAnnotationContext(calledFunction);
+  }
   initializeFuncInfo(toRun);
   currfn = toRun;
   BasicBlock * entry = &toRun->getEntryBlock();
   runOnBB(entry);
-  if(!ci) {
-    assert(toRun->getName().str() == "main" && "callInst not given");
-    return;
-  }
+
+  if(!ci) return;
+
   FuncInfo * fi = fimap[toRun];
-  if(fi->retReg)
-    handleInt(ci, fi->retReg->getValue(), Registers);
   assert(fi->context != NULL && "unexpected behaviour");
   copyContext(fi->context);
   currfn = temp;
   currContextIsAnnotated = tempAnnot;
-  cleanUpfuncBBs(toRun, BasicBlockContexts);
+  cleanUpfuncBBs(toRun, BasicBlockContexts, Registers, pop_back(funcValStack));
+  if(fi->retReg)
+    handleInt(ci, fi->retReg->getValue());
+
 }
 
 bool ConstantFolding::runOnModule(Module & M) {
@@ -97,7 +119,8 @@ bool ConstantFolding::runOnModule(Module & M) {
   TLI = &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI();
   DL = new DataLayout(module);   
   CG = &getAnalysis<CallGraphWrapperPass>().getCallGraph();  
-
+  PreserveLCSSA = mustPreserveAnalysisID(LCSSAID);
+  
   useAnnotations = isAnnotated;  
   if(useAnnotations) {
     createAnnotationList();
@@ -109,6 +132,7 @@ bool ConstantFolding::runOnModule(Module & M) {
   initializeFuncInfo(func);
   createNewContext(entry);
   currBB = entry;
+  terminateBB = false;
   currContextIsAnnotated = true;
   addGlobals();
   runOnFunction(NULL, func);

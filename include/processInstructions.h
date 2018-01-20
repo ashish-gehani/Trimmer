@@ -35,6 +35,7 @@
 #include <stdio.h>
 #include <sstream>
 #include "Utils.cpp"
+#include "loopUtils.cpp"
 #include "stringUtils.cpp"
 
 
@@ -59,14 +60,38 @@ void ConstantFolding::processMallocInst(CallInst * mi) {
     return;
   }
   Value * sizeVal = mi->getOperand(0);
-  if(!isa<ConstantInt>(sizeVal)) {
+  uint64_t size;
+  if(!getSingleVal(sizeVal, size)) {
     debug(Abubakar) << "mallocInst : size not constant\n";
     return;
   }
-  unsigned size = dyn_cast<ConstantInt>(sizeVal)->getZExtValue();
   uint64_t addr = allocateHeap(size);  
   addRegister(mi, mi->getType(), addr);
   debug(Abubakar) << "mallocInst : size " << size << " at address " << addr << "\n";  
+}
+
+void ConstantFolding::processCallocInst(CallInst * ci) {   
+  if(!trackAllocas()) {
+    debug(Abubakar) << "skipping untracked calloc\n";
+    return;
+  }
+  Value * numVal = ci->getOperand(0);
+  Value * sizeVal = ci->getOperand(1);
+  uint64_t num, bsize;
+
+  if(!getSingleVal(numVal, num)) {
+    debug(Abubakar) << "callocInst : num not constant\n";
+    return;
+  }
+  if(!getSingleVal(sizeVal, bsize)) {
+    debug(Abubakar) << "callocInst : size not constant\n";
+    return;
+  }
+  unsigned size = num * bsize;
+  uint64_t addr = allocateHeap(size);  
+  addRegister(ci, ci->getType(), addr);
+  debug(Abubakar) << "callocInst : size " << size << " at address " << addr << "\n";  
+  memset((char *) getActualAddr(addr), '\0', size);
 }
 
 void ConstantFolding::processBitCastInst(BitCastInst * bi) {
@@ -89,19 +114,13 @@ void ConstantFolding::processStoreInst(StoreInst * si) {
   }
   uint64_t addr = reg->getValue();
   uint64_t size = DL->getTypeAllocSize(storeOp->getType());
-  if((reg = getRegister(storeOp))) {
-    debug(Abubakar) << "StoreInst : from register\n";
-    storeToMem(reg->getValue(), size, addr);
-  } else if(ConstantInt * constInt = dyn_cast<ConstantInt>(storeOp)) {
-    debug(Abubakar) << "StoreInst : from ConstantInt " << constInt->getZExtValue() << "\n";
-    storeToMem(constInt->getZExtValue(), size, addr);    
-  } else if(isa<ConstantPointerNull>(storeOp)) {
-    debug(Abubakar) << "StoreInst : NULL\n";
-    storeToMem(0, size, addr);        
-  } else {
+  uint64_t val;
+  if(!getSingleVal(storeOp, val)) {
     debug(Abubakar) << "StoreInst : from cannot be determined\n";
     setConstMem(false, addr, size);
+    return;
   }
+  storeToMem(val, size, addr);   
 }
 
 void ConstantFolding::processLoadInst(LoadInst * li) {
@@ -110,22 +129,19 @@ void ConstantFolding::processLoadInst(LoadInst * li) {
     return;
   
   Value * ptr = li->getOperand(0);
-
   Register * reg = getRegister(ptr);
   if(!reg) {
     debug(Abubakar) << "LoadInst : Not found in Map\n";
     return;
   }
-
   uint64_t addr = reg->getValue();
   uint64_t size = DL->getTypeAllocSize(li->getType());
   if(!checkConstMem(addr, size)) {
     debug(Abubakar) << "LoadInst : skipping non constant\n";
     return;
   }
-
   uint64_t val = loadMem(size, addr);
-  handleInt(li, val, Registers);
+  handleInt(li, val);
 }
 
 void ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
@@ -154,42 +170,56 @@ void ConstantFolding::processMemcpyInst(MemCpyInst * memcpyInst) {
 
   Value * toPtr = memcpyInst->getOperand(0);
   Value * fromPtr = memcpyInst->getOperand(1);
+  char * fromString;
   Value * sizeVal = memcpyInst->getOperand(2);
-
+  uint64_t size;
   Register * reg = getRegister(toPtr);  
+
   if(!reg) {
     debug(Abubakar) << "processMemcpyInst : Not found in Map\n";
     return;
   }
   
-  if(!isa<ConstantInt>(sizeVal)) {
+  if(!getSingleVal(sizeVal, size)) {
     debug(Abubakar) << "processMemcpyInst : size not constant\n";
     setConstContigous(false, reg->getValue()); 
     return;   
-  }
-  unsigned size = dyn_cast<ConstantInt>(sizeVal)->getZExtValue();
+  } 
 
-  char * fromString;
-  StringRef stringRef;
-  if(getConstantStringInfo(fromPtr, stringRef, 0, false)) {
-    fromString = new char[stringRef.str().size()];
-    strcpy(fromString, stringRef.str().c_str());
-  } else if(Register * freg = getRegister(fromPtr)) {
-    if(!checkConstMem(freg->getValue(), size)) {
-      debug(Abubakar) << "processMemcpyInst : fromPtr not constant\n";
-      setConstContigous(false, reg->getValue()); 
-      return;   
-    }
-    fromString = (char *) getActualAddr(freg->getValue());
-  } else {
-    debug(Abubakar) << "processMemcpyInst : fromPtr not found in Map\n";
+  if(!getStr(fromPtr, fromString, size)) {
     setConstContigous(false, reg->getValue()); 
-    return;   
+    return;
   }
   char * toString = (char *) getActualAddr(reg->getValue());
   debug(Abubakar) << "memcpy : from " << fromString << "\n";
   memcpy(toString, fromString, size);
   setConstMem(true, reg->getValue(), size);
+}
+
+void ConstantFolding::processMemSetInst(MemSetInst * memsetInst) {
+  Value * ptr = memsetInst->getOperand(0);
+  Value * chrctr = memsetInst->getOperand(1);
+  Value * sizeVal = memsetInst->getOperand(2);
+
+  Register * ptrReg = getRegister(ptr);  
+  if(!ptrReg) {
+    debug(Abubakar) << "processMemSetInst : Not found in Map\n";
+    return;
+  }
+
+  uint64_t c;
+  if(!getSingleVal(chrctr, c)) {
+    debug(Abubakar) << "processMemSetInst : character not found in Map\n";
+    return;    
+  }
+
+  uint64_t size;
+  if(!getSingleVal(sizeVal, size)) {
+    debug(Abubakar) << "processMemSetInst : size not found in Map\n";
+    return;      
+  }
+  char * ptrString = (char *) getActualAddr(ptrReg->getValue());
+  memset(ptrString, c, size);
 }
 
 void ConstantFolding::processPHINode(PHINode * phiNode) {
@@ -219,6 +249,7 @@ void ConstantFolding::processTermInst(TerminatorInst * termInst) {
   LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();
   bbOps.foldToSingleSucc(termInst, LI);
   for(unsigned int index = 0; index < numS; index++) {
+
     BasicBlock * succ = termInst->getSuccessor(index);
     
     if(!bbOps.visitBB(succ, LI))
@@ -232,9 +263,25 @@ void ConstantFolding::processTermInst(TerminatorInst * termInst) {
       debug(Abubakar) << "cloning\n";
       cloneContext(succ);
     }    
+
     if(index + 1 == numS)
       bbOps.freeBB(currBB, BasicBlockContexts);
+
+    checkTermCond(succ);
+    
+    if(testTerminated()) // test terminated in the  term condition above
+      return;
+
+    if(simplifyLoop(succ)) {
+      assert(termInst->getNumSuccessors() == 1); // has to be a preheader
+      processTermInst(currBB->getTerminator());
+      terminateBB = true;
+      return;
+    }
     runOnBB(succ);   
+
+    if(testTerminated()) // test terminated in runOnBB bove
+      return;
   }
 }
 
@@ -247,12 +294,13 @@ void ConstantFolding::processReturnInst(ReturnInst * retInst) {
   if(!ptr)
     return;
   if(cloneRegister(retInst, ptr))
-    fi->retReg = getRegister(retInst);    
+    fi->retReg = new Register(*getRegister(retInst)); 
 }
 
 void ConstantFolding::processCallInst(CallInst * callInst) {
   if(bbOps.partOfLoop(callInst))
     return;
+
   Function * calledFunction = callInst->getCalledFunction();  
   if(!calledFunction) {
     markArgsAsNonConst(callInst);
@@ -264,26 +312,19 @@ void ConstantFolding::processCallInst(CallInst * callInst) {
   } else if(calledFunction->getName().str() == "malloc") {
     processMallocInst(callInst);
   } else if(calledFunction->getName().str() == "calloc") {
-    debug(Abubakar) << "case not handled : calloc\n";
+    processCallocInst(callInst);
   } else if(calledFunction->isDeclaration()) {
     markArgsAsNonConst(callInst);
     return;
   } else {
     initializeFuncInfo(calledFunction);
-    if(!satisfyConds(calledFunction)) {
-      markArgsAsNonConst(callInst);
-      return;
-    }
+    // if(!satisfyConds(calledFunction)) {
+    //   markArgsAsNonConst(callInst);
+    //   return;
+    // }
     Function * clone = addClonedFunction(callInst, calledFunction);
-    unsigned index = 0;
     BasicBlock * entry = &clone->getEntryBlock();
-    duplicateContext(entry);
-    for(auto arg = calledFunction->arg_begin(); arg != calledFunction->arg_end();
-        arg++, index++) {
-      Value * callerVal = callInst->getOperand(index);
-      Value * calleeVal = getArg(clone, index);
-      replaceOrCloneRegister(calleeVal, callerVal);
-    }
+    duplicateContext(entry);    
     runOnFunction(callInst, clone); 
   }  
 }

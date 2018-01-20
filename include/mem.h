@@ -24,10 +24,9 @@ public:
 		heap = new int8_t[heapTotalSize];
 		heapConst = new bool[heapTotalSize];
 		memset(heap, 0, heapTotalSize);
-		memset(heapConst, true,heapTotalSize);
+		memset(heapConst, true, heapTotalSize);
 	}
 	Memory(Memory& from) {
-		errs() << "copy constructor\n";
 		module = from.getModule();
 		stackIndex = from.getStackIndex();
 		stackTotalSize = from.getStackTotalSize();
@@ -46,7 +45,6 @@ public:
 		memcpy(heapConst, from.getHeapConst(), heapTotalSize);
 		heapStartIndices = from.getHeapStartIndices();
 		heapStartToSizeMap = from.getHeapStartToSizeMap();
-		errs() << "copied\n";
 	}
 	~Memory() {
 		delete stack;
@@ -73,7 +71,6 @@ public:
 		int8_t * withHeap = with->getHeap();
 		bool * withStackConst = with->getStackConst();
 		bool * withHeapConst = with->getHeapConst();
-
 		for(unsigned i = 0; i < stackIndex; i++) {
 			if(!withStackConst[i])
 				stackConst[i] = false;
@@ -82,7 +79,6 @@ public:
 					stackConst[i] = false;
 			} 
  		}
-
 		for(unsigned i = 0; i < heapIndex; i++) {
 			if(!withHeapConst[i])
 				heapConst[i] = false;

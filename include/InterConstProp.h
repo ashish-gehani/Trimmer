@@ -21,6 +21,15 @@
 #include "llvm/IR/ValueMap.h"
 #include "llvm/Transforms/Utils/Cloning.h"
 #include "llvm/Analysis/CallGraph.h"
+
+#include "llvm/Transforms/Scalar.h"
+#include "llvm/Analysis/LoopPass.h"
+#include "llvm/Transforms/Utils/UnrollLoop.h"
+#include "llvm/Analysis/AssumptionCache.h"
+#include "llvm/Analysis/ScalarEvolution.h"
+#include "llvm/Analysis/ScalarEvolutionExpressions.h"
+#include "llvm/Analysis/TargetTransformInfo.h"
+
 #include <sys/stat.h>
 #include <map>
 #include <set>
@@ -55,11 +64,15 @@ struct ConstantFolding : public ModulePass {
   CallGraph * CG;
 
   BasicBlock * currBB;
+  bool terminateBB;
   Function * currfn;
   BasicBlockContInfoMap BasicBlockContexts;
   FuncInfoMap fimap;
   vector<InstPair> toReplace;
   ValToRegisterMap Registers;
+  vector<TestInfo *> testStack;
+  vector<ValSet> funcValStack;
+  bool PreserveLCSSA;
 
   bool currContextIsAnnotated;
   bool useAnnotations;
@@ -74,7 +87,9 @@ struct ConstantFolding : public ModulePass {
   void processGEPInst(GetElementPtrInst *);
   void processCallInst(CallInst *);
   void processMemcpyInst(MemCpyInst *);
+  void processMemSetInst(MemSetInst * memsetInst);
   void processMallocInst(CallInst *);
+  void processCallocInst(CallInst *);
   void processBitCastInst(BitCastInst *);  
   void processPHINode(PHINode *);
   void processReturnInst(ReturnInst *);
@@ -94,6 +109,7 @@ struct ConstantFolding : public ModulePass {
   CmpInst * foldCmp(CmpInst *);
   bool getPointerAddr(Value *, uint64_t&);
 
+  Function * addClonedFunction(Function *, ValueToValueMapTy& vmap);
   Function * addClonedFunction(CallInst *, Function *);
   bool predecessorsVisited(BasicBlock *);
   void handleStringFunction(CallInst *, Function *);
@@ -101,6 +117,12 @@ struct ConstantFolding : public ModulePass {
   void markArgsAsNonConst(CallInst* callInst);
   void addGlobals();
   void initializeGlobal(uint64_t, Constant *);
+  
+  bool getSingleVal(Value * val, uint64_t& i);
+  // bool getStr(Value * ptr, char *& str);
+  bool getStr(Value * ptr, char *& str, uint64_t size);
+  bool handleConstStr(Value *);
+  void handleInt(Value *, uint64_t);
 
   void createNewContext(BasicBlock * BB);
   void cloneContext(BasicBlock *);  
@@ -120,10 +142,18 @@ struct ConstantFolding : public ModulePass {
   bool checkConstMem(uint64_t, uint64_t);
   bool checkConstStr(uint64_t);
   bool checkConstStr(uint64_t, uint64_t);
+  void addRegister(Value *, Register *);
   void addRegister(Value *, Type *, uint64_t);
+  void addGlobalRegister(Value *, Type *, uint64_t);
   bool cloneRegister(Value *, Value *);
-  bool replaceOrCloneRegister(Value * from, Value *);
+  bool replaceOrCloneRegister(Value *, Value *);
   Register * getRegister(Value *);
+
+  bool simplifyLoop(BasicBlock *);
+  TestInfo * runtest(Loop * L);
+  bool peel(unsigned, BasicBlock *);
+  void checkTermCond(BasicBlock *);
+  bool testTerminated();
 
   virtual bool runOnModule(Module &);
   void runOnFunction(CallInst *, Function *);

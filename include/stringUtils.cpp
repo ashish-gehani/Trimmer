@@ -115,6 +115,7 @@ void ConstantFolding::handleStringFunction(CallInst * callInst, Function * calle
   for(unsigned index = 0; index < callInst->getNumArgOperands(); index++) {
     Value * pointerArg = callInst->getArgOperand(index);
     Register * reg = getRegister(pointerArg);
+
     if(!reg) {
       StringRef stringRef;
       if(getConstantStringInfo(pointerArg, stringRef, 0, false))
@@ -138,9 +139,10 @@ void ConstantFolding::handleStringFunction(CallInst * callInst, Function * calle
                      StringRef(baseStringData), true);
       GlobalVariable * globalReadString = new GlobalVariable(*module, stringConstant->getType(), true,
                    GlobalValue::ExternalLinkage, stringConstant, "");
-      GetElementPtrInst * stringPtr = GetElementPtrInst::Create(NULL, globalReadString, 
+      Type * elType = globalReadString->getType()->getContainedType(0);
+      GetElementPtrInst * stringPtr = GetElementPtrInst::Create(elType, globalReadString, 
                 indxList, Twine(""), callInst);
-      callInst->setOperand(index, stringPtr);    
+      callInst->setOperand(index, stringPtr);          
       next = stringPtr;
     }
   }

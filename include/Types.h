@@ -34,7 +34,6 @@ struct ContextInfo {
   ContextInfo * duplicate() {
     ContextInfo * nci = new ContextInfo();
     nci->memory = new Memory(*memory);
-    errs() << "returning\n";
     return nci;
   }
 };
@@ -75,9 +74,21 @@ struct BBInfo {
   }
 };
 
+struct TestInfo {
+  bool terminated, passed;
+  unsigned numLoads, numfolded;
+  BasicBlock * exitBB, * headerBB; // if we fold to the exit then loopPeeling was succesful
+                                  // if we reach the header then it was unsuccesful                 
+  TestInfo(Loop * L) {
+    terminated = passed = false;
+    numLoads = numfolded = 0;
+    exitBB = L->getUniqueExitBlock();
+    headerBB = L->getHeader();
+  }
+};
 typedef map<BasicBlock *, ContextInfo *> BasicBlockContInfoMap;
 typedef map<Function *, ContextInfo *> FuncContInfoMap;
 typedef pair<Instruction *, Instruction *> InstPair;
 typedef map<Function *, FuncInfo *> FuncInfoMap;
-
+typedef set<Value *> ValSet;
 #endif
