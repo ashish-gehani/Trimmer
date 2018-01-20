@@ -70,10 +70,11 @@ struct ConstantFolding : public ModulePass {
   FuncInfoMap fimap;
   vector<InstPair> toReplace;
   ValToRegisterMap Registers;
+
   vector<TestInfo *> testStack;
-  vector<ValSet> funcValStack;
   bool PreserveLCSSA;
 
+  vector<ValSet> funcValStack;
   bool currContextIsAnnotated;
   bool useAnnotations;
   set<Value *> AnnotationList;

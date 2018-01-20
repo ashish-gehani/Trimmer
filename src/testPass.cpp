@@ -34,19 +34,14 @@ namespace {
     testing() : ModulePass(ID) {}
     bool runOnModule(Module& M) {
       Function* pruned, *not_pruned;
-      unsigned cps = 0;
-      unsigned cnps = 0;
+      pruned = not_pruned = NULL;
       for (Module::iterator mit = M.getFunctionList().begin(); mit != M.getFunctionList().end(); ++mit) {
         Function* F = &*mit;
         string name = F->getName().str();
-        if(name.substr (0,12) == "branchPruned" && name.size() > cps) {
+        if(name == "branchPruned_clone")
           pruned = F;
-          cps = name.size();
-        }
-        else if(name.substr (0,15) == "branchNotPruned" && name.size() > cnps) {
+        else if(name == "branchNotPruned_clone")
           not_pruned = F;
-          cnps = name.size();
-        }
       }
       bool passed = true;
       if(pruned) {

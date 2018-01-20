@@ -124,8 +124,10 @@ void ConstantFolding::handleStringFunction(CallInst * callInst, Function * calle
       uint64_t addr = reg->getValue();
       uint64_t len;
       if(getStrLen(callInst, len)) {
-        if(!checkConstStr(addr, len))
+        if(!checkConstStr(addr, len)) {
+          debug(Abubakar) << "skipping non constant string\n";
           continue;
+        }
       }
       else if(!checkConstStr(addr))
         continue;

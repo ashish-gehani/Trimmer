@@ -28,6 +28,14 @@ void branchPruned(struct Node * head) {
     printf("condition true");
 }
 
+void initialize(struct Node * node, int val) {
+  node->val = val;
+  node->buffer = malloc(sizeof(char) * 11);
+  for(int j = 0; j < 10; j++)
+    node->buffer[j] = 'a' + val + j;
+  node->buffer[10] = '\0';
+}
+
 int main() {
   struct Node * head = malloc(sizeof(struct Node));
   head->next = malloc(sizeof(struct Node));
@@ -37,13 +45,8 @@ int main() {
   head->next->next->next->next->next = NULL;
 
   int i = 1;      
-  for(struct Node * node = head; node != NULL; node = node->next, i++) {
-    node->val = i;
-    node->buffer = malloc(sizeof(char) * 11);
-    for(int j = 0; j < 10; j++)
-      node->buffer[j] = 'a' + i + j;
-    node->buffer[10] = '\0';
-  }
+  for(struct Node * node = head; node != NULL; node = node->next, i++)
+    initialize(node, i);
   branchPruned(head);
   return 0;
 }

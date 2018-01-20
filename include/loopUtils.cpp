@@ -62,7 +62,7 @@ TestInfo * ConstantFolding::runtest(Loop * L) {
 
   ValSet oldValSet = funcValStack[funcValStack.size() - 1];
   push_back(funcValStack);
-  
+
   for(auto val : oldValSet)
     addRegister(vmap[val], Registers[val]);
 
@@ -83,6 +83,8 @@ TestInfo * ConstantFolding::runtest(Loop * L) {
 }
 
 bool ConstantFolding::simplifyLoop(BasicBlock * BB) {
+  if(testStack.size()) // for now dont run a test from within a test.
+    return false;
 	if(!bbOps.partOfLoop(BB)) {
   	return false;	
   }
@@ -118,11 +120,11 @@ void ConstantFolding::checkTermCond(BasicBlock * BB) {
   if(ti->exitBB == BB) {
     ti->terminated = true;
     ti->passed = true;
-    debug(Abubakar) << "marking test as passed\n";
+    debug(Abubakar) << "marking test at level " << testStack.size() << " as passed\n";
   } else if(ti->headerBB == BB) {
     ti->terminated = true;
     ti->passed = false;
-    debug(Abubakar) << "marking test as failed\n";
+    debug(Abubakar) << "marking test at level " << testStack.size() << " as failed\n";
   }  
 }
 
