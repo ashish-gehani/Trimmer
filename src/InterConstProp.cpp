@@ -30,31 +30,33 @@ void ConstantFolding::getAnalysisUsage(AnalysisUsage &AU) const {
 
 
 void ConstantFolding::runOnInst(Instruction * I) {
+  ProcResult result;
   printInst(I, Abubakar);
   if(AllocaInst * allocaInst = dyn_cast<AllocaInst>(I)) {
-    processAllocaInst(allocaInst);  
+    result = processAllocaInst(allocaInst);  
   } else if(BitCastInst * bitCastInst = dyn_cast<BitCastInst>(I)) {
-    processBitCastInst(bitCastInst);
+    result = processBitCastInst(bitCastInst);
   } else if(StoreInst * storeInst = dyn_cast<StoreInst>(I)) {
-    processStoreInst(storeInst);
+    result = processStoreInst(storeInst);
   } else if(LoadInst * loadInst = dyn_cast<LoadInst>(I)) {
-    processLoadInst(loadInst);
+    result = processLoadInst(loadInst);
   } else if(GetElementPtrInst * GEPInst = dyn_cast<GetElementPtrInst>(I)) {
-    processGEPInst(GEPInst);
+    result = processGEPInst(GEPInst);
   } else if(PHINode * phiNode = dyn_cast<PHINode>(I)) {
-    processPHINode(phiNode);
+    result = processPHINode(phiNode);
   } else if(ReturnInst * retInst = dyn_cast<ReturnInst>(I)) {
-    processReturnInst(retInst);
+    result = processReturnInst(retInst);
   } else if(TerminatorInst * termInst = dyn_cast<TerminatorInst>(I)) {
-    processTermInst(termInst);
+    result = processTermInst(termInst);
   } else if(MemCpyInst * memcpyInst = dyn_cast<MemCpyInst>(I)) {
-    processMemcpyInst(memcpyInst);
+    result = processMemcpyInst(memcpyInst);
   } else if(MemSetInst * memsetInst = dyn_cast<MemSetInst>(I)) {
-    processMemSetInst(memsetInst);
+    result = processMemSetInst(memsetInst);
   } else if(CallInst * callInst = dyn_cast<CallInst>(I)) {
-    processCallInst(callInst);
+    result = processCallInst(callInst);
   } else 
-    tryfolding(I);
+    result = tryfolding(I);
+  updateCM(result, I);
 }
 
 void ConstantFolding::runOnBB(BasicBlock * BB) {

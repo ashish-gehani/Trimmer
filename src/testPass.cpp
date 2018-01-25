@@ -35,6 +35,7 @@ namespace {
     bool runOnModule(Module& M) {
       Function* pruned, *not_pruned;
       pruned = not_pruned = NULL;
+      bool passed = true;
       for (Module::iterator mit = M.getFunctionList().begin(); mit != M.getFunctionList().end(); ++mit) {
         Function* F = &*mit;
         string name = F->getName().str();
@@ -43,7 +44,10 @@ namespace {
         else if(name == "branchNotPruned_clone")
           not_pruned = F;
       }
-      bool passed = true;
+      if(!pruned && !not_pruned) {
+        errs() << "niether branchPruned_clone nor branchNotPruned_clone\n";
+        passed = false;
+      }
       if(pruned) {
         bool found = false;
         for (Function::iterator f_it = pruned->begin(), f_ite = pruned->end(); f_it != f_ite; ++f_it) {

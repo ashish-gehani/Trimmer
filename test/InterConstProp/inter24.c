@@ -23,7 +23,7 @@ void branchPruned(struct stType * st) {
 
 struct stType st[] = {{0, 0, "helloworld0"}, {1, 1, "helloworld1"}, {2, 2, "helloworld2"}, {3, 3, "helloworld3"}};
 
-int main(){
+int main() {
   branchPruned(st);
   return 0;
 }

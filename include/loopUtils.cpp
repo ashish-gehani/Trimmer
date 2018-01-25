@@ -11,10 +11,20 @@ using namespace std;
 
 static bool canPeel(Loop *L) {
   // Make sure the loop is in simplified form
+  if(!L->isLoopSimplifyForm())
+    debug(Abubakar) << "not L->isLoopSimplifyForm\n";
+  if(!L->getExitingBlock())
+    debug(Abubakar) << "not L->getExitingBlock\n";
+  if(!L->getUniqueExitBlock())
+    debug(Abubakar) << "not L->getUniqueExitBlock\n";
+  if(L->getLoopLatch() != L->getExitingBlock())
+    debug(Abubakar) << "LoopLatch is not the exiting block\n";    
+
   if (!L->isLoopSimplifyForm())
-   return false;
+    return false;
 
   // Only peel loops that contain a single exit
+
   if (!L->getExitingBlock() || !L->getUniqueExitBlock())
    return false;
 
@@ -68,13 +78,12 @@ TestInfo * ConstantFolding::runtest(Loop * L) {
 
   if(!peel(DEFAULT_TRIP_COUNT, hdrClone)) {
     pop_back(testStack);
+    cleanUpfuncBBs(toRun, BasicBlockContexts, Registers, pop_back(funcValStack));
     return ti; // the default value for ti->passed is false
   }
   Function * temp = currfn; 
   currfn = toRun;
   initializeFuncInfo(toRun);
-
-  debug(Abubakar) << "running test\n";
   runOnBB(entry);
 
   currfn = temp;
@@ -93,7 +102,9 @@ bool ConstantFolding::simplifyLoop(BasicBlock * BB) {
   if(BB != L->getHeader()) {
   	return false;
   }
+  debug(Abubakar) << "running test\n";
   TestInfo * ti = runtest(L);
+  // errs() << getCost(ti) << "\n";
   if(!ti->passed) {
     debug(Abubakar) << "test failed\n";
     return false;  
@@ -126,6 +137,94 @@ void ConstantFolding::checkTermCond(BasicBlock * BB) {
     ti->passed = false;
     debug(Abubakar) << "marking test at level " << testStack.size() << " as failed\n";
   }  
+}
+
+void ConstantFolding::updateCM(ProcResult result, Instruction * I) {
+  if(!I->getParent()) // constant expressions etc
+    return;
+  if(!testStack.size())
+    return;
+  TestInfo * ti = testStack[testStack.size() - 1];
+  if(ti->terminated)
+    return;
+  if(ti->InstResults.find(I) != ti->InstResults.end())
+    return;
+  if(bbOps.partOfLoop(I->getParent())) {
+    ti->InstResults[I] = PARTOFLOOP;
+    ti->partOfLoop++;
+    return;
+  }
+
+  ti->InstResults[I] = result;
+  bool found = false;
+  for(unsigned i = 0; i < I->getNumOperands(); i++) {
+    Value * val = I->getOperand(i);
+    if(!isa<Instruction>(val))
+      continue;
+    if(ti->InstResults.find(dyn_cast<Instruction>(val)) != 
+      ti->InstResults.end()) {
+      found = true;
+      break;
+    }
+  }
+  if(!found)
+    ti->indepInsts.push_back(I);
+}
+
+void ConstantFolding::addMemWrite(uint64_t addr, Instruction * I) {
+  if(!testStack.size())
+    return;
+  TestInfo * ti = testStack[testStack.size() - 1];
+  if(ti->terminated)
+    return;
+
+  // if it is already present then the old one will become dead
+  // since stores dont have any uses (hopefully), so we can mark this one 
+  // as dead and old one as live and it will be the same thing as far as 
+  // cost model is concerned
+  if(ti->memWriteAddrs.find(addr) == ti->memWriteAddrs.end()) {
+    ti->memWriteAddrs.insert(addr);
+    updateCM(NOTFOLDED, I);
+  } else
+    updateCM(FOLDED, I);
+}
+
+unsigned ConstantFolding::getNumNodesBelow(Instruction * I, 
+  map<Instruction *, unsigned> & cache, TestInfo * ti) {
+
+  if(cache.find(I) != cache.end())
+    return cache[I];
+
+  // getNumNodesBelow called on a use outside the loop
+  if(ti->InstResults.find(I) == ti->InstResults.end())
+    return 1;
+
+  ProcResult result = ti->InstResults[I];
+  if(result == FOLDED || result == PARTOFLOOP)
+    return 0;
+  unsigned num = 0;
+  for(Use &U : I->uses()) {
+    Instruction * user = dyn_cast<Instruction>(U.getUser());
+    assert(user);
+    if(!bbOps.isVisited(user->getParent()))
+      continue;
+    num += getNumNodesBelow(user, cache, ti);      
+  }      
+  num = num > 0 ? num + 1 : result; // 0 if undecided, 1 if not folded
+  cache[I] = num;
+  return num;
+}
+
+unsigned ConstantFolding::getCost(TestInfo * ti) {
+  unsigned cost = 0;
+  map<Instruction *, unsigned> cache;
+  for(unsigned i = 0; i < ti->indepInsts.size(); i++) {
+    unsigned num = 0;
+    Instruction * I = ti->indepInsts[i];
+    num = getNumNodesBelow(I, cache, ti);
+    cost += num;   
+  }
+  return cost + ti->partOfLoop;
 }
 
 #endif

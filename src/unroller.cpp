@@ -17,6 +17,7 @@
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/raw_ostream.h"
+#include "llvm/Analysis/OptimizationDiagnosticInfo.h"
 #include "llvm/Transforms/Utils/UnrollLoop.h"
 #include "llvm/Transforms/Utils/Cloning.h"
 #include <climits>
@@ -114,25 +115,31 @@ namespace {
         LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*F).getLoopInfo();
         ScalarEvolution * SE = &getAnalysis<ScalarEvolutionWrapperPass>(*F).getSE();
         DominatorTree * DT = new DominatorTree(*F);
+        OptimizationRemarkEmitter ORE(F); 
+        AssumptionCache &AC = getAnalysis<AssumptionCacheTracker>(*F).getAssumptionCache(*F);
         for(Function::iterator b = F->begin(), e = F->end(); b != e; ++b) {
           BasicBlock * BB = &*b;
           if(Loop * L = LI.getLoopFor(BB)) {
-            BasicBlock * ph = L->getLoopPreheader();
-            bool peeled = peelLoop(L, 10, &LI, SE, DT, PreserveLCSSA);
-            if(!peeled) {
-              errs() << "failed to unroll\n";
-              return false;
-            } else {
-              errs() << ph << " is old preheader\n"; 
-              for (Function::iterator f_it = F->begin(), f_ite = F->end(); 
-                f_it != f_ite; ++f_it) {
-                BasicBlock * b = &*f_it;
-                errs() << b << "\n";
-                errs() << *b << "\n";
-              }
-              errs() << "succeeded in unrolling\n";
-              return true;
-            }
+            // BasicBlock * ph = L->getLoopPreheader();
+            int UnrollResult = UnrollLoop(L, 4, 4, true, true, true, 
+            true, false, 1, 0, &LI, SE, DT, &AC, &ORE, PreserveLCSSA);
+            errs() << UnrollResult << "\n";
+            return false;
+            // bool peeled = peelLoop(L, 10, &LI, SE, DT, PreserveLCSSA);
+            // if(!peeled) {
+            //   errs() << "failed to unroll\n";
+            //   return false;
+            // } else {
+            //   errs() << ph << " is old preheader\n"; 
+            //   for (Function::iterator f_it = F->begin(), f_ite = F->end(); 
+            //     f_it != f_ite; ++f_it) {
+            //     BasicBlock * b = &*f_it;
+            //     errs() << b << "\n";
+            //     errs() << *b << "\n";
+            //   }
+            //   errs() << "succeeded in unrolling\n";
+            //   return true;
+            // }
           }
         }     
       }

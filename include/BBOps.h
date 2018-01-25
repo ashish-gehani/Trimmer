@@ -211,7 +211,7 @@ public:
       propagateUR(successor, LI);
     }
   }  
-  BasicBlock * foldToSingleSucc(TerminatorInst * termInst, LoopInfo& LI) {
+  bool foldToSingleSucc(TerminatorInst * termInst, LoopInfo& LI) {
     BasicBlock * single = NULL;
     if(BranchInst *  BI = dyn_cast<BranchInst>(termInst)) {
       if(!BI->isConditional())
@@ -231,7 +231,7 @@ public:
       markSuccessorsAsUR(termInst, single, LI);
       BBInfoMap[termInst->getParent()]->singleSucc = true;
     }
-    return single;
+    return single != NULL;
   }
   bool straightPath(BasicBlock * from, BasicBlock * to, 
   BasicBlockContInfoMap bbc) {

@@ -1,6 +1,8 @@
 using namespace llvm;
 using namespace std;
 
+#include <unistd.h>
+
 #include "InterConstProp.h"
 
 #ifndef UTILS_H
@@ -29,13 +31,6 @@ Value * getArg(Function * func, int index){
   return NULL;  
 }
 
-void replaceAndLog(Value * from, Value * to) {
-  if(!from || !to)
-    return;
-  from->replaceAllUsesWith(to);
-  debug(Abubakar) << "replaced with " << *to << "\n";
-}
-
 void cleanUpfuncBBs(Function * f, BasicBlockContInfoMap bbc,
   ValToRegisterMap& Registers, ValSet valSet) {
   for(auto f_it = f->begin(), f_ite = f->end(); f_it != f_ite; ++f_it) {
@@ -56,7 +51,9 @@ void cleanUpfuncBBs(Function * f, BasicBlockContInfoMap bbc,
 }
 
 bool ignorefunc(Function * F) {
-  if(F->getName() == "printf")
+  if(F->getName() == "printf" || F->getName() == "strncpy")
+    return true;
+  if(F->isIntrinsic())
     return true;
   return false;
 }
@@ -78,7 +75,7 @@ uint64_t ConstantFolding::allocateHeap(uint64_t size) {
 }
 
 uint64_t ConstantFolding::loadMem(uint64_t addr, uint64_t size) {
-  return BasicBlockContexts[currBB]->memory->load(addr, size); 
+  return BasicBlockContexts[currBB]->memory->load(size, addr); 
 }
 
 void ConstantFolding::storeToMem(uint64_t val, uint64_t size, uint64_t addr) {
@@ -103,6 +100,10 @@ void * ConstantFolding::getActualAddr(uint64_t addr) {
 
 bool ConstantFolding::checkConstMem(uint64_t addr, uint64_t size) {
   return BasicBlockContexts[currBB]->memory->checkConstant(addr, size);
+}
+
+bool ConstantFolding::checkConstContigous(uint64_t addr) {
+  return BasicBlockContexts[currBB]->memory->checkConstContigous(addr);
 }
 
 bool ConstantFolding::checkConstStr(uint64_t addr) {
@@ -177,6 +178,9 @@ bool ConstantFolding::replaceOrCloneRegister(Value * from, Value * with) {
 }
 Register * ConstantFolding::getRegister(Value * ptr) {
   
+  if(!ptr)
+    return NULL;
+
   if(Registers.find(ptr) != Registers.end())
     return Registers[ptr];
   Register * reg = NULL;
@@ -492,6 +496,15 @@ bool ConstantFolding::getSingleVal(Value * val, uint64_t& num) {
   return true;
 }
 
+bool ConstantFolding::getStr(uint64_t addr, char *& str) {
+  if(!checkConstContigous(addr)) {
+    debug(Abubakar) << "getStr : ptr not constant\n";
+    return false;   
+  }
+  str = (char *) getActualAddr(addr);
+  return true;
+}
+
 bool ConstantFolding::getStr(Value * ptr, char *& str, uint64_t size) {
   StringRef stringRef;
   if(getConstantStringInfo(ptr, stringRef, 0, false)) {
@@ -509,6 +522,7 @@ bool ConstantFolding::getStr(Value * ptr, char *& str, uint64_t size) {
   }
   return true;
 }
+
 
 bool ConstantFolding::handleConstStr(Value * ptr) {
   StringRef stringRef;
@@ -537,5 +551,75 @@ void ConstantFolding::handleInt(Value * val, uint64_t num) {
   } else if(IntegerType * intTy = dyn_cast<IntegerType>(ty))
     replaceAndLog(val, ConstantInt::get(intTy, num));
 }
+
+void ConstantFolding::replaceAndLog(Value * from, Value * to) {
+  if(!from || !to)
+    return;
+  from->replaceAllUsesWith(to);
+  debug(Abubakar) << "replaced with " << *to << "\n";
+  if(Instruction * I = dyn_cast<Instruction>(from))
+    updateCM(FOLDED, I);
+}
+
+void ConstantFolding::handleGetOpt(CallInst * ci) {
+  string name = ci->getCalledFunction()->getName().str();
+  if(name == "getopt_long" ||
+  name == "getopt_long_only") {
+    errs() << "case not handled " << name << "\n";
+    return;
+  }
+  uint64_t argc;
+  Register * argvReg = getRegister(ci->getOperand(1));
+  Register * optsReg = getRegister(ci->getOperand(2));
+  Register * optindReg = getRegister(module->getNamedGlobal("optind"));
+  if(!getSingleVal(ci->getOperand(0), argc) || !argvReg || 
+  !optsReg || !optindReg || !checkConstContigous(argvReg->getValue()) ||
+  !checkConstContigous(optindReg->getValue()))
+    return;
+
+  uint64_t ptrSize = DL->getTypeAllocSize(argvReg->getType());
+  uint64_t intSize = DL->getTypeAllocSize(ci->getType());
+
+  uint64_t optindAddr = optindReg->getValue();
+  optind = loadMem(optindAddr, intSize);
+
+  char ** argv = (char **) malloc(sizeof(char *) * argc);
+  uint64_t addr = argvReg->getValue();
+  map<char *, uint64_t> realToVirt;
+  for(unsigned i = 0, iter = addr; i < argc; i++, iter += ptrSize) {
+    uint64_t strAddr = loadMem(iter, ptrSize);
+    if(!getStr(strAddr, argv[i]))
+      return;
+    realToVirt[argv[i]] = strAddr;
+  }
+  char * opts = (char *) getActualAddr(optsReg->getValue());  
+  int result = getopt(argc, argv, opts);
+
+  IntegerType * intTy = IntegerType::get(module->getContext(), intSize * 8);
+  ConstantInt * resInt = ConstantInt::get(intTy, result);
+
+  debug(Abubakar) << "getopt returned " << (char) result << "\n";
+  replaceAndLog(ci, resInt);
+
+  if(optarg) {
+    debug(Abubakar) << "optarg is " << optarg << "\n";
+    Register * optargReg = getRegister(module->getNamedGlobal("optarg"));
+    uint64_t optArgAddr = optargReg->getValue();
+    uint64_t strAddr = loadMem(optArgAddr, ptrSize);
+    if(!strAddr) {
+      Type * ty = optargReg->getType()->getContainedType(0);
+      uint64_t charSize = DL->getTypeAllocSize(ty);
+      strAddr = allocateHeap(charSize * 100);
+      storeToMem(strAddr, ptrSize, optArgAddr);
+      debug(Abubakar) << "created new string at " << strAddr << "\n";
+    }
+    char * source = (char *) getActualAddr(strAddr);
+    memcpy(source, optarg, strlen(optarg));
+    source[strlen(optarg)] = '\0';
+  }
+  storeToMem(optind, intSize, optindAddr);
+  for(unsigned i = 0, iter = addr; i < argc; i++, iter += ptrSize)
+    storeToMem(realToVirt[argv[i]], ptrSize, iter);
+} 
 
 #endif

@@ -82,20 +82,20 @@ struct ConstantFolding : public ModulePass {
   ConstantFolding(): ModulePass(ID){}
   void getAnalysisUsage(AnalysisUsage &AU) const;
 
-  void processAllocaInst(AllocaInst *);
-  void processStoreInst(StoreInst *);
-  void processLoadInst(LoadInst *);
-  void processGEPInst(GetElementPtrInst *);
-  void processCallInst(CallInst *);
-  void processMemcpyInst(MemCpyInst *);
-  void processMemSetInst(MemSetInst * memsetInst);
-  void processMallocInst(CallInst *);
-  void processCallocInst(CallInst *);
-  void processBitCastInst(BitCastInst *);  
-  void processPHINode(PHINode *);
-  void processReturnInst(ReturnInst *);
-  void processTermInst(TerminatorInst *);   
-  void tryfolding(Instruction *);
+  ProcResult processAllocaInst(AllocaInst *);
+  ProcResult processStoreInst(StoreInst *);
+  ProcResult processLoadInst(LoadInst *);
+  ProcResult processGEPInst(GetElementPtrInst *);
+  ProcResult processCallInst(CallInst *);
+  ProcResult processMemcpyInst(MemCpyInst *);
+  ProcResult processMemSetInst(MemSetInst * memsetInst);
+  ProcResult processMallocInst(CallInst *);
+  ProcResult processCallocInst(CallInst *);
+  ProcResult processBitCastInst(BitCastInst *);  
+  ProcResult processPHINode(PHINode *);
+  ProcResult processReturnInst(ReturnInst *);
+  ProcResult processTermInst(TerminatorInst *);   
+  ProcResult tryfolding(Instruction *);
 
   void createAnnotationList();
   void createAnnotationList2();
@@ -114,6 +114,7 @@ struct ConstantFolding : public ModulePass {
   Function * addClonedFunction(CallInst *, Function *);
   bool predecessorsVisited(BasicBlock *);
   void handleStringFunction(CallInst *, Function *);
+  void handleGetOpt(CallInst *);
   void replaceUses();
   void markArgsAsNonConst(CallInst* callInst);
   void addGlobals();
@@ -122,8 +123,10 @@ struct ConstantFolding : public ModulePass {
   bool getSingleVal(Value * val, uint64_t& i);
   // bool getStr(Value * ptr, char *& str);
   bool getStr(Value * ptr, char *& str, uint64_t size);
+  bool getStr(uint64_t addr, char *& str);
   bool handleConstStr(Value *);
   void handleInt(Value *, uint64_t);
+  void replaceAndLog(Value *, Value *);
 
   void createNewContext(BasicBlock * BB);
   void cloneContext(BasicBlock *);  
@@ -139,6 +142,7 @@ struct ConstantFolding : public ModulePass {
   void * getActualAddr(uint64_t);
   void setConstMem(bool, uint64_t, uint64_t);
   void setConstContigous(bool, uint64_t);
+  bool checkConstContigous(uint64_t addr);
   uint64_t getRemainingContigousSize(uint64_t);
   bool checkConstMem(uint64_t, uint64_t);
   bool checkConstStr(uint64_t);
@@ -154,7 +158,12 @@ struct ConstantFolding : public ModulePass {
   TestInfo * runtest(Loop * L);
   bool peel(unsigned, BasicBlock *);
   void checkTermCond(BasicBlock *);
+  void updateCM(ProcResult, Instruction *);
+  void addMemWrite(uint64_t, Instruction *);
   bool testTerminated();
+  unsigned getCost(TestInfo * ti);
+  unsigned getNumNodesBelow(Instruction * I,
+  map<Instruction *, unsigned> &, TestInfo *);
 
   virtual bool runOnModule(Module &);
   void runOnFunction(CallInst *, Function *);

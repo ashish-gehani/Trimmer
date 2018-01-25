@@ -13,20 +13,18 @@
 #include <string> 
 #include <unistd.h> 
 #include "parse_args.h"
+#include "debug.h"
 
 using namespace llvm;
 using namespace std;
 
 
-#define debugPrint 0
-
 static cl::opt<string> args("args",
 			    cl::desc("' ' space seperated argument list"));
 GlobalVariable*
 materializeStringLiteral(llvm::Module& m, const char* data) {
-  Constant* ary = llvm::ConstantDataArray::getString(m.getContext(), data, true);
-  GlobalVariable* gv = new GlobalVariable(m, ary->getType(), true, GlobalValue::LinkageTypes::PrivateLinkage, ary, "");
-  gv->setConstant(true);
+  Constant * ary = ConstantDataArray::getString(m.getContext(), StringRef(data), false);
+  GlobalVariable * gv = new GlobalVariable(m, ary->getType(), true, GlobalValue::PrivateLinkage, ary);
   return gv;
 }
  
@@ -51,7 +49,7 @@ namespace {
       vector<string> arguments = parse_args(args);
       int index_count = arguments.size();
       for(unsigned i = 0; i < arguments.size(); i++)
-	if(debugPrint) errs() << arguments[i] << "\n";
+        errs() << arguments[i] << "\n";
       IntegerType* int64Ty = IntegerType::get(M.getContext(), 64);
       IntegerType* int32Ty = IntegerType::get(M.getContext(), 32);
       IntegerType* int8Ty = IntegerType::get(M.getContext(), 8);
@@ -82,50 +80,48 @@ namespace {
 
       vector<Value*> globals; 
       for(unsigned i = 0; i < arguments.size(); i++) {
-	if(debugPrint) errs() << "creating global for " << arguments[i] << "\n";
-	GlobalVariable* gv = materializeStringLiteral(M, arguments[i].c_str());
-	auto* gvT = gv->getType();
-	auto* sty = cast<SequentialType>(gvT);
-	globals.push_back(ir.CreateConstGEP2_32(sty->getElementType(), gv, 0, 0));
+        errs() << "creating global for " << arguments[i] << "\n";
+        GlobalVariable* gv = materializeStringLiteral(M, arguments[i].c_str());
+        PointerType * gvT = gv->getType();
+        globals.push_back(ir.CreateConstGEP2_32(gvT->getElementType(), gv, 0, 0));
       }
 
-      if(debugPrint) errs() << "creating argv_new\n";
+      errs() << "creating argv_new\n";
       GlobalVariable * argv_new = new GlobalVariable(M, argv->getType(), false, 
-						     GlobalValue::ExternalLinkage, nptr1, Twine("__argv_new__"));
-       
-      if(debugPrint) errs() << *argv_new << "\n";
+      		     GlobalValue::ExternalLinkage, nptr1, Twine("__argv_new__"));
+
+      errs() << *argv_new << "\n";
       vector<Value *> args;
       args.push_back(ConstantInt::get(int64Ty, (index_count + 1) * 8)); 
       CallInst * mallocCall =  ir.CreateCall(mf, ArrayRef<Value *>(args));
       Value * bitcast =  ir.CreateBitCast(mallocCall, argv->getType());
       ir.CreateStore(bitcast, argv_new);   
-      unsigned copy_index = 1;
       for (unsigned i = 0; i < arguments.size(); i++) {
-	Value * lptr = ir.CreateLoad(argv_new);
-	Value * newArgptr = ir.CreateConstGEP1_32(lptr, i);
-	if(arguments[i] != "_") {
-	  vector<Value *> args;
-	  ConstantInt * stringSize = ConstantInt::get(int64Ty, 100);
-	  args.push_back(stringSize);
-	  CallInst * mallocCall =  ir.CreateCall(mf, ArrayRef< Value *>(args));
-	  ir.CreateStore(mallocCall, newArgptr); 
-	  Value * destPtr = ir.CreateLoad(newArgptr);
-	  if(debugPrint) errs() << arguments[i] << " " << i << "\n";
-	  std::vector<Value*> functionArgs;
-	  functionArgs.push_back(destPtr);
-	  functionArgs.push_back(globals[i]);
-	  functionArgs.push_back(stringSize);
-	  functionArgs.push_back(align);
-	  functionArgs.push_back(isvolatile);
-	  ir.CreateCall(mcf, ArrayRef<Value*>(functionArgs));
-	}
-	else {
-	  if(debugPrint) errs() << "_" << i << "\n";
-	  if(debugPrint) errs() << *argv << "\n";
-	  Value* oldArgptr = ir.CreateConstGEP1_32(argv, i);
-	  Value* load = ir.CreateLoad(oldArgptr);   
-	  ir.CreateStore(load, newArgptr);                             
-	}
+        Value * lptr = ir.CreateLoad(argv_new);
+        Value * newArgptr = ir.CreateConstGEP1_32(lptr, i);
+        if(arguments[i] != "_") {
+          vector<Value *> args;
+          ConstantInt * stringSize = ConstantInt::get(int64Ty, 100);
+          args.push_back(stringSize);
+          CallInst * mallocCall =  ir.CreateCall(mf, ArrayRef< Value *>(args));
+          ir.CreateStore(mallocCall, newArgptr); 
+          Value * destPtr = ir.CreateLoad(newArgptr);
+          errs() << arguments[i] << " " << i << "\n";
+          std::vector<Value*> functionArgs;
+          functionArgs.push_back(destPtr);
+          functionArgs.push_back(globals[i]);
+          functionArgs.push_back(stringSize);
+          functionArgs.push_back(align);
+          functionArgs.push_back(isvolatile);
+          ir.CreateCall(mcf, ArrayRef<Value*>(functionArgs));
+        }
+        else {
+          errs() << "_" << i << "\n";
+          errs() << *argv << "\n";
+          Value* oldArgptr = ir.CreateConstGEP1_32(argv, i);
+          Value* load = ir.CreateLoad(oldArgptr);   
+          ir.CreateStore(load, newArgptr);                             
+        }
       }
       Value * lptr = ir.CreateLoad(argv_new);
       Value* argptr = ir.CreateConstGEP1_32(lptr, arguments.size());
