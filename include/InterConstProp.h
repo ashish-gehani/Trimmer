@@ -115,6 +115,8 @@ struct ConstantFolding : public ModulePass {
   bool predecessorsVisited(BasicBlock *);
   void handleStringFunction(CallInst *, Function *);
   void handleGetOpt(CallInst *);
+  void handleAtoi(CallInst *);
+  bool handleLongArgs(CallInst *, option *, int *&);
   void replaceUses();
   void markArgsAsNonConst(CallInst* callInst);
   void addGlobals();

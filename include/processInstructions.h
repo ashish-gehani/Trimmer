@@ -327,14 +327,16 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
   }
   string name = calledFunction->getName().str();
   /* specialize for functions defined in string.h e.g strcmp, strchr */
-  if(isStringFunction(calledFunction)) { 
-    handleStringFunction(callInst, calledFunction);
-  } else if(name.size() >= 6 && name.substr(0, 6) == "getopt") {
+  if(name.size() >= 6 && name.substr(0, 6) == "getopt") {
     handleGetOpt(callInst);
+  } else if(name == "atoi") {
+    handleAtoi(callInst);
   } else if(name == "malloc") {
     processMallocInst(callInst);
   } else if(name == "calloc") {
     processCallocInst(callInst);
+  } else if(isStringFunction(calledFunction)) { 
+    handleStringFunction(callInst, calledFunction);
   } else if(calledFunction->isDeclaration()) {
     markArgsAsNonConst(callInst);
     return NOTFOLDED;

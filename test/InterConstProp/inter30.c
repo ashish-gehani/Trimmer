@@ -5,8 +5,7 @@
 #include <string.h>
 
 struct Config {
-  char area, perimeter;
-  int length, breadth;
+  int area, perimeter, length, breadth;
 };
 
 void branchPruned(struct Config config) {
@@ -50,4 +49,5 @@ int main() {
     }
   }
   branchPruned(config);
+  printf("%d\n", optind);
 }

@@ -2,7 +2,7 @@ using namespace llvm;
 using namespace std;
 
 #include <unistd.h>
-
+#include <getopt.h>
 #include "InterConstProp.h"
 
 #ifndef UTILS_H
@@ -129,7 +129,8 @@ void ConstantFolding::addGlobalRegister(Value * val, Type * ty, uint64_t toStore
 }
 
 void ConstantFolding::addRegister(Value * val, Type * ty, uint64_t toStore) {
-  funcValStack[funcValStack.size() - 1].insert(val);
+  if(funcValStack.size())
+    funcValStack[funcValStack.size() - 1].insert(val);
   Registers[val] = new Register(ty, toStore);
 }
 
@@ -183,17 +184,20 @@ Register * ConstantFolding::getRegister(Value * ptr) {
 
   if(Registers.find(ptr) != Registers.end())
     return Registers[ptr];
+  Instruction * I = NULL;
   Register * reg = NULL;
-  if(ConstantExpr * ce = dyn_cast<ConstantExpr>(ptr)) {
-    if(Instruction * I = ce->getAsInstruction()) { 
-      runOnInst(I);
-      if(Registers.find(I) != Registers.end()) {
-        reg = Registers[I];
-        Registers[ptr] = new Register(*reg);
-      }
-      I->dropAllReferences();
+  if(ConstantExpr * ce = dyn_cast<ConstantExpr>(ptr))
+    I = ce->getAsInstruction();
+  else 
+    I = dyn_cast<Instruction>(ptr);
+  if(I && !I->getParent()) { // if it has a parent then it must have been visited 
+    runOnInst(I);
+    if(Registers.find(I) != Registers.end()) {
+      reg = Registers[I];
+      Registers[ptr] = new Register(*reg);
     }
-  }  
+    I->dropAllReferences();
+  }
   return reg;
 }
 
@@ -291,13 +295,17 @@ void ConstantFolding::initializeGlobal(uint64_t addr, Constant * CC) {
     /* 3. points to something which is not in memory */
     Instruction * I = dyn_cast<ConstantExpr>(CE)->getAsInstruction();
     assert(I);
-    assert(isa<GetElementPtrInst>(I));
     StringRef stringRef;
     if(handleConstStr(I->getOperand(0))) {
       uint64_t newAddr = getRegister(I->getOperand(0))->getValue();
       int size = DL->getTypeAllocSize(CE->getType());
       storeToMem(newAddr, size, addr);      
       debug(Abubakar) << "storing address " << newAddr << " at pointer " << addr << " size " << size << "\n";
+    } else if(Register * reg = getRegister(I)) {
+      uint64_t newAddr = reg->getValue();
+      int size = DL->getTypeAllocSize(CE->getType());
+      storeToMem(newAddr, size, addr);
+      debug(Abubakar) << "storing address " << newAddr << " at pointer " << addr << " size " << size << "\n";                  
     }
     I->dropAllReferences();
   } else {
@@ -324,7 +332,7 @@ void ConstantFolding::addGlobals() {
     uint64_t size = DL->getTypeAllocSize(contTy);
     uint64_t addr = allocateStack(size);
     debug(Abubakar) << "addGlobal : size " << size << " at address " << addr << "\n";
-    addGlobalRegister(gv, contTy, addr);
+    addRegister(gv, contTy, addr);
     if(gv->hasInitializer()) 
       initializeGlobal(addr, gv->getInitializer());
   }
@@ -561,10 +569,52 @@ void ConstantFolding::replaceAndLog(Value * from, Value * to) {
     updateCM(FOLDED, I);
 }
 
+bool ConstantFolding::handleLongArgs(CallInst * callInst, option * long_opts,
+  int *& long_index) {
+  Value * val = callInst->getOperand(3);
+  Register * reg = getRegister(val);
+  if(!reg) {
+    debug(Abubakar) << "long_opts not found\n";
+    return false;
+  }
+  uint64_t addr = reg->getValue();
+  if(!checkConstContigous(addr)) {
+    debug(Abubakar) << "long_opts not constant\n";
+    return false;
+  }
+  unsigned i = 0;
+  while(1) {
+    uint64_t nameAddr = loadMem(addr, 8);
+    if(!nameAddr)
+      break;
+    long_opts[i].name = (char *) getActualAddr(nameAddr);
+    long_opts[i].has_arg = loadMem(addr + 8, 4);
+    uint64_t flagAddr = loadMem(addr + 12, 8);
+    long_opts[i].flag = !flagAddr ? 0 : (int *) getActualAddr(flagAddr);
+    long_opts[i].val = loadMem(addr + 20, 4);
+    if(!long_opts[i].name)
+      break;
+    i++;
+    addr += 32;
+  }
+  Value * indexVal = callInst->getOperand(4);
+  reg = getRegister(indexVal);
+  if(!reg) {
+    debug(Abubakar) << "long_index not found\n";
+    return false;
+  }
+  if(!checkConstContigous(reg->getValue())) {
+    debug(Abubakar) << "long_index not constant\n";
+    return false;
+  }
+  long_index = (int *) getActualAddr(reg->getValue());  
+  memset((char *) &long_opts[i], '\0', sizeof(option)); 
+  return true;
+}
+
 void ConstantFolding::handleGetOpt(CallInst * ci) {
   string name = ci->getCalledFunction()->getName().str();
-  if(name == "getopt_long" ||
-  name == "getopt_long_only") {
+  if(name == "getopt_long_only") {
     errs() << "case not handled " << name << "\n";
     return;
   }
@@ -574,26 +624,37 @@ void ConstantFolding::handleGetOpt(CallInst * ci) {
   Register * optindReg = getRegister(module->getNamedGlobal("optind"));
   if(!getSingleVal(ci->getOperand(0), argc) || !argvReg || 
   !optsReg || !optindReg || !checkConstContigous(argvReg->getValue()) ||
-  !checkConstContigous(optindReg->getValue()))
+  !checkConstContigous(optindReg->getValue())) {
+    debug(Abubakar) << "conditions not satisfied\n";
     return;
+  }
 
   uint64_t ptrSize = DL->getTypeAllocSize(argvReg->getType());
   uint64_t intSize = DL->getTypeAllocSize(ci->getType());
 
   uint64_t optindAddr = optindReg->getValue();
   optind = loadMem(optindAddr, intSize);
-
   char ** argv = (char **) malloc(sizeof(char *) * argc);
   uint64_t addr = argvReg->getValue();
   map<char *, uint64_t> realToVirt;
   for(unsigned i = 0, iter = addr; i < argc; i++, iter += ptrSize) {
     uint64_t strAddr = loadMem(iter, ptrSize);
-    if(!getStr(strAddr, argv[i]))
+    if(!getStr(strAddr, argv[i])) {
+      debug(Abubakar) << "updating argv\n";
       return;
+    }
     realToVirt[argv[i]] = strAddr;
   }
-  char * opts = (char *) getActualAddr(optsReg->getValue());  
-  int result = getopt(argc, argv, opts);
+  char * opts = (char *) getActualAddr(optsReg->getValue());
+  int result;
+  if(name == "getopt_long") { 
+    option * long_opts = (option *) malloc(sizeof(option) * 100);
+    int * long_index;
+    if(!handleLongArgs(ci, long_opts, long_index))
+      return;
+    result = getopt_long(argc, argv, opts, long_opts, long_index);
+  } else 
+    result = getopt(argc, argv, opts);
 
   IntegerType * intTy = IntegerType::get(module->getContext(), intSize * 8);
   ConstantInt * resInt = ConstantInt::get(intTy, result);
@@ -621,5 +682,22 @@ void ConstantFolding::handleGetOpt(CallInst * ci) {
   for(unsigned i = 0, iter = addr; i < argc; i++, iter += ptrSize)
     storeToMem(realToVirt[argv[i]], ptrSize, iter);
 } 
+
+void ConstantFolding::handleAtoi(CallInst * callInst) {
+  Value * ptr = callInst->getArgOperand(0);
+  Register * reg = getRegister(ptr);
+  if(!reg) {
+    debug(Abubakar) << "handleAtoi : not found in map\n";
+    return;
+  }
+  if(!checkConstContigous(reg->getValue())) {
+    debug(Abubakar) << "handleAtoi : not constant\n";
+    return;
+  }
+  char * str = (char *) getActualAddr(reg->getValue());
+  int result = atoi(str);
+  IntegerType * int32Ty = IntegerType::get(module->getContext(), 32);
+  replaceAndLog(callInst, ConstantInt::get(int32Ty, result)); 
+}
 
 #endif
