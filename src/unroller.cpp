@@ -121,8 +121,9 @@ namespace {
           BasicBlock * BB = &*b;
           if(Loop * L = LI.getLoopFor(BB)) {
             // BasicBlock * ph = L->getLoopPreheader();
-            int UnrollResult = UnrollLoop(L, 4, 4, true, true, true, 
-            true, false, 1, 0, &LI, SE, DT, &AC, &ORE, PreserveLCSSA);
+            errs() << "unrolling\n";
+            int UnrollResult = UnrollLoop(L, 4, 4, true, false, false, 
+            false, false, 0, 0, &LI, SE, DT, &AC, &ORE, PreserveLCSSA);
             errs() << UnrollResult << "\n";
             return false;
             // bool peeled = peelLoop(L, 10, &LI, SE, DT, PreserveLCSSA);
