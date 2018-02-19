@@ -118,24 +118,23 @@ namespace {
           continue;
         errs() << "running on " << F->getName() << "\n";
         LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*F).getLoopInfo();
-        ScalarEvolution * SE = &getAnalysis<ScalarEvolutionWrapperPass>(*F).getSE();
-        DominatorTree * DT = new DominatorTree(*F);
+        ScalarEvolution *SE = &getAnalysis<ScalarEvolutionWrapperPass>(*F).getSE();
+        DominatorTree *DT = new DominatorTree(*F);
         OptimizationRemarkEmitter ORE(F); 
         AssumptionCache &AC = getAnalysis<AssumptionCacheTracker>(*F).getAssumptionCache(*F);
         for(Function::iterator b = F->begin(), e = F->end(); b != e; ++b) {
           BasicBlock * BB = &*b;
           if(Loop * L = LI.getLoopFor(BB)) {
-            // BasicBlock * ph = L->getLoopPreheader();
             errs() << "unrolling\n";
+            // CHANGE: Passing NULL for SE
 	    int UnrollResult = UnrollLoop(L, 4, 4, true, false, false, 
-             false, false, 0, 0, &LI, SE, DT, &AC, &ORE, PreserveLCSSA);
-
-            //int UnrollResult = UnrollLoop(L, 4, 4, false, false, 
-            //0, &LI, SE, DT, &AC, PreserveLCSSA);
-
+                                          false, false, 0, 0, &LI, NULL, DT, &AC, &ORE, PreserveLCSSA);
+         
             errs() << UnrollResult << "\n";
             return false;
-            // bool peeled = peelLoop(L, 10, &LI, SE, DT, PreserveLCSSA);
+             
+            // CHANGE: Passing NULL for SE
+            // bool peeled = peelLoop(L, 2, &LI, NULL, DT, PreserveLCSSA);
             // if(!peeled) {
             //   errs() << "failed to unroll\n";
             //   return false;
