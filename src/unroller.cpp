@@ -1,3 +1,5 @@
+
+
 #include "llvm/Transforms/Scalar.h"
 #include "llvm/ADT/SetVector.h"
 #include "llvm/Analysis/GlobalsModRef.h"
@@ -73,6 +75,7 @@ namespace {
         VMap[BB] = clone;
         clonedBlocks.push_back(clone);
       }
+
       for(unsigned i = 0; i < clonedBlocks.size(); i++) {
         BasicBlock * clone = clonedBlocks[i];
         for(auto inst = clone->begin(); inst != clone->end(); inst++) {
@@ -97,12 +100,14 @@ namespace {
           }
         }
       }
+
       errs() << "--------------- cloned blocks ---------------\n";
       for(unsigned i = 0; i < clonedBlocks.size(); i++)
         errs() << *clonedBlocks[i] << "\n";
       errs() << "                *************                 \n";
       return clonedBlocks;
     }
+
     bool runOnModule(Module& M) override {
       errs() << "running unroller\n";
       bool PreserveLCSSA = mustPreserveAnalysisID(LCSSAID);
@@ -122,8 +127,12 @@ namespace {
           if(Loop * L = LI.getLoopFor(BB)) {
             // BasicBlock * ph = L->getLoopPreheader();
             errs() << "unrolling\n";
-            int UnrollResult = UnrollLoop(L, 4, 4, true, false, false, 
-            false, false, 0, 0, &LI, SE, DT, &AC, &ORE, PreserveLCSSA);
+	    int UnrollResult = UnrollLoop(L, 4, 4, true, false, false, 
+             false, false, 0, 0, &LI, SE, DT, &AC, &ORE, PreserveLCSSA);
+
+            //int UnrollResult = UnrollLoop(L, 4, 4, false, false, 
+            //0, &LI, SE, DT, &AC, PreserveLCSSA);
+
             errs() << UnrollResult << "\n";
             return false;
             // bool peeled = peelLoop(L, 10, &LI, SE, DT, PreserveLCSSA);
@@ -144,6 +153,7 @@ namespace {
           }
         }     
       }
+
       return false;
     }
   };
