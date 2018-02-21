@@ -56,7 +56,8 @@ namespace {
       AU.addRequiredID(LCSSAID);
       AU.addPreservedID(LCSSAID);
       AU.addRequired<ScalarEvolutionWrapperPass>();
-      AU.addPreserved<ScalarEvolutionWrapperPass>();
+      // NOTE: SCEV is not preserved by this Pass - it is modified
+      //AU.addPreserved<ScalarEvolutionWrapperPass>();
       AU.addRequired<TargetTransformInfoWrapperPass>();
       // FIXME: Loop unroll requires LCSSA. And LCSSA requires dom info.
       // If loop unroll does not preserve dom info then LCSSA pass on next
@@ -113,7 +114,7 @@ namespace {
       bool PreserveLCSSA = mustPreserveAnalysisID(LCSSAID);
       for (Module::iterator mit = M.getFunctionList().begin(); 
         mit != M.getFunctionList().end(); ++mit) {
-        Function * F = &*mit;
+        Function *F = &*mit;
         if(F->isDeclaration())
           continue;
         errs() << "running on " << F->getName() << "\n";
@@ -122,18 +123,29 @@ namespace {
         DominatorTree *DT = new DominatorTree(*F);
         OptimizationRemarkEmitter ORE(F); 
         AssumptionCache &AC = getAnalysis<AssumptionCacheTracker>(*F).getAssumptionCache(*F);
+        TargetLibraryInfo *TLI = &getAnalysis<TargetLibraryInfoWrapperPass>(*F).getTLI();
+        ScalarEvolution SE_new(*F, *TLI, AC, *DT, LI);
+
+
         for(Function::iterator b = F->begin(), e = F->end(); b != e; ++b) {
           BasicBlock * BB = &*b;
           if(Loop * L = LI.getLoopFor(BB)) {
+
+            BasicBlock *latchBlock = L->getLoopLatch();
             errs() << "unrolling\n";
+            // ~This works   
+	    errs() << SE_new.getSmallConstantTripCount(L, latchBlock) << "\n";
+            // ~This does NOT work 
+	    errs() << SE_new.getSmallConstantTripCount(L) << "\n";
+
+
             // CHANGE: Passing NULL for SE
 	    int UnrollResult = UnrollLoop(L, 4, 4, true, false, false, 
-                                          false, false, 0, 0, &LI, NULL, DT, &AC, &ORE, PreserveLCSSA);
+                                          false, false, 0, 0, &LI, &SE_new, DT, &AC, &ORE, PreserveLCSSA);
          
             errs() << UnrollResult << "\n";
             return false;
              
-
             // CHANGE: Passing NULL for SE
             // bool peeled = peelLoop(L, 2, &LI, NULL, DT, PreserveLCSSA);
             // if(!peeled) {
