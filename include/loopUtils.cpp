@@ -97,7 +97,7 @@ TestInfo * ConstantFolding::runtest(Loop * L, LoopOp & op, unsigned & tripCount)
   LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*toRun).getLoopInfo();
   Loop * newLoop = LI.getLoopFor(dyn_cast<BasicBlock>(hdrClone));
 
-  TestInfo * ti = new TestInfo(newLoop, op);
+  TestInfo * ti = new TestInfo(newLoop, getTestInst(LOOPTERM), op);
   testStack.push_back(ti);
   BasicBlock * entry = newLoop->getLoopPreheader();
   duplicateContext(entry);
@@ -162,7 +162,7 @@ void ConstantFolding::checkTermCond(BasicBlock * BB) {
   TestInfo * ti = testStack[testStack.size() - 1];
   if(ti->terminated)
     return;
-  if(ti->termBB == BB) {
+  if(ti->checkExitBB(BB)) {
     ti->terminated = true;
     ti->passed = true;
     debug(Abubakar) << "marking test at level " << testStack.size() << " as passed\n";

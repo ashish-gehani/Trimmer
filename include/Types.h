@@ -6,6 +6,8 @@ using namespace llvm;
 
 #include "mem.h"
 
+#define LOOPTERM "__loop_termination_test__"
+
 enum ProcResult {
   UNDECIDED,
   NOTFOLDED,
@@ -91,21 +93,32 @@ struct TestInfo {
   bool terminated, passed;
   BasicBlock * headerBB; // if we fold to the exit then loopPeeling was succesful
                                    // if we reach the header then it was unsuccesful                 
-  BasicBlock * termBB;
   vector<Instruction *> indepInsts;
   map<Instruction *, ProcResult> InstResults; 
   unsigned numOrigInsts, partOfLoop;
-  TestInfo(Loop * L, LoopOp op) {
+  TestInfo(Loop * L, CallInst * testCall, LoopOp op) {
     terminated = passed = false;
     headerBB = op == PEELOP ? L->getHeader() : NULL;
-    termBB = L->getUniqueExitBlock();
-
+    BasicBlock * exitBB = L->getUniqueExitBlock();
+    Instruction * first = &*exitBB->begin();
+    if(isa<TerminatorInst>(first)) testCall->insertBefore(first);
+    else testCall->insertAfter(first);
     numOrigInsts = partOfLoop = 0;
     for(auto block : L->blocks()) {
       BasicBlock * BB = &*block;
       numOrigInsts += distance(BB->begin(), BB->end());
     }  
-  }  
+  } 
+  bool checkExitBB(BasicBlock * BB) {
+    for(BasicBlock::iterator it = BB->begin(); it != BB->end(); it++) {
+      Instruction * I = &*it;
+      if(CallInst * ci = dyn_cast<CallInst>(I)) {
+        if(ci->getCalledFunction()->getName().str() == LOOPTERM)
+          return true;
+      }
+    }
+    return false;  
+  }
 };
 typedef map<BasicBlock *, ContextInfo *> BasicBlockContInfoMap;
 typedef map<Function *, ContextInfo *> FuncContInfoMap;
