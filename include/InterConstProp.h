@@ -29,6 +29,7 @@
 #include "llvm/Analysis/ScalarEvolution.h"
 #include "llvm/Analysis/ScalarEvolutionExpressions.h"
 #include "llvm/Analysis/TargetTransformInfo.h"
+#include "llvm/Analysis/OptimizationDiagnosticInfo.h"
 
 #include <sys/stat.h>
 #include <map>
@@ -58,7 +59,7 @@ struct ConstantFolding : public ModulePass {
   static char ID;  
   Module * module;  
   BBOps bbOps;
-  const TargetLibraryInfo *TLI;
+  TargetLibraryInfo * TLI;
   DataLayout * DL;
   DominatorTree * DT;
   CallGraph * CG;
@@ -156,12 +157,12 @@ struct ConstantFolding : public ModulePass {
   bool replaceOrCloneRegister(Value *, Value *);
   Register * getRegister(Value *);
 
-  bool simplifyLoop(BasicBlock *);
-  TestInfo * runtest(Loop * L);
-  bool peel(unsigned, BasicBlock *);
+  LoopOp simplifyLoop(BasicBlock *);
+  TestInfo * runtest(Loop *, LoopOp &, unsigned &);
+  bool runOp(BasicBlock *, LoopOp, unsigned);
+  LoopOp getOp(BasicBlock *, unsigned &);
   void checkTermCond(BasicBlock *);
   void updateCM(ProcResult, Instruction *);
-  void addMemWrite(uint64_t, Instruction *);
   bool testTerminated();
   unsigned getCost(TestInfo * ti);
   unsigned getNumNodesBelow(Instruction * I,

@@ -211,7 +211,7 @@ void ConstantFolding::cloneContext(BasicBlock * to) {
 
 void ConstantFolding::initializeBBInfo(BasicBlock * BB) {
   LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*BB->getParent()).getLoopInfo();
-  bbOps.initialize(BB, LI);
+  bbOps.addBB(BB, LI);
 }
 
 void ConstantFolding::createNewContext(BasicBlock * BB) {

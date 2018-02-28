@@ -34,7 +34,7 @@ using namespace std;
 #define debugPrint 0
 
 static cl::opt<string> args("args",
-			    cl::desc("' ' space seperated argument list"));
+          cl::desc("' ' space seperated argument list"));
 
 struct UnrollInfo {
   TerminatorInst * from;
@@ -130,6 +130,7 @@ namespace {
         for(Function::iterator b = F->begin(), e = F->end(); b != e; ++b) {
           BasicBlock * BB = &*b;
           if(Loop * L = LI.getLoopFor(BB)) {
+<<<<<<< HEAD
 
             BasicBlock *latchBlock = L->getLoopLatch();
             errs() << "unrolling\n";
@@ -143,6 +144,28 @@ namespace {
 	    int UnrollResult = UnrollLoop(L, 4, 4, true, false, false, 
                                           false, false, 0, 0, &LI, &SE_new, DT, &AC, &ORE, PreserveLCSSA);
          
+=======
+            for(Function::iterator bi = F->begin(), e = F->end(); bi != e; ++bi) {
+              BasicBlock * bb = &*bi;
+              errs() << bb << " " << *bb << "\n";
+            }
+            BasicBlock *latchBlock = L->getLoopLatch();
+            errs() << "unrolling\n";
+            // ~This works   
+      errs() << SE_new.getSmallConstantTripCount(L, latchBlock) << "\n";
+            // ~This does NOT work 
+      errs() << SE_new.getSmallConstantTripCount(L) << "\n";
+
+      errs() << "---------------------------------\n";
+            // CHANGE: Passing NULL for SE
+      int UnrollResult = UnrollLoop(L, 4, 4, true, false, false, 
+                                          false, false, 0, 0, &LI, &SE_new, DT, &AC, &ORE, PreserveLCSSA);
+         
+      for(Function::iterator bi = F->begin(), e = F->end(); bi != e; ++bi) {
+        BasicBlock * bb = &*bi;
+        errs() << bb << " " << *bb << "\n";
+      }
+>>>>>>> temp
             errs() << UnrollResult << "\n";
             return false;
              
