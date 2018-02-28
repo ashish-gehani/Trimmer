@@ -131,6 +131,7 @@ struct ConstantFolding : public ModulePass {
   void handleInt(Value *, uint64_t);
   void replaceAndLog(Value *, Value *);
 
+  CallInst * getTestInst(string name);
   void createNewContext(BasicBlock * BB);
   void cloneContext(BasicBlock *);  
   void duplicateContext(BasicBlock *);

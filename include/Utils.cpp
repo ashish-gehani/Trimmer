@@ -58,6 +58,19 @@ bool ignorefunc(Function * F) {
   return false;
 }
 
+CallInst * ConstantFolding::getTestInst(string name) {
+  Value * val = module->getNamedValue(name);
+  if(!val) {
+    vector<Type *> ArgTypes;
+    Type * voidType = Type::getVoidTy(module->getContext());
+    FunctionType * FTy = FunctionType::get(voidType, ArgTypes, false);     
+    val = Function::Create(FTy, Function::ExternalLinkage, name, module);
+  }
+  vector<Value *> args;
+  CallInst * testCall = CallInst::Create(dyn_cast<Function>(val), args);
+  return testCall;
+}
+
 ContextInfo * ConstantFolding::getCurrContext() {
   return BasicBlockContexts[currBB];
 }
