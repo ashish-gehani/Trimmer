@@ -125,7 +125,6 @@ ProcResult ConstantFolding::processStoreInst(StoreInst * si) {
     return NOTFOLDED;
   }
   storeToMem(val, size, addr);   
-  addMemWrite(addr, si);
   return UNDECIDED;
 }
 
@@ -269,7 +268,7 @@ ProcResult ConstantFolding::processTermInst(TerminatorInst * termInst) {
 
     BasicBlock * succ = termInst->getSuccessor(index);
     
-    if(!bbOps.visitBB(succ, LI))
+    if(!bbOps.visitBB(succ, LI)) 
       continue;
 
     if(bbOps.needToduplicate(succ, currBB, BasicBlockContexts)) {
@@ -289,7 +288,7 @@ ProcResult ConstantFolding::processTermInst(TerminatorInst * termInst) {
     if(testTerminated()) // test terminated in the  term condition above
       break;
 
-    if(simplifyLoop(succ)) {
+    if(simplifyLoop(succ) == PEELOP) {
       assert(termInst->getNumSuccessors() == 1); // has to be a preheader
       processTermInst(currBB->getTerminator());
       terminateBB = true;

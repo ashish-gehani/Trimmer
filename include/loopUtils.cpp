@@ -4,6 +4,7 @@ using namespace std;
 #include "InterConstProp.h"
 #include "Utils.cpp"
 
+
 #ifndef LOOP_UTILS_H_
 #define LOOP_UTILS_H_
 
@@ -39,33 +40,64 @@ static bool canPeel(Loop *L) {
   return true;
 }
 
-bool ConstantFolding::peel(unsigned tripCount, BasicBlock * header) {
+LoopOp ConstantFolding::getOp(BasicBlock * header, unsigned & tripCount) {
   Function * F = header->getParent();
   LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*F).getLoopInfo();
-  ScalarEvolution * SE = &getAnalysis<ScalarEvolutionWrapperPass>(*F).getSE();
   DominatorTree * DT = new DominatorTree(*F);
+  AssumptionCache &AC = getAnalysis<AssumptionCacheTracker>(*F).getAssumptionCache(*F);
+  ScalarEvolution SE(*F, *TLI, AC, *DT, LI);
   Loop * L = LI.getLoopFor(dyn_cast<BasicBlock>(header));
-  if(!canPeel(L)) {
-    debug(Abubakar) << "failed in peeling\n";
-    return false;
+  tripCount =  SE.getSmallConstantTripCount(L);
+  if(!tripCount) {
+    tripCount = DEFAULT_TRIP_COUNT;
+    return PEELOP;
   }
-  bool peeled = peelLoop(L, tripCount, &LI, SE, DT, PreserveLCSSA);
-  assert(peeled);
-  debug(Abubakar) << "succeeded in peeling\n";
+  return UNROLLOP;
+}
+
+bool ConstantFolding::runOp(BasicBlock * header, LoopOp op, 
+                      unsigned tripCount) {
+  if(!op)
+    return false;
+  Function * F = header->getParent();
+  LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*F).getLoopInfo();
+  DominatorTree * DT = new DominatorTree(*F);
+  AssumptionCache &AC = getAnalysis<AssumptionCacheTracker>(*F).getAssumptionCache(*F);
+  ScalarEvolution SE(*F, *TLI, AC, *DT, LI);
+  Loop * L = LI.getLoopFor(dyn_cast<BasicBlock>(header));
+  if(op == PEELOP) {
+    if(!canPeel(L)) {
+      debug(Abubakar) << "failed in peeling\n";
+      return false;
+    }
+    bool peeled = peelLoop(L, tripCount, &LI, &SE, DT, PreserveLCSSA);
+    assert(peeled);
+    debug(Abubakar) << "succeeded in peeling for " << tripCount << " iterations\n";
+  } else {
+    OptimizationRemarkEmitter ORE(F); 
+    int UnrollResult = UnrollLoop(L, tripCount, tripCount, true, false, false, 
+                  false, false, 0, 0, &LI, &SE, DT, &AC, &ORE, PreserveLCSSA);
+    if(!UnrollResult) {
+      debug(Abubakar) << "failed in unrolling\n";
+      return false;
+    }
+    debug(Abubakar) << "succeeded in unrolling for " << tripCount << " iterations\n";
+  }
   return true;
 }
 
-TestInfo * ConstantFolding::runtest(Loop * L) {
+TestInfo * ConstantFolding::runtest(Loop * L, LoopOp & op, unsigned & tripCount) {
 
   ValueToValueMapTy vmap;
   Function * toRun = addClonedFunction(currfn, vmap);
   BasicBlock * header = L->getHeader();
+  BasicBlock * hdrClone = dyn_cast<BasicBlock>(vmap[header]); 
+  op = getOp(hdrClone, tripCount);
 
   LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*toRun).getLoopInfo();
-  BasicBlock * hdrClone = dyn_cast<BasicBlock>(vmap[header]);
   Loop * newLoop = LI.getLoopFor(dyn_cast<BasicBlock>(hdrClone));
 
-  TestInfo * ti = new TestInfo(newLoop);
+  TestInfo * ti = new TestInfo(newLoop, op);
   testStack.push_back(ti);
   BasicBlock * entry = newLoop->getLoopPreheader();
   duplicateContext(entry);
@@ -76,7 +108,7 @@ TestInfo * ConstantFolding::runtest(Loop * L) {
   for(auto val : oldValSet)
     addRegister(vmap[val], Registers[val]);
 
-  if(!peel(DEFAULT_TRIP_COUNT, hdrClone)) {
+  if(!runOp(hdrClone, op, tripCount)) {
     pop_back(testStack);
     cleanUpfuncBBs(toRun, BasicBlockContexts, Registers, pop_back(funcValStack));
     return ti; // the default value for ti->passed is false
@@ -91,28 +123,30 @@ TestInfo * ConstantFolding::runtest(Loop * L) {
   return pop_back(testStack);
 }
 
-bool ConstantFolding::simplifyLoop(BasicBlock * BB) {
+LoopOp ConstantFolding::simplifyLoop(BasicBlock * BB) {
   if(testStack.size()) // for now dont run a test from within a test.
-    return false;
+    return NOOP;
 	if(!bbOps.partOfLoop(BB)) {
-  	return false;	
+  	return NOOP;	
   }
   LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();
   Loop * L = LI.getLoopFor(BB);
-  if(BB != L->getHeader()) {
-  	return false;
-  }
+  if(BB != L->getHeader())
+  	return NOOP;
   debug(Abubakar) << "running test\n";
-  TestInfo * ti = runtest(L);
-  // errs() << getCost(ti) << "\n";
+  LoopOp op;
+  unsigned tripCount;
+  TestInfo * ti = runtest(L, op, tripCount);
   if(!ti->passed) {
     debug(Abubakar) << "test failed\n";
-    return false;  
-  } else {
-    debug(Abubakar) << "test passed : peeling loop\n";
-    peel(DEFAULT_TRIP_COUNT, BB);
+    return NOOP;  
   }
-  return true;
+  debug(Abubakar) << "test passed : modifying loop\n";
+  runOp(BB, op, tripCount);
+  LoopInfo &newLI = getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();
+  bbOps.recomputeInfo(currfn, newLI);
+
+  return op;
 }
 
 bool ConstantFolding::testTerminated() {
@@ -128,7 +162,7 @@ void ConstantFolding::checkTermCond(BasicBlock * BB) {
   TestInfo * ti = testStack[testStack.size() - 1];
   if(ti->terminated)
     return;
-  if(ti->exitBB == BB) {
+  if(ti->termBB == BB) {
     ti->terminated = true;
     ti->passed = true;
     debug(Abubakar) << "marking test at level " << testStack.size() << " as passed\n";
@@ -169,24 +203,6 @@ void ConstantFolding::updateCM(ProcResult result, Instruction * I) {
   }
   if(!found)
     ti->indepInsts.push_back(I);
-}
-
-void ConstantFolding::addMemWrite(uint64_t addr, Instruction * I) {
-  if(!testStack.size())
-    return;
-  TestInfo * ti = testStack[testStack.size() - 1];
-  if(ti->terminated)
-    return;
-
-  // if it is already present then the old one will become dead
-  // since stores dont have any uses (hopefully), so we can mark this one 
-  // as dead and old one as live and it will be the same thing as far as 
-  // cost model is concerned
-  if(ti->memWriteAddrs.find(addr) == ti->memWriteAddrs.end()) {
-    ti->memWriteAddrs.insert(addr);
-    updateCM(NOTFOLDED, I);
-  } else
-    updateCM(FOLDED, I);
 }
 
 unsigned ConstantFolding::getNumNodesBelow(Instruction * I, 

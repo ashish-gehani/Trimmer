@@ -8,11 +8,8 @@ using namespace llvm;
 
 class BBOps {
 public:
-	BBOps() {
-  }
+	BBOps() {}
   void initialize(BasicBlock * BB, LoopInfo& LI) {
-    if(BBInfoMap.find(BB) != BBInfoMap.end())
-      return;
     BBInfo * bbi = new BBInfo(BB);
     bbi->partOfLoop = LI.getLoopFor(BB);
     for(BasicBlock::iterator b_it = BB->begin(), b_ite = BB->end(); 
@@ -22,6 +19,11 @@ public:
     }
     BBInfoMap[BB] = bbi; 
   }
+  void addBB(BasicBlock * BB, LoopInfo& LI) {
+    if(BBInfoMap.find(BB) != BBInfoMap.end())
+      return;
+    initialize(BB, LI); 
+  }  
   bool partOfLoop(Value * val) {
     if(isa<Instruction>(val) && dyn_cast<Instruction>(val)->getParent())
       return partOfLoop(dyn_cast<Instruction>(val)->getParent());
@@ -40,6 +42,9 @@ public:
   }
   bool isVisited(BasicBlock * BB) {
     return visited.find(BB) != visited.end();
+  }
+  bool isUnReachable(BasicBlock * BB) {
+    return unReachable.find(BB) != unReachable.end();
   }
   bool needToduplicate(BasicBlock * BB, BasicBlock * from,
   BasicBlockContInfoMap bbc) {
@@ -71,16 +76,18 @@ public:
   
   bool visitBB(BasicBlock * BB, LoopInfo& LI) {
     
-    if(isVisited(BB)) 
+    if(isVisited(BB)) {
+      return false;
+    }
+
+    if(isUnReachable(BB))
       return false;
 
-    if(unReachable.find(BB) != unReachable.end())
-      return false;
-
-    initialize(BB, LI);
+    addBB(BB, LI);
     
-    if(!predecessorsVisited(BB, LI))
+    if(!predecessorsVisited(BB, LI)) {
       return false;  
+    }
 
     return true;
   }
@@ -92,7 +99,7 @@ public:
       
       BasicBlock * predecessor = *it;
       
-      if(unReachable.find(predecessor) != unReachable.end())
+      if(isUnReachable(predecessor))
         continue;
 
       if(visited.find(predecessor) == visited.end()) {
@@ -118,7 +125,7 @@ public:
     for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++) {
       BasicBlock * predecessor = *it;
 
-      if(unReachable.find(predecessor) != unReachable.end())
+      if(isUnReachable(predecessor))
         continue;
 
       if(findInVect(BBInfoMap[BB]->loopLatchesWithEdge, predecessor))
@@ -146,7 +153,7 @@ public:
       BasicBlock * predecessor = *it;
       if(findInVect(BBInfoMap[BB]->loopLatchesWithEdge, predecessor))
         continue;
-      if(unReachable.find(predecessor) != unReachable.end())
+      if(isUnReachable(predecessor))
         continue;
       freeBB(predecessor, bbc);
     }
@@ -159,7 +166,7 @@ public:
       return;
     TerminatorInst * ti = BB->getTerminator();
     for(unsigned i = 0; i < ti->getNumSuccessors(); i++) {
-      if(unReachable.find(ti->getSuccessor(i)) != unReachable.end())
+      if(isUnReachable(ti->getSuccessor(i)))
         continue;
       if(bbc.find(ti->getSuccessor(i)) == bbc.end())
         return;
@@ -186,7 +193,7 @@ public:
     while(worklist.size()) {
       BasicBlock * worker = worklist[0];
       worklist.erase(worklist.begin());
-      if(unReachable.find(worker) != unReachable.end()) 
+      if(isUnReachable(worker)) 
         continue;
       unReachable.insert(worker);
       markSuccessorsAsUR(worker->getTerminator(), NULL, LI);
@@ -204,7 +211,7 @@ public:
       BasicBlock * successor = termInst->getSuccessor(index);
       if(successor == except)
         continue;
-      initialize(successor, LI);      
+      addBB(successor, LI);      
       BBInfoMap[successor]->URfrom++;
       if(BBInfoMap[successor]->URfrom < BBInfoMap[successor]->numPreds)
         continue;
@@ -275,6 +282,15 @@ public:
       val = phiNode->getIncomingValue(incV[i]);
     }
     return val;
+  }
+  void recomputeInfo(Function * F, LoopInfo& LI) {
+    for(Function::iterator bi = F->begin(), e = F->end(); bi != e; ++bi) {
+      BasicBlock * BB = &*bi;
+      if(BBInfoMap.find(BB) != BBInfoMap.end()) {
+        delete BBInfoMap[BB];
+        initialize(BB, LI);
+      }
+    }
   }
 private:
   map<BasicBlock *, BBInfo *> BBInfoMap;

@@ -13,6 +13,11 @@ enum ProcResult {
   FOLDED
 };
 
+enum LoopOp {
+  NOOP,
+  UNROLLOP,
+  PEELOP
+};
 
 struct ContextInfo {
   Memory * memory;
@@ -84,22 +89,22 @@ struct BBInfo {
 
 struct TestInfo {
   bool terminated, passed;
-  BasicBlock * exitBB, * headerBB; // if we fold to the exit then loopPeeling was succesful
+  BasicBlock * headerBB; // if we fold to the exit then loopPeeling was succesful
                                    // if we reach the header then it was unsuccesful                 
-  set<uint64_t> memWriteAddrs; 
+  BasicBlock * termBB;
   vector<Instruction *> indepInsts;
   map<Instruction *, ProcResult> InstResults; 
   unsigned numOrigInsts, partOfLoop;
-  TestInfo(Loop * L) {
+  TestInfo(Loop * L, LoopOp op) {
     terminated = passed = false;
-    exitBB = L->getUniqueExitBlock();
-    headerBB = L->getHeader();
+    headerBB = op == PEELOP ? L->getHeader() : NULL;
+    termBB = L->getUniqueExitBlock();
+
     numOrigInsts = partOfLoop = 0;
     for(auto block : L->blocks()) {
       BasicBlock * BB = &*block;
       numOrigInsts += distance(BB->begin(), BB->end());
     }  
-    // errs() << numOrigInsts << "\n";
   }  
 };
 typedef map<BasicBlock *, ContextInfo *> BasicBlockContInfoMap;
@@ -107,9 +112,5 @@ typedef map<Function *, ContextInfo *> FuncContInfoMap;
 typedef pair<Instruction *, Instruction *> InstPair;
 typedef map<Function *, FuncInfo *> FuncInfoMap;
 typedef set<Value *> ValSet;
-typedef int LoopOp;
-
-#define UNROLLOP 2
-#define PEELOP 3
 
 #endif
