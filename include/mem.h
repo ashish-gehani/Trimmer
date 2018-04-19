@@ -1,6 +1,7 @@
 using namespace llvm;
 using namespace std;
 #include "vecUtils.h"
+#include "Types.h"
 
 #ifndef MEM_H_
 #define MEM_H_

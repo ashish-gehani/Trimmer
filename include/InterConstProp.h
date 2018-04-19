@@ -29,7 +29,6 @@
 #include "llvm/Analysis/ScalarEvolution.h"
 #include "llvm/Analysis/ScalarEvolutionExpressions.h"
 #include "llvm/Analysis/TargetTransformInfo.h"
-#include "llvm/Analysis/OptimizationDiagnosticInfo.h"
 
 #include <sys/stat.h>
 #include <map>

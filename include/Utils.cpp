@@ -240,7 +240,8 @@ void ConstantFolding::duplicateContext(BasicBlock * to) {
 Function * ConstantFolding::addClonedFunction(Function * F, ValueToValueMapTy& vmap) {
   ClonedCodeInfo info;
   string name = F->getName().str();
-  Function * clonedFunc = llvm::CloneFunction(F, vmap, &info);
+  Function * clonedFunc = llvm::CloneFunction(F, vmap, true, &info);
+  F->getParent()->getFunctionList().push_back(clonedFunc);
   clonedFunc->setName(StringRef(name + "_clone")); 
   return clonedFunc;
 }

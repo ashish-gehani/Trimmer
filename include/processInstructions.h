@@ -288,12 +288,12 @@ ProcResult ConstantFolding::processTermInst(TerminatorInst * termInst) {
     if(testTerminated()) // test terminated in the  term condition above
       break;
 
-    if(simplifyLoop(succ) == PEELOP) {
-      assert(termInst->getNumSuccessors() == 1); // has to be a preheader
-      processTermInst(currBB->getTerminator());
-      terminateBB = true;
-      break;
-    }
+    // if(simplifyLoop(succ) == PEELOP) {
+    //   assert(termInst->getNumSuccessors() == 1); // has to be a preheader
+    //   processTermInst(currBB->getTerminator());
+    //   terminateBB = true;
+    //   break;
+    // }
     runOnBB(succ);   
 
     if(testTerminated()) // test terminated in runOnBB bove
@@ -341,10 +341,10 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
     return NOTFOLDED;
   } else {
     initializeFuncInfo(calledFunction);
-    // if(!satisfyConds(calledFunction)) {
-    //   markArgsAsNonConst(callInst);
-    //   return NOTFOLDED;
-    // }
+    if(!satisfyConds(calledFunction)) {
+      markArgsAsNonConst(callInst);
+      return NOTFOLDED;
+    }
     Function * clone = addClonedFunction(callInst, calledFunction);
     BasicBlock * entry = &clone->getEntryBlock();
     duplicateContext(entry);    

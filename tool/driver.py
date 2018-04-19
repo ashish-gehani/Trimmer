@@ -13,7 +13,7 @@ clang = config.env_version('clang++')
 llc = config.env_version('llc')
 
 
-debugPrint = 0
+debugPrint = 1
 # Common routine for printing debug messages
 def printDbgMsg(msg):
     if debugPrint == 1:
@@ -44,15 +44,16 @@ def run_argspec(tool):
 	# print tool.args
 
 	# Add arguments to main
-	if(tool.icp_flag):
-		# annotate pass
-		Cmd = opt + ' -load ' + build_path + 'Annotate.so -annotate ' + curr_file + ' -o ' \
-		+ curr_file
-		printDbgMsg(Cmd)
-		subprocess.call(Cmd, shell = True)	
+	# if(tool.icp_flag):
+	# 	# annotate pass
+	# 	Cmd = opt + ' -load ' + build_path + 'Annotate.so -annotate ' + curr_file + ' -o ' \
+	# 	+ curr_file
+	# 	printDbgMsg(Cmd)
+	# 	subprocess.call(Cmd, shell = True)	
 
 	Cmd = opt + ' -load ' + build_path + 'SpecializeArguments.so -specialize-args \
 	-args=' + tool.args + ' ' + curr_file + ' -o ' + add_file
+
 	printDbgMsg(Cmd)
 	subprocess.call(Cmd, shell = True)	
 	

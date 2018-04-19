@@ -10,35 +10,35 @@ using namespace std;
 
 #define DEFAULT_TRIP_COUNT 20
 
-static bool canPeel(Loop *L) {
-  // Make sure the loop is in simplified form
-  if(!L->isLoopSimplifyForm())
-    debug(Abubakar) << "not L->isLoopSimplifyForm\n";
-  if(!L->getExitingBlock())
-    debug(Abubakar) << "not L->getExitingBlock\n";
-  if(!L->getUniqueExitBlock())
-    debug(Abubakar) << "not L->getUniqueExitBlock\n";
-  if(L->getLoopLatch() != L->getExitingBlock())
-    debug(Abubakar) << "LoopLatch is not the exiting block\n";    
+// static bool canPeel(Loop *L) {
+//   // Make sure the loop is in simplified form
+//   if(!L->isLoopSimplifyForm())
+//     debug(Abubakar) << "not L->isLoopSimplifyForm\n";
+//   if(!L->getExitingBlock())
+//     debug(Abubakar) << "not L->getExitingBlock\n";
+//   if(!L->getUniqueExitBlock())
+//     debug(Abubakar) << "not L->getUniqueExitBlock\n";
+//   if(L->getLoopLatch() != L->getExitingBlock())
+//     debug(Abubakar) << "LoopLatch is not the exiting block\n";    
 
-  if (!L->isLoopSimplifyForm())
-    return false;
+//   if (!L->isLoopSimplifyForm())
+//     return false;
 
-  // Only peel loops that contain a single exit
+//   // Only peel loops that contain a single exit
 
-  if (!L->getExitingBlock() || !L->getUniqueExitBlock())
-   return false;
+//   if (!L->getExitingBlock() || !L->getUniqueExitBlock())
+//    return false;
 
 
-  // Don't try to peel loops where the latch is not the exiting block.
-  // This can be an indication of two different things:
-  // 1) The loop is not rotated.
-  // 2) The loop contains irreducible control flow that involves the latch.
-  if (L->getLoopLatch() != L->getExitingBlock())
-   return false;
+//   // Don't try to peel loops where the latch is not the exiting block.
+//   // This can be an indication of two different things:
+//   // 1) The loop is not rotated.
+//   // 2) The loop contains irreducible control flow that involves the latch.
+//   if (L->getLoopLatch() != L->getExitingBlock())
+//    return false;
 
-  return true;
-}
+//   return true;
+// }
 
 LoopOp ConstantFolding::getOp(BasicBlock * header, unsigned & tripCount) {
   Function * F = header->getParent();
@@ -57,32 +57,32 @@ LoopOp ConstantFolding::getOp(BasicBlock * header, unsigned & tripCount) {
 
 bool ConstantFolding::runOp(BasicBlock * header, LoopOp op, 
                       unsigned tripCount) {
-  if(!op)
-    return false;
-  Function * F = header->getParent();
-  LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*F).getLoopInfo();
-  DominatorTree * DT = new DominatorTree(*F);
-  AssumptionCache &AC = getAnalysis<AssumptionCacheTracker>(*F).getAssumptionCache(*F);
-  ScalarEvolution SE(*F, *TLI, AC, *DT, LI);
-  Loop * L = LI.getLoopFor(dyn_cast<BasicBlock>(header));
-  if(op == PEELOP) {
-    if(!canPeel(L)) {
-      debug(Abubakar) << "failed in peeling\n";
-      return false;
-    }
-    bool peeled = peelLoop(L, tripCount, &LI, &SE, DT, PreserveLCSSA);
-    assert(peeled);
-    debug(Abubakar) << "succeeded in peeling for " << tripCount << " iterations\n";
-  } else {
-    OptimizationRemarkEmitter ORE(F); 
-    int UnrollResult = UnrollLoop(L, tripCount, tripCount, true, false, false, 
-                  false, false, 0, 0, &LI, &SE, DT, &AC, &ORE, PreserveLCSSA);
-    if(!UnrollResult) {
-      debug(Abubakar) << "failed in unrolling\n";
-      return false;
-    }
-    debug(Abubakar) << "succeeded in unrolling for " << tripCount << " iterations\n";
-  }
+  // if(!op)
+  //   return false;
+  // Function * F = header->getParent();
+  // LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*F).getLoopInfo();
+  // DominatorTree * DT = new DominatorTree(*F);
+  // AssumptionCache &AC = getAnalysis<AssumptionCacheTracker>(*F).getAssumptionCache(*F);
+  // ScalarEvolution SE(*F, *TLI, AC, *DT, LI);
+  // Loop * L = LI.getLoopFor(dyn_cast<BasicBlock>(header));
+  // if(op == PEELOP) {
+  //   if(!canPeel(L)) {
+  //     debug(Abubakar) << "failed in peeling\n";
+  //     return false;
+  //   }
+  //   bool peeled = peelLoop(L, tripCount, &LI, &SE, DT, PreserveLCSSA);
+  //   assert(peeled);
+  //   debug(Abubakar) << "succeeded in peeling for " << tripCount << " iterations\n";
+  // } else {
+  //   OptimizationRemarkEmitter ORE(F); 
+  //   int UnrollResult = UnrollLoop(L, tripCount, tripCount, true, false, false, 
+  //                 false, false, 0, 0, &LI, &SE, DT, &AC, &ORE, PreserveLCSSA);
+  //   if(!UnrollResult) {
+  //     debug(Abubakar) << "failed in unrolling\n";
+  //     return false;
+  //   }
+  //   debug(Abubakar) << "succeeded in unrolling for " << tripCount << " iterations\n";
+  // }
   return true;
 }
 
