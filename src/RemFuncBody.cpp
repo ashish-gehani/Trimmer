@@ -14,7 +14,7 @@
 #include <string> 
 #include <unistd.h> 
 #include "parse_args.h"
-#include "debug.h"
+#include "processInstructions.h"
 #include <fstream>
 
 using namespace llvm;
@@ -95,18 +95,3 @@ char RemFuncBody::ID = 0;
 static RegisterPass<RemFuncBody> W("rem-func-body", "Clear function body");
 
 
-
-/*      if(input_func_list != ""){
-        std::string file_path = input_func_list.c_str();
-      	printf("input_func_list = %s \n", file_path.c_str());
-
-        ifstream infile;
-        infile.open(file_path);
-        while(!infile.eof()){
-	string temp;
-	getline(infile, temp, '\n');
-	printf("temp = %s\n", temp.c_str());
-	}
-        infile.close();
-
-	}*/
