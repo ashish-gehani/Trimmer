@@ -2,7 +2,7 @@
 import sys
 import os
 import subprocess
-
+import shutil
 
 def run_command(cmd):
     subprocess.call(cmd, shell=True)
@@ -31,10 +31,13 @@ if __name__ == "__main__":
         sys.exit(1)
 
     mod_name = sys.argv[1]
-    func_file = open(sys.argv[1], "r")
+    func_file = open(sys.argv[2], "r")
+    outfile_name = "debloated.bc"
+    shutil.copyfile(mod_name, outfile_name)
+
     for func_name in func_file: 
         func_name = func_name.strip()
-        prune_func(mod_name, func_name)
+        prune_func(outfile_name, func_name)
   
     internalize(mod_name)
     dce(mod_name)
