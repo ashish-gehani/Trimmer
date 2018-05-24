@@ -5,16 +5,18 @@ using namespace std;
 #include "InterConstProp.h"
 #include "Utils.cpp"
 
+/* TODO : in case of read, lseek e.t.c when there is an error stop tracking the fd */
+
+
 bool ConstantFolding::handleFileIOCall(CallInst * ci) {
 	string name = ci->getCalledFunction()->getName();
-	if(name == "open") 
-		handleFileIOOpen(ci);
-	else if(name == "read")
-		handleFileIORead(ci);
-	else
-		return false;
+	if(name == "open") 		 handleFileIOOpen(ci);
+	else if(name == "read")  handleFileIORead(ci);
+	else if(name == "lseek") handleFileIOLSeek(ci);
+	else return false;
 	return true;
 }
+
 void ConstantFolding::handleFileIOOpen(CallInst * ci) {
 	Value * nameptr = ci->getOperand(0);
 	char * fname;
@@ -33,7 +35,6 @@ void ConstantFolding::handleFileIOOpen(CallInst * ci) {
 	handleInt(ci, fd);
 }
 void ConstantFolding::handleFileIORead(CallInst * ci) {
-	errs() << "entered handleFileIORead\n";
 	Value * fdVal = ci->getOperand(0);
 	Value * bufPtr = ci->getOperand(1);
 	Value * sizeVal = ci->getOperand(2);
@@ -44,7 +45,7 @@ void ConstantFolding::handleFileIORead(CallInst * ci) {
 		return;
 	}
 	if(!getSingleVal(fdVal, fd) || !getSingleVal(sizeVal, size)) {
-		debug(Abubakar) << "handleFileIORead : fd or size not constant\n";
+		debug(Abubakar) << "handleFileIORead : fd and/or size not constant\n";
 		setConstContigous(false, reg->getValue()); 
 		return;   
 	}
@@ -56,4 +57,18 @@ void ConstantFolding::handleFileIORead(CallInst * ci) {
 		return;   		
 	}
 	handleInt(ci, bytes_read);
+}
+void ConstantFolding::handleFileIOLSeek(CallInst * ci) {
+	Value * fdVal = ci->getOperand(0);
+	Value * offSetVal = ci->getOperand(1);
+	Value * flagVal = ci->getOperand(2);
+	uint64_t fd, offset, flag;
+	if(!getSingleVal(fdVal, fd) || !getSingleVal(offSetVal, offset) || 
+		!getSingleVal(flagVal, flag)) {
+		debug(Abubakar) << "handleFileIOLSeek : one of fd, offset, flag not constant\n";
+		return;   
+	}	
+	int ret = lseek(fd, offset, flag);
+	if(ret < 0) return;
+	handleInt(ci, ret);
 }

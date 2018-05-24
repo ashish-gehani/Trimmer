@@ -126,6 +126,7 @@ struct ConstantFolding : public ModulePass {
   bool handleFileIOCall(CallInst *);
   void handleFileIOOpen(CallInst *);
   void handleFileIORead(CallInst *);
+  void handleFileIOLSeek(CallInst *);
   bool simplifyCallback(CallInst *);
   void replaceUses();
   void markArgsAsNonConst(CallInst* callInst);
