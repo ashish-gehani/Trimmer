@@ -37,6 +37,7 @@
 #include "Utils.cpp"
 #include "loopUtils.cpp"
 #include "stringUtils.cpp"
+#include "fileIO.cpp"
 
 
 using namespace llvm;
@@ -173,7 +174,7 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
   return UNDECIDED;
 }
 
-ProcResult ConstantFolding::processMemcpyInst(MemCpyInst * memcpyInst) {
+ProcResult ConstantFolding::processMemcpyInst(CallInst * memcpyInst) {
 
   Value * toPtr = memcpyInst->getOperand(0);
   Value * fromPtr = memcpyInst->getOperand(1);
@@ -204,7 +205,7 @@ ProcResult ConstantFolding::processMemcpyInst(MemCpyInst * memcpyInst) {
   return NOTFOLDED;
 }
 
-ProcResult ConstantFolding::processMemSetInst(MemSetInst * memsetInst) {
+ProcResult ConstantFolding::processMemSetInst(CallInst * memsetInst) {
   Value * ptr = memsetInst->getOperand(0);
   Value * chrctr = memsetInst->getOperand(1);
   Value * sizeVal = memsetInst->getOperand(2);
@@ -226,8 +227,10 @@ ProcResult ConstantFolding::processMemSetInst(MemSetInst * memsetInst) {
     debug(Abubakar) << "processMemSetInst : size not found in Map\n";
     return NOTFOLDED;      
   }
+
   char * ptrString = (char *) getActualAddr(ptrReg->getValue());
   memset(ptrString, c, size);
+  debug(Abubakar) << "set string to " << c << " size " << size << "\n";
   return NOTFOLDED;
 }
 
@@ -319,29 +322,27 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
   if(bbOps.partOfLoop(callInst))
     return NOTFOLDED;
 
-  Function * calledFunction = callInst->getCalledFunction();  
-  if(!calledFunction) {
+  if(!callInst->getCalledFunction() && !simplifyCallback(callInst)) {
     markArgsAsNonConst(callInst);
     return NOTFOLDED;
   }
+  Function * calledFunction = callInst->getCalledFunction();
   string name = calledFunction->getName().str();
   /* specialize for functions defined in string.h e.g strcmp, strchr */
-  if(name.size() >= 6 && name.substr(0, 6) == "getopt") {
-    handleGetOpt(callInst);
-  } else if(name == "atoi") {
-    handleAtoi(callInst);
-  } else if(name == "malloc") {
-    processMallocInst(callInst);
-  } else if(name == "calloc") {
-    processCallocInst(callInst);
-  } else if(isStringFunction(calledFunction)) { 
-    handleStringFunction(callInst, calledFunction);
-  } else if(calledFunction->isDeclaration()) {
+  if(handleDbgCall(callInst)) {}
+  else if(handleGetOpt(callInst)) {}
+  else if(handleHeapAlloc(callInst)) {}
+  else if(handleMemInst(callInst)) {}
+  else if(handleStringFunc(callInst)) {} 
+  else if(handleFileIOCall(callInst)) {} 
+  else if(calledFunction->isDeclaration()) {
+    debug(Abubakar) << "skipping function : declaration\n";
     markArgsAsNonConst(callInst);
     return NOTFOLDED;
   } else {
     initializeFuncInfo(calledFunction);
     if(!satisfyConds(calledFunction)) {
+      debug(Abubakar) << "skipping function : does not satisfy conds\n";
       markArgsAsNonConst(callInst);
       return NOTFOLDED;
     }

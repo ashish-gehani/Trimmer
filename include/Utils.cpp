@@ -51,7 +51,7 @@ void cleanUpfuncBBs(Function * f, BasicBlockContInfoMap bbc,
 }
 
 bool ignorefunc(Function * F) {
-  if(F->getName() == "printf" || F->getName() == "strncpy")
+  if(F->getName() == "printf" || F->getName() == "strncpy" || F->getName() == "__printf_chk")
     return true;
   if(F->isIntrinsic())
     return true;
@@ -320,8 +320,14 @@ void ConstantFolding::initializeGlobal(uint64_t addr, Constant * CC) {
       int size = DL->getTypeAllocSize(CE->getType());
       storeToMem(newAddr, size, addr);
       debug(Abubakar) << "storing address " << newAddr << " at pointer " << addr << " size " << size << "\n";                  
-    }
+    } 
     I->dropAllReferences();
+  } else if(Function * callback = dyn_cast<Function>(CC)) {
+    // store its address
+    int size = DL->getTypeAllocSize(callback->getType());
+    uint64_t faddr = (uint64_t) callback;
+    storeToMem(faddr, size, addr);
+    debug(Abubakar) << "stored callback for function " << callback->getName() << "\n";
   } else {
     for(unsigned i = 0; i < CC->getNumOperands(); i++) {
       Constant * CGI = CC->getAggregateElement(i);
@@ -545,19 +551,21 @@ bool ConstantFolding::getStr(Value * ptr, char *& str, uint64_t size) {
   return true;
 }
 
+uint64_t ConstantFolding::createConstStr(string str) {
+    uint64_t size = str.size();
+    uint64_t newAddr = allocateHeap(size);
+    char * source = (char *) getActualAddr(newAddr);      
+    memcpy(source, str.c_str(), size);  
+    debug(Abubakar) << "created new constant string " << str << " at address " << newAddr << "\n";
+    return newAddr;
+}
 
 bool ConstantFolding::handleConstStr(Value * ptr) {
   StringRef stringRef;
-  if(getConstantStringInfo(ptr, stringRef, 0, false)) {  
-    string str = stringRef.str(); 
-    int strSize = str.size(); /* allocate memory for that string */
-    uint64_t newAddr = allocateStack(strSize);
-    char * source = (char *) getActualAddr(newAddr);      
-    memcpy(source, str.c_str(), strSize);
-    addGlobalRegister(ptr, ptr->getType(), newAddr);
-    debug(Abubakar) << "created new constant string " << str << "\n";
+  if(getConstantStringInfo(ptr, stringRef, 0, false)) { 
+    addGlobalRegister(ptr, ptr->getType(), createConstStr(stringRef.str()));
     return true;
-  } 
+  }  
   return false;
 }
 
@@ -565,13 +573,17 @@ void ConstantFolding::handleInt(Value * val, uint64_t num) {
   Type * ty = val->getType();
   if(ty->isPointerTy()) {
     if(!num) {
+      debug(Abubakar) << "replacing with null\n";
       ConstantPointerNull * nullP = ConstantPointerNull::get(dyn_cast<PointerType>(ty));
       replaceAndLog(val, nullP);
     } else {
+      debug(Abubakar) << "adding Register\n";
       addRegister(val, ty, num); 
     }
-  } else if(IntegerType * intTy = dyn_cast<IntegerType>(ty))
+  } else if(IntegerType * intTy = dyn_cast<IntegerType>(ty)) {
+    debug(Abubakar) << "replacing with constant int\n";
     replaceAndLog(val, ConstantInt::get(intTy, num));
+  }
 }
 
 void ConstantFolding::replaceAndLog(Value * from, Value * to) {
@@ -626,11 +638,13 @@ bool ConstantFolding::handleLongArgs(CallInst * callInst, option * long_opts,
   return true;
 }
 
-void ConstantFolding::handleGetOpt(CallInst * ci) {
+bool ConstantFolding::handleGetOpt(CallInst * ci) {
   string name = ci->getCalledFunction()->getName().str();
+  if(name.size() < 6 || name.substr(0, 6) != "getopt")
+    return false;
   if(name == "getopt_long_only") {
     errs() << "case not handled " << name << "\n";
-    return;
+    return true;
   }
   uint64_t argc;
   Register * argvReg = getRegister(ci->getOperand(1));
@@ -640,7 +654,7 @@ void ConstantFolding::handleGetOpt(CallInst * ci) {
   !optsReg || !optindReg || !checkConstContigous(argvReg->getValue()) ||
   !checkConstContigous(optindReg->getValue())) {
     debug(Abubakar) << "conditions not satisfied\n";
-    return;
+    return true;
   }
 
   uint64_t ptrSize = DL->getTypeAllocSize(argvReg->getType());
@@ -655,7 +669,7 @@ void ConstantFolding::handleGetOpt(CallInst * ci) {
     uint64_t strAddr = loadMem(iter, ptrSize);
     if(!getStr(strAddr, argv[i])) {
       debug(Abubakar) << "updating argv\n";
-      return;
+      return true;
     }
     realToVirt[argv[i]] = strAddr;
   }
@@ -665,7 +679,7 @@ void ConstantFolding::handleGetOpt(CallInst * ci) {
     option * long_opts = (option *) malloc(sizeof(option) * 100);
     int * long_index;
     if(!handleLongArgs(ci, long_opts, long_index))
-      return;
+      return true;
     result = getopt_long(argc, argv, opts, long_opts, long_index);
   } else 
     result = getopt(argc, argv, opts);
@@ -695,23 +709,50 @@ void ConstantFolding::handleGetOpt(CallInst * ci) {
   storeToMem(optind, intSize, optindAddr);
   for(unsigned i = 0, iter = addr; i < argc; i++, iter += ptrSize)
     storeToMem(realToVirt[argv[i]], ptrSize, iter);
+  return true;
 } 
 
-void ConstantFolding::handleAtoi(CallInst * callInst) {
-  Value * ptr = callInst->getArgOperand(0);
-  Register * reg = getRegister(ptr);
-  if(!reg) {
-    debug(Abubakar) << "handleAtoi : not found in map\n";
-    return;
-  }
-  if(!checkConstContigous(reg->getValue())) {
-    debug(Abubakar) << "handleAtoi : not constant\n";
-    return;
-  }
-  char * str = (char *) getActualAddr(reg->getValue());
-  int result = atoi(str);
-  IntegerType * int32Ty = IntegerType::get(module->getContext(), 32);
-  replaceAndLog(callInst, ConstantInt::get(int32Ty, result)); 
+bool ConstantFolding::simplifyCallback(CallInst * callInst) {
+  Register * reg = getRegister(callInst->getCalledValue());
+  if(!reg) return false;
+  Function * calledFunction = (Function *) reg->getValue();
+  callInst->setCalledFunction(calledFunction);
+  debug(Abubakar) << "set called Function to " << calledFunction->getName() << "\n";
+  return true;
+}
+
+bool ConstantFolding::handleHeapAlloc(CallInst * callInst) {
+  string name = callInst->getCalledFunction()->getName();
+  if(name == "malloc")      processMallocInst(callInst);
+  else if(name == "calloc") processCallocInst(callInst);
+  else  return false;
+  return true;
+}
+
+bool ConstantFolding::handleMemInst(CallInst * callInst) {
+  string name = callInst->getCalledFunction()->getName();
+  if(name == "memset")      processMemSetInst(callInst);
+  else if(name == "memcpy") processMemcpyInst(callInst);
+  else  return false;
+  return true;  
+}
+
+bool ConstantFolding::handleDbgCall(CallInst * callInst) {
+  string name = callInst->getCalledFunction()->getName();
+  if(name == "__set_debug_level__") {
+    Value * lVal = callInst->getOperand(0);
+    if(ConstantInt * cint = dyn_cast<ConstantInt>(lVal)) {
+      debugLevel = cint->getZExtValue();
+      errs() << "set debugLevel to " << debugLevel << "\n";
+    }
+  } else if(name == "__print_debug_string__") {
+      for(unsigned i = 0; i < callInst->getNumArgOperands(); i++) {
+        Value * ptrVal = callInst->getOperand(i);
+        char * str;
+        if(getStr(ptrVal, str, 100)) errs() << str;
+      }
+  } else return false;
+  return true;
 }
 
 #endif

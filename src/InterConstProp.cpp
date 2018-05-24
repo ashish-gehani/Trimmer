@@ -49,13 +49,14 @@ void ConstantFolding::runOnInst(Instruction * I) {
   } else if(TerminatorInst * termInst = dyn_cast<TerminatorInst>(I)) {
     result = processTermInst(termInst);
   } else if(MemCpyInst * memcpyInst = dyn_cast<MemCpyInst>(I)) {
-    result = processMemcpyInst(memcpyInst);
+    result = processMemcpyInst(dyn_cast<CallInst>(memcpyInst));
   } else if(MemSetInst * memsetInst = dyn_cast<MemSetInst>(I)) {
-    result = processMemSetInst(memsetInst);
+    result = processMemSetInst(dyn_cast<CallInst>(memsetInst));
   } else if(CallInst * callInst = dyn_cast<CallInst>(I)) {
     result = processCallInst(callInst);
-  } else 
+  } else {
     result = tryfolding(I);
+  }
   updateCM(result, I);
 }
 
@@ -104,7 +105,10 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
   if(!ci) return;
 
   FuncInfo * fi = fimap[toRun];
-  assert(fi->context != NULL && "unexpected behaviour");
+  if(!fi->context) {
+    errs() << "Unexpected behavior no context returned : only possible if cant return from function\n";
+    return;
+  }
   copyContext(fi->context);
   currfn = temp;
   currContextIsAnnotated = tempAnnot;

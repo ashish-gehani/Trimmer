@@ -13,7 +13,6 @@
 #include <string> 
 #include <unistd.h> 
 #include "parse_args.h"
-#include "debug.h"
 
 using namespace llvm;
 using namespace std;
@@ -75,6 +74,8 @@ namespace {
 
       ConstantInt * align = ConstantInt::get(int32Ty, 0);
       ConstantInt * isvolatile = ConstantInt::get(int1Ty, 0);
+      ConstantInt * strTerm = ConstantInt::get(int8Ty, 0);
+
       ConstantPointerNull* nptr1 = ConstantPointerNull::get(dyn_cast<PointerType>(argv->getType()));
       ConstantPointerNull* nptr2 = ConstantPointerNull::get(PointerType::get(int8Ty, 0));
 
@@ -114,8 +115,9 @@ namespace {
           functionArgs.push_back(align);
           functionArgs.push_back(isvolatile);
           ir.CreateCall(mcf, ArrayRef<Value*>(functionArgs));
-        }
-        else {
+          Value * gep = ir.CreateConstGEP1_32(destPtr, arguments[i].size());
+          ir.CreateStore(strTerm, gep);
+        } else {
           errs() << "_" << i << "\n";
           errs() << *argv << "\n";
           Value* oldArgptr = ir.CreateConstGEP1_32(argv, i);

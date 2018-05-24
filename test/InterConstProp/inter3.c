@@ -7,14 +7,12 @@
 void branchPruned(char * buf){
   
   //char * value = strchr(buf, '=');
+  char * test1 = strchr(buf, '=');
+  if(!strcmp(test1, "=friend")) printf("branchPruned\n"); 
   int index = strcspn(buf, "=");
-  char * value = buf + index;
-  *value++ = '\0';
-  if(strcmp(value, "friend") == 0) {
-    printf("name = %s\n", buf);
-    printf("value = %s\n", value);    
-    printf("friend\n"); 
-  }
+  char * test2 = buf + index;
+  *test2++ = '\0';
+  if(!strcmp(test2, "friend")) printf("branchPruned\n"); 
 }
 
 int main(){
