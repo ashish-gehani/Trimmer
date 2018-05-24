@@ -1,0 +1,9 @@
+{
+	"binary": "totd_fin", 
+	"native_libs": [], 
+	"name": "totd", 
+	"args": [],
+	"modules": [], 
+	"ldflags": [], 
+	"main": "totd.bc"
+}

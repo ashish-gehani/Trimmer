@@ -1,1 +1,0 @@
-{"binary": "nmap_fin", "native_libs": [], "name": "nmap", "args": [], "modules": [], "ldflags": ["-lpcre", "-lpcap", "-lssl", "-lcrypto", "-llua5.2", "-llua5.2-lpeg"], "main": "nmap.bc"}

@@ -1,0 +1,1 @@
+{"binary": "lighttpd_fin", "native_libs": [], "name": "lighttpd", "args": [], "modules": [], "ldflags": ["-lz", "-lpcre", "-lbz2", "-lcrypt"], "main": "lighttpd.bc"}

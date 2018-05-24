@@ -2,7 +2,7 @@
 	"binary": "ssh_fin", 
 	"native_libs": [], 
 	"name": "ssh", 
-	"args": [],
+	"args": ["-F", "ssh.conf", "lums"],
 	"modules": [], 
 	"ldflags": ["-lcrypto","-ldl","-lutil","-lz","-lcrypt","-lresolv"], 
 	"main": "ssh.bc"
