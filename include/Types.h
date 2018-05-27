@@ -120,6 +120,12 @@ struct TestInfo {
     return false;  
   }
 };
+
+struct FdInfo {
+  int fd, offset;
+  bool tracked;
+};
+
 typedef map<BasicBlock *, ContextInfo *> BasicBlockContInfoMap;
 typedef map<Function *, ContextInfo *> FuncContInfoMap;
 typedef pair<Instruction *, Instruction *> InstPair;

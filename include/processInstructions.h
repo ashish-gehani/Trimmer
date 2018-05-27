@@ -147,7 +147,7 @@ ProcResult ConstantFolding::processLoadInst(LoadInst * li) {
     return NOTFOLDED;
   }
   uint64_t val = loadMem(addr, size);
-  handleInt(li, val);
+  addSingleVal(li, val);
   return UNDECIDED;
 }
 
@@ -341,11 +341,11 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
     return NOTFOLDED;
   } else {
     initializeFuncInfo(calledFunction);
-    if(!satisfyConds(calledFunction)) {
-      debug(Abubakar) << "skipping function : does not satisfy conds\n";
-      markArgsAsNonConst(callInst);
-      return NOTFOLDED;
-    }
+    // if(!satisfyConds(calledFunction)) {
+    //   debug(Abubakar) << "skipping function : does not satisfy conds\n";
+    //   markArgsAsNonConst(callInst);
+    //   return NOTFOLDED;
+    // }
     Function * clone = addClonedFunction(callInst, calledFunction);
     BasicBlock * entry = &clone->getEntryBlock();
     duplicateContext(entry);    

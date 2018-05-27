@@ -106,7 +106,7 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
 
   FuncInfo * fi = fimap[toRun];
   if(!fi->context) {
-    errs() << "Unexpected behavior no context returned : only possible if cant return from function\n";
+    errs() << "Unexpected behavior -> no context returned : only possible if cant return from function\n";
     return;
   }
   copyContext(fi->context);
@@ -114,7 +114,7 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
   currContextIsAnnotated = tempAnnot;
   cleanUpfuncBBs(toRun, BasicBlockContexts, Registers, pop_back(funcValStack));
   if(fi->retReg)
-    handleInt(ci, fi->retReg->getValue());
+    addSingleVal(ci, fi->retReg->getValue());
 
 }
 

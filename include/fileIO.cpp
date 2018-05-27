@@ -5,8 +5,41 @@ using namespace std;
 #include "InterConstProp.h"
 #include "Utils.cpp"
 
-/* TODO : in case of read, lseek e.t.c when there is an error stop tracking the fd */
+int ConstantFolding::initfdi(int fd) {
+	uint64_t addr = allocateHeap(sizeof(FdInfo));
+	FdInfo * fdi = (FdInfo *) getActualAddr(addr);
+	fdi->fd = fd;
+	fdi->offset = 0;
+	fdi->tracked = true;
+	srand(time(NULL));
+	int sfd = rand() % 100000000 + 100000;
+	fdInfoMap[sfd] = addr;
+	return sfd;
+}
 
+bool ConstantFolding::getfdi(int sfd, int & fd) {
+	uint64_t addr = fdInfoMap[sfd];
+	if(!checkConstContigous(addr)) {
+		debug(Abubakar) << "skipping non constant fd\n";
+		return false;
+	}
+	FdInfo * fdi = (FdInfo *) getActualAddr(addr);
+	if(!fdi->tracked) { 
+		debug(Abubakar) << "skipping untracked fd\n";
+		return false;
+	}
+	fd = fdi->fd;
+	lseek(fd, fdi->offset, SEEK_SET);
+	return true;
+}
+
+void ConstantFolding::setfdiUntracked(int sfd) {
+	((FdInfo *) getActualAddr(fdInfoMap[sfd]))->tracked = false;	
+}
+
+void ConstantFolding::setfdiOffset(int sfd, int fd) {
+	((FdInfo *) getActualAddr(fdInfoMap[sfd]))->offset = lseek(fd, 0, SEEK_CUR);
+}
 
 bool ConstantFolding::handleFileIOCall(CallInst * ci) {
 	string name = ci->getCalledFunction()->getName();
@@ -32,43 +65,55 @@ void ConstantFolding::handleFileIOOpen(CallInst * ci) {
 	}
 	int fd = open(fname, flag);
 	if(fd < 0) return;
-	handleInt(ci, fd);
+	fd = initfdi(fd);
+	addSingleVal(ci, fd);
 }
+
 void ConstantFolding::handleFileIORead(CallInst * ci) {
 	Value * fdVal = ci->getOperand(0);
 	Value * bufPtr = ci->getOperand(1);
 	Value * sizeVal = ci->getOperand(2);
-	uint64_t fd, size;
+	uint64_t sfd, size;
+	int fd;
+	bool fdConst = getSingleVal(fdVal, sfd) && getfdi(sfd, fd);
 	Register * reg = getRegister(bufPtr);  
-	if(!reg) {
-		debug(Abubakar) << "handleFileIORead : buffer Not found in Map\n";
-		return;
-	}
-	if(!getSingleVal(fdVal, fd) || !getSingleVal(sizeVal, size)) {
-		debug(Abubakar) << "handleFileIORead : fd and/or size not constant\n";
-		setConstContigous(false, reg->getValue()); 
+	if(!reg || !fdConst || !getSingleVal(sizeVal, size)) {
+		debug(Abubakar) << "handleFileIORead : failed to specialize\n";
+		if(fdConst) setfdiUntracked(sfd);
+		if(reg) setConstContigous(false, reg->getValue()); 
 		return;   
 	}
 	char * buffer = (char *) getActualAddr(reg->getValue());
 	int bytes_read = read(fd, buffer, size);
 	if(bytes_read < 0) {
 		debug(Abubakar) << "handleFileIORead : read returned error\n";
+		setfdiUntracked(sfd);
 		setConstContigous(false, reg->getValue()); 
 		return;   		
 	}
-	handleInt(ci, bytes_read);
+	setConstMem(true, reg->getValue(), bytes_read);
+	setfdiOffset(sfd, fd);
+	addSingleVal(ci, bytes_read);
 }
 void ConstantFolding::handleFileIOLSeek(CallInst * ci) {
 	Value * fdVal = ci->getOperand(0);
 	Value * offSetVal = ci->getOperand(1);
 	Value * flagVal = ci->getOperand(2);
-	uint64_t fd, offset, flag;
-	if(!getSingleVal(fdVal, fd) || !getSingleVal(offSetVal, offset) || 
+	uint64_t sfd, offset, flag;
+	int fd;
+	bool fdConst = getSingleVal(fdVal, sfd) && getfdi(sfd, fd);
+	if(!fdConst || !getSingleVal(offSetVal, offset) || 
 		!getSingleVal(flagVal, flag)) {
-		debug(Abubakar) << "handleFileIOLSeek : one of fd, offset, flag not constant\n";
+		if(fdConst) setfdiUntracked(sfd);
+		debug(Abubakar) << "handleFileIOLSeek : failed to specialize\n";
 		return;   
 	}	
 	int ret = lseek(fd, offset, flag);
-	if(ret < 0) return;
-	handleInt(ci, ret);
+	if(ret < 0) { 
+		setfdiUntracked(sfd);
+		debug(Abubakar) << "handleFileIOLSeek : seek returned error\n";
+		return;
+	}
+	setfdiOffset(sfd, fd);
+	addSingleVal(ci, ret);
 }

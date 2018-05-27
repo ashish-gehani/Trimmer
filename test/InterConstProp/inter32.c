@@ -43,6 +43,7 @@ int main(int argc, char ** argv) {
 
   char line[1024];
   int fd = open("inter32_fileio.txt", O_RDONLY);
+  if(fd < 0) printf("file not found\n");
 
   getLine(fd, line, 1024);
   memcpy(buffer[0], line, strlen(line) + 1);

@@ -78,6 +78,7 @@ struct ConstantFolding : public ModulePass {
   bool currContextIsAnnotated;
   bool useAnnotations;
   set<Value *> AnnotationList;
+  map<int, uint64_t> fdInfoMap; 
 
   ConstantFolding(): ModulePass(ID){}
   void getAnalysisUsage(AnalysisUsage &AU) const;
@@ -113,33 +114,45 @@ struct ConstantFolding : public ModulePass {
   Function * addClonedFunction(Function *, ValueToValueMapTy& vmap);
   Function * addClonedFunction(CallInst *, Function *);
   bool predecessorsVisited(BasicBlock *);
+
+  bool simplifyCallback(CallInst *);
   bool handleDbgCall(CallInst *);
   bool handleHeapAlloc(CallInst *);
   bool handleMemInst(CallInst *);
+
   bool handleStringFunc(CallInst *);
   void handleStrChr(CallInst *); 
   void handleStrpbrk(CallInst * );
   void simplifyStrFunc(CallInst *);
   void handleAtoi(CallInst *);
+
+  bool handleGetOpt(CallInst *);  
   bool handleLongArgs(CallInst *, option *, int *&);
-  bool handleGetOpt(CallInst *);
+  
+  int initfdi(int); 
+  bool getfdi(int, int &);
+  void setfdiUntracked(int);
+  void setfdiOffset(int, int);
   bool handleFileIOCall(CallInst *);
   void handleFileIOOpen(CallInst *);
   void handleFileIORead(CallInst *);
   void handleFileIOLSeek(CallInst *);
-  bool simplifyCallback(CallInst *);
+    
   void replaceUses();
   void markArgsAsNonConst(CallInst* callInst);
   void addGlobals();
   void initializeGlobal(uint64_t, Constant *);
   
   bool getSingleVal(Value * val, uint64_t& i);
+  void addSingleVal(Value *, uint64_t);
+
   // bool getStr(Value * ptr, char *& str);
   bool getStr(Value * ptr, char *& str, uint64_t size);
   bool getStr(uint64_t addr, char *& str);
   uint64_t createConstStr(string str);
   bool handleConstStr(Value *);
-  void handleInt(Value *, uint64_t);
+  
+  bool noreplace(Value *, Value *);
   void replaceAndLog(Value *, Value *);
 
   CallInst * getTestInst(string name);

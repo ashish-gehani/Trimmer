@@ -132,8 +132,7 @@ void ConstantFolding::simplifyStrFunc(CallInst * callInst) {
           debug(Abubakar) << "skipping non constant string\n";
           continue;
         }
-      }
-      else if(!checkConstStr(addr))
+      } else if(!checkConstStr(addr))
         continue;
       char * baseStringData = (char *) getActualAddr(addr);
       debug(Abubakar) << "baseStringData : " << baseStringData << "\n";

@@ -1,49 +1,23 @@
-#include<stdio.h>
-#include<string.h>
-#include<stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
 
-struct COORD {
-  int x, y;
-};
-struct stType{
-  char str[100];
-};
-
-
-void branchPruned(struct stType obj){  
-	switch(obj.str[0]) {
-		case 'a':
-			printf("a\n");
-			break;
-		case 'b':
-			printf("b\n");
-			break;
-		case 'c':
-			printf("c\n");
-			break;
-		case 'd':
-			printf("d\n");
-			break;
-		case 'e':
-			printf("e\n");
-			break;
-		case 'f':
-			printf("f\n");
-			break;						
-		case 'h':
-			printf("h\n");
-	}
+void branchNotPruned(char * buffer) {
+  if(!strcmp(buffer, "helloWorld0"))
+    printf("branchNotPruned 0\n");
+  else if(!strcmp(buffer, "helloWorld1"))
+    printf("branchNotPruned 1\n");
 }
 
-void initialize(struct stType* obj) {
-  memcpy(obj->str, "helloWorld\0", 11);
-} 
-
-int main(){
-
-  struct stType obj;
-  initialize(&obj); 
-  branchPruned(obj);
-
+int main(int argc, char ** argv) {
+  char buffer[100];
+  int fd = open("inter35_fileio.txt", O_RDONLY);
+  if(fd < 0) printf("file not found\n");
+  if(!strcmp(argv[1], "1")) lseek(fd, 11, SEEK_SET);
+  int bytes_read = read(fd, buffer, 11);
+  buffer[bytes_read] = '\0';
+  branchNotPruned(buffer);
   return 0;
 }

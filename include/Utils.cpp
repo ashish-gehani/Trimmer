@@ -512,6 +512,24 @@ bool ConstantFolding::satisfyConds(Function * F) {
   return !(fi->usedInLoop || fi->addrTaken || fi->directCallInsts > 1); 
 }
 
+
+void ConstantFolding::addSingleVal(Value * val, uint64_t num) {
+  Type * ty = val->getType();
+  if(ty->isPointerTy()) {
+    if(!num) {
+      debug(Abubakar) << "replacing with null\n";
+      ConstantPointerNull * nullP = ConstantPointerNull::get(dyn_cast<PointerType>(ty));
+      replaceAndLog(val, nullP);
+    } else {
+      debug(Abubakar) << "adding Register\n";
+      addRegister(val, ty, num); 
+    }
+  } else if(IntegerType * intTy = dyn_cast<IntegerType>(ty)) {
+    debug(Abubakar) << "replacing with constant int\n";
+    replaceAndLog(val, ConstantInt::get(intTy, num));
+  }
+}
+
 bool ConstantFolding::getSingleVal(Value * val, uint64_t& num) {
   if(ConstantInt * CI = dyn_cast<ConstantInt>(val)) 
     num =  CI->getZExtValue();
@@ -569,25 +587,18 @@ bool ConstantFolding::handleConstStr(Value * ptr) {
   return false;
 }
 
-void ConstantFolding::handleInt(Value * val, uint64_t num) {
-  Type * ty = val->getType();
-  if(ty->isPointerTy()) {
-    if(!num) {
-      debug(Abubakar) << "replacing with null\n";
-      ConstantPointerNull * nullP = ConstantPointerNull::get(dyn_cast<PointerType>(ty));
-      replaceAndLog(val, nullP);
-    } else {
-      debug(Abubakar) << "adding Register\n";
-      addRegister(val, ty, num); 
-    }
-  } else if(IntegerType * intTy = dyn_cast<IntegerType>(ty)) {
-    debug(Abubakar) << "replacing with constant int\n";
-    replaceAndLog(val, ConstantInt::get(intTy, num));
+bool ConstantFolding::noreplace(Value * from, Value * to) {
+  if(ConstantInt * CI = dyn_cast<ConstantInt>(to)) {
+    uint64_t val = CI->getZExtValue();
+    if(fdInfoMap.find(val) == fdInfoMap.end()) return false;
+    addRegister(from, from->getType(), val);
+    return true;
   }
+  return false; 
 }
 
 void ConstantFolding::replaceAndLog(Value * from, Value * to) {
-  if(!from || !to)
+  if(!from || !to || noreplace(from, to))
     return;
   from->replaceAllUsesWith(to);
   debug(Abubakar) << "replaced with " << *to << "\n";
