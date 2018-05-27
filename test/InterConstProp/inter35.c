@@ -4,6 +4,13 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+struct Config {
+  char buffer[100];
+  int fd;
+};
+
+struct Config * config;
+
 void branchNotPruned(char * buffer) {
   if(!strcmp(buffer, "helloWorld0"))
     printf("branchNotPruned 0\n");
@@ -11,13 +18,22 @@ void branchNotPruned(char * buffer) {
     printf("branchNotPruned 1\n");
 }
 
+void initConfig(char * str, int fd) {
+  config = malloc(sizeof(struct Config));
+  config->fd = fd;
+  if(!strcmp(str, "1")) lseek(config->fd, 11, SEEK_SET);
+}
+
+void readConfig() {
+  int bytes_read = read(config->fd, config->buffer, 11);
+  config->buffer[bytes_read] = '\0';
+}
+
 int main(int argc, char ** argv) {
-  char buffer[100];
-  int fd = open("inter35_fileio.txt", O_RDONLY);
+  int fd = open("inter34_fileio.txt", O_RDONLY);
   if(fd < 0) printf("file not found\n");
-  if(!strcmp(argv[1], "1")) lseek(fd, 11, SEEK_SET);
-  int bytes_read = read(fd, buffer, 11);
-  buffer[bytes_read] = '\0';
-  branchNotPruned(buffer);
+  initConfig(argv[1], fd);
+  readConfig();
+  branchNotPruned(config->buffer);
   return 0;
 }

@@ -62,17 +62,13 @@ void ConstantFolding::runOnInst(Instruction * I) {
 
 void ConstantFolding::runOnBB(BasicBlock * BB) {
   bbOps.addAncestor(BB, currBB);
+  bbOps.markVisited(BB);
   BasicBlock * temp = currBB;
   currBB = BB;
   ContextInfo * ci = BasicBlockContexts[currBB];
-  bbOps.markVisited(BB);
   for(ci->inst = BB->begin(); ci->inst != BB->end(); ci->inst++) {
     Instruction * I = &*(ci->inst);
     runOnInst(I);
-    if(terminateBB) { // loop peeled and as a result this inst has changed
-      terminateBB = false;
-      break;
-    } 
   }  
   currBB = temp;
   bbOps.freeBB(BB, BasicBlockContexts);
@@ -86,17 +82,7 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
 
   bool tempAnnot = currContextIsAnnotated;
   Function * temp = currfn;
-  if(ci) {
-    Function * calledFunction = ci->getCalledFunction();
-    unsigned index = 0;
-    for(auto arg = calledFunction->arg_begin(); arg != calledFunction->arg_end();
-        arg++, index++) {
-      Value * callerVal = ci->getOperand(index);
-      Value * calleeVal = getArg(toRun, index);
-      replaceOrCloneRegister(calleeVal, callerVal);
-    }
-    updateAnnotationContext(calledFunction);
-  }
+  if(ci) copyCallerContext(ci, toRun);
   initializeFuncInfo(toRun);
   currfn = toRun;
   BasicBlock * entry = &toRun->getEntryBlock();
@@ -113,9 +99,7 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
   currfn = temp;
   currContextIsAnnotated = tempAnnot;
   cleanUpfuncBBs(toRun, BasicBlockContexts, Registers, pop_back(funcValStack));
-  if(fi->retReg)
-    addSingleVal(ci, fi->retReg->getValue());
-
+  if(fi->retReg) addSingleVal(ci, fi->retReg->getValue());
 }
 
 bool ConstantFolding::runOnModule(Module & M) {
@@ -138,7 +122,6 @@ bool ConstantFolding::runOnModule(Module & M) {
   initializeFuncInfo(func);
   createNewContext(entry);
   currBB = entry;
-  terminateBB = false;
   currContextIsAnnotated = true;
   addGlobals();
   runOnFunction(NULL, func);

@@ -1,53 +1,20 @@
-#include <unistd.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <getopt.h>
 #include <string.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
 
-struct Config {
-  int area, perimeter, length, breadth;
-};
-
-void branchPruned(struct Config config) {
-  if(config.area == 1 && config.perimeter == 1 && 
-  config.length == 5 && config.breadth == 10)
+void branchPruned(int size, char * buffer) {
+  if(size == 10 && !strcmp(buffer, "helloWorld"))
     printf("branchPruned\n");
-} 
-struct Config config;
-static struct option long_options[] = {
-  {"area",      no_argument,       0,  'a' },
-  {"perimeter", no_argument,       0,  'p' },
-  {"length",    required_argument, 0,  'l' },
-  {"breadth",   required_argument, 0,  'b' },
-  {"defaultL", no_argument, &config.length, 10},
-  {"defaultB", no_argument, &config.breadth, 10},
-  {0,           0,                 0,  0   }
-};
+}
 
-
-int main() { 
-  int opt = 0;
-  int argc = 6;
-  char * argv[] = {"test", "--area", "-p", "--length", "5", "--defaultB"};
-  memset((char *) &config, '\0', sizeof(struct Config));
-  int long_index = 0;
-  while ((opt = getopt_long(argc, argv,"apl:b:", 
-  long_options, &long_index )) != -1) {
-    switch (opt) {
-      case 'a': 
-        config.area = 1;
-        break;
-      case 'p': 
-        config.perimeter = 1;
-        break;
-      case 'l': 
-        config.length = atoi(optarg); 
-        break;
-      case 'b': 
-        config.breadth = atoi(optarg);
-        break;
-    }
-  }
-  branchPruned(config);
-  printf("%d\n", optind);
+int main(int argc, char ** argv) {
+  char buffer[100];
+  int fd = open("inter30_fileio.txt", O_RDONLY);
+  if(fd < 0) printf("file not found\n");
+  int bytes_read = read(fd, buffer, 100);
+  buffer[bytes_read] = '\0';
+  branchPruned(bytes_read, buffer);
+  return 0;
 }

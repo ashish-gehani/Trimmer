@@ -4,20 +4,20 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-extern void externalFunc(char *);
-
-void branchPruned(int size, char * buffer) {
-  if(size == 10 && !strcmp(buffer, "helloWorld"))
-    printf("branchPruned\n");
+void branchNotPruned(char * buffer) {
+  if(!strcmp(buffer, "helloWorld0"))
+    printf("branchNotPruned 0\n");
+  else if(!strcmp(buffer, "helloWorld1"))
+    printf("branchNotPruned 1\n");
 }
 
 int main(int argc, char ** argv) {
   char buffer[100];
-  externalFunc(buffer);
-  int fd = open("inter31_fileio.txt", O_RDONLY);
+  int fd = open("inter34_fileio.txt", O_RDONLY);
   if(fd < 0) printf("file not found\n");
-  int bytes_read = read(fd, buffer, 100);
+  if(!strcmp(argv[1], "1")) lseek(fd, 11, SEEK_SET);
+  int bytes_read = read(fd, buffer, 11);
   buffer[bytes_read] = '\0';
-  branchPruned(bytes_read, buffer);
+  branchNotPruned(buffer);
   return 0;
 }

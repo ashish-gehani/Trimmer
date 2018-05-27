@@ -263,44 +263,17 @@ ProcResult ConstantFolding::tryfolding(Instruction * I) {
 }
 
 ProcResult ConstantFolding::processTermInst(TerminatorInst * termInst) {  
-  unsigned numS = termInst->getNumSuccessors(); 
+  vector<BasicBlock *> readyToVisit;
   LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();
-  bool single = bbOps.foldToSingleSucc(termInst, LI);
-  ProcResult result = single ? FOLDED : NOTFOLDED;
+  bool single = bbOps.foldToSingleSucc(termInst, readyToVisit, LI);
+  visitReadyToVisit(readyToVisit);
+  ProcResult result =  single ? FOLDED : NOTFOLDED;
+  unsigned numS = termInst->getNumSuccessors(); 
   for(unsigned int index = 0; index < numS; index++) {
-
     BasicBlock * succ = termInst->getSuccessor(index);
-    
-    if(!bbOps.visitBB(succ, LI)) 
-      continue;
-
-    if(bbOps.needToduplicate(succ, currBB, BasicBlockContexts)) {
-      debug(Abubakar) << "duplicating\n";
-      duplicateContext(succ);
-      bbOps.mergeContext(succ, currBB, BasicBlockContexts);
-    } else {
-      debug(Abubakar) << "cloning\n";
-      cloneContext(succ);
-    }    
-
-    if(index + 1 == numS)
-      bbOps.freeBB(currBB, BasicBlockContexts);
-
-    checkTermCond(succ);
-    
-    if(testTerminated()) // test terminated in the  term condition above
-      break;
-
-    // if(simplifyLoop(succ) == PEELOP) {
-    //   assert(termInst->getNumSuccessors() == 1); // has to be a preheader
-    //   processTermInst(currBB->getTerminator());
-    //   terminateBB = true;
-    //   break;
-    // }
-    runOnBB(succ);   
-
-    if(testTerminated()) // test terminated in runOnBB bove
-      break;
+    if(bbOps.isnotSingleSucc(currBB, succ)) continue;
+    if(!bbOps.visitBB(succ, LI)) continue;
+    if(!visitBB(succ, currBB)) break;
   }
   return result;
 }
@@ -346,10 +319,7 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
     //   markArgsAsNonConst(callInst);
     //   return NOTFOLDED;
     // }
-    Function * clone = addClonedFunction(callInst, calledFunction);
-    BasicBlock * entry = &clone->getEntryBlock();
-    duplicateContext(entry);    
-    runOnFunction(callInst, clone); 
+    runOnFunction(callInst, addClonedFunction(callInst, calledFunction)); 
   }
   return UNDECIDED;  
 }

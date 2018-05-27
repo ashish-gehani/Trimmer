@@ -71,6 +71,23 @@ CallInst * ConstantFolding::getTestInst(string name) {
   return testCall;
 }
 
+void ConstantFolding::copyCallerContext(CallInst * ci, Function * toRun) {
+  unsigned index = 0;
+  for(auto arg = toRun->arg_begin(); arg != toRun->arg_end();
+      arg++, index++) {
+    Value * callerVal = ci->getOperand(index);
+    Value * calleeVal = getArg(toRun, index);
+    replaceOrCloneRegister(calleeVal, callerVal);
+  }
+  BasicBlock * entry = &toRun->getEntryBlock();
+  duplicateContext(entry);    
+  updateAnnotationContext(ci->getCalledFunction());
+}
+
+bool ConstantFolding::hasContext(BasicBlock * BB) {
+  return BasicBlockContexts.find(BB) != BasicBlockContexts.end();
+}
+
 ContextInfo * ConstantFolding::getCurrContext() {
   return BasicBlockContexts[currBB];
 }
@@ -591,6 +608,7 @@ bool ConstantFolding::noreplace(Value * from, Value * to) {
   if(ConstantInt * CI = dyn_cast<ConstantInt>(to)) {
     uint64_t val = CI->getZExtValue();
     if(fdInfoMap.find(val) == fdInfoMap.end()) return false;
+    debug(Abubakar) << "adding Register for special integer " << val << "\n";
     addRegister(from, from->getType(), val);
     return true;
   }
@@ -764,6 +782,38 @@ bool ConstantFolding::handleDbgCall(CallInst * callInst) {
       }
   } else return false;
   return true;
+}
+
+void ConstantFolding::visitReadyToVisit(vector<BasicBlock *> readyToVisit) {
+  for(unsigned i = 0; i < readyToVisit.size(); i++) {
+    BasicBlock * BB = readyToVisit[i];
+    BasicBlock * pred = bbOps.getRfromPred(BB);
+    assert(pred != NULL);
+    visitBB(BB, pred);
+  }
+}
+
+bool ConstantFolding::visitBB(BasicBlock * succ, BasicBlock *  from) {
+  BasicBlock * temp = currBB;
+  currBB = from;
+  if(bbOps.needToduplicate(succ, from, BasicBlockContexts)) {
+    debug(Abubakar) << "duplicating\n";
+    duplicateContext(succ);
+    bbOps.mergeContext(succ, from, BasicBlockContexts);
+  } else {
+    debug(Abubakar) << "cloning\n";
+    cloneContext(succ);
+  }    
+
+  bbOps.freeBB(from, BasicBlockContexts);
+
+  checkTermCond(succ);
+  if(testTerminated()) return false; // test terminated in the  term condition above
+  // simplifyLoop(succ);
+  runOnBB(succ);   
+  if(testTerminated()) return false; // test terminated in runOnBB above
+  return true;
+  currBB = temp;
 }
 
 #endif

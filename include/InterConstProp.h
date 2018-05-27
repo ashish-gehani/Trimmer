@@ -161,8 +161,10 @@ struct ConstantFolding : public ModulePass {
   void duplicateContext(BasicBlock *);
   void initializeBBInfo(BasicBlock * BB);
   Memory * duplicateMem();
+  bool hasContext(BasicBlock * BB);
   ContextInfo * getCurrContext();
   void copyContext(Memory *);
+  void copyCallerContext(CallInst *, Function *);
   uint64_t allocateStack(uint64_t);
   uint64_t allocateHeap(uint64_t);
   uint64_t loadMem(uint64_t, uint64_t);
@@ -182,6 +184,8 @@ struct ConstantFolding : public ModulePass {
   bool replaceOrCloneRegister(Value *, Value *);
   Register * getRegister(Value *);
 
+  bool visitBB(BasicBlock *, BasicBlock *);
+  void visitReadyToVisit(vector<BasicBlock *>);
   LoopOp simplifyLoop(BasicBlock *);
   TestInfo * runtest(Loop *, LoopOp &, unsigned &);
   bool runOp(BasicBlock *, LoopOp, unsigned);

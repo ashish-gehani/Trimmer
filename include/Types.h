@@ -68,16 +68,18 @@ struct FuncInfo {
 };
 
 struct BBInfo {
-  bool writesToMemory, partOfLoop, isHeader, singleSucc;
-  unsigned numPreds, URfrom;
+  bool writesToMemory, partOfLoop, isHeader;
+  unsigned numPreds, URfrom, Rfrom;
   vector<BasicBlock *> loopLatchesWithEdge, ancestors;
+  BasicBlock * singleSucc;
   BBInfo(BasicBlock * BB) {
     writesToMemory = false;
     partOfLoop = false;
     isHeader = false;
-    singleSucc = false;
+    singleSucc = NULL;
     URfrom = 0;
     numPreds = 0;
+    Rfrom = 0;
     set<BasicBlock *> preds;
     for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++) {
       BasicBlock * predecessor = *it;

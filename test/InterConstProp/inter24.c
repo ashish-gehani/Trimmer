@@ -8,22 +8,33 @@ struct stType {
   char * buffer;
 };
 
-void branchPruned(struct stType * st) {
-  char cond = 1;
-  char str[11];
-  memcpy(str, "helloworld", 10); 
-  for(unsigned i = 0; i < 4; i++) {
-    str[10] = i + '0'; // add the last character
-    if(st[i].x != i || st[i].y != i || strcmp(str, st[i].buffer))
-      cond = 0;
-  }
-  if(cond)
-    printf("branchPruned\n");
+void branchPruned(int x) {
+  if(x == 3)
+    printf("branchPruned 3\n");
+  else if(x == 5)
+    printf("branchPruned 5\n");
 }
 
-struct stType st[] = {{0, 0, "helloworld0"}, {1, 1, "helloworld1"}, {2, 2, "helloworld2"}, {3, 3, "helloworld3"}};
+struct stType st = {0, 0, "helloworld0"};
 
-int main() {
-  branchPruned(st);
+char checkSt() {
+  return (st.x == 0 && st.y == 0 && !strcmp(st.buffer, "helloworld0"));
+}
+
+int main(int argc, char ** argv) {
+  int x = 0;
+  if(!strcmp(argv[1], "0")) {
+    printf("it is equal to zero\n");
+    x = 3;
+    if(!checkSt()) {
+      printf("checkSt is false\n");
+      goto cond;
+    }
+  } else {
+    printf("it is equal to one\n");
+    x = 5;    
+    cond:
+      branchPruned(x);
+  }
   return 0;
 }

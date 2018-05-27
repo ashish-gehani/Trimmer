@@ -46,9 +46,23 @@ public:
   bool isUnReachable(BasicBlock * BB) {
     return unReachable.find(BB) != unReachable.end();
   }
+
+  // returns true if there is a single child and it is equal to succ
+  bool isSingleSucc(BasicBlock * pred, BasicBlock * succ) {
+    if(pred == NULL || succ == NULL) return false;
+    assert(BBInfoMap.find(pred) != BBInfoMap.end());
+    return BBInfoMap[pred]->singleSucc == succ;
+  }
+
+  // returns true if there is a single child and it is not equal to succ
+  bool isnotSingleSucc(BasicBlock * pred, BasicBlock * succ) {
+    if(pred == NULL || succ == NULL) return false;
+    assert(BBInfoMap.find(pred) != BBInfoMap.end());
+    return BBInfoMap[pred]->singleSucc && BBInfoMap[pred]->singleSucc != succ;
+  }
+
   bool needToduplicate(BasicBlock * BB, BasicBlock * from,
   BasicBlockContInfoMap bbc) {
-
     bool singlePredFrom = true;
     ContextInfo * ci = bbc[from];
     for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++) {
@@ -63,7 +77,7 @@ public:
       } 
     }
     bool noMemWrite = !BBInfoMap[BB]->writesToMemory; 
-    bool singleSuccTo = BBInfoMap[from]->singleSucc;
+    bool singleSuccTo = BBInfoMap[from]->singleSucc != NULL;
     return !(singlePredFrom && (noMemWrite || singleSuccTo));
   }
 
@@ -75,16 +89,15 @@ public:
   }
   
   bool visitBB(BasicBlock * BB, LoopInfo& LI) {
-    
     if(isVisited(BB)) {
       return false;
     }
 
-    if(isUnReachable(BB))
+    if(isUnReachable(BB)) {
       return false;
-
+    }
     addBB(BB, LI);
-    
+    BBInfoMap[BB]->Rfrom++;
     if(!predecessorsVisited(BB, LI)) {
       return false;  
     }
@@ -125,22 +138,18 @@ public:
     for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++) {
       BasicBlock * predecessor = *it;
 
-      if(isUnReachable(predecessor))
-        continue;
+      if(isUnReachable(predecessor)) continue;
 
       if(findInVect(BBInfoMap[BB]->loopLatchesWithEdge, predecessor))
         continue;     
 
-      assert(bbc.find(predecessor) != bbc.end() &&
-        "basic block context not found");
+      assert(bbc.find(predecessor) != bbc.end() && "basic block context not found");
 
-      if(predecessor == prev) {
-        continue;
-      }
+      if(predecessor == prev) continue;
+      if(isnotSingleSucc(predecessor, BB)) continue;
 
-      if(bbc[predecessor]->deleted) {
-        continue;
-      }
+      assert(!bbc[predecessor]->deleted && "predecessor context deleted");
+
       predConts.push_back(bbc[predecessor]);
     }
     for(unsigned i = 0; i < predConts.size(); i++) {
@@ -166,16 +175,13 @@ public:
       return;
     TerminatorInst * ti = BB->getTerminator();
     for(unsigned i = 0; i < ti->getNumSuccessors(); i++) {
-      if(isUnReachable(ti->getSuccessor(i)))
-        continue;
-      if(bbc.find(ti->getSuccessor(i)) == bbc.end())
+      if(isnotSingleSucc(BB, ti->getSuccessor(i))) continue;
+      if(bbc.find(ti->getSuccessor(i)) == bbc.end()) return;
+      if(isUnReachable(ti->getSuccessor(i))) continue;
+      ContextInfo * succCi = bbc[ti->getSuccessor(i)];
+      if(succCi->cloneOf && 
+      (succCi->cloneOf == ci || succCi->cloneOf == ci->cloneOf))
         return;
-      else {
-        ContextInfo * succCi = bbc[ti->getSuccessor(i)];
-        if(succCi->cloneOf && 
-        (succCi->cloneOf == ci || succCi->cloneOf == ci->cloneOf))
-          return;
-      }
     }
     printBB("freeing BB ", BB, "\n", Abubakar); 
     delete ci->memory;
@@ -196,7 +202,7 @@ public:
       if(isUnReachable(worker)) 
         continue;
       unReachable.insert(worker);
-      markSuccessorsAsUR(worker->getTerminator(), NULL, LI);
+      markSuccessorsAsUR(worker->getTerminator(), LI);
       const vector<DomTreeNodeBase<BasicBlock> *> children = 
         DT->getNode(worker)->getChildren();
       for(unsigned i = 0; i < children.size(); i++) {
@@ -205,20 +211,27 @@ public:
       }
     }
   }  
-  void markSuccessorsAsUR(TerminatorInst * termInst,
-   BasicBlock * except, LoopInfo& LI) {
+  void checkReadyToVisit(BasicBlock * BB) {
+    unsigned numPreds = BBInfoMap[BB]->numPreds;
+    unsigned URfrom = BBInfoMap[BB]->URfrom; 
+    unsigned Rfrom = BBInfoMap[BB]->Rfrom;
+    if(Rfrom && (URfrom + Rfrom == numPreds))
+      InsertUnique(readyToVisit, BB);
+  }
+  void markSuccessorsAsUR(TerminatorInst * termInst, LoopInfo& LI) {
     for(unsigned int index = 0; index < termInst->getNumSuccessors(); index++) {
       BasicBlock * successor = termInst->getSuccessor(index);
-      if(successor == except)
-        continue;
+      if(isSingleSucc(termInst->getParent(), successor)) continue;
       addBB(successor, LI);      
       BBInfoMap[successor]->URfrom++;
+      checkReadyToVisit(successor);
       if(BBInfoMap[successor]->URfrom < BBInfoMap[successor]->numPreds)
         continue;
       propagateUR(successor, LI);
     }
   }  
-  bool foldToSingleSucc(TerminatorInst * termInst, LoopInfo& LI) {
+  bool foldToSingleSucc(TerminatorInst * termInst, vector<BasicBlock *> & readyToVisit,
+    LoopInfo& LI) {
     BasicBlock * single = NULL;
     if(BranchInst *  BI = dyn_cast<BranchInst>(termInst)) {
       if(!BI->isConditional())
@@ -235,8 +248,10 @@ public:
     }
     if(single) {
       printBB("folded to single successor ", single, "\n", Abubakar);
-      markSuccessorsAsUR(termInst, single, LI);
-      BBInfoMap[termInst->getParent()]->singleSucc = true;
+      BBInfoMap[termInst->getParent()]->singleSucc = single;
+      this->readyToVisit.clear();
+      markSuccessorsAsUR(termInst, LI);
+      readyToVisit = this->readyToVisit;
     }
     return single != NULL;
   }
@@ -292,8 +307,25 @@ public:
       }
     }
   }
+  BasicBlock * getRfromPred(BasicBlock * BB) {
+    for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++) {
+      
+      BasicBlock * predecessor = *it;
+      if(isUnReachable(predecessor)) {
+        continue;
+      }
+
+      if(visited.find(predecessor) == visited.end()) continue;
+      if(isnotSingleSucc(predecessor, BB)) {
+        continue;
+      }
+      return predecessor;
+    }    
+    return NULL;
+  }
 private:
   map<BasicBlock *, BBInfo *> BBInfoMap;
   set<BasicBlock *> visited;
   set<BasicBlock *> unReachable;
+  vector<BasicBlock *> readyToVisit;
 };
