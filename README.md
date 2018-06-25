@@ -49,20 +49,41 @@
     the results are written to results/exe_sizes.csv and results/funcs.csv
     the pre-generated bitcodes and manifests for some examples can be found in examples/name/trimmer/name
 
-#### running test cases
+#### Running test cases
     
-    test cases are present inside test/InterConstProp
+    Test cases directory: /test/InterConstProp
+      
+    * Includes a suite of multiple test cases used to measure the effectiveness of TRIMMER in debloating unused code 
+             
+    Running test examples:
+    
+    ```
     cd test/InterConstProp
     python test.py 1 1 
+    ```
+    
     will run the test case for inter1.c
+    
+    ```
     python test.py 1 10
-    will run the test cases for inter1.c to inter10.c
+    ```
+    
+    will run 10 test cases including inter1.c to inter10.c (inclusive)
 
-    The major components of the test cases are the functions branchPruned and branchNotPruned.
-    branchPruned contains those code branches which can be pruned as a result of inter procedural constant propagation, while branchNotPruned contains code branches which cannot be pruned because of some ambiguity in the program.
+    In all test cases, we include functions with names 'branchPruned' and 'branchNotPruned'
+    * **branchPruned** contains code branches that we expect should be eliminated by debloating
+    * **branchNotPruned** contains code branches that should NOT be eliminated by debloating 
+      - this serves as a sanity check 
+      
+    Guidelines for Writing Additional Test Cases:
+    
+           * branchPruned should contain only one branch. As a result of specialization we expect 
+           this branch to evaluate to true. The underlying block should contain a 
+           printf call. Multiple branches can be joined by using '&&'.
 
-    Note : branchPruned should contain only one branch. This branch should always evaluate to true as a result of constant propagation. The underlying block should contain a printf call. Multiple branches can be joined by using '&&'.
+           * branchNotPruned should also contain only one branch. Multiple branches 
+           can be joined by using '||'. The underlying block should contain a printf call.
 
-    Note : branchNotPruned should contain only one branch. Multiple branches can be joined by using '||'. The underlying block should contain a printf call.
-
-    If inter procedural constant propagation was succesful the branchPruned function would contain only the printf call that was conditional on the branch. The branchNotPruned function will remain unmodified.
+     **Measuring Code Elimination**: If specialization is successful, the branchPruned function should only contain the printf call that was conditional on the branch. The branchNotPruned function should remain unmodified (no code removed)    
+    
+    
