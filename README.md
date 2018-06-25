@@ -8,18 +8,18 @@
     
     if you have non conventional names for LLVM or CLANG you will have to set certain enviornment variables.
 
-    e.g. if you have version 3.8
+    e.g. if you have version 4.0
     
-    export LLVM_CC_NAME=clang-3.8
-    export LLVM_CXX_NAME=clang++-3.8
-    export LLVM_LINK_NAME=llvm-link-3.8
-    export LLVM_DIS_NAME=llvm-dis-3.8
-    export LLVM_AR_NAME=llvm-ar-3.8
-    export LLVM_AS_NAME=llvm-as-3.8
-    export LLVM_LD_NAME=llvm-ld-3.8
-    export LLVM_LLC_NAME=llc-3.8
-    export LLVM_OPT_NAME=opt-3.8
-    export LLVM_NM_NAME=llvm-nm-3.8
+    export LLVM_CC_NAME=clang-4.0
+    export LLVM_CXX_NAME=clang++-4.0
+    export LLVM_LINK_NAME=llvm-link-4.0
+    export LLVM_DIS_NAME=llvm-dis-4.0
+    export LLVM_AR_NAME=llvm-ar-4.0
+    export LLVM_AS_NAME=llvm-as-4.0
+    export LLVM_LD_NAME=llvm-ld-4.0
+    export LLVM_LLC_NAME=llc-4.0
+    export LLVM_OPT_NAME=opt-4.0
+    export LLVM_NM_NAME=llvm-nm-4.0
 
 #### Synopsis
        
