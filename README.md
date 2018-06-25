@@ -90,7 +90,7 @@ will run 10 test cases including inter1.c to inter10.c (inclusive)
 In all test cases, we include functions with names 'branchPruned' and 'branchNotPruned'
   * **branchPruned** contains code branches that we expect should be eliminated by debloating
   * **branchNotPruned** contains code branches that should NOT be eliminated by debloating 
-                        - this serves as a sanity check 
+                        - this checks cases where the variable under consideration is not a 'provably' constant value, and hence the branch should not be folded.
       
 **Guidelines for Writing Additional Test Cases**:
   * branchPruned should contain only one branch. As a result of specialization we expect 
