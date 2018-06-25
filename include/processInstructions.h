@@ -314,11 +314,11 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
     return NOTFOLDED;
   } else {
     initializeFuncInfo(calledFunction);
-    // if(!satisfyConds(calledFunction)) {
-    //   debug(Abubakar) << "skipping function : does not satisfy conds\n";
-    //   markArgsAsNonConst(callInst);
-    //   return NOTFOLDED;
-    // }
+    if(useAnnotations && !satisfyConds(calledFunction)) {
+      debug(Abubakar) << "skipping function : does not satisfy conds\n";
+      markArgsAsNonConst(callInst);
+      return NOTFOLDED;
+    }
     runOnFunction(callInst, addClonedFunction(callInst, calledFunction)); 
   }
   return UNDECIDED;  

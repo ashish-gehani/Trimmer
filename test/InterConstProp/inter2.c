@@ -25,11 +25,9 @@ void modify(char * buffer, int val, int argc) {
 
 char buffer[100];
 int main(int argc, char ** argv){
-
   memcpy(buffer, "helloWorld", 100);
   modify(buffer, 3, argc);
   branchPruned(buffer);
   branchNotPruned(buffer);
-
   return 0;
 }

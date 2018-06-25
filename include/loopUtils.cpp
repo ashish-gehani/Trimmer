@@ -4,117 +4,82 @@ using namespace std;
 #include "InterConstProp.h"
 #include "Utils.cpp"
 
-
 #ifndef LOOP_UTILS_H_
 #define LOOP_UTILS_H_
 
-#define DEFAULT_TRIP_COUNT 20
+bool ConstantFolding::checkUnrollHint(BasicBlock * hdr, LoopInfo &LI) {
+  Value * unrollH = module->getNamedValue("unroll_loop");
+  if(!unrollH) return false;
+  for(Use &U : unrollH->uses()) {
+    Instruction * user = dyn_cast<Instruction>(U.getUser());
+    if(!user) continue;
+    BasicBlock * BB = user->getParent();
+    Loop * L = LI.getLoopFor(BB);
+    if(L && L->getHeader() == hdr) return true;
+  }
+  return false;
+}
 
-// static bool canPeel(Loop *L) {
-//   // Make sure the loop is in simplified form
-//   if(!L->isLoopSimplifyForm())
-//     debug(Abubakar) << "not L->isLoopSimplifyForm\n";
-//   if(!L->getExitingBlock())
-//     debug(Abubakar) << "not L->getExitingBlock\n";
-//   if(!L->getUniqueExitBlock())
-//     debug(Abubakar) << "not L->getUniqueExitBlock\n";
-//   if(L->getLoopLatch() != L->getExitingBlock())
-//     debug(Abubakar) << "LoopLatch is not the exiting block\n";    
-
-//   if (!L->isLoopSimplifyForm())
-//     return false;
-
-//   // Only peel loops that contain a single exit
-
-//   if (!L->getExitingBlock() || !L->getUniqueExitBlock())
-//    return false;
-
-
-//   // Don't try to peel loops where the latch is not the exiting block.
-//   // This can be an indication of two different things:
-//   // 1) The loop is not rotated.
-//   // 2) The loop contains irreducible control flow that involves the latch.
-//   if (L->getLoopLatch() != L->getExitingBlock())
-//    return false;
-
-//   return true;
-// }
-
-LoopOp ConstantFolding::getOp(BasicBlock * header, unsigned & tripCount) {
+bool ConstantFolding::getTripCount(BasicBlock * header, unsigned & tripCount) {
   Function * F = header->getParent();
   LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*F).getLoopInfo();
   DominatorTree * DT = new DominatorTree(*F);
   AssumptionCache &AC = getAnalysis<AssumptionCacheTracker>(*F).getAssumptionCache(*F);
   ScalarEvolution SE(*F, *TLI, AC, *DT, LI);
   Loop * L = LI.getLoopFor(dyn_cast<BasicBlock>(header));
-  tripCount =  SE.getSmallConstantTripCount(L);
+  tripCount =  SE.getSmallConstantMaxTripCount(L);
   if(!tripCount) {
-    tripCount = DEFAULT_TRIP_COUNT;
-    return PEELOP;
+    tripCount = DEFAULT_TRIP_COUNT + 5;
+    return false;
   }
-  return UNROLLOP;
-}
-
-bool ConstantFolding::runOp(BasicBlock * header, LoopOp op, 
-                      unsigned tripCount) {
-  // if(!op)
-  //   return false;
-  // Function * F = header->getParent();
-  // LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*F).getLoopInfo();
-  // DominatorTree * DT = new DominatorTree(*F);
-  // AssumptionCache &AC = getAnalysis<AssumptionCacheTracker>(*F).getAssumptionCache(*F);
-  // ScalarEvolution SE(*F, *TLI, AC, *DT, LI);
-  // Loop * L = LI.getLoopFor(dyn_cast<BasicBlock>(header));
-  // if(op == PEELOP) {
-  //   if(!canPeel(L)) {
-  //     debug(Abubakar) << "failed in peeling\n";
-  //     return false;
-  //   }
-  //   bool peeled = peelLoop(L, tripCount, &LI, &SE, DT, PreserveLCSSA);
-  //   assert(peeled);
-  //   debug(Abubakar) << "succeeded in peeling for " << tripCount << " iterations\n";
-  // } else {
-  //   OptimizationRemarkEmitter ORE(F); 
-  //   int UnrollResult = UnrollLoop(L, tripCount, tripCount, true, false, false, 
-  //                 false, false, 0, 0, &LI, &SE, DT, &AC, &ORE, PreserveLCSSA);
-  //   if(!UnrollResult) {
-  //     debug(Abubakar) << "failed in unrolling\n";
-  //     return false;
-  //   }
-  //   debug(Abubakar) << "succeeded in unrolling for " << tripCount << " iterations\n";
-  // }
   return true;
 }
 
-TestInfo * ConstantFolding::runtest(Loop * L, LoopOp & op, unsigned & tripCount) {
+bool ConstantFolding::doUnroll(BasicBlock * header, unsigned tripCount) {
+  Function * F = header->getParent();
+  LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*F).getLoopInfo();
+  DominatorTree * DT = new DominatorTree(*F);
+  AssumptionCache &AC = getAnalysis<AssumptionCacheTracker>(*F).getAssumptionCache(*F);
+  ScalarEvolution SE(*F, *TLI, AC, *DT, LI);
+  Loop * L = LI.getLoopFor(dyn_cast<BasicBlock>(header));
+  OptimizationRemarkEmitter ORE(F); 
+  int UnrollResult = UnrollLoop(L, tripCount, tripCount, true, false, false, 
+                true, false, 0, 0, &LI, &SE, DT, &AC, &ORE, PreserveLCSSA);
+  if(!UnrollResult) {
+    debug(Abubakar) << "failed in unrolling\n";
+    return false;
+  }
+  debug(Abubakar) << "succeeded in unrolling for " << tripCount << " iterations\n";
+  return true;
+}
 
+TestInfo * ConstantFolding::runtest(Loop * L) {
   ValueToValueMapTy vmap;
   Function * toRun = addClonedFunction(currfn, vmap);
-  BasicBlock * header = L->getHeader();
-  BasicBlock * hdrClone = dyn_cast<BasicBlock>(vmap[header]); 
-  op = getOp(hdrClone, tripCount);
-
+  bbOps.copyFuncBlocksInfo(currfn, vmap);
+  BasicBlock * hdrClone = dyn_cast<BasicBlock>(vmap[L->getHeader()]); 
+  unsigned tripCount;
+  bool constTripCount = getTripCount(hdrClone, tripCount);
   LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*toRun).getLoopInfo();
   Loop * newLoop = LI.getLoopFor(dyn_cast<BasicBlock>(hdrClone));
-
-  TestInfo * ti = new TestInfo(newLoop, getTestInst(LOOPTERM), op);
+  TestInfo * ti = new TestInfo(newLoop, module, constTripCount);
   testStack.push_back(ti);
   BasicBlock * entry = newLoop->getLoopPreheader();
-  duplicateContext(entry);
 
   ValSet oldValSet = funcValStack[funcValStack.size() - 1];
   push_back(funcValStack);
-
-  for(auto val : oldValSet)
+  for(auto val : oldValSet) 
     addRegister(vmap[val], Registers[val]);
-
-  if(!runOp(hdrClone, op, tripCount)) {
+  if(!doUnroll(hdrClone, tripCount)) {
     pop_back(testStack);
     cleanUpfuncBBs(toRun, BasicBlockContexts, Registers, pop_back(funcValStack));
     return ti; // the default value for ti->passed is false
   }
+  duplicateContext(entry);
   Function * temp = currfn; 
   currfn = toRun;
+  LoopInfo &newLI = getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();
+  bbOps.recomputeLoopInfo(currfn, newLI);
   initializeFuncInfo(toRun);
   runOnBB(entry);
 
@@ -123,30 +88,30 @@ TestInfo * ConstantFolding::runtest(Loop * L, LoopOp & op, unsigned & tripCount)
   return pop_back(testStack);
 }
 
-LoopOp ConstantFolding::simplifyLoop(BasicBlock * BB) {
+void ConstantFolding::simplifyLoop(BasicBlock * BB) {
   if(testStack.size()) // for now dont run a test from within a test.
-    return NOOP;
-	if(!bbOps.partOfLoop(BB)) {
-  	return NOOP;	
+    return;
+  if(!bbOps.partOfLoop(BB)) {
+    return; 
   }
   LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();
   Loop * L = LI.getLoopFor(BB);
   if(BB != L->getHeader())
-  	return NOOP;
+    return;
+  if(useAnnotations && !checkUnrollHint(BB, LI))
+    return;
   debug(Abubakar) << "running test\n";
-  LoopOp op;
-  unsigned tripCount;
-  TestInfo * ti = runtest(L, op, tripCount);
-  if(!ti->passed) {
+  TestInfo * ti = runtest(L);
+  if(!ti->checkPassed()) {
     debug(Abubakar) << "test failed\n";
-    return NOOP;  
+    return;  
   }
+  debug(Abubakar) << "loop broken in " << ti->iterations << " iterations\n";
   debug(Abubakar) << "test passed : modifying loop\n";
-  runOp(BB, op, tripCount);
+  doUnroll(BB, ti->iterations + 1);
   LoopInfo &newLI = getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();
-  bbOps.recomputeInfo(currfn, newLI);
-
-  return op;
+  /*TODO : what other information may change as a result of unrolling/peeling?*/
+  bbOps.recomputeLoopInfo(currfn, newLI);
 }
 
 bool ConstantFolding::testTerminated() {
@@ -156,21 +121,16 @@ bool ConstantFolding::testTerminated() {
   return ti->terminated;
 }
 
-void ConstantFolding::checkTermCond(BasicBlock * BB) {
+void ConstantFolding::checkTermInst(Instruction * I) {
   if(!testStack.size())
     return;
   TestInfo * ti = testStack[testStack.size() - 1];
   if(ti->terminated)
     return;
-  if(ti->checkExitBB(BB)) {
+  if(ti->checkBreakInst(I)) {
     ti->terminated = true;
-    ti->passed = true;
-    debug(Abubakar) << "marking test at level " << testStack.size() << " as passed\n";
-  } else if(ti->headerBB == BB) {
-    ti->terminated = true;
-    ti->passed = false;
-    debug(Abubakar) << "marking test at level " << testStack.size() << " as failed\n";
-  }  
+    debug(Abubakar) << "marking test at level " << testStack.size() << " as terminated\n";
+  } else ti->updateIter(I); 
 }
 
 void ConstantFolding::updateCM(ProcResult result, Instruction * I) {
@@ -181,22 +141,20 @@ void ConstantFolding::updateCM(ProcResult result, Instruction * I) {
   TestInfo * ti = testStack[testStack.size() - 1];
   if(ti->terminated)
     return;
-  if(ti->InstResults.find(I) != ti->InstResults.end())
+  if(findInMap(ti->InstResults, I))
     return;
   if(bbOps.partOfLoop(I->getParent())) {
     ti->InstResults[I] = PARTOFLOOP;
     ti->partOfLoop++;
     return;
   }
-
   ti->InstResults[I] = result;
   bool found = false;
   for(unsigned i = 0; i < I->getNumOperands(); i++) {
     Value * val = I->getOperand(i);
     if(!isa<Instruction>(val))
       continue;
-    if(ti->InstResults.find(dyn_cast<Instruction>(val)) != 
-      ti->InstResults.end()) {
+    if(findInMap(ti->InstResults, dyn_cast<Instruction>(val))) {
       found = true;
       break;
     }
@@ -207,14 +165,11 @@ void ConstantFolding::updateCM(ProcResult result, Instruction * I) {
 
 unsigned ConstantFolding::getNumNodesBelow(Instruction * I, 
   map<Instruction *, unsigned> & cache, TestInfo * ti) {
-
-  if(cache.find(I) != cache.end())
+  if(findInMap(cache, I))
     return cache[I];
-
   // getNumNodesBelow called on a use outside the loop
-  if(ti->InstResults.find(I) == ti->InstResults.end())
+  if(!findInMap(ti->InstResults, I))
     return 1;
-
   ProcResult result = ti->InstResults[I];
   if(result == FOLDED || result == PARTOFLOOP)
     return 0;

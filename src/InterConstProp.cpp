@@ -68,6 +68,9 @@ void ConstantFolding::runOnBB(BasicBlock * BB) {
   ContextInfo * ci = BasicBlockContexts[currBB];
   for(ci->inst = BB->begin(); ci->inst != BB->end(); ci->inst++) {
     Instruction * I = &*(ci->inst);
+    checkTermInst(I);    
+    if(testTerminated()) // test terminated in the  term condition above
+      break;
     runOnInst(I);
   }  
   currBB = temp;
@@ -79,7 +82,6 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
   if(!ci) assert(toRun->getName().str() == "main" && "callInst not given");
 
   push_back(funcValStack);
-
   bool tempAnnot = currContextIsAnnotated;
   Function * temp = currfn;
   if(ci) copyCallerContext(ci, toRun);

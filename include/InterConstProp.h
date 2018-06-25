@@ -29,6 +29,7 @@
 #include "llvm/Analysis/ScalarEvolution.h"
 #include "llvm/Analysis/ScalarEvolutionExpressions.h"
 #include "llvm/Analysis/TargetTransformInfo.h"
+#include "llvm/Analysis/OptimizationDiagnosticInfo.h"
 
 #include <sys/stat.h>
 #include <map>
@@ -43,6 +44,7 @@
 #include <sstream>
 #include <set>
 #include <ctime>
+#include <getopt.h>
 
 #ifndef INTERCONSTPROP_H_
 #define INTERCONSTPROP_H_
@@ -155,7 +157,6 @@ struct ConstantFolding : public ModulePass {
   bool noreplace(Value *, Value *);
   void replaceAndLog(Value *, Value *);
 
-  CallInst * getTestInst(string name);
   void createNewContext(BasicBlock * BB);
   void cloneContext(BasicBlock *);  
   void duplicateContext(BasicBlock *);
@@ -186,11 +187,14 @@ struct ConstantFolding : public ModulePass {
 
   bool visitBB(BasicBlock *, BasicBlock *);
   void visitReadyToVisit(vector<BasicBlock *>);
-  LoopOp simplifyLoop(BasicBlock *);
-  TestInfo * runtest(Loop *, LoopOp &, unsigned &);
-  bool runOp(BasicBlock *, LoopOp, unsigned);
-  LoopOp getOp(BasicBlock *, unsigned &);
-  void checkTermCond(BasicBlock *);
+
+  void simplifyLoop(BasicBlock *);
+  TestInfo * runtest(Loop *);
+  bool doUnroll(BasicBlock *, unsigned);
+  bool getTripCount(BasicBlock *, unsigned &);
+  void checkTermInst(Instruction *);
+  void checkTermBB(BasicBlock *);
+  bool checkUnrollHint(BasicBlock *, LoopInfo &LI);
   void updateCM(ProcResult, Instruction *);
   bool testTerminated();
   unsigned getCost(TestInfo * ti);

@@ -298,15 +298,6 @@ public:
     }
     return val;
   }
-  void recomputeInfo(Function * F, LoopInfo& LI) {
-    for(Function::iterator bi = F->begin(), e = F->end(); bi != e; ++bi) {
-      BasicBlock * BB = &*bi;
-      if(BBInfoMap.find(BB) != BBInfoMap.end()) {
-        delete BBInfoMap[BB];
-        initialize(BB, LI);
-      }
-    }
-  }
   BasicBlock * getRfromPred(BasicBlock * BB) {
     for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++) {
       
@@ -322,6 +313,30 @@ public:
       return predecessor;
     }    
     return NULL;
+  }
+  void recomputeLoopInfo(Function * F, LoopInfo& LI) {
+    for(Function::iterator bi = F->begin(), e = F->end(); bi != e; ++bi) {
+      BasicBlock * BB = &*bi;
+      if(findInMap(BBInfoMap, BB))
+        BBInfoMap[BB]->partOfLoop = LI.getLoopFor(BB);
+    }
+  }
+  /* todo : how to recompute ancestors */
+  void copyFuncBlocksInfo(Function * F, ValueToValueMapTy & vmap) {
+    for(Function::iterator bi = F->begin(), e = F->end(); bi != e; ++bi) {
+      BasicBlock * BB = &*bi;
+      BasicBlock * clone = dyn_cast<BasicBlock>(vmap[BB]);
+      if(findInSet(visited, BB))
+        visited.insert(clone);
+      else if(findInSet(visited, BB))
+        unReachable.insert(clone);
+      if(findInMap(BBInfoMap, BB)) {
+        BBInfo * bbi = BBInfoMap[BB];
+        BBInfo * nbbi = new BBInfo(clone);
+        *nbbi = *bbi;
+        BBInfoMap[clone] = nbbi;
+      }
+    }
   }
 private:
   map<BasicBlock *, BBInfo *> BBInfoMap;

@@ -6,7 +6,11 @@ using namespace llvm;
 
 #include "mem.h"
 
-#define LOOPTERM "__loop_termination_test__"
+#define LOOPEXITBB "__loop_termination_test__"
+#define LOOPITERBB "__loop_iteration_test__"
+
+#define DEFAULT_TRIP_COUNT 20
+
 
 enum ProcResult {
   UNDECIDED,
@@ -91,35 +95,62 @@ struct BBInfo {
   }
 };
 
+CallInst * getTestInst(string, Module *);
+
 struct TestInfo {
-  bool terminated, passed;
-  BasicBlock * headerBB; // if we fold to the exit then loopPeeling was succesful
-                                   // if we reach the header then it was unsuccesful                 
+  bool terminated, ConstTripCount;              
   vector<Instruction *> indepInsts;
   map<Instruction *, ProcResult> InstResults; 
-  unsigned numOrigInsts, partOfLoop;
-  TestInfo(Loop * L, CallInst * testCall, LoopOp op) {
-    terminated = passed = false;
-    headerBB = op == PEELOP ? L->getHeader() : NULL;
-    BasicBlock * exitBB = L->getUniqueExitBlock();
-    Instruction * first = &*exitBB->begin();
-    if(isa<TerminatorInst>(first)) testCall->insertBefore(first);
-    else testCall->insertAfter(first);
-    numOrigInsts = partOfLoop = 0;
+  unsigned numOrigInsts, partOfLoop, iterations;
+  TestInfo(Loop * L, Module * module, bool tripCount) {
+    terminated = false;
+    ConstTripCount = tripCount;
+    CallInst * testCall = getTestInst(LOOPEXITBB, module);
+    CallInst * iterCall = getTestInst(LOOPITERBB, module);  
+    SmallVector<BasicBlock*, 16> ExitBlocks;
+    L->getUniqueExitBlocks(ExitBlocks);
+    for(unsigned i = 0; i < ExitBlocks.size(); i++) {
+      BasicBlock * BB = ExitBlocks[i];
+      testCall->clone()->insertBefore(firstInst(BB));
+    }
+    testCall->dropAllReferences();
+    BasicBlock * latchBB = L->getLoopLatch();
+    iterCall->insertBefore(firstInst(latchBB));
+    numOrigInsts = partOfLoop = iterations = 0;
     for(auto block : L->blocks()) {
       BasicBlock * BB = &*block;
       numOrigInsts += distance(BB->begin(), BB->end());
     }  
   } 
-  bool checkExitBB(BasicBlock * BB) {
-    for(BasicBlock::iterator it = BB->begin(); it != BB->end(); it++) {
-      Instruction * I = &*it;
-      if(CallInst * ci = dyn_cast<CallInst>(I)) {
-        if(ci->getCalledFunction()->getName().str() == LOOPTERM)
-          return true;
-      }
+  Instruction * firstInst(BasicBlock * BB) {
+    BasicBlock::iterator it;
+    for(it = BB->begin(); it != BB->end(); it++) {
+      if(!isa<PHINode>(&*it))
+        break;
     }
-    return false;  
+    return &*it;    
+  }
+  bool checkTestInst(Instruction * I, string testName) {
+    if(CallInst * ci = dyn_cast<CallInst>(I)) {
+      if(ci->getCalledFunction()->getName().str() == testName)
+        return true;
+    }
+    return false;
+  }
+  bool containsTestInst(BasicBlock * BB, string testName) {
+    for(BasicBlock::iterator it = BB->begin(); it != BB->end(); it++)
+      if(checkTestInst(&*it, testName)) return true;
+    return false;
+  }
+  bool checkBreakInst(Instruction * I) {
+    return checkTestInst(I, LOOPEXITBB);  
+  }
+  void updateIter(Instruction * I) {
+    if(checkTestInst(I, LOOPITERBB)) iterations++;  
+  }
+  bool checkPassed() {
+    if(!ConstTripCount) return iterations <= DEFAULT_TRIP_COUNT;
+    return true;
   }
 };
 
