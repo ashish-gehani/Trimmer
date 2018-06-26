@@ -692,9 +692,9 @@ bool ConstantFolding::visitBB(BasicBlock * succ, BasicBlock *  from) {
   bbOps.freeBB(from, BasicBlockContexts);
   simplifyLoop(succ);
   runOnBB(succ);   
+  currBB = temp;
   if(testTerminated()) return false; // test terminated in runOnBB above
   return true;
-  currBB = temp;
 }
 
 #endif
