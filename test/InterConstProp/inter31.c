@@ -18,14 +18,16 @@ void branchPruned(char ** buffer) {
 		printf("branchPruned\n");
 }
 char * getLine(int fd, char * line, int size) {
-	int offset = lseek(fd, 0, SEEK_CUR);
-	int bytes_read = read(fd, line, size);
-	if(bytes_read <= 0) return NULL;
-	int idx = strcspn(line, "\n");
+  int offset = lseek(fd, 0, SEEK_CUR);
+  int bytes_read = read(fd, line, size);
+  if(bytes_read <= 0) return NULL;
+  if(bytes_read < size) line[bytes_read] = '\n';
+  int idx = strcspn(line, "\n");
   if(idx < size) line[idx + 1] = '\0';
-	offset = lseek(fd, offset + idx + 1, SEEK_SET);
-	return line;
+  offset = lseek(fd, offset + idx + 1, SEEK_SET);
+  return line;
 }
+
 
 int main(int argc, char ** argv) {
   char * buffer[10];

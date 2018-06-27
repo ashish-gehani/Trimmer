@@ -1,0 +1,7 @@
+username Muhammad
+ip 9.1.2.3
+port 8163
+add_connection 2.3.1.4
+add_connection 5.6.1.2
+add_connection 9.8.1.2
+add_connection 10.10.10.10
