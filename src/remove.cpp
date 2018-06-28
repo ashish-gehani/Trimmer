@@ -32,13 +32,16 @@ namespace {
             if(CallInst * ci = dyn_cast<CallInst>(I)) {
               if(!ci->getCalledFunction())
                 continue;
-              if(ci->getCalledFunction()->getName() == "unroll_loop")
+              string name = ci->getCalledFunction()->getName();
+              if(name == "unroll_loop" || name == "__loop_termination_test__" ||
+              name == "__loop_iteration_test__" || name == "__print_debug_string__" ||
+              name == "__set_debug_level__")
                 toRemove.push_back(I);
             }
           }
         }
       }
-      errs() << toRemove.size() << " removed\n";
+      // errs() << toRemove.size() << " removed\n";
       for(unsigned i = 0; i < toRemove.size(); i++)
         toRemove[i]->eraseFromParent();
       if(annotVar)

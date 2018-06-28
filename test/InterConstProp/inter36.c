@@ -22,7 +22,7 @@ char * getLine(int fd, char * line, int size) {
 	int offset = lseek(fd, 0, SEEK_CUR);
 	int bytes_read = read(fd, line, size);
   if(bytes_read <= 0) return NULL;
-  if(bytes_read < size) line[bytes_read] = '\n';
+  if(bytes_read < size) line[bytes_read] = '\0';
   int idx = strcspn(line, "\n");
   if(idx < size) line[idx + 1] = '\0';
 	offset = lseek(fd, offset + idx + 1, SEEK_SET);
@@ -44,20 +44,6 @@ char * get_tok_val(char * str) {
   memcpy(new_str, str, size);
   new_str[size] = '\0';
   return new_str;
-}
-
-void branchPruned(struct Config * config) {
-  if(!strcmp(config->username, "Muhammad") &&
-  !config->password &&
-  !strcmp(config->ip, "9.1.2.3") &&
-  !strcmp(config->port, "8163") &&
-  config->max_connections == 100 &&
-  config->num_cons == 4 &&
-  !strcmp(config->conn_list[0], "2.3.1.4") &&
-  !strcmp(config->conn_list[1], "5.6.1.2") &&
-  !strcmp(config->conn_list[2], "9.8.1.2") &&
-  !strcmp(config->conn_list[3], "10.10.10.10"))
-    printf("branchPruned\n");
 }
 
 int parse_input(char  * fname, struct Config * config) {
@@ -86,6 +72,20 @@ int parse_input(char  * fname, struct Config * config) {
     num++;
   } 
   return 1;
+}
+
+void branchPruned(struct Config * config) {
+  if(config->max_connections == 100 &&
+  config->num_cons == 4 &&
+  !strcmp(config->username, "Muhammad") &&
+  !config->password &&
+  !strcmp(config->ip, "1.2.3.4") &&
+  !strcmp(config->port, "2345") &&
+  !strcmp(config->conn_list[0], "3.4.5.6") &&
+  !strcmp(config->conn_list[1], "4.5.6.7") &&
+  !strcmp(config->conn_list[2], "5.6.7.8") &&
+  !strcmp(config->conn_list[3], "6.7.8.9"))
+    printf("branchPruned\n");
 }
 
 int main(int argc, char ** argv) {

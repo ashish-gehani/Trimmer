@@ -8,6 +8,8 @@ using namespace llvm;
 
 #define LOOPEXITBB "__loop_termination_test__"
 #define LOOPITERBB "__loop_iteration_test__"
+#define PRNTDBGSTR "__print_debug_string__"
+#define SETDBGLEVEL "__set_debug_level__"
 
 #define DEFAULT_TRIP_COUNT 20
 

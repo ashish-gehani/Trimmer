@@ -652,18 +652,18 @@ bool ConstantFolding::handleMemInst(CallInst * callInst) {
 
 bool ConstantFolding::handleDbgCall(CallInst * callInst) {
   string name = callInst->getCalledFunction()->getName();
-  if(name == "__set_debug_level__") {
-    Value * lVal = callInst->getOperand(0);
-    if(ConstantInt * cint = dyn_cast<ConstantInt>(lVal)) {
-      debugLevel = cint->getZExtValue();
-      errs() << "set debugLevel to " << debugLevel << "\n";
-    }
-  } else if(name == "__print_debug_string__") {
+  if(name == PRNTDBGSTR) {
       for(unsigned i = 0; i < callInst->getNumArgOperands(); i++) {
         Value * ptrVal = callInst->getOperand(i);
         char * str;
         if(getStr(ptrVal, str, 100)) errs() << str;
       }
+  } else if(name == SETDBGLEVEL) {
+    Value * lVal = callInst->getOperand(0);
+    if(ConstantInt * cint = dyn_cast<ConstantInt>(lVal)) {
+      debugLevel = cint->getZExtValue();
+      errs() << "set debugLevel to " << debugLevel << "\n";
+    }
   } else return false;
   return true;
 }
