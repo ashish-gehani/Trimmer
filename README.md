@@ -76,13 +76,13 @@ Test cases directory: /test/InterConstProp
     
 ```
 cd test/InterConstProp
-python test.py 1 1 
+python test.py work_dir 1 1 
 ```
     
  will run the test case for test/InterConstProp/inter1.c
     
 ```
-python test.py 1 10
+python test.py work_dir 1 10
 ```
     
 will run 10 test cases including inter1.c to inter10.c (inclusive)
