@@ -71,18 +71,25 @@ Running test cases
 Test cases directory: /test/InterConstProp
       
 * Includes a suite of multiple test cases used to measure the effectiveness of TRIMMER in debloating unused code 
-             
+ 
+ **Test script synopsis**:
+ 
+```
+cd test/InterConstProp
+python test.py ${path_to_workdir} ${test_start} ${test_end} 
+``` 
+ 
  **Running test examples**:
     
 ```
 cd test/InterConstProp
-python test.py work_dir 1 1 
+python test.py ./work_dir 1 1 
 ```
     
  will run the test case for test/InterConstProp/inter1.c
     
 ```
-python test.py work_dir 1 10
+python test.py ./work_dir 1 10
 ```
     
 will run 10 test cases including inter1.c to inter10.c (inclusive)
