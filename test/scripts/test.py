@@ -5,9 +5,10 @@ import argparse
 def run_test(workdir, lo, hi):
     if not os.path.exists(workdir):
         os.makedirs(workdir)
-    os.chdir(os.path.dirname(os.path.realpath(__file__)))
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    os.chdir(script_dir)
     for i in xrange(lo, hi + 1):
-        if not os.path.isfile('inter' + str(i) + '.c'):
+        if not os.path.isfile(os.path.join(script_dir, '../src', 'inter' + str(i) + '.c')):
             continue	
         print 'running test ' + str(i)
         Cmd = './script.sh inter' + str(i) + ' out' + str(i) + ' ' + workdir
