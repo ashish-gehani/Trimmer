@@ -1,4 +1,4 @@
-#include "processInstructions.h"
+#include "processInstructions.cpp"
 
 using namespace llvm;
 using namespace std;
