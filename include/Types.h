@@ -4,7 +4,7 @@ using namespace llvm;
 #ifndef TYPES_H_
 #define TYPES_H_
 
-#include "mem.h"
+#include "Mem.h"
 
 #define LOOPEXITBB "__loop_termination_test__"
 #define LOOPITERBB "__loop_iteration_test__"

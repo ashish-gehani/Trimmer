@@ -49,7 +49,7 @@
 #ifndef INTERCONSTPROP_H_
 #define INTERCONSTPROP_H_
 
-#include "debug.h"
+#include "Debug.h"
 #include "BBOps.h"
 
 using namespace llvm;

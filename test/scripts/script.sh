@@ -7,4 +7,4 @@ ${LLVM_DIS_NAME}  $3/${1}t1.bc
 ${LLVM_DIS_NAME}  $3/${1}t2.bc
 ${LLVM_DIS_NAME}  $3/${1}t3.bc
 ${LLVM_DIS_NAME}  $3/${2}.bc
-${LLVM_OPT_NAME} -load ${TRIMMER_HOME}/build/testPass.so -testing $3/${2}.bc -o $3/${2}.bc
+${LLVM_OPT_NAME} -load ${TRIMMER_HOME}/build/TestPass.so -testing $3/${2}.bc -o $3/${2}.bc

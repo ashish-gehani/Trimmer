@@ -1,6 +1,6 @@
 using namespace llvm;
 using namespace std;
-#include "mem.h"
+#include "Mem.h"
 
 #ifndef DEGUB_H_
 #define DEGUB_H_

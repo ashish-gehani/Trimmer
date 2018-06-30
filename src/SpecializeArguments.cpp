@@ -12,7 +12,7 @@
 #include "llvm/Support/CommandLine.h"
 #include <string> 
 #include <unistd.h> 
-#include "parse_args.h"
+#include "ParseArgs.h"
 
 using namespace llvm;
 using namespace std;

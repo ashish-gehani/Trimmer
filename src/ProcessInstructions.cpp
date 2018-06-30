@@ -35,9 +35,9 @@
 #include <stdio.h>
 #include <sstream>
 #include "Utils.cpp"
-#include "loopUtils.cpp"
-#include "stringUtils.cpp"
-#include "fileIO.cpp"
+#include "LoopUtils.cpp"
+#include "StringUtils.cpp"
+#include "FileIO.cpp"
 
 
 using namespace llvm;
