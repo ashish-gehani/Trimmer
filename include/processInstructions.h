@@ -292,8 +292,10 @@ ProcResult ConstantFolding::processReturnInst(ReturnInst * retInst) {
 }
 
 ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
-  if(bbOps.partOfLoop(callInst))
+  if(bbOps.partOfLoop(callInst)) {
+    markArgsAsNonConst(callInst);
     return NOTFOLDED;
+  }
 
   if(!callInst->getCalledFunction() && !simplifyCallback(callInst)) {
     markArgsAsNonConst(callInst);
