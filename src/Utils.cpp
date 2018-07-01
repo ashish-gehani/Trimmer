@@ -39,7 +39,7 @@ void cleanUpfuncBBs(Function * f, BasicBlockContInfoMap bbc,
     if(bbc.find(BB) == bbc.end())
       continue;
     ContextInfo * ci = bbc[BB];
-    if(!ci->deleted && !ci->cloneOf)
+    if(!ci->deleted && !ci->imageOf)
       delete ci->memory;
     delete ci;
   }
@@ -236,8 +236,8 @@ Memory * ConstantFolding::duplicateMem() {
   return new Memory(*BasicBlockContexts[currBB]->memory);
 }
 
-void ConstantFolding::cloneContext(BasicBlock * to) {
-  BasicBlockContexts[to] = BasicBlockContexts[currBB]->clone();
+void ConstantFolding::imageContext(BasicBlock * to) {
+  BasicBlockContexts[to] = BasicBlockContexts[currBB]->image();
 }
 
 void ConstantFolding::initializeBBInfo(BasicBlock * BB) {
@@ -686,7 +686,7 @@ bool ConstantFolding::visitBB(BasicBlock * succ, BasicBlock *  from) {
     bbOps.mergeContext(succ, from, BasicBlockContexts);
   } else {
     debug(Abubakar) << "cloning\n";
-    cloneContext(succ);
+    imageContext(succ);
   }    
 
   bbOps.freeBB(from, BasicBlockContexts);

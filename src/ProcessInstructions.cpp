@@ -42,7 +42,12 @@
 
 using namespace llvm;
 using namespace std;     
-
+/*
+  Process Alloca Instructions:
+  ty * %a = ty
+  allocate shadow memory of bytes sizeof(ty) on the stack and add shadow register 
+  with value equal to the starting address of the allocated memory
+*/
 ProcResult ConstantFolding::processAllocaInst(AllocaInst * ai) {
   if(!trackAllocas()) {
     debug(Abubakar) << "skipping untracked alloca\n";
@@ -55,7 +60,6 @@ ProcResult ConstantFolding::processAllocaInst(AllocaInst * ai) {
   debug(Abubakar) << "allocaInst : size " << size << " at address " << addr << "\n";
   return UNDECIDED;
 }
-
 ProcResult ConstantFolding::processMallocInst(CallInst * mi) {   
   if(!trackAllocas()) {
     debug(Abubakar) << "skipping untracked malloc\n";
@@ -72,7 +76,6 @@ ProcResult ConstantFolding::processMallocInst(CallInst * mi) {
   debug(Abubakar) << "mallocInst : size " << size << " at address " << addr << "\n";  
   return UNDECIDED;
 }
-
 ProcResult ConstantFolding::processCallocInst(CallInst * ci) {   
   if(!trackAllocas()) {
     debug(Abubakar) << "skipping untracked calloc\n";
@@ -97,7 +100,12 @@ ProcResult ConstantFolding::processCallocInst(CallInst * ci) {
   memset((char *) getActualAddr(addr), '\0', size);
   return UNDECIDED;
 }
-
+/*
+  Process Bitcast Instruction :
+  bitcast ty1 * %a, ty2 * %b
+  if shadow register for %b exists add shadow register for %a with same value
+  as %b but type ty1
+*/
 ProcResult ConstantFolding::processBitCastInst(BitCastInst * bi) {
   Value * ptr = bi->getOperand(0);
   Register * reg = getRegister(ptr);
@@ -108,7 +116,6 @@ ProcResult ConstantFolding::processBitCastInst(BitCastInst * bi) {
   addRegister(bi, bi->getType(), reg->getValue());
   return UNDECIDED;
 }
-
 ProcResult ConstantFolding::processStoreInst(StoreInst * si) {
   Value* storeOp = si->getOperand(0);
   Value * ptr = si->getOperand(1);
@@ -128,7 +135,6 @@ ProcResult ConstantFolding::processStoreInst(StoreInst * si) {
   storeToMem(val, size, addr);   
   return UNDECIDED;
 }
-
 ProcResult ConstantFolding::processLoadInst(LoadInst * li) {
   
   if(bbOps.partOfLoop(li))
@@ -173,7 +179,6 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
   addRegister(gi, gi->getType(), val);
   return UNDECIDED;
 }
-
 ProcResult ConstantFolding::processMemcpyInst(CallInst * memcpyInst) {
 
   Value * toPtr = memcpyInst->getOperand(0);
@@ -204,7 +209,6 @@ ProcResult ConstantFolding::processMemcpyInst(CallInst * memcpyInst) {
   setConstMem(true, reg->getValue(), size);
   return NOTFOLDED;
 }
-
 ProcResult ConstantFolding::processMemSetInst(CallInst * memsetInst) {
   Value * ptr = memsetInst->getOperand(0);
   Value * chrctr = memsetInst->getOperand(1);
@@ -233,7 +237,9 @@ ProcResult ConstantFolding::processMemSetInst(CallInst * memsetInst) {
   debug(Abubakar) << "set string to " << c << " size " << size << "\n";
   return NOTFOLDED;
 }
-
+/*
+  Try folding phiNodes
+*/
 ProcResult ConstantFolding::processPHINode(PHINode * phiNode) {
   if(bbOps.partOfLoop(phiNode))
     return NOTFOLDED;
@@ -246,7 +252,9 @@ ProcResult ConstantFolding::processPHINode(PHINode * phiNode) {
     return NOTFOLDED;
   }
 }
-
+/*
+  Try folding simple Instructions like icmps, sext, zexts
+*/
 ProcResult ConstantFolding::tryfolding(Instruction * I) {
   if(bbOps.partOfLoop(I))
     return NOTFOLDED;
@@ -261,7 +269,21 @@ ProcResult ConstantFolding::tryfolding(Instruction * I) {
   }
   return NOTFOLDED;
 }
+/*
+  Process all terminator Instructions except Returns
+  first try to fold a terminator Instruction to a single successor.
+  e.g.
+  %i = icmp eq i32 %a, 7
+  br i1 %i, bb %x, bb %y
 
+  if we can fold the icmp Instruction we can fold the branch Instruction
+  to point to only one block. (Which might lead to code debloating).
+  
+  Then visit all successors one by one. 
+  bbOps.isnotSingleSucc(BB) returns true if the terminator has been folded to a
+  single successor and BB is NOT that successor.
+  e.g. if %i above is true bbOps.isnotSingleSucc(%y) will return true.
+*/
 ProcResult ConstantFolding::processTermInst(TerminatorInst * termInst) {  
   vector<BasicBlock *> readyToVisit;
   LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();
@@ -277,7 +299,11 @@ ProcResult ConstantFolding::processTermInst(TerminatorInst * termInst) {
   }
   return result;
 }
-
+/*
+  Process Return Instruction:
+  At return Instruction we need to save the current memory context as this context
+  will need to be replaced after we return to the calling function.
+*/
 ProcResult ConstantFolding::processReturnInst(ReturnInst * retInst) {   
   if(currfn->getName().str() == "main")
     return NOTFOLDED;
@@ -290,7 +316,26 @@ ProcResult ConstantFolding::processReturnInst(ReturnInst * retInst) {
     fi->retReg = new Register(*getRegister(retInst)); 
   return NOTFOLDED;
 }
+/*
+  Process Call Instruction:
+  If the call is an indirect call, try to see if we can fold allocate the 
+  function because of propagation.
 
+  1. TRIMMER debugging instructions added to the source
+  2. getopt calls
+  3. malloc, calloc etc
+  4. Memcpy, Memset
+  5. string function : e.g. strcmp, strchr, atoi
+  6. fileIO calls : open, read, lseek
+  7. external functions : dont visits
+  8. internal functions : only visit if it satisfies certain conditions
+  
+  If the callInst is an external call, internal call that we dont visit or
+  an indirect function call that we fail to simplify we mark all its input 
+  arguments as non constant
+  TODO : we should mark the globals accessed by it as non constant.
+
+*/
 ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
   if(bbOps.partOfLoop(callInst)) {
     markArgsAsNonConst(callInst);

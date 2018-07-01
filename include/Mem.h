@@ -9,8 +9,21 @@ using namespace std;
 #define DEFAULTINITSIZE 20000
 #define MAXSTACKSIZE 1000000
 
+/*
+	5 main structures in the Memory
+	stack - byte array
+	heap  - byte array
+	stackConst - byte array to check whether stack at location i is constant
+	heapConst  - byte array to check whether heap at location i is constant
+	startToSizeMap - hashMap which keeps track of how much memory was contigously allocated
+					 at each location
+*/
+
 class Memory {
 public:
+	/*
+		starting index of stack is kept at 1
+	*/
 	Memory(Module * M) {
 		module = M;
 		stackIndex = 1;
@@ -27,6 +40,9 @@ public:
 		memset(heap, 0, heapTotalSize);
 		memset(heapConst, true, heapTotalSize);
 	}
+	/*
+		Copy Constructor
+	*/
 	Memory(Memory& from) {
 		module = from.getModule();
 		stackIndex = from.getStackIndex();
@@ -67,6 +83,11 @@ public:
 		heapStartIndices = from->getHeapStartIndices();
 		heapStartToSizeMap = from->getHeapStartToSizeMap();
 	}
+	/*
+		compare all location of memory A with memory B
+		if stack location i is not equat then set stackConst[i] to false
+		same for heap
+	*/
 	void compareWith(Memory * with) {
 		int8_t * withStack = with->getStack();
 		int8_t * withHeap = with->getHeap();
@@ -100,6 +121,11 @@ public:
 		stackStartToSizeMap[address] = size;
 		return address;
 	}
+	/*
+		The addresses of heap seen outside this class are offset
+		by the variable MAXSTACKSIZE
+		so the heap address 15 will be shown as MAXSTACKSIZE + 15;
+	*/
 	uint64_t allocateHeap(uint64_t size) {
 		uint64_t address = heapIndex;
 		heapIndex += size;

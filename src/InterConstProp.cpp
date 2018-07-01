@@ -27,8 +27,6 @@ void ConstantFolding::getAnalysisUsage(AnalysisUsage &AU) const {
   AU.addPreserved<DominatorTreeWrapperPass>();
 
 }
-
-
 void ConstantFolding::runOnInst(Instruction * I) {
   ProcResult result;
   printInst(I, Abubakar);
@@ -59,7 +57,9 @@ void ConstantFolding::runOnInst(Instruction * I) {
   }
   updateCM(result, I);
 }
-
+/*
+  run on each Instruction of the basic.
+*/
 void ConstantFolding::runOnBB(BasicBlock * BB) {
   bbOps.addAncestor(BB, currBB);
   bbOps.markVisited(BB);
@@ -76,7 +76,14 @@ void ConstantFolding::runOnBB(BasicBlock * BB) {
   currBB = temp;
   bbOps.freeBB(BB, BasicBlockContexts);
 }
-
+/*
+  Run on a called Function(or main at start)
+  The context used for the entry basic block will be the same as the currBB
+  at the point of function call.
+  After completing execution of the function, the context before the function call
+  will have to be replaced by the context at the return Instruction of the called
+  function.    
+*/
 void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
 
   if(!ci) assert(toRun->getName().str() == "main" && "callInst not given");
@@ -103,7 +110,9 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
   cleanUpfuncBBs(toRun, BasicBlockContexts, Registers, pop_back(funcValStack));
   if(fi->retReg) addSingleVal(ci, fi->retReg->getValue());
 }
-
+/*
+  Entry point of the pass 
+*/
 bool ConstantFolding::runOnModule(Module & M) {
   initDebugLevel();
   debug(Abubakar) << "  ---------------- ** inter-constprop ** ----------------\n";

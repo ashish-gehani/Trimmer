@@ -71,7 +71,7 @@ public:
         continue;
       if(visited.find(predecessor) != visited.end()) {
         ContextInfo * oci = bbc[predecessor];
-        if(ci->cloneOf && (ci->cloneOf == oci->cloneOf || ci->cloneOf == oci))
+        if(ci->imageOf && (ci->imageOf == oci->imageOf || ci->imageOf == oci))
           continue;
         singlePredFrom = false;
       } 
@@ -171,7 +171,7 @@ public:
     ContextInfo * ci = bbc[BB];
     if(ci->deleted)
       return;
-    if(ci->cloneOf) // Todo : not efficient we should be able to delete it midway
+    if(ci->imageOf) // Todo : not efficient we should be able to delete it midway
       return;
     TerminatorInst * ti = BB->getTerminator();
     for(unsigned i = 0; i < ti->getNumSuccessors(); i++) {
@@ -179,14 +179,14 @@ public:
       if(bbc.find(ti->getSuccessor(i)) == bbc.end()) return;
       if(isUnReachable(ti->getSuccessor(i))) continue;
       ContextInfo * succCi = bbc[ti->getSuccessor(i)];
-      if(succCi->cloneOf && 
-      (succCi->cloneOf == ci || succCi->cloneOf == ci->cloneOf))
+      if(succCi->imageOf && 
+      (succCi->imageOf == ci || succCi->imageOf == ci->imageOf))
         return;
     }
     printBB("freeing BB ", BB, "\n", Abubakar); 
     delete ci->memory;
-    if(ci->cloneOf)
-      ci->cloneOf->deleted = true;
+    if(ci->imageOf)
+      ci->imageOf->deleted = true;
     else
       ci->deleted = true;  
     freePredecessors(BB, bbc);
@@ -264,7 +264,7 @@ public:
     }
     ContextInfo * fc = bbc[from];
     ContextInfo * tc = bbc[to];
-    return tc->cloneOf && (tc->cloneOf == fc || tc->cloneOf == fc->cloneOf);
+    return tc->imageOf && (tc->imageOf == fc || tc->imageOf == fc->imageOf);
   }  
   Value * foldPhiNode(PHINode * phiNode, 
   BasicBlockContInfoMap bbc) {

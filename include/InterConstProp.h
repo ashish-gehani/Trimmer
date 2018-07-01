@@ -158,7 +158,7 @@ struct ConstantFolding : public ModulePass {
   void replaceAndLog(Value *, Value *);
 
   void createNewContext(BasicBlock * BB);
-  void cloneContext(BasicBlock *);  
+  void imageContext(BasicBlock *);  
   void duplicateContext(BasicBlock *);
   void initializeBBInfo(BasicBlock * BB);
   Memory * duplicateMem();

@@ -13,43 +13,76 @@ using namespace llvm;
 
 #define DEFAULT_TRIP_COUNT 20
 
-
+/*
+  This enumeration is used to keep track of the results of constant propagation 
+  on instruction.
+  e.g. i32 %a = load i32* %b
+  if we replace %a with the loaded value the above instruction will be marked as
+  folded
+*/
 enum ProcResult {
   UNDECIDED,
   NOTFOLDED,
   PARTOFLOOP,
   FOLDED
 };
+/*
+  Each basic block is allocated a ContextInfo structure 
+  which keeps track of its current Instruction iterator
+  and contains its copy of shadow memory.  
+  Except for the entry basic block of the program, the basic blocks
+  may be allocated by two main operations
+  1. imaging from parent - Both blocks share the same memory
+  2. duplicating from parent - Both blocks share different memories and at the start of
+  the execution of the child, its memory is a copy of parent's memory
+  We prefer imaging if, as a result of constant propagation, there is no ambiguity about
+  the parent's successor and no ambiguity about the child's successor
+  e.g.
 
-enum LoopOp {
-  NOOP,
-  UNROLLOP,
-  PEELOP
-};
+  BB0 int a = 5;
+      switch(a) { 
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+  BB5   case '5':
+      }
+  BB6
 
+  before inter-const-prop
+  BB0 -> 5 successors
+  BB5 -> 1 predecessor, 1 successor
+  BB6 -> has 5 predecessors
+
+  During inter-const-prop
+  BB0 -> BB5 : image because BB0 successor folded
+  BB5 -> BB6 : image because BB6 predecessors folded
+
+  if there was ambiguity in the switch statement we would have duplicated on both these occasions
+*/
 struct ContextInfo {
   Memory * memory;
   BasicBlock::iterator inst;
 
-  ContextInfo * cloneOf;  
+  ContextInfo * imageOf;  
   bool deleted;
 
   ContextInfo() {
     deleted = false;
-    cloneOf = NULL;
+    imageOf = NULL;
   }
   ContextInfo(Module * M) {
     deleted = false;
-    cloneOf = NULL;
+    imageOf = NULL;
     memory = new Memory(M);    
   }
-  ContextInfo * clone() {
+  ContextInfo * image() {
     ContextInfo * nci = new ContextInfo();
     nci->memory = memory;
-    if(cloneOf)
-      nci->cloneOf = cloneOf;
+    if(imageOf)
+      nci->imageOf = imageOf;
     else
-      nci->cloneOf = this;
+      nci->imageOf = this;
     return nci;        
   }
   ContextInfo * duplicate() {
@@ -59,6 +92,10 @@ struct ContextInfo {
   }
 };
 
+/*
+  structure keeping track of basic function info 
+  as well as value returned and context at return.
+*/
 struct FuncInfo {
   Memory * context;
   Register * retReg;
@@ -72,7 +109,9 @@ struct FuncInfo {
     directCallInsts = 0;
   }
 };
-
+/*
+  structure keeping track of basic BB info   
+*/
 struct BBInfo {
   bool writesToMemory, partOfLoop, isHeader;
   unsigned numPreds, URfrom, Rfrom;
@@ -98,7 +137,9 @@ struct BBInfo {
 };
 
 CallInst * getTestInst(string, Module *);
-
+/*
+  structure used for loop unroll testing
+*/
 struct TestInfo {
   bool terminated, ConstTripCount;              
   vector<Instruction *> indepInsts;
@@ -155,7 +196,10 @@ struct TestInfo {
     return true;
   }
 };
-
+/*
+  The structure used for tracking fileIO system calls
+  open, read, lseek
+*/
 struct FdInfo {
   int fd, offset;
   bool tracked;
