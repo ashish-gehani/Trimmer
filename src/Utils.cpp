@@ -72,14 +72,17 @@ CallInst * getTestInst(string name, Module * module) {
   return testCall;
 }
 
-void ConstantFolding::copyCallerContext(CallInst * ci, Function * toRun) {
-  unsigned index = 0;
-  for(auto arg = toRun->arg_begin(); arg != toRun->arg_end();
+void ConstantFolding::propagateArgs(CallInst *ci, Function *toRun) {
+    unsigned index = 0;
+    for(auto arg = toRun->arg_begin(); arg != toRun->arg_end();
       arg++, index++) {
-    Value * callerVal = ci->getOperand(index);
-    Value * calleeVal = getArg(toRun, index);
-    replaceOrCloneRegister(calleeVal, callerVal);
-  }
+        Value * callerVal = ci->getOperand(index);
+        Value * calleeVal = getArg(toRun, index);
+        replaceOrCloneRegister(calleeVal, callerVal);
+    }
+}
+
+void ConstantFolding::copyCallerContext(CallInst * ci, Function * toRun) {
   BasicBlock * entry = &toRun->getEntryBlock();
   duplicateContext(entry);    
   updateAnnotationContext(ci->getCalledFunction());
