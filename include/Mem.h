@@ -9,14 +9,14 @@ using namespace std;
 #define DEFAULTINITSIZE 20000
 #define MAXSTACKSIZE 1000000
 
-/*
-	5 main structures in the Memory
-	stack - byte array
-	heap  - byte array
-	stackConst - byte array to check whether stack at location i is constant
-	heapConst  - byte array to check whether heap at location i is constant
-	startToSizeMap - hashMap which keeps track of how much memory was contigously allocated
-					 at each location
+/**
+ * 5 main structures in the Memory
+ * stack - byte array
+ * heap  - byte array
+ * stackConst - byte array to check whether stack at location i is constant
+ * heapConst  - byte array to check whether heap at location i is constant
+ * startToSizeMap - hashMap which keeps track of how much memory was contigously allocated
+ * at each location
 */
 
 class Memory {

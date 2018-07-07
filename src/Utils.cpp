@@ -248,6 +248,9 @@ void ConstantFolding::initializeBBInfo(BasicBlock * BB) {
   bbOps.addBB(BB, LI);
 }
 
+/**
+ * Create new ContextInfo for a Basic Block
+ */
 void ConstantFolding::createNewContext(BasicBlock * BB) {
   initializeBBInfo(BB);
   BasicBlockContexts[BB] = new ContextInfo(module);
@@ -608,6 +611,9 @@ bool ConstantFolding::handleConstStr(Value * ptr) {
   return false;
 }
 
+/**
+ * Add constant int to registers instead of replacing uses
+ */
 bool ConstantFolding::noreplace(Value * from, Value * to) {
   if(ConstantInt * CI = dyn_cast<ConstantInt>(to)) {
     uint64_t val = CI->getZExtValue();
@@ -619,6 +625,9 @@ bool ConstantFolding::noreplace(Value * from, Value * to) {
   return false; 
 }
 
+/**
+ * Replaces all uses of a value with another value
+ */
 void ConstantFolding::replaceAndLog(Value * from, Value * to) {
   if(!from || !to || noreplace(from, to))
     return;

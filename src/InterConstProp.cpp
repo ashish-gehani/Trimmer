@@ -27,6 +27,10 @@ void ConstantFolding::getAnalysisUsage(AnalysisUsage &AU) const {
   AU.addPreserved<DominatorTreeWrapperPass>();
 
 }
+
+/**
+ * Process a single instruction appropriately
+ */
 void ConstantFolding::runOnInst(Instruction * I) {
   ProcResult result;
   printInst(I, Abubakar);

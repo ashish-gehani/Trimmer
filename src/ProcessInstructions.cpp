@@ -42,12 +42,13 @@
 
 using namespace llvm;
 using namespace std;     
-/*
-  Process Alloca Instructions:
-  ty * %a = ty
-  allocate shadow memory of bytes sizeof(ty) on the stack and add shadow register 
-  with value equal to the starting address of the allocated memory
-*/
+
+/**
+ * Process Alloca Instructions:
+ * ty * %a = ty
+ * allocate shadow memory of bytes sizeof(ty) on the stack and add shadow register 
+ * with value equal to the starting address of the allocated memory
+ */
 ProcResult ConstantFolding::processAllocaInst(AllocaInst * ai) {
   if(!trackAllocas()) {
     debug(Abubakar) << "skipping untracked alloca\n";
@@ -100,11 +101,12 @@ ProcResult ConstantFolding::processCallocInst(CallInst * ci) {
   memset((char *) getActualAddr(addr), '\0', size);
   return UNDECIDED;
 }
+
 /*
-  Process Bitcast Instruction :
-  bitcast ty1 * %a, ty2 * %b
-  if shadow register for %b exists add shadow register for %a with same value
-  as %b but type ty1
+ * Process Bitcast Instruction :
+ * bitcast ty1 * %a, ty2 * %b
+ * if shadow register for %b exists add shadow register for %a with same value
+ * as %b but type ty1
 */
 ProcResult ConstantFolding::processBitCastInst(BitCastInst * bi) {
   Value * ptr = bi->getOperand(0);
@@ -238,8 +240,8 @@ ProcResult ConstantFolding::processMemSetInst(CallInst * memsetInst) {
   return NOTFOLDED;
 }
 /*
-  Try folding phiNodes
-*/
+ * Try folding phiNodes
+ */
 ProcResult ConstantFolding::processPHINode(PHINode * phiNode) {
   if(bbOps.partOfLoop(phiNode))
     return NOTFOLDED;
@@ -253,8 +255,8 @@ ProcResult ConstantFolding::processPHINode(PHINode * phiNode) {
   }
 }
 /*
-  Try folding simple Instructions like icmps, sext, zexts
-*/
+ * Try folding simple Instructions like icmps, sext, zexts
+ */
 ProcResult ConstantFolding::tryfolding(Instruction * I) {
   if(bbOps.partOfLoop(I))
     return NOTFOLDED;
