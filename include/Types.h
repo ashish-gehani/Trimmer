@@ -99,13 +99,14 @@ struct ContextInfo {
 struct FuncInfo {
   Memory * context;
   Register * retReg;
-  bool usedInLoop, addrTaken;
+  bool calledInLoop,
+       addrTaken;
   unsigned directCallInsts;
   FuncInfo(Function * F) {
     context = NULL;
     retReg = NULL;
     addrTaken = (F->hasAddressTaken() > 0);
-    usedInLoop = false;
+    calledInLoop = false;
     directCallInsts = 0;
   }
 };

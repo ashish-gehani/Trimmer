@@ -510,7 +510,7 @@ void ConstantFolding::initializeFuncInfo(Function * F) {
 
 void ConstantFolding::updatefuncInfo(Function * F, FuncInfo * fi) {
   fi->directCallInsts = 0;
-  fi->usedInLoop = false;
+  fi->calledInLoop = false;
   for(Use &U : F->uses()) {
     User * FU = U.getUser();
     if(CallInst * ci = dyn_cast<CallInst>(FU)) {
@@ -519,7 +519,7 @@ void ConstantFolding::updatefuncInfo(Function * F, FuncInfo * fi) {
       fi->directCallInsts++;
       LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*ci->getFunction()).getLoopInfo();
       if(LI.getLoopFor(ci->getParent()))
-        fi->usedInLoop = true;     
+        fi->calledInLoop = true;     
     }
   }
 }
@@ -533,7 +533,7 @@ bool ConstantFolding::satisfyConds(Function * F) {
   if(AnnotationList.find(F) != AnnotationList.end()) 
     return true;
 
-  return !(fi->usedInLoop || fi->addrTaken || fi->directCallInsts > 1); 
+  return !(fi->calledInLoop || fi->addrTaken || fi->directCallInsts > 1); 
 }
 
 
