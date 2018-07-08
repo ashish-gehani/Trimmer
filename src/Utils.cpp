@@ -503,12 +503,12 @@ bool ConstantFolding::trackAllocas() {
 void ConstantFolding::initializeFuncInfo(Function * F) {
   if(fimap.find(F) == fimap.end()) {
     FuncInfo * fi = new FuncInfo(F);
-    updatefuncInfo(F, fi);
+    updateFuncInfo(F, fi);
     fimap[F] = fi;
   }
 }
 
-void ConstantFolding::updatefuncInfo(Function * F, FuncInfo * fi) {
+void ConstantFolding::updateFuncInfo(Function * F, FuncInfo * fi) {
   fi->directCallInsts = 0;
   fi->calledInLoop = false;
   for(Use &U : F->uses()) {

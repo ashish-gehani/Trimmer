@@ -106,7 +106,7 @@ struct ConstantFolding : public ModulePass {
   bool trackAllocas();
   
   void initializeFuncInfo(Function *);
-  void updatefuncInfo(Function *, FuncInfo *);
+  void updateFuncInfo(Function *, FuncInfo *);
   bool satisfyConds(Function *);
   
   Instruction * simplifyInst(Instruction *);
