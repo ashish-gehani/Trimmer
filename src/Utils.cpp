@@ -501,7 +501,7 @@ bool ConstantFolding::trackAllocas() {
 }
 
 bool ConstantFolding::isFuncInfoInitialized(Function *F) {
-    return !(fimap.find(F) == fimap.end());
+    return fimap.find(F) != fimap.end();
 }
 
 void ConstantFolding::addFuncInfo(Function *F, FuncInfo *fi) {
