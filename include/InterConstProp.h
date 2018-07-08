@@ -205,6 +205,7 @@ struct ConstantFolding : public ModulePass {
   void runOnFunction(CallInst *, Function *);
   void runOnBB(BasicBlock *);
   void runOnInst(Instruction *);
+  void propagateArgs(CallInst *, Function *);
 };
 
 #endif
