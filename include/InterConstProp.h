@@ -167,6 +167,8 @@ struct ConstantFolding : public ModulePass {
   ContextInfo * getCurrContext();
   void copyContext(Memory *);
   void copyCallerContext(CallInst *, Function *);
+  void propagateArgs(CallInst *, Function *);
+
   uint64_t allocateStack(uint64_t);
   uint64_t allocateHeap(uint64_t);
   uint64_t loadMem(uint64_t, uint64_t);
@@ -206,7 +208,6 @@ struct ConstantFolding : public ModulePass {
   void runOnFunction(CallInst *, Function *);
   void runOnBB(BasicBlock *);
   void runOnInst(Instruction *);
-  void propagateArgs(CallInst *, Function *);
 };
 
 #endif

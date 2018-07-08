@@ -1,9 +1,10 @@
 using namespace llvm;
 using namespace std;
-#include "Mem.h"
 
 #ifndef DEGUB_H_
 #define DEGUB_H_
+#include "Mem.h"
+
 #define None 0
 #define Hashim 1
 #define Abubakar 2
