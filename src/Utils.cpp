@@ -500,17 +500,20 @@ bool ConstantFolding::trackAllocas() {
   return true;
 }
 
-void ConstantFolding::initializeFuncInfo(Function * F) {
-  if(fimap.find(F) == fimap.end()) {
-    FuncInfo * fi = new FuncInfo(F);
-    updateFuncInfo(F, fi);
-    fimap[F] = fi;
-  }
+bool ConstantFolding::isFuncInfoInitialized(Function *F) {
+    return !(fimap.find(F) == fimap.end());
 }
 
-void ConstantFolding::updateFuncInfo(Function * F, FuncInfo * fi) {
+void ConstantFolding::addFuncInfo(Function *F, FuncInfo *fi) {
+    fimap[F] = fi;
+}
+
+FuncInfo* ConstantFolding::initializeFuncInfo(Function * F) {
+
+  FuncInfo * fi = new FuncInfo(F);
   fi->directCallInsts = 0;
   fi->calledInLoop = false;
+
   for(Use &U : F->uses()) {
     User * FU = U.getUser();
     if(CallInst * ci = dyn_cast<CallInst>(FU)) {
@@ -522,6 +525,8 @@ void ConstantFolding::updateFuncInfo(Function * F, FuncInfo * fi) {
         fi->calledInLoop = true;     
     }
   }
+
+  return fi;
 }
 
 bool ConstantFolding::satisfyConds(Function * F) {

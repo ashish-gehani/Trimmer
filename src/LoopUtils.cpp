@@ -80,7 +80,11 @@ TestInfo * ConstantFolding::runtest(Loop * L) {
   currfn = toRun;
   LoopInfo &newLI = getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();
   bbOps.recomputeLoopInfo(currfn, newLI);
-  initializeFuncInfo(toRun);
+
+  if(!isFuncInfoInitialized(toRun)) {
+    FuncInfo *fi = initializeFuncInfo(toRun);
+    addFuncInfo(toRun, fi);
+  }
   runOnBB(entry);
 
   currfn = temp;
