@@ -55,7 +55,7 @@ enum ProcResult {
   BB6 -> has 5 predecessors
 
   During inter-const-prop
-  BB0 -> BB5 : image because BB0 successor folded
+  BB0 -> BB5 : image because BB0 successors folded
   BB5 -> BB6 : image because BB6 predecessors folded
 
   if there was ambiguity in the switch statement we would have duplicated on both these occasions
@@ -63,7 +63,6 @@ enum ProcResult {
 struct ContextInfo {
   Memory * memory;
   BasicBlock::iterator inst;
-
   ContextInfo * imageOf;  
   bool deleted;
 
@@ -79,10 +78,8 @@ struct ContextInfo {
   ContextInfo * image() {
     ContextInfo * nci = new ContextInfo();
     nci->memory = memory;
-    if(imageOf)
-      nci->imageOf = imageOf;
-    else
-      nci->imageOf = this;
+    if(imageOf) nci->imageOf = imageOf;
+    else nci->imageOf = this;
     return nci;        
   }
   ContextInfo * duplicate() {
@@ -104,9 +101,9 @@ struct FuncInfo {
   FuncInfo(Function * F) {
     context = NULL;
     retReg = NULL;
-    addrTaken = (F->hasAddressTaken() > 0);
     usedInLoop = false;
     directCallInsts = 0;
+    addrTaken = (F->hasAddressTaken() > 0);
   }
 };
 /*
@@ -118,13 +115,9 @@ struct BBInfo {
   vector<BasicBlock *> loopLatchesWithEdge, ancestors;
   BasicBlock * singleSucc;
   BBInfo(BasicBlock * BB) {
-    writesToMemory = false;
-    partOfLoop = false;
-    isHeader = false;
+    writesToMemory = partOfLoop = isHeader = false;
+    URfrom = numPreds = Rfrom = 0;
     singleSucc = NULL;
-    URfrom = 0;
-    numPreds = 0;
-    Rfrom = 0;
     set<BasicBlock *> preds;
     for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++) {
       BasicBlock * predecessor = *it;
@@ -192,6 +185,7 @@ struct TestInfo {
     if(checkTestInst(I, LOOPITERBB)) iterations++;  
   }
   bool checkPassed() {
+    if(!terminated) return false;
     if(!ConstTripCount) return iterations <= DEFAULT_TRIP_COUNT;
     return true;
   }

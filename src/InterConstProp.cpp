@@ -27,6 +27,10 @@ void ConstantFolding::getAnalysisUsage(AnalysisUsage &AU) const {
   AU.addPreserved<DominatorTreeWrapperPass>();
 
 }
+
+/**
+ * Process a single instruction appropriately
+ */
 void ConstantFolding::runOnInst(Instruction * I) {
   ProcResult result;
   printInst(I, Abubakar);
@@ -90,10 +94,17 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
 
   push_back(funcValStack);
   bool tempAnnot = currContextIsAnnotated;
-  Function * temp = currfn;
-  if(ci) copyCallerContext(ci, toRun);
+
+  if(ci) {
+      // if func call
+      propagateArgs(ci, toRun);
+      copyCallerContext(ci, toRun); //copy context
+  }
   initializeFuncInfo(toRun);
-  currfn = toRun;
+
+  Function * temp = currfn;
+  currfn = toRun; //update to callee
+
   BasicBlock * entry = &toRun->getEntryBlock();
   runOnBB(entry);
 
@@ -105,8 +116,9 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
     return;
   }
   copyContext(fi->context);
-  currfn = temp;
+  currfn = temp; //restore to caller
   currContextIsAnnotated = tempAnnot;
+
   cleanUpfuncBBs(toRun, BasicBlockContexts, Registers, pop_back(funcValStack));
   if(fi->retReg) addSingleVal(ci, fi->retReg->getValue());
 }

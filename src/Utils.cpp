@@ -72,14 +72,17 @@ CallInst * getTestInst(string name, Module * module) {
   return testCall;
 }
 
-void ConstantFolding::copyCallerContext(CallInst * ci, Function * toRun) {
-  unsigned index = 0;
-  for(auto arg = toRun->arg_begin(); arg != toRun->arg_end();
+void ConstantFolding::propagateArgs(CallInst *ci, Function *toRun) {
+    unsigned index = 0;
+    for(auto arg = toRun->arg_begin(); arg != toRun->arg_end();
       arg++, index++) {
-    Value * callerVal = ci->getOperand(index);
-    Value * calleeVal = getArg(toRun, index);
-    replaceOrCloneRegister(calleeVal, callerVal);
-  }
+        Value * callerVal = ci->getOperand(index);
+        Value * calleeVal = getArg(toRun, index);
+        replaceOrCloneRegister(calleeVal, callerVal);
+    }
+}
+
+void ConstantFolding::copyCallerContext(CallInst * ci, Function * toRun) {
   BasicBlock * entry = &toRun->getEntryBlock();
   duplicateContext(entry);    
   updateAnnotationContext(ci->getCalledFunction());
@@ -240,6 +243,9 @@ void ConstantFolding::imageContext(BasicBlock * to) {
   BasicBlockContexts[to] = BasicBlockContexts[currBB]->image();
 }
 
+/**
+ * Create new ContextInfo for a Basic Block
+ */
 void ConstantFolding::createNewContext(BasicBlock * BB) {
   BasicBlockContexts[BB] = new ContextInfo(module);
 }
@@ -603,6 +609,9 @@ bool ConstantFolding::handleConstStr(Value * ptr) {
   return false;
 }
 
+/**
+ * Add constant int to registers instead of replacing uses
+ */
 bool ConstantFolding::noreplace(Value * from, Value * to) {
   if(ConstantInt * CI = dyn_cast<ConstantInt>(to)) {
     uint64_t val = CI->getZExtValue();
@@ -614,6 +623,9 @@ bool ConstantFolding::noreplace(Value * from, Value * to) {
   return false; 
 }
 
+/**
+ * Replaces all uses of a value with another value
+ */
 void ConstantFolding::replaceAndLog(Value * from, Value * to) {
   if(!from || !to || noreplace(from, to))
     return;
