@@ -362,7 +362,10 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
     markArgsAsNonConst(callInst);
     return NOTFOLDED;
   } else {
-    initializeFuncInfo(calledFunction);
+    if (!isFuncInfoInitialized(calledFunction)) {
+        FuncInfo *fi = initializeFuncInfo(calledFunction);
+        addFuncInfo(calledFunction, fi);
+    }
     if(useAnnotations && !satisfyConds(calledFunction)) {
       debug(Abubakar) << "skipping function : does not satisfy conds\n";
       markArgsAsNonConst(callInst);
