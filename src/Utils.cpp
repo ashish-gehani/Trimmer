@@ -498,17 +498,20 @@ bool ConstantFolding::trackAllocas() {
   return true;
 }
 
-void ConstantFolding::initializeFuncInfo(Function * F) {
-  if(fimap.find(F) == fimap.end()) {
-    FuncInfo * fi = new FuncInfo(F);
-    updatefuncInfo(F, fi);
-    fimap[F] = fi;
-  }
+bool ConstantFolding::isFuncInfoInitialized(Function *F) {
+    return fimap.find(F) != fimap.end();
 }
 
-void ConstantFolding::updatefuncInfo(Function * F, FuncInfo * fi) {
+void ConstantFolding::addFuncInfo(Function *F, FuncInfo *fi) {
+    fimap[F] = fi;
+}
+
+FuncInfo* ConstantFolding::initializeFuncInfo(Function * F) {
+
+  FuncInfo * fi = new FuncInfo(F);
   fi->directCallInsts = 0;
-  fi->usedInLoop = false;
+  fi->calledInLoop = false;
+
   for(Use &U : F->uses()) {
     User * FU = U.getUser();
     if(CallInst * ci = dyn_cast<CallInst>(FU)) {
@@ -517,9 +520,11 @@ void ConstantFolding::updatefuncInfo(Function * F, FuncInfo * fi) {
       fi->directCallInsts++;
       LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*ci->getFunction()).getLoopInfo();
       if(LI.getLoopFor(ci->getParent()))
-        fi->usedInLoop = true;     
+        fi->calledInLoop = true;     
     }
   }
+
+  return fi;
 }
 
 bool ConstantFolding::satisfyConds(Function * F) {
@@ -531,7 +536,7 @@ bool ConstantFolding::satisfyConds(Function * F) {
   if(AnnotationList.find(F) != AnnotationList.end()) 
     return true;
 
-  return !(fi->usedInLoop || fi->addrTaken || fi->directCallInsts > 1); 
+  return !(fi->calledInLoop || fi->addrTaken || fi->directCallInsts > 1); 
 }
 
 
