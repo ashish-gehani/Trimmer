@@ -100,7 +100,11 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
       propagateArgs(ci, toRun);
       copyCallerContext(ci, toRun); //copy context
   }
-  initializeFuncInfo(toRun);
+
+  if(!isFuncInfoInitialized(toRun)) {
+    FuncInfo *fi = initializeFuncInfo(toRun);
+    addFuncInfo(toRun, fi);
+  }
 
   Function * temp = currfn;
   currfn = toRun; //update to callee
@@ -142,7 +146,10 @@ bool ConstantFolding::runOnModule(Module & M) {
 
   Function * func = module->getFunction(StringRef("main"));
   BasicBlock * entry = &func->getEntryBlock();
-  initializeFuncInfo(func);
+  if (!isFuncInfoInitialized(func)) {
+    FuncInfo* fi = initializeFuncInfo(func);
+    addFuncInfo(func, fi);
+  }
   createNewContext(entry);
   currBB = entry;
   currContextIsAnnotated = true;

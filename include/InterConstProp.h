@@ -105,8 +105,9 @@ struct ConstantFolding : public ModulePass {
   void updateAnnotationContext(Function * F);
   bool trackAllocas();
   
-  void initializeFuncInfo(Function *);
-  void updatefuncInfo(Function *, FuncInfo *);
+  FuncInfo* initializeFuncInfo(Function *);
+  bool isFuncInfoInitialized(Function *F);
+  void addFuncInfo(Function *F, FuncInfo *fi);
   bool satisfyConds(Function *);
   
   Instruction * simplifyInst(Instruction *);
