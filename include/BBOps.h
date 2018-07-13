@@ -3,7 +3,7 @@
 #include "llvm/Analysis/LoopInfo.h"
 
 
-#include "Types.h"
+#include "LoopUnrollTest.h"
 #include "VecUtils.h"
 #include "Debug.h"
 #include "InterConstProp.h"

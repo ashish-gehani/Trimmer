@@ -599,7 +599,7 @@ bool ConstantFolding::doUnroll(BasicBlock * header, unsigned tripCount) {
   return true;
 }
 
-TestInfo * ConstantFolding::runtest(Loop * L) {
+LoopUnrollTest * ConstantFolding::runtest(Loop * L) {
   ValueToValueMapTy vmap;
   Function * toRun = addClonedFunction(currfn, vmap);
   bbOps.copyFuncBlocksInfo(currfn, vmap);
@@ -608,7 +608,7 @@ TestInfo * ConstantFolding::runtest(Loop * L) {
   bool constTripCount = getTripCount(hdrClone, tripCount);
   LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*toRun).getLoopInfo();
   Loop * newLoop = LI.getLoopFor(dyn_cast<BasicBlock>(hdrClone));
-  TestInfo * ti = new TestInfo(newLoop, module, constTripCount);
+  LoopUnrollTest *ti = new LoopUnrollTest(newLoop, module, constTripCount);
   testStack.push_back(ti);
   BasicBlock * entry = newLoop->getLoopPreheader();
 
@@ -651,7 +651,7 @@ void ConstantFolding::simplifyLoop(BasicBlock * BB) {
   if(useAnnotations && !checkUnrollHint(BB, LI))
     return;
   debug(Abubakar) << "running test\n";
-  TestInfo * ti = runtest(L);
+  LoopUnrollTest *ti = runtest(L);
   if(!ti->checkPassed()) {
     debug(Abubakar) << "test failed\n";
     return;  
@@ -667,14 +667,14 @@ void ConstantFolding::simplifyLoop(BasicBlock * BB) {
 bool ConstantFolding::testTerminated() {
   if(!testStack.size())
     return false;
-  TestInfo * ti = testStack[testStack.size() - 1];
+  LoopUnrollTest *ti = testStack[testStack.size() - 1];
   return ti->terminated;
 }
 
 void ConstantFolding::checkTermInst(Instruction * I) {
   if(!testStack.size())
     return;
-  TestInfo * ti = testStack[testStack.size() - 1];
+  LoopUnrollTest *ti = testStack[testStack.size() - 1];
   if(ti->terminated)
     return;
   if(ti->checkBreakInst(I)) {
@@ -688,7 +688,7 @@ void ConstantFolding::updateCM(ProcResult result, Instruction * I) {
     return;
   if(!testStack.size())
     return;
-  TestInfo * ti = testStack[testStack.size() - 1];
+  LoopUnrollTest *ti = testStack[testStack.size() - 1];
   if(ti->terminated)
     return;
   if(findInMap(ti->InstResults, I))
@@ -714,7 +714,7 @@ void ConstantFolding::updateCM(ProcResult result, Instruction * I) {
 }
 
 unsigned ConstantFolding::getNumNodesBelow(Instruction * I, 
-  map<Instruction *, unsigned> & cache, TestInfo * ti) {
+  map<Instruction *, unsigned> & cache, LoopUnrollTest *ti) {
   if(findInMap(cache, I))
     return cache[I];
   // getNumNodesBelow called on a use outside the loop
@@ -736,7 +736,7 @@ unsigned ConstantFolding::getNumNodesBelow(Instruction * I,
   return num;
 }
 
-unsigned ConstantFolding::getCost(TestInfo * ti) {
+unsigned ConstantFolding::getCost(LoopUnrollTest *ti) {
   unsigned cost = 0;
   map<Instruction *, unsigned> cache;
   for(unsigned i = 0; i < ti->indepInsts.size(); i++) {

@@ -81,7 +81,7 @@ struct ConstantFolding : public ModulePass {
   vector<InstPair> toReplace;
   ValToRegisterMap Registers;
 
-  vector<TestInfo *> testStack;
+  vector<LoopUnrollTest*> testStack;
   bool PreserveLCSSA;
 
   vector<ValSet> funcValStack;
@@ -199,7 +199,7 @@ struct ConstantFolding : public ModulePass {
   void visitReadyToVisit(vector<BasicBlock *>);
 
   void simplifyLoop(BasicBlock *);
-  TestInfo * runtest(Loop *);
+  LoopUnrollTest* runtest(Loop *);
   bool doUnroll(BasicBlock *, unsigned);
   bool getTripCount(BasicBlock *, unsigned &);
   void checkTermInst(Instruction *);
@@ -207,9 +207,9 @@ struct ConstantFolding : public ModulePass {
   bool checkUnrollHint(BasicBlock *, LoopInfo &LI);
   void updateCM(ProcResult, Instruction *);
   bool testTerminated();
-  unsigned getCost(TestInfo * ti);
+  unsigned getCost(LoopUnrollTest* ti);
   unsigned getNumNodesBelow(Instruction * I,
-  map<Instruction *, unsigned> &, TestInfo *);
+  map<Instruction *, unsigned> &, LoopUnrollTest *);
 
   virtual bool runOnModule(Module &);
   void runOnFunction(CallInst *, Function *);

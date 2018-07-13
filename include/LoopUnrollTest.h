@@ -34,12 +34,12 @@ CallInst * getTestInst(string, Module *);
 /*
   structure used for loop unroll testing
 */
-struct TestInfo {
+struct LoopUnrollTest {
   bool terminated, ConstTripCount;              
   vector<Instruction *> indepInsts;
   map<Instruction *, ProcResult> InstResults; 
   unsigned numOrigInsts, partOfLoop, iterations;
-  TestInfo(Loop * L, Module * module, bool tripCount) {
+  LoopUnrollTest(Loop * L, Module * module, bool tripCount) {
     terminated = false;
     ConstTripCount = tripCount;
     CallInst * testCall = getTestInst(LOOPEXITBB, module);

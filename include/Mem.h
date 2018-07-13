@@ -1,7 +1,7 @@
 using namespace llvm;
 using namespace std;
 #include "VecUtils.h"
-#include "Types.h"
+#include "LoopUnrollTest.h"
 
 #ifndef MEM_H_
 #define MEM_H_
