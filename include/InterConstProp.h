@@ -160,6 +160,7 @@ struct ConstantFolding : public ModulePass {
   void createNewContext(BasicBlock * BB);
   void imageContext(BasicBlock *);  
   void duplicateContext(BasicBlock *);
+  void initializeBBInfo(BasicBlock * BB);
   Memory * duplicateMem();
   bool hasContext(BasicBlock * BB);
   ContextInfo * getCurrContext();

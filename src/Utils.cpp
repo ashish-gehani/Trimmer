@@ -243,19 +243,21 @@ void ConstantFolding::imageContext(BasicBlock * to) {
   BasicBlockContexts[to] = BasicBlockContexts[currBB]->image();
 }
 
+void ConstantFolding::initializeBBInfo(BasicBlock * BB) {
+  LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*BB->getParent()).getLoopInfo();
+  bbOps.addBB(BB, LI);
+}
+
 /**
  * Create new ContextInfo for a Basic Block
  */
 void ConstantFolding::createNewContext(BasicBlock * BB) {
+  initializeBBInfo(BB);
   BasicBlockContexts[BB] = new ContextInfo(module);
 }
 
 void ConstantFolding::duplicateContext(BasicBlock * to) {
-  if (!bbOps.isBBInfoInitialized(to)) {
-    LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*to->getParent()).getLoopInfo();
-    bbOps.initAndAddBBInfo(to, LI);
-  }
-
+  initializeBBInfo(to);
   BasicBlockContexts[to] = BasicBlockContexts[currBB]->duplicate();
 }
 
