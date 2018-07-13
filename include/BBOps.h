@@ -1,4 +1,5 @@
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
+#include "llvm/Pass.h"
 #include "llvm/Analysis/LoopInfo.h"
 
 
@@ -12,7 +13,7 @@ using namespace llvm;
 class BBOps {
 public:
 	BBOps() {}
-  void initialize(BasicBlock * BB, LoopInfo& LI) {
+  BBInfo* initializeBBInfo(BasicBlock * BB, LoopInfo& LI) {
     BBInfo * bbi = new BBInfo(BB);
     bbi->partOfLoop = LI.getLoopFor(BB);
     for(BasicBlock::iterator b_it = BB->begin(), b_ite = BB->end(); 
@@ -20,13 +21,21 @@ public:
       if((&*b_it)->mayWriteToMemory()) 
         bbi->writesToMemory = true;
     }
-    BBInfoMap[BB] = bbi; 
+    return bbi; 
   }
-  void addBB(BasicBlock * BB, LoopInfo& LI) {
-    if(BBInfoMap.find(BB) != BBInfoMap.end())
-      return;
-    initialize(BB, LI); 
+  void addBBInfo(BasicBlock * BB, BBInfo* bbi) {
+    BBInfoMap[BB] = bbi;
   }  
+
+  bool isBBInfoInitialized(BasicBlock *BB) {
+    return BBInfoMap.find(BB) != BBInfoMap.end();
+  }
+
+  void initAndAddBBInfo(BasicBlock * BB, LoopInfo &LI) {
+    BBInfo *bbi = initializeBBInfo(BB, LI);
+    addBBInfo(BB, bbi);
+  }
+
   bool partOfLoop(Value * val) {
     if(isa<Instruction>(val) && dyn_cast<Instruction>(val)->getParent())
       return partOfLoop(dyn_cast<Instruction>(val)->getParent());
@@ -99,7 +108,11 @@ public:
     if(isUnReachable(BB)) {
       return false;
     }
-    addBB(BB, LI);
+
+    if (!isBBInfoInitialized(BB)) {
+      initAndAddBBInfo(BB, LI);  
+    }
+
     BBInfoMap[BB]->Rfrom++;
     if(!predecessorsVisited(BB, LI)) {
       return false;  
@@ -225,7 +238,11 @@ public:
     for(unsigned int index = 0; index < termInst->getNumSuccessors(); index++) {
       BasicBlock * successor = termInst->getSuccessor(index);
       if(isSingleSucc(termInst->getParent(), successor)) continue;
-      addBB(successor, LI);      
+
+      if(!isBBInfoInitialized(successor)) {
+        initAndAddBBInfo(successor, LI);
+      }
+
       BBInfoMap[successor]->URfrom++;
       checkReadyToVisit(successor);
       if(BBInfoMap[successor]->URfrom < BBInfoMap[successor]->numPreds)
