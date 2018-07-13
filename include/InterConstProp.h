@@ -155,8 +155,8 @@ struct ConstantFolding : public ModulePass {
   uint64_t createConstStr(string str);
   bool handleConstStr(Value *);
   
-  bool noreplace(Value *, Value *);
-  void replaceAndLog(Value *, Value *);
+  bool isFileDescriptor(Value *);
+  void replaceIfNotFD(Value *, Value *);
 
   void createNewContext(BasicBlock * BB);
   void imageContext(BasicBlock *);  

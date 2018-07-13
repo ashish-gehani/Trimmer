@@ -162,7 +162,7 @@ bool ConstantFolding::handleGetOpt(CallInst * ci) {
   ConstantInt * resInt = ConstantInt::get(intTy, result);
 
   debug(Abubakar) << "getopt returned " << (char) result << "\n";
-  replaceAndLog(ci, resInt);
+  replaceIfNotFD(ci, resInt);
 
   if(optarg) {
     debug(Abubakar) << "optarg is " << optarg << "\n";

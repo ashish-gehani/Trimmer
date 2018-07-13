@@ -438,7 +438,7 @@ ProcResult ConstantFolding::tryfolding(Instruction * I) {
   else {
     Constant * constVal = ConstantFoldInstruction(I, *DL, TLI);
     if(constVal) {
-      replaceAndLog(I, constVal); 
+      replaceIfNotFD(I, constVal); 
       return FOLDED;
     }   
   }
@@ -871,10 +871,10 @@ bool ConstantFolding::replaceOrCloneRegister(Value * from, Value * with) {
 
   Type * ty = from->getType();
   if(isa<ConstantInt>(with)) {
-    replaceAndLog(from, with);
+    replaceIfNotFD(from, with);
     debug(Abubakar) << "replaced with constantInt\n";
   } else if(isa<ConstantPointerNull>(with)) {
-    replaceAndLog(from, with);
+    replaceIfNotFD(from, with);
     debug(Abubakar) << "replaced with NULL pointer\n";
   } else if(Register * reg = getRegister(with)) {
     addRegister(from, ty, reg->getValue());    
@@ -1079,7 +1079,7 @@ CmpInst * ConstantFolding::foldCmp(CmpInst * CI) {
                     newLHS, newRHS);
     NCI->insertBefore(CI);
     debug(Abubakar) << *CI << " ";
-    replaceAndLog(CI, NCI);
+    replaceIfNotFD(CI, NCI);
     return NCI;
   }
   return NULL;
@@ -1090,7 +1090,7 @@ Instruction * ConstantFolding::simplifyInst(Instruction * I) {
     Value * val = I->getOperand(i);
     if(Register * reg = getRegister(val)) {
       if(IntegerType * intTy = dyn_cast<IntegerType>(val->getType()))
-        replaceAndLog(val, ConstantInt::get(intTy, reg->getValue()));
+        replaceIfNotFD(val, ConstantInt::get(intTy, reg->getValue()));
     }
   }
   if(isa<CmpInst>(I) &&
@@ -1180,7 +1180,7 @@ void ConstantFolding::addFuncInfo(Function *F, FuncInfo *fi) {
     fimap[F] = fi;
 }
 
-FuncInfo* ConstantFolding::initializeFuncInfo(Function * F) {
+FuncInfo* ConstantFolding::initializeFuncInfo(Function *F) {
 
   FuncInfo * fi = new FuncInfo(F);
   fi->directCallInsts = 0;
@@ -1191,6 +1191,7 @@ FuncInfo* ConstantFolding::initializeFuncInfo(Function * F) {
     if(CallInst * ci = dyn_cast<CallInst>(FU)) {
       if(!ci->getParent())
         continue;
+
       fi->directCallInsts++;
       LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*ci->getFunction()).getLoopInfo();
       if(LI.getLoopFor(ci->getParent()))
@@ -1220,14 +1221,14 @@ void ConstantFolding::addSingleVal(Value * val, uint64_t num) {
     if(!num) {
       debug(Abubakar) << "replacing with null\n";
       ConstantPointerNull * nullP = ConstantPointerNull::get(dyn_cast<PointerType>(ty));
-      replaceAndLog(val, nullP);
+      replaceIfNotFD(val, nullP);
     } else {
       debug(Abubakar) << "adding Register\n";
       addRegister(val, ty, num); 
     }
   } else if(IntegerType * intTy = dyn_cast<IntegerType>(ty)) {
     debug(Abubakar) << "replacing with constant int\n";
-    replaceAndLog(val, ConstantInt::get(intTy, num));
+    replaceIfNotFD(val, ConstantInt::get(intTy, num));
   }
 }
 
@@ -1288,26 +1289,29 @@ bool ConstantFolding::handleConstStr(Value * ptr) {
   return false;
 }
 
-/**
- * Add constant int to registers instead of replacing uses
- */
-bool ConstantFolding::noreplace(Value * from, Value * to) {
-  if(ConstantInt * CI = dyn_cast<ConstantInt>(to)) {
+
+bool ConstantFolding::isFileDescriptor(Value *value) {
+  if (ConstantInt *CI = dyn_cast<ConstantInt>(value)) {
     uint64_t val = CI->getZExtValue();
-    if(fdInfoMap.find(val) == fdInfoMap.end()) return false;
-    debug(Abubakar) << "adding Register for special integer " << val << "\n";
-    addRegister(from, from->getType(), val);
-    return true;
+    return fdInfoMap.find(val) != fdInfoMap.end();
   }
-  return false; 
+  return false;
 }
 
 /**
  * Replaces all uses of a value with another value
  */
-void ConstantFolding::replaceAndLog(Value * from, Value * to) {
-  if(!from || !to || noreplace(from, to))
+void ConstantFolding::replaceIfNotFD(Value * from, Value * to) {
+  if(!from || !to)
     return;
+  
+  if(isFileDescriptor(to)) {
+    ConstantInt *CI = dyn_cast<ConstantInt>(to);
+    uint64_t val = CI->getZExtValue();
+    addRegister(from, from->getType(), val);
+    return;
+  }
+
   from->replaceAllUsesWith(to);
   debug(Abubakar) << "replaced with " << *to << "\n";
   if(Instruction * I = dyn_cast<Instruction>(from))
@@ -1442,7 +1446,7 @@ void ConstantFolding::simplifyStrFunc(CallInst * callInst) {
   };
   LibCallSimplifier Simplifier(*DL, TLI, InstCombineRAUW);
   if (Value *With = Simplifier.optimizeCall(callInst)) {
-    replaceAndLog(callInst, With);
+    replaceIfNotFD(callInst, With);
   }
 }
 
@@ -1467,7 +1471,7 @@ void ConstantFolding::handleStrChr(CallInst * callInst) {
   if(!remStr) {
     debug(Abubakar) << "strchr : returned NULL\n";
     ConstantPointerNull * nullP = ConstantPointerNull::get(dyn_cast<PointerType>(ty));
-    replaceAndLog(callInst, nullP);
+    replaceIfNotFD(callInst, nullP);
     return;
   }
   uint64_t addr;
@@ -1497,7 +1501,7 @@ void ConstantFolding::handleStrpbrk(CallInst * callInst) {
   Type * ty = callInst->getType();
   if(!remStr) {
     ConstantPointerNull * nullP = ConstantPointerNull::get(dyn_cast<PointerType>(ty));
-    replaceAndLog(callInst, nullP);
+    replaceIfNotFD(callInst, nullP);
     return;
   }
   uint64_t addr;
@@ -1520,7 +1524,7 @@ void ConstantFolding::handleAtoi(CallInst * callInst) {
   char * str = (char *) getActualAddr(reg->getValue());
   int result = atoi(str);
   IntegerType * int32Ty = IntegerType::get(module->getContext(), 32);
-  replaceAndLog(callInst, ConstantInt::get(int32Ty, result)); 
+  replaceIfNotFD(callInst, ConstantInt::get(int32Ty, result)); 
 }
 
 //File FileIO.cpp
