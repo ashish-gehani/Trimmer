@@ -6,6 +6,9 @@
 #include "Types.h"
 #include "VecUtils.h"
 #include "Debug.h"
+#include "InterConstProp.h"
+
+typedef map<BasicBlock *, ContextInfo *> BasicBlockContInfoMap;
 
 using namespace std;
 using namespace llvm;

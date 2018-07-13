@@ -38,8 +38,11 @@
 #include <sstream>
 #include <fcntl.h>
 
+#include "BBInfo.h"
+#include "ContextInfo.h"
 #include "Utils.cpp"
 #include "StringUtils.cpp"
+#include "FdInfo.h"
 
 
 using namespace llvm;

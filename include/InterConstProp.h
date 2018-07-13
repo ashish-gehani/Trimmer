@@ -51,6 +51,14 @@
 
 #include "Debug.h"
 #include "BBOps.h"
+#include "ContextInfo.h"
+#include "BBInfo.h"
+#include "FuncInfo.h"
+
+typedef map<Function *, FuncInfo *> FuncInfoMap;
+typedef map<BasicBlock *, ContextInfo *> BasicBlockContInfoMap;
+typedef pair<Instruction *, Instruction *> InstPair;
+typedef set<Value *> ValSet;
 
 using namespace llvm;
 using namespace std;
