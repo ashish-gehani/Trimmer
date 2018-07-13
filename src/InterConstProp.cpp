@@ -142,10 +142,8 @@ bool ConstantFolding::runOnModule(Module & M) {
 
   Function * func = module->getFunction(StringRef("main"));
   BasicBlock * entry = &func->getEntryBlock();
-  if (!isFuncInfoInitialized(func)) {
-    FuncInfo* fi = initializeFuncInfo(func);
-    addFuncInfo(func, fi);
-  }
+  initializeFuncInfo(func);
+
   if (!bbOps.isBBInfoInitialized(entry)) {
     LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*entry->getParent()).getLoopInfo();
     bbOps.initAndAddBBInfo(entry, LI);
