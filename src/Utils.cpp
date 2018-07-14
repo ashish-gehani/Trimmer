@@ -1,15 +1,57 @@
+#include "llvm/Pass.h"
+#include "llvm/IR/Function.h"
+#include "llvm/Transforms/Utils/BasicBlockUtils.h"
+#include "llvm/Analysis/InstructionSimplify.h"
+#include "llvm/Analysis/ConstantFolding.h"
+#include "llvm/IR/Module.h"
+#include "llvm/Analysis/CallGraph.h"
+#include "llvm/IR/Instruction.h"	
+#include "llvm/IR/Instructions.h"
+#include "llvm/IR/GlobalValue.h"
+#include "llvm/IR/GlobalVariable.h"
+#include "llvm/Support/raw_ostream.h"
+#include "llvm/IR/InstIterator.h"
+#include "llvm/IR/Constants.h"
+#include "llvm/IR/Operator.h"
+#include "llvm/Analysis/MemoryDependenceAnalysis.h"
+#include "llvm/IR/IntrinsicInst.h"
+#include "llvm/ADT/SmallVector.h"
+#include "llvm/Transforms/Utils/SimplifyLibCalls.h"
+#include "llvm/Analysis/TargetLibraryInfo.h"
+#include "llvm/Transforms/Utils/BasicBlockUtils.h"
+#include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/Dominators.h"
+#include "llvm/IR/ValueMap.h"
+#include "llvm/Transforms/Utils/Cloning.h"
+
+#include <unistd.h>
+#include <sys/stat.h>
+#include <map>
+#include <set>
+#include <iostream>
+#include <vector>
+#include <map>
+#include <fstream>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <sstream>
+#include <fcntl.h>
+
+
+#include <unistd.h>
+
+
+#include "llvm/IR/Function.h"
+#include "ConstantFolding.h"
+#include "Utils.h"
+#include "getopt_local.h"
+#include "StringUtils.h"
+#include "Debug.h"
+
 using namespace llvm;
 using namespace std;
 
-#include <unistd.h>
-#include "ConstantFolding.h"
-
-#ifndef UTILS_H
-#define UTILS_H
-
-#include "getopt_local.h"
-
-bool getConstantStringInfo(const Value *, StringRef&, uint64_t, bool);
 
 void split(string str, vector<string>& tokens) {
     size_t pos = str.find(';');
@@ -71,5 +113,3 @@ CallInst * getTestInst(string name, Module * module) {
   CallInst * testCall = CallInst::Create(dyn_cast<Function>(val), args);
   return testCall;
 }
-
-#endif
