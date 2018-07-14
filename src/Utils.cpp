@@ -2,7 +2,7 @@ using namespace llvm;
 using namespace std;
 
 #include <unistd.h>
-#include "InterConstProp.h"
+#include "ConstantFolding.h"
 
 #ifndef UTILS_H
 #define UTILS_H

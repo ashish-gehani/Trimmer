@@ -1,6 +1,6 @@
 using namespace llvm;
 using namespace std;
-#include "InterConstProp.h"
+#include "ConstantFolding.h"
 #include "Utils.cpp"
 
 bool simpleStrFunc(string name) {

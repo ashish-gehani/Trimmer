@@ -6,7 +6,7 @@
 #include "LoopUnrollTest.h"
 #include "VecUtils.h"
 #include "Debug.h"
-#include "InterConstProp.h"
+#include "ConstantFolding.h"
 
 typedef map<BasicBlock *, ContextInfo *> BasicBlockContInfoMap;
 

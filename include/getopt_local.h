@@ -1,4 +1,4 @@
-#include "InterConstProp.h"
+#include "ConstantFolding.h"
 
 string err_local;
 
