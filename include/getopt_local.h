@@ -1,6 +1,6 @@
 #include "ConstantFolding.h"
 
-string err_local;
+extern string err_local;
 
 int getopt_local(int argc, char ** argv, char * opts);
 

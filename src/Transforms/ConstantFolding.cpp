@@ -38,6 +38,7 @@
 #include <sstream>
 #include <fcntl.h>
 
+#include "VecUtils.h"
 #include "Debug.h"
 #include "ConstantFolding.h"
 #include "BBInfo.h"

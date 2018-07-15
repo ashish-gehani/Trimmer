@@ -14,8 +14,13 @@ extern int debugLevel;
 class debug {
     public:
     debug(int level);
+
     template<class T>
-    friend raw_ostream& operator << (raw_ostream&, const T &x);
+    debug& operator << (const T &x) {
+      if(!ignore)
+        errs() << x;
+      return *this;
+    }
 
     private:
         bool ignore;

@@ -1,9 +1,12 @@
+#ifndef UTILS_H_
+#define UTILS_H_
+
+#include "llvm/IR/Function.h"
+
 #include <string>
 
 #include "BBOps.h"
-
-#ifndef UTILS_H_
-#define UTILS_H_
+#include "ConstantFolding.h"
 
 using namespace llvm;
 using namespace std;

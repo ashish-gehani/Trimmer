@@ -1,28 +1,3 @@
-#include "llvm/Pass.h"
-#include "llvm/IR/Function.h"
-#include "llvm/Transforms/Utils/BasicBlockUtils.h"
-#include "llvm/Analysis/InstructionSimplify.h"
-#include "llvm/Analysis/ConstantFolding.h"
-#include "llvm/IR/Module.h"
-#include "llvm/Analysis/CallGraph.h"
-#include "llvm/IR/Instruction.h"	
-#include "llvm/IR/Instructions.h"
-#include "llvm/IR/GlobalValue.h"
-#include "llvm/IR/GlobalVariable.h"
-#include "llvm/Support/raw_ostream.h"
-#include "llvm/IR/InstIterator.h"
-#include "llvm/IR/Constants.h"
-#include "llvm/IR/Operator.h"
-#include "llvm/Analysis/MemoryDependenceAnalysis.h"
-#include "llvm/IR/IntrinsicInst.h"
-#include "llvm/ADT/SmallVector.h"
-#include "llvm/Transforms/Utils/SimplifyLibCalls.h"
-#include "llvm/Analysis/TargetLibraryInfo.h"
-#include "llvm/Transforms/Utils/BasicBlockUtils.h"
-#include "llvm/IR/IRBuilder.h"
-#include "llvm/IR/Dominators.h"
-#include "llvm/IR/ValueMap.h"
-#include "llvm/Transforms/Utils/Cloning.h"
 
 #include <unistd.h>
 #include <sys/stat.h>
@@ -38,7 +13,7 @@
 #include <sstream>
 #include <fcntl.h>
 
-
+#include "VecUtils.h"
 #include "BBOps.h"
 
 BBInfo* BBOps::initializeBBInfo(BasicBlock * BB, LoopInfo& LI) {

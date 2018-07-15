@@ -33,8 +33,8 @@
 #include <vector>
 #include <fstream>
 
-#include "../include/vecUtils.h"
-#include "../include/debug.h"
+#include "../include/VecUtils.h"
+#include "../include/Debug.h"
 
 using namespace llvm;
 using namespace std;

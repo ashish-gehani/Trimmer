@@ -31,19 +31,6 @@
 #include "llvm/Analysis/TargetTransformInfo.h"
 #include "llvm/Analysis/OptimizationDiagnosticInfo.h"
 
-#include <sys/stat.h>
-#include <map>
-#include <set>
-#include <iostream>
-#include <vector>
-#include <map>
-#include <fstream>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <sstream>
-#include <set>
-#include <ctime>
 #include <getopt.h>
 
 #ifndef INTERCONSTPROP_H_
