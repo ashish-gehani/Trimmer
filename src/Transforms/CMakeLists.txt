@@ -5,7 +5,7 @@ add_library(ConstantFolding MODULE
   ../Debug.cpp
   ConstantFolding.cpp
   ../VecUtils.cpp
-  ../getopt_local.cpp
+  ../GetOptLocal.cpp
   )
 add_library(Internalize MODULE
   Internalize.cpp

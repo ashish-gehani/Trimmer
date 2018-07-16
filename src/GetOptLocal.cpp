@@ -1,5 +1,5 @@
 #include "VecUtils.h"
-#include "getopt_local.h"
+#include "GetOptLocal.h"
 
 string err_local;
 int getopt_local(int argc, char ** argv, char * opts) {

@@ -46,7 +46,7 @@
 #include "Utils.h"
 #include "StringUtils.h"
 #include "FdInfo.h"
-#include "getopt_local.h"
+#include "GetOptLocal.h"
 
 
 using namespace llvm;
