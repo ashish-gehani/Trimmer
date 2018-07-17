@@ -4,36 +4,44 @@
 
 #include "VecUtils.h"
 #include "Debug.h"
+#include "Utils.h"
 
-int debugLevel = 0;
+int debugLevel = DebugNone;
 
 using namespace llvm;
 using namespace std;
 
 debug::debug(int level) {
-  if(debugLevel == All || level == debugLevel || level == All)
+  if(debugLevel & level)
     ignore = false;
   else
     ignore = true;
 }
 
 void initDebugLevel() {
-    char * value = getenv("TRIMMER_DEBUG");
-    if(!value)
-        return;
-    if(!strncmp(value, "Abubakar", 8))
-        debugLevel = Abubakar;
-    else if(!strncmp(value, "Hashim", 6))
-        debugLevel = Hashim;
-    else if(!strncmp(value, "All", 3))
-        debugLevel = All;
+  char * value = getenv("TRIMMER_DEBUG");
+  if(!value) return;
+  vector<string> names;
+  split(value, names, '+');
+  for(unsigned i = 0; i < names.size(); i++) addToDebugLevel(&names[i][0u]);
+}
+
+void addToDebugLevel(char * str) {
+  errs() << str << "\n";
+  if(!strncmp(str, "Abubakar", 8))
+      debugLevel |= Abubakar;
+  else if(!strncmp(str, "Hashim", 6))
+      debugLevel |= Hashim;
+  else if(!strncmp(str, "Maaz", 4))
+    debugLevel |= Maaz;
+  else if(!strncmp(str, "All", 3))
+      debugLevel |= All;  
 }
 
 void printBB(string before, BasicBlock * BB, string after, int level) {
-    debug(level) << before;
-    if(debugLevel == All || level == debugLevel || level == All)
-        BB->printAsOperand(errs(), false);        
-    debug(level) << after;
+  debug(level) << before;
+  if(debugLevel & level) BB->printAsOperand(errs(), false);        
+  debug(level) << after;
 }
 
 void printInst(Instruction * I, int level) {
@@ -54,14 +62,14 @@ void printMem(Memory * mem, uint64_t addr, uint64_t size) {
   errs() << "\n";
 }
 
-void printInt(Memory * mem, uint64_t addr, uint64_t size) {
-    errs() << mem->load(size, addr);
+void printStr(Memory * mem, uint64_t addr, uint64_t ptrSize) {
+  uint64_t strAddr = mem->load(ptrSize, addr);
+  char * str = (char *) mem->getActualAddr(strAddr);
+  errs() << str; 
 }
 
-void printStr(Memory * mem, uint64_t addr, uint64_t ptrSize) {
-    uint64_t strAddr = mem->load(ptrSize, addr);
-    char * str = (char *) mem->getActualAddr(strAddr);
-    errs() << str; 
+void printInt(Memory * mem, uint64_t addr, uint64_t size) {
+  errs() << mem->load(size, addr);
 }
 
 void printConstMem(Memory * mem, uint64_t addr, uint64_t size) {

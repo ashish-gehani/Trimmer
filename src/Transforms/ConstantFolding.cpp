@@ -1144,12 +1144,12 @@ void ConstantFolding::createAnnotationList2() {
   GlobalVariable * ggv = module->getNamedGlobal("__tracked_globals__");
   if(ggv) {
     ConstantDataArray * CDA = dyn_cast<ConstantDataArray>(ggv->getInitializer());
-    split(CDA->getAsString(), globs);
+    split(CDA->getAsString(), globs, ';');
   }
   GlobalVariable * fgv = module->getNamedGlobal("__tracked_funcs__");
   if(fgv) {
     ConstantDataArray * CDA = dyn_cast<ConstantDataArray>(fgv->getInitializer());
-    split(CDA->getAsString(), funcs);
+    split(CDA->getAsString(), funcs, ';');
   }
   for(unsigned i = 0; i < globs.size(); i++) {
     GlobalValue * gv = module->getNamedValue(StringRef(globs[i]));

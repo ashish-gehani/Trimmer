@@ -4,15 +4,17 @@ using namespace llvm;
 using namespace std;
 
 
-void split(string str, vector<string>& tokens) {
-    size_t pos = str.find(';');
+void split(string str, vector<string>& tokens, char delim) {
+    size_t pos = str.find(delim);
     size_t initialPos = 0;
     while(pos != string::npos) {
         tokens.push_back( str.substr(initialPos, pos - initialPos));
         initialPos = pos + 1;
-        pos = str.find(';', initialPos);
+        pos = str.find(delim, initialPos); 
     }
-    tokens.push_back(str.substr(initialPos, str.size() - initialPos - 1));
+    size_t to = str.size() - initialPos;
+    if(str[str.size() - 1] == delim) to--;
+    tokens.push_back(str.substr(initialPos, to));
 }
 
 Value * getArg(Function * func, int index){
