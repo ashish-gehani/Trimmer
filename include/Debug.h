@@ -34,6 +34,7 @@ class debug {
 void split(string str, vector<string>& tokens, char delim);
 
 void addToDebugLevel(char * str) {
+  errs() << str << "\n";
   if(!strncmp(str, "Abubakar", 8))
       debugLevel |= Abubakar;
   else if(!strncmp(str, "Hashim", 6))
