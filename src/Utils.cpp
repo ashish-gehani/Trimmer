@@ -11,13 +11,13 @@ using namespace std;
 
 bool getConstantStringInfo(const Value *, StringRef&, uint64_t, bool);
 
-void split(string str, vector<string>& tokens) {
-    size_t pos = str.find(';');
+void split(string str, vector<string>& tokens, char delim) {
+    size_t pos = str.find(delim);
     size_t initialPos = 0;
     while(pos != string::npos) {
         tokens.push_back( str.substr(initialPos, pos - initialPos));
         initialPos = pos + 1;
-        pos = str.find(';', initialPos);
+        pos = str.find(delim, initialPos);
     }
     tokens.push_back(str.substr(initialPos, str.size() - initialPos - 1));
 }
@@ -463,12 +463,12 @@ void ConstantFolding::createAnnotationList2() {
   GlobalVariable * ggv = module->getNamedGlobal("__tracked_globals__");
   if(ggv) {
     ConstantDataArray * CDA = dyn_cast<ConstantDataArray>(ggv->getInitializer());
-    split(CDA->getAsString(), globs);
+    split(CDA->getAsString(), globs, ';');
   }
   GlobalVariable * fgv = module->getNamedGlobal("__tracked_funcs__");
   if(fgv) {
     ConstantDataArray * CDA = dyn_cast<ConstantDataArray>(fgv->getInitializer());
-    split(CDA->getAsString(), funcs);
+    split(CDA->getAsString(), funcs, ';');
   }
   for(unsigned i = 0; i < globs.size(); i++) {
     GlobalValue * gv = module->getNamedValue(StringRef(globs[i]));
