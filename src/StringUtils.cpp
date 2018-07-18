@@ -1,7 +1,12 @@
+#include "llvm/Pass.h"
+
+#include <string>
+#include "ConstantFolding.h"
+#include "StringUtils.h"
+#include "Utils.h"
+
 using namespace llvm;
 using namespace std;
-#include "InterConstProp.h"
-#include "Utils.cpp"
 
 bool simpleStrFunc(string name) {
   if(name == "strcmp" || name == "strcasecmp" || name == "strcspn" 
@@ -100,139 +105,4 @@ bool getConstantStringInfo(const Value * V, StringRef &Str, uint64_t Offset, boo
     Str = Str.substr(0, Str.find('\0'));
   }
   return true;
-}
-
-bool ConstantFolding::handleStringFunc(CallInst * callInst) {
-  string name = callInst->getCalledFunction()->getName();
-  if(simpleStrFunc(name))   simplifyStrFunc(callInst);
-  else if(name == "strchr") handleStrChr(callInst);
-  else if(name == "strpbrk")handleStrpbrk(callInst);
-  else if(name == "atoi")   handleAtoi(callInst);
-  else return false;
-  return true;
-}
-
-void ConstantFolding::simplifyStrFunc(CallInst * callInst) {
-  if(callInst->use_empty())
-    return;
-  Instruction * next = callInst;
-  for(unsigned index = 0; index < callInst->getNumArgOperands(); index++) {
-    Value * pointerArg = callInst->getArgOperand(index);
-    Register * reg = getRegister(pointerArg);
-
-    if(!reg) {
-      StringRef stringRef;
-      if(getConstantStringInfo(pointerArg, stringRef, 0, false))
-        debug(Abubakar) << "constant string " << stringRef << "\n";
-    } else {    
-      uint64_t addr = reg->getValue();
-      uint64_t len;
-      if(getStrLen(callInst, len)) {
-        if(!checkConstStr(addr, len)) {
-          debug(Abubakar) << "skipping non constant string\n";
-          continue;
-        }
-      } else if(!checkConstStr(addr))
-        continue;
-      char * baseStringData = (char *) getActualAddr(addr);
-      debug(Abubakar) << "baseStringData : " << baseStringData << "\n";
-      ConstantInt * ind0 = ConstantInt::get(IntegerType::get(module->getContext(), 64), 0);
-      vector<Value *> indxList;
-      indxList.push_back(ind0); 
-      indxList.push_back(ind0);
-      Constant * stringConstant = ConstantDataArray::getString(module->getContext(), 
-                     StringRef(baseStringData), true);
-      GlobalVariable * globalReadString = new GlobalVariable(*module, stringConstant->getType(), true,
-                   GlobalValue::ExternalLinkage, stringConstant, "");
-      Type * elType = globalReadString->getType()->getContainedType(0);
-      GetElementPtrInst * stringPtr = GetElementPtrInst::Create(elType, globalReadString, 
-                indxList, Twine(""), callInst);
-      callInst->setOperand(index, stringPtr);          
-      next = stringPtr;
-    }
-  }
-  auto InstCombineRAUW = [this](Instruction *From, Value *With) {
-    From->replaceAllUsesWith(With);
-  };
-  LibCallSimplifier Simplifier(*DL, TLI, InstCombineRAUW);
-  if (Value *With = Simplifier.optimizeCall(callInst)) {
-    replaceAndLog(callInst, With);
-  }
-}
-
-void ConstantFolding::handleStrChr(CallInst * callInst) {
-  Value * bufPtr = callInst->getOperand(0);
-  Value * flagVal = callInst->getOperand(1);  
-  uint64_t flag;
-  Register * reg = getRegister(bufPtr);  
-  if(!reg) {
-    debug(Abubakar) << "handleStrChr : buffer Not found in Map\n";
-    return;
-  }
-  if(!getSingleVal(flagVal, flag)) {
-    debug(Abubakar) << "handleStrChr : flag not constant\n";
-    setConstContigous(false, reg->getValue()); 
-    return;   
-  }
-  char * buffer = (char *) getActualAddr(reg->getValue());
-  debug(Abubakar) << "strchr : " << buffer << " with flag " << (char) flag << "\n";
-  char * remStr = strchr(buffer, flag);
-  Type * ty = callInst->getType();
-  if(!remStr) {
-    debug(Abubakar) << "strchr : returned NULL\n";
-    ConstantPointerNull * nullP = ConstantPointerNull::get(dyn_cast<PointerType>(ty));
-    replaceAndLog(callInst, nullP);
-    return;
-  }
-  uint64_t addr;
-  for(addr = reg->getValue(); *buffer && buffer != remStr; addr++, buffer++);
-  debug(Abubakar) << "strchr : returned idx " << (addr - reg->getValue()) << "\n";
-  addRegister(callInst, ty, addr);
-}
-
-void ConstantFolding::handleStrpbrk(CallInst * callInst) {
-  Value * bufPtr = callInst->getOperand(0);
-  Value * keyPtr = callInst->getOperand(1);  
-  handleConstStr(keyPtr);
-  Register * reg1 = getRegister(bufPtr);  
-  if(!reg1) {
-    debug(Abubakar) << "handleStrpbrk : buffer Not found in Map\n";
-    return;
-  }
-  Register * reg2 = getRegister(keyPtr);  
-  if(!reg2) {
-    setConstContigous(false, reg1->getValue()); 
-    debug(Abubakar) << "handleStrpbrk : key Not found in Map\n";
-    return;
-  }
-  char * buffer = (char *) getActualAddr(reg1->getValue());
-  char * key = (char *) getActualAddr(reg2->getValue());
-  char * remStr = strpbrk(buffer, key);
-  Type * ty = callInst->getType();
-  if(!remStr) {
-    ConstantPointerNull * nullP = ConstantPointerNull::get(dyn_cast<PointerType>(ty));
-    replaceAndLog(callInst, nullP);
-    return;
-  }
-  uint64_t addr;
-  for(addr = reg1->getValue(); *buffer && buffer != remStr; addr++, buffer++);
-  addRegister(callInst, ty, addr);
-}
-
-
-void ConstantFolding::handleAtoi(CallInst * callInst) {
-  Value * ptr = callInst->getArgOperand(0);
-  Register * reg = getRegister(ptr);
-  if(!reg) {
-    debug(Abubakar) << "handleAtoi : not found in map\n";
-    return;
-  }
-  if(!checkConstContigous(reg->getValue())) {
-    debug(Abubakar) << "handleAtoi : not constant\n";
-    return;
-  }
-  char * str = (char *) getActualAddr(reg->getValue());
-  int result = atoi(str);
-  IntegerType * int32Ty = IntegerType::get(module->getContext(), 32);
-  replaceAndLog(callInst, ConstantInt::get(int32Ty, result)); 
 }

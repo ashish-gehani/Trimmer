@@ -1,13 +1,14 @@
-using namespace llvm;
-using namespace std;
 #include "VecUtils.h"
-#include "Types.h"
+#include "LoopUnrollTest.h"
 
 #ifndef MEM_H_
 #define MEM_H_
 
 #define DEFAULTINITSIZE 20000
 #define MAXSTACKSIZE 1000000
+
+using namespace llvm;
+using namespace std;
 
 /**
  * 5 main structures in the Memory

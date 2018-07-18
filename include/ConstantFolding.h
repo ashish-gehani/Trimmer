@@ -31,19 +31,6 @@
 #include "llvm/Analysis/TargetTransformInfo.h"
 #include "llvm/Analysis/OptimizationDiagnosticInfo.h"
 
-#include <sys/stat.h>
-#include <map>
-#include <set>
-#include <iostream>
-#include <vector>
-#include <map>
-#include <fstream>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <sstream>
-#include <set>
-#include <ctime>
 #include <getopt.h>
 
 #ifndef INTERCONSTPROP_H_
@@ -51,6 +38,14 @@
 
 #include "Debug.h"
 #include "BBOps.h"
+#include "ContextInfo.h"
+#include "BBInfo.h"
+#include "FuncInfo.h"
+
+typedef map<Function *, FuncInfo *> FuncInfoMap;
+typedef map<BasicBlock *, ContextInfo *> BasicBlockContInfoMap;
+typedef pair<Instruction *, Instruction *> InstPair;
+typedef set<Value *> ValSet;
 
 using namespace llvm;
 using namespace std;
@@ -73,7 +68,7 @@ struct ConstantFolding : public ModulePass {
   vector<InstPair> toReplace;
   ValToRegisterMap Registers;
 
-  vector<TestInfo *> testStack;
+  vector<LoopUnrollTest*> testStack;
   bool PreserveLCSSA;
 
   vector<ValSet> funcValStack;
@@ -155,8 +150,8 @@ struct ConstantFolding : public ModulePass {
   uint64_t createConstStr(string str);
   bool handleConstStr(Value *);
   
-  bool noreplace(Value *, Value *);
-  void replaceAndLog(Value *, Value *);
+  bool isFileDescriptor(Value *);
+  void replaceIfNotFD(Value *, Value *);
 
   void createNewContext(BasicBlock * BB);
   void imageContext(BasicBlock *);  
@@ -191,7 +186,7 @@ struct ConstantFolding : public ModulePass {
   void visitReadyToVisit(vector<BasicBlock *>);
 
   void simplifyLoop(BasicBlock *);
-  TestInfo * runtest(Loop *);
+  LoopUnrollTest* runtest(Loop *);
   bool doUnroll(BasicBlock *, unsigned);
   bool getTripCount(BasicBlock *, unsigned &);
   void checkTermInst(Instruction *);
@@ -199,9 +194,9 @@ struct ConstantFolding : public ModulePass {
   bool checkUnrollHint(BasicBlock *, LoopInfo &LI);
   void updateCM(ProcResult, Instruction *);
   bool testTerminated();
-  unsigned getCost(TestInfo * ti);
+  unsigned getCost(LoopUnrollTest* ti);
   unsigned getNumNodesBelow(Instruction * I,
-  map<Instruction *, unsigned> &, TestInfo *);
+  map<Instruction *, unsigned> &, LoopUnrollTest *);
 
   virtual bool runOnModule(Module &);
   void runOnFunction(CallInst *, Function *);
