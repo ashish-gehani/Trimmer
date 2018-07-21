@@ -594,7 +594,7 @@ bool ConstantFolding::doUnroll(BasicBlock * header, unsigned tripCount) {
   Loop * L = LI.getLoopFor(dyn_cast<BasicBlock>(header));
   OptimizationRemarkEmitter ORE(F); 
   int UnrollResult = UnrollLoop(L, tripCount, tripCount, true, false, false, 
-                true, false, 0, 0, &LI, &SE, DT, &AC, &ORE, PreserveLCSSA);
+                true, false, 1, 0, &LI, &SE, DT, &AC, &ORE, PreserveLCSSA);
   if(!UnrollResult) {
     debug(Abubakar) << "failed in unrolling\n";
     return false;
