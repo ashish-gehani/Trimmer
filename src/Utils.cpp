@@ -27,16 +27,6 @@ Value * getArg(Function * func, int index){
   return NULL;  
 }
 
-void cleanUpfuncBBs(Function * f,
-  ValToRegisterMap& Registers, ValSet valSet) { 
-  for(auto val : valSet) {
-    assert(Registers.find(val) != Registers.end() && "unexpected behavior");
-    Register * reg = Registers[val];
-    delete reg;
-    Registers.erase(val);    
-  }  
-}
-
 bool ignorefunc(Function * F) {
   if(F->getName() == "printf" || F->getName() == "strncpy" || F->getName() == "__printf_chk")
     return true;

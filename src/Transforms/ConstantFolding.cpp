@@ -174,7 +174,7 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
   currContextIsAnnotated = tempAnnot;
 
   bbOps.cleanUpFuncBBInfo(toRun);
-  cleanUpfuncBBs(toRun, Registers, pop_back(funcValStack));
+  regOps.cleanUpFuncBBRegisters(toRun, pop_back(funcValStack));
   if(fi->retReg) addSingleVal(ci, fi->retReg->getValue());
 }
 /*
@@ -238,7 +238,8 @@ ProcResult ConstantFolding::processAllocaInst(AllocaInst * ai) {
   Type * ty = ai->getAllocatedType();
   unsigned size = DL->getTypeAllocSize(ty);
   uint64_t addr = bbOps.allocateStack(size, currBB);
-  addRegister(ai, ty, addr);
+  pushFuncStack(ai);
+  regOps.addRegister(ai, ty, addr);
   debug(Abubakar) << "allocaInst : size " << size << " at address " << addr << "\n";
   return UNDECIDED;
 }
@@ -254,7 +255,8 @@ ProcResult ConstantFolding::processMallocInst(CallInst * mi) {
     return NOTFOLDED;
   }
   uint64_t addr = bbOps.allocateHeap(size, currBB);  
-  addRegister(mi, mi->getType(), addr);
+  pushFuncStack(mi);
+  regOps.addRegister(mi, mi->getType(), addr);
   debug(Abubakar) << "mallocInst : size " << size << " at address " << addr << "\n";  
   return UNDECIDED;
 }
@@ -277,7 +279,8 @@ ProcResult ConstantFolding::processCallocInst(CallInst * ci) {
   }
   unsigned size = num * bsize;
   uint64_t addr = bbOps.allocateHeap(size, currBB);  
-  addRegister(ci, ci->getType(), addr);
+  pushFuncStack(ci);
+  regOps.addRegister(ci, ci->getType(), addr);
   debug(Abubakar) << "callocInst : size " << size << " at address " << addr << "\n";  
   memset((char *) bbOps.getActualAddr(addr, currBB), '\0', size);
   return UNDECIDED;
@@ -291,18 +294,19 @@ ProcResult ConstantFolding::processCallocInst(CallInst * ci) {
 */
 ProcResult ConstantFolding::processBitCastInst(BitCastInst * bi) {
   Value * ptr = bi->getOperand(0);
-  Register * reg = getRegister(ptr);
+  Register * reg = processInstAndGetRegister(ptr);
   if(!reg) {
     debug(Abubakar) << "BitCastInst : Not found in Map\n";
     return NOTFOLDED;
   }
-  addRegister(bi, bi->getType(), reg->getValue());
+  pushFuncStack(bi);
+  regOps.addRegister(bi, bi->getType(), reg->getValue());
   return UNDECIDED;
 }
 ProcResult ConstantFolding::processStoreInst(StoreInst * si) {
   Value* storeOp = si->getOperand(0);
   Value * ptr = si->getOperand(1);
-  Register * reg = getRegister(ptr);
+  Register * reg = processInstAndGetRegister(ptr);
   if(!reg) {
     debug(Abubakar) << "StoreInst : not found in map\n";
     return NOTFOLDED;
@@ -324,7 +328,7 @@ ProcResult ConstantFolding::processLoadInst(LoadInst * li) {
     return NOTFOLDED;  
   
   Value * ptr = li->getOperand(0);
-  Register * reg = getRegister(ptr);
+  Register * reg = processInstAndGetRegister(ptr);
   if(!reg) {
     debug(Abubakar) << "LoadInst : Not found in Map\n";
     return NOTFOLDED;
@@ -344,7 +348,7 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
   
   Value * ptr = gi->getOperand(0);
 
-  Register * reg = getRegister(ptr);    
+  Register * reg = processInstAndGetRegister(ptr);    
   if(!reg) {
     debug(Abubakar) << "GepInst : Not found in map\n";
     return NOTFOLDED;
@@ -359,7 +363,8 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
     return NOTFOLDED;
   }
   uint64_t val = reg->getValue() + offset.getZExtValue();
-  addRegister(gi, gi->getType(), val);
+  pushFuncStack(gi);
+  regOps.addRegister(gi, gi->getType(), val);
   return UNDECIDED;
 }
 ProcResult ConstantFolding::processMemcpyInst(CallInst * memcpyInst) {
@@ -369,7 +374,7 @@ ProcResult ConstantFolding::processMemcpyInst(CallInst * memcpyInst) {
   char * fromString;
   Value * sizeVal = memcpyInst->getOperand(2);
   uint64_t size;
-  Register * reg = getRegister(toPtr);  
+  Register * reg = processInstAndGetRegister(toPtr);  
 
   if(!reg) {
     debug(Abubakar) << "processMemcpyInst : Not found in Map\n";
@@ -397,7 +402,7 @@ ProcResult ConstantFolding::processMemSetInst(CallInst * memsetInst) {
   Value * chrctr = memsetInst->getOperand(1);
   Value * sizeVal = memsetInst->getOperand(2);
 
-  Register * ptrReg = getRegister(ptr);  
+  Register * ptrReg = processInstAndGetRegister(ptr);  
   if(!ptrReg) {
     debug(Abubakar) << "processMemSetInst : Not found in Map\n";
     return NOTFOLDED;
@@ -496,7 +501,7 @@ ProcResult ConstantFolding::processReturnInst(ReturnInst * retInst) {
   if(!ptr)
     return NOTFOLDED;
   if(cloneRegister(retInst, ptr))
-    fi->retReg = new Register(*getRegister(retInst)); 
+    fi->retReg = new Register(*processInstAndGetRegister(retInst)); 
   return NOTFOLDED;
 }
 /*
@@ -576,21 +581,6 @@ void ConstantFolding::copyCallerContext(CallInst * ci, Function * toRun) {
   updateAnnotationContext(ci->getCalledFunction());
 }
 
-void ConstantFolding::addGlobalRegister(Value * val, Type * ty, uint64_t toStore) {
-  Registers[val] = new Register(ty, toStore);
-}
-
-void ConstantFolding::addRegister(Value * val, Type * ty, uint64_t toStore) {
-  if(funcValStack.size())
-    funcValStack[funcValStack.size() - 1].insert(val);
-  Registers[val] = new Register(ty, toStore);
-}
-
-void ConstantFolding::addRegister(Value * val, Register * reg) {
-  funcValStack[funcValStack.size() - 1].insert(val);
-  Registers[val] = new Register(*reg);
-}
-
 
 bool ConstantFolding::cloneRegister(Value * from, Value * with) {
   debug(Abubakar) << "attempting to copy Register for " << *with << "\n";
@@ -602,7 +592,8 @@ bool ConstantFolding::cloneRegister(Value * from, Value * with) {
     debug(Abubakar) << "failed to create Register\n";
     return false;
   }
-  addRegister(from, from->getType(), val);
+  pushFuncStack(from);
+  regOps.addRegister(from, from->getType(), val);
   return true;
 }
 
@@ -620,8 +611,9 @@ bool ConstantFolding::replaceOrCloneRegister(Value * from, Value * with) {
   } else if(isa<ConstantPointerNull>(with)) {
     replaceIfNotFD(from, with);
     debug(Abubakar) << "replaced with NULL pointer\n";
-  } else if(Register * reg = getRegister(with)) {
-    addRegister(from, ty, reg->getValue());    
+  } else if(Register * reg = processInstAndGetRegister(with)) {
+    pushFuncStack(from);
+    regOps.addRegister(from, ty, reg->getValue());    
     debug(Abubakar) << "Register from Register\n";
   } else {   
     debug(Abubakar) << "failed to simplify\n";
@@ -629,31 +621,6 @@ bool ConstantFolding::replaceOrCloneRegister(Value * from, Value * with) {
   }
   return true;
 }
-Register * ConstantFolding::getRegister(Value * ptr) {
-  
-  if(!ptr)
-    return NULL;
-
-  if(Registers.find(ptr) != Registers.end())
-    return Registers[ptr];
-  Instruction * I = NULL;
-  Register * reg = NULL;
-  if(ConstantExpr * ce = dyn_cast<ConstantExpr>(ptr))
-    I = ce->getAsInstruction();
-  else 
-    I = dyn_cast<Instruction>(ptr);
-  if(I && !I->getParent()) { // if it has a parent then it must have been visited 
-    runOnInst(I);
-    if(Registers.find(I) != Registers.end()) {
-      reg = Registers[I];
-      Registers[ptr] = new Register(*reg);
-    }
-    I->dropAllReferences();
-  }
-  return reg;
-}
-
-
 
 Function * ConstantFolding::addClonedFunction(Function * F, ValueToValueMapTy& vmap) {
   ClonedCodeInfo info;
@@ -694,7 +661,7 @@ void ConstantFolding::markArgsAsNonConst(CallInst * callInst) {
   }
   for(unsigned index = 0; index < callInst->getNumArgOperands(); index++) {
     Value * pointerArg = callInst->getOperand(index);
-    Register * reg = getRegister(pointerArg);
+    Register * reg = processInstAndGetRegister(pointerArg);
     if(!reg)
       continue;
     bbOps.setConstContigous(false, reg->getValue(), currBB);
@@ -729,11 +696,11 @@ void ConstantFolding::initializeGlobal(uint64_t addr, Constant * CC) {
     assert(I);
     StringRef stringRef;
     if(handleConstStr(I->getOperand(0))) {
-      uint64_t newAddr = getRegister(I->getOperand(0))->getValue();
+      uint64_t newAddr = processInstAndGetRegister(I->getOperand(0))->getValue();
       int size = DL->getTypeAllocSize(CE->getType());
       bbOps.storeToMem(newAddr, size, addr, currBB);
       debug(Abubakar) << "storing address " << newAddr << " at pointer " << addr << " size " << size << "\n";
-    } else if(Register * reg = getRegister(I)) {
+    } else if(Register * reg = processInstAndGetRegister(I)) {
       uint64_t newAddr = reg->getValue();
       int size = DL->getTypeAllocSize(CE->getType());
       bbOps.storeToMem(newAddr, size, addr, currBB);
@@ -770,14 +737,15 @@ void ConstantFolding::addGlobals() {
     uint64_t size = DL->getTypeAllocSize(contTy);
     uint64_t addr = bbOps.allocateStack(size, currBB);
     debug(Abubakar) << "addGlobal : size " << size << " at address " << addr << "\n";
-    addRegister(gv, contTy, addr);
+    pushFuncStack(gv);
+    regOps.addRegister(gv, contTy, addr);
     if(gv->hasInitializer()) 
       initializeGlobal(addr, gv->getInitializer());
   }
 }
 
 bool ConstantFolding::getPointerAddr(Value * val, uint64_t& addr) {
-  if(Register * reg = getRegister(val)) {
+  if(Register * reg = processInstAndGetRegister(val)) {
     addr = reg->getValue();
     return true;
   }
@@ -810,7 +778,7 @@ CmpInst * ConstantFolding::foldCmp(CmpInst * CI) {
 Instruction * ConstantFolding::simplifyInst(Instruction * I) {
   for(unsigned i = 0; i < I->getNumOperands(); i++) {
     Value * val = I->getOperand(i);
-    if(Register * reg = getRegister(val)) {
+    if(Register * reg = processInstAndGetRegister(val)) {
       if(IntegerType * intTy = dyn_cast<IntegerType>(val->getType()))
         replaceIfNotFD(val, ConstantInt::get(intTy, reg->getValue()));
     }
@@ -946,7 +914,8 @@ void ConstantFolding::addSingleVal(Value * val, uint64_t num) {
       replaceIfNotFD(val, nullP);
     } else {
       debug(Abubakar) << "adding Register\n";
-      addRegister(val, ty, num); 
+      pushFuncStack(val);
+      regOps.addRegister(val, ty, num); 
     }
   } else if(IntegerType * intTy = dyn_cast<IntegerType>(ty)) {
     debug(Abubakar) << "replacing with constant int\n";
@@ -959,7 +928,7 @@ bool ConstantFolding::getSingleVal(Value * val, uint64_t& num) {
     num =  CI->getZExtValue();
   else if(isa<ConstantPointerNull>(val))
     num = 0;
-  else if(Register * reg = getRegister(val)) 
+  else if(Register * reg = processInstAndGetRegister(val)) 
     num = reg->getValue();
   else 
     return false;  
@@ -980,7 +949,7 @@ bool ConstantFolding::getStr(Value * ptr, char *& str, uint64_t size) {
   if(getConstantStringInfo(ptr, stringRef, 0, false)) {
     str = new char[stringRef.str().size()];
     strcpy(str, stringRef.str().c_str());
-  } else if(Register * reg = getRegister(ptr)) {
+  } else if(Register * reg = processInstAndGetRegister(ptr)) {
     if(!bbOps.checkConstMem(reg->getValue(), size, currBB)) {
       debug(Abubakar) << "getStr : ptr not constant\n";
       return false;   
@@ -1005,7 +974,7 @@ uint64_t ConstantFolding::createConstStr(string str) {
 bool ConstantFolding::handleConstStr(Value * ptr) {
   StringRef stringRef;
   if(getConstantStringInfo(ptr, stringRef, 0, false)) { 
-    addGlobalRegister(ptr, ptr->getType(), createConstStr(stringRef.str()));
+    regOps.addGlobalRegister(ptr, ptr->getType(), createConstStr(stringRef.str()));
     return true;
   }  
   return false;
@@ -1030,7 +999,8 @@ void ConstantFolding::replaceIfNotFD(Value * from, Value * to) {
   if(isFileDescriptor(to)) {
     ConstantInt *CI = dyn_cast<ConstantInt>(to);
     uint64_t val = CI->getZExtValue();
-    addRegister(from, from->getType(), val);
+    pushFuncStack(from);
+    regOps.addRegister(from, from->getType(), val);
     return;
   }
 
@@ -1041,7 +1011,7 @@ void ConstantFolding::replaceIfNotFD(Value * from, Value * to) {
 }
 
 bool ConstantFolding::simplifyCallback(CallInst * callInst) {
-  Register * reg = getRegister(callInst->getCalledValue());
+  Register * reg = processInstAndGetRegister(callInst->getCalledValue());
   if(!reg) return false;
   Function * calledFunction = (Function *) reg->getValue();
   callInst->setCalledFunction(calledFunction);
@@ -1130,7 +1100,7 @@ void ConstantFolding::simplifyStrFunc(CallInst * callInst) {
   Instruction * next = callInst;
   for(unsigned index = 0; index < callInst->getNumArgOperands(); index++) {
     Value * pointerArg = callInst->getArgOperand(index);
-    Register * reg = getRegister(pointerArg);
+    Register * reg = processInstAndGetRegister(pointerArg);
 
     if(!reg) {
       StringRef stringRef;
@@ -1176,7 +1146,7 @@ void ConstantFolding::handleStrChr(CallInst * callInst) {
   Value * bufPtr = callInst->getOperand(0);
   Value * flagVal = callInst->getOperand(1);  
   uint64_t flag;
-  Register * reg = getRegister(bufPtr);  
+  Register * reg = processInstAndGetRegister(bufPtr);  
   if(!reg) {
     debug(Abubakar) << "handleStrChr : buffer Not found in Map\n";
     return;
@@ -1199,19 +1169,20 @@ void ConstantFolding::handleStrChr(CallInst * callInst) {
   uint64_t addr;
   for(addr = reg->getValue(); *buffer && buffer != remStr; addr++, buffer++);
   debug(Abubakar) << "strchr : returned idx " << (addr - reg->getValue()) << "\n";
-  addRegister(callInst, ty, addr);
+  pushFuncStack(callInst);
+  regOps.addRegister(callInst, ty, addr);
 }
 
 void ConstantFolding::handleStrpbrk(CallInst * callInst) {
   Value * bufPtr = callInst->getOperand(0);
   Value * keyPtr = callInst->getOperand(1);  
   handleConstStr(keyPtr);
-  Register * reg1 = getRegister(bufPtr);  
+  Register * reg1 = processInstAndGetRegister(bufPtr);  
   if(!reg1) {
     debug(Abubakar) << "handleStrpbrk : buffer Not found in Map\n";
     return;
   }
-  Register * reg2 = getRegister(keyPtr);  
+  Register * reg2 = processInstAndGetRegister(keyPtr);  
   if(!reg2) {
     bbOps.setConstContigous(false, reg1->getValue(), currBB);
     debug(Abubakar) << "handleStrpbrk : key Not found in Map\n";
@@ -1228,13 +1199,14 @@ void ConstantFolding::handleStrpbrk(CallInst * callInst) {
   }
   uint64_t addr;
   for(addr = reg1->getValue(); *buffer && buffer != remStr; addr++, buffer++);
-  addRegister(callInst, ty, addr);
+  pushFuncStack(callInst);
+  regOps.addRegister(callInst, ty, addr);
 }
 
 
 void ConstantFolding::handleAtoi(CallInst * callInst) {
   Value * ptr = callInst->getArgOperand(0);
-  Register * reg = getRegister(ptr);
+  Register * reg = processInstAndGetRegister(ptr);
   if(!reg) {
     debug(Abubakar) << "handleAtoi : not found in map\n";
     return;
@@ -1322,7 +1294,7 @@ void ConstantFolding::handleFileIORead(CallInst * ci) {
 	uint64_t sfd, size;
 	int fd;
 	bool fdConst = getSingleVal(fdVal, sfd) && getfdi(sfd, fd);
-	Register * reg = getRegister(bufPtr);  
+	Register * reg = processInstAndGetRegister(bufPtr);  
 	if(!reg || !fdConst || !getSingleVal(sizeVal, size)) {
 		debug(Abubakar) << "handleFileIORead : failed to specialize\n";
 		if(fdConst) setfdiUntracked(sfd);
@@ -1368,7 +1340,7 @@ void ConstantFolding::handleFileIOLSeek(CallInst * ci) {
 bool ConstantFolding::handleLongArgs(CallInst * callInst, option * long_opts,
   int *& long_index) {
   Value * val = callInst->getOperand(3);
-  Register * reg = getRegister(val);
+  Register * reg = processInstAndGetRegister(val);
   if(!reg) {
     debug(Abubakar) << "long_opts not found\n";
     return false;
@@ -1394,7 +1366,7 @@ bool ConstantFolding::handleLongArgs(CallInst * callInst, option * long_opts,
     addr += 32;
   }
   Value * indexVal = callInst->getOperand(4);
-  reg = getRegister(indexVal);
+  reg = processInstAndGetRegister(indexVal);
   if(!reg) {
     debug(Abubakar) << "long_index not found\n";
     return false;
@@ -1417,9 +1389,9 @@ bool ConstantFolding::handleGetOpt(CallInst * ci) {
     return true;
   }
   uint64_t argc;
-  Register * argvReg = getRegister(ci->getOperand(1));
-  Register * optsReg = getRegister(ci->getOperand(2));
-  Register * optindReg = getRegister(module->getNamedGlobal("optind"));
+  Register * argvReg = processInstAndGetRegister(ci->getOperand(1));
+  Register * optsReg = processInstAndGetRegister(ci->getOperand(2));
+  Register * optindReg = processInstAndGetRegister(module->getNamedGlobal("optind"));
   if(!getSingleVal(ci->getOperand(0), argc) || !argvReg || 
   !optsReg || !optindReg || !bbOps.checkConstContigous(argvReg->getValue(), currBB) ||
   !bbOps.checkConstContigous(optindReg->getValue(), currBB)) {
@@ -1462,7 +1434,7 @@ bool ConstantFolding::handleGetOpt(CallInst * ci) {
 
   if(optarg) {
     debug(Abubakar) << "optarg is " << optarg << "\n";
-    Register * optargReg = getRegister(module->getNamedGlobal("optarg"));
+    Register * optargReg = processInstAndGetRegister(module->getNamedGlobal("optarg"));
     uint64_t optArgAddr = optargReg->getValue();
     uint64_t strAddr = bbOps.loadMem(optArgAddr, ptrSize, currBB);
     if(!strAddr) {
@@ -1544,12 +1516,14 @@ LoopUnrollTest * ConstantFolding::runtest(Loop * L) {
 
   ValSet oldValSet = funcValStack[funcValStack.size() - 1];
   push_back(funcValStack);
-  for(auto val : oldValSet) 
-    addRegister(vmap[val], Registers[val]);
+  for(auto val : oldValSet) {
+    pushFuncStack(vmap[val]);
+    regOps.addRegister(vmap[val], processInstAndGetRegister(val));
+  }
   if(!doUnroll(hdrClone, tripCount)) {
     pop_back(testStack);
     bbOps.cleanUpFuncBBInfo(toRun);
-    cleanUpfuncBBs(toRun, Registers, pop_back(funcValStack));
+    regOps.cleanUpFuncBBRegisters(toRun, pop_back(funcValStack));
     return ti; // the default value for ti->passed is false
   }
   duplicateContext(entry, currBB);
@@ -1566,7 +1540,7 @@ LoopUnrollTest * ConstantFolding::runtest(Loop * L) {
 
   currfn = temp;
   bbOps.cleanUpFuncBBInfo(toRun);
-  cleanUpfuncBBs(toRun, Registers, pop_back(funcValStack));
+  regOps.cleanUpFuncBBRegisters(toRun, pop_back(funcValStack));
   return pop_back(testStack);
 }
 
@@ -1686,4 +1660,31 @@ void ConstantFolding::duplicateContext(BasicBlock * to, BasicBlock *from) {
     bbOps.initAndAddBBInfo(to, LI);
   }
   bbOps.duplicateContext(to, from);
+}
+
+void ConstantFolding::pushFuncStack(Value *val) {
+  if(funcValStack.size())
+    funcValStack[funcValStack.size() - 1].insert(val);
+}
+
+Register *ConstantFolding::processInstAndGetRegister(Value *ptr) {
+  if(!ptr)
+    return NULL;
+
+  if(Register *r = regOps.getRegister(ptr))
+    return r;
+  Instruction * I = NULL;
+  Register * reg = NULL;
+  if(ConstantExpr * ce = dyn_cast<ConstantExpr>(ptr))
+    I = ce->getAsInstruction();
+  else 
+    I = dyn_cast<Instruction>(ptr);
+  if(I && !I->getParent()) { // if it has a parent then it must have been visited 
+    runOnInst(I);
+    if(reg = regOps.getRegister(I)) {
+      regOps.addRegister(ptr, reg);
+    }
+    I->dropAllReferences();
+  }
+  return reg;
 }

@@ -41,6 +41,7 @@
 #include "ContextInfo.h"
 #include "BBInfo.h"
 #include "FuncInfo.h"
+#include "RegOps.h"
 
 typedef map<Function *, FuncInfo *> FuncInfoMap;
 typedef pair<Instruction *, Instruction *> InstPair;
@@ -58,6 +59,7 @@ struct ConstantFolding : public ModulePass {
   DataLayout * DL;
   DominatorTree * DT;
   CallGraph * CG;
+  RegOps regOps;
 
   BasicBlock * currBB;
   bool terminateBB;
@@ -65,7 +67,6 @@ struct ConstantFolding : public ModulePass {
   
   FuncInfoMap fimap;
   vector<InstPair> toReplace;
-  ValToRegisterMap Registers;
 
   vector<LoopUnrollTest*> testStack;
   bool PreserveLCSSA;
@@ -93,6 +94,8 @@ struct ConstantFolding : public ModulePass {
   ProcResult processReturnInst(ReturnInst *);
   ProcResult processTermInst(TerminatorInst *);   
   ProcResult tryfolding(Instruction *);
+
+  Register *processInstAndGetRegister(Value *);
 
   void createAnnotationList();
   void createAnnotationList2();
@@ -156,12 +159,8 @@ struct ConstantFolding : public ModulePass {
   void duplicateContext(BasicBlock *, BasicBlock *);
   void propagateArgs(CallInst *, Function *);
 
-  void addRegister(Value *, Register *);
-  void addRegister(Value *, Type *, uint64_t);
-  void addGlobalRegister(Value *, Type *, uint64_t);
   bool cloneRegister(Value *, Value *);
   bool replaceOrCloneRegister(Value *, Value *);
-  Register * getRegister(Value *);
 
   bool visitBB(BasicBlock *, BasicBlock *);
   void visitReadyToVisit(vector<BasicBlock *>);
@@ -183,6 +182,8 @@ struct ConstantFolding : public ModulePass {
   void runOnFunction(CallInst *, Function *);
   void runOnBB(BasicBlock *);
   void runOnInst(Instruction *);
+
+  void pushFuncStack(Value *val);
 };
 
 #endif
