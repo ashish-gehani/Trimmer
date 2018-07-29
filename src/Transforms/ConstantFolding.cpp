@@ -119,7 +119,7 @@ void ConstantFolding::runOnBB(BasicBlock * BB) {
   bbOps.markVisited(BB);
   BasicBlock * temp = currBB;
   currBB = BB;
-  ContextInfo * ci = BasicBlockContexts[currBB];
+  ContextInfo * ci = bbOps.getContextInfo(currBB);
   for(ci->inst = BB->begin(); ci->inst != BB->end(); ci->inst++) {
     Instruction * I = &*(ci->inst);
     checkTermInst(I);    
@@ -128,7 +128,7 @@ void ConstantFolding::runOnBB(BasicBlock * BB) {
     runOnInst(I);
   }  
   currBB = temp;
-  bbOps.freeBB(BB, BasicBlockContexts);
+  bbOps.freeBB(BB);
 }
 /*
   Run on a called Function(or main at start)
@@ -169,11 +169,12 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
     errs() << "Unexpected behavior -> no context returned : only possible if cant return from function\n";
     return;
   }
-  copyContext(fi->context);
+  bbOps.copyContext(fi->context, currBB);
   currfn = temp; //restore to caller
   currContextIsAnnotated = tempAnnot;
 
-  cleanUpfuncBBs(toRun, BasicBlockContexts, Registers, pop_back(funcValStack));
+  bbOps.cleanUpFuncBBInfo(toRun);
+  cleanUpfuncBBs(toRun, Registers, pop_back(funcValStack));
   if(fi->retReg) addSingleVal(ci, fi->retReg->getValue());
 }
 /*
@@ -206,7 +207,7 @@ bool ConstantFolding::runOnModule(Module & M) {
     LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*entry->getParent()).getLoopInfo();
     bbOps.initAndAddBBInfo(entry, LI);
   }
-  createNewContext(entry);
+  bbOps.createNewContext(entry, module);
 
   currBB = entry;
   currContextIsAnnotated = true;
@@ -236,7 +237,7 @@ ProcResult ConstantFolding::processAllocaInst(AllocaInst * ai) {
   }  
   Type * ty = ai->getAllocatedType();
   unsigned size = DL->getTypeAllocSize(ty);
-  uint64_t addr = allocateStack(size);
+  uint64_t addr = bbOps.allocateStack(size, currBB);
   addRegister(ai, ty, addr);
   debug(Abubakar) << "allocaInst : size " << size << " at address " << addr << "\n";
   return UNDECIDED;
@@ -252,7 +253,7 @@ ProcResult ConstantFolding::processMallocInst(CallInst * mi) {
     debug(Abubakar) << "mallocInst : size not constant\n";
     return NOTFOLDED;
   }
-  uint64_t addr = allocateHeap(size);  
+  uint64_t addr = bbOps.allocateHeap(size, currBB);  
   addRegister(mi, mi->getType(), addr);
   debug(Abubakar) << "mallocInst : size " << size << " at address " << addr << "\n";  
   return UNDECIDED;
@@ -275,10 +276,10 @@ ProcResult ConstantFolding::processCallocInst(CallInst * ci) {
     return NOTFOLDED;
   }
   unsigned size = num * bsize;
-  uint64_t addr = allocateHeap(size);  
+  uint64_t addr = bbOps.allocateHeap(size, currBB);  
   addRegister(ci, ci->getType(), addr);
   debug(Abubakar) << "callocInst : size " << size << " at address " << addr << "\n";  
-  memset((char *) getActualAddr(addr), '\0', size);
+  memset((char *) bbOps.getActualAddr(addr, currBB), '\0', size);
   return UNDECIDED;
 }
 
@@ -311,10 +312,10 @@ ProcResult ConstantFolding::processStoreInst(StoreInst * si) {
   uint64_t val;
   if(!getSingleVal(storeOp, val)) {
     debug(Abubakar) << "StoreInst : from cannot be determined\n";
-    setConstMem(false, addr, size);
+    bbOps.setConstMem(false, addr, size, currBB);
     return NOTFOLDED;
   }
-  storeToMem(val, size, addr);   
+  bbOps.storeToMem(val, size, addr, currBB);   
   return UNDECIDED;
 }
 ProcResult ConstantFolding::processLoadInst(LoadInst * li) {
@@ -330,11 +331,11 @@ ProcResult ConstantFolding::processLoadInst(LoadInst * li) {
   }
   uint64_t addr = reg->getValue();
   uint64_t size = DL->getTypeAllocSize(li->getType());
-  if(!checkConstMem(addr, size)) {
+  if(!bbOps.checkConstMem(addr, size, currBB)) {
     debug(Abubakar) << "LoadInst : skipping non constant\n";
     return NOTFOLDED;
   }
-  uint64_t val = loadMem(addr, size);
+  uint64_t val = bbOps.loadMem(addr, size, currBB);
   addSingleVal(li, val);
   return UNDECIDED;
 }
@@ -354,7 +355,7 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
   bool isConst = gi->accumulateConstantOffset(*DL, offset);
   if(!isConst) {
     debug(Abubakar) << "GepInst : offset not constant\n";
-    setConstContigous(false, reg->getValue());    
+    bbOps.setConstContigous(false, reg->getValue(), currBB);
     return NOTFOLDED;
   }
   uint64_t val = reg->getValue() + offset.getZExtValue();
@@ -377,18 +378,18 @@ ProcResult ConstantFolding::processMemcpyInst(CallInst * memcpyInst) {
   
   if(!getSingleVal(sizeVal, size)) {
     debug(Abubakar) << "processMemcpyInst : size not constant\n";
-    setConstContigous(false, reg->getValue()); 
+    bbOps.setConstContigous(false, reg->getValue(), currBB);
     return NOTFOLDED;   
   } 
 
   if(!getStr(fromPtr, fromString, size)) {
-    setConstContigous(false, reg->getValue()); 
+    bbOps.setConstContigous(false, reg->getValue(), currBB);
     return NOTFOLDED;
   }
-  char * toString = (char *) getActualAddr(reg->getValue());
+  char * toString = (char *) bbOps.getActualAddr(reg->getValue(), currBB);
   debug(Abubakar) << "memcpy : from " << fromString << "\n";
   memcpy(toString, fromString, size);
-  setConstMem(true, reg->getValue(), size);
+  bbOps.setConstMem(true, reg->getValue(), size, currBB);
   return NOTFOLDED;
 }
 ProcResult ConstantFolding::processMemSetInst(CallInst * memsetInst) {
@@ -414,7 +415,7 @@ ProcResult ConstantFolding::processMemSetInst(CallInst * memsetInst) {
     return NOTFOLDED;      
   }
 
-  char * ptrString = (char *) getActualAddr(ptrReg->getValue());
+  char * ptrString = (char *) bbOps.getActualAddr(ptrReg->getValue(), currBB);
   memset(ptrString, c, size);
   debug(Abubakar) << "set string to " << c << " size " << size << "\n";
   return NOTFOLDED;
@@ -425,7 +426,7 @@ ProcResult ConstantFolding::processMemSetInst(CallInst * memsetInst) {
 ProcResult ConstantFolding::processPHINode(PHINode * phiNode) {
   if(bbOps.partOfLoop(phiNode))
     return NOTFOLDED;
-  Value * val = bbOps.foldPhiNode(phiNode, BasicBlockContexts);
+  Value * val = bbOps.foldPhiNode(phiNode);
   if(val && replaceOrCloneRegister(phiNode, val)) {
     debug(Abubakar) << "folded phiNode\n";
     return FOLDED;
@@ -491,7 +492,7 @@ ProcResult ConstantFolding::processReturnInst(ReturnInst * retInst) {
     return NOTFOLDED;
   FuncInfo * fi = fimap[currfn];
   Value * ptr = retInst->getReturnValue();
-  fi->context = duplicateMem();  
+  fi->context = bbOps.duplicateMem(currBB);  
   if(!ptr)
     return NOTFOLDED;
   if(cloneRegister(retInst, ptr))
@@ -557,200 +558,6 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
 }
 
 //File LoopUtils.cpp
-bool ConstantFolding::checkUnrollHint(BasicBlock * hdr, LoopInfo &LI) {
-  Value * unrollH = module->getNamedValue("unroll_loop");
-  if(!unrollH) return false;
-  for(Use &U : unrollH->uses()) {
-    Instruction * user = dyn_cast<Instruction>(U.getUser());
-    if(!user) continue;
-    BasicBlock * BB = user->getParent();
-    Loop * L = LI.getLoopFor(BB);
-    if(L && L->getHeader() == hdr) return true;
-  }
-  return false;
-}
-
-bool ConstantFolding::getTripCount(BasicBlock * header, unsigned & tripCount) {
-  Function * F = header->getParent();
-  LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*F).getLoopInfo();
-  DominatorTree * DT = new DominatorTree(*F);
-  AssumptionCache &AC = getAnalysis<AssumptionCacheTracker>(*F).getAssumptionCache(*F);
-  ScalarEvolution SE(*F, *TLI, AC, *DT, LI);
-  Loop * L = LI.getLoopFor(dyn_cast<BasicBlock>(header));
-  tripCount =  SE.getSmallConstantMaxTripCount(L);
-  if(!tripCount) {
-    tripCount = DEFAULT_TRIP_COUNT + 5;
-    return false;
-  }
-  return true;
-}
-
-bool ConstantFolding::doUnroll(BasicBlock * header, unsigned tripCount) {
-  Function * F = header->getParent();
-  LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*F).getLoopInfo();
-  DominatorTree * DT = new DominatorTree(*F);
-  AssumptionCache &AC = getAnalysis<AssumptionCacheTracker>(*F).getAssumptionCache(*F);
-  ScalarEvolution SE(*F, *TLI, AC, *DT, LI);
-  Loop * L = LI.getLoopFor(dyn_cast<BasicBlock>(header));
-  OptimizationRemarkEmitter ORE(F); 
-  int UnrollResult = UnrollLoop(L, tripCount, tripCount, true, false, false, 
-                true, false, 1, 0, &LI, &SE, DT, &AC, &ORE, PreserveLCSSA);
-  if(!UnrollResult) {
-    debug(Abubakar) << "failed in unrolling\n";
-    return false;
-  }
-  debug(Abubakar) << "succeeded in unrolling for " << tripCount << " iterations\n";
-  return true;
-}
-
-LoopUnrollTest * ConstantFolding::runtest(Loop * L) {
-  ValueToValueMapTy vmap;
-  Function * toRun = addClonedFunction(currfn, vmap);
-  bbOps.copyFuncBlocksInfo(currfn, vmap);
-  BasicBlock * hdrClone = dyn_cast<BasicBlock>(vmap[L->getHeader()]); 
-  unsigned tripCount;
-  bool constTripCount = getTripCount(hdrClone, tripCount);
-  LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*toRun).getLoopInfo();
-  Loop * newLoop = LI.getLoopFor(dyn_cast<BasicBlock>(hdrClone));
-  LoopUnrollTest *ti = new LoopUnrollTest(newLoop, module, constTripCount);
-  testStack.push_back(ti);
-  BasicBlock * entry = newLoop->getLoopPreheader();
-
-  ValSet oldValSet = funcValStack[funcValStack.size() - 1];
-  push_back(funcValStack);
-  for(auto val : oldValSet) 
-    addRegister(vmap[val], Registers[val]);
-  if(!doUnroll(hdrClone, tripCount)) {
-    pop_back(testStack);
-    cleanUpfuncBBs(toRun, BasicBlockContexts, Registers, pop_back(funcValStack));
-    return ti; // the default value for ti->passed is false
-  }
-  duplicateContext(entry);
-  Function * temp = currfn; 
-  currfn = toRun;
-  LoopInfo &newLI = getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();
-  bbOps.recomputeLoopInfo(currfn, newLI);
-
-  if(!isFuncInfoInitialized(toRun)) {
-    FuncInfo *fi = initializeFuncInfo(toRun);
-    addFuncInfo(toRun, fi);
-  }
-  runOnBB(entry);
-
-  currfn = temp;
-  cleanUpfuncBBs(toRun, BasicBlockContexts, Registers, pop_back(funcValStack));
-  return pop_back(testStack);
-}
-
-void ConstantFolding::simplifyLoop(BasicBlock * BB) {
-  if(testStack.size()) // for now dont run a test from within a test.
-    return;
-  if(!bbOps.partOfLoop(BB)) {
-    return; 
-  }
-  LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();
-  Loop * L = LI.getLoopFor(BB);
-  if(BB != L->getHeader())
-    return;
-  if(useAnnotations && !checkUnrollHint(BB, LI))
-    return;
-  debug(Abubakar) << "running test\n";
-  LoopUnrollTest *ti = runtest(L);
-  if(!ti->checkPassed()) {
-    debug(Abubakar) << "test failed\n";
-    return;  
-  }
-  debug(Abubakar) << "loop broken in " << ti->iterations << " iterations\n";
-  debug(Abubakar) << "test passed : modifying loop\n";
-  doUnroll(BB, ti->iterations + 1);
-  LoopInfo &newLI = getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();
-  /*TODO : what other information may change as a result of unrolling/peeling?*/
-  bbOps.recomputeLoopInfo(currfn, newLI);
-}
-
-bool ConstantFolding::testTerminated() {
-  if(!testStack.size())
-    return false;
-  LoopUnrollTest *ti = testStack[testStack.size() - 1];
-  return ti->terminated;
-}
-
-void ConstantFolding::checkTermInst(Instruction * I) {
-  if(!testStack.size())
-    return;
-  LoopUnrollTest *ti = testStack[testStack.size() - 1];
-  if(ti->terminated)
-    return;
-  if(ti->checkBreakInst(I)) {
-    ti->terminated = true;
-    debug(Abubakar) << "marking test at level " << testStack.size() << " as terminated\n";
-  } else ti->updateIter(I); 
-}
-
-void ConstantFolding::updateCM(ProcResult result, Instruction * I) {
-  if(!I->getParent()) // constant expressions etc
-    return;
-  if(!testStack.size())
-    return;
-  LoopUnrollTest *ti = testStack[testStack.size() - 1];
-  if(ti->terminated)
-    return;
-  if(findInMap(ti->InstResults, I))
-    return;
-  if(bbOps.partOfLoop(I->getParent())) {
-    ti->InstResults[I] = PARTOFLOOP;
-    ti->partOfLoop++;
-    return;
-  }
-  ti->InstResults[I] = result;
-  bool found = false;
-  for(unsigned i = 0; i < I->getNumOperands(); i++) {
-    Value * val = I->getOperand(i);
-    if(!isa<Instruction>(val))
-      continue;
-    if(findInMap(ti->InstResults, dyn_cast<Instruction>(val))) {
-      found = true;
-      break;
-    }
-  }
-  if(!found)
-    ti->indepInsts.push_back(I);
-}
-
-unsigned ConstantFolding::getNumNodesBelow(Instruction * I, 
-  map<Instruction *, unsigned> & cache, LoopUnrollTest *ti) {
-  if(findInMap(cache, I))
-    return cache[I];
-  // getNumNodesBelow called on a use outside the loop
-  if(!findInMap(ti->InstResults, I))
-    return 1;
-  ProcResult result = ti->InstResults[I];
-  if(result == FOLDED || result == PARTOFLOOP)
-    return 0;
-  unsigned num = 0;
-  for(Use &U : I->uses()) {
-    Instruction * user = dyn_cast<Instruction>(U.getUser());
-    assert(user);
-    if(!bbOps.isVisited(user->getParent()))
-      continue;
-    num += getNumNodesBelow(user, cache, ti);      
-  }      
-  num = num > 0 ? num + 1 : result; // 0 if undecided, 1 if not folded
-  cache[I] = num;
-  return num;
-}
-
-unsigned ConstantFolding::getCost(LoopUnrollTest *ti) {
-  unsigned cost = 0;
-  map<Instruction *, unsigned> cache;
-  for(unsigned i = 0; i < ti->indepInsts.size(); i++) {
-    unsigned num = 0;
-    Instruction * I = ti->indepInsts[i];
-    num = getNumNodesBelow(I, cache, ti);
-    cost += num;   
-  }
-  return cost + ti->partOfLoop;
-}
 
 //File Utils.cpp
 void ConstantFolding::propagateArgs(CallInst *ci, Function *toRun) {
@@ -765,78 +572,8 @@ void ConstantFolding::propagateArgs(CallInst *ci, Function *toRun) {
 
 void ConstantFolding::copyCallerContext(CallInst * ci, Function * toRun) {
   BasicBlock * entry = &toRun->getEntryBlock();
-  duplicateContext(entry);    
+  duplicateContext(entry, currBB);    
   updateAnnotationContext(ci->getCalledFunction());
-}
-
-bool ConstantFolding::hasContext(BasicBlock * BB) {
-  return BasicBlockContexts.find(BB) != BasicBlockContexts.end();
-}
-
-ContextInfo * ConstantFolding::getCurrContext() {
-  return BasicBlockContexts[currBB];
-}
-
-void ConstantFolding::copyContext(Memory * mem) {
-  BasicBlockContexts[currBB]->memory->copyfrom(mem);
-}
-
-uint64_t ConstantFolding::allocateStack(uint64_t size) {
-  return BasicBlockContexts[currBB]->memory->allocateStack(size);  
-}
-
-uint64_t ConstantFolding::allocateHeap(uint64_t size) {
-  return BasicBlockContexts[currBB]->memory->allocateHeap(size);  
-}
-
-uint64_t ConstantFolding::loadMem(uint64_t addr, uint64_t size) {
-  return BasicBlockContexts[currBB]->memory->load(size, addr); 
-}
-
-void ConstantFolding::storeToMem(uint64_t val, uint64_t size, uint64_t addr) {
-  BasicBlockContexts[currBB]->memory->store(val, size, addr);  
-}
-
-void ConstantFolding::setConstMem(bool val, uint64_t addr, uint64_t size) {
-  BasicBlockContexts[currBB]->memory->setConstant(val, addr, size);  
-}
-
-void ConstantFolding::setConstContigous(bool val, uint64_t addr) {
-  BasicBlockContexts[currBB]->memory->setConstContigous(val, addr);
-}
-
-uint64_t ConstantFolding::getRemainingContigousSize(uint64_t addr) {
-  return BasicBlockContexts[currBB]->memory->getRemainingContigousSize(addr);
-}
-
-void * ConstantFolding::getActualAddr(uint64_t addr) {
-  return BasicBlockContexts[currBB]->memory->getActualAddr(addr);
-}
-
-bool ConstantFolding::checkConstMem(uint64_t addr, uint64_t size) {
-  return BasicBlockContexts[currBB]->memory->checkConstant(addr, size);
-}
-
-bool ConstantFolding::checkConstContigous(uint64_t addr) {
-  return BasicBlockContexts[currBB]->memory->checkConstContigous(addr);
-}
-
-bool ConstantFolding::checkConstStr(uint64_t addr) {
-  char * mem = (char *) getActualAddr(addr);
-  for(unsigned i = 0; mem[i] != '\0'; i++) {
-    if(!checkConstMem(addr + i, 1))
-      return false; 
-  }
-  return checkConstMem(addr, 1); // if the string starts with '\0'
-}
-
-bool ConstantFolding::checkConstStr(uint64_t addr, uint64_t max) {
-  char * mem = (char *) getActualAddr(addr);
-  for(unsigned i = 0; mem[i] != '\0' && i < max; i++) {
-    if(!checkConstMem(i, 1))
-      return false; 
-  }
-  return true;
 }
 
 void ConstantFolding::addGlobalRegister(Value * val, Type * ty, uint64_t toStore) {
@@ -916,29 +653,7 @@ Register * ConstantFolding::getRegister(Value * ptr) {
   return reg;
 }
 
-Memory * ConstantFolding::duplicateMem() {
-  return new Memory(*BasicBlockContexts[currBB]->memory);
-}
 
-void ConstantFolding::imageContext(BasicBlock * to) {
-  BasicBlockContexts[to] = BasicBlockContexts[currBB]->image();
-}
-
-/**
- * Create new ContextInfo for a Basic Block
- */
-void ConstantFolding::createNewContext(BasicBlock * BB) {
-  BasicBlockContexts[BB] = new ContextInfo(module);
-}
-
-void ConstantFolding::duplicateContext(BasicBlock * to) {
-  if (!bbOps.isBBInfoInitialized(to)) {
-    LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*to->getParent()).getLoopInfo();
-    bbOps.initAndAddBBInfo(to, LI);
-  }
-
-  BasicBlockContexts[to] = BasicBlockContexts[currBB]->duplicate();
-}
 
 Function * ConstantFolding::addClonedFunction(Function * F, ValueToValueMapTy& vmap) {
   ClonedCodeInfo info;
@@ -982,7 +697,7 @@ void ConstantFolding::markArgsAsNonConst(CallInst * callInst) {
     Register * reg = getRegister(pointerArg);
     if(!reg)
       continue;
-    setConstContigous(false, reg->getValue());
+    bbOps.setConstContigous(false, reg->getValue(), currBB);
     debug(Abubakar) << "markArgsAsNonConst : index " << index << "\n"; 
   }
 }
@@ -997,14 +712,14 @@ void ConstantFolding::initializeGlobal(uint64_t addr, Constant * CC) {
     return;
   ConstantDataArray * CDA = dyn_cast<ConstantDataArray>(CC);
   if(CDA && CDA->isString()) {
-    char * source = (char *) getActualAddr(addr);
+    char * source = (char *) bbOps.getActualAddr(addr, currBB);
     string str = CDA->getAsString().str();  
     int size = str.size();
     memcpy(source, str.c_str(), size);
     debug(Abubakar) << "storing : size " << size << " at address " << addr << " " << *CC << "\n";
   } else if(ConstantInt * CI = dyn_cast<ConstantInt>(CC)) {
     uint64_t size = DL->getTypeAllocSize(CI->getType());
-    storeToMem(CI->getZExtValue(), size, addr);    
+    bbOps.storeToMem(CI->getZExtValue(), size, addr, currBB);    
     debug(Abubakar) << "storing : size " << size << " at address " << addr << " " << *CC << "\n";
   } else if(ConstantExpr * CE = dyn_cast<ConstantExpr>(CC)) {
     /* 1. either we have it in memory in which case runOnInst will work*/
@@ -1016,12 +731,12 @@ void ConstantFolding::initializeGlobal(uint64_t addr, Constant * CC) {
     if(handleConstStr(I->getOperand(0))) {
       uint64_t newAddr = getRegister(I->getOperand(0))->getValue();
       int size = DL->getTypeAllocSize(CE->getType());
-      storeToMem(newAddr, size, addr);      
+      bbOps.storeToMem(newAddr, size, addr, currBB);
       debug(Abubakar) << "storing address " << newAddr << " at pointer " << addr << " size " << size << "\n";
     } else if(Register * reg = getRegister(I)) {
       uint64_t newAddr = reg->getValue();
       int size = DL->getTypeAllocSize(CE->getType());
-      storeToMem(newAddr, size, addr);
+      bbOps.storeToMem(newAddr, size, addr, currBB);
       debug(Abubakar) << "storing address " << newAddr << " at pointer " << addr << " size " << size << "\n";                  
     } 
     I->dropAllReferences();
@@ -1029,7 +744,7 @@ void ConstantFolding::initializeGlobal(uint64_t addr, Constant * CC) {
     // store its address
     int size = DL->getTypeAllocSize(callback->getType());
     uint64_t faddr = (uint64_t) callback;
-    storeToMem(faddr, size, addr);
+    bbOps.storeToMem(faddr, size, addr, currBB);
     debug(Abubakar) << "stored callback for function " << callback->getName() << "\n";
   } else {
     for(unsigned i = 0; i < CC->getNumOperands(); i++) {
@@ -1053,7 +768,7 @@ void ConstantFolding::addGlobals() {
     //   continue;
     debug(Abubakar) << gv->getName() << "\n"; 
     uint64_t size = DL->getTypeAllocSize(contTy);
-    uint64_t addr = allocateStack(size);
+    uint64_t addr = bbOps.allocateStack(size, currBB);
     debug(Abubakar) << "addGlobal : size " << size << " at address " << addr << "\n";
     addRegister(gv, contTy, addr);
     if(gv->hasInitializer()) 
@@ -1252,11 +967,11 @@ bool ConstantFolding::getSingleVal(Value * val, uint64_t& num) {
 }
 
 bool ConstantFolding::getStr(uint64_t addr, char *& str) {
-  if(!checkConstContigous(addr)) {
+  if(!bbOps.checkConstContigous(addr, currBB)) {
     debug(Abubakar) << "getStr : ptr not constant\n";
     return false;   
   }
-  str = (char *) getActualAddr(addr);
+  str = (char *) bbOps.getActualAddr(addr, currBB);
   return true;
 }
 
@@ -1266,11 +981,11 @@ bool ConstantFolding::getStr(Value * ptr, char *& str, uint64_t size) {
     str = new char[stringRef.str().size()];
     strcpy(str, stringRef.str().c_str());
   } else if(Register * reg = getRegister(ptr)) {
-    if(!checkConstMem(reg->getValue(), size)) {
+    if(!bbOps.checkConstMem(reg->getValue(), size, currBB)) {
       debug(Abubakar) << "getStr : ptr not constant\n";
       return false;   
     }
-    str = (char *) getActualAddr(reg->getValue());
+    str = (char *) bbOps.getActualAddr(reg->getValue(), currBB);
   } else {
     debug(Abubakar) << "getStr : ptr not found in Map\n";
     return false;   
@@ -1280,8 +995,8 @@ bool ConstantFolding::getStr(Value * ptr, char *& str, uint64_t size) {
 
 uint64_t ConstantFolding::createConstStr(string str) {
     uint64_t size = str.size();
-    uint64_t newAddr = allocateHeap(size);
-    char * source = (char *) getActualAddr(newAddr);      
+    uint64_t newAddr = bbOps.allocateHeap(size, currBB);
+    char * source = (char *) bbOps.getActualAddr(newAddr, currBB);
     memcpy(source, str.c_str(), size);  
     debug(Abubakar) << "created new constant string " << str << " at address " << newAddr << "\n";
     return newAddr;
@@ -1380,16 +1095,16 @@ void ConstantFolding::visitReadyToVisit(vector<BasicBlock *> readyToVisit) {
 bool ConstantFolding::visitBB(BasicBlock * succ, BasicBlock *  from) {
   BasicBlock * temp = currBB;
   currBB = from;
-  if(bbOps.needToduplicate(succ, from, BasicBlockContexts)) {
+  if(bbOps.needToduplicate(succ, from)) {
     debug(Abubakar) << "duplicating\n";
-    duplicateContext(succ);
-    bbOps.mergeContext(succ, from, BasicBlockContexts);
+    duplicateContext(succ, currBB);
+    bbOps.mergeContext(succ, from);
   } else {
     debug(Abubakar) << "cloning\n";
-    imageContext(succ);
+    bbOps.imageContext(succ, currBB);
   }    
 
-  bbOps.freeBB(from, BasicBlockContexts);
+  bbOps.freeBB(from);
   simplifyLoop(succ);
   runOnBB(succ);   
   currBB = temp;
@@ -1425,13 +1140,13 @@ void ConstantFolding::simplifyStrFunc(CallInst * callInst) {
       uint64_t addr = reg->getValue();
       uint64_t len;
       if(getStrLen(callInst, len)) {
-        if(!checkConstStr(addr, len)) {
+        if(!bbOps.checkConstStr(addr, len, currBB)) {
           debug(Abubakar) << "skipping non constant string\n";
           continue;
         }
-      } else if(!checkConstStr(addr))
+      } else if(!bbOps.checkConstStr(addr, currBB))
         continue;
-      char * baseStringData = (char *) getActualAddr(addr);
+      char * baseStringData = (char *) bbOps.getActualAddr(addr, currBB);
       debug(Abubakar) << "baseStringData : " << baseStringData << "\n";
       ConstantInt * ind0 = ConstantInt::get(IntegerType::get(module->getContext(), 64), 0);
       vector<Value *> indxList;
@@ -1468,10 +1183,10 @@ void ConstantFolding::handleStrChr(CallInst * callInst) {
   }
   if(!getSingleVal(flagVal, flag)) {
     debug(Abubakar) << "handleStrChr : flag not constant\n";
-    setConstContigous(false, reg->getValue()); 
+    bbOps.setConstContigous(false, reg->getValue(), currBB);
     return;   
   }
-  char * buffer = (char *) getActualAddr(reg->getValue());
+  char * buffer = (char *) bbOps.getActualAddr(reg->getValue(), currBB);
   debug(Abubakar) << "strchr : " << buffer << " with flag " << (char) flag << "\n";
   char * remStr = strchr(buffer, flag);
   Type * ty = callInst->getType();
@@ -1498,12 +1213,12 @@ void ConstantFolding::handleStrpbrk(CallInst * callInst) {
   }
   Register * reg2 = getRegister(keyPtr);  
   if(!reg2) {
-    setConstContigous(false, reg1->getValue()); 
+    bbOps.setConstContigous(false, reg1->getValue(), currBB);
     debug(Abubakar) << "handleStrpbrk : key Not found in Map\n";
     return;
   }
-  char * buffer = (char *) getActualAddr(reg1->getValue());
-  char * key = (char *) getActualAddr(reg2->getValue());
+  char * buffer = (char *) bbOps.getActualAddr(reg1->getValue(), currBB);
+  char * key = (char *) bbOps.getActualAddr(reg2->getValue(), currBB);
   char * remStr = strpbrk(buffer, key);
   Type * ty = callInst->getType();
   if(!remStr) {
@@ -1524,11 +1239,11 @@ void ConstantFolding::handleAtoi(CallInst * callInst) {
     debug(Abubakar) << "handleAtoi : not found in map\n";
     return;
   }
-  if(!checkConstContigous(reg->getValue())) {
+  if(!bbOps.checkConstContigous(reg->getValue(), currBB)) {
     debug(Abubakar) << "handleAtoi : not constant\n";
     return;
   }
-  char * str = (char *) getActualAddr(reg->getValue());
+  char * str = (char *) bbOps.getActualAddr(reg->getValue(), currBB);
   int result = atoi(str);
   IntegerType * int32Ty = IntegerType::get(module->getContext(), 32);
   replaceIfNotFD(callInst, ConstantInt::get(int32Ty, result)); 
@@ -1537,8 +1252,8 @@ void ConstantFolding::handleAtoi(CallInst * callInst) {
 //File FileIO.cpp
 
 int ConstantFolding::initfdi(int fd) {
-	uint64_t addr = allocateHeap(sizeof(FdInfo));
-	FdInfo * fdi = (FdInfo *) getActualAddr(addr);
+	uint64_t addr = bbOps.allocateHeap(sizeof(FdInfo), currBB);
+	FdInfo * fdi = (FdInfo *) bbOps.getActualAddr(addr, currBB);
 	fdi->fd = fd;
 	fdi->offset = 0;
 	fdi->tracked = true;
@@ -1550,11 +1265,11 @@ int ConstantFolding::initfdi(int fd) {
 
 bool ConstantFolding::getfdi(int sfd, int & fd) {
 	uint64_t addr = fdInfoMap[sfd];
-	if(!checkConstContigous(addr)) {
+	if(!bbOps.checkConstContigous(addr, currBB)) {
 		debug(Abubakar) << "skipping non constant fd\n";
 		return false;
 	}
-	FdInfo * fdi = (FdInfo *) getActualAddr(addr);
+	FdInfo * fdi = (FdInfo *) bbOps.getActualAddr(addr, currBB);
 	if(!fdi->tracked) { 
 		debug(Abubakar) << "skipping untracked fd\n";
 		return false;
@@ -1565,11 +1280,11 @@ bool ConstantFolding::getfdi(int sfd, int & fd) {
 }
 
 void ConstantFolding::setfdiUntracked(int sfd) {
-	((FdInfo *) getActualAddr(fdInfoMap[sfd]))->tracked = false;	
+	((FdInfo *) bbOps.getActualAddr(fdInfoMap[sfd], currBB))->tracked = false;
 }
 
 void ConstantFolding::setfdiOffset(int sfd, int fd) {
-	((FdInfo *) getActualAddr(fdInfoMap[sfd]))->offset = lseek(fd, 0, SEEK_CUR);
+	((FdInfo *) bbOps.getActualAddr(fdInfoMap[sfd], currBB))->offset = lseek(fd, 0, SEEK_CUR);
 }
 
 bool ConstantFolding::handleFileIOCall(CallInst * ci) {
@@ -1611,18 +1326,18 @@ void ConstantFolding::handleFileIORead(CallInst * ci) {
 	if(!reg || !fdConst || !getSingleVal(sizeVal, size)) {
 		debug(Abubakar) << "handleFileIORead : failed to specialize\n";
 		if(fdConst) setfdiUntracked(sfd);
-		if(reg) setConstContigous(false, reg->getValue()); 
+		if(reg) bbOps.setConstContigous(false, reg->getValue(), currBB);
 		return;   
 	}
-	char * buffer = (char *) getActualAddr(reg->getValue());
+	char * buffer = (char *) bbOps.getActualAddr(reg->getValue(), currBB);
 	int bytes_read = read(fd, buffer, size);
 	if(bytes_read < 0) {
 		debug(Abubakar) << "handleFileIORead : read returned error\n";
 		setfdiUntracked(sfd);
-		setConstContigous(false, reg->getValue()); 
+		bbOps.setConstContigous(false, reg->getValue(), currBB);
 		return;   		
 	}
-	setConstMem(true, reg->getValue(), bytes_read);
+	bbOps.setConstMem(true, reg->getValue(), bytes_read, currBB);
 	setfdiOffset(sfd, fd);
 	addSingleVal(ci, bytes_read);
 }
@@ -1659,20 +1374,20 @@ bool ConstantFolding::handleLongArgs(CallInst * callInst, option * long_opts,
     return false;
   }
   uint64_t addr = reg->getValue();
-  if(!checkConstContigous(addr)) {
+  if(!bbOps.checkConstContigous(addr, currBB)) {
     debug(Abubakar) << "long_opts not constant\n";
     return false;
   }
   unsigned i = 0;
   while(1) {
-    uint64_t nameAddr = loadMem(addr, 8);
+    uint64_t nameAddr = bbOps.loadMem(addr, 8, currBB);
     if(!nameAddr)
       break;
-    long_opts[i].name = (char *) getActualAddr(nameAddr);
-    long_opts[i].has_arg = loadMem(addr + 8, 4);
-    uint64_t flagAddr = loadMem(addr + 12, 8);
-    long_opts[i].flag = !flagAddr ? 0 : (int *) getActualAddr(flagAddr);
-    long_opts[i].val = loadMem(addr + 20, 4);
+    long_opts[i].name = (char *) bbOps.getActualAddr(nameAddr, currBB);
+    long_opts[i].has_arg = bbOps.loadMem(addr + 8, 4, currBB);
+    uint64_t flagAddr = bbOps.loadMem(addr + 12, 8, currBB);
+    long_opts[i].flag = !flagAddr ? 0 : (int *) bbOps.getActualAddr(flagAddr, currBB);
+    long_opts[i].val = bbOps.loadMem(addr + 20, 4, currBB);
     if(!long_opts[i].name)
       break;
     i++;
@@ -1684,11 +1399,11 @@ bool ConstantFolding::handleLongArgs(CallInst * callInst, option * long_opts,
     debug(Abubakar) << "long_index not found\n";
     return false;
   }
-  if(!checkConstContigous(reg->getValue())) {
+  if(!bbOps.checkConstContigous(reg->getValue(), currBB)) {
     debug(Abubakar) << "long_index not constant\n";
     return false;
   }
-  long_index = (int *) getActualAddr(reg->getValue());  
+  long_index = (int *) bbOps.getActualAddr(reg->getValue(), currBB);
   memset((char *) &long_opts[i], '\0', sizeof(option)); 
   return true;
 }
@@ -1706,8 +1421,8 @@ bool ConstantFolding::handleGetOpt(CallInst * ci) {
   Register * optsReg = getRegister(ci->getOperand(2));
   Register * optindReg = getRegister(module->getNamedGlobal("optind"));
   if(!getSingleVal(ci->getOperand(0), argc) || !argvReg || 
-  !optsReg || !optindReg || !checkConstContigous(argvReg->getValue()) ||
-  !checkConstContigous(optindReg->getValue())) {
+  !optsReg || !optindReg || !bbOps.checkConstContigous(argvReg->getValue(), currBB) ||
+  !bbOps.checkConstContigous(optindReg->getValue(), currBB)) {
     debug(Abubakar) << "conditions not satisfied\n";
     return true;
   }
@@ -1716,19 +1431,19 @@ bool ConstantFolding::handleGetOpt(CallInst * ci) {
   uint64_t intSize = DL->getTypeAllocSize(ci->getType());
 
   uint64_t optindAddr = optindReg->getValue();
-  optind = loadMem(optindAddr, intSize);
+  optind = bbOps.loadMem(optindAddr, intSize, currBB);
   char ** argv = (char **) malloc(sizeof(char *) * argc);
   uint64_t addr = argvReg->getValue();
   map<char *, uint64_t> realToVirt;
   for(unsigned i = 0, iter = addr; i < argc; i++, iter += ptrSize) {
-    uint64_t strAddr = loadMem(iter, ptrSize);
+    uint64_t strAddr = bbOps.loadMem(iter, ptrSize, currBB);
     if(!getStr(strAddr, argv[i])) {
       debug(Abubakar) << "updating argv\n";
       return true;
     }
     realToVirt[argv[i]] = strAddr;
   }
-  char * opts = (char *) getActualAddr(optsReg->getValue());
+  char * opts = (char *) bbOps.getActualAddr(optsReg->getValue(), currBB);
   int result;
   if(name == "getopt_long") { 
     option * long_opts = (option *) malloc(sizeof(option) * 100);
@@ -1749,20 +1464,226 @@ bool ConstantFolding::handleGetOpt(CallInst * ci) {
     debug(Abubakar) << "optarg is " << optarg << "\n";
     Register * optargReg = getRegister(module->getNamedGlobal("optarg"));
     uint64_t optArgAddr = optargReg->getValue();
-    uint64_t strAddr = loadMem(optArgAddr, ptrSize);
+    uint64_t strAddr = bbOps.loadMem(optArgAddr, ptrSize, currBB);
     if(!strAddr) {
       Type * ty = optargReg->getType()->getContainedType(0);
       uint64_t charSize = DL->getTypeAllocSize(ty);
-      strAddr = allocateHeap(charSize * 100);
-      storeToMem(strAddr, ptrSize, optArgAddr);
+      strAddr = bbOps.allocateHeap(charSize * 100, currBB);
+      bbOps.storeToMem(strAddr, ptrSize, optArgAddr, currBB);
       debug(Abubakar) << "created new string at " << strAddr << "\n";
     }
-    char * source = (char *) getActualAddr(strAddr);
+    char * source = (char *) bbOps.getActualAddr(strAddr, currBB);
     memcpy(source, optarg, strlen(optarg));
     source[strlen(optarg)] = '\0';
   }
-  storeToMem(optind, intSize, optindAddr);
+  bbOps.storeToMem(optind, intSize, optindAddr, currBB);
   for(unsigned i = 0, iter = addr; i < argc; i++, iter += ptrSize)
-    storeToMem(realToVirt[argv[i]], ptrSize, iter);
+    bbOps.storeToMem(realToVirt[argv[i]], ptrSize, iter, currBB);
   return true;
+}
+
+
+bool ConstantFolding::checkUnrollHint(BasicBlock * hdr, LoopInfo &LI) {
+  Value * unrollH = module->getNamedValue("unroll_loop");
+  if(!unrollH) return false;
+  for(Use &U : unrollH->uses()) {
+    Instruction * user = dyn_cast<Instruction>(U.getUser());
+    if(!user) continue;
+    BasicBlock * BB = user->getParent();
+    Loop * L = LI.getLoopFor(BB);
+    if(L && L->getHeader() == hdr) return true;
+  }
+  return false;
+}
+
+bool ConstantFolding::getTripCount(BasicBlock * header, unsigned & tripCount) {
+  Function * F = header->getParent();
+  LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*F).getLoopInfo();
+  DominatorTree * DT = new DominatorTree(*F);
+  AssumptionCache &AC = getAnalysis<AssumptionCacheTracker>(*F).getAssumptionCache(*F);
+  ScalarEvolution SE(*F, *TLI, AC, *DT, LI);
+  Loop * L = LI.getLoopFor(dyn_cast<BasicBlock>(header));
+  tripCount =  SE.getSmallConstantMaxTripCount(L);
+  if(!tripCount) {
+    tripCount = DEFAULT_TRIP_COUNT + 5;
+    return false;
+  }
+  return true;
+}
+
+bool ConstantFolding::doUnroll(BasicBlock * header, unsigned tripCount) {
+  Function * F = header->getParent();
+  LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*F).getLoopInfo();
+  DominatorTree * DT = new DominatorTree(*F);
+  AssumptionCache &AC = getAnalysis<AssumptionCacheTracker>(*F).getAssumptionCache(*F);
+  ScalarEvolution SE(*F, *TLI, AC, *DT, LI);
+  Loop * L = LI.getLoopFor(dyn_cast<BasicBlock>(header));
+  OptimizationRemarkEmitter ORE(F); 
+  int UnrollResult = UnrollLoop(L, tripCount, tripCount, true, false, false, 
+                true, false, 1, 0, &LI, &SE, DT, &AC, &ORE, PreserveLCSSA);
+  if(!UnrollResult) {
+    debug(Abubakar) << "failed in unrolling\n";
+    return false;
+  }
+  debug(Abubakar) << "succeeded in unrolling for " << tripCount << " iterations\n";
+  return true;
+}
+
+LoopUnrollTest * ConstantFolding::runtest(Loop * L) {
+  ValueToValueMapTy vmap;
+  Function * toRun = addClonedFunction(currfn, vmap);
+  bbOps.copyFuncBlocksInfo(currfn, vmap);
+  BasicBlock * hdrClone = dyn_cast<BasicBlock>(vmap[L->getHeader()]); 
+  unsigned tripCount;
+  bool constTripCount = getTripCount(hdrClone, tripCount);
+  LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*toRun).getLoopInfo();
+  Loop * newLoop = LI.getLoopFor(dyn_cast<BasicBlock>(hdrClone));
+  LoopUnrollTest *ti = new LoopUnrollTest(newLoop, module, constTripCount);
+  testStack.push_back(ti);
+  BasicBlock * entry = newLoop->getLoopPreheader();
+
+  ValSet oldValSet = funcValStack[funcValStack.size() - 1];
+  push_back(funcValStack);
+  for(auto val : oldValSet) 
+    addRegister(vmap[val], Registers[val]);
+  if(!doUnroll(hdrClone, tripCount)) {
+    pop_back(testStack);
+    bbOps.cleanUpFuncBBInfo(toRun);
+    cleanUpfuncBBs(toRun, Registers, pop_back(funcValStack));
+    return ti; // the default value for ti->passed is false
+  }
+  duplicateContext(entry, currBB);
+  Function * temp = currfn; 
+  currfn = toRun;
+  LoopInfo &newLI = getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();
+  bbOps.recomputeLoopInfo(currfn, newLI);
+
+  if(!isFuncInfoInitialized(toRun)) {
+    FuncInfo *fi = initializeFuncInfo(toRun);
+    addFuncInfo(toRun, fi);
+  }
+  runOnBB(entry);
+
+  currfn = temp;
+  bbOps.cleanUpFuncBBInfo(toRun);
+  cleanUpfuncBBs(toRun, Registers, pop_back(funcValStack));
+  return pop_back(testStack);
+}
+
+void ConstantFolding::simplifyLoop(BasicBlock * BB) {
+  if(testStack.size()) // for now dont run a test from within a test.
+    return;
+  if(!bbOps.partOfLoop(BB)) {
+    return; 
+  }
+  LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();
+  Loop * L = LI.getLoopFor(BB);
+  if(BB != L->getHeader())
+    return;
+  if(useAnnotations && !checkUnrollHint(BB, LI))
+    return;
+  debug(Abubakar) << "running test\n";
+  LoopUnrollTest *ti = runtest(L);
+  if(!ti->checkPassed()) {
+    debug(Abubakar) << "test failed\n";
+    return;  
+  }
+  debug(Abubakar) << "loop broken in " << ti->iterations << " iterations\n";
+  debug(Abubakar) << "test passed : modifying loop\n";
+  doUnroll(BB, ti->iterations + 1);
+  LoopInfo &newLI = getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();
+  /*TODO : what other information may change as a result of unrolling/peeling?*/
+  bbOps.recomputeLoopInfo(currfn, newLI);
+}
+
+bool ConstantFolding::testTerminated() {
+  if(!testStack.size())
+    return false;
+  LoopUnrollTest *ti = testStack[testStack.size() - 1];
+  return ti->terminated;
+}
+
+void ConstantFolding::checkTermInst(Instruction * I) {
+  if(!testStack.size())
+    return;
+  LoopUnrollTest *ti = testStack[testStack.size() - 1];
+  if(ti->terminated)
+    return;
+  if(ti->checkBreakInst(I)) {
+    ti->terminated = true;
+    debug(Abubakar) << "marking test at level " << testStack.size() << " as terminated\n";
+  } else ti->updateIter(I); 
+}
+
+void ConstantFolding::updateCM(ProcResult result, Instruction * I) {
+  if(!I->getParent()) // constant expressions etc
+    return;
+  if(!testStack.size())
+    return;
+  LoopUnrollTest *ti = testStack[testStack.size() - 1];
+  if(ti->terminated)
+    return;
+  if(findInMap(ti->InstResults, I))
+    return;
+  if(bbOps.partOfLoop(I->getParent())) {
+    ti->InstResults[I] = PARTOFLOOP;
+    ti->partOfLoop++;
+    return;
+  }
+  ti->InstResults[I] = result;
+  bool found = false;
+  for(unsigned i = 0; i < I->getNumOperands(); i++) {
+    Value * val = I->getOperand(i);
+    if(!isa<Instruction>(val))
+      continue;
+    if(findInMap(ti->InstResults, dyn_cast<Instruction>(val))) {
+      found = true;
+      break;
+    }
+  }
+  if(!found)
+    ti->indepInsts.push_back(I);
+}
+
+unsigned ConstantFolding::getNumNodesBelow(Instruction * I, 
+  map<Instruction *, unsigned> & cache, LoopUnrollTest *ti) {
+  if(findInMap(cache, I))
+    return cache[I];
+  // getNumNodesBelow called on a use outside the loop
+  if(!findInMap(ti->InstResults, I))
+    return 1;
+  ProcResult result = ti->InstResults[I];
+  if(result == FOLDED || result == PARTOFLOOP)
+    return 0;
+  unsigned num = 0;
+  for(Use &U : I->uses()) {
+    Instruction * user = dyn_cast<Instruction>(U.getUser());
+    assert(user);
+    if(!bbOps.isVisited(user->getParent()))
+      continue;
+    num += getNumNodesBelow(user, cache, ti);      
+  }      
+  num = num > 0 ? num + 1 : result; // 0 if undecided, 1 if not folded
+  cache[I] = num;
+  return num;
+}
+
+unsigned ConstantFolding::getCost(LoopUnrollTest *ti) {
+  unsigned cost = 0;
+  map<Instruction *, unsigned> cache;
+  for(unsigned i = 0; i < ti->indepInsts.size(); i++) {
+    unsigned num = 0;
+    Instruction * I = ti->indepInsts[i];
+    num = getNumNodesBelow(I, cache, ti);
+    cost += num;   
+  }
+  return cost + ti->partOfLoop;
+}
+
+void ConstantFolding::duplicateContext(BasicBlock * to, BasicBlock *from) {
+  if (!bbOps.isBBInfoInitialized(to)) {
+    LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*to->getParent()).getLoopInfo();
+    bbOps.initAndAddBBInfo(to, LI);
+  }
+  bbOps.duplicateContext(to, from);
 }

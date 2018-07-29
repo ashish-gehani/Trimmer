@@ -43,7 +43,6 @@
 #include "FuncInfo.h"
 
 typedef map<Function *, FuncInfo *> FuncInfoMap;
-typedef map<BasicBlock *, ContextInfo *> BasicBlockContInfoMap;
 typedef pair<Instruction *, Instruction *> InstPair;
 typedef set<Value *> ValSet;
 
@@ -63,7 +62,7 @@ struct ConstantFolding : public ModulePass {
   BasicBlock * currBB;
   bool terminateBB;
   Function * currfn;
-  BasicBlockContInfoMap BasicBlockContexts;
+  
   FuncInfoMap fimap;
   vector<InstPair> toReplace;
   ValToRegisterMap Registers;
@@ -153,28 +152,10 @@ struct ConstantFolding : public ModulePass {
   bool isFileDescriptor(Value *);
   void replaceIfNotFD(Value *, Value *);
 
-  void createNewContext(BasicBlock * BB);
-  void imageContext(BasicBlock *);  
-  void duplicateContext(BasicBlock *);
-  Memory * duplicateMem();
-  bool hasContext(BasicBlock * BB);
-  ContextInfo * getCurrContext();
-  void copyContext(Memory *);
   void copyCallerContext(CallInst *, Function *);
+  void duplicateContext(BasicBlock *, BasicBlock *);
   void propagateArgs(CallInst *, Function *);
 
-  uint64_t allocateStack(uint64_t);
-  uint64_t allocateHeap(uint64_t);
-  uint64_t loadMem(uint64_t, uint64_t);
-  void storeToMem(uint64_t, uint64_t, uint64_t);  
-  void * getActualAddr(uint64_t);
-  void setConstMem(bool, uint64_t, uint64_t);
-  void setConstContigous(bool, uint64_t);
-  bool checkConstContigous(uint64_t addr);
-  uint64_t getRemainingContigousSize(uint64_t);
-  bool checkConstMem(uint64_t, uint64_t);
-  bool checkConstStr(uint64_t);
-  bool checkConstStr(uint64_t, uint64_t);
   void addRegister(Value *, Register *);
   void addRegister(Value *, Type *, uint64_t);
   void addGlobalRegister(Value *, Type *, uint64_t);

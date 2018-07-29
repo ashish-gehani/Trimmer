@@ -27,17 +27,8 @@ Value * getArg(Function * func, int index){
   return NULL;  
 }
 
-void cleanUpfuncBBs(Function * f, BasicBlockContInfoMap bbc,
-  ValToRegisterMap& Registers, ValSet valSet) {
-  for(auto f_it = f->begin(), f_ite = f->end(); f_it != f_ite; ++f_it) {
-    BasicBlock * BB = &*f_it;
-    if(bbc.find(BB) == bbc.end())
-      continue;
-    ContextInfo * ci = bbc[BB];
-    if(!ci->deleted && !ci->imageOf)
-      delete ci->memory;
-    delete ci;
-  }
+void cleanUpfuncBBs(Function * f,
+  ValToRegisterMap& Registers, ValSet valSet) { 
   for(auto val : valSet) {
     assert(Registers.find(val) != Registers.end() && "unexpected behavior");
     Register * reg = Registers[val];
