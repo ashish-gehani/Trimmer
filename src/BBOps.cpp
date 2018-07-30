@@ -209,6 +209,11 @@ void BBOps::freeBB(BasicBlock * BB) {
     ci->deleted = true;  
   freePredecessors(BB);
 }
+/**
+ * Recursively marks BB and children dominated by BB 
+ * as unreachable by adding them to the unReachable vector. 
+ * This is done by getting the dominatorTree of the code
+ */
 void BBOps::propagateUR(BasicBlock * BB, LoopInfo& LI) {
   Function * F = BB->getParent();
   DominatorTree * DT = new DominatorTree(*F);
@@ -229,6 +234,10 @@ void BBOps::propagateUR(BasicBlock * BB, LoopInfo& LI) {
     }
   }
 }  
+/**
+ * Adds a BB to readyToVist if it's reachable from at least one
+ * predecessor
+ */
 void BBOps::checkReadyToVisit(BasicBlock * BB) {
   unsigned numPreds = BBInfoMap[BB]->numPreds;
   unsigned URfrom = BBInfoMap[BB]->URfrom; 
@@ -236,6 +245,11 @@ void BBOps::checkReadyToVisit(BasicBlock * BB) {
   if(Rfrom && (URfrom + Rfrom == numPreds))
     InsertUnique(readyToVisit, BB);
 }
+/**
+ * Loops over successors of a terminal, and tries to call porpagateUR
+ * on successors that become unreachable. Reachable successors are
+ * added to readyToVisit vector
+ */
 void BBOps::markSuccessorsAsUR(TerminatorInst * termInst, LoopInfo& LI) {
   for(unsigned int index = 0; index < termInst->getNumSuccessors(); index++) {
     BasicBlock * successor = termInst->getSuccessor(index);
