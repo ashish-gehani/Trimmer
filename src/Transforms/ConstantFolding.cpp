@@ -557,11 +557,20 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
       markArgsAsNonConst(callInst);
       return NOTFOLDED;
     }
-    runOnFunction(callInst, addClonedFunction(callInst, calledFunction)); 
+    CallInst *clonedInst = cloneAndAddFuncCall(callInst); 
+    toReplace.push_back(make_pair(callInst, clonedInst));
+    runOnFunction(callInst, clonedInst->getCalledFunction()); 
   }
   return UNDECIDED;  
 }
 
+CallInst *ConstantFolding::cloneAndAddFuncCall(CallInst *callInst) {
+  ValueToValueMapTy vmap;
+  Function *cloned = cloneFunc(callInst->getCalledFunction(), vmap);
+  std::vector<Value*> args(callInst->arg_begin(), callInst->arg_end());
+  CallInst *clonedCall = createFuncCall(cloned, args);
+  return clonedCall;
+}
 //File LoopUtils.cpp
 
 //File Utils.cpp
@@ -620,24 +629,6 @@ bool ConstantFolding::replaceOrCloneRegister(Value * from, Value * with) {
     return false;
   }
   return true;
-}
-
-Function * ConstantFolding::addClonedFunction(Function * F, ValueToValueMapTy& vmap) {
-  ClonedCodeInfo info;
-  string name = F->getName().str();
-  Function * clonedFunc = llvm::CloneFunction(F, vmap, &info);
-  // F->getParent()->getFunctionList().push_back(clonedFunc);
-  clonedFunc->setName(StringRef(name + "_clone")); 
-  return clonedFunc;
-}
-
-Function * ConstantFolding::addClonedFunction(CallInst * callInst, Function * F) {
-  ValueToValueMapTy vmap;
-  Function * clonedFunc = addClonedFunction(F, vmap);
-  std::vector<Value*> args(callInst->arg_begin(), callInst->arg_end());
-  CallInst * specCallInst = CallInst::Create(clonedFunc, args);
-  toReplace.push_back(make_pair(callInst, specCallInst));
-  return clonedFunc;
 }
 
 void ConstantFolding::replaceUses() {
@@ -1503,7 +1494,7 @@ bool ConstantFolding::doUnroll(BasicBlock * header, unsigned tripCount) {
 
 LoopUnrollTest * ConstantFolding::runtest(Loop * L) {
   ValueToValueMapTy vmap;
-  Function * toRun = addClonedFunction(currfn, vmap);
+  Function * toRun = cloneFunc(currfn, vmap);
   bbOps.copyFuncBlocksInfo(currfn, vmap);
   BasicBlock * hdrClone = dyn_cast<BasicBlock>(vmap[L->getHeader()]); 
   unsigned tripCount;

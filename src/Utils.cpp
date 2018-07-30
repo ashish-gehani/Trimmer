@@ -17,6 +17,20 @@ void split(string str, vector<string>& tokens, char delim) {
     tokens.push_back(str.substr(initialPos, to));
 }
 
+Function *cloneFunc(Function *F, ValueToValueMapTy& vmap) {
+  ClonedCodeInfo info;
+  string name = F->getName().str();
+  Function * clonedFunc = llvm::CloneFunction(F, vmap, &info);
+  // F->getParent()->getFunctionList().push_back(clonedFunc);
+  clonedFunc->setName(StringRef(name + "_clone")); 
+  return clonedFunc;
+}
+
+CallInst *createFuncCall(Function *F, vector<Value*>& args) {
+  CallInst * specCallInst = CallInst::Create(F, args);
+  return specCallInst;
+}
+
 Value * getArg(Function * func, int index){
   int i = 0;
   for(auto arg = func->arg_begin(), argEnd = func->arg_end(); arg != argEnd; arg++){

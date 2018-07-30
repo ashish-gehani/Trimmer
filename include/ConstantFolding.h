@@ -111,8 +111,7 @@ struct ConstantFolding : public ModulePass {
   CmpInst * foldCmp(CmpInst *);
   bool getPointerAddr(Value *, uint64_t&);
 
-  Function * addClonedFunction(Function *, ValueToValueMapTy& vmap);
-  Function * addClonedFunction(CallInst *, Function *);
+  CallInst *cloneAndAddFuncCall(CallInst *);
   bool predecessorsVisited(BasicBlock *);
 
   bool simplifyCallback(CallInst *);
