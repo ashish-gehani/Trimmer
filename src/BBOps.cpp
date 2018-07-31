@@ -362,7 +362,7 @@ void BBOps::copyFuncBlocksInfo(Function * F, ValueToValueMapTy & vmap) {
     BasicBlock * clone = dyn_cast<BasicBlock>(vmap[BB]);
     if(findInSet(visited, BB))
       visited.insert(clone);
-    else if(findInSet(visited, BB))
+    else if(findInSet(unReachable, BB))
       unReachable.insert(clone);
     if(findInMap(BBInfoMap, BB)) {
       BBInfo * bbi = BBInfoMap[BB];
