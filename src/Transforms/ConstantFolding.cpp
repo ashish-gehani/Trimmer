@@ -47,6 +47,7 @@
 #include "StringUtils.h"
 #include "FdInfo.h"
 #include "GetOptLocal.h"
+#include "LoopUnroller.h"
 
 
 using namespace llvm;
@@ -122,13 +123,20 @@ void ConstantFolding::runOnBB(BasicBlock * BB) {
   ContextInfo * ci = bbOps.getContextInfo(currBB);
   for(ci->inst = BB->begin(); ci->inst != BB->end(); ci->inst++) {
     Instruction * I = &*(ci->inst);
-    checkTermInst(I);    
-    if(testTerminated()) // test terminated in the  term condition above
-      break;
+
+    if(isLoopTest()) {
+      LoopUnroller::checkTermInst(I, testStack.back());
+      if (LoopUnroller::testTerminated(testStack.back())) // test terminated in the  term condition above
+        break;
+    }
     runOnInst(I);
   }  
   currBB = temp;
   bbOps.freeBB(BB);
+}
+
+bool ConstantFolding::isLoopTest() {
+  return testStack.size();
 }
 /*
   Run on a called Function(or main at start)
@@ -1053,6 +1061,11 @@ void ConstantFolding::visitReadyToVisit(vector<BasicBlock *> readyToVisit) {
   }
 }
 
+/**
+ * Appropriately mirrors or duplicates succ BasicBlock, based on the
+ * predecessor BasicBlock from. Also frees the predecessor if possible,
+ * simplifies loops in succ, and runs runOnBB on successor
+ */
 bool ConstantFolding::visitBB(BasicBlock * succ, BasicBlock *  from) {
   BasicBlock * temp = currBB;
   currBB = from;
@@ -1069,7 +1082,7 @@ bool ConstantFolding::visitBB(BasicBlock * succ, BasicBlock *  from) {
   simplifyLoop(succ);
   runOnBB(succ);   
   currBB = temp;
-  if(testTerminated()) return false; // test terminated in runOnBB above
+  if(isLoopTest() && LoopUnroller::testTerminated(testStack.back())) return false; // test terminated in runOnBB above
   return true;
 }
 
@@ -1446,138 +1459,93 @@ bool ConstantFolding::handleGetOpt(CallInst * ci) {
 }
 
 
-bool ConstantFolding::checkUnrollHint(BasicBlock * hdr, LoopInfo &LI) {
-  Value * unrollH = module->getNamedValue("unroll_loop");
-  if(!unrollH) return false;
-  for(Use &U : unrollH->uses()) {
-    Instruction * user = dyn_cast<Instruction>(U.getUser());
-    if(!user) continue;
-    BasicBlock * BB = user->getParent();
-    Loop * L = LI.getLoopFor(BB);
-    if(L && L->getHeader() == hdr) return true;
-  }
-  return false;
-}
 
-bool ConstantFolding::getTripCount(BasicBlock * header, unsigned & tripCount) {
-  Function * F = header->getParent();
-  LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*F).getLoopInfo();
-  DominatorTree * DT = new DominatorTree(*F);
-  AssumptionCache &AC = getAnalysis<AssumptionCacheTracker>(*F).getAssumptionCache(*F);
-  ScalarEvolution SE(*F, *TLI, AC, *DT, LI);
-  Loop * L = LI.getLoopFor(dyn_cast<BasicBlock>(header));
-  tripCount =  SE.getSmallConstantMaxTripCount(L);
-  if(!tripCount) {
-    tripCount = DEFAULT_TRIP_COUNT + 5;
-    return false;
-  }
-  return true;
-}
 
-bool ConstantFolding::doUnroll(BasicBlock * header, unsigned tripCount) {
-  Function * F = header->getParent();
-  LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*F).getLoopInfo();
-  DominatorTree * DT = new DominatorTree(*F);
-  AssumptionCache &AC = getAnalysis<AssumptionCacheTracker>(*F).getAssumptionCache(*F);
-  ScalarEvolution SE(*F, *TLI, AC, *DT, LI);
-  Loop * L = LI.getLoopFor(dyn_cast<BasicBlock>(header));
-  OptimizationRemarkEmitter ORE(F); 
-  int UnrollResult = UnrollLoop(L, tripCount, tripCount, true, false, false, 
-                true, false, 1, 0, &LI, &SE, DT, &AC, &ORE, PreserveLCSSA);
-  if(!UnrollResult) {
-    debug(Abubakar) << "failed in unrolling\n";
-    return false;
-  }
-  debug(Abubakar) << "succeeded in unrolling for " << tripCount << " iterations\n";
-  return true;
-}
 
-LoopUnrollTest * ConstantFolding::runtest(Loop * L) {
-  ValueToValueMapTy vmap;
-  Function * toRun = cloneFunc(currfn, vmap);
-  bbOps.copyFuncBlocksInfo(currfn, vmap);
-  BasicBlock * hdrClone = dyn_cast<BasicBlock>(vmap[L->getHeader()]); 
-  unsigned tripCount;
-  bool constTripCount = getTripCount(hdrClone, tripCount);
-  LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*toRun).getLoopInfo();
-  Loop * newLoop = LI.getLoopFor(dyn_cast<BasicBlock>(hdrClone));
-  LoopUnrollTest *ti = new LoopUnrollTest(newLoop, module, constTripCount);
-  testStack.push_back(ti);
-  BasicBlock * entry = newLoop->getLoopPreheader();
-
-  ValSet oldValSet = funcValStack[funcValStack.size() - 1];
-  push_back(funcValStack);
+void ConstantFolding::cloneFuncStackAndRegisters(ValueToValueMapTy &vmap, ValSet &oldValSet) {
   for(auto val : oldValSet) {
     pushFuncStack(vmap[val]);
     regOps.addRegister(vmap[val], processInstAndGetRegister(val));
   }
-  if(!doUnroll(hdrClone, tripCount)) {
-    pop_back(testStack);
-    bbOps.cleanUpFuncBBInfo(toRun);
-    regOps.cleanUpFuncBBRegisters(toRun, pop_back(funcValStack));
-    return ti; // the default value for ti->passed is false
-  }
-  duplicateContext(entry, currBB);
-  Function * temp = currfn; 
-  currfn = toRun;
-  LoopInfo &newLI = getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();
-  bbOps.recomputeLoopInfo(currfn, newLI);
-
-  if(!isFuncInfoInitialized(toRun)) {
-    FuncInfo *fi = initializeFuncInfo(toRun);
-    addFuncInfo(toRun, fi);
-  }
-  runOnBB(entry);
-
-  currfn = temp;
-  bbOps.cleanUpFuncBBInfo(toRun);
-  regOps.cleanUpFuncBBRegisters(toRun, pop_back(funcValStack));
-  return pop_back(testStack);
 }
 
-void ConstantFolding::simplifyLoop(BasicBlock * BB) {
-  if(testStack.size()) // for now dont run a test from within a test.
+void ConstantFolding::simplifyLoop(BasicBlock * BB) {  
+  LoopInfo *LI= &getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();;
+  AssumptionCache *AC;
+
+  LoopUnroller currFnUnroller(module, PreserveLCSSA, useAnnotations);
+  Loop *L = NULL;
+
+  if (!(L = isLoopHeader(BB, *LI)) || !currFnUnroller.shouldSimplifyLoop(BB, *LI) || testStack.size() > 0)
     return;
-  if(!bbOps.partOfLoop(BB)) {
-    return; 
+
+  ValueToValueMapTy vmap;
+  Function *cloned = cloneFunc(currfn, vmap); //clone function
+
+  bbOps.copyFuncBlocksInfo(currfn, vmap); //copy over old function bbinfo into cloned function
+
+  BasicBlock * hdrClone = dyn_cast<BasicBlock>(vmap[L->getHeader()]);
+  LI = &getAnalysis<LoopInfoWrapperPass>(*cloned).getLoopInfo();;
+  AC = &getAnalysis<AssumptionCacheTracker>(*cloned).getAssumptionCache(*cloned);
+
+  LoopUnroller clonedFnUnroller(module, PreserveLCSSA, useAnnotations);
+  //clonedFnUnroller.getTripCount(hdrClone, TLI, *LI, *AC);
+
+  BasicBlock *entry = clonedFnUnroller.getLoopPreHeader(hdrClone, *LI);
+
+  ValSet oldValSet = funcValStack.back();
+  push_back(funcValStack);
+
+
+  cloneFuncStackAndRegisters(vmap, oldValSet ); //copy over stack and registers
+
+  LoopUnrollTest *ti = clonedFnUnroller.runtest(hdrClone, TLI, *LI, *AC);
+
+  if (ti) {
+    testStack.push_back(ti);
+
+    duplicateContext(entry, currBB); 
+    Function * temp = currfn; 
+    currfn = cloned;
+    bbOps.recomputeLoopInfo(currfn, *LI);
+
+    if(!isFuncInfoInitialized(cloned)) {
+      FuncInfo *fi = initializeFuncInfo(cloned);
+      addFuncInfo(cloned, fi);
+    }
+
+    runOnBB(entry);
+    currfn = temp;
   }
-  LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();
+
+  bbOps.cleanUpFuncBBInfo(cloned); //remove cloned BBinfo
+  regOps.cleanUpFuncBBRegisters(cloned, pop_back(funcValStack)); //remove cloned registers and stack
+
+  if(!ti)
+    return;
+
+  ti = pop_back(testStack);
+  if(!ti->checkPassed())
+    return;
+
+  LI = &getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();
+  AC = &getAnalysis<AssumptionCacheTracker>(*currfn).getAssumptionCache(*currfn);
+
+  currFnUnroller.doUnroll(BB, TLI, *LI, *AC, ti->iterations + 1);
+  LoopInfo &newLI = getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();
+
+  bbOps.recomputeLoopInfo(currfn, newLI);
+}
+
+Loop *ConstantFolding::isLoopHeader(BasicBlock *BB, LoopInfo &LI) {
+  if(!bbOps.partOfLoop(BB)) {
+    return NULL; 
+  }
   Loop * L = LI.getLoopFor(BB);
   if(BB != L->getHeader())
-    return;
-  if(useAnnotations && !checkUnrollHint(BB, LI))
-    return;
-  debug(Abubakar) << "running test\n";
-  LoopUnrollTest *ti = runtest(L);
-  if(!ti->checkPassed()) {
-    debug(Abubakar) << "test failed\n";
-    return;  
-  }
-  debug(Abubakar) << "loop broken in " << ti->iterations << " iterations\n";
-  debug(Abubakar) << "test passed : modifying loop\n";
-  doUnroll(BB, ti->iterations + 1);
-  LoopInfo &newLI = getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();
-  /*TODO : what other information may change as a result of unrolling/peeling?*/
-  bbOps.recomputeLoopInfo(currfn, newLI);
-}
+    return NULL; 
 
-bool ConstantFolding::testTerminated() {
-  if(!testStack.size())
-    return false;
-  LoopUnrollTest *ti = testStack[testStack.size() - 1];
-  return ti->terminated;
-}
-
-void ConstantFolding::checkTermInst(Instruction * I) {
-  if(!testStack.size())
-    return;
-  LoopUnrollTest *ti = testStack[testStack.size() - 1];
-  if(ti->terminated)
-    return;
-  if(ti->checkBreakInst(I)) {
-    ti->terminated = true;
-    debug(Abubakar) << "marking test at level " << testStack.size() << " as terminated\n";
-  } else ti->updateIter(I); 
+  return L;
 }
 
 void ConstantFolding::updateCM(ProcResult result, Instruction * I) {
@@ -1610,6 +1578,7 @@ void ConstantFolding::updateCM(ProcResult result, Instruction * I) {
     ti->indepInsts.push_back(I);
 }
 
+/*
 unsigned ConstantFolding::getNumNodesBelow(Instruction * I, 
   map<Instruction *, unsigned> & cache, LoopUnrollTest *ti) {
   if(findInMap(cache, I))
@@ -1644,6 +1613,7 @@ unsigned ConstantFolding::getCost(LoopUnrollTest *ti) {
   }
   return cost + ti->partOfLoop;
 }
+*/
 
 void ConstantFolding::duplicateContext(BasicBlock * to, BasicBlock *from) {
   if (!bbOps.isBBInfoInitialized(to)) {

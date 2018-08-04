@@ -7,6 +7,7 @@ add_library(ConstantFolding MODULE
   ../VecUtils.cpp
   ../GetOptLocal.cpp
   ../RegOps.cpp
+  ../LoopUnroller.cpp
   )
 add_library(Internalize MODULE
   Internalize.cpp

@@ -166,8 +166,6 @@ struct ConstantFolding : public ModulePass {
 
   void simplifyLoop(BasicBlock *);
   LoopUnrollTest* runtest(Loop *);
-  bool doUnroll(BasicBlock *, unsigned);
-  bool getTripCount(BasicBlock *, unsigned &);
   void checkTermInst(Instruction *);
   void checkTermBB(BasicBlock *);
   bool checkUnrollHint(BasicBlock *, LoopInfo &LI);
@@ -183,6 +181,13 @@ struct ConstantFolding : public ModulePass {
   void runOnInst(Instruction *);
 
   void pushFuncStack(Value *val);
+
+  bool isLoopTest();
+  Loop *isLoopHeader(BasicBlock *BB, LoopInfo &LI);
+  void cloneFuncStackAndRegisters(ValueToValueMapTy &vmap, ValSet &);
+
+  LoopInfo &getLoopInfo(Function *);
+  AssumptionCache &getAssumptionCache(Function *);
 };
 
 #endif
