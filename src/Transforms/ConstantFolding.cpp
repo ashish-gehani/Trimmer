@@ -110,7 +110,9 @@ void ConstantFolding::runOnInst(Instruction * I) {
   } else {
     result = tryfolding(I);
   }
-  updateCM(result, I);
+
+  if(isLoopTest())
+    updateLoopCost(result, I);
 }
 /*
   run on each Instruction of the basic.
@@ -135,6 +137,9 @@ void ConstantFolding::runOnBB(BasicBlock * BB) {
   bbOps.freeBB(BB);
 }
 
+/*
+ * Whether running a loop unroll test
+ */
 bool ConstantFolding::isLoopTest() {
   return testStack.size();
 }
@@ -1006,7 +1011,7 @@ void ConstantFolding::replaceIfNotFD(Value * from, Value * to) {
   from->replaceAllUsesWith(to);
   debug(Abubakar) << "replaced with " << *to << "\n";
   if(Instruction * I = dyn_cast<Instruction>(from))
-    updateCM(FOLDED, I);
+    updateLoopCost(FOLDED, I);
 }
 
 bool ConstantFolding::simplifyCallback(CallInst * callInst) {
@@ -1548,7 +1553,7 @@ Loop *ConstantFolding::isLoopHeader(BasicBlock *BB, LoopInfo &LI) {
   return L;
 }
 
-void ConstantFolding::updateCM(ProcResult result, Instruction * I) {
+void ConstantFolding::updateLoopCost(ProcResult result, Instruction * I) {
   if(!I->getParent()) // constant expressions etc
     return;
   if(!testStack.size())

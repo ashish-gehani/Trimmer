@@ -169,7 +169,7 @@ struct ConstantFolding : public ModulePass {
   void checkTermInst(Instruction *);
   void checkTermBB(BasicBlock *);
   bool checkUnrollHint(BasicBlock *, LoopInfo &LI);
-  void updateCM(ProcResult, Instruction *);
+  void updateLoopCost(ProcResult, Instruction *);
   bool testTerminated();
   unsigned getCost(LoopUnrollTest* ti);
   unsigned getNumNodesBelow(Instruction * I,
