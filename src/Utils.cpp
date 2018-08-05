@@ -17,6 +17,20 @@ void split(string str, vector<string>& tokens, char delim) {
     tokens.push_back(str.substr(initialPos, to));
 }
 
+Function *cloneFunc(Function *F, ValueToValueMapTy& vmap) {
+  ClonedCodeInfo info;
+  string name = F->getName().str();
+  Function * clonedFunc = llvm::CloneFunction(F, vmap, &info);
+  // F->getParent()->getFunctionList().push_back(clonedFunc);
+  clonedFunc->setName(StringRef(name + "_clone")); 
+  return clonedFunc;
+}
+
+CallInst *createFuncCall(Function *F, vector<Value*>& args) {
+  CallInst * specCallInst = CallInst::Create(F, args);
+  return specCallInst;
+}
+
 Value * getArg(Function * func, int index){
   int i = 0;
   for(auto arg = func->arg_begin(), argEnd = func->arg_end(); arg != argEnd; arg++){
@@ -25,25 +39,6 @@ Value * getArg(Function * func, int index){
     i++;
   }
   return NULL;  
-}
-
-void cleanUpfuncBBs(Function * f, BasicBlockContInfoMap bbc,
-  ValToRegisterMap& Registers, ValSet valSet) {
-  for(auto f_it = f->begin(), f_ite = f->end(); f_it != f_ite; ++f_it) {
-    BasicBlock * BB = &*f_it;
-    if(bbc.find(BB) == bbc.end())
-      continue;
-    ContextInfo * ci = bbc[BB];
-    if(!ci->deleted && !ci->imageOf)
-      delete ci->memory;
-    delete ci;
-  }
-  for(auto val : valSet) {
-    assert(Registers.find(val) != Registers.end() && "unexpected behavior");
-    Register * reg = Registers[val];
-    delete reg;
-    Registers.erase(val);    
-  }  
 }
 
 bool ignorefunc(Function * F) {

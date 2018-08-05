@@ -41,9 +41,9 @@
 #include "ContextInfo.h"
 #include "BBInfo.h"
 #include "FuncInfo.h"
+#include "RegOps.h"
 
 typedef map<Function *, FuncInfo *> FuncInfoMap;
-typedef map<BasicBlock *, ContextInfo *> BasicBlockContInfoMap;
 typedef pair<Instruction *, Instruction *> InstPair;
 typedef set<Value *> ValSet;
 
@@ -59,14 +59,14 @@ struct ConstantFolding : public ModulePass {
   DataLayout * DL;
   DominatorTree * DT;
   CallGraph * CG;
+  RegOps regOps;
 
   BasicBlock * currBB;
   bool terminateBB;
   Function * currfn;
-  BasicBlockContInfoMap BasicBlockContexts;
+  
   FuncInfoMap fimap;
   vector<InstPair> toReplace;
-  ValToRegisterMap Registers;
 
   vector<LoopUnrollTest*> testStack;
   bool PreserveLCSSA;
@@ -95,6 +95,8 @@ struct ConstantFolding : public ModulePass {
   ProcResult processTermInst(TerminatorInst *);   
   ProcResult tryfolding(Instruction *);
 
+  Register *processInstAndGetRegister(Value *);
+
   void createAnnotationList();
   void createAnnotationList2();
   void updateAnnotationContext(Function * F);
@@ -109,8 +111,7 @@ struct ConstantFolding : public ModulePass {
   CmpInst * foldCmp(CmpInst *);
   bool getPointerAddr(Value *, uint64_t&);
 
-  Function * addClonedFunction(Function *, ValueToValueMapTy& vmap);
-  Function * addClonedFunction(CallInst *, Function *);
+  CallInst *cloneAndAddFuncCall(CallInst *);
   bool predecessorsVisited(BasicBlock *);
 
   bool simplifyCallback(CallInst *);
@@ -153,42 +154,18 @@ struct ConstantFolding : public ModulePass {
   bool isFileDescriptor(Value *);
   void replaceIfNotFD(Value *, Value *);
 
-  void createNewContext(BasicBlock * BB);
-  void imageContext(BasicBlock *);  
-  void duplicateContext(BasicBlock *);
-  Memory * duplicateMem();
-  bool hasContext(BasicBlock * BB);
-  ContextInfo * getCurrContext();
-  void copyContext(Memory *);
   void copyCallerContext(CallInst *, Function *);
+  void duplicateContext(BasicBlock *, BasicBlock *);
   void propagateArgs(CallInst *, Function *);
 
-  uint64_t allocateStack(uint64_t);
-  uint64_t allocateHeap(uint64_t);
-  uint64_t loadMem(uint64_t, uint64_t);
-  void storeToMem(uint64_t, uint64_t, uint64_t);  
-  void * getActualAddr(uint64_t);
-  void setConstMem(bool, uint64_t, uint64_t);
-  void setConstContigous(bool, uint64_t);
-  bool checkConstContigous(uint64_t addr);
-  uint64_t getRemainingContigousSize(uint64_t);
-  bool checkConstMem(uint64_t, uint64_t);
-  bool checkConstStr(uint64_t);
-  bool checkConstStr(uint64_t, uint64_t);
-  void addRegister(Value *, Register *);
-  void addRegister(Value *, Type *, uint64_t);
-  void addGlobalRegister(Value *, Type *, uint64_t);
   bool cloneRegister(Value *, Value *);
   bool replaceOrCloneRegister(Value *, Value *);
-  Register * getRegister(Value *);
 
   bool visitBB(BasicBlock *, BasicBlock *);
   void visitReadyToVisit(vector<BasicBlock *>);
 
   void simplifyLoop(BasicBlock *);
   LoopUnrollTest* runtest(Loop *);
-  bool doUnroll(BasicBlock *, unsigned);
-  bool getTripCount(BasicBlock *, unsigned &);
   void checkTermInst(Instruction *);
   void checkTermBB(BasicBlock *);
   bool checkUnrollHint(BasicBlock *, LoopInfo &LI);
@@ -202,6 +179,15 @@ struct ConstantFolding : public ModulePass {
   void runOnFunction(CallInst *, Function *);
   void runOnBB(BasicBlock *);
   void runOnInst(Instruction *);
+
+  void pushFuncStack(Value *val);
+
+  bool isLoopTest();
+  Loop *isLoopHeader(BasicBlock *BB, LoopInfo &LI);
+  void cloneFuncStackAndRegisters(ValueToValueMapTy &vmap, ValSet &);
+
+  LoopInfo &getLoopInfo(Function *);
+  AssumptionCache &getAssumptionCache(Function *);
 };
 
 #endif
