@@ -6,6 +6,7 @@ def format_args(fname, args):
 
 def exists(fname):
 	if not os.path.exists(fname):
+                print fname
 		print 'file ' + fname + ' does not exist'
 		quit()
 	elif  not os.path.isfile(fname):
@@ -31,6 +32,9 @@ def parse_args(args):
 	if not os.path.exists(work_dir):
 		os.makedirs(work_dir)
 	
+        dir_path = os.path.dirname(os.path.realpath(manifest_file))
+        man_data["main_path"] = os.path.join(dir_path, man_data["main"])
+
 	opt_flag = True
 	spec_flag = True
 	strip_flag = True

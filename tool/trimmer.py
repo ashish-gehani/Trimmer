@@ -11,6 +11,7 @@ class Trimmer:
 
         self.name = man_data["name"]
         self.main = man_data["main"]
+        self.main_path = man_data["main_path"]
         self.args = utils.format_args(self.name, man_data["args"])
         self.modules = man_data["modules"]
         self.ldflags = ' '.join(man_data["ldflags"])
@@ -35,8 +36,8 @@ class Trimmer:
 
     def run(self):
         self.curr_file = self.work_dir + '/' + self.main
-        utils.exists(self.main)
-        copyfile(self.main, self.work_dir + '/' + self.main)
+        utils.exists(self.main_path)
+        copyfile(self.main_path, self.work_dir + '/' + self.main)
         if(self.spec_flag):	
         # The following driver call runs the argument specialization transform
             driver.run_argspec(self)

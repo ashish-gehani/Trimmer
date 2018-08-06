@@ -58,27 +58,27 @@ def run_argspec(tool):
 	subprocess.call(Cmd, shell = True)	
 	
 	# unroll pass
+        """
 	Cmd = opt + ' -load ' + build_path + 'LoopUnroll.so -mem2reg -loops -lcssa \
 	-loop-simplify -loop-rotate -loop-unroll2 -unroll-threshold2=4294967295 -args='\
 	+ tool.args + ' ' + add_file  + ' -o ' + unroll_file
 	printDbgMsg(Cmd)
 	subprocess.call(Cmd, shell = True)
-
 	# specialize getopt calls
 	Cmd = opt + ' -load ' + build_path + 'LibSimplify.so -mem2reg -lib-simplify\
 	-args=' + tool.args + ' ' + unroll_file + ' -o ' + libspec_file  
 	printDbgMsg(Cmd)
 	subprocess.call(Cmd, shell = True)	
-	
+        """
 	if(tool.icp_flag): 
 		# interconstprop pass
-		Cmd = opt + ' -load ' + build_path + 'InterConstProp.so -isAnnotated=true -mem2reg \
-		-mergereturn -simplifycfg -loop-simplify -inter-constprop ' + libspec_file + ' -o '\
+		Cmd = opt + ' -load ' + build_path + 'ConstantFolding.so -isAnnotated=true -mem2reg \
+		-mergereturn -simplifycfg -loops -lcssa -loop-simplify -loop-rotate -inter-constprop ' + add_file + ' -o '\
 		+ constprop_file
 		printDbgMsg(Cmd)
 
-		Cmd = [opt, '-load', build_path + 'InterConstProp.so', '-isAnnotated=true', '-mem2reg',
-		'-mergereturn', '-simplifycfg', '-loop-simplify', '-inter-constprop', libspec_file, '-o',
+		Cmd = [opt, '-load', build_path + 'ConstantFolding.so', '-isAnnotated=true', '-mem2reg',
+		'-mergereturn', '-simplifycfg', '-loops', '-lcssa', '-loop-simplify', '-loop-rotate', '-inter-constprop', add_file , '-o',
 		constprop_file]
 		f = open(constprop_log_file, "wb")
 		printDbgMsg(Cmd)
