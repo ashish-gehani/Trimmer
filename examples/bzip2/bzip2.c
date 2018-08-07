@@ -1886,6 +1886,7 @@ IntNative main ( IntNative argc, Char *argv[] )
    /*-- Look at the flags. --*/
    aa = argList;
    for (int i = 0; i < 10; i++) {
+       unroll_loop(10);
       if(aa == NULL) break;
       if (ISFLAG("--")) break;
       if (aa->name[0] == '-' && aa->name[1] != '-') {
