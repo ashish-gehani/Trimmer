@@ -6,6 +6,7 @@ using namespace llvm;
 
 #include "llvm/Analysis/LoopInfo.h"
 
+#include "Debug.h"
 #include "Mem.h"
 
 #define LOOPEXITBB "__loop_termination_test__"
@@ -39,6 +40,7 @@ struct LoopUnrollTest {
   vector<Instruction *> indepInsts;
   map<Instruction *, ProcResult> InstResults; 
   unsigned numOrigInsts, partOfLoop, iterations;
+  vector<Instruction *> instrumented;
   LoopUnrollTest(Loop * L, Module * module, bool tripCount) {
     terminated = false;
     ConstTripCount = tripCount;
@@ -48,7 +50,9 @@ struct LoopUnrollTest {
     L->getUniqueExitBlocks(ExitBlocks);
     for(unsigned i = 0; i < ExitBlocks.size(); i++) {
       BasicBlock * BB = ExitBlocks[i];
-      testCall->clone()->insertBefore(firstInst(BB));
+      Instruction *I = testCall->clone();
+      I->insertBefore(firstInst(BB));
+      instrumented.push_back(I);
     }
     testCall->dropAllReferences();
     BasicBlock * latchBB = L->getLoopLatch();
@@ -57,7 +61,7 @@ struct LoopUnrollTest {
     for(auto block : L->blocks()) {
       BasicBlock * BB = &*block;
       numOrigInsts += distance(BB->begin(), BB->end());
-    }  
+    }
   } 
   Instruction * firstInst(BasicBlock * BB) {
     BasicBlock::iterator it;
@@ -89,6 +93,13 @@ struct LoopUnrollTest {
     if(!terminated) return false;
     if(!ConstTripCount) return iterations <= DEFAULT_TRIP_COUNT;
     return true;
+  }
+  ~LoopUnrollTest() {
+    for(unsigned i = 0; i < instrumented.size(); i++) {
+      Instruction *I = instrumented[i]; 
+      I->eraseFromParent();
+      I->dropAllReferences();
+    }
   }
 };
 

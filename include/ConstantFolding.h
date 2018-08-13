@@ -42,11 +42,12 @@
 #include "BBInfo.h"
 #include "FuncInfo.h"
 #include "RegOps.h"
+#include "LoopUnroller.h"
 
 typedef map<Function *, FuncInfo *> FuncInfoMap;
 typedef pair<Instruction *, Instruction *> InstPair;
 typedef set<Value *> ValSet;
-typedef vector<BasicBlock *> BBSet;
+typedef vector<BasicBlock *> BBList;
 
 using namespace llvm;
 using namespace std;
@@ -69,8 +70,8 @@ struct ConstantFolding : public ModulePass {
   FuncInfoMap fimap;
   vector<InstPair> toReplace;
 
-  vector<LoopUnrollTest*> testStack;
-  vector<BBSet> worklistBB;
+  vector<LoopUnroller*> testStack;
+  vector<BBList> worklistBB;
   bool PreserveLCSSA;
 
   vector<ValSet> funcValStack;
@@ -166,7 +167,7 @@ struct ConstantFolding : public ModulePass {
   bool visitBB(BasicBlock *, BasicBlock *);
   void visitReadyToVisit(vector<BasicBlock *>);
 
-  void simplifyLoop(BasicBlock *);
+  LoopUnroller *unrollLoop(BasicBlock *, BasicBlock *&);
   LoopUnrollTest* runtest(Loop *);
   void checkTermInst(Instruction *);
   void checkTermBB(BasicBlock *);
@@ -179,7 +180,7 @@ struct ConstantFolding : public ModulePass {
 
   virtual bool runOnModule(Module &);
   void runOnFunction(CallInst *, Function *);
-  void runOnBB(BasicBlock *);
+  bool runOnBB(BasicBlock *);
   void runOnInst(Instruction *);
 
   void pushFuncStack(Value *val);
@@ -192,6 +193,13 @@ struct ConstantFolding : public ModulePass {
   AssumptionCache &getAssumptionCache(Function *);
 
   void addToWorklistBB(BasicBlock *);
+  void copyFuncIntoClone(Function *, ValueToValueMapTy &, Function *, vector<ValSet> &);
+
+  LoopUnroller *unrollLoopInClone(Function *, Loop *L, ValueToValueMapTy &, vector<ValSet> &);
+  void copyWorklistBB(ValueToValueMapTy &, vector<BBList> &);
+
+  void renameFunctions(Function *, Function *);
+  void eraseToReplace(CallInst *, vector<InstPair> &);
 };
 
 #endif

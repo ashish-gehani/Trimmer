@@ -111,13 +111,13 @@ void ConstantFolding::runOnInst(Instruction * I) {
     result = tryfolding(I);
   }
 
-  if(isLoopTest())
-    updateLoopCost(result, I);
+  //if(isLoopTest())
+    //updateLoopCost(result, I);
 }
 /*
   run on each Instruction of the basic.
 */
-void ConstantFolding::runOnBB(BasicBlock * BB) {
+bool ConstantFolding::runOnBB(BasicBlock * BB) {
   bbOps.markVisited(BB);
   currBB = BB;
   ContextInfo * ci = bbOps.getContextInfo(currBB);
@@ -125,13 +125,23 @@ void ConstantFolding::runOnBB(BasicBlock * BB) {
     Instruction * I = &*(ci->inst);
 
     if(isLoopTest()) {
-      LoopUnroller::checkTermInst(I, testStack.back());
-      if (LoopUnroller::testTerminated(testStack.back())) // test terminated in the  term condition above
-        break;
+      LoopUnroller *unroller = testStack.back();
+      unroller->checkTermInst(I);
+      if (unroller->testTerminated()) // test terminated in the  term condition above
+        return true;
     }
     runOnInst(I);
   }  
   bbOps.freeBB(BB);
+  return false;
+}
+
+void ConstantFolding::copyFuncIntoClone(Function *cloned, ValueToValueMapTy &vmap, Function *current, vector<ValSet> &funcValStack) {
+  bbOps.copyFuncBlocksInfo(current, vmap); //copy over old function bbinfo into cloned function
+  bbOps.copyContexts(cloned, current, vmap, module);
+  
+  ValSet oldValSet = funcValStack[funcValStack.size() - 2];
+  cloneFuncStackAndRegisters(vmap, oldValSet); //copy over stack and registers
 }
 
 /*
@@ -175,18 +185,80 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
   push_back(worklistBB);
   addToWorklistBB(entry);
 
+  LoopInfo *LI= &getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo(); //TODO should not recalculate on each iteration
   while(worklistBB[worklistBB.size() - 1].size()) {
+
     int size = worklistBB.size() - 1;
     BasicBlock *current = worklistBB[size].back();
-
     worklistBB[size].pop_back();
+    Loop *L = NULL;
 
-    runOnBB(current);
+
+    assert(current->getParent() == currfn);
+    if((L = isLoopHeader(current, *LI)) && LoopUnroller::shouldSimplifyLoop(current, *LI, module, useAnnotations)) {
+      ValueToValueMapTy vmap;
+      if(auto *unroller= unrollLoopInClone(currfn, L, vmap, funcValStack)) {
+        addToWorklistBB(current); 
+        Function *cloned = dyn_cast<BasicBlock>(vmap[current])->getParent();
+
+        testStack.push_back(unroller);
+        push_back(worklistBB);
+
+        currfn = cloned;
+        copyWorklistBB(vmap, worklistBB);
+        LI = unroller->getLoopInfo();
+        continue;
+      } 
+    }
+
+    if(runOnBB(current)) { //loop test terminated
+      LoopUnroller *unroller = pop_back(testStack);
+      if(!unroller->checkPassed()) {
+        bbOps.cleanUpFuncBBInfo(currfn); //remove cloned BBinfo
+        regOps.cleanUpFuncBBRegisters(currfn, pop_back(funcValStack)); //remove cloned registers and stack
+        pop_back(worklistBB);
+        BasicBlock *failedLoop = worklistBB[worklistBB.size() -1].back();
+        worklistBB[worklistBB.size() - 1].pop_back();
+        currfn = unroller->getCloneOf();
+        LI = &getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();
+        toRun = currfn;
+        //TODO hackish way of running on old failed loopHeader
+        runOnBB(failedLoop);
+      }else {
+        //replace old function with new one
+        Function *oldFn = unroller->getCloneOf();
+        addToWorklistBB(current);
+
+        worklistBB[worklistBB.size() -2].clear();
+        auto temp =  worklistBB.back();
+        pop_back(worklistBB);
+        for(auto it = temp.begin(), end = temp.end() ;it != end; it++)
+          addToWorklistBB(*it); 
+
+        regOps.cleanUpFuncBBRegisters(toRun, funcValStack[funcValStack.size() - 2]);
+
+        bbOps.cleanUpFuncBBInfo(oldFn);
+        funcValStack[funcValStack.size() - 2] = funcValStack.back();
+        funcValStack.pop_back();
+
+        delete unroller; //also removes test instructions
+        
+        // if not main function
+        if(ci) {
+          std::vector<Value*> args(ci->arg_begin(), ci->arg_end());
+          CallInst *clonedCall = createFuncCall(currfn, args);
+          //erase any old replacements from toreplace for this function
+          eraseToReplace(ci, toReplace);
+          toReplace.push_back(make_pair(ci, clonedCall));
+        }
+        renameFunctions(currfn, oldFn);
+        toRun = currfn;
+      }
+    }
   }
 
   currBB = tempBB;
   pop_back(worklistBB);
-
   if(!ci) return;
 
   FuncInfo * fi = fimap[toRun];
@@ -237,6 +309,7 @@ bool ConstantFolding::runOnModule(Module & M) {
   currBB = entry;
   currContextIsAnnotated = true;
   addGlobals();
+
   runOnFunction(NULL, func);
 
   replaceUses();
@@ -1022,8 +1095,8 @@ void ConstantFolding::replaceIfNotFD(Value * from, Value * to) {
 
   from->replaceAllUsesWith(to);
   debug(Abubakar) << "replaced with " << *to << "\n";
-  if(Instruction * I = dyn_cast<Instruction>(from))
-    updateLoopCost(FOLDED, I);
+  //if(Instruction * I = dyn_cast<Instruction>(from))
+    //updateLoopCost(FOLDED, I);
 }
 
 bool ConstantFolding::simplifyCallback(CallInst * callInst) {
@@ -1482,72 +1555,14 @@ void ConstantFolding::cloneFuncStackAndRegisters(ValueToValueMapTy &vmap, ValSet
   }
 }
 
-void ConstantFolding::simplifyLoop(BasicBlock * BB) {  
-  LoopInfo *LI= &getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();;
-  AssumptionCache *AC;
-
-  LoopUnroller currFnUnroller(module, PreserveLCSSA, useAnnotations);
-  Loop *L = NULL;
-
-  if (!(L = isLoopHeader(BB, *LI)) || !currFnUnroller.shouldSimplifyLoop(BB, *LI) || testStack.size() > 0)
-    return;
-
-  ValueToValueMapTy vmap;
-  Function *cloned = cloneFunc(currfn, vmap); //clone function
-
-  bbOps.copyFuncBlocksInfo(currfn, vmap); //copy over old function bbinfo into cloned function
-
-  BasicBlock * hdrClone = dyn_cast<BasicBlock>(vmap[L->getHeader()]);
-  LI = &getAnalysis<LoopInfoWrapperPass>(*cloned).getLoopInfo();;
-  AC = &getAnalysis<AssumptionCacheTracker>(*cloned).getAssumptionCache(*cloned);
-
-  LoopUnroller clonedFnUnroller(module, PreserveLCSSA, useAnnotations);
-  //clonedFnUnroller.getTripCount(hdrClone, TLI, *LI, *AC);
-
-  BasicBlock *entry = clonedFnUnroller.getLoopPreHeader(hdrClone, *LI);
-
-  ValSet oldValSet = funcValStack.back();
-  push_back(funcValStack);
-
-
-  cloneFuncStackAndRegisters(vmap, oldValSet ); //copy over stack and registers
-
-  LoopUnrollTest *ti = clonedFnUnroller.runtest(hdrClone, TLI, *LI, *AC);
-
-  if (ti) {
-    testStack.push_back(ti);
-
-    duplicateContext(entry, currBB); 
-    Function * temp = currfn; 
-    currfn = cloned;
-    bbOps.recomputeLoopInfo(currfn, *LI);
-
-    if(!isFuncInfoInitialized(cloned)) {
-      FuncInfo *fi = initializeFuncInfo(cloned);
-      addFuncInfo(cloned, fi);
-    }
-
-    runOnBB(entry);
-    currfn = temp;
-  }
-
-  bbOps.cleanUpFuncBBInfo(cloned); //remove cloned BBinfo
-  regOps.cleanUpFuncBBRegisters(cloned, pop_back(funcValStack)); //remove cloned registers and stack
-
-  if(!ti)
-    return;
-
-  ti = pop_back(testStack);
-  if(!ti->checkPassed())
-    return;
-
-  LI = &getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();
-  AC = &getAnalysis<AssumptionCacheTracker>(*currfn).getAssumptionCache(*currfn);
-
-  currFnUnroller.doUnroll(BB, TLI, *LI, *AC, ti->iterations + 1);
-  LoopInfo &newLI = getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();
-
-  bbOps.recomputeLoopInfo(currfn, newLI);
+LoopUnroller *ConstantFolding::unrollLoop(BasicBlock * BB, BasicBlock *&entry) {  
+  Function *cloned = BB->getParent();
+  LoopInfo *LI = &getAnalysis<LoopInfoWrapperPass>(*cloned).getLoopInfo();;
+  AssumptionCache *AC = &getAnalysis<AssumptionCacheTracker>(*cloned).getAssumptionCache(*cloned);
+  Loop *L = LI->getLoopFor(dyn_cast<BasicBlock>(BB));
+  LoopUnroller *clonedFnUnroller = new LoopUnroller(module, PreserveLCSSA, useAnnotations, L, LI);
+  clonedFnUnroller->runtest(TLI, *AC);
+  return clonedFnUnroller;
 }
 
 Loop *ConstantFolding::isLoopHeader(BasicBlock *BB, LoopInfo &LI) {
@@ -1561,13 +1576,14 @@ Loop *ConstantFolding::isLoopHeader(BasicBlock *BB, LoopInfo &LI) {
   return L;
 }
 
+/*
 void ConstantFolding::updateLoopCost(ProcResult result, Instruction * I) {
   if(!I->getParent()) // constant expressions etc
     return;
   if(!testStack.size())
     return;
   LoopUnrollTest *ti = testStack[testStack.size() - 1];
-  if(ti->terminated)
+  if(ti->testTerminated())
     return;
   if(findInMap(ti->InstResults, I))
     return;
@@ -1591,7 +1607,6 @@ void ConstantFolding::updateLoopCost(ProcResult result, Instruction * I) {
     ti->indepInsts.push_back(I);
 }
 
-/*
 unsigned ConstantFolding::getNumNodesBelow(Instruction * I, 
   map<Instruction *, unsigned> & cache, LoopUnrollTest *ti) {
   if(findInMap(cache, I))
@@ -1647,12 +1662,14 @@ Register *ConstantFolding::processInstAndGetRegister(Value *ptr) {
 
   if(Register *r = regOps.getRegister(ptr))
     return r;
+
   Instruction * I = NULL;
   Register * reg = NULL;
   if(ConstantExpr * ce = dyn_cast<ConstantExpr>(ptr))
     I = ce->getAsInstruction();
   else 
     I = dyn_cast<Instruction>(ptr);
+
   if(I && !I->getParent()) { // if it has a parent then it must have been visited 
     runOnInst(I);
     if(reg = regOps.getRegister(I)) {
@@ -1660,9 +1677,79 @@ Register *ConstantFolding::processInstAndGetRegister(Value *ptr) {
     }
     I->dropAllReferences();
   }
+
   return reg;
 }
 
 void ConstantFolding::addToWorklistBB(BasicBlock *BB) {
+  assert(BB->getParent() == currfn);
   worklistBB[worklistBB.size()-1].push_back(BB);
+}
+
+void ConstantFolding::copyWorklistBB(ValueToValueMapTy& vmap, vector<BBList> &worklistBB) {
+  int oldSize = worklistBB.size() - 2;
+  for(auto it = worklistBB[oldSize].begin(), end = worklistBB[oldSize].end(); it != end; it++) {
+    addToWorklistBB(dyn_cast<BasicBlock>(vmap[*it]));
+    //worklistBB[worklistBB.size() - 1].push_back(dyn_cast<BasicBlock>(vmap[*it]));
+  }
+}
+
+/*
+ * Clones a function, and tries to unroll a loop in it
+ */
+LoopUnroller *ConstantFolding::unrollLoopInClone(Function *currfn, Loop *L, ValueToValueMapTy &vmap, vector<ValSet> &funcValStack) {
+  LoopUnroller *unroller;
+
+  Function *cloned = cloneFunc(currfn, vmap); //clone function
+  push_back(funcValStack);
+  copyFuncIntoClone(cloned, vmap, currfn, funcValStack);
+  
+  BasicBlock *temp;
+  if(!(unroller = unrollLoop(dyn_cast<BasicBlock>(vmap[L->getHeader()]), temp))) {
+    //remove clone info
+    bbOps.cleanUpFuncBBInfo(cloned);
+    regOps.cleanUpFuncBBRegisters(cloned, pop_back(funcValStack));
+    pop_back(funcValStack);
+    return NULL;
+  }
+
+  FuncInfo *fi = initializeFuncInfo(cloned);
+  addFuncInfo(cloned, fi);
+
+  LoopInfo *LI = unroller->getLoopInfo();
+  bbOps.recomputeLoopInfo(cloned, *LI);
+
+  unroller->setCloneOf(currfn);
+  return unroller;
+}
+
+void ConstantFolding::eraseToReplace(CallInst *ci, vector<InstPair> &toReplace) {
+  auto newEnd = 
+    remove_if(toReplace.begin(), toReplace.end(),
+      [&](const InstPair& ip) { 
+        if(ip.first == ci) {
+          ip.second->dropAllReferences(); 
+          return true;
+        }
+        return false;
+      });
+  toReplace.erase(newEnd, toReplace.end());
+}
+
+void ConstantFolding::renameFunctions(Function *currFn, Function *oldFn) {
+  if (currFn->getName().str().substr(0,12) == "branchPruned") {
+    oldFn->setName(oldFn->getName() + "_old");
+
+    Function *f = module->getFunction("branchPruned_clone");
+    if(f)
+      f->setName("branchPruned_clone_old");
+    currFn->setName("branchPruned_clone");
+  }
+  if(currFn->getName().str().substr(0,4) == "main") {
+    oldFn->setName(oldFn->getName() + "_old");
+    Function *f = module->getFunction("main");          
+    if(f)
+      f->setName("main_old");
+    currFn->setName("main");
+  }
 }

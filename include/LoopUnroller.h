@@ -6,23 +6,29 @@
 
 class LoopUnroller {
   public:
-  LoopUnroller(Module *m, bool PreserveLCSSA, bool useAnnotations);
-  static void checkTermInst(Instruction * I, LoopUnrollTest *ti);
-  static bool testTerminated(LoopUnrollTest *ti);
-  bool checkUnrollHint(BasicBlock * hdr, LoopInfo &LI);
-  bool shouldSimplifyLoop(BasicBlock *BB, LoopInfo &LI);
-  bool getTripCount(BasicBlock * header, TargetLibraryInfo * TLI, LoopInfo &, AssumptionCache &, unsigned &);
-  LoopUnrollTest *runtest(BasicBlock *hdrClone, TargetLibraryInfo * TLI, LoopInfo &, AssumptionCache &);
-  LoopUnrollTest *createLoopUnrollTest(BasicBlock *hdrClone);
-  bool doUnroll(BasicBlock * header, TargetLibraryInfo * TLI, LoopInfo &, AssumptionCache &, unsigned);
-  BasicBlock *getLoopPreHeader(BasicBlock *hdrClone, LoopInfo &LI);
+  LoopUnroller(Module *m, bool PreserveLCSSA, bool useAnnotations, Loop *, LoopInfo *);
+  ~LoopUnroller();
+  void checkTermInst(Instruction * I);
+  bool testTerminated();
+  bool doUnroll(TargetLibraryInfo * TLI, AssumptionCache &, unsigned);
+  static bool checkUnrollHint(BasicBlock * hdr, LoopInfo &LI, Module *);
+  static bool shouldSimplifyLoop(BasicBlock *BB, LoopInfo &LI, Module *, bool);
+  bool getTripCount(TargetLibraryInfo * TLI, AssumptionCache &, unsigned &);
+  void runtest(TargetLibraryInfo * TLI, AssumptionCache &);
+  LoopInfo *getLoopInfo();
 
-  LoopUnrollTest *createTest(BasicBlock *hdrClone);
+  bool checkPassed();
+  void setCloneOf(Function *);
+  Function *getCloneOf();
 
+  Loop *loop;
   private:
+  LoopUnrollTest *ti;
   bool PreserveLCSSA;
   Module *module;
   bool useAnnotations;
+  LoopInfo *LI;
+  Function *cloneOf;
 };
 
 #endif

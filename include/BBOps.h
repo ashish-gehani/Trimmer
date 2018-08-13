@@ -79,6 +79,9 @@ public:
 
   ContextInfo *getContextInfo(BasicBlock *bb);
   void cleanUpFuncBBInfo(Function *f);
+
+  void copyContexts(Function *to, Function *from, ValueToValueMapTy& vmap, Module *);
+  bool isContextDeleted(BasicBlock *);
 private:
   map<BasicBlock *, BBInfo *> BBInfoMap;
   BasicBlockContInfoMap BasicBlockContexts;

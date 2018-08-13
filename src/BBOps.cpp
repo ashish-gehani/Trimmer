@@ -134,6 +134,7 @@ bool BBOps::predecessorsVisited(BasicBlock * BB, LoopInfo &LI) {
     if(isUnReachable(predecessor))
       continue;
 
+    //case to handle loop latch as predecessor
     if(visited.find(predecessor) == visited.end()) {
       Loop * predLoop = LI.getLoopFor(predecessor);
       if(predLoop && predLoop == BBLoop && BB == BBLoop->getHeader()) {
@@ -332,6 +333,7 @@ Value * BBOps::foldPhiNode(PHINode * phiNode) {
   }
   return val;
 }
+
 BasicBlock * BBOps::getRfromPred(BasicBlock * BB) {
   for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++) {
 
@@ -355,7 +357,7 @@ void BBOps::recomputeLoopInfo(Function * F, LoopInfo& LI) {
       BBInfoMap[BB]->partOfLoop = LI.getLoopFor(BB);
   }
 }
-/* todo : how to recompute ancestors */
+
 void BBOps::copyFuncBlocksInfo(Function * F, ValueToValueMapTy & vmap) {
   for(Function::iterator bi = F->begin(), e = F->end(); bi != e; ++bi) {
     BasicBlock * BB = &*bi;
@@ -367,8 +369,51 @@ void BBOps::copyFuncBlocksInfo(Function * F, ValueToValueMapTy & vmap) {
     if(findInMap(BBInfoMap, BB)) {
       BBInfo * bbi = BBInfoMap[BB];
       BBInfo * nbbi = new BBInfo(clone);
-      *nbbi = *bbi;
+
+      //copy over ancestors
+      for(auto it = bbi->ancestors.begin(), end = bbi->ancestors.end(); it != end; it++) {
+        nbbi->ancestors.push_back(dyn_cast<BasicBlock>(vmap[*it]));  
+      }
+
+      for(auto it = bbi->loopLatchesWithEdge.begin(), end = bbi->loopLatchesWithEdge.end(); it != end; it++)
+        nbbi->loopLatchesWithEdge.push_back(dyn_cast<BasicBlock>(vmap[*it]));
+
       BBInfoMap[clone] = nbbi;
+    }
+  }
+}
+
+void BBOps::copyContexts(Function *to, Function *from, ValueToValueMapTy& vmap, Module *module) {
+  for(auto it = from->begin(), end = from->end(); it != end; it++) {
+    if(!hasContext(&*it))
+      continue;
+
+    BasicBlock *oldBB = &*it;
+    BasicBlock *newBB = dyn_cast<BasicBlock>(vmap[oldBB]);
+    createNewContext(newBB, module);
+
+    ContextInfo *oldCi = BasicBlockContexts[oldBB];
+    if(!oldCi->deleted)
+      duplicateContext(newBB, oldBB);
+
+    ContextInfo *newCi = BasicBlockContexts[newBB];
+    newCi->deleted = oldCi->deleted;
+
+    //TODO do this a better way
+    BasicBlock *temp = NULL;
+    for(auto itB = BasicBlockContexts.begin(), endB = BasicBlockContexts.end(); itB != endB; itB++) {
+      if(itB->second == oldCi->imageOf) {//find BB which this is image of
+        temp = itB->first;
+        break;
+      }
+    }
+
+    if(temp) {
+      if(temp->getParent() != from) { //cross function parents
+        newCi->imageOf = oldCi->imageOf; 
+      }else {
+        newCi->imageOf = BasicBlockContexts[dyn_cast<BasicBlock>(vmap[temp])];
+      }
     }
   }
 }
@@ -378,6 +423,10 @@ void BBOps::copyFuncBlocksInfo(Function * F, ValueToValueMapTy & vmap) {
  */
 void BBOps::createNewContext(BasicBlock * BB, Module* module) {
   BasicBlockContexts[BB] = new ContextInfo(module);
+}
+
+bool BBOps::isContextDeleted(BasicBlock *BB) {
+  return BasicBlockContexts[BB]->deleted;
 }
 
 void BBOps::duplicateContext(BasicBlock * to, BasicBlock *from) {
@@ -470,6 +519,7 @@ void BBOps::cleanUpFuncBBInfo(Function *f) {
     ContextInfo * ci = BasicBlockContexts[BB];
     if(!ci->deleted && !ci->imageOf)
       delete ci->memory;
+    BasicBlockContexts.erase(BB);
     delete ci;
   }
 }
