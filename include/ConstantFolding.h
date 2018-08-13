@@ -46,6 +46,7 @@
 typedef map<Function *, FuncInfo *> FuncInfoMap;
 typedef pair<Instruction *, Instruction *> InstPair;
 typedef set<Value *> ValSet;
+typedef vector<BasicBlock *> BBSet;
 
 using namespace llvm;
 using namespace std;
@@ -69,6 +70,7 @@ struct ConstantFolding : public ModulePass {
   vector<InstPair> toReplace;
 
   vector<LoopUnrollTest*> testStack;
+  vector<BBSet> worklistBB;
   bool PreserveLCSSA;
 
   vector<ValSet> funcValStack;
@@ -188,6 +190,8 @@ struct ConstantFolding : public ModulePass {
 
   LoopInfo &getLoopInfo(Function *);
   AssumptionCache &getAssumptionCache(Function *);
+
+  void addToWorklistBB(BasicBlock *);
 };
 
 #endif

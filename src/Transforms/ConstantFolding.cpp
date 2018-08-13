@@ -118,9 +118,7 @@ void ConstantFolding::runOnInst(Instruction * I) {
   run on each Instruction of the basic.
 */
 void ConstantFolding::runOnBB(BasicBlock * BB) {
-  bbOps.addAncestor(BB, currBB);
   bbOps.markVisited(BB);
-  BasicBlock * temp = currBB;
   currBB = BB;
   ContextInfo * ci = bbOps.getContextInfo(currBB);
   for(ci->inst = BB->begin(); ci->inst != BB->end(); ci->inst++) {
@@ -133,7 +131,6 @@ void ConstantFolding::runOnBB(BasicBlock * BB) {
     }
     runOnInst(I);
   }  
-  currBB = temp;
   bbOps.freeBB(BB);
 }
 
@@ -170,10 +167,25 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
   }
 
   Function * temp = currfn;
+  BasicBlock *tempBB  = currBB; //preserve across recursion of this function
   currfn = toRun; //update to callee
 
   BasicBlock * entry = &toRun->getEntryBlock();
-  runOnBB(entry);
+
+  push_back(worklistBB);
+  addToWorklistBB(entry);
+
+  while(worklistBB[worklistBB.size() - 1].size()) {
+    int size = worklistBB.size() - 1;
+    BasicBlock *current = worklistBB[size].back();
+
+    worklistBB[size].pop_back();
+
+    runOnBB(current);
+  }
+
+  currBB = tempBB;
+  pop_back(worklistBB);
 
   if(!ci) return;
 
@@ -1072,22 +1084,18 @@ void ConstantFolding::visitReadyToVisit(vector<BasicBlock *> readyToVisit) {
  * simplifies loops in succ, and runs runOnBB on successor
  */
 bool ConstantFolding::visitBB(BasicBlock * succ, BasicBlock *  from) {
-  BasicBlock * temp = currBB;
-  currBB = from;
   if(bbOps.needToduplicate(succ, from)) {
     debug(Abubakar) << "duplicating\n";
-    duplicateContext(succ, currBB);
+    duplicateContext(succ, from);
     bbOps.mergeContext(succ, from);
   } else {
     debug(Abubakar) << "cloning\n";
-    bbOps.imageContext(succ, currBB);
+    bbOps.imageContext(succ, from);
   }    
 
+  bbOps.addAncestor(succ, from);
   bbOps.freeBB(from);
-  simplifyLoop(succ);
-  runOnBB(succ);   
-  currBB = temp;
-  if(isLoopTest() && LoopUnroller::testTerminated(testStack.back())) return false; // test terminated in runOnBB above
+  addToWorklistBB(succ);
   return true;
 }
 
@@ -1653,4 +1661,8 @@ Register *ConstantFolding::processInstAndGetRegister(Value *ptr) {
     I->dropAllReferences();
   }
   return reg;
+}
+
+void ConstantFolding::addToWorklistBB(BasicBlock *BB) {
+  worklistBB[worklistBB.size()-1].push_back(BB);
 }
