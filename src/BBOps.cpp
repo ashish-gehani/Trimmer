@@ -375,8 +375,12 @@ void BBOps::copyFuncBlocksInfo(Function * F, ValueToValueMapTy & vmap) {
         nbbi->ancestors.push_back(dyn_cast<BasicBlock>(vmap[*it]));  
       }
 
-      for(auto it = bbi->loopLatchesWithEdge.begin(), end = bbi->loopLatchesWithEdge.end(); it != end; it++)
+      //TODO do we need to recompute loopLatches?
+      /*
+      for(auto it = bbi->loopLatchesWithEdge.begin(), end = bbi->loopLatchesWithEdge.end(); it != end; it++) {
         nbbi->loopLatchesWithEdge.push_back(dyn_cast<BasicBlock>(vmap[*it]));
+      }
+      */
 
       BBInfoMap[clone] = nbbi;
     }
