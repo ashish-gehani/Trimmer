@@ -200,6 +200,8 @@ struct ConstantFolding : public ModulePass {
 
   void renameFunctions(Function *, Function *);
   void eraseToReplace(CallInst *, vector<InstPair> &);
+
+  ValSet popFuncValStack();
 };
 
 #endif

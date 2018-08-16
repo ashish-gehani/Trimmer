@@ -140,6 +140,7 @@ void ConstantFolding::copyFuncIntoClone(Function *cloned, ValueToValueMapTy &vma
   bbOps.copyFuncBlocksInfo(current, vmap); //copy over old function bbinfo into cloned function
   bbOps.copyContexts(cloned, current, vmap, module);
   
+  assert(funcValStack.size() >= 2);
   ValSet oldValSet = funcValStack[funcValStack.size() - 2];
   cloneFuncStackAndRegisters(vmap, oldValSet); //copy over stack and registers
 }
@@ -215,7 +216,7 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
       LoopUnroller *unroller = pop_back(testStack);
       if(!unroller->checkPassed()) {
         bbOps.cleanUpFuncBBInfo(currfn); //remove cloned BBinfo
-        regOps.cleanUpFuncBBRegisters(currfn, pop_back(funcValStack)); //remove cloned registers and stack
+        regOps.cleanUpFuncBBRegisters(currfn, popFuncValStack()); //remove cloned registers and stack
         pop_back(worklistBB);
         BasicBlock *failedLoop = worklistBB[worklistBB.size() -1].back();
         worklistBB[worklistBB.size() - 1].pop_back();
@@ -230,16 +231,19 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
         addToWorklistBB(current);
 
         worklistBB[worklistBB.size() -2].clear();
-        auto temp =  worklistBB.back();
+        auto clonedFnWorklist =  worklistBB.back();
         pop_back(worklistBB);
-        for(auto it = temp.begin(), end = temp.end() ;it != end; it++)
+        for(auto it = clonedFnWorklist.begin(), end = clonedFnWorklist.end() ;it != end; it++)
           addToWorklistBB(*it); 
 
         regOps.cleanUpFuncBBRegisters(toRun, funcValStack[funcValStack.size() - 2]);
-
         bbOps.cleanUpFuncBBInfo(oldFn);
-        funcValStack[funcValStack.size() - 2] = funcValStack.back();
-        funcValStack.pop_back();
+
+        funcValStack[funcValStack.size() - 2].clear();
+        auto clonedFnValues = funcValStack.back();
+        popFuncValStack();
+        for(auto *t : clonedFnValues)
+          pushFuncStack(t);  
 
         delete unroller; //also removes test instructions
         
@@ -271,7 +275,7 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
   currContextIsAnnotated = tempAnnot;
 
   bbOps.cleanUpFuncBBInfo(toRun);
-  regOps.cleanUpFuncBBRegisters(toRun, pop_back(funcValStack));
+  regOps.cleanUpFuncBBRegisters(toRun, popFuncValStack());
   if(fi->retReg) addSingleVal(ci, fi->retReg->getValue());
 }
 /*
@@ -826,7 +830,7 @@ void ConstantFolding::addGlobals() {
     uint64_t size = DL->getTypeAllocSize(contTy);
     uint64_t addr = bbOps.allocateStack(size, currBB);
     debug(Abubakar) << "addGlobal : size " << size << " at address " << addr << "\n";
-    pushFuncStack(gv);
+    //pushFuncStack(gv);
     regOps.addRegister(gv, contTy, addr);
     if(gv->hasInitializer()) 
       initializeGlobal(addr, gv->getInitializer());
@@ -1550,6 +1554,8 @@ bool ConstantFolding::handleGetOpt(CallInst * ci) {
 
 void ConstantFolding::cloneFuncStackAndRegisters(ValueToValueMapTy &vmap, ValSet &oldValSet) {
   for(auto val : oldValSet) {
+    if(!vmap[val])
+      continue;
     pushFuncStack(vmap[val]);
     regOps.addRegister(vmap[val], processInstAndGetRegister(val));
   }
@@ -1561,6 +1567,7 @@ LoopUnroller *ConstantFolding::unrollLoop(BasicBlock * BB, BasicBlock *&entry) {
   AssumptionCache *AC = &getAnalysis<AssumptionCacheTracker>(*cloned).getAssumptionCache(*cloned);
   Loop *L = LI->getLoopFor(dyn_cast<BasicBlock>(BB));
   LoopUnroller *clonedFnUnroller = new LoopUnroller(module, PreserveLCSSA, useAnnotations, L, LI);
+  //TODO
   clonedFnUnroller->runtest(TLI, *AC);
   return clonedFnUnroller;
 }
@@ -1652,6 +1659,8 @@ void ConstantFolding::duplicateContext(BasicBlock * to, BasicBlock *from) {
 }
 
 void ConstantFolding::pushFuncStack(Value *val) {
+  assert(val);
+  //assert(funcValStack.size());
   if(funcValStack.size())
     funcValStack[funcValStack.size() - 1].insert(val);
 }
@@ -1708,8 +1717,7 @@ LoopUnroller *ConstantFolding::unrollLoopInClone(Function *currfn, Loop *L, Valu
   if(!(unroller = unrollLoop(dyn_cast<BasicBlock>(vmap[L->getHeader()]), temp))) {
     //remove clone info
     bbOps.cleanUpFuncBBInfo(cloned);
-    regOps.cleanUpFuncBBRegisters(cloned, pop_back(funcValStack));
-    pop_back(funcValStack);
+    regOps.cleanUpFuncBBRegisters(cloned, popFuncValStack());
     return NULL;
   }
 
@@ -1752,4 +1760,9 @@ void ConstantFolding::renameFunctions(Function *currFn, Function *oldFn) {
       f->setName("main_old");
     currFn->setName("main");
   }
+}
+
+ValSet ConstantFolding::popFuncValStack() {
+  assert(funcValStack.size());
+  return pop_back(funcValStack);
 }
