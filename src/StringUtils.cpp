@@ -1,7 +1,8 @@
 #include "llvm/Pass.h"
+#include "llvm/IR/Operator.h"
 
 #include <string>
-#include "ConstantFolding.h"
+
 #include "StringUtils.h"
 #include "Utils.h"
 

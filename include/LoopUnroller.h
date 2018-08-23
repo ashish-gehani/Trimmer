@@ -1,8 +1,19 @@
-#include "ConstantFolding.h"
+#include "llvm/IR/Module.h"
+#include "llvm/Analysis/AssumptionCache.h"
+#include "llvm/Analysis/ScalarEvolution.h"
+#include "llvm/Analysis/ScalarEvolutionExpressions.h"
+#include "llvm/Analysis/TargetTransformInfo.h"
+#include "llvm/IR/Dominators.h"
+#include "llvm/Analysis/OptimizationDiagnosticInfo.h"
+#include "llvm/Transforms/Utils/UnrollLoop.h"
+
 #include "LoopUnrollTest.h"
 
 #ifndef LOOPUNROLLER_H_
 #define LOOPUNROLLER_H_
+
+using namespace llvm;
+using namespace std;
 
 class LoopUnroller {
   public:

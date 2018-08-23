@@ -1,4 +1,6 @@
-#include "ConstantFolding.h"
+#include <string>
+#include <unistd.h>
+#include <getopt.h>
 
 extern string err_local;
 

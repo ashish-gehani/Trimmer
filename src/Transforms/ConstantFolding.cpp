@@ -39,17 +39,11 @@
 #include <sstream>
 #include <fcntl.h>
 
-#include "VecUtils.h"
-#include "Debug.h"
 #include "ConstantFolding.h"
-#include "BBInfo.h"
-#include "ContextInfo.h"
 #include "Utils.h"
 #include "StringUtils.h"
 #include "FdInfo.h"
 #include "GetOptLocal.h"
-#include "LoopUnroller.h"
-
 
 using namespace llvm;
 using namespace std;

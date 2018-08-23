@@ -1,12 +1,14 @@
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
 #include "llvm/Pass.h"
 #include "llvm/Analysis/LoopInfo.h"
+#include "llvm/Transforms/Utils/ValueMapper.h"
+#include "llvm/IR/Dominators.h"
+#include "llvm/IR/Constants.h"
 
 #include <set>
 
 #include "LoopUnrollTest.h"
 #include "VecUtils.h"
-#include "ConstantFolding.h"
 #include "ContextInfo.h"
 #include "BBInfo.h"
 
