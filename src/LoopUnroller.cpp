@@ -55,6 +55,7 @@ bool LoopUnroller::getTripCount(TargetLibraryInfo * TLI, AssumptionCache &AC, un
   DominatorTree * DT = new DominatorTree(*F);
   ScalarEvolution SE(*F, *TLI, AC, *DT, *LI);
   tripCount =  SE.getSmallConstantMaxTripCount(loop);
+  debug(Usama) << "Trip Multiple " << SE.getSmallConstantTripMultiple(loop) << "\n";
 
   if(!tripCount) {
     tripCount = DEFAULT_TRIP_COUNT + 5;
@@ -63,14 +64,19 @@ bool LoopUnroller::getTripCount(TargetLibraryInfo * TLI, AssumptionCache &AC, un
   return true;
 }
 
-void LoopUnroller::runtest(TargetLibraryInfo * TLI, AssumptionCache &AC) {
+bool LoopUnroller::runtest(TargetLibraryInfo * TLI, AssumptionCache &AC) {
   unsigned tripCount;
   bool constTripCount = getTripCount(TLI, AC, tripCount);
+
+  debug(Usama) << "ConstTripCount :" << constTripCount << "\n";
+
   ti = new LoopUnrollTest(loop, module, constTripCount);
   if(!doUnroll(TLI, AC, tripCount)) {
     delete ti;
     ti = NULL;
+    return false;
   }
+  return true;
 }
 
 

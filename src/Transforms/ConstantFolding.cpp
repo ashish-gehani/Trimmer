@@ -24,6 +24,7 @@
 #include "llvm/IR/ValueMap.h"
 #include "llvm/Transforms/Utils/Cloning.h"
 
+
 #include <unistd.h>
 #include <sys/stat.h>
 #include <map>
@@ -1567,9 +1568,11 @@ LoopUnroller *ConstantFolding::unrollLoop(BasicBlock * BB, BasicBlock *&entry) {
   AssumptionCache *AC = &getAnalysis<AssumptionCacheTracker>(*cloned).getAssumptionCache(*cloned);
   Loop *L = LI->getLoopFor(dyn_cast<BasicBlock>(BB));
   LoopUnroller *clonedFnUnroller = new LoopUnroller(module, PreserveLCSSA, useAnnotations, L, LI);
-  //TODO
-  clonedFnUnroller->runtest(TLI, *AC);
-  return clonedFnUnroller;
+
+  if(clonedFnUnroller->runtest(TLI, *AC))
+    return clonedFnUnroller;
+  delete clonedFnUnroller;
+  return NULL;
 }
 
 Loop *ConstantFolding::isLoopHeader(BasicBlock *BB, LoopInfo &LI) {
