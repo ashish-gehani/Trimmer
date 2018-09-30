@@ -28,10 +28,14 @@ struct AnnotateNew: public ModulePass {
   string print(SVFGNode *node, SVFG *graph);
   PAG *pag;
   SVFGOPT *svfg;
-  void getTaintedBranches(set<BranchInst*>& trackedBranches, set<BranchInst*> &, Value *argv, set<const Instruction *>& trackedAllocas);
-  void run(GlobalValue* argv, set<const Instruction*> &);
+  void getTaintedBranches(set<BranchInst*>& trackedBranches, set<BranchInst*> &, Value *argv, set<const Value*>& trackedAllocas);
+  void run(GlobalValue* argv, Value *, set<const Value*> &);
 
-  void getBranchInstructions(set<BranchInst*> &branches);
+  void getBranchInstructions(set<BranchInst*> &, set<CallInst*> &);
+  void getMemoryFlow(const SVFGNode *current, set<const Value *> &singleLevelPointers, set<SVFGNode*> &storeSvfg, set<CallInst*> calls);
+  void getSourceAllocas(set<SVFGNode*> &, vector<const SVFGNode*> &, set<const Value*> &);
+  void getStoreSvfg(set<Value*> &, set<SVFGNode*> &);
+  SVFGNode *getSvfgNode(Value *);
 };
 
 #endif
