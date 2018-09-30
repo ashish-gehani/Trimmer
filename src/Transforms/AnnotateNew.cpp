@@ -453,18 +453,23 @@ void AnnotateNew::getSourceAllocas(set<SVFGNode*> &storeSvfg, vector<const SVFGN
  */
 void getScalarStores(Value *scalar, set<Value*>& stores) {
   //errs() << "LOADDDDDD************: " << *scalar << "\n";
-  vector<Value *> temp;
-  temp.push_back(scalar);
+  vector<Value *> worklist;
+  worklist.push_back(scalar);
   //traverse use chain of load and get any getElementPtr or stores
-  while(temp.size()) {
-    Value *current = temp.back();
-    temp.pop_back();
+  while(worklist.size()) {
+    Value *current = worklist.back();
+    worklist.pop_back();
     errs() << "Use: " << *current << "\n";
     for(auto &use: current->uses()) {
       auto user = use.getUser();
-      if(dyn_cast<GetElementPtrInst>(user) || dyn_cast<StoreInst>(user))
+
+      if(isMemTransfer(user))
         stores.insert(user);
-      temp.push_back(user);
+
+      if(dyn_cast<GetElementPtrInst>(user))
+        assert(false);
+
+      worklist.push_back(user);
     }
   }
 }
