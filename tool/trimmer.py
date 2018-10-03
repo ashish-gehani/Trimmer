@@ -7,7 +7,7 @@ debugPrint = 1
 
 class Trimmer:
 
-    def __init__(self, (man_data, work_dir, opt_flag, spec_flag, strip_flag, icp_flag)):
+    def __init__(self, (man_data, work_dir, opt_flag, spec_flag, strip_flag, icp_flag, annot_flag, track_allocas)):
 
         self.name = man_data["name"]
         self.main = man_data["main"]
@@ -22,6 +22,8 @@ class Trimmer:
         self.spec_flag = spec_flag
         self.strip_flag = strip_flag
         self.icp_flag = icp_flag
+        self.annot_flag = annot_flag
+        self.track_allocas = track_allocas
         self.print_info()
 
     def print_info(self):

@@ -26,6 +26,7 @@ def run_argspec(tool):
 	curr_file = tool.curr_file
 	# strip_file = tool.work_dir + '/' + fname + '_strip.bc'
 	add_file = tool.work_dir + '/' + fname + '_added.bc'
+        annotated_file = tool.work_dir + '/' + fname + '_annotated.bc'
 	unroll_file = tool.work_dir + '/' + fname + '_unroll.bc'
 	libspec_file = tool.work_dir + '/' + fname + '_ls.bc'
 	annot_file = tool.work_dir + '/' + fname + '_annot.bc'
@@ -55,35 +56,29 @@ def run_argspec(tool):
 	-args=' + tool.args + ' ' + curr_file + ' -o ' + add_file
 
 	printDbgMsg(Cmd)
-	subprocess.call(Cmd, shell = True)	
-	
-	# unroll pass
-        """
-	Cmd = opt + ' -load ' + build_path + 'LoopUnroll.so -mem2reg -loops -lcssa \
-	-loop-simplify -loop-rotate -loop-unroll2 -unroll-threshold2=4294967295 -args='\
-	+ tool.args + ' ' + add_file  + ' -o ' + unroll_file
-	printDbgMsg(Cmd)
-	subprocess.call(Cmd, shell = True)
-	# specialize getopt calls
-	Cmd = opt + ' -load ' + build_path + 'LibSimplify.so -mem2reg -lib-simplify\
-	-args=' + tool.args + ' ' + unroll_file + ' -o ' + libspec_file  
-	printDbgMsg(Cmd)
-	subprocess.call(Cmd, shell = True)	
-        """
+	subprocess.call(Cmd, shell = True)	 
+
 	if(tool.icp_flag): 
+                if(tool.track_allocas):
+                        Cmd = opt + ' -load ' + build_path + 'AnnotateNew.so -loops -lcssa -loop-simplify -loop-rotate -indvars -svfg --argvName=__argv_new__\
+                            ' + add_file + ' -o ' + annotated_file
+                        printDbgMsg(Cmd)
+                        subprocess.call(Cmd, shell = True)	
+                else:
+                        annotated_file = add_file
 		# interconstprop pass
-		Cmd = opt + ' -load ' + build_path + 'ConstantFolding.so -isAnnotated=true -mem2reg \
-		-mergereturn -simplifycfg -loops -lcssa -loop-simplify -loop-rotate -inter-constprop ' + add_file + ' -o '\
+		Cmd = opt + ' -load ' + build_path + 'ConstantFolding.so -isAnnotated=' + str(tool.annot_flag) + ' -trackAllocas=' + str(tool.track_allocas) + ' -mem2reg \
+		-mergereturn -simplifycfg -loops -lcssa -loop-simplify -loop-rotate -inter-constprop ' + annotated_file + ' -o '\
 		+ constprop_file
 		printDbgMsg(Cmd)
 
-		Cmd = [opt, '-load', build_path + 'ConstantFolding.so', '-isAnnotated=true', '-mem2reg',
-		'-mergereturn', '-simplifycfg', '-loops', '-lcssa', '-loop-simplify', '-loop-rotate', '-inter-constprop', add_file , '-o',
+		Cmd = [opt, '-load', build_path + 'ConstantFolding.so', '-isAnnotated=' + str(tool.annot_flag), '-trackAllocas=' + str(tool.track_allocas),'-mem2reg',
+		'-mergereturn', '-simplifycfg', '-loops', '-lcssa', '-loop-simplify', '-loop-rotate', '-inter-constprop', annotated_file , '-o',
 		constprop_file]
 		f = open(constprop_log_file, "wb")
 		printDbgMsg(Cmd)
 
-		subprocess.call(Cmd, stdout=f)
+		subprocess.call(Cmd)
 		f.close()
 		# remove pass
 		Cmd = opt + ' -load ' + build_path + 'Remove.so -remove ' + constprop_file\
