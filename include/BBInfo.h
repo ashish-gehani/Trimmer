@@ -15,10 +15,17 @@ struct BBInfo {
   unsigned numPreds, URfrom, Rfrom;
   vector<BasicBlock *> loopLatchesWithEdge, ancestors;
   BasicBlock * singleSucc;
-  BBInfo(BasicBlock * BB) {
+  BasicBlock *BB;
+
+  BBInfo(BasicBlock * basicBlock) {
     writesToMemory = partOfLoop = isHeader = false;
     URfrom = numPreds = Rfrom = 0;
-    singleSucc = NULL;
+    BB = basicBlock;
+    singleSucc = NULL;    
+    calculateNumPreds();
+  }
+
+  void calculateNumPreds() {
     set<BasicBlock *> preds;
     for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++) {
       BasicBlock * predecessor = *it;
@@ -26,7 +33,7 @@ struct BBInfo {
         numPreds++;
         preds.insert(predecessor);
       }
-    }   
+    }
   }
 };
 #endif
