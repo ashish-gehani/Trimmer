@@ -225,6 +225,7 @@ void BBOps::propagateUR(BasicBlock * BB, LoopInfo& LI) {
     worklist.erase(worklist.begin());
     if(isUnReachable(worker)) 
       continue;
+    debug(Usama) << "Adding bb " << BB->getName() << " to unreachable set \n";
     unReachable.insert(worker);
     markSuccessorsAsUR(worker->getTerminator(), LI);
     const vector<DomTreeNodeBase<BasicBlock> *> children = 
@@ -262,8 +263,10 @@ void BBOps::markSuccessorsAsUR(TerminatorInst * termInst, LoopInfo& LI) {
 
     BBInfoMap[successor]->URfrom++;
     checkReadyToVisit(successor);
-    if(BBInfoMap[successor]->URfrom < BBInfoMap[successor]->numPreds)
+    if(BBInfoMap[successor]->URfrom < BBInfoMap[successor]->numPreds) {
+      debug(Usama) << "Skipping " << successor->getName() << " as unreachable=" << BBInfoMap[successor]->URfrom << " and numPreds=" << BBInfoMap[successor]->numPreds;
       continue;
+    }
     propagateUR(successor, LI);
   }
 }  
@@ -369,6 +372,14 @@ void BBOps::copyFuncBlocksInfo(Function * F, ValueToValueMapTy & vmap) {
     if(findInMap(BBInfoMap, BB)) {
       BBInfo * bbi = BBInfoMap[BB];
       BBInfo * nbbi = new BBInfo(clone);
+
+      nbbi->writesToMemory = bbi->writesToMemory;
+      nbbi->URfrom = bbi->URfrom;
+      nbbi->numPreds = bbi->numPreds;
+      nbbi->Rfrom = bbi->Rfrom;
+      nbbi->partOfLoop = bbi->partOfLoop;
+      nbbi->isHeader = bbi->isHeader;
+      nbbi->singleSucc = bbi->singleSucc ? dyn_cast<BasicBlock>(bbi->singleSucc) : NULL;
 
       //copy over ancestors
       for(auto it = bbi->ancestors.begin(), end = bbi->ancestors.end(); it != end; it++) {
