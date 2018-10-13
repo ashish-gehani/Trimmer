@@ -580,8 +580,14 @@ ProcResult ConstantFolding::processTermInst(TerminatorInst * termInst) {
   visitReadyToVisit(readyToVisit);
   ProcResult result =  single ? FOLDED : NOTFOLDED;
   unsigned numS = termInst->getNumSuccessors(); 
+  set<BasicBlock*> processed;
   for(unsigned int index = 0; index < numS; index++) {
     BasicBlock * succ = termInst->getSuccessor(index);
+
+    if(processed.find(succ) != processed.end())
+      continue;
+
+    processed.insert(succ);
     if(bbOps.isnotSingleSucc(currBB, succ)) continue;
     if(!bbOps.visitBB(succ, LI)) continue;
     if(!visitBB(succ, currBB)) break;
