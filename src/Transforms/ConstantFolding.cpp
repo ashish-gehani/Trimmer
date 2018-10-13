@@ -264,7 +264,9 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
 
   FuncInfo * fi = fimap[toRun];
   if(!fi->context) {
-    errs() << "Unexpected behavior -> no context returned : only possible if cant return from function\n";
+    errs() << "Unexpected behavior -> no context returned : possible if cant return from function, or unreachable instruction hit\n";
+    //TODO: Can we hit unreachable and exit, even if there's a return present?
+    currfn = temp;
     return;
   }
   bbOps.copyContext(fi->context, currBB);
