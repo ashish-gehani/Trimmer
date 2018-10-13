@@ -52,6 +52,8 @@ using namespace std;
 //File InterConstProp.cpp
 static cl::opt<bool> isAnnotated("isAnnotated",
                   cl::desc("are annotations found or should the whole program be tracked"));
+static cl::opt<bool> trackAlloc("trackAllocas",cl::init(false),
+                  cl::desc("are allocas tracked"));
 
 void ConstantFolding::getAnalysisUsage(AnalysisUsage &AU) const { 
   AU.addRequired<TargetLibraryInfoWrapperPass>();
@@ -286,6 +288,8 @@ bool ConstantFolding::runOnModule(Module & M) {
   PreserveLCSSA = mustPreserveAnalysisID(LCSSAID);
   
   useAnnotations = isAnnotated;  
+  trackAllocas = trackAlloc;
+
   if(useAnnotations) {
     createAnnotationList();
     // createAnnotationList2();
@@ -328,7 +332,7 @@ static RegisterPass<ConstantFolding> X("inter-constprop", "Constant Folding for 
  * with value equal to the starting address of the allocated memory
  */
 ProcResult ConstantFolding::processAllocaInst(AllocaInst * ai) {
-  if(!trackAllocas()) {
+  if(!isAllocaTracked(ai)) {
     debug(Abubakar) << "skipping untracked alloca\n";
     return NOTFOLDED;
   }  
@@ -341,7 +345,7 @@ ProcResult ConstantFolding::processAllocaInst(AllocaInst * ai) {
   return UNDECIDED;
 }
 ProcResult ConstantFolding::processMallocInst(CallInst * mi) {   
-  if(!trackAllocas()) {
+  if(!isAllocaTracked(mi)) {
     debug(Abubakar) << "skipping untracked malloc\n";
     return NOTFOLDED;
   }
@@ -358,7 +362,7 @@ ProcResult ConstantFolding::processMallocInst(CallInst * mi) {
   return UNDECIDED;
 }
 ProcResult ConstantFolding::processCallocInst(CallInst * ci) {   
-  if(!trackAllocas()) {
+  if(!isAllocaTracked(ci)) {
     debug(Abubakar) << "skipping untracked calloc\n";
     return NOTFOLDED;
   }
@@ -752,6 +756,9 @@ void ConstantFolding::markArgsAsNonConst(CallInst * callInst) {
     Register * reg = processInstAndGetRegister(pointerArg);
     if(!reg)
       continue;
+
+    debug(Usama) << "Marking args as non const. Register value = " << reg->getValue() << "\n";
+
     bbOps.setConstContigous(false, reg->getValue(), currBB);
     debug(Abubakar) << "markArgsAsNonConst : index " << index << "\n"; 
   }
@@ -815,7 +822,7 @@ void ConstantFolding::addGlobals() {
   for(auto& global : module->globals()) {
     GlobalVariable *  gv = &global;
     Type * contTy = gv->getType()->getContainedType(0);
-    if(useAnnotations && AnnotationList.find(gv) == AnnotationList.end() && 
+    if(trackAllocas && !gv->getMetadata("track") && 
     gv->getName() != "optarg" && gv->getName() != "optind" &&
     gv->getName() != "__argv_new__")
       continue; 
@@ -906,6 +913,9 @@ void ConstantFolding::createAnnotationList() {
     
     debug(Abubakar) << val->getName() << " will be tracked\n";
     AnnotationList.insert(val);
+    //AnnotationList.insert(module->getFunction("mkCell"));
+    //AnnotationList.insert(module->getFunction("snocString"));
+    errs() << "Inserted custom function " << module->getFunction("snocString") << "\n";
     StringRef stringRef;
   }
 }
@@ -944,8 +954,8 @@ void ConstantFolding::updateAnnotationContext(Function * F) {
   }
 }
 
-bool ConstantFolding::trackAllocas() {
-  if(useAnnotations && !currContextIsAnnotated)
+bool ConstantFolding::isAllocaTracked(Instruction *I) {
+  if(trackAllocas && !I->getMetadata("track"))
     return false;
   return true;
 }
@@ -981,7 +991,6 @@ FuncInfo* ConstantFolding::initializeFuncInfo(Function *F) {
 }
 
 bool ConstantFolding::satisfyConds(Function * F) {
- 
   if(fimap.find(F) == fimap.end())
     return false;
 
@@ -1158,6 +1167,7 @@ void ConstantFolding::visitReadyToVisit(vector<BasicBlock *> readyToVisit) {
 bool ConstantFolding::visitBB(BasicBlock * succ, BasicBlock *  from) {
   if(bbOps.needToduplicate(succ, from)) {
     debug(Abubakar) << "duplicating\n";
+    debug(Usama) << "duplicating from " << from->getName() << " to " << succ->getName();
     duplicateContext(succ, from);
     bbOps.mergeContext(succ, from);
   } else {

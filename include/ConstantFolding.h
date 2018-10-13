@@ -77,6 +77,7 @@ struct ConstantFolding : public ModulePass {
   vector<ValSet> funcValStack;
   bool currContextIsAnnotated;
   bool useAnnotations;
+  bool trackAllocas;
   set<Value *> AnnotationList;
   map<int, uint64_t> fdInfoMap; 
 
@@ -103,7 +104,7 @@ struct ConstantFolding : public ModulePass {
   void createAnnotationList();
   void createAnnotationList2();
   void updateAnnotationContext(Function * F);
-  bool trackAllocas();
+  bool isAllocaTracked(Instruction *);
   
   FuncInfo* initializeFuncInfo(Function *);
   bool isFuncInfoInitialized(Function *F);
@@ -178,7 +179,7 @@ struct ConstantFolding : public ModulePass {
   unsigned getNumNodesBelow(Instruction * I,
   map<Instruction *, unsigned> &, LoopUnrollTest *);
 
-  virtual bool runOnModule(Module &);
+  bool runOnModule(Module &);
   void runOnFunction(CallInst *, Function *);
   bool runOnBB(BasicBlock *);
   void runOnInst(Instruction *);
