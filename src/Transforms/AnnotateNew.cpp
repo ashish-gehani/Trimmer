@@ -391,9 +391,6 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
             }
           }
         }
-        if(auto call = dyn_cast<CallInst>(inst))
-          if(call->getCalledFunction()->getName() == "malloc")
-            singleLevelPointers.insert(call);
       }
 
       auto pagEdge = casted->getPAGEdge();
@@ -451,7 +448,10 @@ void AnnotateNew::getSourceAllocas(set<SVFGNode*> &storeSvfg, vector<const SVFGN
   for(auto it = storeSvfg.begin(), end = storeSvfg.end(); it != end; it++) {
     set<SVFGNode *> allocas;
     auto temp = dyn_cast<StmtSVFGNode>(*it);
-    errs() << "Going backward on Instruction : " << *(temp->getInst()) << " \n";
+    if(!temp)
+      continue;
+    if(temp->getInst())
+      errs() << "Going backward on Instruction : " << *(temp->getInst()) << " \n";
     dfs<SVFGNode*>(*it, backwardDfsLambda, backwardDfsCondition, allocas);
     std::copy(allocas.begin(), allocas.end(), std::back_inserter(worklistSvfg));
     //for(auto it = allocas.begin(), end = allocas.end(); it != end; it++)
@@ -469,18 +469,29 @@ void getScalarStores(Value *scalar, set<Value*>& stores) {
   vector<Value *> worklist;
   worklist.push_back(scalar);
   //traverse use chain of load and get any getElementPtr or stores
+  assert(!scalar->getType()->isPointerTy());
+  errs() << *scalar << " getting uses of scalar \n";
+  set<Value*> processed;
   while(worklist.size()) {
     Value *current = worklist.back();
     worklist.pop_back();
+    if(processed.find(current) != processed.end())
+      continue;
+    processed.insert(current);
     errs() << "Use: " << *current << "\n";
     for(auto &use: current->uses()) {
       auto user = use.getUser();
-
+      errs() << "User: " << *user << "\n";
+      //errs() << 
       if(isMemTransfer(user))
         stores.insert(user);
 
-      if(dyn_cast<GetElementPtrInst>(user))
-        assert(false);
+      //TODO can we skip this? Since if a scalar has a memory value,
+      //there must always be a load in it's chain, making this gep redundant?
+      //Can there be a gep in its chain without a load?
+      //if(dyn_cast<GetElementPtrInst>(user))
+        //stores.insert(user);
+        //assert(false);
 
       worklist.push_back(user);
     }
@@ -655,11 +666,12 @@ void AnnotateNew::run(GlobalValue* argv, Value *argc, set<const Value*> &tracked
       const SVFGNode *current = worklistSvfg.back();
       worklistSvfg.pop_back();
 
-      errs() << "PROCESSING " << current << "\n";
-      trackIfMemory(current, trackedAllocas);
-
       if(processed.find(current) != processed.end())
         continue;
+
+      errs() << "PROCESSING " << current << "\n";
+
+      trackIfMemory(current, trackedAllocas);
 
       processed.insert(current);
 
