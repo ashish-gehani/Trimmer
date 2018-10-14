@@ -186,6 +186,16 @@ vector<Value*> genericScalarDfs(Value *current) {
   return worklist;
 };
 
+vector<Value*> genericScalarDfsBackward(Value *current) {
+  vector<Value *> worklist;
+  for(auto &use: current->uses()) {
+    auto user = use.getUser();
+    for(unsigned i = 0; i < user->getNumOperands(); i++)
+      worklist.push_back(user->getOperand(i));
+  }
+  return worklist;
+};
+
 bool supportedInst(Value *v) {
   return dyn_cast<AllocaInst>(v) || dyn_cast<PHINode>(v) || dyn_cast<StoreInst>(v) || dyn_cast<LoadInst>(v) || dyn_cast<GetElementPtrInst>(v);
 }
@@ -244,6 +254,10 @@ void AnnotateNew::getBranchInstructions(set<BranchInst*> &branches, set<CallInst
   }
 }
 
+bool isLoad(Value *V) {
+  return dyn_cast<LoadInst>(V);
+}
+
 void AnnotateNew::getTaintedBranches(set<BranchInst*>& trackedBranches, set<BranchInst*> &allBranches, Value *argv, set<const Value*>& trackedAllocas) {
 
   for(auto branchInst: allBranches) {
@@ -255,72 +269,60 @@ void AnnotateNew::getTaintedBranches(set<BranchInst*>& trackedBranches, set<Bran
     if(!condition)
       continue;
 
-    //condition for when a branch instruction is of our use
-    //TODO handle loads on single level pointers? maybe add to tracked allocas
-    auto conditionLambda = [&](SVFGNode *node) {
-      if(auto temp = dyn_cast<StmtSVFGNode>(node)) {
-        if(trackedAllocas.find(temp->getInst()) != trackedAllocas.end())
-          return true;
-        for(auto &use: argv->uses()) {
-          auto user = use.getUser();
-          if(user == temp->getInst()) {
-            return true;
-          }
-        }
-      }
-      return false;
-    };
-
-    //errs() << *branchInst << "\n";
-    //errs() << *condition << "\n";
     //perform dfs backwards on each value of the branch condition
     for(int i = 0; i < condition->getNumOperands(); i++) {
-      //errs() << *condition->getOperand(i) << "\n";
-      vector<Value *> worklist;
-      set<Value*> processed;
+
       errs() << "Operand : " << *condition->getOperand(i)<< "\n";
-      worklist.push_back(condition->getOperand(i));
-      Value *temp = NULL;
+      Value *current = condition->getOperand(i);
+      set<Value *> possible;
 
-      vector<Value *> possible;
-      //TODO separate this.
+      //if scalar, get loads. if pointer and supported by svfg, get allocas
+      if(!current->getType()->isPointerTy())
+        dfs<Value*>(current, genericScalarDfsBackward, isLoad, possible);
+      else if(supportedInst(current))
+        possible.insert(current);
+
       //go back to tap into any possible SVFG node.
-      //Due to mem2reg, we might have direct register values instead of allocas
+      //TODO:? Due to mem2reg, we might have direct register values instead of allocas
       //e.g. if(a == 1) x = 2; else x = 3; Need to handle that
-      while(worklist.size()) {
-        auto current = dyn_cast<User>(worklist.back()); 
-        worklist.pop_back();
-
-        if(!current)
-          continue;
-
-        if(processed.find(current) != processed.end())
-          continue;
-
-        processed.insert(current);
-        errs() <<  *current << "\n";
-
-        if(supportedInst(current) && current->getType()->isPointerTy()) {
-          possible.push_back(current);
-        }else {
-          for(int i = 0; i < current->getNumOperands(); i++)
-            worklist.push_back(current->getOperand(i));
-        }
-      }
+      
       if(!possible.size())
         continue;
-      //errs() << "TEMP: " << *temp << "\n";
       set<SVFGNode*> poss;
-      //track back to possible alloca. TODO Can also trace back to tracked value
-      for(auto &temp: possible) {
-        auto pagNode = pag->getPAGNode(pag->getValueNode(temp));
-        auto svfgNode = svfg->getDefSVFGNode(pagNode);
-        dfs<SVFGNode*>((SVFGNode*) svfgNode, backwardDfsLambda, conditionLambda, poss);
 
-        if(poss.size()) {
-          errs() << "Tracking branch : " << *branchInst << "\n"; 
-          trackedBranches.insert(branchInst);
+      //condition for when a branch instruction is of our use
+      auto conditionLambda = [&](SVFGNode *node) {
+        if(auto temp = dyn_cast<StmtSVFGNode>(node)) {
+          if(trackedAllocas.find(temp->getInst()) != trackedAllocas.end())
+            return true;
+          for(auto &use: argv->uses()) {
+            auto user = use.getUser();
+            if(user == temp->getInst()) {
+              return true;
+            }
+          }
         }
+        return false;
+      };
+
+      //track back to possible alloca
+      for(auto value: possible) {
+        errs() << *value << "\n";
+        const PAGNode* pagNode;
+        //single level loads
+        if(auto load = dyn_cast<LoadInst>(value) && !value->getType()isPointerTy())
+          value = load->getPointerOperand();
+
+        errs() << *value << "\n";
+        pagNode = pag->getPAGNode(pag->getValueNode(value));
+        auto svfgNode = svfg->getDefSVFGNode(pagNode);
+        dfs<SVFGNode*>((SVFGNode*) svfgNode, backwardDfsLambda, conditionLambda, poss); 
+      }
+
+      if(poss.size()) {
+        errs() << "Tracking branch : " << *branchInst << "\n"; 
+        trackedBranches.insert(branchInst);
+        break;
       }
     }
   }
