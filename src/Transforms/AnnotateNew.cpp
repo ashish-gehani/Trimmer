@@ -7,6 +7,7 @@
 #include "MemoryModel/PAG.h"
 #include "MSSA/SVFGBuilder.h"
 #include "MSSA/MemSSA.h"
+#include "llvm/Analysis/AssumptionCache.h"
 
 
 static cl::opt<std::string> argvName("argvName",
@@ -240,11 +241,95 @@ void diamondJoin(BasicBlock *current, map<BasicBlock *, dfsInfo*> &dfsData, int 
   distance += 1;
 }
 
-void AnnotateNew::getBranchAndArgcInstructions(set<BranchInst*> &branches, set<CallInst*> &calls, set<Instruction*> &argcValues) {
+PHINode* getLoopInductionVariable(Loop *L, ScalarEvolution *SE) {
+  PHINode *InnerIndexVar = L->getCanonicalInductionVariable();
+  if (InnerIndexVar)
+   return InnerIndexVar;
+  if (L->getLoopLatch() == nullptr || L->getLoopPredecessor() == nullptr)
+   return nullptr;
+  for (BasicBlock::iterator I = L->getHeader()->begin(); isa<PHINode>(I); ++I) {
+   PHINode *PhiVar = cast<PHINode>(I);
+   Type *PhiTy = PhiVar->getType();
+   if (!PhiTy->isIntegerTy() && !PhiTy->isFloatingPointTy() &&
+       !PhiTy->isPointerTy())
+     return nullptr;
+   const SCEVAddRecExpr *AddRec =
+       dyn_cast<SCEVAddRecExpr>(SE->getSCEV(PhiVar));
+   if (!AddRec || !AddRec->isAffine())
+     continue;
+   const SCEV *Step = AddRec->getStepRecurrence(*SE);
+   if (!isa<SCEVConstant>(Step))
+     continue;
+   // Found the induction variable.
+   // FIXME: Handle loops with more than one induction variable. Note that,
+   // currently, legality makes sure we have only one induction variable.
+   return PhiVar;
+  }
+  return nullptr;
+}
+
+void AnnotateNew::getBranchAndArgcInstructions(set<BranchInst*> &branches, set<CallInst*> &calls, set<Instruction*> &argcValues, set<SVFGNode*>& svfgNodes) {
+
+  TargetLibraryInfo *TLI = &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI();
 
   for(auto &F: *module) {
     if(F.isDeclaration())
       continue;
+
+    LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(F).getLoopInfo();
+    AssumptionCache &AC = getAnalysis<AssumptionCacheTracker>(F).getAssumptionCache(F);
+    DominatorTree * DT = new DominatorTree(F);
+    ScalarEvolution SE(F, *TLI, AC, *DT, LI);
+
+    for(auto it = LI.begin(), end = LI.end(); it != end; it++) {
+      errs() << F.getName() << "\n";
+      Loop *L = *it;
+      if(auto temp = getLoopInductionVariable(L, &SE)) {
+        errs() << *temp << "\n";
+        errs() << "loop AWWWWWWWWWWWWWWWWWWWWWWWWWWWW" << "\n";
+        for(unsigned i = 0; i < temp->getNumIncomingValues(); i++) {
+          errs() << *temp->getIncomingValue(i) << "\n";
+          set<Value *> possible;
+          Value *current = temp->getIncomingValue(i);
+
+          dfs<Value*>(current, genericScalarDfsBackward, isLoad, possible);
+
+          for(auto &V: possible) {
+            errs() << "Loop: adding : " << *V << "\n";
+            SVFGNode* svfgNode;
+            if(V->getType()->isPointerTy())
+              svfgNode = getSvfgNode(V);     
+            else
+              svfgNode = getSvfgNode(dyn_cast<LoadInst>(V)->getPointerOperand());
+
+            svfgNodes.insert(svfgNode);
+          }
+        }
+      } else {
+        for(auto BB: L->getBlocks()) {
+          for(auto &I: *BB) {
+            Value *current;
+
+            if(I.getType()->isPointerTy())
+              current = &I;
+            else if(auto load = dyn_cast<LoadInst>(&I))
+              current = load->getPointerOperand();
+            else if(auto store = dyn_cast<StoreInst>(&I))
+              current = store->getPointerOperand();
+            else
+              continue;
+
+            auto svfgNode = getSvfgNode(current);
+            if(auto temp = dyn_cast<StmtSVFGNode>(svfgNode)) {
+              if(temp->getInst()) {
+                errs() << "Adding loop pointer " << *temp->getInst() << "\n";
+                svfgNodes.insert(svfgNode);
+              }
+            }
+          }
+        }
+      }
+    }
 
     for(auto &BB: F) {
       for(auto &I: BB) {
@@ -635,7 +720,7 @@ void AnnotateNew::run(GlobalValue* argv, Value *argc, set<const Value*> &tracked
   trackedAllocas.insert(argv);
   {
     set<SVFGNode*> svfgNodes;
-    getBranchAndArgcInstructions(allBranches, calls, argcValues);
+    getBranchAndArgcInstructions(allBranches, calls, argcValues, svfgNodes);
     getSourceAllocas(svfgNodes, worklistSvfg, trackedAllocas);
   }
     
@@ -826,4 +911,11 @@ bool AnnotateNew::runOnModule(Module &M) {
       ((GlobalObject*)I)->setMetadata("track", N);
   }
   return false;
+}
+
+void AnnotateNew::getAnalysisUsage(AnalysisUsage &AU) const { 
+  AU.addRequired<LoopInfoWrapperPass>();
+  AU.addRequired<ScalarEvolutionWrapperPass>();
+  AU.addRequired<TargetLibraryInfoWrapperPass>();
+  AU.addRequired<DominatorTreeWrapperPass>();
 }
