@@ -58,8 +58,17 @@ namespace {
       Function* _main = M.getFunction(StringRef("main"));
       ConstantInt* argcConst = ConstantInt::get(int32Ty, index_count);
       Function::arg_iterator ai = _main->arg_begin();
-      Value* argc = (Value*) &(*ai);
+      Value* argc = (Value*) &(*ai); 
+      for(auto use: argc->users()) {
+        if(auto I = dyn_cast<Instruction>(use)) {
+          errs() << *I << "\n";
+          LLVMContext &C = I->getContext();
+          MDNode *N = MDNode::get(C, MDString::get(C, "1"));
+          I->setMetadata("track_argc", N);
+        }
+      }
       argc->replaceAllUsesWith(argcConst);   
+      
 
       // Setting argv 
       ai++;
