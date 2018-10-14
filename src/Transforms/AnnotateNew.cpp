@@ -328,13 +328,12 @@ void AnnotateNew::getTaintedBranches(set<BranchInst*>& trackedBranches, set<Bran
         pagNode = pag->getPAGNode(pag->getValueNode(value));
         auto svfgNode = svfg->getDefSVFGNode(pagNode);
         dfs<SVFGNode*>((SVFGNode*) svfgNode, backwardDfsLambda, conditionLambda, poss); 
-      }
-
-      if(poss.size()) {
-        errs() << "Tracking branch : " << *branchInst << "\n"; 
-        trackedBranches.insert(branchInst);
-        break;
-      }
+        if(poss.size()) {
+          errs() << "Tracking branch : " << *branchInst << "\n"; 
+          trackedBranches.insert(branchInst);
+          break;
+        }
+      } 
     }
   }
 }
