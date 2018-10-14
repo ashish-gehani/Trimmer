@@ -240,12 +240,22 @@ void diamondJoin(BasicBlock *current, map<BasicBlock *, dfsInfo*> &dfsData, int 
   distance += 1;
 }
 
-void AnnotateNew::getBranchInstructions(set<BranchInst*> &branches, set<CallInst*> &calls) {
+void AnnotateNew::getBranchAndArgcInstructions(set<BranchInst*> &branches, set<CallInst*> &calls, set<Instruction*> &argcValues) {
+
   for(auto &F: *module) {
+    if(F.isDeclaration())
+      continue;
+
     for(auto &BB: F) {
       for(auto &I: BB) {
+
+        if(I.getMetadata("track_argc")) {
+          argcValues.insert(&I);
+        }
+
         if(auto branch = dyn_cast<BranchInst>(&I))
           branches.insert(branch);
+
         if(auto callInst = dyn_cast<CallInst>(&I))
           if(callInst->getCalledFunction()->getName() == "strncpy" || callInst->getCalledFunction()->getName() == "strcpy")
             calls.insert(callInst);
@@ -310,8 +320,9 @@ void AnnotateNew::getTaintedBranches(set<BranchInst*>& trackedBranches, set<Bran
         errs() << *value << "\n";
         const PAGNode* pagNode;
         //single level loads
-        if(auto load = dyn_cast<LoadInst>(value) && !value->getType()isPointerTy())
-          value = load->getPointerOperand();
+        if(auto load = dyn_cast<LoadInst>(value))
+          if(!value->getType()->isPointerTy())
+            value = load->getPointerOperand();
 
         errs() << *value << "\n";
         pagNode = pag->getPAGNode(pag->getValueNode(value));
@@ -593,16 +604,49 @@ void AnnotateNew::run(GlobalValue* argv, Value *argc, set<const Value*> &tracked
   set<BranchInst*> allBranches;
   set<const Value*> singleLevelPointers;
   set<const SVFGNode *> processed;
+  set<Instruction *> argcValues;
   set<CallInst *> calls;
+  set<Loop*> loops;
 
   {
     const PAGNode *pagNode = pag->getPAGNode((pag->getValueNode(argv)));
     auto svfgNode = svfg->getDefSVFGNode(pagNode);
     worklistSvfg.push_back(svfgNode);
+  } 
+
+  if(argc) {
+    set<Value*> stores;
+    set<SVFGNode*> storeSvfg;
+    getScalarStores(argc, stores);
+    getStoreSvfg(stores, storeSvfg);
+    getSourceAllocas(storeSvfg, worklistSvfg, trackedAllocas);
   }
 
   trackedAllocas.insert(argv);
-  getBranchInstructions(allBranches, calls);
+  {
+    set<SVFGNode*> svfgNodes;
+    getBranchAndArgcInstructions(allBranches, calls, argcValues);
+    getSourceAllocas(svfgNodes, worklistSvfg, trackedAllocas);
+  }
+    
+  // just for running tests
+  {
+    for(auto &I: argcValues) {
+      set<Value*> stores;
+      set<SVFGNode*> storeSvfg;
+      errs() << *I << "\n";
+      if(dyn_cast<StoreInst>(I)) {
+        worklistSvfg.push_back(getSvfgNode(dyn_cast<User>(I)->getOperand(1)));
+      } else if (I->getType()->isPointerTy()) {
+        worklistSvfg.push_back(getSvfgNode(I));
+      } else {
+        //is a scalar value
+        getScalarStores(argc, stores);
+        getStoreSvfg(stores, storeSvfg);
+        getSourceAllocas(storeSvfg, worklistSvfg, trackedAllocas);
+      }
+    }
+  }
 
   //getArgc(trackedAllocas, M); 
 
