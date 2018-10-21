@@ -3,15 +3,17 @@
 
 string err_local;
 int getopt_local(int argc, char ** argv, char * opts) {
-  if(optind == argc) return -1;
-  int i, opt;
+  if(optind >= argc) return -1;
+  int i, opt = -1;
   for(i = optind; i < argc; i++) {
     if(strlen(argv[i]) > 2) continue;
     if(argv[i][0] != '-') continue;
     opt = argv[i][1];
     break;
   }
-  if(optind == argc) return -1;
+  if(opt == -1)
+    return -1;
+  if(optind >= argc) return -1;
   optind = i;
   for(i = 0; opts[i] && opts[i] != opt; i++) {}
   if(!opts[i]) { 
