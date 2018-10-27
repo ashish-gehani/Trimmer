@@ -77,6 +77,12 @@ bool BBOps::isnotSingleSucc(BasicBlock * pred, BasicBlock * succ) {
   return BBInfoMap[pred]->singleSucc && BBInfoMap[pred]->singleSucc != succ;
 }
 
+/*
+ * Need to duplicate a BB if it has multiple predecessors.
+ * In case of single single predecessor, can mirror from 
+ * parent even if it's not the only successor, as long as
+ * it does not write to memory. Otherwise need to duplicate
+ */
 bool BBOps::needToduplicate(BasicBlock * BB, BasicBlock * from) {
   bool singlePredFrom = true;
   ContextInfo * ci = BasicBlockContexts[from];
@@ -238,7 +244,7 @@ void BBOps::propagateUR(BasicBlock * BB, LoopInfo& LI) {
 }  
 /**
  * Adds a BB to readyToVist if it's reachable from at least one
- * predecessor
+ * predecessor and all its predecessors have been visited
  */
 void BBOps::checkReadyToVisit(BasicBlock * BB) {
   unsigned numPreds = BBInfoMap[BB]->numPreds;
@@ -249,8 +255,8 @@ void BBOps::checkReadyToVisit(BasicBlock * BB) {
 }
 /**
  * Loops over successors of a terminal, and tries to call porpagateUR
- * on successors that become unreachable. Reachable successors are
- * added to readyToVisit vector
+ * on successors that become unreachable. Successors that become reachable
+ * are added to readyToVisit vector
  */
 void BBOps::markSuccessorsAsUR(TerminatorInst * termInst, LoopInfo& LI) {
   for(unsigned int index = 0; index < termInst->getNumSuccessors(); index++) {
@@ -305,7 +311,7 @@ bool BBOps::straightPath(BasicBlock * from, BasicBlock * to) {
   ContextInfo * tc = BasicBlockContexts[to];
   return tc->imageOf && (tc->imageOf == fc || tc->imageOf == fc->imageOf);
 }  
-Value * BBOps::foldPhiNode(PHINode * phiNode) {
+Value * BBOps::foldPhiNode(PHINode * phiNode, vector<Value*> &incPtrs) {
   vector<unsigned> incV;
   for(unsigned i = 0; i < phiNode->getNumIncomingValues(); i++) {
     BasicBlock * BB = phiNode->getIncomingBlock(i);
@@ -327,6 +333,13 @@ Value * BBOps::foldPhiNode(PHINode * phiNode) {
     }
   }
   Value * val = NULL; 
+  if(phiNode->getType()->isPointerTy()) {
+    for(unsigned i = 0; i < incV.size(); i++) {
+      Value *val = phiNode->getIncomingValue(incV[i]);
+      incPtrs.push_back(val);
+    }
+  }
+
   for(unsigned i = 0; i < incV.size(); i++) {
     if(val && val != phiNode->getIncomingValue(incV[i])) {
       debug(Abubakar) << "phiNode not constant\n";
@@ -334,6 +347,7 @@ Value * BBOps::foldPhiNode(PHINode * phiNode) {
     }
     val = phiNode->getIncomingValue(incV[i]);
   }
+ 
   return val;
 }
 
@@ -383,15 +397,21 @@ void BBOps::copyFuncBlocksInfo(Function * F, ValueToValueMapTy & vmap) {
 
       //copy over ancestors
       for(auto it = bbi->ancestors.begin(), end = bbi->ancestors.end(); it != end; it++) {
-        nbbi->ancestors.push_back(dyn_cast<BasicBlock>(vmap[*it]));  
+        if(vmap.find(*it) == vmap.end()) {
+            errs() << "BB not found :" << *it << "\n";
+        }else {
+            nbbi->ancestors.push_back(dyn_cast<BasicBlock>(vmap[*it]));  
+        }
       }
 
       //TODO do we need to recompute loopLatches?
-      /*
       for(auto it = bbi->loopLatchesWithEdge.begin(), end = bbi->loopLatchesWithEdge.end(); it != end; it++) {
-        nbbi->loopLatchesWithEdge.push_back(dyn_cast<BasicBlock>(vmap[*it]));
+        if(vmap.find(*it) == vmap.end()) {
+            errs() << "BB not found :" << *it << "\n";
+        }else {
+            nbbi->loopLatchesWithEdge.push_back(dyn_cast<BasicBlock>(vmap[*it]));
+        }
       }
-      */
 
       BBInfoMap[clone] = nbbi;
     }
@@ -536,5 +556,13 @@ void BBOps::cleanUpFuncBBInfo(Function *f) {
       delete ci->memory;
     BasicBlockContexts.erase(BB);
     delete ci;
+  }
+}
+
+void BBOps::getVisitedPreds(BasicBlock *BB, vector<BasicBlock *> &preds) {
+  for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++) {
+    BasicBlock *predecessor = *it;
+    if(visited.find(predecessor) != visited.end())
+      preds.push_back(predecessor);
   }
 }

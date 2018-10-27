@@ -326,6 +326,7 @@ bool ConstantFolding::runOnModule(Module & M) {
 }   
   
 char ConstantFolding::ID = 0;
+
 static RegisterPass<ConstantFolding> X("inter-constprop", "Constant Folding for strings", false, false);
 
 //File ProcessInstructions.cpp
@@ -344,6 +345,8 @@ ProcResult ConstantFolding::processAllocaInst(AllocaInst * ai) {
   Type * ty = ai->getAllocatedType();
   unsigned size = DL->getTypeAllocSize(ty);
   uint64_t addr = bbOps.allocateStack(size, currBB);
+
+  addToPtrMap(ai, ai);
   pushFuncStack(ai);
   regOps.addRegister(ai, ty, addr);
   debug(Abubakar) << "allocaInst : size " << size << " at address " << addr << "\n";
@@ -361,6 +364,8 @@ ProcResult ConstantFolding::processMallocInst(CallInst * mi) {
     return NOTFOLDED;
   }
   uint64_t addr = bbOps.allocateHeap(size, currBB);  
+
+  addToPtrMap(mi, mi);
   pushFuncStack(mi);
   regOps.addRegister(mi, mi->getType(), addr);
   debug(Abubakar) << "mallocInst : size " << size << " at address " << addr << "\n";  
@@ -385,6 +390,8 @@ ProcResult ConstantFolding::processCallocInst(CallInst * ci) {
   }
   unsigned size = num * bsize;
   uint64_t addr = bbOps.allocateHeap(size, currBB);  
+
+  addToPtrMap(ci, ci);
   pushFuncStack(ci);
   regOps.addRegister(ci, ci->getType(), addr);
   debug(Abubakar) << "callocInst : size " << size << " at address " << addr << "\n";  
@@ -405,6 +412,8 @@ ProcResult ConstantFolding::processBitCastInst(BitCastInst * bi) {
     debug(Abubakar) << "BitCastInst : Not found in Map\n";
     return NOTFOLDED;
   }
+
+  addToPtrMap(bi, getPointsTo(ptr));
   pushFuncStack(bi);
   regOps.addRegister(bi, bi->getType(), reg->getValue());
   return UNDECIDED;
@@ -425,6 +434,22 @@ ProcResult ConstantFolding::processStoreInst(StoreInst * si) {
     bbOps.setConstMem(false, addr, size, currBB);
     return NOTFOLDED;
   }
+
+  if(reg->getPointsToCount() > 1) {
+    debug(Usama) << "StoreInst: points to count greater than 1\n";
+    if(storeOp->getType()->isPointerTy()) {
+      markPtrNonConst(storeOp, currBB);
+    }
+    return NOTFOLDED;
+  }
+  
+  //if num is a pointer and we have register
+  if(Register *reg = processInstAndGetRegister(storeOp)) {
+    if(storeOp->getType()->isPointerTy()) {
+      addToPtrMap(ptr, getPointsTo(storeOp));
+    }
+  }
+
   bbOps.storeToMem(val, size, addr, currBB);   
   return UNDECIDED;
 }
@@ -460,6 +485,8 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
     return NOTFOLDED;
   }
   
+  addToPtrMap(gi, getPointsTo(ptr));
+
   unsigned OffsetBits = DL->getPointerTypeSizeInBits(gi->getType());
   APInt offset(OffsetBits, 0); 
   bool isConst = gi->accumulateConstantOffset(*DL, offset);
@@ -486,6 +513,8 @@ ProcResult ConstantFolding::processMemcpyInst(CallInst * memcpyInst) {
     debug(Abubakar) << "processMemcpyInst : Not found in Map\n";
     return NOTFOLDED;
   }
+
+  addToPtrMap(toPtr, getPointsTo(fromPtr));
   
   if(!getSingleVal(sizeVal, size)) {
     debug(Abubakar) << "processMemcpyInst : size not constant\n";
@@ -537,7 +566,18 @@ ProcResult ConstantFolding::processMemSetInst(CallInst * memsetInst) {
 ProcResult ConstantFolding::processPHINode(PHINode * phiNode) {
   if(bbOps.partOfLoop(phiNode))
     return NOTFOLDED;
-  Value * val = bbOps.foldPhiNode(phiNode);
+  vector<Value*> incPtrs;
+  Value * val = bbOps.foldPhiNode(phiNode, incPtrs);
+  //in case not folded, mark all memories as non constant
+  if(!val) {
+    for(auto &val: incPtrs) {
+      if(Value *mem = getPointsTo(val)) {
+        Register *reg = processInstAndGetRegister(mem);
+        uint64_t size = DL->getTypeAllocSize(reg->getType());
+        bbOps.setConstMem(false, reg->getValue(), size, currBB);
+      }
+    }
+  }
   if(val && replaceOrCloneRegister(phiNode, val)) {
     debug(Abubakar) << "folded phiNode\n";
     return FOLDED;
@@ -1181,10 +1221,12 @@ bool ConstantFolding::visitBB(BasicBlock * succ, BasicBlock *  from) {
     debug(Usama) << "duplicating from " << from->getName() << " to " << succ->getName();
     duplicateContext(succ, from);
     bbOps.mergeContext(succ, from);
+    checkPtrMemory(succ);
   } else {
     debug(Abubakar) << "cloning\n";
     bbOps.imageContext(succ, from);
   }    
+  
 
   bbOps.addAncestor(succ, from);
   bbOps.freeBB(from);
@@ -1502,6 +1544,7 @@ bool ConstantFolding::handleGetOpt(CallInst * ci) {
   Register * argvReg = processInstAndGetRegister(ci->getOperand(1));
   Register * optsReg = processInstAndGetRegister(ci->getOperand(2));
   Register * optindReg = processInstAndGetRegister(module->getNamedGlobal("optind"));
+  debug(Usama) << "optind : " <<  bbOps.checkConstContigous(optindReg->getValue(), currBB) << " argvReg : " <<  bbOps.checkConstContigous(argvReg->getValue(), currBB) << "\n";
   if(!getSingleVal(ci->getOperand(0), argc) || !argvReg || 
   !optsReg || !optindReg || !bbOps.checkConstContigous(argvReg->getValue(), currBB) ||
   !bbOps.checkConstContigous(optindReg->getValue(), currBB)) {
@@ -1783,4 +1826,58 @@ void ConstantFolding::renameFunctions(Function *currFn, Function *oldFn) {
 ValSet ConstantFolding::popFuncValStack() {
   assert(funcValStack.size());
   return pop_back(funcValStack);
+}
+
+void ConstantFolding::addToPtrMap(Value *from, Value *to) {
+  if(!to)
+    return;
+
+  ptrMap[from] = to;
+}
+
+Value *ConstantFolding::getPointsTo(Value *val) {
+  if(ptrMap.find(val) != ptrMap.end())
+    return ptrMap[val];
+  else
+    return NULL;
+}
+
+void ConstantFolding::markPtrNonConst(Value *val, BasicBlock *currBB) {
+  Register *reg = processInstAndGetRegister(val);
+  assert(reg);
+
+  errs() << "setting non constant at address :" << reg->getValue() << "\n";
+  bbOps.setConstMem(false, reg->getValue(), DL->getTypeAllocSize(reg->getType()), currBB);
+}
+
+/*
+ * For last processed BB, if after merging, 
+ * two pointers are non constant, mark their
+ * memories as non const
+ */
+void ConstantFolding::checkPtrMemory(BasicBlock *currBB) {
+  vector<BasicBlock*> preds;
+  bbOps.getVisitedPreds(currBB, preds);
+  
+  for(auto BB: preds) {
+    for(auto &I: *BB) {
+
+      if(!dyn_cast<StoreInst>(&I))
+        continue;
+      Value *ptr = dyn_cast<StoreInst>(&I)->getOperand(1);
+      Register *reg = processInstAndGetRegister(ptr);
+      uint64_t size = DL->getTypeAllocSize(reg->getType()); 
+      //if some memory was marked non const after merging
+      if(bbOps.checkConstMem(reg->getValue(), size, BB) &&
+          !bbOps.checkConstMem(reg->getValue(), size, currBB)) {
+        //if it's a pointer
+        Value *alloca = getPointsTo(ptr);
+        //already non const
+        if(!alloca)
+          continue;
+        
+        markPtrNonConst(alloca, currBB);
+      }
+    }
+  }
 }

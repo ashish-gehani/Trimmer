@@ -62,6 +62,7 @@ struct ConstantFolding : public ModulePass {
   DominatorTree * DT;
   CallGraph * CG;
   RegOps regOps;
+  map<Value*, Value*> ptrMap;
 
   BasicBlock * currBB;
   bool terminateBB;
@@ -203,6 +204,12 @@ struct ConstantFolding : public ModulePass {
   void eraseToReplace(CallInst *, vector<InstPair> &);
 
   ValSet popFuncValStack();
+
+  void addToPtrMap(Value*, Value *);
+  Value *getPointsTo(Value*);
+  void markPtrNonConst(Value *, BasicBlock *);
+
+  void checkPtrMemory(BasicBlock *currBB);
 };
 
 #endif
