@@ -212,14 +212,18 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
     if(runOnBB(current)) { //loop test terminated
       LoopUnroller *unroller = pop_back(testStack);
       if(!unroller->checkPassed()) {
+        BasicBlock *failedLoop;
         bbOps.cleanUpFuncBBInfo(currfn); //remove cloned BBinfo
         regOps.cleanUpFuncBBRegisters(currfn, popFuncValStack()); //remove cloned registers and stack
         pop_back(worklistBB);
-        BasicBlock *failedLoop = worklistBB[worklistBB.size() -1].back();
+
+        failedLoop = worklistBB[worklistBB.size() -1].back();
         worklistBB[worklistBB.size() - 1].pop_back();
+
         currfn = unroller->getCloneOf();
-        LI = &getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();
         toRun = currfn;
+
+        LI = &getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();
         //TODO hackish way of running on old failed loopHeader
         runOnBB(failedLoop);
       }else {
@@ -233,7 +237,7 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
         for(auto it = clonedFnWorklist.begin(), end = clonedFnWorklist.end() ;it != end; it++)
           addToWorklistBB(*it); 
 
-        regOps.cleanUpFuncBBRegisters(toRun, funcValStack[funcValStack.size() - 2]);
+        regOps.cleanUpFuncBBRegisters(oldFn, funcValStack[funcValStack.size() - 2]);
         bbOps.cleanUpFuncBBInfo(oldFn);
 
         funcValStack[funcValStack.size() - 2].clear();
@@ -242,8 +246,7 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
         for(auto *t : clonedFnValues)
           pushFuncStack(t);  
 
-        delete unroller; //also removes test instructions
-        
+        delete unroller;
         // if not main function
         if(ci) {
           std::vector<Value*> args(ci->arg_begin(), ci->arg_end());
