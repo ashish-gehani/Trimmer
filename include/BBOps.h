@@ -54,7 +54,7 @@ public:
   bool foldToSingleSucc(TerminatorInst * termInst, vector<BasicBlock *> & readyToVisit, 
       LoopInfo& LI);
   bool straightPath(BasicBlock * from, BasicBlock * to); 
-  Value * foldPhiNode(PHINode * phiNode);
+  Value * foldPhiNode(PHINode * phiNode, vector<Value*>&);
   BasicBlock * getRfromPred(BasicBlock * BB);
   void recomputeLoopInfo(Function * F, LoopInfo& LI);
   /* todo : how to recompute ancestors */
@@ -84,6 +84,7 @@ public:
 
   void copyContexts(Function *to, Function *from, ValueToValueMapTy& vmap, Module *);
   bool isContextDeleted(BasicBlock *);
+  void getVisitedPreds(BasicBlock *BB, vector<BasicBlock *> &preds);
 private:
   map<BasicBlock *, BBInfo *> BBInfoMap;
   BasicBlockContInfoMap BasicBlockContexts;
