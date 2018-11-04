@@ -8,6 +8,8 @@ add_library(ConstantFolding MODULE
   ../GetOptLocal.cpp
   ../RegOps.cpp
   ../LoopUnroller.cpp
+  ../LoopUnrollTest.cpp
+  ../ContextInfo.cpp
   )
 add_library(Internalize MODULE
   Internalize.cpp
@@ -37,6 +39,7 @@ add_library(AnnotateConfig MODULE
   ../RegOps.cpp
   ../LoopUnroller.cpp
   AnnotateConfig.cpp
+  ../LoopUnrollTest.cpp
   )
 #[[
 add_library(RemFuncBody MODULE
@@ -48,6 +51,7 @@ add_library(ListFunctions MODULE
   )
 add_library(AnnotateNew MODULE
   AnnotateNew.cpp
+  ../LoopUnroller.cpp
   )
 
 

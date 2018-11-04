@@ -7,4 +7,5 @@ link_directories(${LLVM_LIBRARY_DIRS})
 
 include_directories(include)
 add_subdirectory(src/Transforms)
+add_subdirectory(src)
 add_subdirectory(include)
