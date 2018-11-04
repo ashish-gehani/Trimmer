@@ -60,7 +60,7 @@ def run_argspec(tool):
 
 	if(tool.icp_flag): 
                 if(tool.track_allocas):
-                        Cmd = opt + ' -load ' + build_path + 'AnnotateNew.so -loops -lcssa -loop-simplify -loop-rotate -indvars -svfg --argvName=__argv_new__\
+                        Cmd = opt + ' -load ' + build_path + 'AnnotateNew.so -mem2reg -loops -lcssa -loop-simplify -loop-rotate -indvars  -svfg --isAnnotated=' + str(tool.annot_flag) + ' --argvName=__argv_new__\
                             ' + add_file + ' -o ' + annotated_file
                         printDbgMsg(Cmd)
                         subprocess.call(Cmd, shell = True)	
