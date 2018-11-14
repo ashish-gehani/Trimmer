@@ -1,6 +1,7 @@
 #include "AnnotateNew.h"
 
 #include "llvm/ADT/DenseMap.h"
+#include "llvm/IR/IRBuilder.h"
 
 #include <algorithm>
 #include <climits>
@@ -32,9 +33,6 @@ static cl::opt<int> isAnnotated("isAnnotated",
 
 set<SVFGNode*> forwardDp;
 set<Value*> slpLoadDp;
-map<Value*, set<Value*> *> isLoadOrArgcDp;
-map<Value*, set<Value*> *> isLoadDp;
-map<SVFGNode*, set<SVFGNode*> *> backwardDp;
 
 using namespace std;
 using namespace analysisUtil;
@@ -123,7 +121,7 @@ string AnnotateNew::print(SVFGNode *node, SVFG *graph) {
   return rawstr.str();
 }
 
-void getSlpStores(set<const Value *>& singleLevelPointers, set<Value*>& stores) {
+void AnnotateNew::getSlpStores(set<const Value *>& singleLevelPointers, set<Value*>& stores) {
   set<Value*> scalars; //these are esentially normal llvm scalar values, tracked through use def chains
   //Handle single level pointers
   for(auto &pointer: singleLevelPointers) {
@@ -160,6 +158,119 @@ GlobalValue* getArgv(string argvName, Module &M) {
 
 static RegisterPass<AnnotateNew> X("svfg", "Constant Folding for strings", false, false);
 
+const BasicBlock *AnnotateNew::partOfLoop(const BasicBlock *BB) {
+  if(loopHeaders.find(BB) != loopHeaders.end())
+    return loopHeaders[BB];
+
+  return NULL;
+}
+
+void AnnotateNew::checkIfLoop(SVFGNode *node) {
+  if(auto stmt = dyn_cast<StmtSVFGNode>(node)) {
+    if(stmt->getInst()) {
+      const BasicBlock * data = partOfLoop(stmt->getInst()->getParent());
+      if(data) {
+        if(markedLoops.insert(data).second) {
+          errs() << "(LOG) (LOOP) Marking loop for BB " <<  data->getName() << " in function " <<  data->getParent()->getName() << " for instruction " << *stmt->getInst() << "\n";
+        }
+      }
+    }
+  }
+}
+
+void AnnotateNew::checkIfLoop(Value *node) {
+  if(auto inst = dyn_cast<Instruction>(node)) {
+    const BasicBlock *data = partOfLoop(inst->getParent());
+    if(data) {
+      if(markedLoops.insert(data).second) {
+        errs() << "(LOG) (LOOP) Marking loop for BB " << data->getName() << " in function " << data->getParent()->getName() << " for instruction " << *inst << "\n";
+      }
+    }
+  }
+}
+
+set<SVFGNode*> *AnnotateNew::dfs_rec(SVFGNode* root, std::function<vector<SVFGNode*> (SVFGNode*)> nextNodes, std::function<bool (SVFGNode*)> condition, set<SVFGNode*> &visited, map<SVFGNode*, set<SVFGNode*>* > *dpData, bool trackLoops) {
+  //static map<T, set<T>* > dpData;
+  dpData = NULL;
+  if(visited.find(root) != visited.end()) {
+    return NULL;
+  }
+
+  visited.insert(root);
+  if(dpData && dpData->find(root) != dpData->end()) {
+    errs() << "Found in dp svfg" << "\n";
+    set<SVFGNode*> *temp = dpData->find(root)->second;
+    return temp;
+  }
+
+  if(trackLoops)
+    checkIfLoop(root);
+
+  set<SVFGNode*> *output = new set<SVFGNode*>;
+
+  if(condition(root)) {
+    output->insert(root);
+  }
+
+  vector<SVFGNode*> children = nextNodes(root);
+  for(auto child : children) {
+    set<SVFGNode*> *childOutput = dfs_rec(child, nextNodes, condition, visited, NULL , trackLoops);
+    if(childOutput)
+      output->insert(childOutput->begin(), childOutput->end());
+    //if(auto casted = dyn_cast<StmtSVFGNode>(child))
+    //if(casted->getInst())
+    //errs() << "Instruction :" << *casted->getInst() << "\n";
+  }
+  if(dpData)
+    (*dpData)[root] = output;
+
+  return output;
+}
+
+set<Value*> *AnnotateNew::dfs_rec(Value* root, std::function<vector<Value*> (Value*)> nextNodes, std::function<bool (Value *)> condition, set<Value *> &visited, map<Value *, set<Value *>* > *dpData, bool trackLoops) {
+  //static map<T, set<T>* > dpData;
+  dpData = NULL; //FIXME
+  if(visited.find(root) != visited.end()) {
+    if(dpData) {
+      assert(dpData->find(root) != dpData->end());
+      return (*dpData)[root];
+    }
+    return NULL;
+  }
+
+  visited.insert(root);
+  if(dpData && dpData->find(root) != dpData->end()) {
+    errs() << "Found in dp: " << *root << "\n";
+    set<Value *> *temp = dpData->find(root)->second;
+    return temp;
+  }
+
+  if(trackLoops)
+    checkIfLoop(root);
+  set<Value *> *output = new set<Value *>;
+
+  if(condition(root)) {
+    output->insert(root);
+  }
+
+  vector<Value *> children = nextNodes(root);
+  for(auto child : children) {
+    set<Value *> *childOutput = dfs_rec(child, nextNodes, condition, visited, dpData, trackLoops);
+    if(childOutput)
+      output->insert(childOutput->begin(), childOutput->end());
+    //if(auto casted = dyn_cast<StmtSVFGNode>(child))
+    //if(casted->getInst())
+    //errs() << "Instruction :" << *casted->getInst() << "\n";
+  }
+  if(dpData)
+    (*dpData)[root] = output;
+
+  return output;
+}
+
+bool isInLoop(Value* value) {
+  return false;
+}
 
 template <typename T>
 set<T> *dfs_rec(T root, std::function<vector<T> (T)> nextNodes, std::function<bool (T)> condition, set<T> &visited, map<T, set<T>* > *dpData = NULL) {
@@ -169,7 +280,6 @@ set<T> *dfs_rec(T root, std::function<vector<T> (T)> nextNodes, std::function<bo
 
   if(dpData && dpData->find(root) != dpData->end()) {
     set<T> *temp = dpData->find(root)->second;
-    errs() << "FOUND HA :" << temp->size();
     return temp;
   }
   visited.insert(root);
@@ -190,8 +300,68 @@ set<T> *dfs_rec(T root, std::function<vector<T> (T)> nextNodes, std::function<bo
   }
   if(dpData)
     (*dpData)[root] = output;
-  errs() << *root << " HE_SIZE: " << output->size() << "\n";
   return output;
+}
+
+void AnnotateNew::dfs(Value* root, std::function<vector<Value*> (Value*)> nextNodes, std::function<bool (Value*)> condition, set<Value*> &output) {
+  vector<Value*> worklist;
+  worklist.push_back(root);
+
+  set<Value*> visited;
+
+  while(worklist.size()) {
+    auto currentNode = worklist.back();
+    worklist.pop_back();
+    if(visited.find(currentNode) != visited.end())
+      continue;
+
+    checkIfLoop(root);
+    visited.insert(currentNode);
+
+    if(condition(currentNode)) {
+      output.insert(currentNode);
+    }
+
+    vector<Value*> children = nextNodes(currentNode);
+    //errs() << "Parent:  " << *root << "\n";
+    for(auto child : children) {
+      //errs() << "Child : " << *child << "\n";
+      worklist.push_back(child);
+      //if(auto casted = dyn_cast<StmtSVFGNode>(child))
+      //if(casted->getInst())
+      //errs() << "Instruction :" << *casted->getInst() << "\n";
+    }
+  }
+}
+void AnnotateNew::dfs(SVFGNode* root, std::function<vector<SVFGNode*> (SVFGNode*)> nextNodes, std::function<bool (SVFGNode*)> condition, set<SVFGNode*> &output) {
+  vector<SVFGNode*> worklist;
+  worklist.push_back(root);
+
+  set<SVFGNode*> visited;
+
+  while(worklist.size()) {
+    auto currentNode = worklist.back();
+    worklist.pop_back();
+    if(visited.find(currentNode) != visited.end())
+      continue;
+
+    checkIfLoop(root);
+    visited.insert(currentNode);
+
+    if(condition(currentNode)) {
+      output.insert(currentNode);
+    }
+
+    vector<SVFGNode*> children = nextNodes(currentNode);
+    //errs() << "Parent:  " << *root << "\n";
+    for(auto child : children) {
+      //errs() << "Child : " << *child << "\n";
+      worklist.push_back(child);
+      //if(auto casted = dyn_cast<StmtSVFGNode>(child))
+      //if(casted->getInst())
+      //errs() << "Instruction :" << *casted->getInst() << "\n";
+    }
+  }
 }
 //function SVFGNode*, vector<SVFGNode *> -> void
 template <typename T>
@@ -225,7 +395,7 @@ void dfs(T root, std::function<vector<T> (T)> nextNodes, std::function<bool (T)>
   }
 }
 
-vector<SVFGNode*> forwardDfsLambda(SVFGNode *current) {
+vector<SVFGNode*> AnnotateNew::forwardDfsLambda(SVFGNode *current) {
   vector<SVFGNode*> worklist;
   if(forwardDp.find(current) !=forwardDp.end())
     return worklist;
@@ -245,6 +415,7 @@ vector<SVFGNode*> backwardDfsLambda(SVFGNode *current) {
   for(auto it = current->InEdgeBegin(), end = current->InEdgeEnd(); it != end; it++) {
     worklist.push_back((*it)->getSrcNode());
   }
+  errs() << "Node: " << current << " Size: " <<  worklist.size() << "\n";
   return worklist;
 }
 
@@ -252,7 +423,7 @@ bool allTrueCondition(SVFGNode *) {
   return true;
 }
 
-vector<Value*> genericScalarDfs(Value *current) {
+vector<Value*> AnnotateNew::genericScalarDfs(Value *current) {
   vector<Value *> worklist;
   if(slpLoadDp.find(current) != slpLoadDp.end())
     return worklist;
@@ -266,7 +437,7 @@ vector<Value*> genericScalarDfs(Value *current) {
   return worklist;
 };
 
-vector<Value*> genericScalarDfsBackward(Value *current) {
+vector<Value*> AnnotateNew::genericScalarDfsBackward(Value *current) {
   vector<Value *> worklist;
   if(!dyn_cast<User>(current))
     return worklist;
@@ -355,7 +526,7 @@ PHINode* getLoopInductionVariable(Loop *L, ScalarEvolution *SE) {
   return nullptr;
 }
 
-void getSlpScalarStores(set<const Value*> slps, set<Value *>& scalars, set<Value *> stores) {
+void AnnotateNew::getSlpScalarStores(set<const Value*> slps, set<Value *>& scalars, set<Value *> stores) {
   for(auto &slp: slps)
     getSlpStores(slps, stores);
 
@@ -372,75 +543,113 @@ void AnnotateNew::classifyValAndOperands(Value *value, set<SVFGNode *> &backward
       classifyVal(user->getOperand(i), backwardPtr, slps, scalars); 
 }
 
-void AnnotateNew::getLoopIterators(Module &M, set<const Value *> &trackedAllocas, vector<const SVFGNode *>& worklistSvfg) {
+void AnnotateNew::getLoopBbs(Module *M) {
+//TargetLibraryInfo *TLI = &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI();
+
+  unsigned i = 0;
+  for(auto &F: *M) {
+    if(F.isDeclaration())
+      continue;
+    LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(F).getLoopInfo();
+
+    /*
+      AssumptionCache &AC = getAnalysis<AssumptionCacheTracker>(F).getAssumptionCache(F);
+      DominatorTree * DT = new DominatorTree(F);
+      ScalarEvolution SE(F, *TLI, AC, *DT, LI);
+      */
+    set<Loop *> loops;
+    auto getNestedLoops = [&](Loop *L) {
+      vector<Loop *> worklist;
+      worklist.push_back(L);
+      while(worklist.size()) {
+        Loop *L = worklist.back();
+        worklist.pop_back();
+        loops.insert(L);
+        for(auto it = L->begin(), end = L->end(); it != end; it++) {
+          worklist.push_back(*it); 
+        }
+      }
+        //Loop *temp = *it;
+    };
+
+    for(auto it = LI.begin(), end = LI.end(); it != end; it++) {
+      Loop *L = *it;
+      //errs() << *L->getHeader();
+      getNestedLoops(L); 
+      //getLoopInductionVariable(L, &SE); 
+    }
+
+    for(auto &L: loops) {
+      for(auto BB: L->getBlocks()) {
+        loopHeaders[BB] = L->getHeader();
+        errs() << "Adding header: " << *L->getHeader() << "\n";
+      }
+      i++;
+    }
+  }
+
+  errs() << "TOTAL LOOPS: " << i << "\n";
+}
+
+void AnnotateNew::getLoopIterators(const BasicBlock *BB, set<const Value *> &trackedAllocas) {
 
   TargetLibraryInfo *TLI = &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI();
-  set<Loop*> processedLoops;
  
   set<SVFGNode*> backwardPtr;
   set<Value *> scalars; //scalars
   set<const Value *> slps;
+  vector<const SVFGNode *> worklistSvfg;
 
-  for(auto &F: M) {
-    if(F.isDeclaration())
-      continue;
-    LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(F).getLoopInfo();
-    AssumptionCache &AC = getAnalysis<AssumptionCacheTracker>(F).getAssumptionCache(F);
-    DominatorTree * DT = new DominatorTree(F);
-    ScalarEvolution SE(F, *TLI, AC, *DT, LI);
+  Function *F = (Function *)BB->getParent();
+  AssumptionCache &AC = getAnalysis<AssumptionCacheTracker>(*F).getAssumptionCache(*F);
+  DominatorTree * DT = new DominatorTree(*F);
+  LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*F).getLoopInfo();
+  Loop *L = LI.getLoopFor(BB);
+  //assert(L->getHeader() == BB);
+  
+  ScalarEvolution SE(*F, *TLI, AC, *DT, LI);
+  /*
+  if(isAnnotated && !LoopUnroller::checkUnrollHint(L->getHeader(), LI, &M)) {
+    errs() << "Skipping unannotated loop \n";
+    continue;
+  }
+  */
+  //errs() << "LOOP INDUCTION VAR" << getLoopInductionVariable(L, &SE) << "\n";
+  if(auto phi = getLoopInductionVariable(L, &SE)) {
+    for(unsigned i = 0; i < phi->getNumIncomingValues(); i++) {
+      //errs() << *phi->getIncomingValue(i) << "\n";
+      set<Value *> possible;
+      Value *current = phi->getIncomingValue(i);
 
-    for(auto it = LI.begin(), end = LI.end(); it != end; it++) {
-      Loop *L = *it;
-      if(isAnnotated && !LoopUnroller::checkUnrollHint(L->getHeader(), LI, &M)) {
-        errs() << "Skipping unannotated loop \n";
-        continue;
+      if(dyn_cast<Constant>(current))
+          continue;
+
+      //errs() << "current processing: "<< *current << "\n";
+      if(!current->getType()->isPointerTy()) {
+        set<Value *> processed;
+        set<Value *> *vals = dfs_rec(current, genericScalarDfsBackward, isLoad, processed, &isLoadDp);
+        for(auto val: *vals)
+          possible.insert(val);
+      } else {
+        possible.insert(current);
       }
 
-      if(processedLoops.find(L) != processedLoops.end())
-        continue;
-      processedLoops.insert(L);
-      errs() << "LOOP INDUCTION VAR" << getLoopInductionVariable(L, &SE) << "\n";
-      if(auto temp = getLoopInductionVariable(L, &SE)) {
-        errs() << *temp << "\n";
-        errs() << "loop " << "\n";
-        for(unsigned i = 0; i < temp->getNumIncomingValues(); i++) {
-          errs() << *temp->getIncomingValue(i) << "\n";
-          set<Value *> possible;
-          Value *current = temp->getIncomingValue(i);
-
-          if(dyn_cast<Constant>(current))
-              continue;
-
-          errs() << "current processing: "<< *current << "\n";
-          if(!current->getType()->isPointerTy()) {
-            //dfs<Value*>(current, genericScalarDfsBackward, isLoad, possible);
-            set<Value *> processed;
-            set<Value *> *vals = dfs_rec<Value*>(current, genericScalarDfsBackward, isLoad, processed, &isLoadDp);
-            for(auto val: *vals)
-              possible.insert(val);
-          } else {
-            possible.insert(current);
-          }
-
-          for(auto &V: possible) {
-            errs() << "Loop: adding : " << *V << "\n";
-            SVFGNode* svfgNode;
-            if(V->getType()->isPointerTy())
-              svfgNode = getSvfgNode(V);     
-            else
-              svfgNode = getSvfgNode(dyn_cast<LoadInst>(V)->getPointerOperand());
-
-            backwardPtr.insert(svfgNode);
-          }
-        }
-      } else {
-        for(auto BB: L->getBlocks())
-          for(auto &I: *BB){
-            errs() << "loop value :" << I << "\n";
-            classifyValAndOperands(&I, backwardPtr, slps, scalars); 
-          }
+      for(auto &V: possible) {
+        errs() << "Loop: adding : " << *V << "\n";
+        SVFGNode* svfgNode;
+        if(V->getType()->isPointerTy())
+          svfgNode = getSvfgNode(V);     
+        else
+          svfgNode = getSvfgNode(dyn_cast<LoadInst>(V)->getPointerOperand());
+        backwardPtr.insert(svfgNode);
       }
     }
+  } else {
+    for(auto BB: L->getBlocks())
+      for(auto &I: *BB){
+        errs() << "loop value :" << I << "\n";
+        classifyValAndOperands(&I, backwardPtr, slps, scalars); 
+      }
   }
 
   set<Value*> stores;
@@ -449,9 +658,9 @@ void AnnotateNew::getLoopIterators(Module &M, set<const Value *> &trackedAllocas
   getSlpScalarStores(slps, scalars, stores);
   getStoreSvfg(stores, backwardPtr);
   getSourceAllocas(backwardPtr,worklistSvfg, trackedAllocas);
-
 }
-void AnnotateNew::getBranchAndArgcInstructions(set<BranchInst*> &branches, set<CallInst*> &calls, set<Instruction*> &argcValues, set<SVFGNode*>& svfgNodes) {
+
+void AnnotateNew::getBranchAndArgcInstructions(set<BranchInst*> &branches, set<CallInst*> &calls, set<Instruction*> &argcValues) {
 
   for(auto &F: *module) {
     if(F.isDeclaration())
@@ -477,7 +686,7 @@ void AnnotateNew::getBranchAndArgcInstructions(set<BranchInst*> &branches, set<C
   }
 }
 
-bool isLoad(Value *V) {
+bool AnnotateNew::isLoad(Value *V) {
   return dyn_cast<LoadInst>(V);
 }
 
@@ -613,8 +822,10 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
   auto forwardDfsCondition = [&](SVFGNode* node) {
     if(auto casted = dyn_cast<StmtSVFGNode>(node)) {
       if(casted->getInst()) {
-        errs() << "Going forward on Instruction: " << *casted->getInst() << "\n";
+        errs() << "Going forward on Instruction: " << *casted->getInst() << " in function " << casted->getInst()->getParent()->getParent()->getName() << "\n";
+
         const Value *inst = casted->getInst();
+
         if(auto point = dyn_cast<PointerType>(inst->getType())) {
           if(!point->getElementType()->isPointerTy()) {
             //errs() <<*point << " " << *inst<< "  ****************\n";
@@ -657,7 +868,7 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
   };
 
   //go forward 
-  dfs<SVFGNode*>((SVFGNode*)current, forwardDfsLambda, forwardDfsCondition, storeSvfg);
+  dfs((SVFGNode*)current, forwardDfsLambda, forwardDfsCondition, storeSvfg);
 }
 
 GlobalValue *pointsToGlobal(const User *user) {
@@ -674,16 +885,24 @@ GlobalValue *pointsToGlobal(const User *user) {
 }
 
 
-void AnnotateNew::getSourceAllocas(set<SVFGNode*> &svfgNodes, vector<const SVFGNode*> &worklistSvfg, set<const Value*> &trackedAllocas) {
+void AnnotateNew::getSourceAllocas(set<SVFGNode*> &svfgNodes, vector<const SVFGNode*> &worklistSvfg, set<const Value*> &trackedAllocas, bool trackLoops) {
 
-  auto backwardDfsCondition = [](SVFGNode* node) {
+  auto backwardDfsCondition = [&](SVFGNode* node) {
     if(auto casted = dyn_cast<StmtSVFGNode>(node)) {
       auto pagEdge = casted->getPAGEdge();
       if(pagEdge->getInst()) {
-        
+        errs() << "Going backward on : " << *pagEdge->getInst() << " Node: " << node << "\n";
         //errs() << "In backward " << *pagEdge->getInst() << "\n";
+        auto I = pagEdge->getInst();
         if(dyn_cast<AllocaInst>(pagEdge->getInst()))
           return true;
+
+        for(unsigned i = 0; i < I->getNumOperands(); i++) {
+          if(auto global = pointsToGlobal(dyn_cast<User>(I->getOperand(i)))) {
+            worklistSvfg.push_back(getSvfgNode(global));
+            trackedAllocas.insert(global); // hackish
+          }
+        }
 
         //FIXME Use MemObj instead of pointer hack
         if(auto user = dyn_cast<User>(pagEdge->getInst())){
@@ -711,15 +930,18 @@ void AnnotateNew::getSourceAllocas(set<SVFGNode*> &svfgNodes, vector<const SVFGN
     set<SVFGNode*>* data = NULL;
     set<SVFGNode*> visited;
     if(temp->getInst()) {
-      //errs() << "GOING BACKWARD on : " << *temp->getInst() << "\n";
-      data = dfs_rec<SVFGNode*>(*it, backwardDfsLambda, backwardDfsCondition, visited, &backwardDp);
+      errs() << "Backward dp size:" << backwardDp.size() << "\n";
+      data = dfs_rec(*it, backwardDfsLambda, backwardDfsCondition, visited, &backwardDp, trackLoops);
+      errs() << "Data: " << data << "\n";
     }
 
     if(!data)
       continue;
-
+    
+    errs() << data->size() << "size\n";
     for(auto val: *data) { 
       Instruction *current = (Instruction*)dyn_cast<StmtSVFGNode>(val)->getPAGEdge()->getInst(); 
+      errs() << *current << " here\n"; 
       //errs() << "ALLOCAAA : " << *current << "\n";
       if(auto global = pointsToGlobal(dyn_cast<User>(current))) {
         trackedAllocas.insert(global);
@@ -740,9 +962,7 @@ void AnnotateNew::getSourceAllocas(set<SVFGNode*> &svfgNodes, vector<const SVFGN
  * Get non pointer uses of a scalar
  * Currently only getting Stores
  */
-void getScalarStores(Value *scalar, set<Value*>& stores) {
-  //errs() << "LOADDDDDD************: " << *scalar << "\n";
-
+void AnnotateNew::getScalarStores(Value *scalar, set<Value*>& stores) {
   vector<Value *> worklist;
   worklist.push_back(scalar);
   //traverse use chain of load and get any getElementPtr or stores
@@ -789,7 +1009,7 @@ void trackIfMemory(const SVFGNode* current, set<const Value*> &trackedAllocas) {
     if(casted->getInst()) {
       auto inst = casted->getInst();
       //TODO remove this debug statement
-      errs() << "Going forward on Instruction : " << *inst << " in function " <<  "\n";
+      //errs() << "Going forward on Instruction : " << *inst << " in function " <<  inst->getParent()->getParent()->getName() << "\n";
 
       if(dyn_cast<AllocaInst>(casted->getInst()) || dyn_cast<GlobalValue>(casted->getInst()))
         trackedAllocas.insert(casted->getInst());
@@ -848,7 +1068,7 @@ void getBbsTillJoin(BasicBlock *join, set<BasicBlock*>& markedBBs, BranchInst *I
   }
 }
 
-void getLoadsOnSlps(Value* pointer, set<Value*> &singleLevelLoads) {
+void AnnotateNew::getLoadsOnSlps(Value* pointer, set<Value*> &singleLevelLoads) {
   //get non pointer data to track
   static set<Value *> processed;
 
@@ -863,7 +1083,8 @@ void getLoadsOnSlps(Value* pointer, set<Value*> &singleLevelLoads) {
     return;
 
   processed.insert(pointer);
-  dfs<Value*>((Value*)pointer, genericScalarDfs, isLoadOnSingleLevelPointer, singleLevelLoads); //get all loads of single level pointer 
+  set<Value*> visited;
+  dfs((Value*)pointer, genericScalarDfs, isLoadOnSingleLevelPointer, singleLevelLoads); //get all loads of single level pointer 
 }
 
 void AnnotateNew::classifyVal(Value *value, set<SVFGNode*>& backwardPtr, set<const Value *> &singleLevelPointers, set<Value*>& scalar) {
@@ -948,7 +1169,7 @@ void AnnotateNew::getBranchMemory(set<BranchInst *> &allBranches, map<Value *, s
 
       if(!current->getType()->isPointerTy()) {
         set<Value *> visited;
-        set<Value*> *data = dfs_rec<Value*>(current, genericScalarDfsBackward, isLoadOrArgc, visited, &isLoadOrArgcDp);
+        set<Value*> *data = dfs_rec(current, genericScalarDfsBackward, isLoadOrArgc, visited, &isLoadOrArgcDp, false);
         for(auto d: *data)
           pointers.insert(d);
       } else if(supportedInst(current)) {
@@ -1012,7 +1233,7 @@ void AnnotateNew::getBranchMemory(set<BranchInst *> &allBranches, map<Value *, s
         svfgNodes.insert((SVFGNode*)svfgNode);
       }
 
-      getSourceAllocas(svfgNodes, worklistSvfg, allocs);
+      getSourceAllocas(svfgNodes, worklistSvfg, allocs, false);
       
         //set<SVFGNode*> visited;
         //set<SVFGNode*> *poss = dfs_rec<SVFGNode*>((SVFGNode*) svfgNode, backwardDfsLambda, conditionLambda, visited);  
@@ -1160,10 +1381,11 @@ void AnnotateNew::run(GlobalValue* argv, Value *argc, set<const Value*> &tracked
   trackedAllocas.insert(argv);
   {
     set<SVFGNode*> svfgNodes;
-    getBranchAndArgcInstructions(allBranches, calls, argcValues, svfgNodes);
-    getSourceAllocas(svfgNodes, worklistSvfg, trackedAllocas);
+    getBranchAndArgcInstructions(allBranches, calls, argcValues);
+    //getSourceAllocas(svfgNodes, worklistSvfg, trackedAllocas);
   }
-  getLoopIterators(*module, trackedAllocas, worklistSvfg);
+
+  getLoopBbs(module);
 
   {
     for(auto &I: argcValues) {
@@ -1184,7 +1406,7 @@ void AnnotateNew::run(GlobalValue* argv, Value *argc, set<const Value*> &tracked
   }
 
   set<BranchInst*> argcBranches;
-  getBranchMemory(allBranches, branchDp, argcBranches);
+  //getBranchMemory(allBranches, branchDp, argcBranches);
   
   //getArgc(trackedAllocas, M); 
 
@@ -1306,6 +1528,50 @@ void AnnotateNew::run(GlobalValue* argv, Value *argc, set<const Value*> &tracked
       break;
     } 
   }
+  
+  errs() << "Printing loops " << "\n";
+
+  set<const BasicBlock *> processedLoops;
+  Function *loopFunc = insertLoopFuncAnnot(module, "unroll_loop");
+  for(auto &BB: markedLoops) {
+    errs() << BB->getName() << "\n";
+    if(processedLoops.find(BB) != processedLoops.end())
+      continue;
+
+    processedLoops.insert(BB);
+
+    getLoopIterators(BB, trackedAllocas); 
+    //annotateLoop(BB, loopFunc);
+  }
+
+  errs() << "MARKED LOOPS: " << markedLoops.size() << "\n";
+  for(auto &BB: markedLoops) {
+    annotateLoop(BB, loopFunc, LOOP_ID);
+    LOOP_ID++;
+  }
+}
+
+void AnnotateNew::annotateLoop(const BasicBlock *BB, Function *F, unsigned loop_id) {
+  IRBuilder<> builder((BasicBlock *) BB);
+
+  builder.SetInsertPoint((Instruction *) BB->getFirstNonPHI());
+  vector<Value *> args;
+  args.push_back(builder.getInt32(loop_id));
+  builder.CreateCall(F, args);
+}
+
+Function *AnnotateNew::insertLoopFuncAnnot(Module *M, const string &name) {
+  vector<Type *> args;
+  LLVMContext &context = M->getContext();
+  Type *returnType = Type::getVoidTy(context);
+  
+  args.push_back(Type::getInt32Ty(context));
+  return createFunction(returnType, args, false, name, M);
+}
+
+Function *createFunction(Type *returnType, vector<Type*> &args, bool isVarArg, const string &name, Module *M) {
+  FunctionType *funcType = FunctionType::get(returnType, args, isVarArg);
+  return Function::Create(funcType, GlobalValue::LinkageTypes::ExternalLinkage, name, M);
 }
 
 /**
@@ -1315,6 +1581,7 @@ bool AnnotateNew::runOnModule(Module &M) {
   AndersenWaveDiff* ander = AndersenWaveDiff::createAndersenWaveDiff(M);
   SVFGBuilder builder;
 
+  LOOP_ID = 0;
   module = &M;
   svfg =  builder.buildSVFG(ander);
   pag = svfg->getPAG();
