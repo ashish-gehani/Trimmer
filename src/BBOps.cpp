@@ -241,6 +241,8 @@ void BBOps::propagateUR(BasicBlock * BB, LoopInfo& LI) {
       worklist.push_back(dom);
     }
   }
+
+  delete DT;
 }  
 /**
  * Adds a BB to readyToVist if it's reachable from at least one
