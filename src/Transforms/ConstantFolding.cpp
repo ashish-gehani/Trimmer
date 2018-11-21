@@ -23,6 +23,7 @@
 #include "llvm/IR/Dominators.h"
 #include "llvm/IR/ValueMap.h"
 #include "llvm/Transforms/Utils/Cloning.h"
+#include "llvm/Analysis/CallGraph.h"
 
 
 #include <unistd.h>
@@ -76,12 +77,38 @@ void ConstantFolding::getAnalysisUsage(AnalysisUsage &AU) const {
 
 }
 
+void ConstantFolding::markInstMemNonConst(Instruction  *I) {
+  for(unsigned i = 0; i < I->getNumOperands(); i++) {
+    Value *val = I->getOperand(i);
+    Register *reg = processInstAndGetRegister(val);
+    if(val->getType()->isPointerTy() && reg) {
+      markMemNonConst(dyn_cast<PointerType>(val->getType())->getElementType(), reg->getValue(), currBB);
+    } else if(reg) {
+      markMemNonConst(val->getType(), reg->getValue(), currBB);
+    }
+  }
+
+  if(auto callInst = dyn_cast<CallInst>(I)) {
+    markArgsAsNonConst(callInst);
+    if(callInst->getCalledFunction() && !callInst->getCalledFunction()->isDeclaration())
+      markGlobAsNonConst(callInst->getCalledFunction());
+    return;
+  }
+}
 /**
  * Process a single instruction appropriately
  */
 void ConstantFolding::runOnInst(Instruction * I) {
   ProcResult result;
   printInst(I, Abubakar);
+  
+  if(bbOps.partOfLoop(I)) {
+    markInstMemNonConst(I); 
+    if(!isa<TerminatorInst>(I)) { //need terminator instruction to make BB graphs
+      return;
+    }
+  }
+
   if(AllocaInst * allocaInst = dyn_cast<AllocaInst>(I)) {
     result = processAllocaInst(allocaInst);  
   } else if(BitCastInst * bitCastInst = dyn_cast<BitCastInst>(I)) {
@@ -300,6 +327,8 @@ bool ConstantFolding::runOnModule(Module & M) {
     // createAnnotationList2();
   }
 
+  collectCallGraphGlobals(CG);
+
   Function * func = module->getFunction(StringRef("main"));
   BasicBlock * entry = &func->getEntryBlock();
 
@@ -329,6 +358,148 @@ char ConstantFolding::ID = 0;
 
 static RegisterPass<ConstantFolding> X("inter-constprop", "Constant Folding for strings", false, false);
 
+//1) collect any load on any global in current
+//function. add globals to func mod set
+//2) traverse call graph of each function, and 
+//add mod sets of called functions in callees
+//3) In case a cycle is found, duplicate mod
+// set to all the functions in the cycle
+//4) A function calling a function part of a cycle
+//will always be a superset of the mod set of the 
+//functions in the cycle
+
+Cycle *ConstantFolding::mergeCycles(set<Cycle *> &cycles) {
+  Cycle *newCycle = new Cycle;
+  for(auto &cycle: cycles) {
+    newCycle->nodes.insert(cycle->nodes.begin(), cycle->nodes.end());
+    newCycle->values.insert(cycle->values.begin(), cycle->values.end());
+  }
+  return newCycle;
+}
+
+set<GlobalVariable *> ConstantFolding::dfs(CallGraphNode *root, map<Function *, set<GlobalVariable *> >&modSet, set<Function *> &openNodes, vector<Function *> &recStack, map<Function *, Cycle * > &cycles) {
+  if(!root)
+    return set<GlobalVariable *>();
+
+  Function *F = root->getFunction();
+  if(!F)
+    return set<GlobalVariable *>();
+  
+  if(F->isDeclaration())
+    return set<GlobalVariable *>();
+
+  if(openNodes.find(F) != openNodes.end()) {
+    //handle cycle
+    errs() << "Cycle found : " << "\n";
+    set<Cycle *> oldCycles;
+    set<Function *> cycleFunctions;
+
+    cycleFunctions.insert(F);
+    //find if part of any cycle already
+    for(int i = recStack.size() - 1; recStack[i] != F; i--) {
+      assert(i > -1);
+      if(cycles.find(recStack[i]) != cycles.end())
+        oldCycles.insert(cycles[recStack[i]]);
+      cycleFunctions.insert(recStack[i]);
+    }
+
+    if(cycles.find(F) != cycles.end())
+      oldCycles.insert(cycles[F]);
+
+    Cycle *newCycle;
+
+    //FIXME redundant in case of size = 1
+    if(oldCycles.size())
+      newCycle = mergeCycles(oldCycles);
+    else
+      newCycle = new Cycle;
+     
+    //merge cycle functions 
+    newCycle->nodes.insert(cycleFunctions.begin(), cycleFunctions.end());
+
+    //merge values
+    for(auto &func: cycleFunctions) {
+      newCycle->values.insert(modSet[func].begin(), modSet[func].end());
+    }
+  
+    //update mod sets. FIXME can just replace instead of merging here?
+    for(auto &func: cycleFunctions)
+      modSet[func] = newCycle->values;
+      //modSet[func].insert(newCycle->values.begin(), newCycle->values.end());
+
+    for(auto &cycle: oldCycles)
+      delete cycle;
+
+    //update cycle reference
+    for(auto &func: cycleFunctions)
+      cycles[func] = newCycle;
+
+    return set<GlobalVariable *>();
+  }
+
+  openNodes.insert(F);
+  recStack.push_back(F);
+
+  set<GlobalVariable *> data = modSet[F];
+  for(unsigned i = 0, end = root->size(); i != end; i++) {
+    auto called = (*root)[i];
+    if(!called)
+        continue;
+    set<GlobalVariable *> childData = dfs(called, modSet, openNodes, recStack, cycles);
+    data.insert(childData.begin(), childData.end());
+    //if(calledNode.second->getFunction())
+  }
+
+  openNodes.erase(F);
+  recStack.pop_back();
+  modSet[F] = data;
+  return data;
+}
+
+set<GlobalVariable *> &ConstantFolding::getFuncModset(Function *F) {
+  //assert(modSet.find(F) != modSet.end());
+  if(modSet.find(F) != modSet.end())
+    return modSet[F];
+  else {
+    modSet[NULL] = set<GlobalVariable *>();
+    return modSet[NULL];
+  }
+}
+
+void ConstantFolding::collectModSet(GlobalVariable *gv, map<Function *, set<GlobalVariable *> > &modSet) {
+  for(auto user: gv->users()) {
+    Instruction *I;
+    if(!(I = dyn_cast<Instruction>(user)))
+      continue;
+    Function *F = I->getParent()->getParent();
+    modSet[F].insert(gv);
+  }
+}
+
+void ConstantFolding::collectCallGraphGlobals(CallGraph *CG) {
+  debug(Usama) << "PRINTING CALL GRAPH" << "\n";
+  map<Function *, Cycle * > cycles;
+  set<Function *> openNodes;
+  vector<Function *> recStack;
+
+  for(auto &global: module->global_objects())
+    if(dyn_cast<GlobalVariable>(&global))
+      collectModSet(dyn_cast<GlobalVariable>(&global), modSet);
+  
+  Function *main = CG->getModule().getFunction("main");
+  assert(main);
+  //debug(Usama) << "External calling Node: " << CG->getExternalCallingNode() << "\n";
+  //debug(Usama) << "Calls external Node: " << CG->getCallsExternalNode() << "\n";
+  dfs(CG->begin()->second.get(), modSet, openNodes, recStack, cycles);
+
+  for(auto &kv: modSet) {
+    Function *F = kv.first;
+    errs() << "Function: " << F->getName() << "\n";
+    for(auto &val: kv.second) {
+      errs() << *val << "\n";
+    }
+  }
+}
 //File ProcessInstructions.cpp
 
 /**
@@ -346,7 +517,6 @@ ProcResult ConstantFolding::processAllocaInst(AllocaInst * ai) {
   unsigned size = DL->getTypeAllocSize(ty);
   uint64_t addr = bbOps.allocateStack(size, currBB);
 
-  addToPtrMap(ai, ai);
   pushFuncStack(ai);
   regOps.addRegister(ai, ty, addr);
   debug(Abubakar) << "allocaInst : size " << size << " at address " << addr << "\n";
@@ -365,7 +535,6 @@ ProcResult ConstantFolding::processMallocInst(CallInst * mi) {
   }
   uint64_t addr = bbOps.allocateHeap(size, currBB);  
 
-  addToPtrMap(mi, mi);
   pushFuncStack(mi);
   regOps.addRegister(mi, mi->getType(), addr);
   debug(Abubakar) << "mallocInst : size " << size << " at address " << addr << "\n";  
@@ -391,7 +560,6 @@ ProcResult ConstantFolding::processCallocInst(CallInst * ci) {
   unsigned size = num * bsize;
   uint64_t addr = bbOps.allocateHeap(size, currBB);  
 
-  addToPtrMap(ci, ci);
   pushFuncStack(ci);
   regOps.addRegister(ci, ci->getType(), addr);
   debug(Abubakar) << "callocInst : size " << size << " at address " << addr << "\n";  
@@ -413,7 +581,6 @@ ProcResult ConstantFolding::processBitCastInst(BitCastInst * bi) {
     return NOTFOLDED;
   }
 
-  addToPtrMap(bi, getPointsTo(ptr));
   pushFuncStack(bi);
   regOps.addRegister(bi, bi->getType(), reg->getValue());
   return UNDECIDED;
@@ -435,28 +602,10 @@ ProcResult ConstantFolding::processStoreInst(StoreInst * si) {
     return NOTFOLDED;
   }
 
-  if(reg->getPointsToCount() > 1) {
-    debug(Usama) << "StoreInst: points to count greater than 1\n";
-    if(storeOp->getType()->isPointerTy()) {
-      markPtrNonConst(storeOp, currBB);
-    }
-    return NOTFOLDED;
-  }
-  
-  //if num is a pointer and we have register
-  if(Register *reg = processInstAndGetRegister(storeOp)) {
-    if(storeOp->getType()->isPointerTy()) {
-      addToPtrMap(ptr, getPointsTo(storeOp));
-    }
-  }
-
   bbOps.storeToMem(val, size, addr, currBB);   
   return UNDECIDED;
 }
-ProcResult ConstantFolding::processLoadInst(LoadInst * li) {
-  
-  if(bbOps.partOfLoop(li))
-    return NOTFOLDED;  
+ProcResult ConstantFolding::processLoadInst(LoadInst * li) { 
   
   Value * ptr = li->getOperand(0);
   Register * reg = processInstAndGetRegister(ptr);
@@ -485,7 +634,6 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
     return NOTFOLDED;
   }
   
-  addToPtrMap(gi, getPointsTo(ptr));
 
   unsigned OffsetBits = DL->getPointerTypeSizeInBits(gi->getType());
   APInt offset(OffsetBits, 0); 
@@ -514,7 +662,6 @@ ProcResult ConstantFolding::processMemcpyInst(CallInst * memcpyInst) {
     return NOTFOLDED;
   }
 
-  addToPtrMap(toPtr, getPointsTo(fromPtr));
   
   if(!getSingleVal(sizeVal, size)) {
     debug(Abubakar) << "processMemcpyInst : size not constant\n";
@@ -564,20 +711,14 @@ ProcResult ConstantFolding::processMemSetInst(CallInst * memsetInst) {
  * Try folding phiNodes
  */
 ProcResult ConstantFolding::processPHINode(PHINode * phiNode) {
-  if(bbOps.partOfLoop(phiNode))
-    return NOTFOLDED;
   vector<Value*> incPtrs;
   Value * val = bbOps.foldPhiNode(phiNode, incPtrs);
   //in case not folded, mark all memories as non constant
-  if(!val) {
-    for(auto &val: incPtrs) {
-      if(Value *mem = getPointsTo(val)) {
-        Register *reg = processInstAndGetRegister(mem);
-        uint64_t size = DL->getTypeAllocSize(reg->getType());
-        bbOps.setConstMem(false, reg->getValue(), size, currBB);
-      }
-    }
-  }
+  if(!val)
+    for(auto &val: incPtrs)
+      if(Register *reg = processInstAndGetRegister(val))
+        markMemNonConst(reg->getType(), reg->getValue(), currBB);
+
   if(val && replaceOrCloneRegister(phiNode, val)) {
     debug(Abubakar) << "folded phiNode\n";
     return FOLDED;
@@ -589,9 +730,7 @@ ProcResult ConstantFolding::processPHINode(PHINode * phiNode) {
 /*
  * Try folding simple Instructions like icmps, sext, zexts
  */
-ProcResult ConstantFolding::tryfolding(Instruction * I) {
-  if(bbOps.partOfLoop(I))
-    return NOTFOLDED;
+ProcResult ConstantFolding::tryfolding(Instruction * I) { 
   if(Instruction * sI = simplifyInst(I))
     return tryfolding(sI);
   else {
@@ -676,13 +815,25 @@ ProcResult ConstantFolding::processReturnInst(ReturnInst * retInst) {
   TODO : we should mark the globals accessed by it as non constant.
 
 */
-ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
-  if(bbOps.partOfLoop(callInst)) {
-    markArgsAsNonConst(callInst);
-    return NOTFOLDED;
+void ConstantFolding::markGlobAsNonConst(Function *F) {
+  if(!F)
+    return;
+
+  set<GlobalVariable*> &data = getFuncModset(F);
+  debug(Usama) << "marking globals for " << F->getName() << " as false \n";
+  for(auto &gv: data) {
+    auto reg = processInstAndGetRegister(gv);  
+    if(!reg)
+      continue;
+    errs() << "marking global non constant: " << *gv << "\n";
+    bbOps.setConstMem(false, reg->getValue(), DL->getTypeAllocSize(reg->getType()), currBB);
   }
+}
+
+ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
 
   if(!callInst->getCalledFunction() && !simplifyCallback(callInst)) {
+    //TODO: mark all globals as non constant?
     markArgsAsNonConst(callInst);
     return NOTFOLDED;
   }
@@ -707,6 +858,7 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
     if(useAnnotations && !satisfyConds(calledFunction)) {
       debug(Abubakar) << "skipping function : does not satisfy conds\n";
       markArgsAsNonConst(callInst);
+      markGlobAsNonConst(callInst->getCalledFunction());
       return NOTFOLDED;
     }
     CallInst *clonedInst = cloneAndAddFuncCall(callInst); 
@@ -808,9 +960,12 @@ void ConstantFolding::markArgsAsNonConst(CallInst * callInst) {
     if(!reg)
       continue;
 
-    debug(Usama) << "Marking args as non const. Register value = " << reg->getValue() << "\n";
-
-    bbOps.setConstContigous(false, reg->getValue(), currBB);
+    if(pointerArg->getType()->isPointerTy()) {
+      //assert(reg->getType()  == pointerArg->getType());
+      markMemNonConst(dyn_cast<PointerType>(pointerArg->getType())->getElementType(), reg->getValue(), currBB);
+    } else if(reg) {
+      bbOps.setConstContigous(false, reg->getValue(), currBB); 
+    }
     debug(Abubakar) << "markArgsAsNonConst : index " << index << "\n"; 
   }
 }
@@ -1828,30 +1983,9 @@ ValSet ConstantFolding::popFuncValStack() {
   return pop_back(funcValStack);
 }
 
-void ConstantFolding::addToPtrMap(Value *from, Value *to) {
-  if(!to)
-    return;
-
-  ptrMap[from] = to;
-}
-
-Value *ConstantFolding::getPointsTo(Value *val) {
-  if(ptrMap.find(val) != ptrMap.end())
-    return ptrMap[val];
-  else
-    return NULL;
-}
-
-void ConstantFolding::markPtrNonConst(Value *val, BasicBlock *currBB) {
-  Register *reg = processInstAndGetRegister(val);
-  assert(reg);
-
-  errs() << "setting non constant at address :" << reg->getValue() << "\n";
-  bbOps.setConstMem(false, reg->getValue(), DL->getTypeAllocSize(reg->getType()), currBB);
-}
 
 /*
- * For last processed BB, if after merging, 
+ * For last processed BB, if after merging memory of its preds, 
  * two pointers are non constant, mark their
  * memories as non const
  */
@@ -1859,25 +1993,86 @@ void ConstantFolding::checkPtrMemory(BasicBlock *currBB) {
   vector<BasicBlock*> preds;
   bbOps.getVisitedPreds(currBB, preds);
   
+  errs() << "SIZE : " << preds.size() << "\n";
   for(auto BB: preds) {
     for(auto &I: *BB) {
 
       if(!dyn_cast<StoreInst>(&I))
         continue;
       Value *ptr = dyn_cast<StoreInst>(&I)->getOperand(1);
+      PointerType *type = dyn_cast<PointerType>(ptr->getType());
       Register *reg = processInstAndGetRegister(ptr);
+      if(!reg)
+        continue;
       uint64_t size = DL->getTypeAllocSize(reg->getType()); 
       //if some memory was marked non const after merging
       if(bbOps.checkConstMem(reg->getValue(), size, BB) &&
           !bbOps.checkConstMem(reg->getValue(), size, currBB)) {
-        //if it's a pointer
-        Value *alloca = getPointsTo(ptr);
-        //already non const
-        if(!alloca)
-          continue;
-        
-        markPtrNonConst(alloca, currBB);
+        if(type->getElementType()->isPointerTy()) {
+          uint64_t value = bbOps.loadMem(reg->getValue(), size, BB); //load the pointer in memory
+          markMemNonConst(dyn_cast<PointerType>(type->getElementType())->getElementType(), value, currBB);
+        }
       }
     }
   }
+}
+
+/**
+ * Given a type, and an address to that type, recursively marks memory at that address,
+ * and any addresses (pointers) in the memory of that type as non const
+ */
+
+void ConstantFolding::markMemNonConst(Type *ty, uint64_t address, BasicBlock *BB) {
+  errs() << *ty << " " << address <<  "\n";
+  if(!ty)
+    return;
+
+  if(!address)
+    return;
+
+  //if(!ty->isPointerTy())
+    //return;
+  if(!bbOps.checkConstMem(address, DL->getTypeAllocSize(ty), BB)) {
+    debug(Usama) << "Address already non constant: " << address << "\n";
+    return;
+  }
+
+  if(ty->isStructTy()) {
+
+    errs() << "is struct type" << "\n";
+    auto structLayout = DL->getStructLayout(dyn_cast<StructType>(ty));
+    for(unsigned i = 0; i < ty->getStructNumElements(); i++) {
+      Type *t = ty->getStructElementType(i);
+
+      if(!t->isPointerTy()) {
+        continue;
+      }
+
+      uint64_t offset = address + structLayout->getElementOffset(i);
+      uint64_t size = DL->getTypeAllocSize(t);
+      uint64_t val = bbOps.loadMem(offset, size, BB);
+      markMemNonConst(dyn_cast<PointerType>(t)->getElementType(), val, BB); 
+    }
+  } else if(ty->isArrayTy() || ty->isVectorTy()) {
+    errs() << "is array type " << "\n";
+    auto *arrayTy = dyn_cast<SequentialType>(ty);
+    Type *t = arrayTy->getElementType();
+    unsigned offsetTotal = 0;
+    if(t->isPointerTy()) {
+      errs() << "array pointer ty " <<"\n";
+      for(unsigned i = 0; i < arrayTy->getNumElements(); i++) {
+        uint64_t offset = address + offsetTotal;
+        uint64_t ptrSize = DL->getPointerSize();
+        uint64_t value = bbOps.loadMem(offset, ptrSize, BB);
+        markMemNonConst(dyn_cast<PointerType>(t)->getElementType(), value, BB);
+      }
+    }
+  } else if(ty->isPointerTy()) {
+    PointerType *t = dyn_cast<PointerType>(ty);
+    uint64_t value = bbOps.loadMem(address, DL->getTypeAllocSize(t->getElementType()), BB);
+    markMemNonConst(t->getElementType(), value, BB);
+  }
+
+  errs() << "marking mem non const in loop at address " << address << " to " << address + DL->getTypeAllocSize(ty)  <<"\n";
+  bbOps.setConstContigous(false, address, BB);
 }

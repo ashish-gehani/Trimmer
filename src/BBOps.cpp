@@ -43,7 +43,7 @@ void BBOps::initAndAddBBInfo(BasicBlock * BB, LoopInfo &LI) {
 bool BBOps::partOfLoop(Value * val) {
   if(isa<Instruction>(val) && dyn_cast<Instruction>(val)->getParent())
     return partOfLoop(dyn_cast<Instruction>(val)->getParent());
-  return true;
+  return false;
 }
 bool BBOps::partOfLoop(BasicBlock * BB) {
   assert(BBInfoMap.find(BB) != BBInfoMap.end());

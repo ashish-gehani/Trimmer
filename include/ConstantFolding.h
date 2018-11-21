@@ -52,6 +52,11 @@ typedef vector<BasicBlock *> BBList;
 using namespace llvm;
 using namespace std;
 
+struct Cycle {
+  set<Function *> nodes;
+  set<GlobalVariable *> values;
+};
+
 struct ConstantFolding : public ModulePass {
 
   static char ID;  
@@ -63,6 +68,7 @@ struct ConstantFolding : public ModulePass {
   CallGraph * CG;
   RegOps regOps;
   map<Value*, Value*> ptrMap;
+  map<Function *, set<GlobalVariable *> > modSet;
 
   BasicBlock * currBB;
   bool terminateBB;
@@ -205,11 +211,19 @@ struct ConstantFolding : public ModulePass {
 
   ValSet popFuncValStack();
 
-  void addToPtrMap(Value*, Value *);
-  Value *getPointsTo(Value*);
-  void markPtrNonConst(Value *, BasicBlock *);
-
   void checkPtrMemory(BasicBlock *currBB);
+  void markInstMemNonConst(Instruction *);
+  void markMemNonConst(Type *, uint64_t, BasicBlock *);
+
+  void collectCallGraphGlobals(CallGraph *);
+  void collectModSet(GlobalVariable *, map<Function *, set<GlobalVariable *> > &);
+  set<GlobalVariable *> dfs(CallGraphNode *root, map<Function *, set<GlobalVariable *> >&modSet, set<Function *> &openNodes, vector<Function *> &recStack, map<Function *, Cycle * > &cycles);
+
+  Cycle *mergeCycles(set<Cycle *> &);
+
+  set<GlobalVariable *> &getFuncModset(Function *F);
+  void markGlobAsNonConst(Function *);
+
 };
 
 #endif
