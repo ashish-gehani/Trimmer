@@ -1133,9 +1133,6 @@ void ConstantFolding::createAnnotationList() {
     
     debug(Abubakar) << val->getName() << " will be tracked\n";
     AnnotationList.insert(val);
-    //AnnotationList.insert(module->getFunction("mkCell"));
-    //AnnotationList.insert(module->getFunction("snocString"));
-    errs() << "Inserted custom function " << module->getFunction("snocString") << "\n";
     StringRef stringRef;
   }
 }
