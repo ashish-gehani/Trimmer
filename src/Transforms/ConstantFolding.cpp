@@ -145,8 +145,8 @@ bool ConstantFolding::runOnBB(BasicBlock * BB) {
   bbOps.markVisited(BB);
   currBB = BB;
   ContextInfo * ci = bbOps.getContextInfo(currBB);
-  for(ci->inst = BB->begin(); ci->inst != BB->end(); ci->inst++) {
-    Instruction * I = &*(ci->inst);
+  for(ci->inst = BB->begin(); ci->inst != BB->end();) {
+    Instruction * I = &*(ci->inst++);
 
     if(isLoopTest()) {
       LoopUnroller *unroller = testStack.back();
@@ -252,6 +252,7 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
 
         LI = &getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();
         //TODO hackish way of running on old failed loopHeader
+        LoopUnroller::deleteLoop(failedLoop);
         runOnBB(failedLoop);
       }else {
         //replace old function with new one
@@ -279,8 +280,8 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
           std::vector<Value*> args(ci->arg_begin(), ci->arg_end());
           CallInst *clonedCall = createFuncCall(currfn, args);
           //erase any old replacements from toreplace for this function
-          eraseToReplace(ci, toReplace);
-          toReplace.push_back(make_pair(ci, clonedCall));
+          ReplaceInstWithInst(ci, clonedCall);
+          ci = clonedCall;
         }
         renameFunctions(currfn, oldFn);
         toRun = currfn;
@@ -862,8 +863,8 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
       return NOTFOLDED;
     }
     CallInst *clonedInst = cloneAndAddFuncCall(callInst); 
-    toReplace.push_back(make_pair(callInst, clonedInst));
-    runOnFunction(callInst, clonedInst->getCalledFunction()); 
+    ReplaceInstWithInst(callInst, clonedInst);
+    runOnFunction(clonedInst, clonedInst->getCalledFunction()); 
   }
   return UNDECIDED;  
 }
