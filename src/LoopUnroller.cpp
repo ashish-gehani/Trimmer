@@ -113,3 +113,41 @@ Function *LoopUnroller::getCloneOf() {
 LoopInfo *LoopUnroller::getLoopInfo() {
   return LI;
 }
+
+bool LoopUnroller::deleteLoop(BasicBlock *failed) {
+  CallInst *unrollCall = NULL;
+  for(auto &I: *failed) {
+    if(auto call = dyn_cast<CallInst>(&I))
+      if(call->getCalledFunction() && call->getCalledFunction()->getName() == "unroll_loop")
+        unrollCall = call;
+  }
+
+  if(!unrollCall)
+    return false;
+
+  Module *module = failed->getParent()->getParent();
+  Value * unrollH = module->getNamedValue("unroll_loop");
+  if(!unrollH) return false;
+
+  set<Instruction*> toDelete;
+  toDelete.insert(unrollCall);
+
+  for(auto user: unrollH->users()) {
+    CallInst *call = NULL;
+    if(!(call = dyn_cast<CallInst>(user)))
+        continue;
+
+    assert(call->getNumArgOperands() == 1);
+
+    if(call->getArgOperand(0) == unrollCall->getArgOperand(0))
+      toDelete.insert(call);
+  }
+
+  for(auto &del: toDelete) {
+    errs() << "DELETING: " << *del << "\n";
+    del->dropAllReferences();
+    del->eraseFromParent();
+  }
+
+  return true;
+}
