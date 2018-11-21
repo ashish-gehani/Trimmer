@@ -690,7 +690,7 @@ void AnnotateNew::getBranchAndArgcInstructions(set<BranchInst*> &branches, set<C
           branches.insert(branch);
 
         if(auto callInst = dyn_cast<CallInst>(&I)) {
-          if(callInst->getCalledFunction() && (callInst->getCalledFunction()->getName() == "strncpy" || callInst->getCalledFunction()->getName() == "strcpy"))
+          if(callInst->getCalledFunction() && callInst->getCalledFunction()->isDeclaration())
             calls.insert(callInst);
         }
       }
@@ -828,7 +828,7 @@ BasicBlock *getJoinBb(BasicBlock *current) {
  * Traverse SVFG chain, and get all nodes into which the current node's data flows,
  * e.g. through store, memcpy
  */
-void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &singleLevelPointers, set<SVFGNode*> &storeSvfg, set<CallInst*> calls) {
+void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &singleLevelPointers, set<SVFGNode*> &storeSvfg, set<CallInst*> &calls) {
   //capture single level pointers as well as condition to capture output
 
   auto forwardDfsCondition = [&](SVFGNode* node) {
@@ -855,10 +855,13 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
               }
             }
             if(found) {
-              for(unsigned i = 0; i < 2; i++) {
+              for(unsigned i = 0; i < call->getNumOperands(); i++) {
+                if(!call->getOperand(i)->getType()->isPointerTy())
+                  continue;
                 auto *pagNode = pag->getPAGNode((pag->getValueNode(call->getOperand(i))));
                 storeSvfg.insert((SVFGNode*) svfg->getDefSVFGNode(pagNode));
               }
+              calls.erase(call);
             }
           }
         }
