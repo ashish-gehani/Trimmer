@@ -37,13 +37,17 @@ int getopt_local(int argc, char ** argv, char * opts) {
 
 int getopt_long_local(int argc, char ** argv, char * opts, struct option * long_opts, int * long_index) {
   if(optind == argc) return -1;
-  int i, opt;
+  int i;
+  int opt = -1;
   for(i = optind; i < argc; i++) {
     if(argv[i][0] != '-') continue;
     opt = argv[i][1];
     break;
   }
-  if(optind == argc) return -1;
+  if(opt == -1)
+    return -1;
+
+  if(optind >= argc) return -1;
   optind = i;
   if(argv[i][1] != '-') return getopt_local(argc, argv, opts);
   for(i = 0; long_opts[i].name && strcmp(long_opts[i].name, &argv[optind][2]); i++) {}
