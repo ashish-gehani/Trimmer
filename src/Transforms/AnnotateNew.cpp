@@ -883,7 +883,12 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
   };
 
   //go forward 
-  dfs((SVFGNode*)current, forwardDfsLambda, forwardDfsCondition, storeSvfg);
+  set<SVFGNode *> visited;
+  set<SVFGNode *> *data = dfs_rec((SVFGNode*)current, forwardDfsLambda, forwardDfsCondition, visited, NULL, true);
+
+  for(auto &node: *data) {
+    storeSvfg.insert(node);
+  }
 }
 
 GlobalValue *pointsToGlobal(const User *user) {
@@ -1102,7 +1107,9 @@ void AnnotateNew::getLoadsOnSlps(Value* pointer, set<Value*> &singleLevelLoads) 
 
   processed.insert(pointer);
   set<Value*> visited;
-  dfs((Value*)pointer, genericScalarDfs, isLoadOnSingleLevelPointer, singleLevelLoads); //get all loads of single level pointer 
+  set<Value *> *data = dfs_rec((Value*)pointer, genericScalarDfs, isLoadOnSingleLevelPointer, visited, NULL, true); //get all loads of single level pointer 
+  for(auto &value: *data)
+    singleLevelLoads.insert(value);
 }
 
 void AnnotateNew::classifyVal(Value *value, set<SVFGNode*>& backwardPtr, set<const Value *> &singleLevelPointers, set<Value*>& scalar) {
