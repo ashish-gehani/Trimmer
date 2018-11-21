@@ -308,6 +308,21 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
   regOps.cleanUpFuncBBRegisters(toRun, popFuncValStack());
   if(fi->retReg) addSingleVal(ci, fi->retReg->getValue());
 }
+void ConstantFolding::getTrackedValues(set<Value *> &trackedValues) {
+  for(auto &F: *module) {
+    for(auto &BB: F) {
+      for(auto &I: BB) {
+        if(isAllocaTracked(&I))
+          trackedValues.insert(&I);
+      }
+    }
+  }
+
+  for(auto it = module->global_object_begin(), end = module->global_object_end(); it != end; it++)
+    if(it->getMetadata("track"))
+      trackedValues.insert(&*it);
+}
+
 /*
   Entry point of the pass 
 */
@@ -322,10 +337,8 @@ bool ConstantFolding::runOnModule(Module & M) {
   
   useAnnotations = isAnnotated;  
   trackAllocas = trackAlloc;
-
-  if(useAnnotations) {
-    createAnnotationList();
-    // createAnnotationList2();
+  if(trackAllocas) {
+    getTrackedValues(trackedValues);
   }
 
   collectCallGraphGlobals(CG);
