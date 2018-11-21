@@ -869,7 +869,7 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
         FuncInfo *fi = initializeFuncInfo(calledFunction);
         addFuncInfo(calledFunction, fi);
     }
-    if(useAnnotations && !satisfyConds(calledFunction)) {
+    if(useAnnotations && !satisfyConds(calledFunction, callInst)) {
       debug(Abubakar) << "skipping function : does not satisfy conds\n";
       markArgsAsNonConst(callInst);
       markGlobAsNonConst(callInst->getCalledFunction());
@@ -1210,15 +1210,55 @@ FuncInfo* ConstantFolding::initializeFuncInfo(Function *F) {
   return fi;
 }
 
-bool ConstantFolding::satisfyConds(Function * F) {
+bool ConstantFolding::hasTrackedMalloc(Function *F) {
+  for(auto &BB: *F)
+    for(auto &I: BB)
+      if(isAllocaTracked(&I) && isa<CallInst>(&I))
+        return true;
+
+  return false;
+}
+
+bool ConstantFolding::satisfyConds(Function * F, CallInst *ci) {
   if(fimap.find(F) == fimap.end())
     return false;
 
   FuncInfo* fi = fimap[F];  
-  if(AnnotationList.find(F) != AnnotationList.end()) 
-    return true;
+  if(trackAllocas) {
+    //if any argument is being tracked 
+    for(unsigned i = 0; i < ci->getNumArgOperands(); i++) {
+      Value *argument = ci->getArgOperand(i);
+      if(processInstAndGetRegister(argument)) { //dyn_cast<Constant>(argument) || 
+        debug(Usama) << "(LOG) (SATISFYCONDS) Call " << *ci << " satisfied specializing conditions due to argument " <<  *argument << " at index " << i << "\n";
+        return true;
+      }
+    }
 
-  return !(fi->calledInLoop || fi->addrTaken || fi->directCallInsts > 1); 
+    set<GlobalVariable *> &modData = getFuncModset(F);
+    //vector<Value *> intersection;
+    /*
+    for(auto &modD: modData)
+      if(trackedValues.find(modD) != trackedValues.end()) {
+        debug(Usama) << "(LOG) (SATISFYCONDS) Call " << *ci << " satisfied specializing conditions due to modset" << "\n";
+        return true;
+      }
+      */
+    //set_intersection(modData.begin(), modData.end(), trackedValues.begin(), trackedValues.end(), intersection.begin());
+    //if(intersection.size()) {
+    //}
+
+    //if function has a malloc
+    if(hasTrackedMalloc(F))
+      return true;
+
+    debug(Usama) << "(LOG) (SATISFYCONDS) Call " << *ci << " does not meet specializing conditions" << "\n";
+    return false;
+  } else {
+    if(AnnotationList.find(F) != AnnotationList.end()) 
+        return true;
+
+    return !(fi->calledInLoop || fi->addrTaken || fi->directCallInsts > 1); 
+  }
 }
 
 

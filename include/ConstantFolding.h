@@ -118,7 +118,7 @@ struct ConstantFolding : public ModulePass {
   FuncInfo* initializeFuncInfo(Function *);
   bool isFuncInfoInitialized(Function *F);
   void addFuncInfo(Function *F, FuncInfo *fi);
-  bool satisfyConds(Function *);
+  bool satisfyConds(Function *, CallInst *);
   
   Instruction * simplifyInst(Instruction *);
   CmpInst * foldCmp(CmpInst *);
@@ -226,7 +226,9 @@ struct ConstantFolding : public ModulePass {
   set<GlobalVariable *> &getFuncModset(Function *F);
   void markGlobAsNonConst(Function *);
 
+  bool hasTrackedMalloc(Function *);
   void getTrackedValues(set<Value *> &);
 };
+
 
 #endif
