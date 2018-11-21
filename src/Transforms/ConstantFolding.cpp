@@ -1674,16 +1674,21 @@ bool ConstantFolding::handleLongArgs(CallInst * callInst, option * long_opts,
     addr += 32;
   }
   Value * indexVal = callInst->getOperand(4);
-  reg = processInstAndGetRegister(indexVal);
-  if(!reg) {
-    debug(Abubakar) << "long_index not found\n";
-    return false;
+  errs() << *indexVal << "\n";
+  if(dyn_cast<ConstantPointerNull>(indexVal)) {
+    long_index = NULL;
+  } else {
+    reg = processInstAndGetRegister(indexVal);
+    if(!reg) {
+      debug(Abubakar) << "long_index not found\n";
+      return false;
+    }
+    if(!bbOps.checkConstContigous(reg->getValue(), currBB)) {
+      debug(Abubakar) << "long_index not constant\n";
+      return false;
+    }
+    long_index = (int *) bbOps.getActualAddr(reg->getValue(), currBB);
   }
-  if(!bbOps.checkConstContigous(reg->getValue(), currBB)) {
-    debug(Abubakar) << "long_index not constant\n";
-    return false;
-  }
-  long_index = (int *) bbOps.getActualAddr(reg->getValue(), currBB);
   memset((char *) &long_opts[i], '\0', sizeof(option)); 
   return true;
 }
