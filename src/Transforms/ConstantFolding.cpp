@@ -1272,8 +1272,10 @@ void ConstantFolding::addSingleVal(Value * val, uint64_t num) {
       regOps.addRegister(val, ty, num); 
     }
   } else if(IntegerType * intTy = dyn_cast<IntegerType>(ty)) {
-    debug(Abubakar) << "replacing with constant int\n";
-    replaceIfNotFD(val, ConstantInt::get(intTy, num));
+    if(!ty->isIntegerTy(64)) {
+      debug(Abubakar) << "replacing with constant int\n";
+      replaceIfNotFD(val, ConstantInt::get(intTy, num));
+    }
   }
 }
 
