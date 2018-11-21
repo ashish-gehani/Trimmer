@@ -97,9 +97,9 @@ bool BBOps::needToduplicate(BasicBlock * BB, BasicBlock * from) {
       singlePredFrom = false;
     } 
   }
-  bool noMemWrite = !BBInfoMap[BB]->writesToMemory; 
+  //bool noMemWrite = !BBInfoMap[BB]->writesToMemory; 
   bool singleSuccTo = BBInfoMap[from]->singleSucc != NULL;
-  return !(singlePredFrom && (noMemWrite || singleSuccTo));
+  return !(singlePredFrom && singleSuccTo);
 }
 
 void BBOps::addAncestor(BasicBlock * succ, BasicBlock * anc) {
