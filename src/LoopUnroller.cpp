@@ -52,8 +52,8 @@ bool LoopUnroller::shouldSimplifyLoop(BasicBlock *BB, LoopInfo &LI, Module *m, b
 bool LoopUnroller::getTripCount(TargetLibraryInfo * TLI, AssumptionCache &AC, unsigned &tripCount) {
   BasicBlock *header = loop->getHeader();
   Function * F = loop->getHeader()->getParent();
-  DominatorTree * DT = new DominatorTree(*F);
-  ScalarEvolution SE(*F, *TLI, AC, *DT, *LI);
+  DominatorTree DT(*F);
+  ScalarEvolution SE(*F, *TLI, AC, DT, *LI);
   tripCount =  SE.getSmallConstantMaxTripCount(loop);
   debug(Usama) << "Trip Multiple " << SE.getSmallConstantTripMultiple(loop) << "\n";
 
@@ -82,13 +82,13 @@ bool LoopUnroller::runtest(TargetLibraryInfo * TLI, AssumptionCache &AC) {
 
 bool LoopUnroller::doUnroll(TargetLibraryInfo * TLI, AssumptionCache &AC, unsigned tripCount) {
   Function * F = loop->getHeader()->getParent();
-  DominatorTree * DT = new DominatorTree(*F);
+  DominatorTree DT(*F); 
 
-  ScalarEvolution SE(*F, *TLI, AC, *DT, *LI);
+  ScalarEvolution SE(*F, *TLI, AC, DT, *LI);
   Loop * L = LI->getLoopFor(loop->getHeader());
   OptimizationRemarkEmitter ORE(F); 
   int UnrollResult = UnrollLoop(L, tripCount, tripCount, true, false, false, 
-                true, false, 1, 0, LI, &SE, DT, &AC, &ORE, PreserveLCSSA);
+                true, false, 1, 0, LI, &SE, &DT, &AC, &ORE, PreserveLCSSA);
   if(!UnrollResult) {
     debug(Abubakar) << "failed in unrolling\n";
     return false;
