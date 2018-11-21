@@ -28,19 +28,7 @@ add_library(SpecializeArguments MODULE
 add_library(Remove MODULE
   Remove.cpp
   )
-add_library(AnnotateConfig MODULE
-  ../Utils.cpp
-  ../StringUtils.cpp
-  ../BBOps.cpp
-  ../Debug.cpp
-  ConstantFolding.cpp
-  ../VecUtils.cpp
-  ../GetOptLocal.cpp
-  ../RegOps.cpp
-  ../LoopUnroller.cpp
-  AnnotateConfig.cpp
-  ../LoopUnrollTest.cpp
-  )
+
 #[[
 add_library(RemFuncBody MODULE
   RemFuncBody.cpp
@@ -64,12 +52,11 @@ target_compile_features(SpecializeArguments PRIVATE cxx_range_for cxx_auto_type)
 target_compile_features(Remove PRIVATE cxx_range_for cxx_auto_type)
 #target_compile_features(RemFuncBody PRIVATE cxx_range_for cxx_auto_type)
 target_compile_features(ListFunctions PRIVATE cxx_range_for cxx_auto_type)
-target_compile_features(AnnotateConfig PRIVATE cxx_range_for cxx_auto_type)
 target_compile_features(AnnotateNew PRIVATE cxx_range_for cxx_auto_type)
 
 # LLVM is (typically) built with no C++ RTTI. We need to match that;
 # otherwise, we'll get linker errors about missing RTTI data.
-set_target_properties(ConstantFolding Internalize TestPass Annotate SpecializeArguments Remove ListFunctions AnnotateConfig #RemFuncBody 
+set_target_properties(ConstantFolding Internalize TestPass Annotate SpecializeArguments Remove ListFunctions #RemFuncBody 
   PROPERTIES
   COMPILE_FLAGS "-fPIC -D__GLIBCXX_USE_CXX11_ABI=0 -fno-rtti -g"
   LINK_FLAGS "-rdynamic"
