@@ -45,7 +45,7 @@ struct AnnotateNew: public ModulePass {
   void run(GlobalValue* argv, Value *, set<const Value*> &);
   void getBranchAndArgcInstructions(set<BranchInst*> &branches, set<CallInst*> &calls, set<Instruction*> &argcValues);
   void getMemoryFlow(const SVFGNode *current, set<const Value *> &singleLevelPointers, set<SVFGNode*> &storeSvfg, set<CallInst*> calls);
-  void getSourceAllocas(set<SVFGNode*> &, vector<const SVFGNode*> &, set<const Value*> &, bool trackLoops = true);
+  void getSourceAllocas(set<SVFGNode*> &, vector<const SVFGNode*> &, set<const Value*> &, bool trackLoops = true, bool dpMem = true);
   void getStoreSvfg(set<Value*> &, set<SVFGNode*> &);
   SVFGNode *getSvfgNode(Value *);
   void getAnalysisUsage(AnalysisUsage &AU) const; 

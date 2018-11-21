@@ -33,6 +33,7 @@ static cl::opt<int> isAnnotated("isAnnotated",
 
 set<SVFGNode*> forwardDp;
 set<Value*> slpLoadDp;
+set<SVFGNode *> backwardDp;
 
 using namespace std;
 using namespace analysisUtil;
@@ -408,7 +409,18 @@ vector<SVFGNode*> AnnotateNew::forwardDfsLambda(SVFGNode *current) {
   return worklist;
 }
 
+vector<SVFGNode*> backwardDfsLambdaDp(SVFGNode *current) {
+  vector<SVFGNode*> worklist;
+  if(backwardDp.find(current) != backwardDp.end())
+    return worklist;
 
+  backwardDp.insert(current);
+  for(auto it = current->InEdgeBegin(), end = current->InEdgeEnd(); it != end; it++) {
+    worklist.push_back((*it)->getSrcNode());
+  }
+  errs() << "Node: " << current << " Size: " <<  worklist.size() << "\n";
+  return worklist;
+}
 
 vector<SVFGNode*> backwardDfsLambda(SVFGNode *current) {
   vector<SVFGNode*> worklist;
@@ -885,7 +897,7 @@ GlobalValue *pointsToGlobal(const User *user) {
 }
 
 
-void AnnotateNew::getSourceAllocas(set<SVFGNode*> &svfgNodes, vector<const SVFGNode*> &worklistSvfg, set<const Value*> &trackedAllocas, bool trackLoops) {
+void AnnotateNew::getSourceAllocas(set<SVFGNode*> &svfgNodes, vector<const SVFGNode*> &worklistSvfg, set<const Value*> &trackedAllocas, bool trackLoops, bool dpMem) {
 
   auto backwardDfsCondition = [&](SVFGNode* node) {
     if(auto casted = dyn_cast<StmtSVFGNode>(node)) {
@@ -931,7 +943,10 @@ void AnnotateNew::getSourceAllocas(set<SVFGNode*> &svfgNodes, vector<const SVFGN
     set<SVFGNode*> visited;
     if(temp->getInst()) {
       errs() << "Backward dp size:" << backwardDp.size() << "\n";
-      data = dfs_rec(*it, backwardDfsLambda, backwardDfsCondition, visited, &backwardDp, trackLoops);
+      if(dpMem)
+        data = dfs_rec(*it, backwardDfsLambdaDp, backwardDfsCondition, visited, &backwardDp, trackLoops);
+      else
+        data = dfs_rec(*it, backwardDfsLambda, backwardDfsCondition, visited, &backwardDp, trackLoops);
       errs() << "Data: " << data << "\n";
     }
 
@@ -1233,7 +1248,7 @@ void AnnotateNew::getBranchMemory(set<BranchInst *> &allBranches, map<Value *, s
         svfgNodes.insert((SVFGNode*)svfgNode);
       }
 
-      getSourceAllocas(svfgNodes, worklistSvfg, allocs, false);
+      getSourceAllocas(svfgNodes, worklistSvfg, allocs, false, false);
       
         //set<SVFGNode*> visited;
         //set<SVFGNode*> *poss = dfs_rec<SVFGNode*>((SVFGNode*) svfgNode, backwardDfsLambda, conditionLambda, visited);  
