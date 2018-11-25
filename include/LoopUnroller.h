@@ -27,6 +27,7 @@ class LoopUnroller {
   bool getTripCount(TargetLibraryInfo * TLI, AssumptionCache &, unsigned &);
   bool runtest(TargetLibraryInfo * TLI, AssumptionCache &);
   LoopInfo *getLoopInfo();
+  bool checkIfFileIOLoop(Loop * L);
 
   bool checkPassed();
   void setCloneOf(Function *);
