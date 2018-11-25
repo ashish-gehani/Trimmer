@@ -8,10 +8,19 @@ def run_test(workdir, lo, hi):
     script_dir = os.path.dirname(os.path.realpath(__file__))
     os.chdir(script_dir)
     for i in xrange(lo, hi + 1):
-        if not os.path.isfile(os.path.join(script_dir, '../src', 'inter' + str(i) + '.c')):
-            continue	
+        fileName = "../data/configFile" + str(i) + ".txt";
+        if os.path.isfile(os.path.join(script_dir, '../src/ConstProp/', 'inter' + str(i) + '.c')):
+            srcPath = 'src/ConstProp/'
+        else:
+            if os.path.isfile(os.path.join(script_dir, '../src/LoopUnroll/', 'inter' + str(i) + '.c')):
+                srcPath = 'src/LoopUnroll/'		
+	    else:
+                if os.path.isfile(os.path.join(script_dir, '../src/FileIO/', 'inter' + str(i) + '.c')):
+                    srcPath = 'src/FileIO/'
+                else:
+                    continue	
         print 'running test ' + str(i)
-        Cmd = './script.sh inter' + str(i) + ' out' + str(i) + ' ' + workdir
+        Cmd = './script.sh inter' + str(i) + ' out' + str(i) + ' ' + workdir + ' ' + srcPath + ' ' + fileName
         subprocess.call(Cmd, shell = True)	
 
 def main():
