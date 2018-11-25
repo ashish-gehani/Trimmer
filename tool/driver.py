@@ -73,17 +73,16 @@ def run_argspec(tool):
 	if(tool.icp_flag): 
 		# interconstprop pass
 		Cmd = opt + ' -load ' + build_path + 'ConstantFolding.so -isAnnotated=true -mem2reg \
-		-mergereturn -simplifycfg -loops -lcssa -loop-simplify -loop-rotate -inter-constprop ' + add_file + ' -o '\
-		+ constprop_file
-		printDbgMsg(Cmd)
+		-mergereturn -simplifycfg -loops -lcssa -loop-simplify -loop-rotate -inter-constprop -fileNames ' + tool.config_files + ' ' + add_file + ' -o '+ constprop_file		
+                printDbgMsg(Cmd)
 
 		Cmd = [opt, '-load', build_path + 'ConstantFolding.so', '-isAnnotated=true', '-mem2reg',
-		'-mergereturn', '-simplifycfg', '-loops', '-lcssa', '-loop-simplify', '-loop-rotate', '-inter-constprop', add_file , '-o',
+		'-mergereturn', '-simplifycfg', '-loops', '-lcssa', '-loop-simplify', '-loop-rotate', '-inter-constprop','-fileNames',tool.config_files, add_file , '-o',
 		constprop_file]
 		f = open(constprop_log_file, "wb")
 		printDbgMsg(Cmd)
 
-		subprocess.call(Cmd, stdout=f)
+		subprocess.call(Cmd, stderr=f)
 		f.close()
 		# remove pass
 		Cmd = opt + ' -load ' + build_path + 'Remove.so -remove ' + constprop_file\
