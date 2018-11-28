@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <string.h>
+//tests open, read and lseek 2
+
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -71,6 +73,7 @@ int parse_input(char  * fname, struct Config * config) {
     }
     num++;
   } 
+  close(fd);
   return 1;
 }
 
@@ -90,7 +93,7 @@ void branchPruned(struct Config * config) {
 
 int main(int argc, char ** argv) {
   struct Config * config = get_new_config();
-  parse_input("inter36_fileio.txt", config);
+  parse_input("../data/configFile36.txt", config);
   branchPruned(config);
   return 0;
 }

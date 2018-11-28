@@ -1,3 +1,5 @@
+//tests open and read
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -11,10 +13,11 @@ void branchPruned(int size, char * buffer) {
 
 int main(int argc, char ** argv) {
   char buffer[100];
-  int fd = open("inter30_fileio.txt", O_RDONLY);
+  int fd = open("../data/configFile30.txt", O_RDONLY);
   if(fd < 0) printf("file not found\n");
   int bytes_read = read(fd, buffer, 100);
   buffer[bytes_read] = '\0';
   branchPruned(bytes_read, buffer);
+  close(fd);
   return 0;
 }

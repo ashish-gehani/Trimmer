@@ -32,6 +32,7 @@
 #include "llvm/Analysis/OptimizationDiagnosticInfo.h"
 
 #include <getopt.h>
+#include <list>
 
 #ifndef INTERCONSTPROP_H_
 #define INTERCONSTPROP_H_
@@ -43,6 +44,8 @@
 #include "FuncInfo.h"
 #include "RegOps.h"
 #include "LoopUnroller.h"
+#include "FileInsts.h"
+#include "MMapInfo.h"
 
 typedef map<Function *, FuncInfo *> FuncInfoMap;
 typedef pair<Instruction *, Instruction *> InstPair;
@@ -89,6 +92,11 @@ struct ConstantFolding : public ModulePass {
   bool trackAllocas;
   set<Value *> AnnotationList;
   map<int, uint64_t> fdInfoMap; 
+  map<uint64_t,FileInsts*> fileIOCalls;
+  list<string> configFileNames;
+  int numConfigFiles;
+  vector<MMapInfo*> mMapBuffer; 
+  ValueToValueMapTy vmap;
 
   ConstantFolding(): ModulePass(ID){}
   void getAnalysisUsage(AnalysisUsage &AU) const;
@@ -137,20 +145,38 @@ struct ConstantFolding : public ModulePass {
   void handleStrpbrk(CallInst * );
   void simplifyStrFunc(CallInst *);
   void handleAtoi(CallInst *);
+  void handleStrCaseCmp(CallInst *); 
 
   bool handleGetOpt(CallInst *);  
   bool handleLongArgs(CallInst *, option *, int *&);
   
-  int initfdi(int); 
+  int initfdi(int,char*); 
+  int initfptr(FILE*,char*); 
   bool getfdi(int, int &);
+  bool getfptr(int, FILE* &);
   void setfdiUntracked(int);
+  bool getfdiUntracked(int);
   void setfdiOffset(int, int);
+  int getfdiOffset(int, int);
+  void setfptrOffset(int, FILE*);
+  int getfptrOffset(int, FILE*);
   bool handleFileIOCall(CallInst *);
-  void handleFileIOOpen(CallInst *);
-  void handleFileIORead(CallInst *);
-  void handleFileIOLSeek(CallInst *);
-    
+  void handleOpen(CallInst *);
+  void handleFOpen(CallInst *);
+  void handleRead(CallInst *);
+  void handlePRead(CallInst *);
+  void handleMMap(CallInst *);
+  void handleMUnmap(CallInst *);
+  void handleFRead(CallInst *);
+  void handleLSeek(CallInst *);
+  void handleFSeek(CallInst *);
+  void handleFGets(CallInst *);
+  void handleClose(CallInst *);
+  void handleFClose(CallInst *);
+  void removeFileIOCallsFromMap(string buffer[],uint64_t);
+      
   void replaceUses();
+  void deleteFileIOCalls();
   void markArgsAsNonConst(CallInst* callInst);
   void addGlobals();
   void initializeGlobal(uint64_t, Constant *);

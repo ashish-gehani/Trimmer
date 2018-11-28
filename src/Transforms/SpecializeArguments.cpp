@@ -78,8 +78,26 @@ namespace {
       _main->getBasicBlockList().push_front(bb);
       IRBuilder<> ir(bb);
 
-      Function * mf = M.getFunction(StringRef("malloc"));         
-      Function * mcf = M.getFunction(StringRef("llvm.memcpy.p0i8.p0i8.i64"));         
+      Function * mallocFunc = M.getFunction(StringRef("malloc")); 
+      vector<Type *> mallocArgs;
+      mallocArgs.push_back(Type::getInt64Ty(M.getContext()));
+      FunctionType * mallocFT = FunctionType::get(Type::getInt8PtrTy(M.getContext()), mallocArgs, false);      
+      
+      if(!mallocFunc)
+      	mallocFunc= Function::Create(mallocFT, GlobalValue::ExternalLinkage, "malloc", &M);
+	
+      Function * llvmMemCpyFunc = M.getFunction(StringRef("llvm.memcpy.p0i8.p0i8.i64"));  
+
+      vector<Type*> llvmMemCpyArgs;
+      llvmMemCpyArgs.push_back(Type::getInt8PtrTy(M.getContext()));
+      llvmMemCpyArgs.push_back(Type::getInt8PtrTy(M.getContext()));
+      llvmMemCpyArgs.push_back(Type::getInt64Ty(M.getContext()));
+      llvmMemCpyArgs.push_back(Type::getInt32Ty(M.getContext()));
+      llvmMemCpyArgs.push_back(Type::getInt1Ty(M.getContext()));
+
+      FunctionType * llvmMemCpyFT = FunctionType::get(Type::getVoidTy(M.getContext()), llvmMemCpyArgs, false);      
+      if(!llvmMemCpyFunc)
+      	llvmMemCpyFunc = Function::Create(llvmMemCpyFT, GlobalValue::ExternalLinkage, "llvm.memcpy.p0i8.p0i8.i64", &M);
 
       ConstantInt * align = ConstantInt::get(int32Ty, 0);
       ConstantInt * isvolatile = ConstantInt::get(int1Ty, 0);
@@ -103,7 +121,7 @@ namespace {
       errs() << *argv_new << "\n";
       vector<Value *> args;
       args.push_back(ConstantInt::get(int64Ty, (index_count + 1) * 8)); 
-      CallInst * mallocCall =  ir.CreateCall(mf, ArrayRef<Value *>(args));
+      CallInst * mallocCall =  ir.CreateCall(mallocFunc, ArrayRef<Value *>(args));
       Value * bitcast =  ir.CreateBitCast(mallocCall, argv->getType());
       ir.CreateStore(bitcast, argv_new);   
       for (unsigned i = 0; i < arguments.size(); i++) {
@@ -113,7 +131,7 @@ namespace {
           vector<Value *> args;
           ConstantInt * stringSize = ConstantInt::get(int64Ty, 100);
           args.push_back(stringSize);
-          CallInst * mallocCall =  ir.CreateCall(mf, ArrayRef< Value *>(args));
+          CallInst * mallocCall =  ir.CreateCall(mallocFunc, ArrayRef< Value *>(args));
           ir.CreateStore(mallocCall, newArgptr); 
           Value * destPtr = ir.CreateLoad(newArgptr);
           errs() << arguments[i] << " " << i << "\n";
@@ -123,7 +141,7 @@ namespace {
           functionArgs.push_back(stringSize);
           functionArgs.push_back(align);
           functionArgs.push_back(isvolatile);
-          ir.CreateCall(mcf, ArrayRef<Value*>(functionArgs));
+          ir.CreateCall(llvmMemCpyFunc, ArrayRef<Value*>(functionArgs));
           Value * gep = ir.CreateConstGEP1_32(destPtr, arguments[i].size());
           ir.CreateStore(strTerm, gep);
         } else {

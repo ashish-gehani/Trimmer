@@ -58,7 +58,11 @@ bool LoopUnroller::getTripCount(TargetLibraryInfo * TLI, AssumptionCache &AC, un
   debug(Usama) << "Trip Multiple " << SE.getSmallConstantTripMultiple(loop) << "\n";
 
   if(!tripCount) {
-    tripCount = DEFAULT_TRIP_COUNT + 5;
+    bool isFileIOLoop = checkIfFileIOLoop(loop);
+    if(isFileIOLoop)
+      tripCount = DEFAULT_TRIP_COUNT * 5;
+    else
+      tripCount = DEFAULT_TRIP_COUNT + 5;
     return false;
   }
   return true;
@@ -150,4 +154,21 @@ bool LoopUnroller::deleteLoop(BasicBlock *failed) {
   }
 
   return true;
+}
+
+bool LoopUnroller::checkIfFileIOLoop(Loop * L) {
+  for (Loop::block_iterator LoopIter = L->block_begin(), End = L->block_end(); LoopIter != End; ++LoopIter) {
+    BasicBlock * B = *LoopIter;
+    for (auto Inst = B->begin(), J = B->end(); Inst != J; ++Inst) {
+       if(strcmp(Inst->getOpcodeName(),"call")==0){
+          CallInst* callInst = dyn_cast<CallInst>(Inst);
+          string funcname = callInst->getCalledFunction()->getName().str();
+          if(funcname.compare("fread")== 0 || funcname.compare("read")== 0 || funcname.compare("fgets")== 0 || funcname.compare("pread")== 0){
+            return true;            
+          }
+      }
+    }
+  }
+
+  return false;
 }

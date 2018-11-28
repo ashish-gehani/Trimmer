@@ -1,3 +1,4 @@
+//tests constant propagation, strcmp and memcpy
 
 #include<stdio.h>
 #include<string.h>

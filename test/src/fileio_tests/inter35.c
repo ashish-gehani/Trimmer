@@ -1,3 +1,5 @@
+//tests open, read and lseek 2
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -30,10 +32,11 @@ void readConfig() {
 }
 
 int main(int argc, char ** argv) {
-  int fd = open("inter34_fileio.txt", O_RDONLY);
+  int fd = open("../data/configFile35.txt", O_RDONLY);
   if(fd < 0) printf("file not found\n");
   initConfig(argv[1], fd);
   readConfig();
   branchNotPruned(config->buffer);
+  close(fd);
   return 0;
 }

@@ -82,7 +82,7 @@ def run_argspec(tool):
 		f = open(constprop_log_file, "wb")
 		printDbgMsg(Cmd)
 
-		subprocess.call(Cmd)
+		subprocess.call(Cmd, stderr=f)
 		f.close()
                 disassemble(constprop_file)
 		# remove pass

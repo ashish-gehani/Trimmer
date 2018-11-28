@@ -1,3 +1,5 @@
+/* This Test is expected to specialized the func function such that a branch is pruned out in one case and not pruned in other case as it depends on command-line argument*/
+
 #include<stdio.h>
 #include<string.h>
 #include<stdlib.h>

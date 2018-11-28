@@ -24,6 +24,9 @@
 #include "llvm/IR/ValueMap.h"
 #include "llvm/Transforms/Utils/Cloning.h"
 #include "llvm/Analysis/CallGraph.h"
+#include "llvm/IR/InstrTypes.h"
+#include "llvm/IR/DerivedTypes.h"
+
 
 
 #include <unistd.h>
@@ -39,11 +42,16 @@
 #include <stdio.h>
 #include <sstream>
 #include <fcntl.h>
+#include <algorithm>
+#include <sys/mman.h>
+#include <sys/types.h>
 
 #include "ConstantFolding.h"
 #include "Utils.h"
 #include "StringUtils.h"
 #include "FdInfo.h"
+#include "FileInsts.h"
+#include "MMapInfo.h"
 #include "GetOptLocal.h"
 
 using namespace llvm;
@@ -51,6 +59,9 @@ using namespace std;
 
 
 //File InterConstProp.cpp
+
+static cl::list<std::string> fileNames("fileNames",cl::ZeroOrMore, cl::desc("config filenames to specialize for"),cl::CommaSeparated);
+
 static cl::opt<bool> isAnnotated("isAnnotated",
                   cl::desc("are annotations found or should the whole program be tracked"));
 static cl::opt<bool> trackAlloc("trackAllocas",cl::init(false),
@@ -275,6 +286,21 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
           pushFuncStack(t);  
 
         delete unroller;
+
+        for (map<uint64_t,FileInsts*>::iterator it=fileIOCalls.begin(); it!=fileIOCalls.end(); ++it){
+          for(int i = (it->second)->insertedSeekCalls.size() -1; i >= 0; i--) { 
+            if(vmap[(it->second)->insertedSeekCalls[i]]){
+              (it->second)->insertedSeekCalls[i] = dyn_cast<Instruction>(vmap[(it->second)->insertedSeekCalls[i]]);  
+            }
+          } 
+
+          for(int i = (it->second)->insts.size() -1; i >= 0; i--) {
+            if(vmap[(it->second)->insts[i]]){
+              (it->second)->insts[i] = dyn_cast<Instruction>(vmap[(it->second)->insts[i]]);  
+            }
+          }
+        }
+        
         // if not main function
         if(ci) {
           std::vector<Value*> args(ci->arg_begin(), ci->arg_end());
@@ -337,11 +363,16 @@ bool ConstantFolding::runOnModule(Module & M) {
   
   useAnnotations = isAnnotated;  
   trackAllocas = trackAlloc;
-  if(trackAllocas) {
+  if(trackAllocas)
     getTrackedValues(trackedValues);
+
+  for (auto &fileName:fileNames){
+    debug(Abubakar) <<fileName <<"\n";
+    configFileNames.push_back(fileName);
   }
 
   collectCallGraphGlobals(CG);
+  numConfigFiles = rand() % 100000000 + 100000; 
 
   Function * func = module->getFunction(StringRef("main"));
   BasicBlock * entry = &func->getEntryBlock();
@@ -364,6 +395,7 @@ bool ConstantFolding::runOnModule(Module & M) {
   runOnFunction(NULL, func);
 
   replaceUses();
+  deleteFileIOCalls();
 
   return true;
 }   
@@ -961,6 +993,34 @@ void ConstantFolding::replaceUses() {
   }
 }
 
+void ConstantFolding::deleteFileIOCalls() {
+  for (map<uint64_t,FileInsts*>::iterator it=fileIOCalls.begin(); it!=fileIOCalls.end(); ++it){
+    bool isSpecialized = (it->second)->isSpecialized;
+    if(isSpecialized == true){
+      for(int i = (it->second)->insertedSeekCalls.size() -1; i >= 0; i--) {  
+         (it->second)->insertedSeekCalls[i]->eraseFromParent();  
+      } 
+    }
+    vector<Instruction*> insts = (it->second)->insts;
+    for(int i = insts.size() -1; i >= 0; i--) {
+      debug(Abubakar) << "insts  " << dyn_cast<CallInst>(insts[i])->getCalledFunction()->getName().data() <<insts[i]->getNumUses()<<"\n"; 
+      if(insts[i]->getNumUses() > 0){
+        CallInst *Inst = dyn_cast<CallInst>(insts[i]); 
+        if(strcmp(Inst->getCalledFunction()->getName().data(),"open")==0){
+          llvm::Type * type = llvm::IntegerType::getInt32Ty(module->getContext());
+          llvm::Constant *zeroVal = llvm::ConstantInt::get(type, 0, true);  
+          insts[i]->replaceAllUsesWith(zeroVal);
+        } 
+        else if(strcmp(Inst->getCalledFunction()->getName().data(),"fopen")==0){              
+          ConstantPointerNull * nullP = ConstantPointerNull::get(dyn_cast<PointerType>(insts[i]->getType()));     
+          insts[i]->replaceAllUsesWith(nullP);
+        } 
+      }
+      insts[i]->eraseFromParent();
+    }   
+  }
+}
+
 void ConstantFolding::markArgsAsNonConst(CallInst * callInst) {
   Function* calledFunction = callInst->getCalledFunction();
   if(calledFunction && ignorefunc(calledFunction))
@@ -1447,6 +1507,7 @@ bool ConstantFolding::visitBB(BasicBlock * succ, BasicBlock *  from) {
 bool ConstantFolding::handleStringFunc(CallInst * callInst) {
   string name = callInst->getCalledFunction()->getName();
   if(simpleStrFunc(name))   simplifyStrFunc(callInst);
+  else if(name == "strcasecmp") handleStrCaseCmp(callInst);
   else if(name == "strchr") handleStrChr(callInst);
   else if(name == "strpbrk")handleStrpbrk(callInst);
   else if(name == "atoi")   handleAtoi(callInst);
@@ -1500,6 +1561,43 @@ void ConstantFolding::simplifyStrFunc(CallInst * callInst) {
   if (Value *With = Simplifier.optimizeCall(callInst)) {
     replaceIfNotFD(callInst, With);
   }
+}
+
+void ConstantFolding::handleStrCaseCmp(CallInst * callInst)
+{
+
+  debug(Abubakar) << " in str case cmp"<< "\n";
+  Value * bufPtr0 = callInst->getOperand(0);
+  Value * bufPtr1 = callInst->getOperand(1);  
+
+  Register * reg0 = processInstAndGetRegister(bufPtr0);  
+  Register * reg1 = processInstAndGetRegister(bufPtr1); 
+
+   
+  if(!reg0) {
+        debug(Abubakar) << "handleStrCaseCmp: not found in map"<< "\n";
+        return;
+  }
+
+  if(!reg1) {
+    debug(Abubakar) << "handleStrCaseCmp: not found in map"<< "\n";
+    return;
+  }
+
+  if(!bbOps.checkConstContigous(reg0->getValue(), currBB) || !bbOps.checkConstContigous(reg1->getValue(), currBB)) {
+    debug(Abubakar) << "handleStrCaseCmp: non constant"<< "\n";
+    return;
+  }    
+
+  char * buffer0 = (char *) bbOps.getActualAddr(reg0->getValue(), currBB);
+  char * buffer1 = (char *) bbOps.getActualAddr(reg1->getValue(), currBB);
+
+  int result = strcasecmp(buffer0,buffer1);
+
+  debug(Abubakar) << result << "\n";
+  IntegerType * int32Ty = IntegerType::get(module->getContext(), 32);
+  replaceIfNotFD(callInst, ConstantInt::get(int32Ty, result));     
+    
 }
 
 void ConstantFolding::handleStrChr(CallInst * callInst) {
@@ -1583,119 +1681,793 @@ void ConstantFolding::handleAtoi(CallInst * callInst) {
 
 //File FileIO.cpp
 
-int ConstantFolding::initfdi(int fd) {
-	uint64_t addr = bbOps.allocateHeap(sizeof(FdInfo), currBB);
-	FdInfo * fdi = (FdInfo *) bbOps.getActualAddr(addr, currBB);
-	fdi->fd = fd;
-	fdi->offset = 0;
-	fdi->tracked = true;
-	srand(time(NULL));
-	int sfd = rand() % 100000000 + 100000;
-	fdInfoMap[sfd] = addr;
-	return sfd;
+/*
+   The following code specializes File IO Calls such as open, read, pread, lseek, fopen, fread, fgets, fseek, mmap, munmap, close,fclose
+
+   For each opened file, a File Structure (FdInfo) is defined which stores its file pointer (in case of fopen()), 
+   file descriptor (in case of open()), file name, current offset and a tracked boolean, which tells whether it can be specialized 
+   or not. File Open calls will be only specialized if they are successful and have constant arguments.
+
+   File Read calls will be specialized if they are successful and there exist a valid File structure associated with it 
+   (initialized when file is opened) and a valid buffer,where the contents of file read will be stored. 
+   Also the size of the file contents to be read and the offset of the file should be constant. Similarly, for File Seek Calls,
+   offset and flag should be constant.
+
+   After File Read Calls, the buffer where the file data is stored is marked as constant and the calls are replaced with memcpys instructions. 
+   
+   Additional File Seek calls are added for replacing File Read Calls in case the file is not completely specialized. We are handling partial specialization.
+
+   All File IO calls are added to fileIOCalls map so that if they are successfully specialized, they can be deleted at the end.
+
+*/
+
+
+/**
+ * Allocates and Initializes File Structure (FDInfo) for open() call
+ * Saves the address of structure in FdInfoMap
+ */
+
+int ConstantFolding::initfdi(int fd,char* fname) {
+  uint64_t addr = bbOps.allocateHeap(sizeof(FdInfo), currBB);
+  FdInfo * fdi = (FdInfo *) bbOps.getActualAddr(addr, currBB);
+  fdi->fd = fd;
+  fdi->offset = 0;
+  fdi->tracked = true;
+  fdi->fileName = fname;
+  int sfd = numConfigFiles;
+  numConfigFiles++;
+  fdInfoMap[sfd] = addr;
+  return sfd;
 }
+
+/**
+ * Allocates and Initializes File Structure (FDInfo) for fopen() call
+ * Saves the address of structure in FdInfoMap
+ */
+
+int ConstantFolding::initfptr(FILE *fptr, char* fname) {
+  uint64_t addr = bbOps.allocateHeap(sizeof(FdInfo),currBB);
+  FdInfo * fdi = (FdInfo *) bbOps.getActualAddr(addr,currBB);
+  fdi->fd = 0;
+  fdi->fptr = fptr;
+  fdi->offset = 0;
+  fdi->tracked = true;
+  fdi->fileName = fname;
+  int sfd = numConfigFiles;
+  numConfigFiles++;  
+  fdInfoMap[sfd] = addr;
+
+  return sfd;
+}
+
+/**
+ * Returns true if a valid File Descriptor is found in FdInfoMap
+ * For read, pread, lseek, mmap, close only
+ */
 
 bool ConstantFolding::getfdi(int sfd, int & fd) {
-	uint64_t addr = fdInfoMap[sfd];
-	if(!bbOps.checkConstContigous(addr, currBB)) {
-		debug(Abubakar) << "skipping non constant fd\n";
-		return false;
-	}
-	FdInfo * fdi = (FdInfo *) bbOps.getActualAddr(addr, currBB);
-	if(!fdi->tracked) { 
-		debug(Abubakar) << "skipping untracked fd\n";
-		return false;
-	}
-	fd = fdi->fd;
-	lseek(fd, fdi->offset, SEEK_SET);
-	return true;
+  uint64_t addr = fdInfoMap[sfd];
+  if(!bbOps.checkConstContigous(addr, currBB)) {
+    debug(Abubakar) << "skipping non constant fd\n";
+    return false;
+  }
+  FdInfo * fdi = (FdInfo *) bbOps.getActualAddr(addr, currBB);
+  if(!fdi->tracked) { 
+    debug(Abubakar) << "skipping untracked fd\n";
+    return false;
+  }
+  fd = fdi->fd;
+  lseek(fd, fdi->offset, SEEK_SET);
+  return true;
 }
 
-void ConstantFolding::setfdiUntracked(int sfd) {
-	((FdInfo *) bbOps.getActualAddr(fdInfoMap[sfd], currBB))->tracked = false;
+/**
+ * Returns true if a valid File Pointer is found in FdInfoMap
+ * For fread, fgets, fseek, fclose only
+ */
+
+bool ConstantFolding::getfptr(int sfd, FILE *& fptr) {
+  uint64_t addr = fdInfoMap[sfd];
+  if(!bbOps.checkConstContigous(addr,currBB)) {
+    debug(Abubakar) << "skipping non constant fptr\n";
+    return false;
+  }
+  FdInfo * fdi = (FdInfo *) bbOps.getActualAddr(addr,currBB);
+  if(!fdi->tracked) { 
+    debug(Abubakar) << "skipping untracked fptr\n";
+    return false;
+  }
+  fptr = fdi->fptr;
+  fseek(fptr, fdi->offset, SEEK_SET);
+  return true;
 }
+
+/**
+ * Sets tracking of File as false
+ * Set as false in two cases: 
+ * 1.FileIO Calls can not be specialized e.g, arguments are non-constant
+ * 2.FileIO functions returns an error
+ */
+void ConstantFolding::setfdiUntracked(int sfd) {
+  ((FdInfo *) bbOps.getActualAddr(fdInfoMap[sfd], currBB))->tracked = false;
+}
+
+
+/**
+ * Get tracked value of a File
+ */
+
+bool ConstantFolding::getfdiUntracked(int sfd) {
+  return ((FdInfo *) bbOps.getActualAddr(fdInfoMap[sfd], currBB))->tracked;
+}
+
+/**
+ * Sets File offset to the new offset of the File after it has being read or seeked
+ * For read, pread and lseek only
+ */
 
 void ConstantFolding::setfdiOffset(int sfd, int fd) {
-	((FdInfo *) bbOps.getActualAddr(fdInfoMap[sfd], currBB))->offset = lseek(fd, 0, SEEK_CUR);
+  ((FdInfo *) bbOps.getActualAddr(fdInfoMap[sfd], currBB))->offset = lseek(fd, 0, SEEK_CUR);
 }
+
+/**
+ * Get File offset
+ */
+
+int ConstantFolding::getfdiOffset(int sfd, int fd) {
+  return ((FdInfo *) bbOps.getActualAddr(fdInfoMap[sfd], currBB))->offset;
+}
+
+/**
+ * Sets File offset to the new offset of the File after it has being read or seeked
+ * For fread, fgets and fseek only
+ */
+
+void ConstantFolding::setfptrOffset(int sfd, FILE *fptr) {
+  ((FdInfo *) bbOps.getActualAddr(fdInfoMap[sfd],currBB))->offset = ftell(fptr);
+
+}
+
+/**
+ * Get File offset
+ */
+int ConstantFolding::getfptrOffset(int sfd, FILE *fptr) {
+  return ((FdInfo *) bbOps.getActualAddr(fdInfoMap[sfd],currBB))->offset;
+
+}
+
+/**
+ * Handle File IO calls such as open, read, pread,lseek,close,fopen,fread,fgets,fseek,fclose, map, munmap
+ */
 
 bool ConstantFolding::handleFileIOCall(CallInst * ci) {
-	string name = ci->getCalledFunction()->getName();
-	if(name == "open") 		 handleFileIOOpen(ci);
-	else if(name == "read")  handleFileIORead(ci);
-	else if(name == "lseek") handleFileIOLSeek(ci);
-	else return false;
-	return true;
+  string name = ci->getCalledFunction()->getName();
+  if(name == "open")  handleOpen(ci);
+  else if(name == "fopen") handleFOpen(ci);
+  else if(name == "read")  handleRead(ci);
+  else if(name == "fread")  handleFRead(ci);
+  else if(name == "lseek")  handleLSeek(ci);
+  else if(name == "fseek")  handleFSeek(ci);
+  else if(name == "pread")  handlePRead(ci);
+  else if(name == "mmap")  handleMMap(ci);
+  else if(name == "munmap")  handleMUnmap(ci);
+  else if(name == "fgets")  handleFGets(ci);
+  else if (name == "close")  handleClose(ci);
+  else if (name == "fclose")  handleFClose(ci);
+  else return false;
+  return true;
 }
 
-void ConstantFolding::handleFileIOOpen(CallInst * ci) {
-	Value * nameptr = ci->getOperand(0);
-	char * fname;
-	Value * flagVal = ci->getOperand(1);
-	uint64_t flag; 
-	if(!getStr(nameptr, fname, 100)) {
-		debug(Abubakar) << "handleFileIOOpen : fname not found in map\n";
-		return;
-	}
-	if(!getSingleVal(flagVal, flag)) {
-		debug(Abubakar) << "handleFileIOOpen : flag not constant\n";
-		return;   
-	}
-	int fd = open(fname, flag);
-	if(fd < 0) return;
-	fd = initfdi(fd);
-	addSingleVal(ci, fd);
+/**
+ * Handle open() calls
+ * Opens the file and if call is succesful, it creates, initializes and saves the File Structure (FDInfo) for that file
+ */
+
+void ConstantFolding::handleOpen(CallInst * ci) {
+  Value * nameptr = ci->getOperand(0);
+  char * fname;
+  Value * flagVal = ci->getOperand(1);
+  uint64_t flag; 
+  if(!getStr(nameptr, fname, 100)) {
+    debug(Abubakar) << "handleOpen : fname not found in map\n";
+    return;
+  }
+  if(!getSingleVal(flagVal, flag)) {
+    debug(Abubakar) << "handleOpen : flag not constant\n";
+    return;   
+  }
+  if (std::find(std::begin(configFileNames), std::end(configFileNames), fname) != std::end(configFileNames) && flag==0){
+    int fd = open(fname, flag);
+    if(fd < 0) return;
+    fd = initfdi(fd,fname);
+    addSingleVal(ci, fd);
+    FileInsts* insts = new FileInsts();
+    insts->insts.push_back(ci);
+    insts->isSpecialized = true;
+    fileIOCalls[fd] = insts;
+  } else {
+    debug(Usama) << "open not specialized" << "\n";
+  }
 }
 
-void ConstantFolding::handleFileIORead(CallInst * ci) {
-	Value * fdVal = ci->getOperand(0);
-	Value * bufPtr = ci->getOperand(1);
-	Value * sizeVal = ci->getOperand(2);
-	uint64_t sfd, size;
-	int fd;
-	bool fdConst = getSingleVal(fdVal, sfd) && getfdi(sfd, fd);
-	Register * reg = processInstAndGetRegister(bufPtr);  
-	if(!reg || !fdConst || !getSingleVal(sizeVal, size)) {
-		debug(Abubakar) << "handleFileIORead : failed to specialize\n";
-		if(fdConst) setfdiUntracked(sfd);
-		if(reg) bbOps.setConstContigous(false, reg->getValue(), currBB);
-		return;   
-	}
-	char * buffer = (char *) bbOps.getActualAddr(reg->getValue(), currBB);
-	int bytes_read = read(fd, buffer, size);
-	if(bytes_read < 0) {
-		debug(Abubakar) << "handleFileIORead : read returned error\n";
-		setfdiUntracked(sfd);
-		bbOps.setConstContigous(false, reg->getValue(), currBB);
-		return;   		
-	}
-	bbOps.setConstMem(true, reg->getValue(), bytes_read, currBB);
-	setfdiOffset(sfd, fd);
-	addSingleVal(ci, bytes_read);
-}
-void ConstantFolding::handleFileIOLSeek(CallInst * ci) {
-	Value * fdVal = ci->getOperand(0);
-	Value * offSetVal = ci->getOperand(1);
-	Value * flagVal = ci->getOperand(2);
-	uint64_t sfd, offset, flag;
-	int fd;
-	bool fdConst = getSingleVal(fdVal, sfd) && getfdi(sfd, fd);
-	if(!fdConst || !getSingleVal(offSetVal, offset) || 
-		!getSingleVal(flagVal, flag)) {
-		if(fdConst) setfdiUntracked(sfd);
-		debug(Abubakar) << "handleFileIOLSeek : failed to specialize\n";
-		return;   
-	}	
-	int ret = lseek(fd, offset, flag);
-	if(ret < 0) { 
-		setfdiUntracked(sfd);
-		debug(Abubakar) << "handleFileIOLSeek : seek returned error\n";
-		return;
-	}
-	setfdiOffset(sfd, fd);
-	addSingleVal(ci, ret);
+/**
+ * Handle fopen() calls
+ * Opens the file and if call is succesful, it creates, initializes and saves the File Structure (FDInfo) for that file
+ */
+
+void ConstantFolding::handleFOpen(CallInst * ci) {
+  Value * nameptr = ci->getOperand(0);
+  char * fname;
+  Value * modVal = ci->getOperand(1);
+  char * fmode;
+  if(!getStr(nameptr, fname, 100)) {
+    debug(Abubakar) << "handleFOpen : fname not found in map\n";
+    return;
+  }
+  if(!getStr(modVal,fmode,100)) {
+    debug(Abubakar) << "handleFOpen : fmode not found in map\n";
+    return;   
+  }
+  if (std::find(std::begin(configFileNames), std::end(configFileNames), fname) != std::end(configFileNames) && (strcmp(fmode,"rb")==0 || strcmp(fmode,"r")==0)){
+    FILE* fptr = fopen(fname, fmode);
+    if(!fptr) return;
+    int fd = initfptr(fptr,fname);
+    addSingleVal(ci, fd);
+    FileInsts* insts = new FileInsts();
+    insts->insts.push_back(ci);
+    insts->isSpecialized = true;
+    fileIOCalls[fd] = insts;
+  }
 }
 
+/**
+ * Handle read() calls
+ * Reads the file and if call is successful, it initializes and sets the buffer(where the file data is read to) to constant
+ * Add llvm.memcpy instruction to replace read calls
+ * Also updates the file offset
+ * Seek call added for partial specialization
+ */
+
+void ConstantFolding::handleRead(CallInst * ci) {
+  Value * fdVal = ci->getOperand(0);
+  Value * bufPtr = ci->getOperand(1);
+  Value * sizeVal = ci->getOperand(2);
+  uint64_t sfd, size;
+  int fd;
+  bool fdConst = getSingleVal(fdVal, sfd) && getfdi(sfd, fd);  
+  Register * reg = processInstAndGetRegister(bufPtr);  
+  if(!reg || !fdConst || !getSingleVal(sizeVal, size)) {
+    debug(Abubakar) << "handleRead : failed to specialize\n";
+    if(reg) bbOps.setConstContigous(false, reg->getValue(), currBB);
+    if(fdConst) setfdiUntracked(sfd);
+    if(getSingleVal(fdVal, sfd)){
+      string funcNames[2];
+      funcNames[0] = "open";
+      funcNames[1] = "lseek";
+      removeFileIOCallsFromMap(funcNames, sfd);    
+    }  
+    return;   
+  }
+  char * buffer = (char *) bbOps.getActualAddr(reg->getValue(), currBB);
+  int bytes_read = read(fd, buffer, size);
+
+  if(bytes_read < 0) {
+    debug(Abubakar) << "handleRead : read returned error\n";
+    setfdiUntracked(sfd);
+    bbOps.setConstContigous(false, reg->getValue(), currBB);
+    string funcNames[2];
+    funcNames[0] = "open";
+    funcNames[1] = "lseek";
+    removeFileIOCallsFromMap(funcNames, sfd);    
+    return;   		
+  }
+  bbOps.setConstMem(true, reg->getValue(), bytes_read, currBB);
+  setfdiOffset(sfd, fd);
+  addSingleVal(ci, bytes_read);
+  buffer[bytes_read] = '\0';
+
+  Constant * const_array = ConstantDataArray::getString(module->getContext(),StringRef(buffer),true);
+  GlobalVariable * gv = new GlobalVariable(*module,const_array->getType(),true,GlobalValue::ExternalLinkage,const_array,"");
+  gv->setAlignment(1);
+  IRBuilder<> Builder(ci);
+  Instruction* MemCpyInst = Builder.CreateMemCpy(bufPtr,gv,bytes_read,1);
+  
+  Constant *hookFunc;
+  hookFunc = module->getOrInsertFunction("lseek", Type::getInt64Ty(module->getContext()), Type::getInt32Ty(module->getContext()),Type::getInt64Ty(module->getContext()),Type::getInt32Ty(module->getContext()),NULL);    
+  Function *hook= cast<Function>(hookFunc);
+
+  ConstantInt * arg1 = Builder.getInt32(fd);
+  ConstantInt * arg2 = Builder.getInt64(getfdiOffset(sfd,fd));
+  ConstantInt * arg3 = Builder.getInt32(0);
+  std::vector <llvm::Value*> putsArgs;
+  putsArgs.push_back(arg1);
+  putsArgs.push_back(arg2);
+  putsArgs.push_back(arg3);
+  CallInst * seek = Builder.CreateCall(hook,putsArgs);
+            
+  fileIOCalls[sfd]->insts.push_back(ci);
+  fileIOCalls[sfd]->insertedSeekCalls.push_back(seek);
+}
+
+/**
+ * Handle pread() calls
+ * Reads the file and if call is successful, it initializes and sets the buffer(where the file data is read to) to constant
+ * Add llvm.memcpy instruction to replace read calls
+ * Also updates the file offset
+ */
+
+void ConstantFolding::handlePRead(CallInst * ci) {
+  Value * fdVal = ci->getOperand(0);
+  Value * bufPtr = ci->getOperand(1);
+  Value * sizeVal = ci->getOperand(2);
+  Value * offsetVal = ci->getOperand(3);
+  uint64_t sfd, size,offset;
+  int fd;
+  bool fdConst = getSingleVal(fdVal, sfd) && getfdi(sfd, fd);
+  Register * reg = processInstAndGetRegister(bufPtr);  
+  if(!reg || !fdConst || !getSingleVal(sizeVal, size)|| !getSingleVal(offsetVal, offset)) {
+    debug(Abubakar) << "handlePRead : failed to specialize\n";
+    if(reg) bbOps.setConstContigous(false, reg->getValue(),currBB); 
+    if(fdConst) setfdiUntracked(sfd);
+    if(getSingleVal(fdVal, sfd)){
+      string funcNames[2];
+      funcNames[0] = "open";
+      funcNames[1] = "open";
+      removeFileIOCallsFromMap(funcNames, sfd);          
+    }
+    return;   
+  }
+  char * buffer = (char *) bbOps.getActualAddr(reg->getValue(),currBB);
+  int bytes_read = pread(fd, buffer, size,offset);
+  if(bytes_read < 0) {
+    debug(Abubakar) << "handlePRead : read returned error\n";
+    setfdiUntracked(sfd);
+    bbOps.setConstContigous(false, reg->getValue(),currBB); 
+    string funcNames[2];
+    funcNames[0] = "open";
+    funcNames[1] = "open";
+    removeFileIOCallsFromMap(funcNames, sfd);    
+    return;   
+	
+  }
+  bbOps.setConstMem(true, reg->getValue(), bytes_read,currBB);
+  addSingleVal(ci, bytes_read);
+
+  Constant * const_array = ConstantDataArray::getString(module->getContext(),StringRef(buffer),true);
+  GlobalVariable * gv = new GlobalVariable(*module,const_array->getType(),true,GlobalValue::ExternalLinkage,const_array,"");
+  gv->setAlignment(1);
+  IRBuilder<> Builder(ci);
+  Instruction* MemCpyInst = Builder.CreateMemCpy(bufPtr,gv,bytes_read,1);
+  fileIOCalls[sfd]->insts.push_back(ci);
+}
+
+//handles mmap calls
+
+void ConstantFolding::handleMMap(CallInst * ci) {
+  Value * bufPtr = ci->getOperand(0);
+  Value * sizeVal = ci->getOperand(1);
+  Value * flagVal1 = ci->getOperand(2);
+  Value * flagVal2 = ci->getOperand(3);
+  Value * fdVal = ci->getOperand(4);
+  Value * offsetVal = ci->getOperand(5);
+  uint64_t sfd, size,offset,flag1,flag2;
+  int fd;
+  bool fdConst = getSingleVal(fdVal, sfd) && getfdi(sfd, fd);
+  Register * reg = processInstAndGetRegister(bufPtr); 
+
+  if(!fdConst || !getSingleVal(offsetVal, offset)|| !getSingleVal(flagVal1, flag1)|| !getSingleVal(flagVal2, flag2)) {
+    debug(Abubakar) << "handleMMap : failed to specialize\n";
+    if(fdConst) setfdiUntracked(sfd);
+    if(getSingleVal(fdVal, sfd)){
+      string funcNames[2];
+      funcNames[0] = "open";
+      funcNames[1] = "open";
+      removeFileIOCallsFromMap(funcNames, sfd);         
+    }
+    return;   
+
+  }
+  char * buffer;
+  if(!reg)
+    buffer = NULL;
+  else
+    buffer = (char *) bbOps.getActualAddr(reg->getValue(),currBB);
+
+  uint64_t addr = fdInfoMap[sfd];
+  FdInfo * fdi = (FdInfo *) bbOps.getActualAddr(addr,currBB);
+
+  if(!getSingleVal(sizeVal, size)){
+
+    struct stat st;
+    stat(fdi->fileName,&st);
+    size = st.st_size;
+      
+  } 
+  char* mmappedData = (char*)mmap(buffer,size,flag1,flag2,fd,offset);
+  if (mmappedData == MAP_FAILED){
+    debug(Abubakar) << "handleMMap : read returned error\n";
+    setfdiUntracked(sfd);
+    string funcNames[2];
+    funcNames[0] = "open";
+    funcNames[1] = "open";
+    removeFileIOCallsFromMap(funcNames, sfd);      
+    return;     		
+  }
+
+  uint64_t addr1 = bbOps.allocateHeap(sizeof(mmappedData),currBB);
+  char * buffer1 = (char *) bbOps.getActualAddr(addr1,currBB);
+  strcpy(buffer1,mmappedData);
+
+  Constant * const_array = ConstantDataArray::getString(module->getContext(),StringRef(mmappedData),true);
+  GlobalVariable * gv = new GlobalVariable(*module,const_array->getType(),true,GlobalValue::ExternalLinkage,const_array,"");
+  gv->setAlignment(1);
+  IRBuilder<> Builder(ci);
+  Value * BitCastInst = Builder.CreateBitCast(gv, PointerType::getUnqual(llvm::IntegerType::getInt8Ty(module->getContext())));
+  ci->replaceAllUsesWith(BitCastInst);
+  fileIOCalls[sfd]->insts.push_back(ci);
+  MMapInfo* mmapInfo = new MMapInfo();
+  mmapInfo->sfd = sfd;
+  mmapInfo->buffer = mmappedData;
+  mMapBuffer.push_back(mmapInfo);
+  addSingleVal(BitCastInst,addr1);
+
+}
+
+//handle munmap calls
+void ConstantFolding::handleMUnmap(CallInst * ci) {
+
+  Value * bufPtr = ci->getOperand(0);
+  Value * sizeVal = ci->getOperand(1);
+  uint64_t sfd, size;
+  char* mmappedData;
+  bool hasCorrespondingMmap = false;
+
+  
+  Register * reg = processInstAndGetRegister(bufPtr);
+  if(!reg) {
+    debug(Abubakar) << "handleMUnmap : failed to specialize\n";
+    return;
+   }
+
+  char * buffer =  (char*)bbOps.getActualAddr(reg->getValue(),currBB);
+
+
+  for(int i =0; i < mMapBuffer.size();i++)
+  {
+    
+    if(strcmp(buffer,mMapBuffer[i]->buffer)==0)
+    {
+     debug(Abubakar) <<"sfd equals "<<mMapBuffer[i]->sfd <<"\n";
+     debug(Abubakar) <<"buffer equals "<<mMapBuffer[i]->buffer <<"\n";
+     sfd = mMapBuffer[i]->sfd;
+     mmappedData = mMapBuffer[i]->buffer;
+     hasCorrespondingMmap = true;
+     break;
+    }
+
+  }
+
+
+  if(!getSingleVal(sizeVal, size)){
+    size =1;
+  }
+
+  int ret = munmap(mmappedData,size);
+  if (ret!=0){
+    debug(Abubakar) << "handleMUnmap : read returned error\n";
+    if(hasCorrespondingMmap){
+      setfdiUntracked(sfd);
+      string funcNames[2];
+      funcNames[0] = "open";
+      funcNames[1] = "mmap";
+     removeFileIOCallsFromMap(funcNames, sfd);    
+    }
+    return;   		
+  }
+
+  addSingleVal(ci, ret);
+  fileIOCalls[sfd]->insts.push_back(ci);
+  
+}
+
+
+/**
+ * Handle fread() calls
+ * Reads the file and if call is successful, it initializes and sets the buffer(where the file data is read to) to constant
+ * Add llvm.memcpy instruction to replace read calls
+ * Also updates the file offset
+ * Seek call added for partial specialization
+ */
+
+void ConstantFolding::handleFRead(CallInst * ci) {
+  Value * bufPtr = ci->getOperand(0);
+  Value * sizeVal = ci->getOperand(1);
+  Value * numVal = ci->getOperand(2);
+  Value * fptrVal = ci->getOperand(3);
+  uint64_t sfd, size,num;
+  FILE* fptr;
+  bool fdConst = getSingleVal(fptrVal, sfd) && getfptr(sfd, fptr);
+  Register * reg = processInstAndGetRegister(bufPtr);  
+  if(!reg || !fdConst || !getSingleVal(sizeVal, size) || !getSingleVal(numVal, num)) {
+    debug(Abubakar) << "handleFRead : failed to specialize\n";
+    if(reg) bbOps.setConstContigous(false, reg->getValue(),currBB); 
+    if(fdConst) setfdiUntracked(sfd);
+    if(getSingleVal(fptrVal, sfd)){
+      string funcNames[2];
+      funcNames[0] = "fopen";
+      funcNames[1] = "fseek";
+      removeFileIOCallsFromMap(funcNames, sfd);    
+
+    }
+    return;   
+  }
+  char * buffer = (char *) bbOps.getActualAddr(reg->getValue(),currBB);
+  int bytes_read = fread(buffer,size,num,fptr);
+  if(bytes_read < 0) {
+    debug(Abubakar) << "handleFRead : read returned error\n";
+    setfdiUntracked(sfd);
+    bbOps.setConstContigous(false, reg->getValue(),currBB); 
+    string funcNames[2];
+    funcNames[0] = "fopen";
+    funcNames[1] = "fseek";
+    removeFileIOCallsFromMap(funcNames, sfd);    
+    return;   
+  }
+  bbOps.setConstMem(true, reg->getValue(), bytes_read,currBB);
+  setfptrOffset(sfd, fptr);
+  addSingleVal(ci, bytes_read);
+  buffer[bytes_read] = '\0';
+
+  Constant * const_array = ConstantDataArray::getString(module->getContext(),StringRef(buffer),true);
+  GlobalVariable * gv = new GlobalVariable(*module,const_array->getType(),true,GlobalValue::ExternalLinkage,const_array,"");
+  gv->setAlignment(1);
+  IRBuilder<> Builder(ci);
+  Instruction* MemCpyInst = Builder.CreateMemCpy(bufPtr,gv,bytes_read,1);
+  Constant *hookFunc;
+  hookFunc = module->getOrInsertFunction("fseek", Type::getInt32Ty(module->getContext()),fptrVal->getType(),Type::getInt64Ty(module->getContext()),Type::getInt32Ty(module->getContext()),NULL);    
+  Function *hook= cast<Function>(hookFunc);
+
+  ConstantInt * arg2 = Builder.getInt64(getfptrOffset(sfd,fptr));
+  ConstantInt * arg3 = Builder.getInt32(0);
+  std::vector <llvm::Value*> putsArgs;
+  putsArgs.push_back(fptrVal);
+  putsArgs.push_back(arg2);
+  putsArgs.push_back(arg3);
+  CallInst * seek = Builder.CreateCall(hook,putsArgs);
+            
+  fileIOCalls[sfd]->insts.push_back(ci);
+  fileIOCalls[sfd]->insertedSeekCalls.push_back(seek);
+
+}
+
+/**
+ * Handle fgets() calls
+ * Reads the file and if call is successful, it initializes and sets the buffer(where the file data is read to) to constant
+ * Add llvm.memcpy instruction to replace read calls
+ * Also updates the file offset
+ * Seek call added for partial specialization
+ */
+
+void ConstantFolding::handleFGets(CallInst * ci) {
+  Value * bufPtr = ci->getOperand(0);
+  Value * sizeVal = ci->getOperand(1);
+  Value * fptrVal = ci->getOperand(2);
+  uint64_t sfd, size;
+  FILE* fptr;
+  bool fdConst = getSingleVal(fptrVal, sfd) && getfptr(sfd, fptr);
+  Register * reg = processInstAndGetRegister(bufPtr);  
+  if(!reg || !fdConst || !getSingleVal(sizeVal, size)) {
+    debug(Abubakar) << "handleFGets : failed to specialize\n";
+    if(reg) bbOps.setConstContigous(false, reg->getValue(),currBB); 
+    if(fdConst) setfdiUntracked(sfd);
+    if(getSingleVal(fptrVal, sfd)){
+      string funcNames[2];
+      funcNames[0] = "fopen";
+      funcNames[1] = "fseek";
+     removeFileIOCallsFromMap(funcNames, sfd);    
+    }  
+    return;   
+  }
+  char * buffer = (char *) bbOps.getActualAddr(reg->getValue(),currBB);
+  char * oldBuffer = new char(strlen(buffer) + 1);
+  int index = 0;
+  for(index=0;index<strlen(buffer);index++){
+    oldBuffer[index] = buffer[index];
+  }
+  oldBuffer[index] = '\0';
+  
+  char* bytes_read = fgets(buffer,size,fptr);
+
+  if(strcmp(buffer,oldBuffer)==0){
+    debug(Abubakar) << "handleFGets : read NULL value\n";
+    ConstantPointerNull * nullP = ConstantPointerNull::get(dyn_cast<PointerType>(bufPtr->getType()));     
+    ci->replaceAllUsesWith(nullP);
+    fileIOCalls[sfd]->insts.push_back(ci);
+
+  }
+
+  else if(bytes_read == NULL) {
+    debug(Abubakar) << "handleFGets : read returned error\n";
+    setfdiUntracked(sfd);
+    bbOps.setConstContigous(false, reg->getValue(),currBB); 
+    string funcNames[2];
+    funcNames[0] = "fopen";
+    funcNames[1] = "fseek";
+    removeFileIOCallsFromMap(funcNames, sfd);    
+    return;   
+  }
+
+  else{
+    bbOps.setConstMem(true, reg->getValue(), strlen(bytes_read),currBB);
+    setfptrOffset(sfd, fptr);
+
+    Constant * const_array = ConstantDataArray::getString(module->getContext(),StringRef(buffer),true);
+    GlobalVariable * gv = new GlobalVariable(*module,const_array->getType(),true,GlobalValue::ExternalLinkage,const_array,"");
+    gv->setAlignment(1);
+    IRBuilder<> Builder(ci);
+    Instruction* MemCpyInst = Builder.CreateMemCpy(bufPtr,gv,strlen(bytes_read),1);
+    ci->replaceAllUsesWith(bufPtr);
+    Constant *hookFunc;
+    hookFunc = module->getOrInsertFunction("fseek", Type::getInt32Ty(module->getContext()),fptrVal->getType(),Type::getInt64Ty(module->getContext()),Type::getInt32Ty(module->getContext()),NULL);    
+    Function *hook= cast<Function>(hookFunc);
+
+    ConstantInt * arg2 = Builder.getInt64(getfptrOffset(sfd,fptr));
+    ConstantInt * arg3 = Builder.getInt32(0);
+    std::vector <llvm::Value*> putsArgs;
+    putsArgs.push_back(fptrVal);
+    putsArgs.push_back(arg2);
+    putsArgs.push_back(arg3);
+    CallInst * seek = Builder.CreateCall(hook,putsArgs);
+            
+    fileIOCalls[sfd]->insts.push_back(ci);
+    fileIOCalls[sfd]->insertedSeekCalls.push_back(seek);
+
+  }
+}
+
+/**
+ * Handle lseek() calls
+ * Updates the file offset if the call is successful
+ */
+
+void ConstantFolding::handleLSeek(CallInst * ci) {
+  Value * fdVal = ci->getOperand(0);
+  Value * offSetVal = ci->getOperand(1);
+  Value * flagVal = ci->getOperand(2);
+  uint64_t sfd, offset, flag;
+  int fd;
+  bool fdConst = getSingleVal(fdVal, sfd) && getfdi(sfd, fd);
+  if(!fdConst || !getSingleVal(offSetVal, offset) || 
+  !getSingleVal(flagVal, flag)) {
+    if(fdConst) setfdiUntracked(sfd);
+    if(getSingleVal(fdVal, sfd)){
+      string funcNames[2];
+      funcNames[0] = "open";
+      funcNames[1] = "lseek";
+      removeFileIOCallsFromMap(funcNames, sfd);    
+    }  
+    return;   
+  }	
+  int ret = lseek(fd, offset, flag);
+  if(ret < 0) { 
+    setfdiUntracked(sfd);
+    debug(Abubakar) << "handleLSeek : seek returned error\n";
+    string funcNames[2];
+    funcNames[0] = "open";
+    funcNames[1] = "lseek";
+    removeFileIOCallsFromMap(funcNames, sfd);    
+    return;   
+
+  }
+  setfdiOffset(sfd, fd);
+  addSingleVal(ci, ret);
+  fileIOCalls[sfd]->insts.push_back(ci);
+}
+
+/**
+ * Handle fseek() calls
+ * Updates the file offset if the call is successful
+ */
+
+void ConstantFolding::handleFSeek(CallInst * ci) {
+  Value * fptrVal = ci->getOperand(0);
+  Value * offSetVal = ci->getOperand(1);
+  Value * flagVal = ci->getOperand(2);
+  uint64_t sfd, offset, flag;
+  FILE* fptr;
+  bool fdConst = getSingleVal(fptrVal, sfd) && getfptr(sfd, fptr);
+  if(!fdConst || !getSingleVal(offSetVal, offset) || 
+  !getSingleVal(flagVal, flag)) {
+    if(fdConst) setfdiUntracked(sfd);
+    if(getSingleVal(fptrVal, sfd)){
+      string funcNames[2];
+      funcNames[0] = "fopen";
+      funcNames[1] = "fseek";
+      removeFileIOCallsFromMap(funcNames, sfd);    
+    }  
+    return;    
+  }	
+  int ret = fseek(fptr, offset, flag);
+  if(ret != 0) { 
+    setfdiUntracked(sfd);
+    debug(Abubakar) << "handleFSeek : seek returned error\n";
+    string funcNames[2];
+    funcNames[0] = "fopen";
+    funcNames[1] = "fseek";
+    removeFileIOCallsFromMap(funcNames, sfd);    
+    return;
+  }
+  setfptrOffset(sfd, fptr);
+  addSingleVal(ci, ret);
+  fileIOCalls[sfd]->insts.push_back(ci);
+}
+
+/**
+ * handle close() calls
+ * Just add them to FileIOCalls map 
+ */
+
+void ConstantFolding::handleClose(CallInst * ci) {
+  Value * fdVal = ci->getOperand(0);
+  uint64_t sfd;
+  int fd;
+  bool fdConst = getSingleVal(fdVal, sfd) && getfdi(sfd, fd);
+  if(!fdConst){
+    debug(Abubakar) << "handleClose : failed to specialize\n";
+    if(getSingleVal(fdVal, sfd)){
+      string funcNames[2];
+      funcNames[0] = "open";
+      funcNames[1] = "open";
+      removeFileIOCallsFromMap(funcNames, sfd);
+    }  
+    return;   
+  }    
+  close(fd);
+  fileIOCalls[sfd]->insts.push_back(ci);
+}
+
+/**
+ * handle fclose() calls
+ * Just add them to FileIOCalls map 
+ */
+
+void ConstantFolding::handleFClose(CallInst * ci) {
+  Value * fptrVal = ci->getOperand(0);
+  uint64_t sfd;
+  FILE* fptr;
+  bool fdConst = getSingleVal(fptrVal, sfd)&& getfptr(sfd, fptr);
+  if(!fdConst){
+    debug(Abubakar) << "handleFClose : failed to specialize\n";
+    if(getSingleVal(fptrVal, sfd)){
+       string funcNames[2];
+       funcNames[0] = "fopen";
+       funcNames[1] = "fopen";
+       removeFileIOCallsFromMap(funcNames, sfd);
+    }  
+    return;   
+  }   
+  fclose(fptr); 
+  fileIOCalls[sfd]->insts.push_back(ci);
+}
+
+void ConstantFolding::removeFileIOCallsFromMap(string buffer[],uint64_t sfd) {
+
+  vector<Instruction*> insts = fileIOCalls[sfd]->insts;
+  vector<Instruction*>::iterator it = insts.begin() ;
+  while (it != insts.end()){
+    CallInst *Inst = dyn_cast<CallInst>(*it); 
+    if((Inst->getCalledFunction()->getName().str()).compare(buffer[0])==0 || (Inst->getCalledFunction()->getName().str()).compare(buffer[1])==0){
+      it = insts.erase(it);
+    }
+    else{
+      ++it; 
+    } 
+  }   
+      
+  fileIOCalls[sfd]->insts = insts;
+  fileIOCalls[sfd]->isSpecialized = false;
+
+}
 
 bool ConstantFolding::handleLongArgs(CallInst * callInst, option * long_opts,
   int *& long_index) {

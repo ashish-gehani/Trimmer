@@ -17,6 +17,7 @@ class Trimmer:
         self.ldflags = ' '.join(man_data["ldflags"])
         self.native_libs = ' '.join(man_data["native_libs"])
         self.exe_name = man_data["binary"]
+        self.config_files = ','.join(man_data["config_files"])
         self.work_dir = work_dir
         self.opt_flag = opt_flag
         self.spec_flag = spec_flag
@@ -35,6 +36,7 @@ class Trimmer:
         print 'native_libs are ' + self.native_libs
         print 'exe name is ' + self.exe_name
         print 'work_dir is ' + self.work_dir
+        print 'config_files are ' + self.config_files
 
     def run(self):
         self.curr_file = self.work_dir + '/' + self.main

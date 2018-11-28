@@ -41,13 +41,14 @@ The manifest file for curl (one of the example programs) is shown below:
 
 ``` 
 {
-   "binary": "curl_fin", 
+    "binary": "curl_fin", 
     "native_libs": [], 
     "name": "curl", 
     "args": ["--compress", "--http1.1", "--ipv4", "--ssl", "ftp://speedtest.tele2.net"],
     "modules": [], 
     "ldflags": ["-lz", "-lcurl"], 
     "main": "curl.bc"
+    "config_files": []
  }
  ```
 
@@ -73,26 +74,31 @@ Test cases directory: /test/src
 * Includes a suite of multiple test cases used to measure the effectiveness of TRIMMER in debloating unused code 
  
  **Test script synopsis**:
+
+For tests placed in test/src/ConstProp, test/src/LoopUnroll and test/src/FileIO
  
 ```
 cd test/scripts
 python test.py ${path_to_workdir} ${test_start} ${test_end} 
-``` 
+
+ 
  
  **Running test examples**:
-    
+
 ```
 cd test/scripts
 python test.py ./work_dir 1 1 
 ```
     
- will run the test case for test/InterConstProp/inter1.c
+ will run the test case for inter1.c placed in test/src/ConstProp
     
 ```
 python test.py ./work_dir 1 10
 ```
     
 will run 10 test cases including inter1.c to inter10.c (inclusive)
+
+
 
 In all test cases, we include functions with names 'branchPruned' and 'branchNotPruned'
   * **branchPruned** contains code branches that we expect should be eliminated by debloating

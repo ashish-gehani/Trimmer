@@ -1,3 +1,5 @@
+/* This Test is expected to specialized the func function such that the branch is pruned out */
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
