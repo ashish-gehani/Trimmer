@@ -1949,7 +1949,7 @@ void ConstantFolding::handleRead(CallInst * ci) {
     return;   
   }
   char * buffer = (char *) bbOps.getActualAddr(reg->getValue(), currBB);
-  int bytes_read = read(fd, buffer, size);
+  long bytes_read = read(fd, buffer, size);
 
   if(bytes_read < 0) {
     debug(Abubakar) << "handleRead : read returned error\n";
@@ -1987,6 +1987,8 @@ void ConstantFolding::handleRead(CallInst * ci) {
             
   fileIOCalls[sfd]->insts.push_back(ci);
   fileIOCalls[sfd]->insertedSeekCalls.push_back(seek);
+
+  ci->replaceAllUsesWith(Builder.getInt64(bytes_read));
 }
 
 /**
@@ -2202,8 +2204,8 @@ void ConstantFolding::handleFRead(CallInst * ci) {
     return;   
   }
   char * buffer = (char *) bbOps.getActualAddr(reg->getValue(),currBB);
-  int bytes_read = fread(buffer,size,num,fptr);
-  if(bytes_read < 0) {
+  uint64_t bytes_read = fread(buffer,size,num,fptr);
+  if(ferror(fptr)) {
     debug(Abubakar) << "handleFRead : read returned error\n";
     setfdiUntracked(sfd);
     bbOps.setConstContigous(false, reg->getValue(),currBB); 
@@ -2238,6 +2240,7 @@ void ConstantFolding::handleFRead(CallInst * ci) {
   fileIOCalls[sfd]->insts.push_back(ci);
   fileIOCalls[sfd]->insertedSeekCalls.push_back(seek);
 
+  ci->replaceAllUsesWith(Builder.getInt64(bytes_read));
 }
 
 /**
