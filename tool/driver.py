@@ -9,6 +9,7 @@ build_path = trimmer_path + '/build/'
 
 link = config.env_version('llvm-link')
 opt = config.env_version('opt')
+dis = config.env_version("llvm-dis")
 clang = config.env_version('clang++')
 llc = config.env_version('llc')
 
@@ -19,6 +20,8 @@ def printDbgMsg(msg):
     if debugPrint == 1:
         print msg
 
+def disassemble(path):
+    os.system(dis + " " + path)
 
 def run_argspec(tool):
 
@@ -57,13 +60,14 @@ def run_argspec(tool):
 
 	printDbgMsg(Cmd)
 	subprocess.call(Cmd, shell = True)	 
-
+        disassemble(add_file)
 	if(tool.icp_flag): 
                 if(tool.track_allocas):
                         Cmd = opt + ' -load ' + build_path + 'AnnotateNew.so -mem2reg -loops -lcssa -loop-simplify -loop-rotate -indvars  -svfg --isAnnotated=' + str(tool.annot_flag) + ' --argvName=__argv_new__\
                             ' + add_file + ' -o ' + annotated_file
                         printDbgMsg(Cmd)
-                        subprocess.call(Cmd, shell = True)	
+                        subprocess.call(Cmd, shell = True)
+                        disassemble(annotated_file)
                 else:
                         annotated_file = add_file
 		# interconstprop pass
@@ -80,12 +84,13 @@ def run_argspec(tool):
 
 		subprocess.call(Cmd)
 		f.close()
+                disassemble(constprop_file)
 		# remove pass
 		Cmd = opt + ' -load ' + build_path + 'Remove.so -remove ' + constprop_file\
 		+ ' -o ' + libspec_file
 		printDbgMsg(Cmd)
 		subprocess.call(Cmd, shell = True)	
-
+                disassemble(libspec_file)
 	# inline pass
 	Cmd = opt + ' -always-inline ' + libspec_file + ' -o ' + inline_file
         printDbgMsg(Cmd)
