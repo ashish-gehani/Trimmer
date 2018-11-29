@@ -92,10 +92,8 @@ void ConstantFolding::markInstMemNonConst(Instruction  *I) {
   for(unsigned i = 0; i < I->getNumOperands(); i++) {
     Value *val = I->getOperand(i);
     Register *reg = processInstAndGetRegister(val);
-    if(val->getType()->isPointerTy() && reg) {
+    if(reg && val->getType()->isPointerTy() && !dyn_cast<CallInst>(val)) {
       markMemNonConst(dyn_cast<PointerType>(val->getType())->getElementType(), reg->getValue(), currBB);
-    } else if(reg) {
-      markMemNonConst(val->getType(), reg->getValue(), currBB);
     }
   }
 
@@ -761,9 +759,14 @@ ProcResult ConstantFolding::processPHINode(PHINode * phiNode) {
   Value * val = bbOps.foldPhiNode(phiNode, incPtrs);
   //in case not folded, mark all memories as non constant
   if(!val)
-    for(auto &val: incPtrs)
-      if(Register *reg = processInstAndGetRegister(val))
-        markMemNonConst(reg->getType(), reg->getValue(), currBB);
+    for(auto &val: incPtrs) {
+      if(Register *reg = processInstAndGetRegister(val)) {
+        Value *val = regOps.getValue(reg);
+        assert(val);
+        if(val->getType()->isPointerTy())
+          markMemNonConst(dyn_cast<PointerType>(val->getType())->getElementType(), reg->getValue(), currBB);
+      }
+    }
 
   if(val && replaceOrCloneRegister(phiNode, val)) {
     debug(Abubakar) << "folded phiNode\n";
@@ -1029,17 +1032,14 @@ void ConstantFolding::markArgsAsNonConst(CallInst * callInst) {
     return;
   }
   for(unsigned index = 0; index < callInst->getNumArgOperands(); index++) {
-    Value * pointerArg = callInst->getOperand(index);
-    Register * reg = processInstAndGetRegister(pointerArg);
+    Value * val = callInst->getOperand(index);
+    Register * reg = processInstAndGetRegister(val);
     if(!reg)
       continue;
 
-    if(pointerArg->getType()->isPointerTy()) {
-      //assert(reg->getType()  == pointerArg->getType());
-      markMemNonConst(dyn_cast<PointerType>(pointerArg->getType())->getElementType(), reg->getValue(), currBB);
-    } else if(reg) {
-      bbOps.setConstContigous(false, reg->getValue(), currBB); 
-    }
+    if(val->getType()->isPointerTy())
+      markMemNonConst(dyn_cast<PointerType>(val->getType())->getElementType(), reg->getValue(), currBB);
+
     debug(Abubakar) << "markArgsAsNonConst : index " << index << "\n"; 
   }
 }
