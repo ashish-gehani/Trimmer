@@ -1165,6 +1165,9 @@ Instruction * ConstantFolding::simplifyInst(Instruction * I) {
     if(ConstantInt * CI = dyn_cast<ConstantInt>(SI->getCondition())) {
       Value * rep = CI->getZExtValue() ? SI->getTrueValue() : SI->getFalseValue();
       replaceOrCloneRegister(I, rep);
+    } else {
+      //non constant select, mark mem non constant appropriately
+      markInstMemNonConst(SI);
     }
   }
   return NULL;
