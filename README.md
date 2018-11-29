@@ -54,17 +54,10 @@ The manifest file for curl (one of the example programs) is shown below:
 
 Examples
 ========
-(This is outdated, and needs to be updated)     
 ```
 mkdir examples/tool_name/work_dir
 python tool/trimmer.py   examples/tool_name/tool.manifest  examples/tool_name/work_dir      
 ```
-
-* To run a comparison for trimmer, occam, orig use the scripts in experimentation directory
-  to run en masse, run run_examples.sh in the root.
-    
-* The results are written to results/exe_sizes.csv and results/funcs.csv
-* The pre-generated bitcodes and manifests for some examples can be found in examples/name/trimmer/name
 
 Running test cases
 ==================
