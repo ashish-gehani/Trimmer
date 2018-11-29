@@ -54,7 +54,7 @@ The manifest file for curl (one of the example programs) is shown below:
 
 Examples
 ========
-     
+(This is outdated, and needs to be updated)     
 ```
 mkdir examples/tool_name/work_dir
 python tool/trimmer.py   examples/tool_name/tool.manifest  examples/tool_name/work_dir      
@@ -75,28 +75,27 @@ Test cases directory: /test/src
  
  **Test script synopsis**:
 
-For tests placed in test/src/ConstProp, test/src/LoopUnroll and test/src/FileIO
+For tests placed in test/src, where ${prefix} is the prefix of the folder in test/src
  
 ```
 cd test/scripts
-python test.py ${path_to_workdir} ${test_start} ${test_end} 
-
+python test.py ${path_to_workdir} ${prefix} ${test_start} ${test_end} 
  
  
  **Running test examples**:
 
 ```
 cd test/scripts
-python test.py ./work_dir 1 1 
+python test.py ./work_dir pointer 1 1 
 ```
     
- will run the test case for inter1.c placed in test/src/ConstProp
+ will run the test case for inter1.c placed in test/src/pointer_tests
     
 ```
-python test.py ./work_dir 1 10
+python test.py ./work_dir constprop 1 10
 ```
     
-will run 10 test cases including inter1.c to inter10.c (inclusive)
+will run 10 test cases including inter1.c to inter10.c in test/src/constprop (inclusive)
 
 
 
