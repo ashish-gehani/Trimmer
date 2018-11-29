@@ -70,6 +70,8 @@ bool LoopUnroller::getTripCount(TargetLibraryInfo * TLI, AssumptionCache &AC, un
 
 bool LoopUnroller::runtest(TargetLibraryInfo * TLI, AssumptionCache &AC) {
   unsigned tripCount;
+
+  //getBranchMemory(loop);
   bool constTripCount = getTripCount(TLI, AC, tripCount);
 
   debug(Usama) << "ConstTripCount :" << constTripCount << "\n";
