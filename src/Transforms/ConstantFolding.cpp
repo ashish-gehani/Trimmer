@@ -1321,8 +1321,13 @@ bool ConstantFolding::satisfyConds(Function * F, CallInst *ci) {
   }
 }
 
-
-void ConstantFolding::addSingleVal(Value * val, uint64_t num) {
+/**
+ * Since we can't replace pointers in IR, we make internal
+ * registers for pointers. Otherwise, if constant integer,
+ * replace in IR. (Temporarily not replacing 64 bit integers
+ * due to potentially replacing casted pointers in IR)
+ */
+void ConstantFolding::addSingleVal(Value * val, uint64_t num, bool replace64) {
   Type * ty = val->getType();
   if(ty->isPointerTy()) {
     if(!num) {
@@ -1335,7 +1340,7 @@ void ConstantFolding::addSingleVal(Value * val, uint64_t num) {
       regOps.addRegister(val, ty, num); 
     }
   } else if(IntegerType * intTy = dyn_cast<IntegerType>(ty)) {
-    if(!ty->isIntegerTy(64)) {
+    if(replace64 || !ty->isIntegerTy(64)) {
       debug(Abubakar) << "replacing with constant int\n";
       replaceIfNotFD(val, ConstantInt::get(intTy, num));
     }

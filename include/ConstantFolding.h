@@ -182,7 +182,7 @@ struct ConstantFolding : public ModulePass {
   void initializeGlobal(uint64_t, Constant *);
   
   bool getSingleVal(Value *, uint64_t&);
-  void addSingleVal(Value *, uint64_t);
+  void addSingleVal(Value *, uint64_t, bool replace64 = false);
 
   // bool getStr(Value * ptr, char *& str);
   bool getStr(Value * ptr, char *& str, uint64_t size);

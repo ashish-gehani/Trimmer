@@ -41,87 +41,6 @@ using namespace llvm;
 
 char AnnotateNew::ID = 0;
 
-string AnnotateNew::print(SVFGNode *node, SVFG *graph) {
-  std::string str;
-  raw_string_ostream rawstr(str);
-  rawstr << "NodeID: " << node->getId() << "\n";
-  if(StmtSVFGNode* stmtNode = dyn_cast<StmtSVFGNode>(node)) {
-    NodeID src = stmtNode->getPAGSrcNodeID();
-    NodeID dst = stmtNode->getPAGDstNodeID();
-    rawstr << dst << "<--" << src << "\n";
-    if(stmtNode->getInst()) {
-      rawstr << getSourceLoc(stmtNode->getInst());
-    }
-    else if(stmtNode->getPAGDstNode()->hasValue()) {
-      rawstr << getSourceLoc(stmtNode->getPAGDstNode()->getValue());
-    }
-  }
-  else if(MSSAPHISVFGNode* mphi = dyn_cast<MSSAPHISVFGNode>(node)) {
-    rawstr << "MR_" << mphi->getRes()->getMR()->getMRID()
-      << "V_" << mphi->getRes()->getResVer()->getSSAVersion() << " = PHI(";
-    for (MemSSA::PHI::OPVers::const_iterator it = mphi->opVerBegin(), eit = mphi->opVerEnd();
-        it != eit; it++)
-      rawstr << "MR_" << it->second->getMR()->getMRID() << "V_" << it->second->getSSAVersion() << ", ";
-    rawstr << ")\n";
-
-    rawstr << mphi->getRes()->getMR()->dumpStr() << "\n";
-    rawstr << getSourceLoc(&mphi->getBB()->back());
-  }
-  else if(PHISVFGNode* tphi = dyn_cast<PHISVFGNode>(node)) {
-    rawstr << tphi->getRes()->getId() << " = PHI(";
-    for(PHISVFGNode::OPVers::const_iterator it = tphi->opVerBegin(), eit = tphi->opVerEnd();
-        it != eit; it++)
-      rawstr << it->second->getId() << ", ";
-    rawstr << ")\n";
-    rawstr << getSourceLoc(tphi->getRes()->getValue());
-  }
-  else if(FormalINSVFGNode* fi = dyn_cast<FormalINSVFGNode>(node)) {
-    rawstr	<< fi->getEntryChi()->getMR()->getMRID() << "V_" << fi->getEntryChi()->getResVer()->getSSAVersion() <<
-      " = ENCHI(MR_" << fi->getEntryChi()->getMR()->getMRID() << "V_" << fi->getEntryChi()->getOpVer()->getSSAVersion() << ")\n";
-    rawstr << fi->getEntryChi()->getMR()->dumpStr() << "\n";
-    rawstr << "Fun[" << fi->getFun()->getName() << "]";
-  }
-  else if(FormalOUTSVFGNode* fo = dyn_cast<FormalOUTSVFGNode>(node)) {
-    rawstr << "RETMU(" << fo->getRetMU()->getMR()->getMRID() << "V_" << fo->getRetMU()->getVer()->getSSAVersion() << ")\n";
-    rawstr  << fo->getRetMU()->getMR()->dumpStr() << "\n";
-    rawstr << "Fun[" << fo->getFun()->getName() << "]";
-  }
-  else if(FormalParmSVFGNode* fp = dyn_cast<FormalParmSVFGNode>(node)) {
-    rawstr	<< "FPARM(" << fp->getParam()->getId() << ")\n";
-    rawstr << "Fun[" << fp->getFun()->getName() << "]";
-  }
-  else if(ActualINSVFGNode* ai = dyn_cast<ActualINSVFGNode>(node)) {
-    rawstr << "CSMU(" << ai->getCallMU()->getMR()->getMRID() << "V_" << ai->getCallMU()->getVer()->getSSAVersion() << ")\n";
-    rawstr << ai->getCallMU()->getMR()->dumpStr() << "\n";
-    rawstr << "CS[" << getSourceLoc(ai->getCallSite().getInstruction()) << "]";
-  }
-  else if(ActualOUTSVFGNode* ao = dyn_cast<ActualOUTSVFGNode>(node)) {
-    rawstr <<  ao->getCallCHI()->getMR()->getMRID() << "V_" << ao->getCallCHI()->getResVer()->getSSAVersion() <<
-      " = CSCHI(MR_" << ao->getCallCHI()->getMR()->getMRID() << "V_" << ao->getCallCHI()->getOpVer()->getSSAVersion() << ")\n";
-    rawstr << ao->getCallCHI()->getMR()->dumpStr() << "\n";
-    rawstr << "CS[" << getSourceLoc(ao->getCallSite().getInstruction()) << "]" ;
-  }
-  else if(ActualParmSVFGNode* ap = dyn_cast<ActualParmSVFGNode>(node)) {
-    rawstr << "APARM(" << ap->getParam()->getId() << ")\n" ;
-    rawstr << "CS[" << getSourceLoc(ap->getCallSite().getInstruction()) << "]";
-  }
-  else if(isa<NullPtrSVFGNode>(node)) {
-    rawstr << "NullPtr";
-  }
-  else if (ActualRetSVFGNode* ar = dyn_cast<ActualRetSVFGNode>(node)) {
-    rawstr << "ARet(" << ar->getRev()->getId() << ")\n";
-    rawstr << "CS[" << getSourceLoc(ar->getCallSite().getInstruction()) << "]";
-  }
-  else if (FormalRetSVFGNode* fr = dyn_cast<FormalRetSVFGNode>(node)) {
-    rawstr << "FRet(" << fr->getRet()->getId() << ")\n";
-    rawstr << "Fun[" << fr->getFun()->getName() << "]";
-  }
-  else
-    assert(false && "what else kinds of nodes do we have??");
-
-  return rawstr.str();
-}
-
 void AnnotateNew::getSlpStores(set<const Value *>& singleLevelPointers, set<Value*>& stores) {
   set<Value*> scalars; //these are esentially normal llvm scalar values, tracked through use def chains
   //Handle single level pointers
@@ -1452,8 +1371,6 @@ void AnnotateNew::run(GlobalValue* argv, Value *argc, set<const Value*> &tracked
       trackIfMemory(current, trackedAllocas);
 
       processed.insert(current);
-
-      errs() << print((SVFGNode*)(current),svfg) << "\n";
 
       set<SVFGNode *> storeSvfg; 
       //traverse memory chain of this svfgnode, and get any stores 
