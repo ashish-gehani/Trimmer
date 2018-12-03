@@ -1888,7 +1888,7 @@ void ConstantFolding::handleOpen(CallInst * ci) {
     int fd = open(fname, flag);
     if(fd < 0) return;
     fd = initfdi(fd,fname);
-    addSingleVal(ci, fd);
+    addSingleVal(ci, fd, true);
     FileInsts* insts = new FileInsts();
     insts->insts.push_back(ci);
     insts->isSpecialized = true;
@@ -1920,7 +1920,7 @@ void ConstantFolding::handleFOpen(CallInst * ci) {
     FILE* fptr = fopen(fname, fmode);
     if(!fptr) return;
     int fd = initfptr(fptr,fname);
-    addSingleVal(ci, fd);
+    addSingleVal(ci, fd, true);
     FileInsts* insts = new FileInsts();
     insts->insts.push_back(ci);
     insts->isSpecialized = true;
@@ -1971,7 +1971,7 @@ void ConstantFolding::handleRead(CallInst * ci) {
   }
   bbOps.setConstMem(true, reg->getValue(), bytes_read, currBB);
   setfdiOffset(sfd, fd);
-  addSingleVal(ci, bytes_read);
+  addSingleVal(ci, bytes_read, true);
   buffer[bytes_read] = '\0';
 
   Constant * const_array = ConstantDataArray::getString(module->getContext(),StringRef(buffer),true);
@@ -1995,8 +1995,6 @@ void ConstantFolding::handleRead(CallInst * ci) {
             
   fileIOCalls[sfd]->insts.push_back(ci);
   fileIOCalls[sfd]->insertedSeekCalls.push_back(seek);
-
-  ci->replaceAllUsesWith(Builder.getInt64(bytes_read));
 }
 
 /**
@@ -2041,7 +2039,7 @@ void ConstantFolding::handlePRead(CallInst * ci) {
 	
   }
   bbOps.setConstMem(true, reg->getValue(), bytes_read,currBB);
-  addSingleVal(ci, bytes_read);
+  addSingleVal(ci, bytes_read, true);
 
   Constant * const_array = ConstantDataArray::getString(module->getContext(),StringRef(buffer),true);
   GlobalVariable * gv = new GlobalVariable(*module,const_array->getType(),true,GlobalValue::ExternalLinkage,const_array,"");
@@ -2119,7 +2117,7 @@ void ConstantFolding::handleMMap(CallInst * ci) {
   mmapInfo->sfd = sfd;
   mmapInfo->buffer = mmappedData;
   mMapBuffer.push_back(mmapInfo);
-  addSingleVal(BitCastInst,addr1);
+  addSingleVal(BitCastInst,addr1, true);
 
 }
 
@@ -2175,7 +2173,7 @@ void ConstantFolding::handleMUnmap(CallInst * ci) {
     return;   		
   }
 
-  addSingleVal(ci, ret);
+  addSingleVal(ci, ret, true);
   fileIOCalls[sfd]->insts.push_back(ci);
   
 }
@@ -2225,7 +2223,7 @@ void ConstantFolding::handleFRead(CallInst * ci) {
   }
   bbOps.setConstMem(true, reg->getValue(), bytes_read,currBB);
   setfptrOffset(sfd, fptr);
-  addSingleVal(ci, bytes_read);
+  addSingleVal(ci, bytes_read, true);
   buffer[bytes_read] = '\0';
 
   Constant * const_array = ConstantDataArray::getString(module->getContext(),StringRef(buffer),true);
@@ -2247,8 +2245,6 @@ void ConstantFolding::handleFRead(CallInst * ci) {
             
   fileIOCalls[sfd]->insts.push_back(ci);
   fileIOCalls[sfd]->insertedSeekCalls.push_back(seek);
-
-  ci->replaceAllUsesWith(Builder.getInt64(bytes_read));
 }
 
 /**
@@ -2371,7 +2367,7 @@ void ConstantFolding::handleLSeek(CallInst * ci) {
 
   }
   setfdiOffset(sfd, fd);
-  addSingleVal(ci, ret);
+  addSingleVal(ci, ret, true);
   fileIOCalls[sfd]->insts.push_back(ci);
 }
 
@@ -2409,7 +2405,7 @@ void ConstantFolding::handleFSeek(CallInst * ci) {
     return;
   }
   setfptrOffset(sfd, fptr);
-  addSingleVal(ci, ret);
+  addSingleVal(ci, ret, true);
   fileIOCalls[sfd]->insts.push_back(ci);
 }
 
