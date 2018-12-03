@@ -6,6 +6,7 @@ def format_args(fname, args):
 
 def exists(fname):
 	if not os.path.exists(fname):
+                print fname
 		print 'file ' + fname + ' does not exist'
 		quit()
 	elif  not os.path.isfile(fname):
@@ -31,10 +32,15 @@ def parse_args(args):
 	if not os.path.exists(work_dir):
 		os.makedirs(work_dir)
 	
+        dir_path = os.path.dirname(os.path.realpath(manifest_file))
+        man_data["main_path"] = os.path.join(dir_path, man_data["main"])
+
 	opt_flag = True
 	spec_flag = True
 	strip_flag = True
 	icp_flag = True
+        annot_flag = 1
+        track_allocas = 1
 	for i in range(2, len(args)):
 		if(args[i] == 'no-optimization'):
 			opt_flag = False
@@ -44,5 +50,9 @@ def parse_args(args):
 			strip_flag = False
 		elif(args[i] == 'no-inter-constprop'):
 			icp_flag = False
+                elif(args[i] == 'no-annot'):
+                        annot_flag = 0 
+                elif(args[i] == 'no-track-allocas'):
+                        track_allocas = 0
 		else: usage()
-	return (man_data, work_dir, opt_flag, spec_flag, strip_flag, icp_flag)
+	return (man_data, work_dir, opt_flag, spec_flag, strip_flag, icp_flag, annot_flag, track_allocas)

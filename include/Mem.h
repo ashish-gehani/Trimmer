@@ -1,5 +1,7 @@
+#include "llvm/IR/Module.h"
 #include "VecUtils.h"
-#include "LoopUnrollTest.h"
+#include "llvm/Support/raw_ostream.h"
+//#include "LoopUnrollTest.h"
 
 #ifndef MEM_H_
 #define MEM_H_
@@ -325,10 +327,12 @@ public:
 	Register(Type * allocatedType, uint64_t sv) {
 		ty = allocatedType;
 		storedValue = sv;
+        ptsToCount = 1;
 	}
 	Register(Register& from) {
 		ty = from.getType();	
 		storedValue = from.getValue();
+        ptsToCount = from.getPointsToCount();
 	}
 	Type * getType() {
 		return ty;
@@ -336,9 +340,13 @@ public:
 	uint64_t getValue() {
 		return storedValue;
 	}
+    uint32_t getPointsToCount() {
+      return ptsToCount;
+    }
 private:
 	uint64_t storedValue;
 	Type * ty;
+    uint32_t ptsToCount;
 };
 
 typedef map<Value *, Register *> ValToRegisterMap;

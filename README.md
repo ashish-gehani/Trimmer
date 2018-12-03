@@ -41,29 +41,23 @@ The manifest file for curl (one of the example programs) is shown below:
 
 ``` 
 {
-   "binary": "curl_fin", 
+    "binary": "curl_fin", 
     "native_libs": [], 
     "name": "curl", 
     "args": ["--compress", "--http1.1", "--ipv4", "--ssl", "ftp://speedtest.tele2.net"],
     "modules": [], 
     "ldflags": ["-lz", "-lcurl"], 
     "main": "curl.bc"
+    "config_files": []
  }
  ```
 
 Examples
 ========
-     
 ```
 mkdir examples/tool_name/work_dir
 python tool/trimmer.py   examples/tool_name/tool.manifest  examples/tool_name/work_dir      
 ```
-
-* To run a comparison for trimmer, occam, orig use the scripts in experimentation directory
-  to run en masse, run run_examples.sh in the root.
-    
-* The results are written to results/exe_sizes.csv and results/funcs.csv
-* The pre-generated bitcodes and manifests for some examples can be found in examples/name/trimmer/name
 
 Running test cases
 ==================
@@ -73,26 +67,30 @@ Test cases directory: /test/src
 * Includes a suite of multiple test cases used to measure the effectiveness of TRIMMER in debloating unused code 
  
  **Test script synopsis**:
+
+For tests placed in test/src, where ${prefix} is the prefix of the folder in test/src
  
 ```
 cd test/scripts
-python test.py ${path_to_workdir} ${test_start} ${test_end} 
-``` 
+python test.py ${path_to_workdir} ${prefix} ${test_start} ${test_end} 
+ 
  
  **Running test examples**:
-    
+
 ```
 cd test/scripts
-python test.py ./work_dir 1 1 
+python test.py ./work_dir pointer 1 1 
 ```
     
- will run the test case for test/InterConstProp/inter1.c
+ will run the test case for inter1.c placed in test/src/pointer_tests
     
 ```
-python test.py ./work_dir 1 10
+python test.py ./work_dir constprop 1 10
 ```
     
-will run 10 test cases including inter1.c to inter10.c (inclusive)
+will run 10 test cases including inter1.c to inter10.c in test/src/constprop (inclusive)
+
+
 
 In all test cases, we include functions with names 'branchPruned' and 'branchNotPruned'
   * **branchPruned** contains code branches that we expect should be eliminated by debloating

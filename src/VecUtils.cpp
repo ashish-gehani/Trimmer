@@ -1,9 +1,11 @@
 #include "VecUtils.h"
+#include "Debug.h"
 
 using namespace llvm;
 using namespace std;
 
 unsigned binarySearchIndices(vector<unsigned> indices, unsigned lo, unsigned hi, unsigned val) {
+  debug(Usama) << "lo =" << lo << " high=" << hi << "\n";
   assert(hi < indices.size() && lo < indices.size());
   if(indices.size() == 1) return indices[0];
   unsigned mid = lo + (hi - lo)/2;

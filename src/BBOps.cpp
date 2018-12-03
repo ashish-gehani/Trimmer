@@ -43,7 +43,7 @@ void BBOps::initAndAddBBInfo(BasicBlock * BB, LoopInfo &LI) {
 bool BBOps::partOfLoop(Value * val) {
   if(isa<Instruction>(val) && dyn_cast<Instruction>(val)->getParent())
     return partOfLoop(dyn_cast<Instruction>(val)->getParent());
-  return true;
+  return false;
 }
 bool BBOps::partOfLoop(BasicBlock * BB) {
   assert(BBInfoMap.find(BB) != BBInfoMap.end());
@@ -77,6 +77,12 @@ bool BBOps::isnotSingleSucc(BasicBlock * pred, BasicBlock * succ) {
   return BBInfoMap[pred]->singleSucc && BBInfoMap[pred]->singleSucc != succ;
 }
 
+/*
+ * Need to duplicate a BB if it has multiple predecessors.
+ * In case of single single predecessor, can mirror from 
+ * parent even if it's not the only successor, as long as
+ * it does not write to memory. Otherwise need to duplicate
+ */
 bool BBOps::needToduplicate(BasicBlock * BB, BasicBlock * from) {
   bool singlePredFrom = true;
   ContextInfo * ci = BasicBlockContexts[from];
@@ -91,9 +97,9 @@ bool BBOps::needToduplicate(BasicBlock * BB, BasicBlock * from) {
       singlePredFrom = false;
     } 
   }
-  bool noMemWrite = !BBInfoMap[BB]->writesToMemory; 
+  //bool noMemWrite = !BBInfoMap[BB]->writesToMemory; 
   bool singleSuccTo = BBInfoMap[from]->singleSucc != NULL;
-  return !(singlePredFrom && (noMemWrite || singleSuccTo));
+  return !(singlePredFrom && singleSuccTo);
 }
 
 void BBOps::addAncestor(BasicBlock * succ, BasicBlock * anc) {
@@ -134,6 +140,7 @@ bool BBOps::predecessorsVisited(BasicBlock * BB, LoopInfo &LI) {
     if(isUnReachable(predecessor))
       continue;
 
+    //case to handle loop latch as predecessor
     if(visited.find(predecessor) == visited.end()) {
       Loop * predLoop = LI.getLoopFor(predecessor);
       if(predLoop && predLoop == BBLoop && BB == BBLoop->getHeader()) {
@@ -224,6 +231,7 @@ void BBOps::propagateUR(BasicBlock * BB, LoopInfo& LI) {
     worklist.erase(worklist.begin());
     if(isUnReachable(worker)) 
       continue;
+    debug(Usama) << "Adding bb " << BB->getName() << " to unreachable set \n";
     unReachable.insert(worker);
     markSuccessorsAsUR(worker->getTerminator(), LI);
     const vector<DomTreeNodeBase<BasicBlock> *> children = 
@@ -233,10 +241,12 @@ void BBOps::propagateUR(BasicBlock * BB, LoopInfo& LI) {
       worklist.push_back(dom);
     }
   }
+
+  delete DT;
 }  
 /**
  * Adds a BB to readyToVist if it's reachable from at least one
- * predecessor
+ * predecessor and all its predecessors have been visited
  */
 void BBOps::checkReadyToVisit(BasicBlock * BB) {
   unsigned numPreds = BBInfoMap[BB]->numPreds;
@@ -247,8 +257,8 @@ void BBOps::checkReadyToVisit(BasicBlock * BB) {
 }
 /**
  * Loops over successors of a terminal, and tries to call porpagateUR
- * on successors that become unreachable. Reachable successors are
- * added to readyToVisit vector
+ * on successors that become unreachable. Successors that become reachable
+ * are added to readyToVisit vector
  */
 void BBOps::markSuccessorsAsUR(TerminatorInst * termInst, LoopInfo& LI) {
   for(unsigned int index = 0; index < termInst->getNumSuccessors(); index++) {
@@ -261,8 +271,10 @@ void BBOps::markSuccessorsAsUR(TerminatorInst * termInst, LoopInfo& LI) {
 
     BBInfoMap[successor]->URfrom++;
     checkReadyToVisit(successor);
-    if(BBInfoMap[successor]->URfrom < BBInfoMap[successor]->numPreds)
+    if(BBInfoMap[successor]->URfrom < BBInfoMap[successor]->numPreds) {
+      debug(Usama) << "Skipping " << successor->getName() << " as unreachable=" << BBInfoMap[successor]->URfrom << " and numPreds=" << BBInfoMap[successor]->numPreds;
       continue;
+    }
     propagateUR(successor, LI);
   }
 }  
@@ -301,7 +313,7 @@ bool BBOps::straightPath(BasicBlock * from, BasicBlock * to) {
   ContextInfo * tc = BasicBlockContexts[to];
   return tc->imageOf && (tc->imageOf == fc || tc->imageOf == fc->imageOf);
 }  
-Value * BBOps::foldPhiNode(PHINode * phiNode) {
+Value * BBOps::foldPhiNode(PHINode * phiNode, vector<Value*> &incPtrs) {
   vector<unsigned> incV;
   for(unsigned i = 0; i < phiNode->getNumIncomingValues(); i++) {
     BasicBlock * BB = phiNode->getIncomingBlock(i);
@@ -323,6 +335,13 @@ Value * BBOps::foldPhiNode(PHINode * phiNode) {
     }
   }
   Value * val = NULL; 
+  if(phiNode->getType()->isPointerTy()) {
+    for(unsigned i = 0; i < incV.size(); i++) {
+      Value *val = phiNode->getIncomingValue(incV[i]);
+      incPtrs.push_back(val);
+    }
+  }
+
   for(unsigned i = 0; i < incV.size(); i++) {
     if(val && val != phiNode->getIncomingValue(incV[i])) {
       debug(Abubakar) << "phiNode not constant\n";
@@ -330,8 +349,10 @@ Value * BBOps::foldPhiNode(PHINode * phiNode) {
     }
     val = phiNode->getIncomingValue(incV[i]);
   }
+ 
   return val;
 }
+
 BasicBlock * BBOps::getRfromPred(BasicBlock * BB) {
   for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++) {
 
@@ -355,7 +376,7 @@ void BBOps::recomputeLoopInfo(Function * F, LoopInfo& LI) {
       BBInfoMap[BB]->partOfLoop = LI.getLoopFor(BB);
   }
 }
-/* todo : how to recompute ancestors */
+
 void BBOps::copyFuncBlocksInfo(Function * F, ValueToValueMapTy & vmap) {
   for(Function::iterator bi = F->begin(), e = F->end(); bi != e; ++bi) {
     BasicBlock * BB = &*bi;
@@ -367,8 +388,69 @@ void BBOps::copyFuncBlocksInfo(Function * F, ValueToValueMapTy & vmap) {
     if(findInMap(BBInfoMap, BB)) {
       BBInfo * bbi = BBInfoMap[BB];
       BBInfo * nbbi = new BBInfo(clone);
-      *nbbi = *bbi;
+
+      nbbi->writesToMemory = bbi->writesToMemory;
+      nbbi->URfrom = bbi->URfrom;
+      nbbi->numPreds = bbi->numPreds;
+      nbbi->Rfrom = bbi->Rfrom;
+      nbbi->partOfLoop = bbi->partOfLoop;
+      nbbi->isHeader = bbi->isHeader;
+      nbbi->singleSucc = bbi->singleSucc ? dyn_cast<BasicBlock>(bbi->singleSucc) : NULL;
+
+      //copy over ancestors
+      for(auto it = bbi->ancestors.begin(), end = bbi->ancestors.end(); it != end; it++) {
+        if(vmap.find(*it) == vmap.end()) {
+            errs() << "BB not found :" << *it << "\n";
+        }else {
+            nbbi->ancestors.push_back(dyn_cast<BasicBlock>(vmap[*it]));  
+        }
+      }
+
+      //TODO do we need to recompute loopLatches?
+      for(auto it = bbi->loopLatchesWithEdge.begin(), end = bbi->loopLatchesWithEdge.end(); it != end; it++) {
+        if(vmap.find(*it) == vmap.end()) {
+            errs() << "BB not found :" << *it << "\n";
+        }else {
+            nbbi->loopLatchesWithEdge.push_back(dyn_cast<BasicBlock>(vmap[*it]));
+        }
+      }
+
       BBInfoMap[clone] = nbbi;
+    }
+  }
+}
+
+void BBOps::copyContexts(Function *to, Function *from, ValueToValueMapTy& vmap, Module *module) {
+  for(auto it = from->begin(), end = from->end(); it != end; it++) {
+    if(!hasContext(&*it))
+      continue;
+
+    BasicBlock *oldBB = &*it;
+    BasicBlock *newBB = dyn_cast<BasicBlock>(vmap[oldBB]);
+    createNewContext(newBB, module);
+
+    ContextInfo *oldCi = BasicBlockContexts[oldBB];
+    if(!oldCi->deleted)
+      duplicateContext(newBB, oldBB);
+
+    ContextInfo *newCi = BasicBlockContexts[newBB];
+    newCi->deleted = oldCi->deleted;
+
+    //TODO do this a better way
+    BasicBlock *temp = NULL;
+    for(auto itB = BasicBlockContexts.begin(), endB = BasicBlockContexts.end(); itB != endB; itB++) {
+      if(itB->second == oldCi->imageOf) {//find BB which this is image of
+        temp = itB->first;
+        break;
+      }
+    }
+
+    if(temp) {
+      if(temp->getParent() != from) { //cross function parents
+        newCi->imageOf = oldCi->imageOf; 
+      }else {
+        newCi->imageOf = BasicBlockContexts[dyn_cast<BasicBlock>(vmap[temp])];
+      }
     }
   }
 }
@@ -378,6 +460,10 @@ void BBOps::copyFuncBlocksInfo(Function * F, ValueToValueMapTy & vmap) {
  */
 void BBOps::createNewContext(BasicBlock * BB, Module* module) {
   BasicBlockContexts[BB] = new ContextInfo(module);
+}
+
+bool BBOps::isContextDeleted(BasicBlock *BB) {
+  return BasicBlockContexts[BB]->deleted;
 }
 
 void BBOps::duplicateContext(BasicBlock * to, BasicBlock *from) {
@@ -470,6 +556,15 @@ void BBOps::cleanUpFuncBBInfo(Function *f) {
     ContextInfo * ci = BasicBlockContexts[BB];
     if(!ci->deleted && !ci->imageOf)
       delete ci->memory;
+    BasicBlockContexts.erase(BB);
     delete ci;
+  }
+}
+
+void BBOps::getVisitedPreds(BasicBlock *BB, vector<BasicBlock *> &preds) {
+  for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++) {
+    BasicBlock *predecessor = *it;
+    if(visited.find(predecessor) != visited.end())
+      preds.push_back(predecessor);
   }
 }

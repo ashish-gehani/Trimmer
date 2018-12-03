@@ -32,6 +32,7 @@
 #include "llvm/Analysis/OptimizationDiagnosticInfo.h"
 
 #include <getopt.h>
+#include <list>
 
 #ifndef INTERCONSTPROP_H_
 #define INTERCONSTPROP_H_
@@ -42,13 +43,22 @@
 #include "BBInfo.h"
 #include "FuncInfo.h"
 #include "RegOps.h"
+#include "LoopUnroller.h"
+#include "FileInsts.h"
+#include "MMapInfo.h"
 
 typedef map<Function *, FuncInfo *> FuncInfoMap;
 typedef pair<Instruction *, Instruction *> InstPair;
 typedef set<Value *> ValSet;
+typedef vector<BasicBlock *> BBList;
 
 using namespace llvm;
 using namespace std;
+
+struct Cycle {
+  set<Function *> nodes;
+  set<GlobalVariable *> values;
+};
 
 struct ConstantFolding : public ModulePass {
 
@@ -60,6 +70,10 @@ struct ConstantFolding : public ModulePass {
   DominatorTree * DT;
   CallGraph * CG;
   RegOps regOps;
+  map<Value*, Value*> ptrMap;
+  map<Function *, set<GlobalVariable *> > modSet;
+
+  set<Value *> trackedValues;
 
   BasicBlock * currBB;
   bool terminateBB;
@@ -68,14 +82,21 @@ struct ConstantFolding : public ModulePass {
   FuncInfoMap fimap;
   vector<InstPair> toReplace;
 
-  vector<LoopUnrollTest*> testStack;
+  vector<LoopUnroller*> testStack;
+  vector<BBList> worklistBB;
   bool PreserveLCSSA;
 
   vector<ValSet> funcValStack;
   bool currContextIsAnnotated;
   bool useAnnotations;
+  bool trackAllocas;
   set<Value *> AnnotationList;
   map<int, uint64_t> fdInfoMap; 
+  map<uint64_t,FileInsts*> fileIOCalls;
+  list<string> configFileNames;
+  int numConfigFiles;
+  vector<MMapInfo*> mMapBuffer; 
+  ValueToValueMapTy vmap;
 
   ConstantFolding(): ModulePass(ID){}
   void getAnalysisUsage(AnalysisUsage &AU) const;
@@ -100,12 +121,12 @@ struct ConstantFolding : public ModulePass {
   void createAnnotationList();
   void createAnnotationList2();
   void updateAnnotationContext(Function * F);
-  bool trackAllocas();
+  bool isAllocaTracked(Instruction *);
   
   FuncInfo* initializeFuncInfo(Function *);
   bool isFuncInfoInitialized(Function *F);
   void addFuncInfo(Function *F, FuncInfo *fi);
-  bool satisfyConds(Function *);
+  bool satisfyConds(Function *, CallInst *);
   
   Instruction * simplifyInst(Instruction *);
   CmpInst * foldCmp(CmpInst *);
@@ -124,20 +145,38 @@ struct ConstantFolding : public ModulePass {
   void handleStrpbrk(CallInst * );
   void simplifyStrFunc(CallInst *);
   void handleAtoi(CallInst *);
+  void handleStrCaseCmp(CallInst *); 
 
   bool handleGetOpt(CallInst *);  
   bool handleLongArgs(CallInst *, option *, int *&);
   
-  int initfdi(int); 
+  int initfdi(int,char*); 
+  int initfptr(FILE*,char*); 
   bool getfdi(int, int &);
+  bool getfptr(int, FILE* &);
   void setfdiUntracked(int);
+  bool getfdiUntracked(int);
   void setfdiOffset(int, int);
+  int getfdiOffset(int, int);
+  void setfptrOffset(int, FILE*);
+  int getfptrOffset(int, FILE*);
   bool handleFileIOCall(CallInst *);
-  void handleFileIOOpen(CallInst *);
-  void handleFileIORead(CallInst *);
-  void handleFileIOLSeek(CallInst *);
-    
+  void handleOpen(CallInst *);
+  void handleFOpen(CallInst *);
+  void handleRead(CallInst *);
+  void handlePRead(CallInst *);
+  void handleMMap(CallInst *);
+  void handleMUnmap(CallInst *);
+  void handleFRead(CallInst *);
+  void handleLSeek(CallInst *);
+  void handleFSeek(CallInst *);
+  void handleFGets(CallInst *);
+  void handleClose(CallInst *);
+  void handleFClose(CallInst *);
+  void removeFileIOCallsFromMap(string buffer[],uint64_t);
+      
   void replaceUses();
+  void deleteFileIOCalls();
   void markArgsAsNonConst(CallInst* callInst);
   void addGlobals();
   void initializeGlobal(uint64_t, Constant *);
@@ -164,20 +203,20 @@ struct ConstantFolding : public ModulePass {
   bool visitBB(BasicBlock *, BasicBlock *);
   void visitReadyToVisit(vector<BasicBlock *>);
 
-  void simplifyLoop(BasicBlock *);
+  LoopUnroller *unrollLoop(BasicBlock *, BasicBlock *&);
   LoopUnrollTest* runtest(Loop *);
   void checkTermInst(Instruction *);
   void checkTermBB(BasicBlock *);
   bool checkUnrollHint(BasicBlock *, LoopInfo &LI);
-  void updateCM(ProcResult, Instruction *);
+  void updateLoopCost(ProcResult, Instruction *);
   bool testTerminated();
   unsigned getCost(LoopUnrollTest* ti);
   unsigned getNumNodesBelow(Instruction * I,
   map<Instruction *, unsigned> &, LoopUnrollTest *);
 
-  virtual bool runOnModule(Module &);
+  bool runOnModule(Module &);
   void runOnFunction(CallInst *, Function *);
-  void runOnBB(BasicBlock *);
+  bool runOnBB(BasicBlock *);
   void runOnInst(Instruction *);
 
   void pushFuncStack(Value *val);
@@ -188,6 +227,34 @@ struct ConstantFolding : public ModulePass {
 
   LoopInfo &getLoopInfo(Function *);
   AssumptionCache &getAssumptionCache(Function *);
+
+  void addToWorklistBB(BasicBlock *);
+  void copyFuncIntoClone(Function *, ValueToValueMapTy &, Function *, vector<ValSet> &);
+
+  LoopUnroller *unrollLoopInClone(Function *, Loop *L, ValueToValueMapTy &, vector<ValSet> &);
+  void copyWorklistBB(ValueToValueMapTy &, vector<BBList> &);
+
+  void renameFunctions(Function *, Function *);
+  void eraseToReplace(CallInst *, vector<InstPair> &);
+
+  ValSet popFuncValStack();
+
+  void checkPtrMemory(BasicBlock *currBB);
+  void markInstMemNonConst(Instruction *);
+  void markMemNonConst(Type *, uint64_t, BasicBlock *);
+
+  void collectCallGraphGlobals(CallGraph *);
+  void collectModSet(GlobalVariable *, map<Function *, set<GlobalVariable *> > &);
+  set<GlobalVariable *> dfs(CallGraphNode *root, map<Function *, set<GlobalVariable *> >&modSet, set<Function *> &openNodes, vector<Function *> &recStack, map<Function *, Cycle * > &cycles);
+
+  Cycle *mergeCycles(set<Cycle *> &);
+
+  set<GlobalVariable *> &getFuncModset(Function *F);
+  void markGlobAsNonConst(Function *);
+
+  bool hasTrackedMalloc(Function *);
+  void getTrackedValues(set<Value *> &);
 };
+
 
 #endif

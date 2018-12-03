@@ -1,7 +1,8 @@
 #include "llvm/Pass.h"
+#include "llvm/IR/Operator.h"
 
 #include <string>
-#include "ConstantFolding.h"
+
 #include "StringUtils.h"
 #include "Utils.h"
 
@@ -9,7 +10,7 @@ using namespace llvm;
 using namespace std;
 
 bool simpleStrFunc(string name) {
-  if(name == "strcmp" || name == "strcasecmp" || name == "strcspn" 
+  if(name == "strcmp" || name == "strcspn" 
      || name == "strspn" || name == "strncmp" || name == "strncasecmp"
      || name == "strlen" || name == "strtol")
     return true;

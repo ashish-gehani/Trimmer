@@ -1,12 +1,14 @@
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
 #include "llvm/Pass.h"
 #include "llvm/Analysis/LoopInfo.h"
+#include "llvm/Transforms/Utils/ValueMapper.h"
+#include "llvm/IR/Dominators.h"
+#include "llvm/IR/Constants.h"
 
 #include <set>
 
 #include "LoopUnrollTest.h"
 #include "VecUtils.h"
-#include "ConstantFolding.h"
 #include "ContextInfo.h"
 #include "BBInfo.h"
 
@@ -52,7 +54,7 @@ public:
   bool foldToSingleSucc(TerminatorInst * termInst, vector<BasicBlock *> & readyToVisit, 
       LoopInfo& LI);
   bool straightPath(BasicBlock * from, BasicBlock * to); 
-  Value * foldPhiNode(PHINode * phiNode);
+  Value * foldPhiNode(PHINode * phiNode, vector<Value*>&);
   BasicBlock * getRfromPred(BasicBlock * BB);
   void recomputeLoopInfo(Function * F, LoopInfo& LI);
   /* todo : how to recompute ancestors */
@@ -79,6 +81,10 @@ public:
 
   ContextInfo *getContextInfo(BasicBlock *bb);
   void cleanUpFuncBBInfo(Function *f);
+
+  void copyContexts(Function *to, Function *from, ValueToValueMapTy& vmap, Module *);
+  bool isContextDeleted(BasicBlock *);
+  void getVisitedPreds(BasicBlock *BB, vector<BasicBlock *> &preds);
 private:
   map<BasicBlock *, BBInfo *> BBInfoMap;
   BasicBlockContInfoMap BasicBlockContexts;

@@ -1,14 +1,17 @@
 #ifndef FD_INFO_H
 #define FD_INFO_H
-
+# include <stdio.h>
 
 /*
- * The structure used for tracking fileIO system calls
- * open, read, lseek
+ * The structure used for tracking fileIO descriptors
+ * open, read, pread, lseek, fopen, fread, fseek, fgets, mmap, munmap,close, fclose
 */
 struct FdInfo {
-  int fd, offset;
-  bool tracked;
+  FILE *fptr; //for fopen, fread, fseek, fgets, fclose calls
+  int fd; //for open, read, lseek, pread, mmap, munmap, close calls
+  char * fileName; //File name
+  int offset; // current offset of the File
+  bool tracked; // tracks whether the file structure is valid or not
 };
 
 #endif

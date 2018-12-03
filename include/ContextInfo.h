@@ -48,26 +48,9 @@ struct ContextInfo {
   ContextInfo * imageOf;  
   bool deleted;
 
-  ContextInfo() {
-    deleted = false;
-    imageOf = NULL;
-  }
-  ContextInfo(Module * M) {
-    deleted = false;
-    imageOf = NULL;
-    memory = new Memory(M);    
-  }
-  ContextInfo * image() {
-    ContextInfo * nci = new ContextInfo();
-    nci->memory = memory;
-    if(imageOf) nci->imageOf = imageOf;
-    else nci->imageOf = this;
-    return nci;        
-  }
-  ContextInfo * duplicate() {
-    ContextInfo * nci = new ContextInfo();
-    nci->memory = new Memory(*memory);
-    return nci;
-  }
+  ContextInfo();
+  ContextInfo(Module * M);
+  ContextInfo * image();
+  ContextInfo * duplicate();
 };
 #endif

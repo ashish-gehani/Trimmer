@@ -2,6 +2,7 @@
 #define DEBUG_H_
 
 #include "Mem.h"
+#include "llvm/Support/raw_ostream.h"
 
 using namespace llvm;
 using namespace std;
@@ -10,6 +11,7 @@ using namespace std;
 #define Abubakar 1
 #define Hashim 2
 #define Maaz 4
+#define Usama 8
 #define All 1023
 
 extern int debugLevel; 

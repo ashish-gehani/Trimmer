@@ -1,4 +1,11 @@
+#include "llvm/IR/Instructions.h"
+#include "llvm/IR/Value.h"
+#include "llvm/ADT/StringRef.h"
+
 #include <string>
+
+using namespace std;
+using namespace llvm;
 
 #ifndef STRINGUTILS_H_
 #define STRINGUTILS_H_

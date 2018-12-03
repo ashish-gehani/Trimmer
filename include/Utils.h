@@ -2,11 +2,11 @@
 #define UTILS_H_
 
 #include "llvm/IR/Function.h"
+#include "llvm/Transforms/Utils/Cloning.h"
 
 #include <string>
 
 #include "BBOps.h"
-#include "ConstantFolding.h"
 
 using namespace llvm;
 using namespace std;

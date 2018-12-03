@@ -1,0 +1,2 @@
+debug         #debug=1
+port=60

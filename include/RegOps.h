@@ -15,6 +15,7 @@ using namespace std;
 using namespace llvm;
 
 typedef map<Value *, Register *> ValToRegisterMap;
+typedef map<Register *, Value *> RegToValMap;
 typedef set<Value *> ValSet;
 
 class RegOps {
@@ -24,7 +25,9 @@ public:
   void addRegister(Value * val, Type * ty, uint64_t toStore);
   void addGlobalRegister(Value * val, Type * ty, uint64_t toStore);
   void cleanUpFuncBBRegisters(Function * f, ValSet valSet);
+  Value *getValue(Register *);
 private:
   ValToRegisterMap Registers;
+  RegToValMap RevRegisters;
 };
 #endif
