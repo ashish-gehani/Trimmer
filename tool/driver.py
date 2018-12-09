@@ -71,14 +71,10 @@ def run_argspec(tool):
                 else:
                         annotated_file = add_file
 		# interconstprop pass
-		Cmd = opt + ' -load ' + build_path + 'ConstantFolding.so -isAnnotated=' + str(tool.annot_flag) + ' -trackAllocas=' + str(tool.track_allocas) + ' -mem2reg \
-		-mergereturn -simplifycfg -loops -lcssa -loop-simplify -loop-rotate -inter-constprop ' + annotated_file + ' -o '\
-		+ constprop_file
+		Cmd = opt + ' -load ' + build_path + 'ConstantFolding.so -isAnnotated=' + str(tool.annot_flag) + ' -trackAllocas=' + str(tool.track_allocas) + ' -fileNames '  + str(tool.config_files) + ' -mem2reg -mergereturn -simplifycfg -loops -lcssa -loop-simplify -loop-rotate -inter-constprop ' + annotated_file + ' -o ' + constprop_file
 		printDbgMsg(Cmd)
 
-		Cmd = [opt, '-load', build_path + 'ConstantFolding.so', '-isAnnotated=' + str(tool.annot_flag), '-trackAllocas=' + str(tool.track_allocas),'-mem2reg',
-		'-mergereturn', '-simplifycfg', '-loops', '-lcssa', '-loop-simplify', '-loop-rotate', '-inter-constprop', annotated_file , '-o',
-		constprop_file]
+		Cmd = [opt, '-load', build_path + 'ConstantFolding.so', '-isAnnotated=' + str(tool.annot_flag), '-trackAllocas=' + str(tool.track_allocas), '-fileNames', str(tool.config_files),'-mem2reg','-mergereturn', '-simplifycfg', '-loops', '-lcssa', '-loop-simplify', '-loop-rotate', '-inter-constprop', annotated_file , '-o', constprop_file]
 		f = open(constprop_log_file, "wb")
 		printDbgMsg(Cmd)
 
