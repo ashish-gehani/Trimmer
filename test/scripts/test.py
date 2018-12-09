@@ -13,7 +13,7 @@ def run_test(workdir, typ, lo, hi):
     
     script_file = 'script.sh' if typ != 'annotate' else 'annotate.sh'
     for i in xrange(lo, hi + 1):
-        fileName = os.path.join(script_dir, "../data/configFile" + str(i) + ".txt")
+        fileName = "../data/configFile" + str(i) + ".txt"
         if not os.path.isfile(os.path.join(src_dir, 'inter' + str(i) + '.c')):
             continue
         print 'running test ' + str(i)
