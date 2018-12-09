@@ -241,6 +241,23 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
         currfn = cloned;
         copyWorklistBB(vmap, worklistBB);
         LI = unroller->getLoopInfo();
+
+
+        for (map<uint64_t,FileInsts*>::iterator it=fileIOCalls.begin(); it!=fileIOCalls.end(); ++it){
+          int sizeOfInsertedSeekCalls = (it->second)->insertedSeekCalls.size();
+          for(int i = 0;i<sizeOfInsertedSeekCalls;i++) { 
+            if(vmap[(it->second)->insertedSeekCalls[i]]){
+               (it->second)->insertedSeekCalls.push_back(dyn_cast<Instruction>(vmap[(it->second)->insertedSeekCalls[i]]));  
+            }
+          } 
+          int sizeOfFileIOCalls = (it->second)->insts.size();
+          for(int i = 0;i< sizeOfFileIOCalls;i++){
+            if(vmap[(it->second)->insts[i]]){
+               (it->second)->insts.push_back(dyn_cast<Instruction>(vmap[(it->second)->insts[i]]));  
+            }
+          }
+        }  
+       
         continue;
       } 
     }
@@ -248,6 +265,7 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
     if(runOnBB(current)) { //loop test terminated
       LoopUnroller *unroller = pop_back(testStack);
       if(!unroller->checkPassed()) {
+         debug(Abubakar) << " test not terminated\n";
         BasicBlock *failedLoop;
         bbOps.cleanUpFuncBBInfo(currfn); //remove cloned BBinfo
         regOps.cleanUpFuncBBRegisters(currfn, popFuncValStack()); //remove cloned registers and stack
@@ -267,6 +285,7 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
         //replace old function with new one
         Function *oldFn = unroller->getCloneOf();
         addToWorklistBB(current);
+        debug(Abubakar) << "marking test at level " << testStack.size() << " as terminated\n";
 
         worklistBB[worklistBB.size() -2].clear();
         auto clonedFnWorklist =  worklistBB.back();
@@ -285,20 +304,7 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
 
         delete unroller;
 
-        for (map<uint64_t,FileInsts*>::iterator it=fileIOCalls.begin(); it!=fileIOCalls.end(); ++it){
-          for(int i = (it->second)->insertedSeekCalls.size() -1; i >= 0; i--) { 
-            if(vmap[(it->second)->insertedSeekCalls[i]]){
-              (it->second)->insertedSeekCalls[i] = dyn_cast<Instruction>(vmap[(it->second)->insertedSeekCalls[i]]);  
-            }
-          } 
-
-          for(int i = (it->second)->insts.size() -1; i >= 0; i--) {
-            if(vmap[(it->second)->insts[i]]){
-              (it->second)->insts[i] = dyn_cast<Instruction>(vmap[(it->second)->insts[i]]);  
-            }
-          }
-        }
-        
+       
         // if not main function
         if(ci) {
           std::vector<Value*> args(ci->arg_begin(), ci->arg_end());
@@ -363,6 +369,7 @@ bool ConstantFolding::runOnModule(Module & M) {
   trackAllocas = trackAlloc;
   if(trackAllocas)
     getTrackedValues(trackedValues);
+
 
   for (auto &fileName:fileNames){
     debug(Abubakar) <<fileName <<"\n";
@@ -432,6 +439,7 @@ set<GlobalVariable *> ConstantFolding::dfs(CallGraphNode *root, map<Function *, 
   if(F->isDeclaration())
     return set<GlobalVariable *>();
 
+
   if(openNodes.find(F) != openNodes.end()) {
     //handle cycle
     errs() << "Cycle found : " << "\n";
@@ -485,11 +493,14 @@ set<GlobalVariable *> ConstantFolding::dfs(CallGraphNode *root, map<Function *, 
   recStack.push_back(F);
 
   set<GlobalVariable *> data = modSet[F];
+
   for(unsigned i = 0, end = root->size(); i != end; i++) {
     auto called = (*root)[i];
     if(!called)
         continue;
+
     set<GlobalVariable *> childData = dfs(called, modSet, openNodes, recStack, cycles);
+
     data.insert(childData.begin(), childData.end());
     //if(calledNode.second->getFunction())
   }
@@ -538,7 +549,7 @@ void ConstantFolding::collectCallGraphGlobals(CallGraph *CG) {
 
   for(auto &kv: modSet) {
     Function *F = kv.first;
-    errs() << "Function: " << F->getName() << "\n";
+    debug(Abubakar)<< "Function: " << F->getName() << "\n";
     for(auto &val: kv.second) {
       errs() << *val << "\n";
     }
@@ -1006,7 +1017,7 @@ void ConstantFolding::deleteFileIOCalls() {
     }
     vector<Instruction*> insts = (it->second)->insts;
     for(int i = insts.size() -1; i >= 0; i--) {
-      debug(Abubakar) << "insts  " << dyn_cast<CallInst>(insts[i])->getCalledFunction()->getName().data() <<insts[i]->getNumUses()<<"\n"; 
+      debug(Abubakar) << "insts  " << dyn_cast<CallInst>(insts[i])->getCalledFunction()->getName().data() <<insts[i]->getNumUses()<<dyn_cast<CallInst>(insts[i])->getParent()->getParent()->getName()<<"\n"; 
       if(insts[i]->getNumUses() > 0){
         CallInst *Inst = dyn_cast<CallInst>(insts[i]); 
         if(strcmp(Inst->getCalledFunction()->getName().data(),"open")==0){
@@ -1822,7 +1833,7 @@ void ConstantFolding::setfdiOffset(int sfd, int fd) {
  * Get File offset
  */
 
-int ConstantFolding::getfdiOffset(int sfd, int fd) {
+long ConstantFolding::getfdiOffset(int sfd, int fd) {
   return ((FdInfo *) bbOps.getActualAddr(fdInfoMap[sfd], currBB))->offset;
 }
 
@@ -1839,7 +1850,7 @@ void ConstantFolding::setfptrOffset(int sfd, FILE *fptr) {
 /**
  * Get File offset
  */
-int ConstantFolding::getfptrOffset(int sfd, FILE *fptr) {
+long ConstantFolding::getfptrOffset(int sfd, FILE *fptr) {
   return ((FdInfo *) bbOps.getActualAddr(fdInfoMap[sfd],currBB))->offset;
 
 }
@@ -1926,6 +1937,9 @@ void ConstantFolding::handleFOpen(CallInst * ci) {
     insts->isSpecialized = true;
     fileIOCalls[fd] = insts;
   }
+  else {
+    debug(Usama) << "fopen not specialized" << "\n";
+  }
 }
 
 /**
@@ -1940,7 +1954,7 @@ void ConstantFolding::handleRead(CallInst * ci) {
   Value * fdVal = ci->getOperand(0);
   Value * bufPtr = ci->getOperand(1);
   Value * sizeVal = ci->getOperand(2);
-  uint64_t sfd, size;
+  uint64_t size, sfd;
   int fd;
   bool fdConst = getSingleVal(fdVal, sfd) && getfdi(sfd, fd);  
   Register * reg = processInstAndGetRegister(bufPtr);  
@@ -2009,7 +2023,7 @@ void ConstantFolding::handlePRead(CallInst * ci) {
   Value * bufPtr = ci->getOperand(1);
   Value * sizeVal = ci->getOperand(2);
   Value * offsetVal = ci->getOperand(3);
-  uint64_t sfd, size,offset;
+  uint64_t size,offset,sfd;
   int fd;
   bool fdConst = getSingleVal(fdVal, sfd) && getfdi(sfd, fd);
   Register * reg = processInstAndGetRegister(bufPtr);  
@@ -2026,7 +2040,7 @@ void ConstantFolding::handlePRead(CallInst * ci) {
     return;   
   }
   char * buffer = (char *) bbOps.getActualAddr(reg->getValue(),currBB);
-  int bytes_read = pread(fd, buffer, size,offset);
+  long bytes_read = pread(fd, buffer, size,offset);
   if(bytes_read < 0) {
     debug(Abubakar) << "handlePRead : read returned error\n";
     setfdiUntracked(sfd);
@@ -2058,7 +2072,7 @@ void ConstantFolding::handleMMap(CallInst * ci) {
   Value * flagVal2 = ci->getOperand(3);
   Value * fdVal = ci->getOperand(4);
   Value * offsetVal = ci->getOperand(5);
-  uint64_t sfd, size,offset,flag1,flag2;
+  uint64_t size,offset,flag1,flag2,sfd;
   int fd;
   bool fdConst = getSingleVal(fdVal, sfd) && getfdi(sfd, fd);
   Register * reg = processInstAndGetRegister(bufPtr); 
@@ -2126,7 +2140,8 @@ void ConstantFolding::handleMUnmap(CallInst * ci) {
 
   Value * bufPtr = ci->getOperand(0);
   Value * sizeVal = ci->getOperand(1);
-  uint64_t sfd, size;
+  uint64_t size;
+  uint64_t sfd;
   char* mmappedData;
   bool hasCorrespondingMmap = false;
 
@@ -2192,7 +2207,7 @@ void ConstantFolding::handleFRead(CallInst * ci) {
   Value * sizeVal = ci->getOperand(1);
   Value * numVal = ci->getOperand(2);
   Value * fptrVal = ci->getOperand(3);
-  uint64_t sfd, size,num;
+  uint64_t size,num,sfd;
   FILE* fptr;
   bool fdConst = getSingleVal(fptrVal, sfd) && getfptr(sfd, fptr);
   Register * reg = processInstAndGetRegister(bufPtr);  
@@ -2259,7 +2274,7 @@ void ConstantFolding::handleFGets(CallInst * ci) {
   Value * bufPtr = ci->getOperand(0);
   Value * sizeVal = ci->getOperand(1);
   Value * fptrVal = ci->getOperand(2);
-  uint64_t sfd, size;
+  uint64_t size,sfd;
   FILE* fptr;
   bool fdConst = getSingleVal(fptrVal, sfd) && getfptr(sfd, fptr);
   Register * reg = processInstAndGetRegister(bufPtr);  
@@ -2341,7 +2356,7 @@ void ConstantFolding::handleLSeek(CallInst * ci) {
   Value * fdVal = ci->getOperand(0);
   Value * offSetVal = ci->getOperand(1);
   Value * flagVal = ci->getOperand(2);
-  uint64_t sfd, offset, flag;
+  uint64_t offset,sfd,flag;
   int fd;
   bool fdConst = getSingleVal(fdVal, sfd) && getfdi(sfd, fd);
   if(!fdConst || !getSingleVal(offSetVal, offset) || 
@@ -2355,7 +2370,7 @@ void ConstantFolding::handleLSeek(CallInst * ci) {
     }  
     return;   
   }	
-  int ret = lseek(fd, offset, flag);
+  long ret = lseek(fd, offset, flag);
   if(ret < 0) { 
     setfdiUntracked(sfd);
     debug(Abubakar) << "handleLSeek : seek returned error\n";
@@ -2380,7 +2395,7 @@ void ConstantFolding::handleFSeek(CallInst * ci) {
   Value * fptrVal = ci->getOperand(0);
   Value * offSetVal = ci->getOperand(1);
   Value * flagVal = ci->getOperand(2);
-  uint64_t sfd, offset, flag;
+  uint64_t offset, sfd, flag;
   FILE* fptr;
   bool fdConst = getSingleVal(fptrVal, sfd) && getfptr(sfd, fptr);
   if(!fdConst || !getSingleVal(offSetVal, offset) || 
@@ -2429,7 +2444,17 @@ void ConstantFolding::handleClose(CallInst * ci) {
     }  
     return;   
   }    
-  close(fd);
+  int fileClose = close(fd);
+  if(fileClose !=0)
+  {
+    debug(Abubakar) << "handleClose : close returned error\n";
+    string funcNames[2];
+    funcNames[0] = "open";
+    funcNames[1] = "open";
+    removeFileIOCallsFromMap(funcNames, sfd);
+    return;
+
+  }
   fileIOCalls[sfd]->insts.push_back(ci);
 }
 
@@ -2453,11 +2478,21 @@ void ConstantFolding::handleFClose(CallInst * ci) {
     }  
     return;   
   }   
-  fclose(fptr); 
+  int fileClose =fclose(fptr); 
+  if(fileClose !=0)
+  {
+    debug(Abubakar) << "handleFClose : fclose returned error\n";
+    string funcNames[2];
+    funcNames[0] = "fopen";
+    funcNames[1] = "fopen";
+    removeFileIOCallsFromMap(funcNames, sfd);
+    return;
+
+  }
   fileIOCalls[sfd]->insts.push_back(ci);
 }
 
-void ConstantFolding::removeFileIOCallsFromMap(string buffer[],uint64_t sfd) {
+void ConstantFolding::removeFileIOCallsFromMap(string buffer[],int sfd) {
 
   vector<Instruction*> insts = fileIOCalls[sfd]->insts;
   vector<Instruction*>::iterator it = insts.begin() ;
