@@ -96,7 +96,7 @@ struct ConstantFolding : public ModulePass {
   list<string> configFileNames;
   int numConfigFiles;
   vector<MMapInfo*> mMapBuffer; 
-  ValueToValueMapTy vmap;
+
 
   ConstantFolding(): ModulePass(ID){}
   void getAnalysisUsage(AnalysisUsage &AU) const;
@@ -157,9 +157,9 @@ struct ConstantFolding : public ModulePass {
   void setfdiUntracked(int);
   bool getfdiUntracked(int);
   void setfdiOffset(int, int);
-  int getfdiOffset(int, int);
+  long getfdiOffset(int, int);
   void setfptrOffset(int, FILE*);
-  int getfptrOffset(int, FILE*);
+  long getfptrOffset(int, FILE*);
   bool handleFileIOCall(CallInst *);
   void handleOpen(CallInst *);
   void handleFOpen(CallInst *);
@@ -173,7 +173,7 @@ struct ConstantFolding : public ModulePass {
   void handleFGets(CallInst *);
   void handleClose(CallInst *);
   void handleFClose(CallInst *);
-  void removeFileIOCallsFromMap(string buffer[],uint64_t);
+  void removeFileIOCallsFromMap(string buffer[],int);
       
   void replaceUses();
   void deleteFileIOCalls();
