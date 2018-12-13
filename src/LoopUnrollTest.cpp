@@ -75,9 +75,9 @@ bool LoopUnrollTest::checkPassed() {
   if(!terminated) return false;
   if(!ConstTripCount){ 
     if(isFileIOLoop)
-     return iterations <= DEFAULT_TRIP_COUNT * 5;
+     return iterations < (DEFAULT_TRIP_COUNT * 5);
    else
-     return iterations <= DEFAULT_TRIP_COUNT;
+     return iterations < DEFAULT_TRIP_COUNT;
   }
   return true;
 }
