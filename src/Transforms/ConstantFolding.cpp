@@ -869,8 +869,10 @@ void ConstantFolding::markGlobAsNonConst(Function *F) {
     return;
 
   set<GlobalVariable*> &data = getFuncModset(F);
-  debug(Usama) << "marking globals for " << F->getName() << " as false \n";
+  debug(Usama) << "marking globals for " << F->getName() << " as non const\n";
   for(auto &gv: data) {
+    if(gv->isConstant())
+      continue;
     auto reg = processInstAndGetRegister(gv);  
     if(!reg)
       continue;
