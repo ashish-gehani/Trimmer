@@ -25,7 +25,7 @@ class LoopUnroller {
   static bool checkUnrollHint(BasicBlock * hdr, LoopInfo &LI, Module *);
   static bool shouldSimplifyLoop(BasicBlock *BB, LoopInfo &LI, Module *, bool);
   static bool deleteLoop(BasicBlock *);
-  bool getTripCount(TargetLibraryInfo * TLI, AssumptionCache &, unsigned &);
+  bool getTripCount(TargetLibraryInfo * TLI, AssumptionCache &, unsigned &, bool);
   bool runtest(TargetLibraryInfo * TLI, AssumptionCache &);
   LoopInfo *getLoopInfo();
   bool checkIfFileIOLoop(Loop * L);

@@ -10,7 +10,7 @@ struct FdInfo {
   FILE *fptr; //for fopen, fread, fseek, fgets, fclose calls
   int fd; //for open, read, lseek, pread, mmap, munmap, close calls
   char * fileName; //File name
-  int offset; // current offset of the File
+  long offset; // current offset of the File
   bool tracked; // tracks whether the file structure is valid or not
 };
 

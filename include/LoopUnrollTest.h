@@ -39,13 +39,13 @@ CallInst * getTestInst(string, Module *);
 
 struct LoopUnrollTest {
   static int GLOBAL_LOOP_ID;
-  bool terminated, ConstTripCount;              
+  bool terminated, ConstTripCount, isFileIOLoop;              
   vector<Instruction *> indepInsts;
   map<Instruction *, ProcResult> InstResults; 
   unsigned numOrigInsts, partOfLoop, iterations; 
   int id;
   //vector<Instruction *> instrumented;
-  LoopUnrollTest(Loop * L, Module * module, bool tripCount);
+  LoopUnrollTest(Loop * L, Module * module, bool tripCount, bool isFileIOLoop);
   string getExitName(); 
   string getIterName(); 
 

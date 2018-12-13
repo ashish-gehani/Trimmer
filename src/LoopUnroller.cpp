@@ -49,7 +49,7 @@ bool LoopUnroller::shouldSimplifyLoop(BasicBlock *BB, LoopInfo &LI, Module *m, b
   return true;
 }
 
-bool LoopUnroller::getTripCount(TargetLibraryInfo * TLI, AssumptionCache &AC, unsigned &tripCount) {
+bool LoopUnroller::getTripCount(TargetLibraryInfo * TLI, AssumptionCache &AC, unsigned &tripCount, bool isFileIOLoop) {
   BasicBlock *header = loop->getHeader();
   Function * F = loop->getHeader()->getParent();
   DominatorTree DT(*F);
@@ -58,7 +58,6 @@ bool LoopUnroller::getTripCount(TargetLibraryInfo * TLI, AssumptionCache &AC, un
   debug(Usama) << "Trip Multiple " << SE.getSmallConstantTripMultiple(loop) << "\n";
 
   if(!tripCount) {
-    bool isFileIOLoop = checkIfFileIOLoop(loop);
     if(isFileIOLoop)
       tripCount = DEFAULT_TRIP_COUNT * 5;
     else
@@ -70,13 +69,13 @@ bool LoopUnroller::getTripCount(TargetLibraryInfo * TLI, AssumptionCache &AC, un
 
 bool LoopUnroller::runtest(TargetLibraryInfo * TLI, AssumptionCache &AC) {
   unsigned tripCount;
-
+  bool isFileIOLoop = checkIfFileIOLoop(loop);
   //getBranchMemory(loop);
-  bool constTripCount = getTripCount(TLI, AC, tripCount);
+  bool constTripCount = getTripCount(TLI, AC, tripCount, isFileIOLoop);
 
   debug(Usama) << "ConstTripCount :" << constTripCount << "\n";
 
-  ti = new LoopUnrollTest(loop, module, constTripCount);
+  ti = new LoopUnrollTest(loop, module, constTripCount, isFileIOLoop);
   if(!doUnroll(TLI, AC, tripCount)) {
     delete ti;
     ti = NULL;
