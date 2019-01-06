@@ -16,7 +16,7 @@ bool findInVect(vector<Ty> & vect, Ty val) {
 }
 
 template <typename Ty>
-bool findInVect(SmallVector<Ty, 16> vect, Ty val) {
+bool findInVect(SmallVector<Ty, 16> &vect, Ty val) {
   for(unsigned i = 0; i < vect.size(); i++) {
     if(vect[i] == val)
       return true;
@@ -56,15 +56,15 @@ Ty pop_back(vector<Ty> & vect) {
   return val;
 }
 template <typename Ty>
-bool findInSet(set<Ty> valSet, Ty key) {
+bool findInSet(set<Ty> &valSet, Ty key) {
   return valSet.find(key) != valSet.end();
 }
 template <typename Ty1, typename Ty2>
-bool findInMap(map<Ty1, Ty2> valMap, Ty1 key) {
+bool findInMap(map<Ty1, Ty2> &valMap, Ty1 key) {
   return valMap.find(key) != valMap.end();
 }
 template <typename Ty1, typename Ty2>
-map<Ty1, Ty2 *> duplicateMap(map<Ty1, Ty2 *> oldMap) {
+map<Ty1, Ty2 *> duplicateMap(map<Ty1, Ty2 *> &oldMap) {
   map<Ty1, Ty2 *> newMap;
   for(auto const &ent : oldMap) {
     newMap[ent.first] = new Ty2(*ent.second);
