@@ -46,6 +46,7 @@
 #include "LoopUnroller.h"
 #include "FileInsts.h"
 #include "MMapInfo.h"
+#include "Stats.h"
 
 typedef map<Function *, FuncInfo *> FuncInfoMap;
 typedef pair<Instruction *, Instruction *> InstPair;
@@ -65,6 +66,7 @@ struct ConstantFolding : public ModulePass {
   static char ID;  
   Module * module;  
   BBOps bbOps;
+  Stats stats;
   TargetLibraryInfo * TLI;
   DataLayout * DL;
   DominatorTree * DT;

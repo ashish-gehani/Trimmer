@@ -199,6 +199,8 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
 
   if(!ci) assert(toRun->getName().str() == "main" && "callInst not given");
 
+  stats.functionCall(toRun);
+
   push_back(funcValStack);
   bool tempAnnot = currContextIsAnnotated;
 
@@ -237,6 +239,9 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
       if(auto *unroller= unrollLoopInClone(currfn, L, vmap, funcValStack)) {
         addToWorklistBB(current); 
         Function *cloned = dyn_cast<BasicBlock>(vmap[current])->getParent();
+
+        stats.swapFunction(currfn, cloned);
+        stats.loopStart(dyn_cast<BasicBlock>(vmap[current]));
 
         testStack.push_back(unroller);
         push_back(worklistBB);
@@ -277,6 +282,8 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
         failedLoop = worklistBB[worklistBB.size() -1].back();
         worklistBB[worklistBB.size() - 1].pop_back();
 
+        stats.swapFunction(currfn, unroller->getCloneOf());
+        stats.loopFail();
         currfn = unroller->getCloneOf();
         toRun = currfn;
 
@@ -286,6 +293,7 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
         runOnBB(failedLoop);
       }else {
         //replace old function with new one
+        stats.loopSuccess();
         Function *oldFn = unroller->getCloneOf();
         addToWorklistBB(current);
         debug(Abubakar) << "marking test at level " << testStack.size() << " as terminated\n";
@@ -321,6 +329,8 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
       }
     }
   }
+
+  stats.functionReturn();
 
   currBB = tempBB;
   pop_back(worklistBB);
@@ -410,6 +420,8 @@ bool ConstantFolding::runOnModule(Module & M) {
   replaceUses();
   deleteFileIOCalls();
 
+  stats.printStats(module->getFunction("main"));
+  stats.makeGraph(module->getFunction("main"));
   return true;
 }   
   

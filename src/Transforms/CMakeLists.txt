@@ -10,6 +10,7 @@ add_library(ConstantFolding MODULE
   ../LoopUnroller.cpp
   ../LoopUnrollTest.cpp
   ../ContextInfo.cpp
+  ../Stats.cpp
   )
 add_library(Internalize MODULE
   Internalize.cpp
