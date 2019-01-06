@@ -372,7 +372,7 @@ BasicBlock * BBOps::getRfromPred(BasicBlock * BB) {
 void BBOps::recomputeLoopInfo(Function * F, LoopInfo& LI) {
   for(Function::iterator bi = F->begin(), e = F->end(); bi != e; ++bi) {
     BasicBlock * BB = &*bi;
-    if(findInMap(BBInfoMap, BB))
+    if(BBInfoMap.find(BB) != BBInfoMap.end())
       BBInfoMap[BB]->partOfLoop = LI.getLoopFor(BB);
   }
 }
@@ -381,11 +381,11 @@ void BBOps::copyFuncBlocksInfo(Function * F, ValueToValueMapTy & vmap) {
   for(Function::iterator bi = F->begin(), e = F->end(); bi != e; ++bi) {
     BasicBlock * BB = &*bi;
     BasicBlock * clone = dyn_cast<BasicBlock>(vmap[BB]);
-    if(findInSet(visited, BB))
+    if(visited.find(BB) != visited.end())
       visited.insert(clone);
-    else if(findInSet(unReachable, BB))
+    else if(unReachable.find(BB) != unReachable.end())
       unReachable.insert(clone);
-    if(findInMap(BBInfoMap, BB)) {
+    if(BBInfoMap.find(BB) != BBInfoMap.end()) {
       BBInfo * bbi = BBInfoMap[BB];
       BBInfo * nbbi = new BBInfo(clone);
 
