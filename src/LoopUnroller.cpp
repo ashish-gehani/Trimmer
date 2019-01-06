@@ -163,6 +163,8 @@ bool LoopUnroller::checkIfFileIOLoop(Loop * L) {
     for (auto Inst = B->begin(), J = B->end(); Inst != J; ++Inst) {
        if(strcmp(Inst->getOpcodeName(),"call")==0){
           CallInst* callInst = dyn_cast<CallInst>(Inst);
+          if(!callInst->getCalledFunction())
+            continue;
           string funcname = callInst->getCalledFunction()->getName().str();
           if(funcname.compare("fread")== 0 || funcname.compare("read")== 0 || funcname.compare("fgets")== 0 || funcname.compare("pread")== 0){
             return true;            
