@@ -538,7 +538,7 @@ bool BBOps::checkConstStr(uint64_t addr, BasicBlock *from) {
 bool BBOps::checkConstStr(uint64_t addr, uint64_t max, BasicBlock *from) {
   char * mem = (char *) getActualAddr(addr, from);
   for(unsigned i = 0; mem[i] != '\0' && i < max; i++) {
-    if(!checkConstMem(i, 1, from))
+    if(!checkConstMem(addr + i, 1, from))
       return false; 
   }
   return true;
