@@ -1561,8 +1561,92 @@ bool ConstantFolding::handleStringFunc(CallInst * callInst) {
   else if(name == "atoi")   handleAtoi(callInst);
   else if(name == "strdup")   handleStrDup(callInst);
   else if(name == "strtok")   handleStrTok(callInst);
+  else if(name == "strcpy") handleStrCpy(callInst);
+  else if(name == "strrchr") handleStrrChr(callInst);
   else return false;
   return true;
+}
+
+void ConstantFolding::handleStrrChr(CallInst *callInst) {
+  Value *str = callInst->getOperand(0);
+  Value *chr = callInst->getOperand(1);
+
+  char *string;
+  uint64_t character;
+  Register *strReg = processInstAndGetRegister(str);
+  
+  if(!strReg) {
+    debug(Usama) << "handleStrrChr: string not found\n";
+    return;
+  }
+
+  if(!getStr(strReg->getValue(), string)) {
+    debug(Usama) << "handleStrrChr: string not constant\n";
+    return;
+  }
+
+  if(!getSingleVal(chr, character)) {
+    debug(Usama) << "handleStrrChr: failed to find character\n";
+    return;
+  }
+
+  char *result = strrchr(string, (int) character); 
+  debug(Usama) << "handleStrrChr: successfully folded \n";
+  if(!result) {
+    addSingleVal(callInst, 0);
+    return;
+  }
+ 
+  addSingleVal(callInst, (uint64_t) strReg->getValue() + (result - string));
+  return;
+}
+
+void ConstantFolding::handleStrCpy(CallInst *callInst) {
+  Value *dest = callInst->getOperand(0);
+  Value *src = callInst->getOperand(1);
+
+  Register *srcReg = processInstAndGetRegister(src);
+  Register *destReg = processInstAndGetRegister(dest);
+  if(!srcReg || !bbOps.checkConstContigous(srcReg->getValue(), currBB)) {
+    debug(Usama) << "strcpy: source string not constant" << "\n";
+    //mark destination as non constant too
+    if(destReg)
+      bbOps.setConstContigous(false, destReg->getValue(), currBB);
+    else
+      debug(Usama) << "strcpy: (Warning) strcpy, destination unknown" << "\n";
+
+    return;
+  }
+
+  if(!destReg) {
+    debug(Usama) << "strcpy: Destination not found\n";
+    return;
+  }
+
+  //get untill NULL
+  uint64_t upperLimit = 50000;
+  uint64_t size = 0;
+  char *addr = (char *) bbOps.getActualAddr(srcReg->getValue(), currBB);
+  char *destAddr = (char *) bbOps.getActualAddr(destReg->getValue(), currBB);
+  char *temp = addr;
+
+  while(*temp && size <= upperLimit) {
+    size++;
+    temp++;
+  }
+
+  if(size > upperLimit) {
+    debug(Usama) << "strcpy: (Warning), src null not found untill upper limit \n";
+
+    if(destReg)
+      bbOps.setConstContigous(false, destReg->getValue(), currBB);
+
+    return;
+  }
+  
+  memcpy(destAddr, addr, size);
+  debug(Usama) << "strcpy: Successfully folded" << "\n";
+  return;
 }
 
 void ConstantFolding::simplifyStrFunc(CallInst * callInst) {
