@@ -1705,7 +1705,7 @@ void *myMalloc ( Int32 n )
 
 
 /*---------------------------------------------*/
-__attribute__((annotate("specializeArg")))
+//__attribute__((annotate("specializeArg")))
 static Cell *mkCell ( void )
 {
    Cell *c;
@@ -1716,11 +1716,13 @@ static Cell *mkCell ( void )
    return c;
 }
 
+/*
 __attribute__((noinline)) void unroll_loop(int count) {
   printf("unrolling loop with count %d\n", count);
 } 
+*/
 /*---------------------------------------------*/
-__attribute__((annotate("specializeArg")))
+//__attribute__((annotate("specializeArg")))
 static Cell *snocString ( Cell *root, Char *name )
 {
    if (root == NULL) {
@@ -1732,7 +1734,7 @@ static Cell *snocString ( Cell *root, Char *name )
    } else {
       Cell *tmp = root;
       for(int i = 0; i < 10; i++) {
-         unroll_loop(10);
+         //unroll_loop(10);
          if(tmp->link == NULL)
             break;
          tmp = tmp->link;
@@ -1774,7 +1776,7 @@ void addFlagsFromEnvVar ( Cell** argList, Char* varName )
 /*---------------------------------------------*/
 #define ISFLAG(s) (strcmp(aa->name, (s))==0)
 
-__attribute__((annotate("specializeArg")))
+//__attribute__((annotate("specializeArg")))
 IntNative main ( IntNative argc, Char *argv[] )
 {
    Int32  i, j;
@@ -1840,7 +1842,7 @@ IntNative main ( IntNative argc, Char *argv[] )
    // addFlagsFromEnvVar ( &argList,  (Char*)"BZIP2" );
    // addFlagsFromEnvVar ( &argList,  (Char*)"BZIP" );
    for (i = 1; i < 10; i++) {
-      unroll_loop(10);
+      //unroll_loop(10);
       if(!(i <= argc-1))
          break;
       APPEND_FILESPEC(argList, argv[i]);
@@ -1886,12 +1888,12 @@ IntNative main ( IntNative argc, Char *argv[] )
    /*-- Look at the flags. --*/
    aa = argList;
    for (int i = 0; i < 10; i++) {
-       unroll_loop(10);
+       //unroll_loop(10);
       if(aa == NULL) break;
       if (ISFLAG("--")) break;
       if (aa->name[0] == '-' && aa->name[1] != '-') {
          for (j = 1; j < 10; j++) {
-            unroll_loop(10);
+            //unroll_loop(10);
             if(aa->name[j] == '\0')
                break;
             switch (aa->name[j]) {
@@ -1936,7 +1938,7 @@ IntNative main ( IntNative argc, Char *argv[] )
    }
    /*-- And again ... --*/
    for (int i = 0; i < 10; i++) {
-      unroll_loop(10);
+      //unroll_loop(10);
       if(aa == NULL) break;
       if (ISFLAG("--")) break;
       if (ISFLAG("--stdout"))            srcMode          = SM_F2O;  else
