@@ -564,7 +564,10 @@ void BBOps::cleanUpFuncBBInfo(Function *f) {
 void BBOps::getVisitedPreds(BasicBlock *BB, vector<BasicBlock *> &preds) {
   for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++) {
     BasicBlock *predecessor = *it;
-    if(visited.find(predecessor) != visited.end())
+    if(visited.find(predecessor) != visited.end()) {
+      if(isnotSingleSucc(predecessor, BB))
+        continue;
       preds.push_back(predecessor);
+    }
   }
 }
