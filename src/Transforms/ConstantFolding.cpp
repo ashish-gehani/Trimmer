@@ -3091,12 +3091,13 @@ void ConstantFolding::checkPtrMemory(BasicBlock *currBB) {
 
       if(!dyn_cast<StoreInst>(&I))
         continue;
-      Value *ptr = dyn_cast<StoreInst>(&I)->getOperand(1);
+      StoreInst *str = dyn_cast<StoreInst>(&I);
+      Value *ptr = str->getOperand(1);
       PointerType *type = dyn_cast<PointerType>(ptr->getType());
       Register *reg = processInstAndGetRegister(ptr);
       if(!reg)
         continue;
-      uint64_t size = DL->getTypeAllocSize(reg->getType()); 
+      uint64_t size = DL->getTypeAllocSize(str->getOperand(0)->getType());
       //if some memory was marked non const after merging
       if(bbOps.checkConstMem(reg->getValue(), size, BB) &&
           !bbOps.checkConstMem(reg->getValue(), size, currBB)) {
