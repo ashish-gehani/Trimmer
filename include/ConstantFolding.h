@@ -152,6 +152,7 @@ struct ConstantFolding : public ModulePass {
   void handleStrCaseCmp(CallInst *); 
   void handleStrDup(CallInst *); 
   void handleStrTok(CallInst *); 
+  void handleStrCat(CallInst *);
 
   bool handleGetOpt(CallInst *);  
   bool handleLongArgs(CallInst *, option *, int *&);

@@ -1616,6 +1616,7 @@ bool ConstantFolding::handleStringFunc(CallInst * callInst) {
   else if(name == "strtok")   handleStrTok(callInst);
   else if(name == "strcpy") handleStrCpy(callInst);
   else if(name == "strrchr") handleStrrChr(callInst);
+  else if(name == "strcat") handleStrCat(callInst);
   else return false;
   return true;
 }
@@ -1817,6 +1818,46 @@ void ConstantFolding::handleStrTok(CallInst * callInst)
   debug(Abubakar) << "buffer2 = "<<buffer2 << "\n";
   debug(Abubakar) << "type = "<<BitCastInst->getType() << "\n";
   addSingleVal(BitCastInst,addr1,true);
+  
+}
+
+void ConstantFolding::handleStrCat(CallInst * callInst) {
+  debug(Abubakar) << " in str cat"<< "\n";
+  Value * bufPtr0 = callInst->getOperand(0);
+  Value * bufPtr1 = callInst->getOperand(1);  
+
+  Register * reg0 = processInstAndGetRegister(bufPtr0);  
+  Register * reg1 = processInstAndGetRegister(bufPtr1); 
+
+   
+  if(!reg0) {
+        debug(Abubakar) << "handleStrCat: not found in map"<< "\n";
+        return;
+  }
+
+  if(!reg1) {
+    debug(Abubakar) << "handleStrCat: not found in map"<< "\n";
+    return;
+  }
+
+  if(!bbOps.checkConstContigous(reg0->getValue(), currBB) || !bbOps.checkConstContigous(reg1->getValue(), currBB)) {
+    debug(Abubakar) << "handleStrCat: non constant"<< "\n";
+    return;
+  }    
+
+  char * buffer0 = (char *) bbOps.getActualAddr(reg0->getValue(), currBB);
+  char * buffer1 = (char *) bbOps.getActualAddr(reg1->getValue(), currBB);
+
+  char * result = strcat(buffer0,buffer1);
+
+  debug(Abubakar) << "result = "<<result << "\n";
+  debug(Abubakar) << "buffer0 = "<<buffer0 << "\n";
+  debug(Abubakar) << "buffer1 = "<<buffer1 << "\n";
+
+  uint64_t addr = bbOps.allocateHeap(strlen(buffer0)+strlen(buffer1), currBB);
+  char * buffer3 = (char *) bbOps.getActualAddr(addr, currBB);
+  strcpy(buffer3,result);
+  addSingleVal(callInst, addr, true);
   
 }
 
