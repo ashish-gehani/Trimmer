@@ -167,6 +167,9 @@ struct ConstantFolding : public ModulePass {
   void setfptrOffset(int, FILE*);
   long getfptrOffset(int, FILE*);
   bool handleFileIOCall(CallInst *);
+  bool handleSysCall(CallInst *);
+  bool handleGetUid(CallInst *);
+  bool handleGetPwUid(CallInst *);
   void handleOpen(CallInst *);
   void handleFOpen(CallInst *);
   void handleRead(CallInst *);

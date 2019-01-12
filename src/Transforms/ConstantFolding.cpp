@@ -45,6 +45,7 @@
 #include <algorithm>
 #include <sys/mman.h>
 #include <sys/types.h>
+#include <pwd.h>
 
 #include "ConstantFolding.h"
 #include "Utils.h"
@@ -917,6 +918,57 @@ void ConstantFolding::markGlobAsNonConst(Function *F) {
   }
 }
 
+bool ConstantFolding::handleGetUid(CallInst *callInst) {
+  uid_t userId = getuid();
+  addSingleVal(callInst, (uint64_t)userId, true);
+  return true;
+}
+
+bool ConstantFolding::handleGetPwUid(CallInst *callInst) {	
+	Value *uidVal = callInst->getOperand(0);
+	uint64_t uid;
+
+	if(!getSingleVal(uidVal, uid))
+		return false;
+
+	struct passwd *pwuid = getpwuid(uid);
+	if(!pwuid)
+		return false;
+
+  PointerType * pointerTy = dyn_cast<PointerType>(callInst->getType());
+  if(!pointerTy)
+    return false;
+
+  Type *ty = pointerTy->getElementType();
+
+  unsigned size = DL->getTypeAllocSize(ty);
+  uint64_t addr = bbOps.allocateStack(size, currBB);
+
+  uint64_t addrField = bbOps.allocateStack(100, currBB);
+  char * addrFieldAct = (char *) bbOps.getActualAddr(addrField, currBB);
+  strcpy(addrFieldAct, pwuid->pw_dir);
+  struct passwd *memPwUid = (struct passwd *)bbOps.getActualAddr(addr, currBB); 
+  memcpy(memPwUid, pwuid, size);
+  memPwUid->pw_dir = (char *) addrField;
+	addSingleVal(callInst, (uint64_t) addr);
+  struct passwd *temp = (struct passwd *)bbOps.getActualAddr(addr, currBB);
+  //errs() << string(temp->pw_dir) << "asd\n";
+  pushFuncStack(callInst);
+	return true;
+}
+
+bool ConstantFolding::handleSysCall(CallInst *callInst) {
+  Function *F;
+  if(!(F = callInst->getCalledFunction()))
+    return false;
+
+  if(F->getName().str() == "getuid")
+    return handleGetUid(callInst);
+  else if(F->getName().str() == "getpwuid")
+    return handleGetPwUid(callInst);
+  return false;
+}
+
 ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
 
   if(!callInst->getCalledFunction() && !simplifyCallback(callInst)) {
@@ -933,6 +985,7 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
   else if(handleMemInst(callInst)) {}
   else if(handleStringFunc(callInst)) {} 
   else if(handleFileIOCall(callInst)) {} 
+  else if(handleSysCall(callInst)) {}
   else if(calledFunction->isDeclaration()) {
     debug(Abubakar) << "skipping function : declaration\n";
     markArgsAsNonConst(callInst);
