@@ -264,6 +264,10 @@ struct ConstantFolding : public ModulePass {
 
   bool hasTrackedMalloc(Function *);
   void getTrackedValues(set<Value *> &);
+
+
+  bool exceedsRecursion(Function *called, Function *callee);
+  string removeCloneName(string name);
 };
 
 

@@ -1008,6 +1008,32 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
   return UNDECIDED;  
 }
 
+string ConstantFolding::removeCloneName(string name) {
+  size_t pos = name.find("_clone");
+  if(pos == string::npos)
+    return name;
+  return name.substr(0, pos);
+}
+
+bool ConstantFolding::exceedsRecursion(Function *called, Function *callee) {
+  string calledName = removeCloneName(called->getName().str());
+  string calleeName = removeCloneName(callee->getName().str());
+
+  if(calledName != calleeName)
+    return false;
+
+  //check call stack
+  int max = 5;
+  for(unsigned i = worklistBB.size() - 1; i >= max && i >= 0; i--) {
+    string func = removeCloneName(worklistBB[i].back()->getParent()->getParent()->getName().str());
+    if(func != calledName)
+      return false;
+  }
+  
+  debug(Usama) << "Recursion exceeded" << "\n";
+  return true;
+}
+
 CallInst *ConstantFolding::cloneAndAddFuncCall(CallInst *callInst) {
   ValueToValueMapTy vmap;
   Function *cloned = cloneFunc(callInst->getCalledFunction(), vmap);
