@@ -995,7 +995,10 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
         FuncInfo *fi = initializeFuncInfo(calledFunction);
         addFuncInfo(calledFunction, fi);
     }
-    if(useAnnotations && !satisfyConds(calledFunction, callInst)) {
+    if(calledFunction->getName().str() == "ConfigAddOption")
+      return NOTFOLDED;
+
+    if((useAnnotations && !satisfyConds(calledFunction, callInst)) || exceedsRecursion(calledFunction, callInst->getParent()->getParent())) {
       debug(Abubakar) << "skipping function : does not satisfy conds\n";
       markArgsAsNonConst(callInst);
       markGlobAsNonConst(callInst->getCalledFunction());
