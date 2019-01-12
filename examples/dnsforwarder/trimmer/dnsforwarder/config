@@ -1,0 +1,484 @@
+# DNS ת�����������ļ�
+# # Configure File for dnsforwarder
+# # �������ļ������ ANSI �����
+#
+# # ���·����д��
+# # Windows��
+# # ֧���� `% %' ��Χ���������·�������� `%SYSTEMROOT%\System32\drivers\etc\hosts'��
+# # `%PROGRAMDIRECTORY%' ��ʾ�������ڵ��ļ��С�
+# # Linux��
+# # ֧������ `${HOME}' �ı��������� `${HOME}/hosts'��
+# # `${PROGRAMDIRECTORY}' ��ʾ����������ļ��У�һ��Ϊ `/root/.dnsforwarder/'��ִ�� `dnsforwarder -p' ���Ի�þ����λ�á�
+#
+# ##################################################
+# #
+# # ��־�ļ�����
+# #
+# ##################################################
+#
+# # LogOn <BOOLEAN>
+# # �Ƿ���ļ���־��� (since 5.0.4)
+# LogOn false
+#
+# # LogFileThresholdLength <NUM>
+# # ������־�ļ���С���ٽ�ֵ���ֽڣ�(since 5.0.4)
+# # ����־�ļ���С��������ٽ�ֵ�󣬵�ǰ����־�ļ����ᱻ��������Ȼ����һ���µ���־�ļ���������¼��־
+# LogFileThresholdLength 102400
+#
+# # LogFileFolder <PATH>
+# # �趨��־�ļ����ڵ��ļ��� (since 5.0.4)
+# # ��־�ļ���ʼ���ļ���Ϊ `dnsforwarder.log'���������ٽ�ֵ֮�󣬽��ᱻ������Ϊ `dnsforwarder.log.1'��`dnsforwarder.log.2' �ȵȣ�Ȼ�����½���һ�� dnsforwarder.log' �ļ�
+# # ��·����Ĭ��ֵΪ�������ڵ��ļ��У�Windows�������������ļ��У�Linux��
+# LogFileFolder
+#
+# ##################################################
+# #
+# # ����
+# #
+# ##################################################
+#
+# # LocalInterface <IP>
+# # �����ڱ��ؿ����Ľ��棬�����Ǳ��ػػ���ַ (127.0.0.1) �����ؾ��������Լ������� (since 2.2)
+# # ����� IPv6 ��ַ�����ڵ�ַ���˼��Ϸ����ţ����� [::1] (���ػػ�)��[fe80::699c:f79a:9bb6:1] (since 2.3)
+# LocalInterface 127.0.0.1
+#
+# # LocalPort <NUM>
+# # ���ؿ����Ķ˿� (since 2.2)
+# LocalPort 53
+#
+# # OpenLocalTCP <BOOLEAN>
+# # �ڱ��ؿ���TCP���Ա����TCPЭ��Ĳ�ѯ (since 2.2)
+# # ��ѡֵ��`false' �� `true'
+# OpenLocalTCP false
+#
+# ##################################################
+# #
+# # IP ѡ�����
+# #
+# ##################################################
+#
+# #########################
+# # ��������ַ
+# #########################
+#
+# # �����������������η�������
+# # һ������ TCP Э��ķ����� (�� `TCPServer' ָ��)��
+# # ��һ������ UDP Э��ķ����� (�� `UDPServer' ָ��)
+#
+# # ѡ�� `PrimaryServer' ����ָ����ѡ�ķ�������ͬʱҲָ����Э�飩
+# # �κβ����ų��б��е��򶼻�����ͨ����ѡ����������Э������ѯ��
+# # ���ų��б��е��������ʹ����һ���������ͨ����һ��Э���ѯ��
+# # PrimaryServer
+# # ��ѡ������ (since 2.2)
+# # ��ѡֵ��`TCP' �� `UDP'
+# PrimaryServer UDP
+#
+# # TCPServer <IP[:PORT]>
+# # ָ���� TCP Э���ѯ�����η����� (since 2.2)
+# # ����ָ�������������������֮���ð�Ƕ��Ÿ��� (since 2.3)
+# # ������Ӷ˿ںţ���Ĭ��Ϊ 53 (since 2.3)
+# # ���� 192.168.1.2:500 �Լ� 4.2.2.2 (since 2.3)
+# # ����IPv6��ַ�����ڵ�ַ���˼ӷ����ţ����� [2001:4860:4860::8888] �Լ��Ӷ˿ڵ���ʽ [2001:4860:4860::8888]:53 (since 2.3)
+# TCPServer 8.8.4.4,8.8.8.8
+#
+# # TCPProxy <IP[:PORT]>
+# # ���� TCP ��ѯʱ�� Socks5 ���������������鹦�ܣ� (since 5.0.11)
+# # д���� `TCPServer' һ��
+# # ����ָ�������������������֮���ð�Ƕ��Ÿ���
+# # ������Ӷ˿ںţ���Ĭ��Ϊ 1080
+# # ��ѡ�������Ϊ�գ���ͨ�� TCP Э�������η�������ѯʱ��ͨ����ѡ�����õĴ�������
+# # �����ѡ��Ϊ�գ���ͨ�� TCP Э�������η�������ѯʱ��ֱ�����������������
+# # ��ѡ���ͨ�� UDP Э�������η������Ĳ�ѯ��Ч
+# TCPProxy
+#
+# # UDPServer <IP[:PORT]>
+# # ָ���� UDP Э���ѯ�����η����� (since 2.2)
+# # ����ָ�������������������֮���ð�Ƕ��Ÿ��� (since 2.3)
+# # ������Ӷ˿ںţ���Ĭ��Ϊ 53 (since 2.3)
+# # ���� 192.168.1.2:500 �Լ� 4.2.2.2 (since 2.3)
+# # ����IPv6��ַ�����ڵ�ַ���˼ӷ����ţ����� [2001:4860:4860::8888] �Լ��Ӷ˿ڵ���ʽ [2001:4860:4860::8888]:53 (since 2.3)
+# UDPServer 208.67.220.220,8.8.8.8,114.114.115.115
+#
+# # DedicatedServer <DOMAIN1 SERVER_IP1>,<DOMAIN2 SERVER_IP2>,...
+# # ΪĳЩ����ָ��ר�ŵĲ�ѯ������������ʹ�÷������б���`TCPServer' �� `UDPServer'���еķ����� (since 2.5 b1)
+# # ��ʽΪ������ ��������ַ
+# #
+# # ���磺DedicatedServer www.google.com 8.8.8.8
+# # �������ж����� www.google.com �Ĳ�ѯ��ͨ�� 8.8.8.8 ���������������
+# # �����ָ�������������ų��б��У���ô��ͨ�� `PrimaryServer' ��ָ����Э���������ͨѶ��
+# # ����ͨ����һ��Э���������ͨѶ��
+# # ��ͬ��֮���ð�Ƕ��� (`,') �ָ���ͬʱע�����Ҫ�ж���
+# # �����ж��� `DedicatedServer' ѡ��
+# DedicatedServer
+#
+# #########################
+# # ������ѡ��
+# #########################
+#
+# # ParallelQuery <BOOLEAN>
+# # �Ƿ����� UDP ������ѯ (since 2.6 b1)
+# # ������ѯָ���ǣ�������ָ���� UDP ���������Ͳ�ѯ����ȡ���Ƚ��ܵ�����Ч�ظ���Ϊ��ѯ���������������Ļظ�
+# # ������ѡ����뱣֤ `UDPServer' �еķ��������� IPv4 ���߶��� IPv6 ��
+# # ��ѡ�Ӱ�� `DedicatedServer' �����ã�Ҳ����˵�������Ѿ�ָ��ר�÷�������������ֻͨ��ר�÷��������в�ѯ
+# # ��ѡֵ��`false' �� `true'
+# ParallelQuery true
+#
+# # UDPFilter <BOOLEAN>
+# # �Ƿ��� UDP ����Ⱦ (since 2.6 b1)
+# # ������Ⱦ��ָ���ǹ���α��� DNS ���ݰ�
+# # ����ʱ��Ҫ��֤ `UDPServer' �д��ڹ���� DNS ��������������ʹ�� `UDPBlock_IP' ѡ������߹��˵ľ�ȷ��
+# # ��ѡֵ��`false' �� `true'
+# UDPFilter true
+#
+# # UDPBlock_IP <IP1>,<IP2>,.....
+# # �赲�������� IP ��ַ��֧�� IPv4 �� IPv6 ��ַ (since 5.0.11) ���� UDP DNS ���ݰ� (since 2.6 b1)
+# # ����ͨ�� UDP ��������ѯ������ DNS ���ݰ���Ч
+# # �����б����Ѿ����в���α��� IP ��ַ������ִ�� `dnsforwarder -P' ����ȡ����α��� IP ��ַ
+# # ��� `UDPFilter' Ϊ `false'����ѡ����Ч
+# # IPv6 ��ַ���üӷ�����
+# UDPBlock_IP 243.185.187.39,46.82.174.68,37.61.54.158,93.46.8.89,59.24.3.173,203.98.7.65,8.7.198.45,78.16.49.15,159.106.121.75
+#
+# # IPSubstituting <IP1 IP'1>,<IP2 IP'2>,.....
+# # �滻 DNS ���ݰ��е� IP ��ַ��ֻ֧�� IPv4 ��ַ�� (since 5.0.1)
+# # ���磺
+# # IPSubstituting 127.0.0.1 1.2.0.127
+# # ��Ч���ǰ� DNS ���ݰ������е� 127.0.0.1 ��ַ�滻Ϊ 1.2.0.127
+# # ���滻ͨ����������TCP �� UDP����ѯ������ DNS ���ݰ������ڻ����к� Hosts �еĽ����Ч
+# # �����滻��Ŀ�ð�Ƕ��� (`,') �ָ���Ҳ����д���� `IPSubstituting'
+# IPSubstituting
+#
+# #########################
+# # �ų��б�
+# #########################
+#
+# # ExcludedDomain <DOMAIN1>,<DOMAIN2>,.....
+# # �ų��б���ÿ����֮���ð�Ƕ��� (`,') �ָ���ͬʱע�����Ҫ�ж��� (since 2.2)
+# # ֧��ͨ����� (since 2.2.2)
+# # һ����Ŀ�������ͨ������������β����ʼƥ�䣬���� `123.com' ���ƥ�������� `123.com' ��β��������
+# # �����ͨ������ϸ���ͨ�����ƥ�䡣
+# # �����ж��� `ExcludedDomain' ѡ�� (since 2.2.2)
+# ExcludedDomain
+#
+# # ExcludedList <PATH>
+# # ���ļ����뵽�ų��б� (since 5.0.3)
+# ExcludedList
+#
+# # AlwaysUDP <DOMAIN1>,<DOMAIN2>,.....
+# # ����Щ����ʼ��ͨ�� UDP ��ѯ������ `PrimaryServer' ��������õ� (since 5.0.18)
+# AlwaysUDP
+#
+# # AlwaysTCP <DOMAIN1>,<DOMAIN2>,.....
+# # ����Щ����ʼ��ͨ�� TCP ��ѯ������ `PrimaryServer' ��������õ� (since 5.0.18)
+# AlwaysTCP
+#
+# #########################
+# # IP �б�����֧�� IPv4 ��ַ��
+# #########################
+# # IP �б������Զ����һ�� IP ��ַ������Ӧ���� IP ��ַ��ѡ����
+#
+# # GoodIPList <NAME> <INTERVAL>
+# # ����һ�� IP �б���<NAME> Ϊ���б������ƣ�<INTERVAL> Ϊ����б��� IP ��ַ��Ч�Եļ��ʱ�䣨���룩
+# # ���磺
+# # GoodIPList list1 60000
+#
+# # GoodIPListAddIP <LIST_NAME> <IP:PORT>
+# # ��һ�� IP �б������� IP ��ַ
+# # ���磺
+# # GoodIPListAddIP list1 120.0.0.1:80
+#
+# #########################
+# # Hosts
+# #########################
+#
+# # Hosts <STRING>
+# # Hosts �ļ��� URL�������Ǳ��� Hosts �ļ� (�� file:// ��ͷ��֧�����·��)��Ҳ�����������ϵ� Hosts �ļ� (�� http:// ���� https:// ��ͷ)�� (since 5.0.5)
+# # ���� file://C:/Windows/System32/drivers/etc/hosts �� file:///etc/hosts �� http://xxx.com/hosts
+# # ����ָ����� Hosts���԰�Ƕ��ţ�`,'���ָ���Ҳ����д���� `Hosts'��·����ͷ��Ҫ������
+# # �� Hosts �ļ��У�֧��ͨ��� (`*' �� `?') (ֻ���������г���ͨ���)
+# # Hosts �ļ�������ԭʼ��ʽ��������ѹ���ļ����� HTML �ļ�
+# # Hosts �ļ������ ANSI �����
+# # Hosts �е� IPv6 ��ַ���üӷ�����
+# # �������Ϊ�գ��򲻴��ļ����� Hosts
+# Hosts
+#
+# # HostsUpdateInterval <NUM>
+# # �������� Hosts �ļ��ļ��ʱ�䣬�� (since 2.2)
+# # -1 ��ʾ����������
+# # �������Ϊ�գ���ʹ��Ĭ��ֵ (18000)
+# HostsUpdateInterval 18000
+#
+# # HostsDownloadPath <PATH>
+# # Hosts �ļ������ص������ļ���·�� (�����ļ���·��) (since 2.2)
+# # ���� C:\Windows\Temp\hosts ���� /tmp/hosts
+# # ֧�����·�� (since 5.0.3)
+# # ����ļ������򸲸�
+# # �������Ϊ�գ���Ĭ���������������ͬ���ļ����ڣ�Windows�������������ļ����ڣ�Linux��
+# HostsDownloadPath
+#
+# # HostsScript <PATH>
+# # ��ÿ�������� Hosts �ļ��󡢼��� Hosts �ļ�֮ǰִ�еĽű� (since 2.2)
+# # ֧�����·�� (since 5.0.3)
+# # �������Ϊ�գ���ִ�нű�
+# HostsScript
+#
+# # HostsRetryInterval <NUM>
+# # ������ Hosts ����ʧ�ܺ������ʱ�䣬�� (since 2.2.2)
+# # �������� Hosts ��Ч
+# # �������Ϊ�գ���ʹ��Ĭ��ֵ (30)
+# HostsRetryInterval 30
+#
+# # AppendHosts <HOSTS>,<HOSTS>,...
+# # ���ӵ� hosts����ʹ `Hosts' ѡ��Ϊ��Ҳ�������� (since 2.2.2)
+# # <HOSTS> ��д�����ļ��е�һ����ͬ��֧��ͨ���
+# # IPv6 ��ַ���üӷ�����
+# # ���� hosts �����ð�Ƕ��ŷָ�����Ҳ����д���� `AppendHosts'
+# # �������д��:
+# #  AppendHosts 127.0.0.1 123.com,127.0.0.1 456.com,1.2.3.4 foobar.*
+# # Ҳ���Էֶ���д:
+# #  AppendHosts 127.0.0.1 123.com
+# #  AppendHosts 127.0.0.1 456.com
+# #  AppendHosts 1.2.3.4 foobar.*
+# #
+# # Ҳ���Զ���ָ��һ�� IP �б��� Hosts ���֧�� IPv4 ��ַ�������磺
+# #  AppendHosts <list1> www.123.com
+# # ��ʱ www.123.com ����ָ�� list1 ������ IP ��ַ��
+# #
+# # Ҳ���Զ��� CName �� Hosts ����磺
+# #  AppendHosts www.google.cn *.google.com
+# # ��������ƥ�� *.google.com ����������ָ�� www.google.cn �� IP ��ַ (since 2.3)
+# #
+# # ���ʹĳЩ���������� hosts �еĲ�ѯ������
+# #  AppendHosts @@ *.012345.com
+# # ��������ƥ�� *.012345.com �������������� hosts �в�ѯ
+# #
+# # ���� hosts �����ȼ��Ӹߵ���
+# # �� `@@' �Ľ�ֹ��
+# # һ�� hosts ��
+# # CName hosts ��
+# # �����ϵĻ����ϣ�
+# # `AppendHosts' ָ���� hosts �� `Hosts' ����ѡ��ָ�����ļ��е� hosts �����ȼ���
+# # ����Խǰ�� `Hosts' �����ȼ�Խ��
+# # ����Խǰ�� hosts ��Ŀ���ȼ�Խ��
+# AppendHosts
+#
+# # DisableIpv6WhenIpv4Exists <BOOLEAN>
+# # ���һ�������� Hosts ��ָ����һ�� IPv4 ��ַ�������ļ� Hosts �� `AppendHosts' ָ���� Hosts������ô�ܾ������������ IPv6 ��ַ��ѯ (since 5.0.12)
+# DisableIpv6WhenIpv4Exists false
+#
+# ##################################################
+# #
+# # �������
+# #
+# ##################################################
+#
+# # UseCache <BOOLEAN>
+# # �Ƿ�ʹ�û��棨Ĭ��Ϊ�ļ����棩 (since 2.2)
+# # ��ѡֵ��`false' �� `true'
+# UseCache false
+#
+# # CacheSize <NUM>
+# # �����С (�ֽ�)
+# # �����С����С�� 102400 (100KB) (since 2.3)
+# CacheSize 1048576
+#
+# # MemoryCache <BOOLEAN>
+# # �Ƿ�ʹ���ڴ滺�棬�������ļ����� (since 2.3.2)
+# # ��� `UseCache' Ϊ `false'����ѡ����Ч
+# # ��ѡֵ��`false' �� `true'
+# MemoryCache true
+#
+# # CacheFile <PATH>
+# # �ֹ�ָ�������ļ� (�����ļ���) (since 2.3)
+# # ֧�����·�� (since 5.0.3)
+# # �������Ϊ�գ���Ĭ���������������ͬ���ļ����ڣ�Windows�������������ļ����ڣ�Linux��
+# # ��� `MemoryCache' Ϊ `true'����ѡ����Ч
+# CacheFile
+#
+# # IgnoreTTL <BOOLEAN>
+# # �Ƿ���� TTL (since 2.2)
+# # ��ѡֵ��`false' �� `true'
+# # Ϊ `true' ʱ������ TTL����ʱ���еĻ�����Ŀ�����ᱻ�Ƴ�
+# # Ϊ `false' ʱ������ TTL��������Ŀ���ᰴ�� TTL ��ʱ�����Ƴ�
+# # �� `UseCache' ��ֵΪ `false' ʱ����ѡ����Ч
+# IgnoreTTL false
+#
+# # OverrideTTL <NUM>
+# # ǿ��ʹ���л������Ŀ�� TTL Ϊ <NUM> (since 2.2)
+# # �� <NUM> Ϊ -1�����ʾ������ǿ��
+# # �� `UseCache' ��ֵΪ `false' ʱ����ѡ����Ч
+# # ��ѡ���ͬ�� `CacheControl * fixed <NUM>' (since 5.0.18)
+# OverrideTTL -1
+#
+# # MultipleTTL <NUM>
+# # �����л�����Ŀ�� TTL �ӱ�������Ϊ <NUM> (since 2.2)
+# # �� `UseCache' ��ֵΪ `false' ʱ����ѡ����Ч
+# # �� `IgnoreTTL' ��ֵΪ `true' ʱ����ѡ����Ч
+# # ��ѡ���ͬ�� `CacheControl * vari <NUM>x+0' (since 5.0.18)
+# MultipleTTL 1
+#
+# # CacheControl <DOMAIN> [$[$]]<TYPE> [ARGUMENT]
+# # �������� <DOMAIN> �Ļ�����Ϊ (since 5.0.18)
+# # �������δ���������ѡ����Ч
+# # <DOMAIN> ��������[$[$]] �Ǵ�Ⱦ�趨��<TYPE> �����ͣ�[ARGUMENT] �ǲ���
+# # <DOMAIN> ֧��ͨ�����֧��β��ƥ��
+# # <TYPE> �����¿�ѡ���ΪСд����
+# #  orig    : ʹ��ԭ�ȵ� TTL�������ı�ָ��������¼�� TTL������������ [ARGUMENT] ����
+# #  nocache : ������ָ��������¼������������ [ARGUMENT] ����
+# #  fixed   : ��ָ��������¼�� TTL �޸�Ϊһ��Ԥ��ָ���ĳ���ֵ�����ֵͨ�� [ARGUMENT] ����ָ��
+# #  vari    : ��ָ��������¼�� TTL �޸�Ϊһ��Ԥ�ȹ涨�ı������������ͨ�� [ARGUMENT] ����ָ������ʱ [ARGUMENT] �����ĸ�ʽΪ `ax+b'������ a��b Ϊ�Ǹ����������û��ֹ�ָ������x Ϊ��¼ԭ�ȵ� TTL ֵ������Ҫ�û�ָ��������ѡ�����Ϊ `ax+b' ����ʽ�������� `ax-b' ���������ı�����ʽ
+# #
+# # ʾ����
+# # CacheControl baidu.com orig # ���ı��� `baidu.com' ��β�������� TTL
+# # CacheControl 163.com nocache # �������� `163.com' ��β������
+# # CacheControl qq.com fixed 500 # �������� `qq.com' ��β�������� TTL �޸�Ϊ 500
+# # CacheControl sina.com.cn vari 2x+200 # �������� `sina.com.cn' ��β�������� TTL ��ֵ�޸�Ϊ 2x+200������ x ��������¼ԭ�ȵ� TTL ֵ
+# #
+# # ��Ⱦ���ƣ�
+# # ĳЩ������ CName ��¼������ www.windowsupdate.com��
+# # ;; QUESTION SECTION:
+# # ;www.windowsupdate.com.		IN	A
+# #
+# # ;; ANSWER SECTION:
+# # www.windowsupdate.com.	3585	IN	CNAME	windowsupdate.microsoft.nsatc.net.      ����¼һ��
+# # windowsupdate.microsoft.nsatc.net. 285 IN CNAME	www.update.microsoft.com.nsatc.net. ����¼����
+# # www.update.microsoft.com.nsatc.net. 285	IN A	134.170.58.222                      ����¼����
+# # www.update.microsoft.com.nsatc.net. 285	IN A	65.55.50.157                        ����¼�ģ�
+# #
+# # �������ָ���� `www.windowsupdate.com' �Ļ�����ƣ���ô `windowsupdate.microsoft.nsatc.net' �� `www.update.microsoft.com.nsatc.net' �ļ�¼��ʲô������д������Ǽ̳� `www.windowsupdate.com' �Ļ������ã�����ʹ���Լ�ר�ŵ����ã�����еĻ�����
+# # ����ָ����Ⱦ����������������
+# # �����´�Ⱦ���ƣ��� `www.windowsupdate.com' Ϊ������
+# #  ������Ⱦ : ���е�������¼�����Ƿ���ڵ���ָ���Ŀ�����Ŀ����ʹ�� `www.windowsupdate.com' �Ŀ�����Ŀ
+# #  ������Ⱦ : ������ڵ���ָ���Ŀ�����Ŀ����ôʹ�õ���ָ���Ŀ�����Ŀ������ʹ�� `www.windowsupdate.com' �Ŀ�����Ŀ
+# #  ����Ⱦ   : ������ڵ���ָ���Ŀ�����Ŀ����ôʹ�õ���ָ���Ŀ�����Ŀ�����û�����޸ļ�¼�� TTL ֵ
+# # ֻ�б���ѯ������������Ŀ�ž��д�Ⱦ����
+# # д����
+# #  ������Ⱦ ����ΪĬ�������:
+# #   CacheControl www.windowsupdate.com fixed 1000
+# #   CacheControl 163.com orig
+# #  ������Ⱦ��<TYPE> ǰ��һ�� `$'��:
+# #   CacheControl www.windowsupdate.com $fixed 1500
+# #   CacheControl sina.com.cn $nocache
+# #  ����Ⱦ��<TYPE> ǰ������ `$'��:
+# #   CacheControl www.windowsupdate.com $$fixed 2000
+# #   CacheControl windowsupdate.microsoft.nsatc.net $$vari 2x+100
+# #
+# # ʾ������Ȼ�� `www.windowsupdate.com' Ϊ������
+# #  CacheControl www.windowsupdate.com fixed 1000
+# #  CacheControl windowsupdate.microsoft.nsatc.net fixed 500
+# #  Ч���ǣ���¼һ�����������ĵ� TTL ���ᱻ�޸�Ϊ 1000
+# #
+# #  CacheControl www.windowsupdate.com $fixed 1000
+# #  CacheControl windowsupdate.microsoft.nsatc.net fixed 500
+# #  Ч���ǣ���¼һ�������ĵ� TTL �ᱻ�޸�Ϊ 1000����¼���� TTL �ᱻ�޸�Ϊ 500
+# #
+# #  CacheControl www.windowsupdate.com $$fixed 1000
+# #  CacheControl windowsupdate.microsoft.nsatc.net fixed 500
+# #  Ч���ǣ���¼һ�� TTL �ᱻ�޸�Ϊ 1000����¼���� TTL �ᱻ�޸�Ϊ 500����¼�����ĵ� TTL ���ᱻ�޸�
+#
+# # ReloadCache <BOOLEAN>
+# # �������������Ƿ������������е��ļ����� (since 2.2.3)
+# # ���еĻ����С����� `CacheSize' ��ָ���Ĵ�С���
+# # ��ѡֵ��`false' �� `true'
+# # ��� `MemoryCache' ��ֵΪ `true'����ѡ����Ч
+# ReloadCache false
+#
+# # OverwriteCache <BOOLEAN>
+# # ������е��ļ������޷����أ��Ƿ�ֱ�ӽ��串�ǵ� (since 2.3)
+# # ��ѡֵ��`false' �� `true'
+# # ��� `MemoryCache' ��ֵΪ `true'����ѡ����Ч
+# # ��� `ReloadCache' ��ֵΪ `false'����ѡ����Ч
+# OverwriteCache false
+#
+# ##################################################
+# #
+# # ����
+# #
+# ##################################################
+#
+# # DisabledType <NUM1>,<NUM2>,.....
+# # ��ֹ��ѯ�� DNS �����б���ÿ�����ͣ������ִ�����֮���ð�Ƕ��� (`,') �ָ� (since 2.2)
+# # ���е� DNS ���ͣ�
+# # A	      1   IPv4 ��ַ
+# # AAAA       28   IPv6 ��ַ
+# # APL        42
+# # CERT       37
+# # CNAME       5
+# # DHCID      49
+# # DLV     32769
+# # DNAME      39
+# # DNSKEY     48
+# # DS	     43
+# # HIP        55
+# # IPSECKEY   45
+# # KEY        25
+# # KX	     36
+# # LOC        29
+# # MX	     15
+# # NAPTR      35
+# # NS	      2   Name Server
+# # NSEC       47
+# # NSEC3      50
+# # NSEC3PARAM 51
+# # PTR        12   Domain pointer
+# # RRSIG      46
+# # RP	     17
+# # SIG        24
+# # SOA         6   start of authority record
+# # SPF        99
+# # SRV        33
+# # SSHFP      44
+# # TA	  32768
+# # TKEY      249
+# # TSIG      250
+# # TXT        16
+# # ANY       255
+# # AXFR      252
+# # IXFR      251
+# # OPT        41
+# DisabledType
+#
+# # DisabledDomain <DOMAIN1>,<DOMAIN2>,.....
+# # ��ֹ��ѯ�����б���ÿ����֮���ð�Ƕ��� (`,') �ָ� (since 2.2)
+# # ֧��ͨ����� (since 2.2.2)
+# # һ����Ŀ�������ͨ������������β����ʼƥ�䣬���� `123.com' ���ƥ�������� `123.com' ��β��������
+# # �����ͨ������ϸ���ͨ�����ƥ�䡣
+# # �����ж���DisabledDomain (since 2.2.2)
+# DisabledDomain
+#
+# # DisabledList <PATH>
+# # ���ļ����뵽�����б� (since 5.0.3)
+# DisabledList
+#
+# # RefusingResponseCode <NUM>
+# # ���ܾ�һ�β�ѯ��`DisabledType' ���� `DisabledDomain'����ʱ�������ص�״̬�� (since 2.6 b1)
+# # ״̬��  ����
+# # 0       No error condition
+# # 1       Format error
+# # 2       Server failure
+# # 3       Name Error (NXDOMAIN)
+# # 4       Not Implemented
+# # 5       Refused
+# # �μ� RFC 1035��`4.1.1. Header section format'��`Response code'
+# RefusingResponseCode 0
+#
+# # DomainStatistic <BOOLEAN>
+# # �Ƿ���������ͳ�� (since 2.5 b1)
+# # ������Ϣͳ�ƻ�����ģ���ļ���¼�����Ĳ�ѯ���
+# # ��¼�Ľ���������������ͬ���ļ����ڣ�Windows�������������ļ����ڣ�Linux����`statistic.html'�ļ���
+# # ��ѡֵ��`false' �� `true'
+# DomainStatistic false
+#
+# # DomainStatisticTempletFile <PATH>
+# # ����ͳ�Ƶ�ģ���ļ�·�� (since 5.0.23)
+# # �������Ϊ�գ���Ĭ��Ϊ�����������ͬ���ļ����ڣ�Windows�������������ļ����ڣ�Linux����`StatisticTemplate.html'�ļ� 
+# DomainStatisticTempletFile
+#
+# # StatisticInsertionPosition <STRING>
+# # ָ����ģ���ļ���д���λ�� (since 5.0.23)
+# # �������Ϊ�գ���Ĭ��Ϊ`<!-- INSERT HERE -->'
+# # StatisticInsertionPosition <!-- INSERT HERE -->
+#
+# # StatisticUpdateInterval <NUM>
+# # ����ͳ��ˢ��ʱ�������룩 (since 2.5 b1)
+# StatisticUpdateInterval 29
+#
