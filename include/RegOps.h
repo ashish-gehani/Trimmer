@@ -22,7 +22,7 @@ class RegOps {
 public:
   Register * getRegister(Value * ptr);
   void addRegister(Value * val, Register * reg);
-  void addRegister(Value * val, Type * ty, uint64_t toStore);
+  void addRegister(Value * val, Type * ty, uint64_t toStore, bool tracked = false);
   void addGlobalRegister(Value * val, Type * ty, uint64_t toStore);
   void cleanUpFuncBBRegisters(Function * f, ValSet valSet);
   Value *getValue(Register *);

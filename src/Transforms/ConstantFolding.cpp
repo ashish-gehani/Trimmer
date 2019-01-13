@@ -350,7 +350,7 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
 
   bbOps.cleanUpFuncBBInfo(toRun);
   regOps.cleanUpFuncBBRegisters(toRun, popFuncValStack());
-  if(fi->retReg) addSingleVal(ci, fi->retReg->getValue());
+  if(fi->retReg) addSingleVal(ci, fi->retReg->getValue(), false, true);
 }
 void ConstantFolding::getTrackedValues(set<Value *> &trackedValues) {
   for(auto &F: *module) {
@@ -585,24 +585,29 @@ void ConstantFolding::collectCallGraphGlobals(CallGraph *CG) {
  * with value equal to the starting address of the allocated memory
  */
 ProcResult ConstantFolding::processAllocaInst(AllocaInst * ai) {
+  /*
   if(!isAllocaTracked(ai)) {
     debug(Abubakar) << "skipping untracked alloca\n";
     return NOTFOLDED;
   }  
+  */
   Type * ty = ai->getAllocatedType();
   unsigned size = DL->getTypeAllocSize(ty);
   uint64_t addr = bbOps.allocateStack(size, currBB);
 
   pushFuncStack(ai);
-  regOps.addRegister(ai, ty, addr);
+  bool tracked = isAllocaTracked(ai);
+  regOps.addRegister(ai, ty, addr, tracked);
   debug(Abubakar) << "allocaInst : size " << size << " at address " << addr << "\n";
   return UNDECIDED;
 }
 ProcResult ConstantFolding::processMallocInst(CallInst * mi) {   
+  /*
   if(!isAllocaTracked(mi)) {
     debug(Abubakar) << "skipping untracked malloc\n";
     return NOTFOLDED;
   }
+  */
   Value * sizeVal = mi->getOperand(0);
   uint64_t size;
   if(!getSingleVal(sizeVal, size)) {
@@ -610,17 +615,20 @@ ProcResult ConstantFolding::processMallocInst(CallInst * mi) {
     return NOTFOLDED;
   }
   uint64_t addr = bbOps.allocateHeap(size, currBB);  
+  bool tracked = isAllocaTracked(mi);
 
   pushFuncStack(mi);
-  regOps.addRegister(mi, mi->getType(), addr);
+  regOps.addRegister(mi, mi->getType(), addr, tracked);
   debug(Abubakar) << "mallocInst : size " << size << " at address " << addr << "\n";  
   return UNDECIDED;
 }
 ProcResult ConstantFolding::processCallocInst(CallInst * ci) {   
+  /*
   if(!isAllocaTracked(ci)) {
     debug(Abubakar) << "skipping untracked calloc\n";
     return NOTFOLDED;
   }
+  */
   Value * numVal = ci->getOperand(0);
   Value * sizeVal = ci->getOperand(1);
   uint64_t num, bsize;
@@ -635,9 +643,10 @@ ProcResult ConstantFolding::processCallocInst(CallInst * ci) {
   }
   unsigned size = num * bsize;
   uint64_t addr = bbOps.allocateHeap(size, currBB);  
+  bool tracked = isAllocaTracked(ci);
 
   pushFuncStack(ci);
-  regOps.addRegister(ci, ci->getType(), addr);
+  regOps.addRegister(ci, ci->getType(), addr, tracked);
   debug(Abubakar) << "callocInst : size " << size << " at address " << addr << "\n";  
   memset((char *) bbOps.getActualAddr(addr, currBB), '\0', size);
   return UNDECIDED;
@@ -658,7 +667,7 @@ ProcResult ConstantFolding::processBitCastInst(BitCastInst * bi) {
   }
 
   pushFuncStack(bi);
-  regOps.addRegister(bi, bi->getType(), reg->getValue());
+  regOps.addRegister(bi, bi->getType(), reg->getValue(), reg->getTracked());
   return UNDECIDED;
 }
 ProcResult ConstantFolding::processStoreInst(StoreInst * si) {
@@ -698,7 +707,7 @@ ProcResult ConstantFolding::processLoadInst(LoadInst * li) {
   }
   uint64_t val = bbOps.loadMem(addr, size, currBB);
   debug(Abubakar) << li->getType() << " LoadInst\n";
-  addSingleVal(li, val);
+  addSingleVal(li, val, false, reg->getTracked());
   return UNDECIDED;
 }
 
@@ -723,8 +732,8 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
   }
   uint64_t val = reg->getValue() + offset.getZExtValue();
   pushFuncStack(gi);
-  regOps.addRegister(gi, gi->getType(), val);
-  debug(Abubakar) << gi->getType() << " GepInst\n";
+  regOps.addRegister(gi, gi->getType(), val, reg->getTracked());
+  debug(Abubakar) << val << " GepInst\n";
   return UNDECIDED;
 }
 ProcResult ConstantFolding::processMemcpyInst(CallInst * memcpyInst) {
@@ -948,6 +957,7 @@ bool ConstantFolding::handleGetPwUid(CallInst *callInst) {
   char * addrFieldAct = (char *) bbOps.getActualAddr(addrField, currBB);
   strcpy(addrFieldAct, pwuid->pw_dir);
   struct passwd *memPwUid = (struct passwd *)bbOps.getActualAddr(addr, currBB); 
+  addSingleVal(callInst, (uint64_t) addr, false, true);
   memcpy(memPwUid, pwuid, size);
   memPwUid->pw_dir = (char *) addrField;
 	addSingleVal(callInst, (uint64_t) addr);
@@ -1075,7 +1085,7 @@ bool ConstantFolding::cloneRegister(Value * from, Value * with) {
     return false;
   }
   pushFuncStack(from);
-  regOps.addRegister(from, from->getType(), val);
+  regOps.addRegister(from, from->getType(), val, true);
   return true;
 }
 
@@ -1095,7 +1105,7 @@ bool ConstantFolding::replaceOrCloneRegister(Value * from, Value * with) {
     debug(Abubakar) << "replaced with NULL pointer\n";
   } else if(Register * reg = processInstAndGetRegister(with)) {
     pushFuncStack(from);
-    regOps.addRegister(from, ty, reg->getValue());    
+    regOps.addRegister(from, ty, reg->getValue(), reg->getTracked());    
     debug(Abubakar) << "Register from Register\n";
   } else {   
     debug(Abubakar) << "failed to simplify\n";
@@ -1222,10 +1232,12 @@ void ConstantFolding::addGlobals() {
   for(auto& global : module->globals()) {
     GlobalVariable *  gv = &global;
     Type * contTy = gv->getType()->getContainedType(0);
+    /*
     if(trackAllocas && !gv->getMetadata("track") && 
     gv->getName() != "optarg" && gv->getName() != "optind" &&
     gv->getName() != "__argv_new__")
       continue; 
+    */
     // if(gv->isConstant() && isa<ArrayType>(contTy) && contTy->getContainedType(0)->isIntegerTy(8))
     //   continue;
     debug(Abubakar) << gv->getName() << "\n"; 
@@ -1233,7 +1245,8 @@ void ConstantFolding::addGlobals() {
     uint64_t addr = bbOps.allocateStack(size, currBB);
     debug(Abubakar) << "addGlobal : size " << size << " at address " << addr << "\n";
     //pushFuncStack(gv);
-    regOps.addRegister(gv, contTy, addr);
+    bool tracked = !!gv->getMetadata("track");
+    regOps.addRegister(gv, contTy, addr, tracked);
     if(gv->hasInitializer()) 
       initializeGlobal(addr, gv->getInitializer());
   }
@@ -1409,9 +1422,11 @@ bool ConstantFolding::satisfyConds(Function * F, CallInst *ci) {
     //if any argument is being tracked 
     for(unsigned i = 0; i < ci->getNumArgOperands(); i++) {
       Value *argument = ci->getArgOperand(i);
-      if(processInstAndGetRegister(argument)) { //dyn_cast<Constant>(argument) || 
-        debug(Usama) << "(LOG) (SATISFYCONDS) Call " << *ci << " satisfied specializing conditions due to argument " <<  *argument << " at index " << i << "\n";
-        return true;
+      if(Register *reg = processInstAndGetRegister(argument)) { //dyn_cast<Constant>(argument) || 
+        if(reg->getTracked()) {
+          debug(Usama) << "(LOG) (SATISFYCONDS) Call " << *ci << " satisfied specializing conditions due to argument " <<  *argument << " at index " << i << "\n";
+          return true;
+        }
       }
     }
 
@@ -1449,7 +1464,7 @@ bool ConstantFolding::satisfyConds(Function * F, CallInst *ci) {
  * replace in IR. (Temporarily not replacing 64 bit integers
  * due to potentially replacing casted pointers in IR)
  */
-void ConstantFolding::addSingleVal(Value * val, uint64_t num, bool replace64) {
+void ConstantFolding::addSingleVal(Value * val, uint64_t num, bool replace64, bool tracked) {
   Type * ty = val->getType();
   if(ty->isPointerTy()) {
     if(!num) {
@@ -1459,7 +1474,7 @@ void ConstantFolding::addSingleVal(Value * val, uint64_t num, bool replace64) {
     } else {
       debug(Abubakar) << "adding Register\n";
       pushFuncStack(val);
-      regOps.addRegister(val, ty, num); 
+      regOps.addRegister(val, ty, num, tracked); 
     }
   } else if(IntegerType * intTy = dyn_cast<IntegerType>(ty)) {
     if(replace64 || !ty->isIntegerTy(64)) {
@@ -1546,7 +1561,7 @@ void ConstantFolding::replaceIfNotFD(Value * from, Value * to) {
     ConstantInt *CI = dyn_cast<ConstantInt>(to);
     uint64_t val = CI->getZExtValue();
     pushFuncStack(from);
-    regOps.addRegister(from, from->getType(), val);
+    regOps.addRegister(from, from->getType(), val, true); //track set to true since we only have fds for config files
     return;
   }
 
@@ -1676,11 +1691,11 @@ void ConstantFolding::handleStrrChr(CallInst *callInst) {
   char *result = strrchr(string, (int) character); 
   debug(Usama) << "handleStrrChr: successfully folded \n";
   if(!result) {
-    addSingleVal(callInst, 0);
+    addSingleVal(callInst, 0, false, true);
     return;
   }
  
-  addSingleVal(callInst, (uint64_t) strReg->getValue() + (result - string));
+  addSingleVal(callInst, (uint64_t) strReg->getValue() + (result - string), false, true);
   return;
 }
 
@@ -1846,7 +1861,7 @@ void ConstantFolding::handleStrTok(CallInst * callInst)
   buffer2[strlen(result)] = '\0';
   debug(Abubakar) << "buffer2 = "<<buffer2 << "\n";
   debug(Abubakar) << "type = "<<BitCastInst->getType() << "\n";
-  addSingleVal(BitCastInst,addr1,true);
+  addSingleVal(BitCastInst,addr1,true, true);
   
 }
 
@@ -1886,7 +1901,7 @@ void ConstantFolding::handleStrCat(CallInst * callInst) {
   uint64_t addr = bbOps.allocateHeap(strlen(buffer0)+strlen(buffer1), currBB);
   char * buffer3 = (char *) bbOps.getActualAddr(addr, currBB);
   strcpy(buffer3,result);
-  addSingleVal(callInst, addr, true);
+  addSingleVal(callInst, addr, true, true);
   
 }
 
@@ -1950,7 +1965,8 @@ void ConstantFolding::handleStrDup(CallInst * callInst)
   uint64_t addr = bbOps.allocateHeap(sizeof(buffer), currBB);
   char * buffer1 = (char *) bbOps.getActualAddr(addr, currBB);
   strcpy(buffer1,buffer);
-  addSingleVal(callInst, addr, true);
+  debug(Usama) << "strdup folded: string " << string(buffer1) << "\n";
+  addSingleVal(callInst, addr, true, true);
     
 }
 
@@ -1982,7 +1998,7 @@ void ConstantFolding::handleStrChr(CallInst * callInst) {
   for(addr = reg->getValue(); *buffer && buffer != remStr; addr++, buffer++);
   debug(Abubakar) << "strchr : returned idx " << (addr - reg->getValue()) << "\n";
   pushFuncStack(callInst);
-  regOps.addRegister(callInst, ty, addr);
+  regOps.addRegister(callInst, ty, addr, reg->getTracked());
 }
 
 void ConstantFolding::handleStrpbrk(CallInst * callInst) {
@@ -2012,7 +2028,7 @@ void ConstantFolding::handleStrpbrk(CallInst * callInst) {
   uint64_t addr;
   for(addr = reg1->getValue(); *buffer && buffer != remStr; addr++, buffer++);
   pushFuncStack(callInst);
-  regOps.addRegister(callInst, ty, addr);
+  regOps.addRegister(callInst, ty, addr, reg1->getTracked() | reg2->getTracked());
 }
 
 
@@ -2234,7 +2250,7 @@ void ConstantFolding::handleOpen(CallInst * ci) {
     int fd = open(fname, flag);
     if(fd < 0) return;
     fd = initfdi(fd,fname);
-    addSingleVal(ci, fd, true);
+    addSingleVal(ci, fd, true, true);
     FileInsts* insts = new FileInsts();
     insts->insts.push_back(ci);
     insts->isSpecialized = true;
@@ -2269,7 +2285,7 @@ void ConstantFolding::handleFOpen(CallInst * ci) {
       return;
     }
     int fd = initfptr(fptr,fname);
-    addSingleVal(ci, fd, true);
+    addSingleVal(ci, fd, true, true);
     FileInsts* insts = new FileInsts();
     insts->insts.push_back(ci);
     insts->isSpecialized = true;
@@ -2323,7 +2339,7 @@ void ConstantFolding::handleRead(CallInst * ci) {
   }
   bbOps.setConstMem(true, reg->getValue(), bytes_read, currBB);
   setfdiOffset(sfd, fd);
-  addSingleVal(ci, bytes_read, true);
+  addSingleVal(ci, bytes_read, true, true);
   buffer[bytes_read] = '\0';
 
   Constant * const_array = ConstantDataArray::getString(module->getContext(),StringRef(buffer),true);
@@ -2391,7 +2407,7 @@ void ConstantFolding::handlePRead(CallInst * ci) {
 	
   }
   bbOps.setConstMem(true, reg->getValue(), bytes_read,currBB);
-  addSingleVal(ci, bytes_read, true);
+  addSingleVal(ci, bytes_read, true, true);
 
   Constant * const_array = ConstantDataArray::getString(module->getContext(),StringRef(buffer),true);
   GlobalVariable * gv = new GlobalVariable(*module,const_array->getType(),true,GlobalValue::ExternalLinkage,const_array,"");
@@ -2469,7 +2485,7 @@ void ConstantFolding::handleMMap(CallInst * ci) {
   mmapInfo->sfd = sfd;
   mmapInfo->buffer = mmappedData;
   mMapBuffer.push_back(mmapInfo);
-  addSingleVal(BitCastInst,addr1, true);
+  addSingleVal(BitCastInst,addr1, true, true);
 
 }
 
@@ -2526,7 +2542,7 @@ void ConstantFolding::handleMUnmap(CallInst * ci) {
     return;   		
   }
 
-  addSingleVal(ci, ret, true);
+  addSingleVal(ci, ret, true, true);
   fileIOCalls[sfd]->insts.push_back(ci);
   
 }
@@ -2576,7 +2592,7 @@ void ConstantFolding::handleFRead(CallInst * ci) {
   }
   bbOps.setConstMem(true, reg->getValue(), bytes_read,currBB);
   setfptrOffset(sfd, fptr);
-  addSingleVal(ci, bytes_read, true);
+  addSingleVal(ci, bytes_read, true, true);
   buffer[bytes_read] = '\0';
 
   Constant * const_array = ConstantDataArray::getString(module->getContext(),StringRef(buffer),true);
@@ -2720,7 +2736,7 @@ void ConstantFolding::handleLSeek(CallInst * ci) {
 
   }
   setfdiOffset(sfd, fd);
-  addSingleVal(ci, ret, true);
+  addSingleVal(ci, ret, true, true);
   fileIOCalls[sfd]->insts.push_back(ci);
 }
 
@@ -2758,7 +2774,7 @@ void ConstantFolding::handleFSeek(CallInst * ci) {
     return;
   }
   setfptrOffset(sfd, fptr);
-  addSingleVal(ci, ret, true);
+  addSingleVal(ci, ret, true, true);
   fileIOCalls[sfd]->insts.push_back(ci);
 }
 

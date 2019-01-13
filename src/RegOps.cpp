@@ -6,8 +6,8 @@ void RegOps::addGlobalRegister(Value * val, Type * ty, uint64_t toStore) {
   RevRegisters[reg] = val;
 }
 
-void RegOps::addRegister(Value * val, Type * ty, uint64_t toStore) {
-  Register *reg = new Register(ty, toStore);
+void RegOps::addRegister(Value * val, Type * ty, uint64_t toStore, bool tracked) {
+  Register *reg = new Register(ty, toStore, tracked);
   Registers[val] = reg;
   RevRegisters[reg] = val;
 }

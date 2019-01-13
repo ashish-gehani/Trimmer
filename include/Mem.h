@@ -324,15 +324,17 @@ private:
 
 class Register {
 public:
-	Register(Type * allocatedType, uint64_t sv) {
+	Register(Type * allocatedType, uint64_t sv, bool trkd = false) {
 		ty = allocatedType;
 		storedValue = sv;
         ptsToCount = 1;
+        tracked = trkd;
 	}
 	Register(Register& from) {
 		ty = from.getType();	
 		storedValue = from.getValue();
         ptsToCount = from.getPointsToCount();
+        tracked = from.tracked;
 	}
 	Type * getType() {
 		return ty;
@@ -343,10 +345,14 @@ public:
     uint32_t getPointsToCount() {
       return ptsToCount;
     }
+    inline bool getTracked() {
+      return tracked;
+    }
 private:
 	uint64_t storedValue;
 	Type * ty;
     uint32_t ptsToCount;
+    bool tracked;
 };
 
 typedef map<Value *, Register *> ValToRegisterMap;
