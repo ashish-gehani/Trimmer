@@ -1183,6 +1183,11 @@ void ConstantFolding::initializeGlobal(uint64_t addr, Constant * CC) {
   if(isa<ConstantAggregateZero>(CC))
     return;
   ConstantDataArray * CDA = dyn_cast<ConstantDataArray>(CC);
+  if(auto gv = dyn_cast<GlobalVariable>(CC))
+    CC = gv->getInitializer();
+
+  debug(Usama) << "Global Value" << dyn_cast<GlobalValue>(CC) << "\n";
+  debug(Usama) << "Constant expr" << dyn_cast<ConstantExpr>(CC) << "\n";
   if(CDA && CDA->isString()) {
     char * source = (char *) bbOps.getActualAddr(addr, currBB);
     string str = CDA->getAsString().str();  
