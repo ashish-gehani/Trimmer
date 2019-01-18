@@ -929,8 +929,46 @@ void ConstantFolding::markGlobAsNonConst(Function *F) {
 
 bool ConstantFolding::handleGetUid(CallInst *callInst) {
   uid_t userId = getuid();
-  addSingleVal(callInst, (uint64_t)userId, true);
+  addSingleVal(callInst, (uint64_t)userId, true, true);
   return true;
+}
+
+bool ConstantFolding::copyMemory(char *address, Type *ty, char *localAddress) {
+  debug(Usama) << "Copying over memory" << "\n";
+  StructType *st = dyn_cast<StructType>(ty);
+  debug(Usama) << st << "\n";
+  auto structLayout = DL->getStructLayout(st);
+  for(unsigned i = 0; i < st->getStructNumElements(); i++) {
+    PointerType *t = dyn_cast<PointerType>(st->getStructElementType(i));
+
+    if(!t) {
+      continue;
+    }
+
+    uint64_t offset = structLayout->getElementOffset(i);
+    if(t->getElementType()->isPointerTy()) {
+      debug(Usama) << "Warning case not handled\n"; 
+    } else {
+      //assumption that this is char *
+
+      //allocate memory
+      char *pointer = *(char**)(address + offset);
+      uint64_t allocationSize = strlen(pointer);
+      uint64_t val = bbOps.allocateStack(allocationSize, currBB);
+
+      //copy over data
+      char *actualAddr = (char *)bbOps.getActualAddr(val, currBB);
+      debug(Usama) << "Copying : "<< string(pointer) << " at address: " << val << " real destination address: " << actualAddr << "\n";
+      strcpy(actualAddr, pointer);
+      debug(Usama) << "Copied : " << actualAddr << "\n";
+
+      //store pointer
+      uint64_t size = DL->getTypeAllocSize(t);
+      debug(Usama) << "Storing pointer at address: " << (uint64_t) localAddress + offset << "\n";
+      bbOps.storeToMem(val, size,(uint64_t) localAddress + offset, currBB);  
+
+    }
+  }
 }
 
 bool ConstantFolding::handleGetPwUid(CallInst *callInst) {	
@@ -953,18 +991,13 @@ bool ConstantFolding::handleGetPwUid(CallInst *callInst) {
   unsigned size = DL->getTypeAllocSize(ty);
   uint64_t addr = bbOps.allocateStack(size, currBB);
 
-  uint64_t addrField = bbOps.allocateStack(100, currBB);
-  char * addrFieldAct = (char *) bbOps.getActualAddr(addrField, currBB);
-  strcpy(addrFieldAct, pwuid->pw_dir);
   struct passwd *memPwUid = (struct passwd *)bbOps.getActualAddr(addr, currBB); 
-  addSingleVal(callInst, (uint64_t) addr, false, true);
+
   memcpy(memPwUid, pwuid, size);
-  memPwUid->pw_dir = (char *) addrField;
-	addSingleVal(callInst, (uint64_t) addr);
-  struct passwd *temp = (struct passwd *)bbOps.getActualAddr(addr, currBB);
-  //errs() << string(temp->pw_dir) << "asd\n";
+  copyMemory((char *) pwuid, dyn_cast<PointerType>(callInst->getType())->getElementType(), (char *)addr);
+  addSingleVal(callInst, (uint64_t) addr, false, true);
   pushFuncStack(callInst);
-	return true;
+  return true;
 }
 
 bool ConstantFolding::handleSysCall(CallInst *callInst) {
