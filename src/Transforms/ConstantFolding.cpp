@@ -2682,17 +2682,11 @@ void ConstantFolding::handleFGets(CallInst * ci) {
     }  
     return;   
   }
+
   char * buffer = (char *) bbOps.getActualAddr(reg->getValue(),currBB);
-  char * oldBuffer = new char(strlen(buffer) + 1);
-  int index = 0;
-  for(index=0;index<strlen(buffer);index++){
-    oldBuffer[index] = buffer[index];
-  }
-  oldBuffer[index] = '\0';
-  
   char* bytes_read = fgets(buffer,size,fptr);
 
-  if(strcmp(buffer,oldBuffer)==0){
+  if(feof(fptr)){
     debug(Abubakar) << "handleFGets : read NULL value\n";
     ConstantPointerNull * nullP = ConstantPointerNull::get(dyn_cast<PointerType>(bufPtr->getType()));     
     ci->replaceAllUsesWith(nullP);
