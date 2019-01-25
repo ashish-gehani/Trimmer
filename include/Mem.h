@@ -65,12 +65,13 @@ public:
 		memcpy(heapConst, from.getHeapConst(), heapTotalSize);
 		heapStartIndices = from.getHeapStartIndices();
 		heapStartToSizeMap = from.getHeapStartToSizeMap();
+        constMemSize = from.getConstMemSize();
 	}
 	~Memory() {
-		delete stack;
-		delete heap;
-		delete stackConst;
-		delete heapConst;
+		delete [] stack;
+		delete [] heap;
+		delete [] stackConst;
+		delete [] heapConst;
 	}
 	void copyfrom(Memory * from) {
 		memcpy(stack, from->getStack(), stackIndex); 
@@ -300,14 +301,14 @@ private:
 		memset(newMem + totalSize, 0, totalSize);
 		int8_t * delMem = memory;
 		memory = newMem;
-		delete delMem;
 
+		delete [] delMem;
 		bool * newConst = new bool[totalSize * 2];
 		memcpy(newConst, constant, totalSize);
 		memset(newConst + totalSize, true, totalSize);
 		bool * delConst = constant;
 		constant = newConst;
-		delete delConst;
+		delete [] delConst;
 
 		totalSize *= 2;
 	}
