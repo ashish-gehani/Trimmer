@@ -2,7 +2,7 @@
 ContextInfo::ContextInfo() {
   deleted = false;
   imageOf = NULL;
-  memory = new Memory(NULL);
+  //memory = new Memory(NULL);
 }
 
 ContextInfo::ContextInfo(Module * M) {
