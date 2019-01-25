@@ -427,14 +427,31 @@ void BBOps::copyContexts(Function *to, Function *from, ValueToValueMapTy& vmap, 
 
     BasicBlock *oldBB = &*it;
     BasicBlock *newBB = dyn_cast<BasicBlock>(vmap[oldBB]);
-    createNewContext(newBB, module);
 
     ContextInfo *oldCi = BasicBlockContexts[oldBB];
-    if(!oldCi->deleted)
+    if(!oldCi->deleted && !oldCi->imageOf) {
+      printBB("duplicating in copyContexts", newBB, "\n", Usama);
       duplicateContext(newBB, oldBB);
+    } else {
+      printBB("creating new in copyContexts", newBB, "\n", Usama);
+      BasicBlockContexts[newBB] = new ContextInfo(); //will set memory pointer later, since parent ci might not have been intiialized
+    }
 
     ContextInfo *newCi = BasicBlockContexts[newBB];
-    newCi->deleted = oldCi->deleted;
+    newCi->deleted = oldCi->deleted; 
+  }
+
+  //Now all memory has been initialized for sure
+  for(auto it = from->begin(), end = from->end(); it != end; it++) {
+    BasicBlock *oldBB = &*it;
+    BasicBlock *newBB = dyn_cast<BasicBlock>(vmap[oldBB]);
+    if(!hasContext(oldBB))
+      continue;
+    ContextInfo *oldCi = BasicBlockContexts[oldBB];
+    ContextInfo *newCi = BasicBlockContexts[newBB];
+
+    if(!oldCi->imageOf)
+      continue;
 
     //TODO do this a better way
     BasicBlock *temp = NULL;
@@ -450,6 +467,7 @@ void BBOps::copyContexts(Function *to, Function *from, ValueToValueMapTy& vmap, 
         newCi->imageOf = oldCi->imageOf; 
       }else {
         newCi->imageOf = BasicBlockContexts[dyn_cast<BasicBlock>(vmap[temp])];
+        newCi->memory = BasicBlockContexts[dyn_cast<BasicBlock>(vmap[temp])]->memory;
       }
     }
   }
