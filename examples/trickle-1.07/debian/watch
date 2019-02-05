@@ -1,0 +1,3 @@
+version=2
+http://monkey.org/~marius/pages/?page=trickle .*trickle-(.*)\.tar\.gz
+

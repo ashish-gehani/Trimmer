@@ -1,0 +1,125 @@
+trickle (1.07-10ubuntu2) trusty; urgency=medium
+
+  * Use dh-autoreconf instead of autotools-dev to also fix FTBFS on ppc64el by
+    getting new libtool macros (still updates config.{sub,guess}).
+
+ -- Logan Rosen <logan@ubuntu.com>  Sat, 25 Jan 2014 22:59:48 -0500
+
+trickle (1.07-10ubuntu1) trusty; urgency=medium
+
+  * Use autotools-dev to update config.{sub,guess} for new arches.
+
+ -- Logan Rosen <logan@ubuntu.com>  Sat, 25 Jan 2014 22:39:32 -0500
+
+trickle (1.07-10) unstable; urgency=low
+
+  * Enable hardning flags during build
+  * Update packaging 
+  * Bump standards-version
+
+ -- Robert Lemmen <robertle@semistable.com>  Thu, 04 Jul 2013 20:03:22 +0100
+
+trickle (1.07-9) unstable; urgency=low
+
+  * Further changes to getopt handling for mips builds
+
+ -- Robert Lemmen <robertle@semistable.com>  Tue, 30 Jun 2009 11:28:31 +0100
+
+trickle (1.07-8) unstable; urgency=low
+
+  * use -fPIC on all archs (closes: #531940)
+
+ -- Robert Lemmen <robertle@semistable.com>  Mon, 29 Jun 2009 15:31:16 +0100
+
+trickle (1.07-7) unstable; urgency=low
+
+  * Applied select() patch (closes: #375173)
+  * Bumped standards-version and debhelper
+
+ -- Robert Lemmen <robertle@semistable.com>  Mon, 23 Mar 2009 10:11:57 +0000
+
+trickle (1.07-6) unstable; urgency=low
+
+  * Disables default loading of the .so from the local dir, this might be a
+    security issue (closes: #513456)
+  * Added dependency to libbsd and modified build scripts to fix FTBFS under
+    lenny
+  * Bumped Standards-Version since it is compliant with the new version without
+    further changes
+
+ -- Robert Lemmen <robertle@semistable.com>  Mon, 02 Feb 2009 17:43:16 +0000
+
+trickle (1.07-5) unstable; urgency=low
+
+  * Fixed typos in manual pages (closes: #359166) 
+  * Fixed debian/rules (closes: #395766)
+  * Make trickle work on kFreeBSD (closes: #414198)
+  * Fixed clean target in debian/rules
+
+ -- Robert Lemmen <robertle@semistable.com>  Tue, 28 Aug 2007 13:04:07 +0200
+
+trickle (1.07-4) unstable; urgency=low
+
+  * Fixed autoconf setup to not predefine stuff (closes: #324580)
+  * Fixed a smallish typo in the manual page (closes: #302942)
+  * Finally applied the fwrite patch (closes: #241843)
+  * Fixed nroff formatting errors in the manual pages
+  * Override for a stray lintian warning
+
+ -- Robert Lemmen <robertle@semistable.com>  Fri, 26 Aug 2005 10:30:28 +0200
+
+trickle (1.07-3) unstable; urgency=low
+
+  * Various smallish cleanups in debian/rules
+  * Used debian/compat instead of an export in debian/rules
+
+ -- Robert Lemmen <robertle@semistable.com>  Wed,  2 Feb 2005 21:48:34 +0100
+
+trickle (1.07-2) unstable; urgency=low
+
+  * Added manual page for tricklectl
+
+ -- Robert Lemmen <robertle@semistable.com>  Thu, 13 Jan 2005 11:30:00 +0100
+
+trickle (1.07-1) unstable; urgency=low
+
+  * New upstream release, resolves the sendfile() issue
+
+ -- Robert Lemmen <robertle@semistable.com>  Sun,  9 Jan 2005 13:50:24 +0100
+
+trickle (1.06-4) unstable; urgency=low
+
+  * rebuild again since i386 was missed (darn)
+
+ -- Robert Lemmen <robertle@semistable.com>  Thu, 23 Oct 2003 00:53:35 +0200
+
+trickle (1.06-3) unstable; urgency=low
+
+  * rebuild against libevent1 (closes: #216586)
+
+ -- Robert Lemmen <robertle@semistable.com>  Mon, 20 Oct 2003 15:19:50 +0200
+
+trickle (1.06-2) unstable; urgency=low
+
+  * removed bogus usr/share/man{1,5,8} directories (closes: #207258)
+
+ -- Robert Lemmen <robertle@semistable.com>  Wed, 27 Aug 2003 15:33:04 +0200
+
+trickle (1.06-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Robert Lemmen <robertle@semistable.com>  Mon,  9 Jun 2003 19:28:37 +0200
+
+trickle (1.04-1) unstable; urgency=low
+
+  * New upstream release that closes a minor bug with noblocking sockets
+
+ -- Robert Lemmen <robertle@semistable.com>  Tue,  7 Apr 2003 15:49:42 +0200
+
+trickle (1.03-1) unstable; urgency=low
+
+  * Initial Release. (closes: #186277)
+
+ -- Robert Lemmen <robertle@semistable.com>  Tue,  1 Apr 2003 20:09:45 +0200
+

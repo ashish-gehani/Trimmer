@@ -1,0 +1,17 @@
+Source: trickle
+Section: net
+Priority: optional
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+XSBC-Original-Maintainer: Robert Lemmen <robertle@semistable.com>
+Build-Depends: debhelper (>= 7.0.0), libevent-dev (>= 0.7b), autoconf,
+ libbsd-dev, dh-autoreconf
+Standards-Version: 3.9.4
+
+Package: trickle
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: user-space bandwidth shaper
+ Trickle is a voluntary, cooperative bandwidth shaper. it works
+ entirely in userland and is very easy to use.
+ .
+ The most simple application is to limit the bandwidth usage of programs.
