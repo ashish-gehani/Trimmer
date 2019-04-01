@@ -1256,17 +1256,18 @@ void ConstantFolding::initializeGlobal(uint64_t addr, Constant * CC) {
     uint64_t faddr = (uint64_t) callback;
     bbOps.storeToMem(faddr, size, addr, currBB);
     debug(Abubakar) << "stored callback for function " << callback->getName() << "\n";
+  } else if(ConstantStruct *cStruct = dyn_cast<ConstantStruct>(CC)) {
+    for(unsigned i = 0; i < cStruct->getNumOperands(); i++) {
+       Constant * CGI = CC->getAggregateElement(i);
+       auto layout = DL->getStructLayout(cStruct->getType());
+       initializeGlobal(addr + layout->getElementOffset(i), CGI);
+    }
   } else {
     for(unsigned i = 0; i < CC->getNumOperands(); i++) {
       Constant * CGI = CC->getAggregateElement(i);
-      if(auto cStruct = dyn_cast<ConstantStruct>(CC)) {
-        auto layout = DL->getStructLayout(cStruct->getType());
-        addr += layout->getElementOffset(i);
-        debug(Usama) << "initializing constant struct element " << layout->getElementOffset(i) << "\n";
-      } else {
-        addr += DL->getTypeAllocSize(CGI->getType());
-      }
+      //debug(Usama) << "CGI: " << *CGI << "\n CC: " << *CC << "\n";
       initializeGlobal(addr, CGI);
+      addr += DL->getTypeAllocSize(CGI->getType());
     }
   }
 }
