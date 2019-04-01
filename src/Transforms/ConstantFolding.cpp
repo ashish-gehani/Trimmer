@@ -1259,8 +1259,14 @@ void ConstantFolding::initializeGlobal(uint64_t addr, Constant * CC) {
   } else {
     for(unsigned i = 0; i < CC->getNumOperands(); i++) {
       Constant * CGI = CC->getAggregateElement(i);
+      if(auto cStruct = dyn_cast<ConstantStruct>(CC)) {
+        auto layout = DL->getStructLayout(cStruct->getType());
+        addr += layout->getElementOffset(i);
+        debug(Usama) << "initializing constant struct element " << layout->getElementOffset(i) << "\n";
+      } else {
+        addr += DL->getTypeAllocSize(CGI->getType());
+      }
       initializeGlobal(addr, CGI);
-      addr += DL->getTypeAllocSize(CGI->getType());
     }
   }
 }
