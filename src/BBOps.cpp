@@ -589,3 +589,7 @@ void BBOps::getVisitedPreds(BasicBlock *BB, vector<BasicBlock *> &preds) {
     }
   }
 }
+
+uint64_t BBOps::getSizeContigous(uint64_t address, BasicBlock *BB) {
+  return BasicBlockContexts[BB]->memory->getSizeContigous(address);
+}

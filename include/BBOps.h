@@ -85,6 +85,7 @@ public:
   void copyContexts(Function *to, Function *from, ValueToValueMapTy& vmap, Module *);
   bool isContextDeleted(BasicBlock *);
   void getVisitedPreds(BasicBlock *BB, vector<BasicBlock *> &preds);
+  uint64_t getSizeContigous(uint64_t, BasicBlock *);
 private:
   map<BasicBlock *, BBInfo *> BBInfoMap;
   BasicBlockContInfoMap BasicBlockContexts;
