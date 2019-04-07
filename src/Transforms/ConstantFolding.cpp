@@ -1272,28 +1272,25 @@ void ConstantFolding::initializeGlobal(uint64_t addr, Constant * CC) {
   }
 }
 
+void ConstantFolding::addGlobal(GlobalVariable* gv){
+  debug(Abubakar) << gv->getName() << "\n"; 
+  Type* contTy = gv->getType()->getContainedType(0);
+
+  uint64_t size = DL->getTypeAllocSize(contTy);
+  uint64_t addr = bbOps.allocateStack(size, currBB);
+  debug(Abubakar) << "addGlobal : size " << size << " at address " << addr << "\n";
+  //pushFuncStack(gv);
+  bool tracked = !!gv->getMetadata("track");
+  regOps.addRegister(gv, contTy, addr, tracked);
+  if(gv->hasInitializer()) 
+    initializeGlobal(addr, gv->getInitializer());
+}
+
 // important globals : optind, optarg, __argv_new__
 void ConstantFolding::addGlobals() {
   for(auto& global : module->globals()) {
-    GlobalVariable *  gv = &global;
-    Type * contTy = gv->getType()->getContainedType(0);
-    /*
-    if(trackAllocas && !gv->getMetadata("track") && 
-    gv->getName() != "optarg" && gv->getName() != "optind" &&
-    gv->getName() != "__argv_new__")
-      continue; 
-    */
-    // if(gv->isConstant() && isa<ArrayType>(contTy) && contTy->getContainedType(0)->isIntegerTy(8))
-    //   continue;
-    debug(Abubakar) << gv->getName() << "\n"; 
-    uint64_t size = DL->getTypeAllocSize(contTy);
-    uint64_t addr = bbOps.allocateStack(size, currBB);
-    debug(Abubakar) << "addGlobal : size " << size << " at address " << addr << "\n";
-    //pushFuncStack(gv);
-    bool tracked = !!gv->getMetadata("track");
-    regOps.addRegister(gv, contTy, addr, tracked);
-    if(gv->hasInitializer()) 
-      initializeGlobal(addr, gv->getInitializer());
+    if(!regOps.getRegister(&global))
+      addGlobal(&global);
   }
 }
 
@@ -2913,28 +2910,37 @@ bool ConstantFolding::handleLongArgs(CallInst * callInst, option * long_opts,
     return false;
   }
   uint64_t addr = reg->getValue();
+
+  errs()<<"Checking if addr: "<<addr<<" is constant\n";
   if(!bbOps.checkConstContigous(addr, currBB)) {
     debug(Abubakar) << "long_opts not constant\n";
     return false;
   }
   unsigned i = 0;
-  while(1) {
+  unsigned size = bbOps.getSizeContigous(addr, currBB);
+  errs() << "Size of long options " << size/32<< "\n";
+
+  for(;;) {
     uint64_t nameAddr = bbOps.loadMem(addr, 8, currBB);
     if(!nameAddr)
       break;
     long_opts[i].name = (char *) bbOps.getActualAddr(nameAddr, currBB);
     long_opts[i].has_arg = bbOps.loadMem(addr + 8, 4, currBB);
-    uint64_t flagAddr = bbOps.loadMem(addr + 12, 8, currBB);
+    uint64_t flagAddr = bbOps.loadMem(addr + 16, 8, currBB);
     long_opts[i].flag = !flagAddr ? 0 : (int *) bbOps.getActualAddr(flagAddr, currBB);
-    long_opts[i].val = bbOps.loadMem(addr + 20, 4, currBB);
+    long_opts[i].val = bbOps.loadMem(addr + 24, 4, currBB);
     if(!long_opts[i].name)
       break;
+    errs()<<"{name: "<<long_opts[i].name<<", has_args: "<<long_opts[i].has_arg<<", flag: "<<long_opts[i].flag<<", val: "<<long_opts[i].val<<"}\n";
     i++;
     addr += 32;
   }
+  errs()<<"i: "<<i<<"\n";
   Value * indexVal = callInst->getOperand(4);
-  errs() << *indexVal << "\n";
+  debug(Usama) << indexVal << " indexVal printing" << "\n";
+  //errs() << *indexVal << "\n";
   if(dyn_cast<ConstantPointerNull>(indexVal)) {
+    errs()<<"indexVal is a Constant Pointer Null\n";
     long_index = NULL;
   } else {
     reg = processInstAndGetRegister(indexVal);
@@ -3162,8 +3168,14 @@ Register *ConstantFolding::processInstAndGetRegister(Value *ptr) {
   Register * reg = NULL;
   if(ConstantExpr * ce = dyn_cast<ConstantExpr>(ptr))
     I = ce->getAsInstruction();
+  else if(auto gl = dyn_cast<GlobalVariable>(ptr)){
+    addGlobal(gl);
+    return regOps.getRegister(ptr);
+
+  }
   else 
     I = dyn_cast<Instruction>(ptr);
+  errs()<<"ptr: "<<ptr<<", I: "<<I<<"\n";
 
   if(I && !I->getParent()) { // if it has a parent then it must have been visited 
     runOnInst(I);

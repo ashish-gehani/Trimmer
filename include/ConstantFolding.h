@@ -153,6 +153,8 @@ struct ConstantFolding : public ModulePass {
   void handleStrDup(CallInst *); 
   void handleStrTok(CallInst *); 
   void handleStrCat(CallInst *);
+  void handleStrTol(CallInst *);
+  void handleStrnDup(CallInst *);
 
   bool handleGetOpt(CallInst *);  
   bool handleLongArgs(CallInst *, option *, int *&);
@@ -171,6 +173,7 @@ struct ConstantFolding : public ModulePass {
   bool handleSysCall(CallInst *);
   bool handleGetUid(CallInst *);
   bool handleGetPwUid(CallInst *);
+  bool handleGetEnv(CallInst *);
   void handleOpen(CallInst *);
   void handleFOpen(CallInst *);
   void handleRead(CallInst *);
@@ -182,6 +185,7 @@ struct ConstantFolding : public ModulePass {
   void handleFSeek(CallInst *);
   void handleFGets(CallInst *);
   void handleClose(CallInst *);
+  void handleFEof(CallInst *);
   void handleFClose(CallInst *);
   void removeFileIOCallsFromMap(string buffer[],int);
       
@@ -189,6 +193,8 @@ struct ConstantFolding : public ModulePass {
   void deleteFileIOCalls();
   void markArgsAsNonConst(CallInst* callInst);
   void addGlobals();
+  void addGlobal(GlobalVariable* );
+
   void initializeGlobal(uint64_t, Constant *);
   
   bool getSingleVal(Value *, uint64_t&);
