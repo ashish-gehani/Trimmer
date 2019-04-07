@@ -1691,9 +1691,146 @@ bool ConstantFolding::visitBB(BasicBlock * succ, BasicBlock *  from) {
 
 //File StringUtils.cpp
 
+bool ConstantFolding::handleStrStr(CallInst *callInst) {
+  Value *val1 = callInst->getOperand(0);
+  Value *val2 = callInst->getOperand(1);
+
+  Register *reg1 = processInstAndGetRegister(val1);
+  Register *reg2 = processInstAndGetRegister(val2);
+
+  if(!reg1) {
+    debug(Usama) << "handleStrStr, argument one not found in map" << "\n";
+    return false;
+  }
+
+  if(!reg2) {
+    debug(Usama) << "handleStrStr, argument two not found in map" << "\n";
+    return false;
+  }
+
+  if(!bbOps.checkConstContigous(reg1->getValue(), currBB) || !bbOps.checkConstContigous(reg2->getValue(), currBB)) {
+    debug(Usama) << "handleStrStr, one of the arguments is non constant \n";
+    return false;
+  }
+
+  char * buffer1 = (char *) bbOps.getActualAddr(reg1->getValue(), currBB);
+  char * buffer2 = (char *) bbOps.getActualAddr(reg2->getValue(), currBB);
+  char *result = strstr(buffer1, buffer2);
+
+  if(!result) {
+    addSingleVal(callInst, 0, true, true);
+    return false;
+  }
+  debug(Abubakar) << "result = "<< result << "\n";
+  debug(Abubakar) << "buffer1 = "<<buffer1 << "\n";
+  debug(Abubakar) << "buffer2 = "<<buffer2 << "\n";
+
+  uint64_t size = strlen(result);
+  uint64_t address = bbOps.allocateHeap(size, currBB);
+  char *pointer = (char *) bbOps.getActualAddr(address, currBB);
+
+  strcpy(pointer, result);
+  addSingleVal(callInst, address, true, true);
+  return true;
+}
+
+bool ConstantFolding::handleStrSep(CallInst *callInst) {
+  Value *arg1 = callInst->getOperand(0);
+  Value *arg2 = callInst->getOperand(1);
+  Register *reg1 = processInstAndGetRegister(arg1);
+  Register *reg2 = processInstAndGetRegister(arg2);
+  
+  if(!reg1 || !reg2) {
+    debug(Usama) << "strsep: one of the registers not found \n";
+    return false;
+  }
+  
+  char *delim;
+  if(!bbOps.checkConstMem(reg1->getValue(), DL->getPointerSize(), currBB) || !getStr(reg2->getValue(), delim)) {
+    debug(Usama) << "strsep: non constant register \n";
+    return false;
+  }
+  
+  uint64_t stringpAddr = bbOps.loadMem(reg1->getValue(), DL->getPointerSize(), currBB);
+  if(!stringpAddr) {
+    addSingleVal(callInst, 0, true, true);
+    debug(Usama) << "strsep returned null\n";
+    return true;
+  }
+  debug(Usama) << "stringpAddr: " << stringpAddr << "\n";
+  char *string;
+  if(!getStr(stringpAddr, string)) {
+    debug(Usama) << "strsep: string not constant\n";
+    return false;
+  }
+  char **stringp = &string;
+  char *stringCopy = string;
+  char *result = strsep(stringp, delim);
+
+  addSingleVal(callInst, stringpAddr, true, true);
+  if(*stringp)
+    bbOps.storeToMem(stringpAddr + (stringCopy - *stringp), DL->getPointerSize(), reg1->getValue(), currBB);
+  else {
+    bbOps.storeToMem(0, DL->getPointerSize(), reg1->getValue(), currBB);
+    debug(Usama) << "after storing null: " << bbOps.loadMem(reg1->getValue(), DL->getPointerSize(), currBB) << "\n";
+    debug(Usama) << "storing null" << "\n";
+  }
+  //addSingleVal(arg1, reg1->getValue() + (stringpCopy - stringp), true, true); //@TODO memory leak for register overwriting
+  debug(Usama) << "strsep: returned " << result << "\n";
+  return true;
+}
+
+bool ConstantFolding::handleStrTol(CallInst *call) {
+  Value *arg1 = call->getOperand(0);
+  Value *arg2 = call->getOperand(1);
+  Value *arg3 = call->getOperand(2);
+
+  Register *reg1 = processInstAndGetRegister(arg1),
+           *reg2 = processInstAndGetRegister(arg2);
+
+  if(!reg1 || !reg2) {
+    debug(Usama) << "strtol: one of the registers not found\n";
+    return false;
+  }
+  
+  char *str;
+  char **endptr = NULL;
+  char *strStart = NULL;
+  int base;
+  if(!getStr(reg1->getValue(), str)) {
+    debug(Usama) << "strtol: string non constant\n";
+    return false;
+  }
+
+  strStart = str;
+  if(!dyn_cast<ConstantInt>(arg2)) {
+    char *endptrAddr = (char *) bbOps.getActualAddr(bbOps.loadMem(reg2->getValue(), DL->getPointerSize(), currBB), currBB);
+    endptr = &endptrAddr;
+  }
+ 
+  if(auto constant = dyn_cast<ConstantInt>(arg3)) {
+    base = constant->getZExtValue(); 
+  } else {
+    debug(Usama) << "strtol: base not constant\n";
+    return false;
+  }
+
+  long int answer = strtol(str, endptr, base);
+
+  if(endptr) {
+    debug(Usama) << "strtol: moved endptr forward by: " << *endptr - strStart << "\n";
+    uint64_t newEndPtr = reg1->getValue() + (*endptr - strStart);
+    bbOps.storeToMem(reg2->getValue(), DL->getPointerSize(), newEndPtr, currBB);
+  }
+  addSingleVal(call, answer, true, true);
+  return true;
+}
+
 bool ConstantFolding::handleStringFunc(CallInst * callInst) {
   string name = callInst->getCalledFunction()->getName();
-  if(simpleStrFunc(name))   simplifyStrFunc(callInst);
+
+  if(name == "strtol") handleStrTol(callInst);
+  else if(simpleStrFunc(name))   simplifyStrFunc(callInst);
   else if(name == "strcasecmp") handleStrCaseCmp(callInst);
   else if(name == "strchr") handleStrChr(callInst);
   else if(name == "strpbrk")handleStrpbrk(callInst);
@@ -1703,6 +1840,8 @@ bool ConstantFolding::handleStringFunc(CallInst * callInst) {
   else if(name == "strcpy") handleStrCpy(callInst);
   else if(name == "strrchr") handleStrrChr(callInst);
   else if(name == "strcat") handleStrCat(callInst);
+  else if(name == "strstr") handleStrStr(callInst);
+  else if(name == "strsep") handleStrSep(callInst);
   else return false;
   return true;
 }

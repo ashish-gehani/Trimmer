@@ -143,6 +143,7 @@ struct ConstantFolding : public ModulePass {
   bool handleMemInst(CallInst *);
 
   bool handleStringFunc(CallInst *);
+  bool handleStrSep(CallInst *);
   void handleStrChr(CallInst *); 
   void handleStrpbrk(CallInst * );
   void handleStrCpy(CallInst *);
@@ -275,6 +276,8 @@ struct ConstantFolding : public ModulePass {
   bool exceedsRecursion(Function *called, Function *callee);
   string removeCloneName(string name);
   bool copyMemory(char *address, Type *ty, char *localAddress);
+
+  bool handleStrStr(CallInst *);
 };
 
 
