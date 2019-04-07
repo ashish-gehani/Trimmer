@@ -1780,7 +1780,7 @@ bool ConstantFolding::handleStrSep(CallInst *callInst) {
   return true;
 }
 
-bool ConstantFolding::handleStrTol(CallInst *call) {
+void ConstantFolding::handleStrTol(CallInst *call) {
   Value *arg1 = call->getOperand(0);
   Value *arg2 = call->getOperand(1);
   Value *arg3 = call->getOperand(2);
@@ -1790,7 +1790,7 @@ bool ConstantFolding::handleStrTol(CallInst *call) {
 
   if(!reg1 || !reg2) {
     debug(Usama) << "strtol: one of the registers not found\n";
-    return false;
+    return;
   }
   
   char *str;
@@ -1799,7 +1799,7 @@ bool ConstantFolding::handleStrTol(CallInst *call) {
   int base;
   if(!getStr(reg1->getValue(), str)) {
     debug(Usama) << "strtol: string non constant\n";
-    return false;
+    return;
   }
 
   strStart = str;
@@ -1812,7 +1812,7 @@ bool ConstantFolding::handleStrTol(CallInst *call) {
     base = constant->getZExtValue(); 
   } else {
     debug(Usama) << "strtol: base not constant\n";
-    return false;
+    return;
   }
 
   long int answer = strtol(str, endptr, base);
@@ -1823,7 +1823,7 @@ bool ConstantFolding::handleStrTol(CallInst *call) {
     bbOps.storeToMem(reg2->getValue(), DL->getPointerSize(), newEndPtr, currBB);
   }
   addSingleVal(call, answer, true, true);
-  return true;
+  return;
 }
 
 bool ConstantFolding::handleStringFunc(CallInst * callInst) {
