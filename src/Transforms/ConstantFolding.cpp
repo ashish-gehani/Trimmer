@@ -397,6 +397,7 @@ bool ConstantFolding::runOnModule(Module & M) {
 
   collectCallGraphGlobals(CG);
   numConfigFiles = rand() % 100000000 + 100000; 
+  getReadonlyFuncNames();
 
   Function * func = module->getFunction(StringRef("main"));
   BasicBlock * entry = &func->getEntryBlock();
@@ -699,6 +700,11 @@ ProcResult ConstantFolding::processLoadInst(LoadInst * li) {
     return NOTFOLDED;
   }
   uint64_t addr = reg->getValue();
+  if(addr==999999999){
+    pushFuncStack(li);
+    regOps.addRegister(li,li->getType(),999999999);
+    return UNDECIDED;
+  }
   uint64_t size = DL->getTypeAllocSize(li->getType());
 
   if(!bbOps.checkConstMem(addr, size, currBB)) {
@@ -706,8 +712,9 @@ ProcResult ConstantFolding::processLoadInst(LoadInst * li) {
     return NOTFOLDED;
   }
   uint64_t val = bbOps.loadMem(addr, size, currBB);
-  debug(Abubakar) << li->getType() << " LoadInst\n";
-  addSingleVal(li, val, false, reg->getTracked());
+  addSingleVal(li, val, true, reg->getTracked());
+  debug(Abubakar) << addr << " "<< size << " Load Inst\n";
+  pushFuncStack(li);
   return UNDECIDED;
 }
 
@@ -721,7 +728,6 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
     return NOTFOLDED;
   }
   
-
   unsigned OffsetBits = DL->getPointerTypeSizeInBits(gi->getType());
   APInt offset(OffsetBits, 0); 
   bool isConst = gi->accumulateConstantOffset(*DL, offset);
@@ -730,10 +736,22 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
     bbOps.setConstContigous(false, reg->getValue(), currBB);
     return NOTFOLDED;
   }
+  if(reg->getValue()==999999999)
+  {
+    unsigned short int num = traitsTable[offset.getZExtValue()/2];
+    uint64_t addr = bbOps.allocateHeap(sizeof(unsigned short int), currBB);
+    unsigned short int * source = (unsigned short int *) bbOps.getActualAddr(addr, currBB);
+    *source = num;
+    regOps.addRegister(gi, gi->getType(), addr);
+    pushFuncStack(gi);
+    return UNDECIDED;
+
+  }
   uint64_t val = reg->getValue() + offset.getZExtValue();
   pushFuncStack(gi);
   regOps.addRegister(gi, gi->getType(), val, reg->getTracked());
-  debug(Abubakar) << val << " GepInst\n";
+  debug(Abubakar) << val << " GEP Inst\n";
+  
   return UNDECIDED;
 }
 ProcResult ConstantFolding::processMemcpyInst(CallInst * memcpyInst) {
@@ -1000,6 +1018,87 @@ bool ConstantFolding::handleGetPwUid(CallInst *callInst) {
   return true;
 }
 
+bool ConstantFolding::handleFStat(CallInst *callInst) {	
+
+   Value * f = callInst->getOperand(0);
+   Value * stats = callInst->getOperand(1);
+   uint64_t fileno;
+
+   if(!getSingleVal(f,fileno)){
+     debug(Abubakar)<<"file number is not constant\n";
+     return false;
+   }
+   Register *statReg = processInstAndGetRegister(stats);
+   if(!statReg){
+     debug(Abubakar)<<"stat struct not found\n";
+     return false;
+   }
+
+   struct stat st;
+   int result = fstat(fileno, &st);
+   if(result!=0){
+    debug(Abubakar)<<"fstat returns error\n";
+     return false;
+   }
+  uint64_t addr = statReg->getValue();
+  struct stat* temp = (struct stat *)bbOps.getActualAddr(addr, currBB);
+  memcpy(temp,&st,sizeof(struct stat));
+  addSingleVal(callInst,result,true,true);
+  return true;
+   
+}
+bool ConstantFolding::handleStat(CallInst *callInst) {	
+
+   Value * f = callInst->getOperand(0);
+   Value * stats = callInst->getOperand(1);
+   char * filename;
+
+   if(!getStr(f,filename,100)){
+     debug(Abubakar)<<"file name is not constant\n";
+     return false;
+   }
+   Register *statReg = processInstAndGetRegister(stats);
+   if(!statReg){
+     debug(Abubakar)<<"stat struct not found\n";
+     return false;
+   }
+
+   struct stat st;
+   int result = stat(filename, &st);
+   if(result!=0){
+    debug(Abubakar)<<"stat returns error\n";
+     return false;
+   }
+  uint64_t addr = statReg->getValue();
+  struct stat* temp = (struct stat *)bbOps.getActualAddr(addr, currBB);
+  memcpy(temp,&st,sizeof(struct stat));
+  addSingleVal(callInst,result,true,true);
+  return true;
+   
+}
+
+bool ConstantFolding::handleFileNo(CallInst *callInst) {	
+
+   Value * f = callInst->getOperand(0);
+
+   uint64_t sfd;
+   FILE* fptr;
+   bool fdConst = getSingleVal(f,sfd) && getfptr(sfd, fptr);
+
+   if(!fdConst){
+     debug(Abubakar)<<"file pointer is not constant\n";
+     return false;
+   }
+  
+   int result = fileno(fptr);
+   if(result==-1){
+    debug(Abubakar)<<"fileno returns error\n";
+     return false;
+   }
+  addSingleVal(callInst,result,true,true);
+  return true;   
+}
+
 bool ConstantFolding::handleSysCall(CallInst *callInst) {
   Function *F;
   if(!(F = callInst->getCalledFunction()))
@@ -1009,6 +1108,12 @@ bool ConstantFolding::handleSysCall(CallInst *callInst) {
     return handleGetUid(callInst);
   else if(F->getName().str() == "getpwuid")
     return handleGetPwUid(callInst);
+  else if(F->getName().str() == "stat" || F->getName().str() == "stat64")
+    return handleStat(callInst);
+  else if(F->getName().str() == "fstat")
+    return handleFStat(callInst);
+  else if(F->getName().str() == "fileno")
+    return handleFileNo(callInst);
   return false;
 }
 
@@ -1189,7 +1294,7 @@ void ConstantFolding::deleteFileIOCalls() {
 
 void ConstantFolding::markArgsAsNonConst(CallInst * callInst) {
   Function* calledFunction = callInst->getCalledFunction();
-  if(calledFunction && ignorefunc(calledFunction))
+  if(calledFunction && checkIfReadOnlyFunc(calledFunction))
     return;
   if(calledFunction && calledFunction->onlyReadsMemory()) {
     return;
@@ -1842,8 +1947,56 @@ bool ConstantFolding::handleStringFunc(CallInst * callInst) {
   else if(name == "strcat") handleStrCat(callInst);
   else if(name == "strstr") handleStrStr(callInst);
   else if(name == "strsep") handleStrSep(callInst);
+  else if(name == "strncpy") handleStrNCpy(callInst);
+  else if(name == "__ctype_b_loc")  handleCTypeFuncs(callInst);
   else return false;
   return true;
+}
+
+void ConstantFolding::handleStrNCpy(CallInst *callInst) {
+  Value *dest = callInst->getOperand(0);
+  Value *src = callInst->getOperand(1);
+  Value *sizeVal = callInst->getOperand(2);
+  uint64_t size;
+
+  Register *srcReg = processInstAndGetRegister(src);
+  Register *destReg = processInstAndGetRegister(dest);
+  if(!srcReg || !bbOps.checkConstContigous(srcReg->getValue(), currBB) || !getSingleVal(sizeVal,size)) {
+    debug(Usama) << "strncpy: source string not constant" << "\n";
+    //mark destination as non constant too
+    if(destReg)
+      bbOps.setConstContigous(false, destReg->getValue(), currBB);
+    else
+      debug(Usama) << "strncpy: (Warning) strcpy, destination unknown" << "\n";
+
+    return;
+  }
+
+  if(!destReg) {
+    debug(Usama) << "strncpy: Destination not found\n";
+    return;
+  }
+
+  //get untill NULL
+
+  char *addr = (char *) bbOps.getActualAddr(srcReg->getValue(), currBB);
+  char *destAddr = (char *) bbOps.getActualAddr(destReg->getValue(), currBB);
+  char *temp = addr;
+  
+  memcpy(destAddr, addr, size);
+  addSingleVal(callInst, destReg->getValue(), true, true);
+  
+  debug(Abubakar) << "strncpy: Successfully folded" << destAddr <<"\n";
+  return;
+}
+
+
+void ConstantFolding::handleCTypeFuncs(CallInst * callInst) {
+
+   traitsTable = *(__ctype_b_loc());
+   pushFuncStack(callInst);
+   regOps.addRegister(callInst,callInst->getType(),999999999);
+
 }
 
 void ConstantFolding::handleStrrChr(CallInst *callInst) {
@@ -2143,7 +2296,7 @@ void ConstantFolding::handleStrDup(CallInst * callInst)
   }    
 
   char * buffer = (char *) bbOps.getActualAddr(reg->getValue(), currBB);
-  uint64_t addr = bbOps.allocateHeap(sizeof(buffer), currBB);
+  uint64_t addr = bbOps.allocateHeap(strlen(buffer), currBB);
   char * buffer1 = (char *) bbOps.getActualAddr(addr, currBB);
   strcpy(buffer1,buffer);
   debug(Usama) << "strdup folded: string " << string(buffer1) << "\n";
@@ -2403,8 +2556,11 @@ bool ConstantFolding::handleFileIOCall(CallInst * ci) {
   else if(name == "mmap")  handleMMap(ci);
   else if(name == "munmap")  handleMUnmap(ci);
   else if(name == "fgets")  handleFGets(ci);
+  else if(name == "getline")  handleGetLine(ci);
   else if (name == "close")  handleClose(ci);
   else if (name == "fclose")  handleFClose(ci);
+  else if (name == "feof")  handleFEOF(ci);
+
   else return false;
   return true;
 }
@@ -2440,6 +2596,126 @@ void ConstantFolding::handleOpen(CallInst * ci) {
     debug(Usama) << "open not specialized" << "\n";
   }
 }
+
+void ConstantFolding::handleFEOF(CallInst * ci) {
+  Value * fptrVal = ci->getOperand(0);
+  uint64_t sfd;
+  FILE* fptr;
+  bool fdConst = getSingleVal(fptrVal, sfd)&& getfptr(sfd, fptr);
+  if(!fdConst){
+    debug(Abubakar) << "handleFEOF : failed to specialize\n";
+    if(getSingleVal(fptrVal, sfd)){
+       string funcNames[2];
+       funcNames[0] = "fopen";
+       funcNames[1] = "fopen";
+       removeFileIOCallsFromMap(funcNames, sfd);
+    }  
+    return;   
+  }   
+  int fileC =feof(fptr); 
+  addSingleVal(ci,fileC,true,true);
+  fileIOCalls[sfd]->insts.push_back(ci);
+  
+}
+
+void ConstantFolding::handleGetLine(CallInst * ci) {
+  Value * bufPtr = ci->getOperand(0);
+  Value * sizeVal = ci->getOperand(1);
+  Value * fptrVal = ci->getOperand(2);
+  uint64_t sfd;
+  size_t  size;
+  FILE* fptr;
+  bool fdConst = getSingleVal(fptrVal, sfd) && getfptr(sfd, fptr);
+  Register * reg = processInstAndGetRegister(bufPtr); 
+  Register * reg1 = processInstAndGetRegister(sizeVal);   
+  if(!reg || !reg1 ||!fdConst) {
+    debug(Abubakar) << "handleGetLine : failed to specialize\n";
+    if(reg) bbOps.setConstContigous(false, reg->getValue(),currBB); 
+    if(fdConst) setfdiUntracked(sfd);
+    if(getSingleVal(fptrVal, sfd)){
+      string funcNames[2];
+      funcNames[0] = "fopen";
+      funcNames[1] = "fseek";
+     removeFileIOCallsFromMap(funcNames, sfd);    
+    }  
+    return;   
+  }
+  char ** buffer = (char **) bbOps.getActualAddr(reg->getValue(),currBB);
+  size_t * buffer2 = (size_t *) bbOps.getActualAddr(reg1->getValue(),currBB);
+  char * newBuf = NULL;
+
+  size_t characters = getline(&newBuf,&size,fptr);
+
+
+
+  
+  if(characters == -1 && !feof(fptr)) {
+    debug(Abubakar) << "handleGetLine : read returned error\n";
+    setfdiUntracked(sfd);
+    bbOps.setConstContigous(false, reg->getValue(),currBB); 
+    bbOps.setConstContigous(false, reg1->getValue(),currBB); 
+    string funcNames[2];
+    funcNames[0] = "fopen";
+    funcNames[1] = "fseek";
+    removeFileIOCallsFromMap(funcNames, sfd);    
+    return;   
+  }
+
+  else{
+     debug(Abubakar) << "buffer value " << newBuf <<" "<<strlen(newBuf)<<" "<<size<<" "<< characters <<"\n";
+    bbOps.setConstMem(true, reg1->getValue(),8,currBB);
+    bbOps.setConstMem(true, reg->getValue(),8,currBB);
+    *buffer2 = size;
+
+    uint64_t addr1 = bbOps.allocateStack(strlen(newBuf),currBB);
+    char * buffer1 = (char *) bbOps.getActualAddr(addr1,currBB);
+    strcpy(buffer1,newBuf);
+
+    bbOps.storeToMem(addr1,8,reg->getValue(), currBB); 
+
+    setfptrOffset(sfd, fptr);
+    llvm::Type * type = llvm::IntegerType::getInt64Ty(module->getContext());
+    llvm::Constant *sizeNum = llvm::ConstantInt::get(type, characters, true);
+    ci->replaceAllUsesWith(sizeNum); 
+
+    IRBuilder<> Builder(ci);
+
+    Constant *mallocFunc;
+    mallocFunc = module->getOrInsertFunction("malloc",Type::getInt8PtrTy(module->getContext()),Type::getInt64Ty(module->getContext()),NULL);    
+    Function *hookM= cast<Function>(mallocFunc);
+
+    ConstantInt * arg1 = Builder.getInt64(strlen(newBuf) + 1);
+    CallInst * malloc = Builder.CreateCall(hookM,arg1);   
+    
+    Constant * const_array = ConstantDataArray::getString(module->getContext(),StringRef(newBuf),true);
+    GlobalVariable * gv = new GlobalVariable(*module,const_array->getType(),true,GlobalValue::ExternalLinkage,const_array,"");
+    gv->setAlignment(1);
+
+    Instruction* MemCpyInst = Builder.CreateMemCpy(malloc,gv,strlen(newBuf),1);
+
+    StoreInst * store = Builder.CreateStore(malloc,bufPtr,false);
+
+    
+    Constant *hookFunc;
+    hookFunc = module->getOrInsertFunction("fseek", Type::getInt32Ty(module->getContext()),fptrVal->getType(),Type::getInt64Ty(module->getContext()),Type::getInt32Ty(module->getContext()),NULL);    
+    Function *hook= cast<Function>(hookFunc);
+
+    ConstantInt * arg2 = Builder.getInt64(getfptrOffset(sfd,fptr));
+    ConstantInt * arg3 = Builder.getInt32(0);
+    std::vector <llvm::Value*> putsArgs;
+    putsArgs.push_back(fptrVal);
+    putsArgs.push_back(arg2);
+    putsArgs.push_back(arg3);
+    CallInst * seek = Builder.CreateCall(hook,putsArgs);
+            
+    fileIOCalls[sfd]->insts.push_back(ci);
+    fileIOCalls[sfd]->insertedSeekCalls.push_back(seek);
+
+  }
+
+}
+
+
 
 /**
  * Handle fopen() calls
@@ -3197,7 +3473,7 @@ LoopUnroller *ConstantFolding::unrollLoop(BasicBlock * BB, BasicBlock *&entry) {
   Loop *L = LI->getLoopFor(dyn_cast<BasicBlock>(BB));
   LoopUnroller *clonedFnUnroller = new LoopUnroller(module, PreserveLCSSA, useAnnotations, L, LI);
 
-  if(clonedFnUnroller->runtest(TLI, *AC))
+  if(clonedFnUnroller->runtest(TLI, *AC, regOps,bbOps,fdInfoMap,currBB))
     return clonedFnUnroller;
   delete clonedFnUnroller;
   return NULL;
