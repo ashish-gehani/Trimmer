@@ -3,6 +3,7 @@
 using namespace llvm;
 using namespace std;
 
+map<string,int> readOnlyFuncs;
 
 void split(string str, vector<string>& tokens, char delim) {
     size_t pos = str.find(delim);
@@ -60,4 +61,45 @@ CallInst * getTestInst(string name, Module * module) {
   vector<Value *> args;
   CallInst * testCall = CallInst::Create(dyn_cast<Function>(val), args);
   return testCall;
+}
+
+void getReadonlyFuncNames()
+{
+  string const HOME = std::getenv("TRIMMER_HOME") ? std::getenv("TRIMMER_HOME") : ".";
+  char fileName[1000];
+  strcpy(fileName,HOME.c_str());
+  strcat(fileName,"/data/readOnlyFuncs.txt");
+  FILE * stream = fopen(fileName,"r");
+  if(stream == NULL)
+  {
+    errs()<<"File not found\n";
+    exit(1);
+  }
+  char buffer[100];
+
+  while(fgets(buffer,100,stream) !=NULL)
+  {
+    char * cp= strchr(buffer,'\n');
+    if(cp)
+     *cp = '\0';
+    string buffer2(buffer);
+    readOnlyFuncs[buffer2] = 1;
+
+  }
+}
+
+bool checkIfReadOnlyFunc(Function * F)
+{
+  string funcName = F->getName().str();
+  std::map<string,int>::iterator it;
+  it = readOnlyFuncs.find(funcName);
+
+  if (it != readOnlyFuncs.end())
+  {
+    errs()<<"FOUND\n";
+    return true;
+  }
+  if(F->isIntrinsic())
+    return true;
+  return false;
 }

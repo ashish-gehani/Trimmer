@@ -6,10 +6,11 @@ using namespace std;
 
 int LoopUnrollTest::GLOBAL_LOOP_ID = 0;
 
-LoopUnrollTest::LoopUnrollTest(Loop * L, Module * module, bool tripCount, bool isFileIO) {
+LoopUnrollTest::LoopUnrollTest(Loop * L, Module * module, bool tripCount, bool isFileIO, int fileCount) {
   terminated = false;
   ConstTripCount = tripCount;
   isFileIOLoop = isFileIO;
+  fileTripCount = fileCount;
   id = GLOBAL_LOOP_ID;
   GLOBAL_LOOP_ID++;
   CallInst * testCall = getTestInst(getExitName(), module);
@@ -75,9 +76,9 @@ bool LoopUnrollTest::checkPassed() {
   if(!terminated) return false;
   if(!ConstTripCount){ 
     if(isFileIOLoop)
-     return iterations < (DEFAULT_TRIP_COUNT * 5);
+     return iterations < fileTripCount + 5;
    else
-     return iterations < DEFAULT_TRIP_COUNT;
+     return iterations < DEFAULT_TRIP_COUNT + 5;
   }
   return true;
 }

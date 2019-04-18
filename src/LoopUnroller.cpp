@@ -8,6 +8,7 @@ LoopUnroller::LoopUnroller(Module *m, bool preserveLcssa, bool useAnnot, Loop *L
   ti = NULL;
   cloneOf = NULL;
   LI = li;
+  fileTripCount = 0;
 }
 
 LoopUnroller::~LoopUnroller() {
@@ -57,9 +58,9 @@ bool LoopUnroller::getTripCount(TargetLibraryInfo * TLI, AssumptionCache &AC, un
   tripCount =  SE.getSmallConstantMaxTripCount(loop);
   debug(Usama) << "Trip Multiple " << SE.getSmallConstantTripMultiple(loop) << "\n";
 
-  if(!tripCount) {
+  if(!tripCount || tripCount > 100) {
     if(isFileIOLoop)
-      tripCount = DEFAULT_TRIP_COUNT * 5;
+      tripCount = fileTripCount + 5;
     else
       tripCount = DEFAULT_TRIP_COUNT + 5;
     return false;
@@ -67,15 +68,19 @@ bool LoopUnroller::getTripCount(TargetLibraryInfo * TLI, AssumptionCache &AC, un
   return true;
 }
 
-bool LoopUnroller::runtest(TargetLibraryInfo * TLI, AssumptionCache &AC) {
+bool LoopUnroller::runtest(TargetLibraryInfo * TLI, AssumptionCache &AC, RegOps regOps,BBOps bbOps,map<int,uint64_t> fdInfoMap, BasicBlock * currBB) {
+
   unsigned tripCount;
-  bool isFileIOLoop = checkIfFileIOLoop(loop);
+  bool isFileIOLoop = checkIfFileIOLoop(loop, regOps, bbOps,fdInfoMap, currBB);
+
   //getBranchMemory(loop);
   bool constTripCount = getTripCount(TLI, AC, tripCount, isFileIOLoop);
 
-  debug(Usama) << "ConstTripCount :" << constTripCount << "\n";
+  debug(Abubakar) << "ConstTripCount :" << constTripCount << "\n";
 
-  ti = new LoopUnrollTest(loop, module, constTripCount, isFileIOLoop);
+  debug(Abubakar) << "TripCount :" << tripCount << "\n";
+  ti = new LoopUnrollTest(loop, module, constTripCount, isFileIOLoop,fileTripCount);
+
   if(!doUnroll(TLI, AC, tripCount)) {
     delete ti;
     ti = NULL;
@@ -83,6 +88,7 @@ bool LoopUnroller::runtest(TargetLibraryInfo * TLI, AssumptionCache &AC) {
   }
   return true;
 }
+
 
 
 bool LoopUnroller::doUnroll(TargetLibraryInfo * TLI, AssumptionCache &AC, unsigned tripCount) {
@@ -157,21 +163,121 @@ bool LoopUnroller::deleteLoop(BasicBlock *failed) {
   return true;
 }
 
-bool LoopUnroller::checkIfFileIOLoop(Loop * L) {
+bool LoopUnroller::checkIfFileIOLoop(Loop * L, RegOps regOps,BBOps bbOps,map<int,uint64_t> fdInfoMap, BasicBlock * currBB) {
+  int size = 1;
   for (Loop::block_iterator LoopIter = L->block_begin(), End = L->block_end(); LoopIter != End; ++LoopIter) {
     BasicBlock * B = *LoopIter;
     for (auto Inst = B->begin(), J = B->end(); Inst != J; ++Inst) {
        if(strcmp(Inst->getOpcodeName(),"call")==0){
           CallInst* callInst = dyn_cast<CallInst>(Inst);
-          if(!callInst->getCalledFunction())
+          if(callInst->isInlineAsm())
             continue;
-          string funcname = callInst->getCalledFunction()->getName().str();
-          if(funcname.compare("fread")== 0 || funcname.compare("read")== 0 || funcname.compare("fgets")== 0 || funcname.compare("pread")== 0){
-            return true;            
+          Function * func = callInst->getCalledFunction();
+          if(func==NULL)
+            continue;
+          string funcname = func->getName().str();
+          if(funcname.compare("read")== 0 || funcname.compare("pread")== 0)
+          {
+            Value * fdVal = callInst->getOperand(0);
+            Value * sizeVal = callInst->getOperand(2);
+            if(Register *r = regOps.getRegister(dyn_cast<CallInst>(fdVal))){     
+              uint64_t fileId = r->getValue();
+              uint64_t addr = fdInfoMap[fileId];
+              FdInfo * fdi = (FdInfo *) bbOps.getActualAddr(addr, currBB); 
+              debug(Abubakar)<<fdi->fileName;  
+              if(ConstantInt * CI = dyn_cast<ConstantInt>(sizeVal))
+                size =  CI->getZExtValue();
+              fileTripCount = getNumCharacters(fdi->fileName,size);  
+              debug(Abubakar)<<"numcharacters"<<fileTripCount; 
+              return true;
+            }
           }
+          else if(funcname.compare("fread")== 0)
+          {
+            Value * fdVal = callInst->getOperand(3);
+            Value * sizeVal = callInst->getOperand(1);
+            Value * numVal = callInst->getOperand(2);
+            if(Register *r = regOps.getRegister(dyn_cast<CallInst>(fdVal))){  
+                 
+              uint64_t fileId = r->getValue();
+              uint64_t addr = fdInfoMap[fileId];
+              FdInfo * fdi = (FdInfo *) bbOps.getActualAddr(addr, currBB); 
+              debug(Abubakar)<<fdi->fileName;  
+              if(ConstantInt * CI = dyn_cast<ConstantInt>(sizeVal))
+                if(ConstantInt * CI2 = dyn_cast<ConstantInt>(numVal))
+                  size =  CI->getZExtValue() * CI2->getZExtValue();
+              fileTripCount = getNumCharacters(fdi->fileName,size);  
+              debug(Abubakar)<<"numcharacters"<<fileTripCount; 
+              return true;
+            }
+          
+          }
+
+          else if(funcname.compare("fgets")== 0)
+          {
+
+            Value * fdVal = callInst->getOperand(2);
+            if(Register *r = regOps.getRegister(dyn_cast<CallInst>(fdVal))) { 
+              uint64_t fileId = r->getValue();
+              uint64_t addr = fdInfoMap[fileId];
+              FdInfo * fdi = (FdInfo *) bbOps.getActualAddr(addr, currBB); 
+              debug(Abubakar)<<fdi->fileName; 
+              fileTripCount = getNumLines(fdi->fileName);         
+              return true;
+            }
+          } 
+  
+ 
+         else if(funcname.compare("getline")== 0)
+          {
+            Value * fdVal = callInst->getOperand(2);
+            if(Register *r = regOps.getRegister(dyn_cast<CallInst>(fdVal))){     
+              uint64_t fileId = r->getValue();
+              uint64_t addr = fdInfoMap[fileId];
+              FdInfo * fdi = (FdInfo *) bbOps.getActualAddr(addr, currBB); 
+              debug(Abubakar)<<fdi->fileName;  
+              fileTripCount = getNumLines(fdi->fileName);   
+              return true;
+            }
+          }                   
+        }
       }
     }
-  }
 
   return false;
+}
+
+int LoopUnroller::getNumLines(char * fileName) {
+  FILE *fp; 
+  int count = 0;
+  char c;
+  fp = fopen(fileName, "r"); 
+  if (fp == NULL) {
+    printf("Could not open file %s", fileName); 
+    return 0;
+  }
+  for (c = getc(fp); c != EOF; c = getc(fp)){
+    if (c == '\n') 
+      count = count + 1; 
+  }
+
+  fclose(fp);
+  return count;
+}
+
+int LoopUnroller::getNumCharacters(char * fileName, int size) {
+  FILE *fp; 
+  int count = 0;
+  char c;
+  fp = fopen(fileName, "r"); 
+  if (fp == NULL) {
+    printf("Could not open file %s", fileName); 
+    return 0;
+  }
+  for (c = getc(fp); c != EOF; c = getc(fp)){ 
+      count = count + 1; 
+  }
+
+  fclose(fp);
+  return count/size;
 }
