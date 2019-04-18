@@ -98,7 +98,7 @@ struct ConstantFolding : public ModulePass {
   list<string> configFileNames;
   int numConfigFiles;
   vector<MMapInfo*> mMapBuffer; 
-
+  const unsigned short int * traitsTable;
 
   ConstantFolding(): ModulePass(ID){}
   void getAnalysisUsage(AnalysisUsage &AU) const;
@@ -147,6 +147,7 @@ struct ConstantFolding : public ModulePass {
   void handleStrChr(CallInst *); 
   void handleStrpbrk(CallInst * );
   void handleStrCpy(CallInst *);
+  void handleStrNCpy(CallInst *);
   void handleStrrChr(CallInst *);
   void simplifyStrFunc(CallInst *);
   void handleAtoi(CallInst *);
@@ -156,6 +157,7 @@ struct ConstantFolding : public ModulePass {
   void handleStrCat(CallInst *);
   void handleStrTol(CallInst *);
   void handleStrnDup(CallInst *);
+  void handleCTypeFuncs(CallInst *);
 
   bool handleGetOpt(CallInst *);  
   bool handleLongArgs(CallInst *, option *, int *&);
@@ -185,10 +187,15 @@ struct ConstantFolding : public ModulePass {
   void handleLSeek(CallInst *);
   void handleFSeek(CallInst *);
   void handleFGets(CallInst *);
+  void handleGetLine(CallInst *);
   void handleClose(CallInst *);
-  void handleFEof(CallInst *);
+  void handleFEOF(CallInst *);
   void handleFClose(CallInst *);
   void removeFileIOCallsFromMap(string buffer[],int);
+  bool handleStat(CallInst *);
+  bool handleFileNo(CallInst *);
+  bool handleFStat(CallInst *);	
+
       
   void replaceUses();
   void deleteFileIOCalls();

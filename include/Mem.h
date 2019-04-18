@@ -65,7 +65,6 @@ public:
 		memcpy(heapConst, from.getHeapConst(), heapTotalSize);
 		heapStartIndices = from.getHeapStartIndices();
 		heapStartToSizeMap = from.getHeapStartToSizeMap();
-        constMemSize = from.getConstMemSize();
 	}
 	~Memory() {
 		delete [] stack;
@@ -97,6 +96,8 @@ public:
 		int8_t * withHeap = with->getHeap();
 		bool * withStackConst = with->getStackConst();
 		bool * withHeapConst = with->getHeapConst();
+                uint64_t hIndex;
+
 		for(unsigned i = 0; i < stackIndex; i++) {
 			if(!withStackConst[i])
 				stackConst[i] = false;
@@ -105,15 +106,28 @@ public:
 					stackConst[i] = false;
 			} 
  		}
-		for(unsigned i = 0; i < heapIndex; i++) {
-			if(!withHeapConst[i])
-				heapConst[i] = false;
-			if(heapConst[i]) {
-				if(heap[i] != withHeap[i]) {
-					heapConst[i] = false;
-				}
-			}
+
+
+                if(heapTotalSize >= with->getHeapTotalSize()){
+                  if(heapIndex >= with->getHeapIndex())
+                    hIndex = with->getHeapIndex();
+                  else
+                    hIndex = heapIndex;
+                }
+
+                else 
+                  hIndex = heapTotalSize;
+                  
+		for(unsigned i = 0; i < hIndex; i++) {
+	          if(!withHeapConst[i])
+		    heapConst[i] = false;
+		    if(heapConst[i]) {
+		      if(heap[i] != withHeap[i]) {
+		        heapConst[i] = false;
+		      }
+		    }
  		}
+
 	}
 	uint64_t allocateStack(uint64_t size) {
 		uint64_t address = stackIndex;

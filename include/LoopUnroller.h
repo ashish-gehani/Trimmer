@@ -6,7 +6,9 @@
 #include "llvm/IR/Dominators.h"
 #include "llvm/Analysis/OptimizationDiagnosticInfo.h"
 #include "llvm/Transforms/Utils/UnrollLoop.h"
-
+#include "RegOps.h"
+#include "BBOps.h"
+#include "FdInfo.h"
 #include "LoopUnrollTest.h"
 
 #ifndef LOOPUNROLLER_H_
@@ -26,9 +28,11 @@ class LoopUnroller {
   static bool shouldSimplifyLoop(BasicBlock *BB, LoopInfo &LI, Module *, bool);
   static bool deleteLoop(BasicBlock *);
   bool getTripCount(TargetLibraryInfo * TLI, AssumptionCache &, unsigned &, bool);
-  bool runtest(TargetLibraryInfo * TLI, AssumptionCache &);
+  bool runtest(TargetLibraryInfo * TLI, AssumptionCache &, RegOps regOps, BBOps bbOps,map<int,uint64_t> fdInfoMap, BasicBlock * currBB);
   LoopInfo *getLoopInfo();
-  bool checkIfFileIOLoop(Loop * L);
+  bool checkIfFileIOLoop(Loop * L, RegOps regOps,BBOps bbOps,map<int,uint64_t> fdInfoMap, BasicBlock * currBB);
+  int getNumLines(char * fileName);
+  int getNumCharacters(char * fileName,int);
 
   bool checkPassed();
   void setCloneOf(Function *);
@@ -42,6 +46,7 @@ class LoopUnroller {
   bool useAnnotations;
   LoopInfo *LI;
   Function *cloneOf;
+  int fileTripCount;
 };
 
 #endif
