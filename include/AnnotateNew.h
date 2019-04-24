@@ -42,7 +42,7 @@ struct AnnotateNew: public ModulePass {
 
 
   void getTaintedBranches(set<BranchInst *> &, map<Value *, set<Value *> > &, set<const Value*>&);
-  void run(GlobalValue* argv, Value *, set<const Value*> &);
+  void run(vector<GlobalValue*>, Value *, set<const Value*> &);
   void getBranchAndArgcInstructions(set<BranchInst*> &branches, set<CallInst*> &calls, set<Instruction*> &argcValues);
   void getMemoryFlow(const SVFGNode *current, set<const Value *> &singleLevelPointers, set<SVFGNode*> &storeSvfg, set<CallInst*> &calls);
   void getSourceAllocas(set<SVFGNode*> &, vector<const SVFGNode*> &, set<const Value*> &, bool trackLoops = true, bool dpMem = true);
@@ -80,6 +80,9 @@ struct AnnotateNew: public ModulePass {
   const BasicBlock *partOfLoop(const BasicBlock *BB);
   Function *insertLoopFuncAnnot(Module *M, const string &name);
   void annotateLoop(const BasicBlock *, Function *F, unsigned);
+
+  void trackStats(Value *);
+  void trackStats(SVFGNode *);
 };
 
 #endif
