@@ -1454,17 +1454,21 @@ CmpInst * ConstantFolding::foldCmp(CmpInst * CI) {
   Value * oldLHS = CI->getOperand(0);
   Value * oldRHS = CI->getOperand(1);
   uint64_t lAddr, rAddr;
-  if(getPointerAddr(oldLHS, lAddr) && 
-  getPointerAddr(oldRHS, rAddr)) {
-    IntegerType * intTy = IntegerType::get(module->getContext(), 1);
-    Value * newLHS = ConstantInt::get(intTy, lAddr != 0);
-    Value * newRHS = ConstantInt::get(intTy, rAddr != 0);
-    CmpInst * NCI = CmpInst::Create(CI->getOpcode(), CI->getPredicate(),
-                    newLHS, newRHS);
+  if(getPointerAddr(oldLHS, lAddr) && getPointerAddr(oldRHS, rAddr)) {
+    errs()<<"left Address: "<<lAddr<<", rightAddress: "<<rAddr<<"\n";
+    IntegerType * intTy = IntegerType::get(module->getContext(), 64);
+    Value * newLHS = ConstantInt::get(intTy, lAddr);
+    Value * newRHS = ConstantInt::get(intTy, rAddr);
+
+    CmpInst* NCI = CmpInst::Create(CI->getOpcode(), CI->getPredicate(),
+        newLHS, newRHS);
     NCI->insertBefore(CI);
-    debug(Abubakar) << *CI << " ";
-    replaceIfNotFD(CI, NCI);
+    errs()<<"foldCmp: "<<*CI<<" ";
+    replaceIfNotFD(CI,NCI);
+    errs()<<"Replaced instruction: "<<*NCI<<"\n";
     return NCI;
+  } else {
+    errs()<<"Atleast one of the pointerAddress does not exist\n";
   }
   return NULL;
 }
