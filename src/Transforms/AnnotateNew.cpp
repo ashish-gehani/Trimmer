@@ -368,7 +368,6 @@ vector<SVFGNode*> AnnotateNew::forwardDfsLambda(SVFGNode *current) {
     return worklist;
 
   forwardDp.insert(current);
-
   for(auto it = current->OutEdgeBegin(), end = current->OutEdgeEnd(); it != end; it++) {
     worklist.push_back((*it)->getDstNode());
   }
@@ -800,45 +799,61 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
 
   static set<const Value *> slps;
   auto forwardDfsCondition = [&](SVFGNode* node) {
-    if(auto casted = dyn_cast<StmtSVFGNode>(node)) {
+    const Value *inst = NULL;
+    if(auto temp = dyn_cast<InterPHISVFGNode>(node)) {
+      errs() << *temp->getRes()->getValue() << " phinode\n";
+      inst = temp->getRes()->getValue();
+      auto pagNode = pag->getPAGNode(pag->getValueNode(inst));
+      auto svfgNode = svfg->getDefSVFGNode(pagNode);
+      //return true;
+    } 
+    auto casted = dyn_cast<StmtSVFGNode>(node);
+    if(casted) {
       if(casted->getInst()) {
         errs() << "Going forward on Instruction: " << *casted->getInst() << " in function " << casted->getInst()->getParent()->getParent()->getName() << "\n";
+        inst = casted->getInst(); 
+      }
+    }
+    if(inst) {
+      if(auto point = dyn_cast<PointerType>(inst->getType())) {
+        if(!point->getElementType()->isPointerTy()) {
+          //errs() <<*point << " " << *inst<< "  ****************\n";
+          if(slps.find(inst) == slps.end()) {
+            singleLevelPointers.insert(inst);
+            slps.insert(inst);
+          }
+        }
 
-        const Value *inst = casted->getInst();
-
-        if(auto point = dyn_cast<PointerType>(inst->getType())) {
-          if(!point->getElementType()->isPointerTy()) {
-            //errs() <<*point << " " << *inst<< "  ****************\n";
-            if(slps.find(inst) == slps.end()) {
-              singleLevelPointers.insert(inst);
-              slps.insert(inst);
+        //check if involved in any strcpy or strncpy
+        //TODO this is a hack, and can be imporved by checking formalin at any callsite
+        for(auto &call: calls) {
+          bool found = false;
+          for(unsigned i = 0; i < call->getNumOperands(); i++) { 
+            if(call->getOperand(i) == inst) {
+              //return true;
+              errs() << "call found\n" << " " << *call << "\n";
+              found = true;
             }
           }
-
-          //check if involved in any strcpy or strncpy
-          //TODO this is a hack, and can be imporved by checking formalin at any callsite
-          for(auto &call: calls) {
-            bool found = false;
-            for(unsigned i = 0; i < call->getNumOperands(); i++) { 
-              if(call->getOperand(i) == casted->getInst()) {
-                //return true;
-                found = true;
-              }
+          if(found) {
+            for(unsigned i = 0; i < call->getNumOperands(); i++) {
+              if(!call->getOperand(i)->getType()->isPointerTy())
+                continue;
+              auto *pagNode = pag->getPAGNode((pag->getValueNode(call->getOperand(i))));
+              storeSvfg.insert((SVFGNode*) svfg->getDefSVFGNode(pagNode));
             }
-            if(found) {
-              for(unsigned i = 0; i < call->getNumOperands(); i++) {
-                if(!call->getOperand(i)->getType()->isPointerTy())
-                  continue;
-                auto *pagNode = pag->getPAGNode((pag->getValueNode(call->getOperand(i))));
-                storeSvfg.insert((SVFGNode*) svfg->getDefSVFGNode(pagNode));
-              }
+            if(call->getType()->isPointerTy()) {
+              auto *pagNode = pag->getPAGNode((pag->getValueNode(call)));
+              storeSvfg.insert((SVFGNode*)svfg->getDefSVFGNode(pagNode));
               calls.erase(call);
               
             }
+            
           }
         }
       }
-
+    }
+    if(casted) {
       auto pagEdge = casted->getPAGEdge();
       if(dyn_cast<StorePE>(pagEdge) && casted->getInst())
         return true;
@@ -913,11 +928,14 @@ void AnnotateNew::getSourceAllocas(set<SVFGNode*> &svfgNodes, vector<const SVFGN
         }
 
         if(auto call = dyn_cast<CallInst>(pagEdge->getInst())) {
-          if (call->getCalledFunction()->getName() == "malloc" || call->getCalledFunction()->getName() == "calloc") {
+          if (call->getCalledFunction()->getName() == "malloc" || call->getCalledFunction()->getName() == "calloc" || call->getCalledFunction()->isDeclaration()) {
+            errs() << "is external call " << *call->getCalledFunction() << "\n";
             return true;
           }
         }
       }
+    } else if(dyn_cast<MRSVFGNode>(node)) {
+      errs() << "TESTINGGG";
     }
     return false;
   };
@@ -1074,7 +1092,8 @@ void AnnotateNew::getLoadsOnSlps(Value* pointer, set<Value*> &singleLevelLoads) 
   //get non pointer data to track
   static set<Value *> processed;
 
-  auto isLoadOnSingleLevelPointer = [](Value *current) {
+  auto isLoadOnSingleLevelPointer = [&](Value *current) {
+    processed.insert(current);
     if(dyn_cast<LoadInst>(current))
       if(auto temp = dyn_cast<PointerType>(dyn_cast<User>(current)->getOperand(0)->getType()))
         return !current->getType()->isPointerTy(); 
