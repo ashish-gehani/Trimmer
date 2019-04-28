@@ -1099,6 +1099,42 @@ bool ConstantFolding::handleFileNo(CallInst *callInst) {
   return true;   
 }
 
+
+
+bool ConstantFolding::handleGetEnv(CallInst *callInst) {
+  errs()<<"Invoked handleGetEnv\n";
+  Value *envVar = callInst->getOperand(0);
+
+  Register* reg0 = processInstAndGetRegister(envVar);
+
+  if(!reg0){
+    errs()<<"handleGetEnv: not found in map \n";
+    return false;
+  }
+  
+
+  char * buffer0 = (char *) bbOps.getActualAddr(reg0->getValue(), currBB);
+
+  
+  errs()<<"handleGetEnv string: "<<buffer0<<"\n";
+  char * result = getenv(buffer0);
+  errs()<<"getEnvResult: "<<result<<"\n";
+  errs()<<"Result is null?:"<<(result == 0)<<"\n";
+
+  if(result){
+    unsigned len = strlen(result) + 1;
+    uint64_t addr = bbOps.allocateHeap(len, currBB);
+    char * buffer1 = (char *) bbOps.getActualAddr(addr, currBB);
+    strcpy(buffer1,result);
+    addSingleVal(callInst, addr, true, false);
+  } else {
+    uint64_t addr = 0;
+    addSingleVal(callInst, addr, true, false);
+  }
+
+  return true;
+}
+
 bool ConstantFolding::handleSysCall(CallInst *callInst) {
   Function *F;
   if(!(F = callInst->getCalledFunction()))
@@ -1114,6 +1150,9 @@ bool ConstantFolding::handleSysCall(CallInst *callInst) {
     return handleFStat(callInst);
   else if(F->getName().str() == "fileno")
     return handleFileNo(callInst);
+  else if(F->getName().str() == "getenv")
+    return handleGetEnv(callInst);
+
   return false;
 }
 
