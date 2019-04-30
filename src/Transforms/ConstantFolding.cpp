@@ -35,7 +35,7 @@
 #include <set>
 #include <iostream>
 #include <vector>
-#include <map>
+#include <assert.h>
 #include <fstream>
 #include <string.h>
 #include <stdlib.h>
@@ -90,13 +90,12 @@ void ConstantFolding::getAnalysisUsage(AnalysisUsage &AU) const {
 }
 
 void ConstantFolding::markInstMemNonConst(Instruction  *I) {
-  debug(Abubakar) << I->getType() << " Inst\n";
-  debug(Abubakar) << I->getOpcodeName() << " Inst\n";
   for(unsigned i = 0; i < I->getNumOperands(); i++) {
     Value *val = I->getOperand(i);
     Register *reg = processInstAndGetRegister(val);
-    debug(Abubakar) << i <<"operand "<<val->getType()->isPointerTy() << "value type\n";
+    debug(Abubakar)<<"Mark inst mem non-constant\n";
     if(reg && val->getType()->isPointerTy() && !dyn_cast<CallInst>(val)) {
+      debug(Abubakar)<<"Mark inst mem non-constant\n";
       markMemNonConst(dyn_cast<PointerType>(val->getType())->getElementType(), reg->getValue(), currBB);
     }
   }
@@ -123,7 +122,7 @@ void ConstantFolding::runOnInst(Instruction * I) {
   }
 
   if(AllocaInst * allocaInst = dyn_cast<AllocaInst>(I)) {
-    result = processAllocaInst(allocaInst);  
+    result = processAllocaInst(allocaInst); 
   } else if(BitCastInst * bitCastInst = dyn_cast<BitCastInst>(I)) {
     result = processBitCastInst(bitCastInst);
   } else if(StoreInst * storeInst = dyn_cast<StoreInst>(I)) {
@@ -142,7 +141,9 @@ void ConstantFolding::runOnInst(Instruction * I) {
     result = processMemcpyInst(dyn_cast<CallInst>(memcpyInst));
   } else if(MemSetInst * memsetInst = dyn_cast<MemSetInst>(I)) {
     result = processMemSetInst(dyn_cast<CallInst>(memsetInst));
-  } else if(CallInst * callInst = dyn_cast<CallInst>(I)) {
+  } else if(MemMoveInst * memmoveInst = dyn_cast<MemMoveInst>(I)) {
+    result = processMemMoveInst(dyn_cast<CallInst>(memmoveInst));
+  }else if(CallInst * callInst = dyn_cast<CallInst>(I)) {
     result = processCallInst(callInst);
   } else {
     result = tryfolding(I);
@@ -623,6 +624,36 @@ ProcResult ConstantFolding::processMallocInst(CallInst * mi) {
   debug(Abubakar) << "mallocInst : size " << size << " at address " << addr << "\n";  
   return UNDECIDED;
 }
+
+ProcResult ConstantFolding::processReallocInst(CallInst * mi) {   
+  /*
+  if(!isAllocaTracked(mi)) {
+    debug(Abubakar) << "skipping untracked malloc\n";
+    return NOTFOLDED;
+  }
+  */
+  Value * bufPtr = mi->getOperand(0);
+  Value * sizeVal = mi->getOperand(1);
+  uint64_t size;
+  if(!getSingleVal(sizeVal, size)) {
+    debug(Abubakar) << "reallocInst : size not constant\n";
+    return NOTFOLDED;
+  }
+  Register * reg = processInstAndGetRegister(bufPtr);
+  debug(Abubakar) << "reallocInst : value " << reg->getValue() << "\n";
+  uint64_t addr = bbOps.allocateHeap(size, currBB);  
+  bool tracked = isAllocaTracked(mi);
+
+  regOps.removeRegister(bufPtr);
+  regOps.addRegister(bufPtr, bufPtr->getType(), addr, tracked);
+
+  pushFuncStack(mi);
+  regOps.addRegister(mi, mi->getType(), addr, tracked);
+  debug(Abubakar) << "reallocInst : size " << size << " at address " << addr << "\n";
+  //bufPtr->replaceAllUsesWith(mi);  
+  return UNDECIDED;
+}
+
 ProcResult ConstantFolding::processCallocInst(CallInst * ci) {   
   /*
   if(!isAllocaTracked(ci)) {
@@ -1099,42 +1130,6 @@ bool ConstantFolding::handleFileNo(CallInst *callInst) {
   return true;   
 }
 
-
-
-bool ConstantFolding::handleGetEnv(CallInst *callInst) {
-  errs()<<"Invoked handleGetEnv\n";
-  Value *envVar = callInst->getOperand(0);
-
-  Register* reg0 = processInstAndGetRegister(envVar);
-
-  if(!reg0){
-    errs()<<"handleGetEnv: not found in map \n";
-    return false;
-  }
-  
-
-  char * buffer0 = (char *) bbOps.getActualAddr(reg0->getValue(), currBB);
-
-  
-  errs()<<"handleGetEnv string: "<<buffer0<<"\n";
-  char * result = getenv(buffer0);
-  errs()<<"getEnvResult: "<<result<<"\n";
-  errs()<<"Result is null?:"<<(result == 0)<<"\n";
-
-  if(result){
-    unsigned len = strlen(result) + 1;
-    uint64_t addr = bbOps.allocateHeap(len, currBB);
-    char * buffer1 = (char *) bbOps.getActualAddr(addr, currBB);
-    strcpy(buffer1,result);
-    addSingleVal(callInst, addr, true, false);
-  } else {
-    uint64_t addr = 0;
-    addSingleVal(callInst, addr, true, false);
-  }
-
-  return true;
-}
-
 bool ConstantFolding::handleSysCall(CallInst *callInst) {
   Function *F;
   if(!(F = callInst->getCalledFunction()))
@@ -1150,9 +1145,6 @@ bool ConstantFolding::handleSysCall(CallInst *callInst) {
     return handleFStat(callInst);
   else if(F->getName().str() == "fileno")
     return handleFileNo(callInst);
-  else if(F->getName().str() == "getenv")
-    return handleGetEnv(callInst);
-
   return false;
 }
 
@@ -1417,6 +1409,10 @@ void ConstantFolding::initializeGlobal(uint64_t addr, Constant * CC) {
 }
 
 void ConstantFolding::addGlobal(GlobalVariable* gv){
+
+ if(gv->getName()=="stderr" || gv->getName()=="stdin" || gv->getName()=="stdout")
+      return;
+
   debug(Abubakar) << gv->getName() << "\n"; 
   Type* contTy = gv->getType()->getContainedType(0);
 
@@ -1432,7 +1428,7 @@ void ConstantFolding::addGlobal(GlobalVariable* gv){
 
 // important globals : optind, optarg, __argv_new__
 void ConstantFolding::addGlobals() {
-  for(auto& global : module->globals()) {
+  for(auto& global : module->globals()) { 
     if(!regOps.getRegister(&global))
       addGlobal(&global);
   }
@@ -1454,21 +1450,17 @@ CmpInst * ConstantFolding::foldCmp(CmpInst * CI) {
   Value * oldLHS = CI->getOperand(0);
   Value * oldRHS = CI->getOperand(1);
   uint64_t lAddr, rAddr;
-  if(getPointerAddr(oldLHS, lAddr) && getPointerAddr(oldRHS, rAddr)) {
-    errs()<<"left Address: "<<lAddr<<", rightAddress: "<<rAddr<<"\n";
+  if(getPointerAddr(oldLHS, lAddr) && 
+  getPointerAddr(oldRHS, rAddr)) {
     IntegerType * intTy = IntegerType::get(module->getContext(), 64);
     Value * newLHS = ConstantInt::get(intTy, lAddr);
     Value * newRHS = ConstantInt::get(intTy, rAddr);
-
-    CmpInst* NCI = CmpInst::Create(CI->getOpcode(), CI->getPredicate(),
-        newLHS, newRHS);
+    CmpInst * NCI = CmpInst::Create(CI->getOpcode(), CI->getPredicate(),
+                    newLHS, newRHS);
     NCI->insertBefore(CI);
-    errs()<<"foldCmp: "<<*CI<<" ";
-    replaceIfNotFD(CI,NCI);
-    errs()<<"Replaced instruction: "<<*NCI<<"\n";
+    debug(Abubakar) << *CI << " ";
+    replaceIfNotFD(CI, NCI);
     return NCI;
-  } else {
-    errs()<<"Atleast one of the pointerAddress does not exist\n";
   }
   return NULL;
 }
@@ -1614,7 +1606,7 @@ bool ConstantFolding::satisfyConds(Function * F, CallInst *ci) {
       Value *argument = ci->getArgOperand(i);
       if(Register *reg = processInstAndGetRegister(argument)) { //dyn_cast<Constant>(argument) || 
         if(reg->getTracked()) {
-          debug(Usama) << "(LOG) (SATISFYCONDS) Call " << *ci << " satisfied specializing conditions due to argument " <<  *argument << " at index " << i << "\n";
+          debug(Abubakar) << "(LOG) (SATISFYCONDS) Call " << *ci << " satisfied specializing conditions due to argument " <<  *argument << " at index " << i << "\n";
           return true;
         }
       }
@@ -1622,13 +1614,13 @@ bool ConstantFolding::satisfyConds(Function * F, CallInst *ci) {
 
     set<GlobalVariable *> &modData = getFuncModset(F);
     //vector<Value *> intersection;
-    /*
-    for(auto &modD: modData)
+    
+   /* for(auto &modD: modData)
       if(trackedValues.find(modD) != trackedValues.end()) {
-        debug(Usama) << "(LOG) (SATISFYCONDS) Call " << *ci << " satisfied specializing conditions due to modset" << "\n";
+        debug(Abubakar) << "(LOG) (SATISFYCONDS) Call " << *ci << " satisfied specializing conditions due to modset" << "\n";
         return true;
-      }
-      */
+      }*/
+      
     //set_intersection(modData.begin(), modData.end(), trackedValues.begin(), trackedValues.end(), intersection.begin());
     //if(intersection.size()) {
     //}
@@ -1774,14 +1766,48 @@ bool ConstantFolding::handleHeapAlloc(CallInst * callInst) {
   string name = callInst->getCalledFunction()->getName();
   if(name == "malloc")      processMallocInst(callInst);
   else if(name == "calloc") processCallocInst(callInst);
+  if(name == "realloc")      processReallocInst(callInst);
   else  return false;
   return true;
+}
+
+ProcResult ConstantFolding::processMemMoveInst(CallInst * memmoveInst) {
+
+  Value * toPtr = memmoveInst->getOperand(0);
+  Value * fromPtr = memmoveInst->getOperand(1);
+  char * fromString;
+  Value * sizeVal = memmoveInst->getOperand(2);
+  uint64_t size;
+  Register * reg = processInstAndGetRegister(toPtr);  
+
+  if(!reg) {
+    debug(Abubakar) << "processMemMoveInst : Not found in Map\n";
+    return NOTFOLDED;
+  }
+
+  
+  if(!getSingleVal(sizeVal, size)) {
+    debug(Abubakar) << "processMemMoveInst : size not constant\n";
+    bbOps.setConstContigous(false, reg->getValue(), currBB);
+    return NOTFOLDED;   
+  } 
+
+  if(!getStr(fromPtr, fromString, size)) {
+    bbOps.setConstContigous(false, reg->getValue(), currBB);
+    return NOTFOLDED;
+  }
+  char * toString = (char *) bbOps.getActualAddr(reg->getValue(), currBB);
+  debug(Abubakar) << "memmove : from " << fromString << "\n";
+  memmove(toString, fromString, size);
+  bbOps.setConstMem(true, reg->getValue(), size, currBB);
+  return NOTFOLDED;
 }
 
 bool ConstantFolding::handleMemInst(CallInst * callInst) {
   string name = callInst->getCalledFunction()->getName();
   if(name == "memset")      processMemSetInst(callInst);
   else if(name == "memcpy") processMemcpyInst(callInst);
+  else if(name == "memmove") processMemMoveInst(callInst);
   else  return false;
   return true;  
 }
@@ -1808,7 +1834,9 @@ void ConstantFolding::visitReadyToVisit(vector<BasicBlock *> readyToVisit) {
   for(unsigned i = 0; i < readyToVisit.size(); i++) {
     BasicBlock * BB = readyToVisit[i];
     BasicBlock * pred = bbOps.getRfromPred(BB);
+assert(false);
     assert(pred != NULL);
+    debug(Abubakar) << "pred is not null\n";
     visitBB(BB, pred);
   }
 }
@@ -2464,6 +2492,7 @@ int ConstantFolding::initfdi(int fd,char* fname) {
   int sfd = numConfigFiles;
   numConfigFiles++;
   fdInfoMap[sfd] = addr;
+  debug(Abubakar) << addr;
   return sfd;
 }
 
@@ -2483,6 +2512,7 @@ int ConstantFolding::initfptr(FILE *fptr, char* fname) {
   int sfd = numConfigFiles;
   numConfigFiles++;  
   fdInfoMap[sfd] = addr;
+  debug(Abubakar) <<"address = "<<addr<<"sfd = "<<sfd<<"\n";
 
   return sfd;
 }
@@ -3427,20 +3457,33 @@ bool ConstantFolding::handleGetOpt(CallInst * ci) {
   uint64_t argc;
   Register * argvReg = processInstAndGetRegister(ci->getOperand(1));
   Register * optsReg = processInstAndGetRegister(ci->getOperand(2));
-  Register * optindReg = processInstAndGetRegister(module->getNamedGlobal("optind"));
-  debug(Usama) << "optind : " <<  bbOps.checkConstContigous(optindReg->getValue(), currBB) << " argvReg : " <<  bbOps.checkConstContigous(argvReg->getValue(), currBB) << "\n";
-  if(!getSingleVal(ci->getOperand(0), argc) || !argvReg || 
-  !optsReg || !optindReg || !bbOps.checkConstContigous(argvReg->getValue(), currBB) ||
-  !bbOps.checkConstContigous(optindReg->getValue(), currBB)) {
-    debug(Abubakar) << "conditions not satisfied\n";
-    return true;
-  }
 
   uint64_t ptrSize = DL->getTypeAllocSize(argvReg->getType());
   uint64_t intSize = DL->getTypeAllocSize(ci->getType());
+  uint64_t optindAddr = 0;
+  if(module->getNamedGlobal("optind"))
+  {
+    Register * optindReg = processInstAndGetRegister(module->getNamedGlobal("optind"));
+    if(!optindReg || !bbOps.checkConstContigous(optindReg->getValue(), currBB))
+    {
+      debug(Abubakar) << "optind condition not satisfied\n";
+      return true;
+    }
+    else
+    {
+     optindAddr = optindReg->getValue();
+     optind = bbOps.loadMem(optindAddr, intSize, currBB);
+    }
+  
+  }
+  //debug(Usama) << "optind : " <<  bbOps.checkConstContigous(optindReg->getValue(), currBB) << " argvReg : " <<  bbOps.checkConstContigous(argvReg->getValue(), currBB) << "\n";
 
-  uint64_t optindAddr = optindReg->getValue();
-  optind = bbOps.loadMem(optindAddr, intSize, currBB);
+  if(!getSingleVal(ci->getOperand(0), argc) || !argvReg || 
+  !optsReg || !bbOps.checkConstContigous(argvReg->getValue(), currBB)) {
+    debug(Abubakar) << "conditions not satisfied\n";
+    return true;
+  }
+  
   char ** argv = (char **) malloc(sizeof(char *) * argc);
   uint64_t addr = argvReg->getValue();
   map<char *, uint64_t> realToVirt;
@@ -3485,11 +3528,11 @@ bool ConstantFolding::handleGetOpt(CallInst * ci) {
     memcpy(source, optarg, strlen(optarg));
     source[strlen(optarg)] = '\0';
   }
-  bbOps.storeToMem(optind, intSize, optindAddr, currBB);
+  if(optindAddr)
+    bbOps.storeToMem(optind, intSize, optindAddr, currBB);
   for(unsigned i = 0, iter = addr; i < argc; i++, iter += ptrSize)
     bbOps.storeToMem(realToVirt[argv[i]], ptrSize, iter, currBB);
-  return true;
-}
+  return true;}
 
 
 
@@ -3771,6 +3814,8 @@ void ConstantFolding::markMemNonConst(Type *ty, uint64_t address, BasicBlock *BB
   if(!address)
     return;
 
+  if(fdInfoMap.find(address) != fdInfoMap.end())
+    return;
   //if(!ty->isPointerTy())
     //return;
   if(!bbOps.checkConstMem(address, DL->getTypeAllocSize(ty), BB)) {
@@ -3788,6 +3833,9 @@ void ConstantFolding::markMemNonConst(Type *ty, uint64_t address, BasicBlock *BB
       if(!t->isPointerTy()) {
         continue;
       }
+
+      if(ty == dyn_cast<PointerType>(t)->getElementType())
+        continue;
 
       uint64_t offset = address + structLayout->getElementOffset(i);
       uint64_t size = DL->getTypeAllocSize(t);
@@ -3809,6 +3857,7 @@ void ConstantFolding::markMemNonConst(Type *ty, uint64_t address, BasicBlock *BB
       }
     }
   } else if(ty->isPointerTy()) {
+    errs() << *ty << " is of pointer type\n";
     PointerType *t = dyn_cast<PointerType>(ty);
     uint64_t value = bbOps.loadMem(address, DL->getTypeAllocSize(t->getElementType()), BB);
     markMemNonConst(t->getElementType(), value, BB);
