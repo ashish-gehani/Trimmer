@@ -46,7 +46,37 @@ bool LoopUnroller::checkUnrollHint(BasicBlock * hdr, LoopInfo &LI, Module *modul
 bool LoopUnroller::shouldSimplifyLoop(BasicBlock *BB, LoopInfo &LI, Module *m, bool useAnnotations) {
   if(useAnnotations && !checkUnrollHint(BB, LI, m))
     return false;
-  return true;
+  //expectation in loop rotated form
+  Loop *L = LI.getLoopFor(BB);
+  BasicBlock* preheader = L->getLoopPreheader();
+  auto terminator = preheader->getTerminator();
+
+  if(pred_begin(preheader) == pred_end(preheader)) {
+    debug(Usama) << "shouldSimplifyLoop: preheader has no predecessor\n";
+  } else {
+    preheader = *pred_begin(preheader);
+    terminator = preheader->getTerminator();
+  }
+
+  debug(Usama) << "shouldSimplifyLoop: " << *terminator << "\n";
+  if(auto branch = dyn_cast<BranchInst>(terminator)) {
+    if(branch->isUnconditional()) {
+      debug(Usama) << "shouldSimplifyLoop: unconditional branch\n";
+      return true;
+    } else {
+      if(dyn_cast<Constant>(branch->getCondition())) {
+        debug(Usama) << "shouldSimplifyLoop: constant condition\n";
+        return true;
+      }
+    }
+  } else if(auto branch = dyn_cast<SwitchInst>(terminator)) {
+    if(auto si = dyn_cast<Constant>(branch->getCondition())) {
+      debug(Usama) << "shouldSimplifyLoop: constant condition\n";
+      return true;
+    }
+  }
+  debug(Usama) << "shouldSimplifyLoop: false\n";
+  return false;
 }
 
 bool LoopUnroller::getTripCount(TargetLibraryInfo * TLI, AssumptionCache &AC, unsigned &tripCount, bool isFileIOLoop) {
