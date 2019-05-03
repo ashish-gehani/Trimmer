@@ -558,9 +558,10 @@ void AnnotateNew::getLoopBbs(Module *M) {
     }
 
     for(auto &L: loops) {
+      errs() << L->getHeader()->getName() << "\n";
       for(auto BB: L->getBlocks()) {
-        loopHeaders[BB] = L->getHeader();
-        errs() << "Adding header: " << "\n";//*L->getHeader() << "\n";
+        loopHeaders[BB] = LI.getLoopFor(BB)->getHeader(); //get header for inner most loop
+        //errs() << "Adding header: " << *L->getHeader() << "\n";
       }
       i++;
     }
