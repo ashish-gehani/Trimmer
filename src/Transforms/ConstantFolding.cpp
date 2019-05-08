@@ -3446,65 +3446,116 @@ bool ConstantFolding::handleLongArgs(CallInst * callInst, option * long_opts,
   return true;
 }
 
+
+
 bool ConstantFolding::handleGetOpt(CallInst * ci) {
+  // Right now if atleast one arg is non-const, it will reject all. However we want to
+  // add the condition that if the last one is "_" we don't mark all non const and return -1;
+  // In the case the last arg is "_", we run the loop till argc -1 after wards
+  errs()<<"Invoked handleGetOpt\n";
+  
   string name = ci->getCalledFunction()->getName().str();
+  errs()<<"Function name: "<<name<<"\n";
   if(name.size() < 6 || name.substr(0, 6) != "getopt")
     return false;
   if(name == "getopt_long_only") {
     errs() << "case not handled " << name << "\n";
     return true;
   }
+
+  errs()<<"Moving on to argc\n";
+  errs()<<"Ins: "<<*ci<<"\n";
+
+
+
   uint64_t argc;
   Register * argvReg = processInstAndGetRegister(ci->getOperand(1));
   Register * optsReg = processInstAndGetRegister(ci->getOperand(2));
+  Register * optindReg = processInstAndGetRegister(module->getNamedGlobal("optind"));
 
+  errs() << "handleGetOpt => optind : " <<  bbOps.checkConstContigous(optindReg->getValue(), currBB) << " argvReg : " <<  bbOps.checkConstContigous(argvReg->getValue(), currBB) << "\n";
+
+  errs()<<"Obtaining argvSize...\n";
   uint64_t ptrSize = DL->getTypeAllocSize(argvReg->getType());
   uint64_t intSize = DL->getTypeAllocSize(ci->getType());
-  uint64_t optindAddr = 0;
-  if(module->getNamedGlobal("optind"))
-  {
-    Register * optindReg = processInstAndGetRegister(module->getNamedGlobal("optind"));
-    if(!optindReg || !bbOps.checkConstContigous(optindReg->getValue(), currBB))
-    {
-      debug(Abubakar) << "optind condition not satisfied\n";
-      return true;
-    }
-    else
-    {
-     optindAddr = optindReg->getValue();
-     optind = bbOps.loadMem(optindAddr, intSize, currBB);
-    }
-  
-  }
-  //debug(Usama) << "optind : " <<  bbOps.checkConstContigous(optindReg->getValue(), currBB) << " argvReg : " <<  bbOps.checkConstContigous(argvReg->getValue(), currBB) << "\n";
 
-  if(!getSingleVal(ci->getOperand(0), argc) || !argvReg || 
-  !optsReg || !bbOps.checkConstContigous(argvReg->getValue(), currBB)) {
-    debug(Abubakar) << "conditions not satisfied\n";
-    return true;
-  }
+  uint64_t argvSize = bbOps.getSizeContigous(argvReg->getValue(),currBB) - ptrSize;
+  errs()<<"argvSize: "<<argvSize<<"(Excluding NULL ptr)\n";
+  uint64_t argcLimit = 10000;
+
+  errs()<<"Check getopt from: "<<argvReg->getValue()<<", to "<<argvReg->getValue() + argvSize<<"\n";
   
+  if(!getSingleVal(ci->getOperand(0), argc) || !argvReg || 
+      !optsReg || !optindReg || !bbOps.checkConstContigous(argvReg->getValue(), currBB) ||
+      !bbOps.checkConstContigous(optindReg->getValue(), currBB)) {
+
+
+    errs()<<"GETOPT FAIL CASE\n";
+    bool onlyLastNonConst = true;
+
+
+    for(uint64_t start = argvReg->getValue(); start < argvReg->getValue() + argvSize; start += ptrSize){
+      errs()<<"Checking address: "<<start<<"\n";
+      if(!bbOps.checkConstMem(start,ptrSize, currBB) && start != argvReg->getValue() + argvSize - ptrSize){
+        errs()<<"[ArgvReg] starting at "<<start<<" for "<<ptrSize<<" bytes is non const\n";
+        onlyLastNonConst = false;
+        errs()<<"flipping onlyLastNonConst to false\n";
+      } 
+    }
+
+
+
+    
+    if(!onlyLastNonConst){
+      debug(Abubakar) << "conditions not satisfied\n";
+      return true;
+    } else {
+      errs()<<"Only last is non constant, hence we can continue onwards\n";
+      argcLimit = argc-1; // ignore last arg
+    }
+  }
+
+  
+  errs()<<"ptrSize: "<<ptrSize<<", intSize: "<<intSize<<"\n";
+
+
+
+  if(argcLimit == 10000){ // if we didn't enter the failing condition, argcLimit should be same as argc
+    argcLimit = argc;
+  }
+
+
+  errs()<<"argcLimit: "<<argcLimit<<"\n";
+
+  
+  uint64_t optindAddr = optindReg->getValue();
+  optind = bbOps.loadMem(optindAddr, intSize, currBB);
   char ** argv = (char **) malloc(sizeof(char *) * argc);
   uint64_t addr = argvReg->getValue();
   map<char *, uint64_t> realToVirt;
-  for(unsigned i = 0, iter = addr; i < argc; i++, iter += ptrSize) {
+  for(unsigned i = 0, iter = addr; i < argcLimit; i++, iter += ptrSize) {
     uint64_t strAddr = bbOps.loadMem(iter, ptrSize, currBB);
     if(!getStr(strAddr, argv[i])) {
       debug(Abubakar) << "updating argv\n";
       return true;
     }
+    errs()<<"Got String "<<argv[i]<<"\n";
+
     realToVirt[argv[i]] = strAddr;
   }
   char * opts = (char *) bbOps.getActualAddr(optsReg->getValue(), currBB);
   int result;
   if(name == "getopt_long") { 
-    option * long_opts = (option *) malloc(sizeof(option) * 100);
+    errs()<<"handleGetOpt: getopt_long\n";
+    option * long_opts = (option *) malloc(sizeof(option) * 350);
     int * long_index;
     if(!handleLongArgs(ci, long_opts, long_index))
       return true;
-    result = getopt_long_local(argc, argv, opts, long_opts, long_index);
+    errs()<<"Calling getopt_long_local\n";
+    errs()<<"PRE_GETOPT_LONG: "<<*long_index<<"\n";
+    result = getopt_long_local(argcLimit, argv, opts, long_opts, long_index);
   } else 
-    result = getopt_local(argc, argv, opts);
+    result = getopt_local(argcLimit, argv, opts);
 
   IntegerType * intTy = IntegerType::get(module->getContext(), intSize * 8);
   ConstantInt * resInt = ConstantInt::get(intTy, result);
@@ -3517,6 +3568,7 @@ bool ConstantFolding::handleGetOpt(CallInst * ci) {
     Register * optargReg = processInstAndGetRegister(module->getNamedGlobal("optarg"));
     uint64_t optArgAddr = optargReg->getValue();
     uint64_t strAddr = bbOps.loadMem(optArgAddr, ptrSize, currBB);
+    errs()<<"optArgAddr: "<<optArgAddr<<", strAddr "<<strAddr<<"\n";
     if(!strAddr) {
       Type * ty = optargReg->getType()->getContainedType(0);
       uint64_t charSize = DL->getTypeAllocSize(ty);
@@ -3527,12 +3579,16 @@ bool ConstantFolding::handleGetOpt(CallInst * ci) {
     char * source = (char *) bbOps.getActualAddr(strAddr, currBB);
     memcpy(source, optarg, strlen(optarg));
     source[strlen(optarg)] = '\0';
+    errs()<<"Pasted string: "<<source<<" to addr "<<strAddr<<"\n";
   }
-  if(optindAddr)
-    bbOps.storeToMem(optind, intSize, optindAddr, currBB);
-  for(unsigned i = 0, iter = addr; i < argc; i++, iter += ptrSize)
+  bbOps.storeToMem(optind, intSize, optindAddr, currBB);
+  for(unsigned i = 0, iter = addr; i < argcLimit; i++, iter += ptrSize)
     bbOps.storeToMem(realToVirt[argv[i]], ptrSize, iter, currBB);
-  return true;}
+  errs()<<"Returning from handleGetOpt\n";
+  return true;
+}
+
+
 
 
 
