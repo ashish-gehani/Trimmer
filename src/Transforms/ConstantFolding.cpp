@@ -146,6 +146,8 @@ void ConstantFolding::runOnInst(Instruction * I) {
     result = processMemMoveInst(dyn_cast<CallInst>(memmoveInst));
   }else if(CallInst * callInst = dyn_cast<CallInst>(I)) {
     result = processCallInst(callInst);
+  } else if(PtrToIntInst * ptrinst = dyn_cast<PtrToIntInst>(I)){
+    result = processPtrToIntInst(ptrinst);
   } else {
     result = tryfolding(I);
   }
@@ -749,6 +751,31 @@ ProcResult ConstantFolding::processLoadInst(LoadInst * li) {
   pushFuncStack(li);
   return UNDECIDED;
 }
+
+
+ProcResult ConstantFolding::processPtrToIntInst(PtrToIntInst* pi){
+  errs()<<"Invoked processPtrToIntInst\n";
+  Value * ptr = pi->getOperand(0);
+
+  Register * reg = processInstAndGetRegister(ptr);
+  if(!reg){
+    errs()<<"PtrToIntInst: Not found in map\n";
+    return NOTFOLDED;
+  }
+  uint64_t addr = reg->getValue();
+  uint64_t size = DL->getTypeAllocSize(pi->getType());
+
+  errs()<<"PtrToIntInst => RegValue: "<<addr<<"\n";
+
+  if(!bbOps.checkConstMem(addr, size, currBB)) {
+    debug(Abubakar) << " PtrToIntInst: skipping non constant\n";
+    return NOTFOLDED;
+  }
+  pushFuncStack(pi);
+  regOps.addRegister(pi, pi->getType(), reg->getValue(), reg->getTracked());
+  return UNDECIDED;
+}
+
 
 ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
   

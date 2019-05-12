@@ -116,6 +116,7 @@ struct ConstantFolding : public ModulePass {
   ProcResult processPHINode(PHINode *);
   ProcResult processReturnInst(ReturnInst *);
   ProcResult processTermInst(TerminatorInst *);   
+  ProcResult processPtrToIntInst(PtrToIntInst *);
   ProcResult tryfolding(Instruction *);
 
   Register *processInstAndGetRegister(Value *);
