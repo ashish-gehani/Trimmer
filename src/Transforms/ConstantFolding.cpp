@@ -46,6 +46,7 @@
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <pwd.h>
+#include <ctype.h>
 
 #include "ConstantFolding.h"
 #include "Utils.h"
@@ -2020,6 +2021,10 @@ bool ConstantFolding::handleStringFunc(CallInst * callInst) {
   else if(name == "strsep") handleStrSep(callInst);
   else if(name == "strncpy") handleStrNCpy(callInst);
   else if(name == "__ctype_b_loc")  handleCTypeFuncs(callInst);
+  else if(name == "c_isspace") handleCIsSpace(callInst); 
+  else if(name == "c_isalnum") handleCIsalnum(callInst);
+  else if(name == "c_tolower") handleCToLower(callInst);
+  else if(name == "c_isdigit") handleCIsDigit(callInst);
   else return false;
   return true;
 }
@@ -2452,6 +2457,82 @@ void ConstantFolding::handleAtoi(CallInst * callInst) {
   int result = atoi(str);
   IntegerType * int32Ty = IntegerType::get(module->getContext(), 32);
   replaceIfNotFD(callInst, ConstantInt::get(int32Ty, result)); 
+}
+
+
+
+void ConstantFolding::handleCIsSpace(CallInst* callInst){
+  errs()<<"Invoked handleCIsSpace\n";
+
+  Value* arg = callInst->getOperand(0);
+
+  if(auto CI = dyn_cast<ConstantInt>(arg)){
+    int constVal = CI->getSExtValue();
+    errs()<<"ConstantVal: "<<constVal<<"\n";
+
+    int result=0;
+
+    switch(constVal){
+      case 32:
+      case 9:
+      case 10:
+      case 11:
+      case 12:
+      case 13:
+        result =1;
+        break;
+      default:
+        result =0;
+        break;
+    }
+    errs()<<"Post Switch: Result = "<<result<<"\n";
+    addSingleVal(callInst,(uint64_t)(result!=0),true, false); 
+  }
+}
+
+void ConstantFolding::handleCIsalnum(CallInst* callInst){
+  errs()<<"Invoked handleCIsalnum\n";
+
+  Value* arg = callInst->getOperand(0);
+
+  if(auto CI = dyn_cast<ConstantInt>(arg)){
+    int constVal = CI->getSExtValue();
+    errs()<<"ConstantVal: "<<constVal<<"\n";
+
+    int result=isalnum(constVal);
+    errs()<<"Result = "<<result<<"\n";
+    addSingleVal(callInst,(uint64_t)(result!=0),true, false); 
+  }
+}
+
+void ConstantFolding::handleCToLower(CallInst* callInst){
+  errs()<<"Invoked handleCToLower\n";
+
+  Value* arg = callInst->getOperand(0);
+
+  if(auto CI = dyn_cast<ConstantInt>(arg)){
+    int constVal = CI->getSExtValue();
+    errs()<<"ConstantVal: "<<constVal<<"\n";
+
+    int result=tolower(constVal);
+    errs()<<"Result = "<<result<<"\n";
+    addSingleVal(callInst,(uint64_t)result,true, false); 
+  }
+}
+
+void ConstantFolding::handleCIsDigit(CallInst* callInst){
+  errs()<<"Invoked handleCIsDigit\n";
+
+  Value* arg = callInst->getOperand(0);
+
+  if(auto CI = dyn_cast<ConstantInt>(arg)){
+    int constVal = CI->getSExtValue();
+    errs()<<"ConstantVal: "<<constVal<<"\n";
+
+    int result=isdigit(constVal);
+    errs()<<"Result = "<<result<<"\n";
+    addSingleVal(callInst,(uint64_t)result,true, false); 
+  }
 }
 
 //File FileIO.cpp
