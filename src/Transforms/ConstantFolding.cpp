@@ -772,6 +772,40 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
   debug(Abubakar) << val << " GepInst\n";
   return UNDECIDED;
 }
+
+ProcResult ConstantFolding::processMemMoveInst(CallInst * memMoveInst) {
+
+  Value * toPtr = memMoveInst->getOperand(0);
+  Value * fromPtr = memMoveInst->getOperand(1);
+  char * fromString;
+  Value * sizeVal = memMoveInst->getOperand(2);
+  uint64_t size;
+  Register * reg = processInstAndGetRegister(toPtr);
+  if(!reg) {
+    debug(Abubakar) << "processMemMoveInst : Not found in Map\n";
+    return NOTFOLDED;
+  }
+
+  if(!getSingleVal(sizeVal, size)) {
+    debug(Abubakar) << "processMemMoveInst : size not constant\n";
+    bbOps.setConstContigous(false, reg->getValue(), currBB);
+    return NOTFOLDED;
+  }
+
+  if(!getStr(fromPtr, fromString, size)) {
+    bbOps.setConstContigous(false, reg->getValue(), currBB);
+    return NOTFOLDED;
+  }
+  char * toString = (char *) bbOps.getActualAddr(reg->getValue(), currBB);
+  //need to duplicate first since move
+  char *dup = strdup(toString);
+  debug(Abubakar) << "memmove : from " << fromString << "\n";
+  memcpy(toString, dup, size);
+  bbOps.setConstMem(true, reg->getValue(), size, currBB);
+  free(dup);
+  return NOTFOLDED;
+}
+
 ProcResult ConstantFolding::processMemcpyInst(CallInst * memcpyInst) {
 
   Value * toPtr = memcpyInst->getOperand(0);

@@ -109,6 +109,7 @@ struct ConstantFolding : public ModulePass {
   ProcResult processGEPInst(GetElementPtrInst *);
   ProcResult processCallInst(CallInst *);
   ProcResult processMemcpyInst(CallInst *);
+  ProcResult processMemMoveInst(CallInst *);
   ProcResult processPtrToInt(PtrToIntInst *);
   ProcResult processIntToPtr(IntToPtrInst *);
   ProcResult processMemSetInst(CallInst *);
