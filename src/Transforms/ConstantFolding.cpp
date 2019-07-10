@@ -1770,6 +1770,27 @@ bool ConstantFolding::handleHeapAlloc(CallInst * callInst) {
   return true;
 }
 
+ProcResult ConstantFolding::processReallocInst(CallInst *ci) {
+  Value *ptr = ci->getOperand(0);
+  ConstantInt *size = dyn_cast<ConstantInt>(ci->getOperand(1));
+  Register *reg = processInstAndGetRegister(ptr);
+
+  if(!ptr || !size) {
+    debug(Usama) << "realloc: register not found or size not constant\n";
+    return NOTFOLDED;
+  }
+
+  //not going to actually realloc. just allocate more memory. Warning, memory leak
+  uint64_t addr = bbOps.allocateHeap(size->getZExtValue(), currBB);
+  char *oldAddr = (char *) bbOps.getActualAddr(reg->getValue(), currBB);
+  uint64_t size_old = bbOps.getSizeContigous(reg->getValue(), currBB);
+  debug(Usama) << "realloc: copying over memory size: " << size_old << "\n";
+  memcpy((void *) bbOps.getActualAddr(addr, currBB), (void *) oldAddr, size_old);
+  addSingleVal(ci, addr, false, true);
+  debug(Usama) << "realloc processed successfully\n";
+  return FOLDED;
+}
+
 bool ConstantFolding::handleMemInst(CallInst * callInst) {
   string name = callInst->getCalledFunction()->getName();
   if(name == "memset")      processMemSetInst(callInst);
