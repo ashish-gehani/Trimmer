@@ -1780,7 +1780,7 @@ ProcResult ConstantFolding::processReallocInst(CallInst *ci) {
     return NOTFOLDED;
   }
 
-  //not going to actually realloc. just allocate more memory. Warning, memory leak
+  //@TODO not going to actually realloc. just allocate more memory. Warning, memory leak
   uint64_t addr = bbOps.allocateHeap(size->getZExtValue(), currBB);
   char *oldAddr = (char *) bbOps.getActualAddr(reg->getValue(), currBB);
   uint64_t size_old = bbOps.getSizeContigous(reg->getValue(), currBB);
