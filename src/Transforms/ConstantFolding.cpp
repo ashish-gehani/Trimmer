@@ -595,6 +595,23 @@ void ConstantFolding::collectCallGraphGlobals(CallGraph *CG) {
     }
   }
 }
+
+ProcResult ConstantFolding::processPtrToInt(PtrToIntInst *pi) {
+  Value *pointer = pi->getPointerOperand();
+  Register *reg = processInstAndGetRegister(pointer);
+
+  if(!reg) {
+    debug(Usama) << "failed to fold pointer inst. Register not found\n";
+    return NOTFOLDED;
+  }
+
+  //PtrToIntInst *clone = cast<PtrToIntInst>(pi->clone());
+  ConstantInt *constantPtr = cast<ConstantInt>(ConstantInt::get(pi->getType(), reg->getValue()));
+
+  debug(Usama) << "trying to fold " << *constantPtr<< "\n";
+  addSingleVal(pi, constantPtr->getZExtValue(), true, true);
+  return FOLDED;
+}
 //File ProcessInstructions.cpp
 
 /**
