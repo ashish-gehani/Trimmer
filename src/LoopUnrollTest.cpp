@@ -7,6 +7,7 @@ using namespace std;
 int LoopUnrollTest::GLOBAL_LOOP_ID = 0;
 
 LoopUnrollTest::LoopUnrollTest(Loop * L, Module * module, bool tripCount, bool isFileIO) {
+  elapsedTime = 0;
   terminated = false;
   ConstTripCount = tripCount;
   isFileIOLoop = isFileIO;
@@ -68,18 +69,48 @@ bool LoopUnrollTest::checkBreakInst(Instruction * I) {
 }
 
 void LoopUnrollTest::updateIter(Instruction * I) {
-  if(checkTestInst(I, getIterName())) iterations++;  
+  if(checkTestInst(I, getIterName())) {
+    iterations++;  
+  }
 }
 
 bool LoopUnrollTest::checkPassed() {
   if(!terminated) return false;
+  if(elapsedTime > 300) return false;
+  errs() << "iterations = " << iterations << "\n";
   if(!ConstTripCount){ 
     if(isFileIOLoop)
-     return iterations < (DEFAULT_TRIP_COUNT * 5);
+     return iterations < (DEFAULT_TRIP_COUNT + 5);
    else
      return iterations < DEFAULT_TRIP_COUNT;
   }
   return true;
+}
+
+void LoopUnrollTest::updateTime(Instruction *I, uint64_t seconds) {
+  elapsedTime = seconds;
+  //debug(Usama) << "updateTime: seconds = " << seconds << "\n";
+  Module *m = I->getParent()->getParent()->getParent();
+  //CallInst *iterCall = getTestInst(getIterName(), module);
+  Function *f = m->getFunction(getExitName());
+  CallInst *call = NULL;
+
+  for(auto use: f->users()) {
+    if(auto CI = dyn_cast<CallInst>(use))
+      call = CI;
+  }
+
+  if(!call) {
+    debug(Usama) << "updateTime: call not found\n";
+    return;
+  }
+
+  //if in the same function, only then fail the test
+  if(I->getParent()->getParent() == call->getParent()->getParent())
+    if(elapsedTime > 300) {
+      debug(Usama) << "updateTime: loop terminated due to overtime\n";
+      terminated = true;
+    }
 }
 
 void LoopUnrollTest::removeInstructions(Function *F) {

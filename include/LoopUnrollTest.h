@@ -57,5 +57,7 @@ struct LoopUnrollTest {
   bool checkPassed();
   
   void removeInstructions(Function *F);
+  void updateTime(Instruction *, uint64_t);
+  uint64_t elapsedTime;
 };
 #endif
