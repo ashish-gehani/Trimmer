@@ -151,6 +151,25 @@ void ConstantFolding::runOnInst(Instruction * I) {
   //if(isLoopTest())
     //updateLoopCost(result, I);
 }
+
+ProcResult ConstantFolding::processIntToPtr(IntToPtrInst *inst) {
+  Value *val = inst->getOperand(0);
+  ConstantInt *cInt = dyn_cast<ConstantInt>(val);
+  Register *reg = processInstAndGetRegister(val);
+  uint64_t value;
+  if(!reg && !cInt) {
+    debug(Usama) << "inttoptr: register not found\n";
+    return NOTFOLDED;
+  }
+
+  if(cInt)
+    value = cInt->getZExtValue();
+  else
+    value = reg->getValue();
+
+  addSingleVal(inst, (uint64_t) value, false, true);
+  return FOLDED;
+}
 /*
   run on each Instruction of the basic.
 */
