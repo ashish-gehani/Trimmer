@@ -1094,6 +1094,32 @@ bool ConstantFolding::handleGetPwUid(CallInst *callInst) {
   return true;
 }
 
+
+bool ConstantFolding::handleGetCwd(CallInst* callInst) {
+  Value *val = callInst->getOperand(0);
+  Value *val2 = callInst->getOperand(1);
+  Register *reg = processInstAndGetRegister(val);
+
+  if(!reg || !dyn_cast<ConstantInt>(val2)) {
+    debug(Usama) << "getcwd: register not found or size not constant\n";
+    return false;
+  }
+
+  size_t size = cast<ConstantInt>(val2)->getZExtValue();
+  char *buf = (char *) bbOps.getActualAddr(reg->getValue(), currBB);
+  char *result = getcwd(buf, size);
+
+  if(!buf) {
+    debug(Usama) << "getcwd: returned null\n";
+    addSingleVal(callInst, 0, true, true);
+    return true;
+  }
+
+  debug(Usama) << "cwd = " << *buf << "\n";
+  addSingleVal(callInst, reg->getValue(), true, true);
+  return true;
+}
+
 bool ConstantFolding::handleSysCall(CallInst *callInst) {
   Function *F;
   if(!(F = callInst->getCalledFunction()))
