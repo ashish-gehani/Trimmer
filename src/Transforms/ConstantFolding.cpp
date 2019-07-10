@@ -1041,6 +1041,30 @@ bool ConstantFolding::copyMemory(char *address, Type *ty, char *localAddress) {
   }
 }
 
+bool ConstantFolding::handleStat(CallInst *ci) {
+  Value *path = ci->getOperand(0);
+  Value *statBuf = ci->getOperand(1);
+  Register *pathReg = processInstAndGetRegister(path);
+  Register *statBufRegister = processInstAndGetRegister(statBuf);
+
+  if(!pathReg || !statBufRegister) {
+    debug(Usama) << "stat: one of the registers not found\n";
+    return false;
+  }
+
+  debug(Usama) << "calling stat on " << (char *) bbOps.getActualAddr(pathReg->getValue(), currBB) << " virtual addr = " << pathReg->getValue() << " statbuf addr = " << statBufRegister->getValue() << "\n";
+  string name = string((char *) bbOps.getActualAddr(pathReg->getValue(), currBB));
+  if(std::find(std::begin(configFileNames), std::end(configFileNames), name) == std::end(configFileNames)) {
+    debug(Usama) << "stat: on non config file. returning\n";
+    return false;
+  }
+
+  int result = stat((char *) bbOps.getActualAddr(pathReg->getValue(), currBB), (struct stat *) bbOps.getActualAddr(statBufRegister->getValue(), currBB));
+  debug(Usama) << "stat returned " << result << "\n";
+  addSingleVal(ci, result, true, true);
+  return FOLDED;
+}
+
 bool ConstantFolding::handleGetPwUid(CallInst *callInst) {	
 	Value *uidVal = callInst->getOperand(0);
 	uint64_t uid;

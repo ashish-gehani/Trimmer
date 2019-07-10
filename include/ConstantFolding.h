@@ -177,6 +177,7 @@ struct ConstantFolding : public ModulePass {
   bool handleSysCall(CallInst *);
   bool handleGetUid(CallInst *);
   bool handleGetPwUid(CallInst *);
+  bool handleStat(CallInst *);
   bool handleGetEnv(CallInst *);
   void handleOpen(CallInst *);
   void handleFOpen(CallInst *);
