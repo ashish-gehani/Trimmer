@@ -283,6 +283,7 @@ struct ConstantFolding : public ModulePass {
   bool copyMemory(char *address, Type *ty, char *localAddress);
 
   bool handleStrStr(CallInst *);
+  bool handleToLower(CallInst *);
 };
 
 

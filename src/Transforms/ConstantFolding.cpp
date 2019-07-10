@@ -1095,6 +1095,26 @@ bool ConstantFolding::handleGetPwUid(CallInst *callInst) {
 }
 
 
+bool ConstantFolding::handleToLower(CallInst *callInst) {
+  debug(Usama) << "Entering tolower \n";
+  Value *arg = callInst->getOperand(0);
+  int argValue;
+  if(auto *cint = dyn_cast<ConstantInt>(arg)) {
+    argValue = (int) cint->getZExtValue();
+  } else if (Register *reg = processInstAndGetRegister(arg)) {
+    argValue = reg->getValue();
+  } else {
+    debug(Usama) << "tolower: register not found" << "\n";
+    return false;
+  }
+
+  int answer = tolower(argValue);
+  debug(Usama) << "tolower returned " << answer << "\n";
+  addSingleVal(callInst, answer, true, true);
+  return true;
+}
+
+
 bool ConstantFolding::handleGetCwd(CallInst* callInst) {
   Value *val = callInst->getOperand(0);
   Value *val2 = callInst->getOperand(1);
