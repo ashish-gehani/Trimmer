@@ -1406,21 +1406,26 @@ void ConstantFolding::markArgsAsNonConst(CallInst * callInst) {
     if(val->getType()->isPointerTy())
       markMemNonConst(dyn_cast<PointerType>(val->getType())->getElementType(), reg->getValue(), currBB);
 
-    debug(Abubakar) << "markArgsAsNonConst : index " << index << "\n"; 
   }
 }
 
 void ConstantFolding::initializeGlobal(uint64_t addr, Constant * CC) {
 
   /* already initialize with zero */
+  if(!CC)
+    return;
+
   if(isa<ConstantPointerNull>(CC))
     return;    
 
   if(isa<ConstantAggregateZero>(CC))
     return;
   ConstantDataArray * CDA = dyn_cast<ConstantDataArray>(CC);
-  if(auto gv = dyn_cast<GlobalVariable>(CC))
-    CC = gv->getInitializer();
+  if(auto gv = dyn_cast<GlobalVariable>(CC)) {
+    uint64_t address = addGlobal(gv);
+    bbOps.storeToMem(address, DL->getPointerSize(), addr, currBB);
+    return;
+  }
 
   debug(Usama) << "Global Value" << dyn_cast<GlobalValue>(CC) << "\n";
   debug(Usama) << "Constant expr" << dyn_cast<ConstantExpr>(CC) << "\n";
@@ -1469,14 +1474,25 @@ void ConstantFolding::initializeGlobal(uint64_t addr, Constant * CC) {
     for(unsigned i = 0; i < CC->getNumOperands(); i++) {
       Constant * CGI = CC->getAggregateElement(i);
       //debug(Usama) << "CGI: " << *CGI << "\n CC: " << *CC << "\n";
+      if(!CGI) {
+        debug(Usama) << "initializeGlobal: (Warning) aggregate element not found\n";
+        return;
+      }
       initializeGlobal(addr, CGI);
       addr += DL->getTypeAllocSize(CGI->getType());
     }
   }
 }
 
-void ConstantFolding::addGlobal(GlobalVariable* gv){
+uint64_t ConstantFolding::addGlobal(GlobalVariable* gv){
   debug(Abubakar) << gv->getName() << "\n"; 
+
+  if(Register *reg = regOps.getRegister(gv))
+    return reg->getValue();
+
+  if(gv->getName() == "stdin" || gv->getName() == "stderr" || gv->getName() == "stdout")
+    return 0;
+
   Type* contTy = gv->getType()->getContainedType(0);
 
   uint64_t size = DL->getTypeAllocSize(contTy);
@@ -1485,8 +1501,11 @@ void ConstantFolding::addGlobal(GlobalVariable* gv){
   //pushFuncStack(gv);
   bool tracked = !!gv->getMetadata("track");
   regOps.addRegister(gv, contTy, addr, tracked);
+
   if(gv->hasInitializer()) 
     initializeGlobal(addr, gv->getInitializer());
+
+  return addr;
 }
 
 // important globals : optind, optarg, __argv_new__
@@ -2409,11 +2428,26 @@ void ConstantFolding::handleStrDup(CallInst * callInst)
     return;
   }    
 
+  uint64_t length; 
   char * buffer = (char *) bbOps.getActualAddr(reg->getValue(), currBB);
-  uint64_t addr = bbOps.allocateHeap(sizeof(buffer), currBB);
+  string calledFunc = callInst->getCalledFunction()->getName();
+  if(calledFunc == "strndup") {
+    ConstantInt *num = dyn_cast<ConstantInt>(callInst->getOperand(1));
+    if(!num)
+      return;
+    length = num->getZExtValue();
+  } else {
+    length = strlen(buffer) + 1;
+  }
+
+  uint64_t addr = bbOps.allocateHeap(length, currBB);
   char * buffer1 = (char *) bbOps.getActualAddr(addr, currBB);
-  strcpy(buffer1,buffer);
-  debug(Usama) << "strdup folded: string " << string(buffer1) << "\n";
+  if(calledFunc == "strndup")
+    strncpy(buffer1,buffer, length);
+  else
+    strcpy(buffer1, buffer);
+
+  debug(Usama) << "strdup: adding register address: " << addr << "\n";
   addSingleVal(callInst, addr, true, true);
     
 }
