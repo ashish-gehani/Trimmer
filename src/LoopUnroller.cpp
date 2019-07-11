@@ -15,7 +15,7 @@ LoopUnroller::~LoopUnroller() {
     delete ti;
 }
 
-void LoopUnroller::checkTermInst(Instruction * I) {
+void LoopUnroller::checkTermInst(Instruction * I, uint64_t seconds) {
   assert(ti && "no loop unroll test");
   if(ti->terminated)
     return;
@@ -23,6 +23,7 @@ void LoopUnroller::checkTermInst(Instruction * I) {
     ti->terminated = true;
     //debug(Abubakar) << "marking test at level " << testStack.size() << " as terminated\n";
   } else ti->updateIter(I); 
+  ti->updateTime(I, seconds);
 }
 
 bool LoopUnroller::testTerminated() {

@@ -188,8 +188,11 @@ bool ConstantFolding::runOnBB(BasicBlock * BB) {
     Instruction * I = &*(ci->inst++);
 
     if(isLoopTest()) {
+      uint64_t seconds;
+      stats.getLoopTime(seconds);
+      debug(Usama) << "checking loop test. time elapsed = " << seconds << "\n";
       LoopUnroller *unroller = testStack.back();
-      unroller->checkTermInst(I);
+      unroller->checkTermInst(I, seconds);
       if (unroller->testTerminated()) // test terminated in the  term condition above
         return true;
     }

@@ -23,6 +23,16 @@ inline FunctionStats *Stats::getRunningFunction() {
   return stack[stack.size()-1];
 }
 
+LoopStats *Stats::getRunningLoop() {
+  int i;
+  for(i = stack.size() - 1; i >= 0; i--) {
+    if(stack[i]->loops.size() && stack[i]->getRunningLoop())
+      return stack[i]->getRunningLoop();
+  }
+  errs() << "getRunningLoop: returned NULL\n";
+  return NULL;
+}
+
 void Stats::functionReturn() {
   FunctionStats *pop = stack.back();
   pop->functionReturn();
@@ -36,6 +46,11 @@ void Stats::loopStart(BasicBlock *loopHeader) {
 
 void Stats::loopSuccess() {
   getRunningFunction()->loopSuccess();
+}
+
+//returns true if terminated
+bool Stats::getLoopTime(uint64_t &seconds) {
+  return getRunningLoop()->getLoopTime(seconds);
 }
 
 void Stats::loopFail() {
@@ -79,6 +94,10 @@ void Stats::makeGraph(Function *main) {
   errs() << str << "\n";
 }
 
+bool FunctionStats::getLoopTime(uint64_t &seconds) {
+  return getRunningLoop()->getLoopTime(seconds);
+}
+
 FunctionStats::FunctionStats(Function *f, unsigned id) {
   this->f = f;
   this->id = id;
@@ -103,6 +122,8 @@ inline LoopStats *FunctionStats::getRunningLoop() {
   errs() << "loop size:" << loops.size() << "\n";
   for(i = loops.size() - 1; i >= 0 && loops[i]->hasLoopTerminated(); i--);
   assert(i >= 0);
+  if(i < 0)
+    return NULL;
   errs() << " i " << i << "\n";
   return loops[i];
 }
@@ -161,6 +182,18 @@ void FunctionStats::makeGraph(string &str) {
   for(auto &child: children) {
     child->makeGraph(str);
   }
+}
+
+bool LoopStats::getLoopTime(uint64_t &seconds) {
+  if(terminated) {
+    auto elapsed = chrono::duration_cast<chrono::seconds>(endTime-startTime);
+    seconds = elapsed.count();
+  } else {
+    auto current = chrono::system_clock::now();
+    auto elapsed = chrono::duration_cast<chrono::seconds>(current - startTime);
+    seconds = elapsed.count();
+  }
+  return terminated;
 }
 
 LoopStats::LoopStats(BasicBlock *BB) {

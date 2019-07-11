@@ -19,7 +19,7 @@ class LoopUnroller {
   public:
   LoopUnroller(Module *m, bool PreserveLCSSA, bool useAnnotations, Loop *, LoopInfo *);
   ~LoopUnroller();
-  void checkTermInst(Instruction * I);
+  void checkTermInst(Instruction * I, uint64_t);
   bool testTerminated();
   bool doUnroll(TargetLibraryInfo * TLI, AssumptionCache &, unsigned);
   static bool checkUnrollHint(BasicBlock * hdr, LoopInfo &LI, Module *);

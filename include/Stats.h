@@ -41,15 +41,17 @@ class LoopStats: public StatItem {
     void loopFail();
     BasicBlock *getHeader();
     inline bool hasLoopTerminated();
+
+    bool getLoopTime(uint64_t &);
 };
 
 class FunctionStats: public StatNode<FunctionStats*>, public StatItem {
   private:
     unsigned id;
     Function *f;
+  public:
     vector<LoopStats *> loops;
     inline LoopStats *getRunningLoop();
-  public:
     FunctionStats(Function *, unsigned);
     void functionReturn();
     void loopStart(BasicBlock *); 
@@ -60,12 +62,15 @@ class FunctionStats: public StatNode<FunctionStats*>, public StatItem {
     Function *getFunction();
     void makeGraph(string &str);
     string getLabels();
+
+    bool getLoopTime(uint64_t &);
 };
 
 class Stats {
   private:
     unsigned count;
     inline FunctionStats *getRunningFunction();
+    LoopStats *getRunningLoop();
     vector<FunctionStats *> stack;
     set<FunctionStats *> processed;
     void printStats(FunctionStats*);
@@ -79,6 +84,8 @@ class Stats {
     void loopFail();
     void printStats(Function *);
     void makeGraph(Function *);
+
+    bool getLoopTime(uint64_t &);
 };
 
 #endif
