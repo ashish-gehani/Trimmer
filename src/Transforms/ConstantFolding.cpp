@@ -1123,6 +1123,22 @@ bool ConstantFolding::handleCTypeBLoc(CallInst *callInst) {
   return true;
 }
 
+bool ConstantFolding::handleCTypeBLocLower(CallInst *callInst) {
+  const int **ptr = __ctype_tolower_loc();
+  uint64_t addrPtr = bbOps.allocateStack(DL->getPointerSize(), currBB);
+
+  const int *arr = *ptr;
+  uint64_t localArr = bbOps.allocateStack(sizeof(int ) * (255 + 1 + 128), currBB);
+  int *localArrReal = ((int *) bbOps.getActualAddr(localArr, currBB)) + 128; // move to 0
+  //can just use a memcpy, but this is more explanatory
+  for(int i = -128; i <= 255; i++) {
+    localArrReal[i] = arr[i];
+  }
+
+  *((int **) bbOps.getActualAddr(addrPtr, currBB)) = ((int *) localArr + 128);
+  addSingleVal(callInst, addrPtr, true, true);
+  return true;
+}
 
 bool ConstantFolding::handleToLower(CallInst *callInst) {
   debug(Usama) << "Entering tolower \n";
