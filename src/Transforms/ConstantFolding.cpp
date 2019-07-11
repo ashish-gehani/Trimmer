@@ -3630,7 +3630,7 @@ void ConstantFolding::checkPtrMemory(BasicBlock *currBB) {
 
 void ConstantFolding::markMemNonConst(Type *ty, uint64_t address, BasicBlock *BB) {
   errs() << *ty << " " << address <<  "\n";
-  if(!ty)
+  if(!ty || ty->isFunctionTy())
     return;
 
   if(!address)
@@ -3649,8 +3649,8 @@ void ConstantFolding::markMemNonConst(Type *ty, uint64_t address, BasicBlock *BB
     auto structLayout = DL->getStructLayout(dyn_cast<StructType>(ty));
     for(unsigned i = 0; i < ty->getStructNumElements(); i++) {
       Type *t = ty->getStructElementType(i);
-
-      if(!t->isPointerTy()) {
+      PointerType *pty = dyn_cast<PointerType>(t);
+      if(!pty || pty->getElementType()->isFunctionTy()) {
         continue;
       }
 
@@ -3675,8 +3675,10 @@ void ConstantFolding::markMemNonConst(Type *ty, uint64_t address, BasicBlock *BB
     }
   } else if(ty->isPointerTy()) {
     PointerType *t = dyn_cast<PointerType>(ty);
-    uint64_t value = bbOps.loadMem(address, DL->getTypeAllocSize(t->getElementType()), BB);
-    markMemNonConst(t->getElementType(), value, BB);
+    if(!t->getElementType()->isFunctionTy()) {
+      uint64_t value = bbOps.loadMem(address, DL->getTypeAllocSize(t->getElementType()), BB);
+      markMemNonConst(t->getElementType(), value, BB);
+    }
   }
 
   errs() << "marking mem non const in loop at address " << address << " to " << address + DL->getTypeAllocSize(ty)  <<"\n";
