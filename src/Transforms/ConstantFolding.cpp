@@ -2314,7 +2314,7 @@ void ConstantFolding::handleStrCat(CallInst * callInst) {
   debug(Abubakar) << "buffer0 = "<<buffer0 << "\n";
   debug(Abubakar) << "buffer1 = "<<buffer1 << "\n";
 
-  uint64_t addr = bbOps.allocateHeap(strlen(buffer0)+strlen(buffer1), currBB);
+  uint64_t addr = bbOps.allocateHeap(strlen(buffer0)+strlen(buffer1) + 1, currBB);
   char * buffer3 = (char *) bbOps.getActualAddr(addr, currBB);
   strcpy(buffer3,result);
   addSingleVal(callInst, addr, true, true);
