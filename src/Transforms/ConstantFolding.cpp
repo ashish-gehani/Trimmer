@@ -29,6 +29,7 @@
 
 
 
+#include <malloc.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <map>
@@ -747,13 +748,13 @@ ProcResult ConstantFolding::processLoadInst(LoadInst * li) {
   uint64_t addr = reg->getValue();
   uint64_t size = DL->getTypeAllocSize(li->getType());
 
+  debug(Abubakar) << addr << " LoadInst\n";
   if(!bbOps.checkConstMem(addr, size, currBB)) {
     debug(Abubakar) << " LoadInst : skipping non constant\n";
     return NOTFOLDED;
   }
   uint64_t val = bbOps.loadMem(addr, size, currBB);
-  debug(Abubakar) << li->getType() << " LoadInst\n";
-  addSingleVal(li, val, false, reg->getTracked());
+  addSingleVal(li, val, true , reg->getTracked());
   return UNDECIDED;
 }
 
