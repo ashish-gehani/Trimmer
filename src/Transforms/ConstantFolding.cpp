@@ -1106,6 +1106,23 @@ bool ConstantFolding::handleGetPwUid(CallInst *callInst) {
   return true;
 }
 
+bool ConstantFolding::handleCTypeBLoc(CallInst *callInst) {
+  const unsigned short **ptr = __ctype_b_loc();
+  uint64_t addrPtr = bbOps.allocateStack(DL->getPointerSize(), currBB);
+
+  const unsigned short *arr = *ptr;
+  uint64_t localArr = bbOps.allocateStack(sizeof(unsigned short) * (255 + 1 + 128), currBB);
+  unsigned short *localArrReal = ((unsigned short *) bbOps.getActualAddr(localArr, currBB)) + 128; // move to 0
+  //can just use a memcpy, but this is more explanatory
+  for(int i = -128; i <= 255; i++) {
+    localArrReal[i] = arr[i];
+  }
+
+  *((unsigned short **) bbOps.getActualAddr(addrPtr, currBB)) = ((unsigned short *) localArr + 128);
+  addSingleVal(callInst, addrPtr, true, true);
+  return true;
+}
+
 
 bool ConstantFolding::handleToLower(CallInst *callInst) {
   debug(Usama) << "Entering tolower \n";
