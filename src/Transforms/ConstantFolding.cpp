@@ -95,8 +95,15 @@ void ConstantFolding::markInstMemNonConst(Instruction  *I) {
   for(unsigned i = 0; i < I->getNumOperands(); i++) {
     Value *val = I->getOperand(i);
     Register *reg = processInstAndGetRegister(val);
-    debug(Abubakar) << i <<"operand "<<val->getType()->isPointerTy() << "value type\n";
-    if(reg && val->getType()->isPointerTy() && !dyn_cast<CallInst>(val)) {
+    PointerType *pty = dyn_cast<PointerType>(val->getType());
+
+    if(pty && pty->getElementType()->isFunctionTy()){
+      //do not mark function pointee non constant since it points to actual llvm function
+      debug(Usama) << "markInstMemNonConst: skipping function\n";
+      continue;
+    }
+
+    if(reg && pty && !dyn_cast<CallInst>(val)) {
       markMemNonConst(dyn_cast<PointerType>(val->getType())->getElementType(), reg->getValue(), currBB);
     }
   }
