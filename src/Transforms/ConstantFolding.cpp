@@ -2660,21 +2660,42 @@ long ConstantFolding::getfptrOffset(int sfd, FILE *fptr) {
 
 bool ConstantFolding::handleFileIOCall(CallInst * ci) {
   string name = ci->getCalledFunction()->getName();
-  if(name == "open")  handleOpen(ci);
-  else if(name == "fopen") handleFOpen(ci);
+  if(name == "open" || name == "open64")  handleOpen(ci);
+  else if(name == "fopen" || name == "fopen64") handleFOpen(ci);
   else if(name == "read")  handleRead(ci);
   else if(name == "fread")  handleFRead(ci);
   else if(name == "lseek")  handleLSeek(ci);
   else if(name == "fseek")  handleFSeek(ci);
   else if(name == "pread")  handlePRead(ci);
-  else if(name == "mmap")  handleMMap(ci);
+  else if(name == "mmap" || name == "mmap64")   handleMMap(ci);
   else if(name == "munmap")  handleMUnmap(ci);
   else if(name == "fgets")  handleFGets(ci);
   else if (name == "close")  handleClose(ci);
   else if (name == "fclose")  handleFClose(ci);
+  else if (name == "feof")  handleFEOF(ci);
   else return false;
   return true;
 }
+
+void ConstantFolding::handleFEOF(CallInst * ci) {
+  Value * fptrVal = ci->getOperand(0);
+  uint64_t sfd;
+  FILE* fptr;
+  bool fdConst = getSingleVal(fptrVal, sfd)&& getfptr(sfd, fptr);
+  if(!fdConst){
+    if(getSingleVal(fptrVal, sfd)){
+      string funcNames[2];
+      funcNames[0] = "fopen";
+      funcNames[1] = "fopen";
+      removeFileIOCallsFromMap(funcNames, sfd);
+    }
+    return;
+  }
+  int fileC =feof(fptr);
+  addSingleVal(ci,fileC,true,true);
+  fileIOCalls[sfd]->insts.push_back(ci);
+}
+
 
 /**
  * Handle open() calls
