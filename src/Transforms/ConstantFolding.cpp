@@ -68,6 +68,7 @@ static cl::opt<bool> isAnnotated("isAnnotated",
                   cl::desc("are annotations found or should the whole program be tracked"));
 static cl::opt<bool> trackAlloc("trackAllocas",cl::init(false),
                   cl::desc("are allocas tracked"));
+static cl::opt<std::string> progName("__progName", cl::init(""));
 
 void ConstantFolding::getAnalysisUsage(AnalysisUsage &AU) const { 
   AU.addRequired<TargetLibraryInfoWrapperPass>();
@@ -1442,6 +1443,17 @@ void ConstantFolding::addGlobals() {
   for(auto& global : module->globals()) {
     if(!regOps.getRegister(&global))
       addGlobal(&global);
+  }
+
+  //add libc __progname global variable
+  GlobalVariable *__progName = module->getGlobalVariable(StringRef("__progname"));
+  if (progName.size() && __progName) {
+    uint64_t addr = bbOps.allocateStack(progName.size() + 1, currBB);
+    char *address = (char *) bbOps.getActualAddr(addr, currBB);
+    strcpy(address, &progName[0]);
+    uint64_t doubleAddress = bbOps.allocateStack(DL->getPointerSize(), currBB);
+    bbOps.storeToMem(addr, DL->getPointerSize(), doubleAddress, currBB);
+    regOps.addRegister(__progName, __progName->getType()->getContainedType(0), doubleAddress, 1);
   }
 }
 
