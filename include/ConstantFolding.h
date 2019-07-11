@@ -164,6 +164,7 @@ struct ConstantFolding : public ModulePass {
   bool handleGetOpt(CallInst *);  
   bool handleLongArgs(CallInst *, option *, int *&);
   
+  bool handleBasename(CallInst *);
   bool handleCTypeBLoc(CallInst *callInst);
   bool handleCTypeBLocLower(CallInst *callInst);
   int initfdi(int,char*); 

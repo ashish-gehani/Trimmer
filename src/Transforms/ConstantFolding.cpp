@@ -1159,6 +1159,24 @@ bool ConstantFolding::handleToLower(CallInst *callInst) {
   return true;
 }
 
+bool ConstantFolding::handleBasename(CallInst *ci) {
+  Value *val1 = ci->getOperand(0);
+  Register *reg1 = processInstAndGetRegister(val1);
+  char *path;
+
+  if(!reg1 || !getStr(reg1->getValue(), path)) {
+    debug(Usama) << "handleBasename: path not constant or register not found\n";
+    return false;
+  }
+
+  char *result = basename(path);
+  uint64_t virtAddr = bbOps.allocateHeap(strlen(result) + 1, currBB);
+  char *actualAddr = (char *) bbOps.getActualAddr(virtAddr, currBB);
+  strcpy(actualAddr, result);
+  addSingleVal(ci, virtAddr, true, true);
+  return true;
+}
+
 
 bool ConstantFolding::handleGetCwd(CallInst* callInst) {
   Value *val = callInst->getOperand(0);
