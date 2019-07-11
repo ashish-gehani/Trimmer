@@ -3385,6 +3385,35 @@ bool ConstantFolding::handleLongArgs(CallInst * callInst, option * long_opts,
   return true;
 }
 
+bool ConstantFolding::handleGetEnv(CallInst *ci) {
+  Value *arg1 = ci->getOperand(0);
+
+  Register *reg = processInstAndGetRegister(arg1);
+  if(!reg) {
+    debug(Usama) << "handleGetEnv: Register not found\n";
+    return false;
+  }
+
+  char *str;
+  if(!getStr(reg->getValue(), str)) {
+    debug(Usama) << "handleGetEnv: string not constant\n";
+    return false;
+  }
+
+  char *result = getenv(str);
+  if(!result) {
+    debug(Usama) << "handleGetEnv: returned null\n";
+    addSingleVal(ci, 0, true, true);
+    return true;
+  }
+
+  uint64_t addr = bbOps.allocateStack(strlen(result) + 1, currBB);
+  char *actualAddr = (char *) bbOps.getActualAddr(addr, currBB);
+  strcpy(actualAddr, result);
+  addSingleVal(ci, addr, true, true);
+  debug(Usama) << "handleGetEnv: returned " << result << "\n";
+  return true;
+}
 bool ConstantFolding::handleGetOpt(CallInst * ci) {
   string name = ci->getCalledFunction()->getName().str();
   if(name.size() < 6 || name.substr(0, 6) != "getopt")
