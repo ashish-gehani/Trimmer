@@ -1048,9 +1048,9 @@ bool ConstantFolding::copyMemory(char *address, Type *ty, char *localAddress) {
       uint64_t size = DL->getTypeAllocSize(t);
       debug(Usama) << "Storing pointer at address: " << (uint64_t) localAddress + offset << "\n";
       bbOps.storeToMem(val, size,(uint64_t) localAddress + offset, currBB);  
-
     }
   }
+  return true;
 }
 
 bool ConstantFolding::handleStat(CallInst *ci) {
