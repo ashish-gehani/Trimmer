@@ -1035,7 +1035,7 @@ bool ConstantFolding::copyMemory(char *address, Type *ty, char *localAddress) {
 
       //allocate memory
       char *pointer = *(char**)(address + offset);
-      uint64_t allocationSize = strlen(pointer);
+      uint64_t allocationSize = strlen(pointer) + 1;
       uint64_t val = bbOps.allocateStack(allocationSize, currBB);
 
       //copy over data
