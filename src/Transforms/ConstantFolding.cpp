@@ -312,8 +312,8 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
         failedLoop = worklistBB[worklistBB.size() -1].back();
         worklistBB[worklistBB.size() - 1].pop_back();
 
-        stats.swapFunction(currfn, unroller->getCloneOf());
         stats.loopFail();
+        stats.swapFunction(currfn, unroller->getCloneOf());
         currfn = unroller->getCloneOf();
         toRun = currfn;
 
