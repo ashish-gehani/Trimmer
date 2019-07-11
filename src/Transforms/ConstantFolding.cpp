@@ -2061,6 +2061,38 @@ void ConstantFolding::handleStrTol(CallInst *call) {
   return;
 }
 
+void ConstantFolding::handleStrnCpy(CallInst *callInst) {
+  Value *dest = callInst->getOperand(0);
+  Value *src = callInst->getOperand(1);
+  ConstantInt *ci = dyn_cast<ConstantInt>(callInst->getOperand(2));
+
+  Register *reg1 = processInstAndGetRegister(dest);
+  Register *reg2 = processInstAndGetRegister(src);
+
+  if(!reg2 || !bbOps.checkConstContigous(reg2->getValue(), currBB)) {
+    debug(Usama) << "strncpy: source not found or non const\n";
+    return;
+  }
+
+  if(!ci) {
+    debug(Usama) << "strncpy: n not constant\n";
+    return;
+  }
+
+  if(!dest) {
+    debug(Usama) << "strncpy: dest register not found\n";
+    return;
+  }
+
+  char *destAddr = (char *) bbOps.getActualAddr(reg1->getValue(), currBB);
+  char *srcAddr = (char *) bbOps.getActualAddr(reg2->getValue(), currBB);
+
+  strncpy(destAddr, srcAddr, ci->getZExtValue());
+
+  debug(Usama) << "strncpy: folded, dest string = " << destAddr << "\n";
+  return;
+}
+
 bool ConstantFolding::handleStringFunc(CallInst * callInst) {
   string name = callInst->getCalledFunction()->getName();
 

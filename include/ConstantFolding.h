@@ -150,6 +150,7 @@ struct ConstantFolding : public ModulePass {
   bool handleStrSep(CallInst *);
   void handleStrChr(CallInst *); 
   void handleStrpbrk(CallInst * );
+  void handleStrnCpy(CallInst *);
   void handleStrCpy(CallInst *);
   void handleStrrChr(CallInst *);
   void simplifyStrFunc(CallInst *);
