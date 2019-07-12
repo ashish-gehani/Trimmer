@@ -13,7 +13,7 @@
 #include "MSSA/MemSSA.h"
 #include "llvm/Analysis/AssumptionCache.h"
 #include "LoopUnroller.h"
-
+#include <chrono>
 
 //getLoopIterator -> genericScalarDfsBackward -> isLoad (Memoized)
 //getBranchMemory -> genericScalarDfsBackward -> isLoadOrArgc (Memoized)
@@ -34,6 +34,30 @@ static cl::opt<int> isAnnotated("isAnnotated",
 set<SVFGNode*> forwardDp;
 set<Value*> slpLoadDp;
 set<SVFGNode *> backwardDp;
+
+
+/**
+  * Statistics to start tracking
+  * 1) Alloca used in how many functions
+  * 2) How many loads on an Alloca(More loads -> probably config variable)
+  * 3) How many stores on an Alloca (Most stores in one function -> config parsing function -> config variable)
+  * 4) Whether function stores on alloca
+  *
+  * How to do?
+  * 1) Add current Alloca/Value global variable
+  * 2) For each value in data flow graph of current Value, check:
+  *      i)   What's the parent function (For 1)
+  *      ii)  Whether it's a load (For 2)
+*/
+struct Stat {
+  set<Value *> loads;
+  set<Value *> stores;
+  set<Value *> branches;
+  Value *value;
+};
+
+map<Value *, Stat > statMap;
+Value *currentValue;
 
 using namespace std;
 using namespace analysisUtil;
@@ -61,13 +85,32 @@ bool isMemTransfer(const Value *inst) {
 
   if(auto casted =dyn_cast<CallInst>(inst)) {
     if(casted->getCalledFunction())
-      errs() << casted->getCalledFunction()->getName() << "\n";
+      errs() << casted->getCalledFunction()->getName() << "\n"; 
 
     if(casted->getCalledFunction() && (casted->getCalledFunction()->getName() == "strncpy" || casted->getCalledFunction()->getName() == "strcpy"))
       return true;
   }
 
   return false;
+}
+
+void AnnotateNew::trackStats(Value *val) {
+  if(!val || !currentValue)
+    return;
+  if(isMemTransfer(val))
+    statMap[currentValue].stores.insert(val);
+  
+  if(dyn_cast<LoadInst>(val))
+    statMap[currentValue].loads.insert(val);
+
+  if(dyn_cast<BranchInst>(val))
+      statMap[currentValue].branches.insert(val);
+  statMap[currentValue].value = currentValue;
+}
+
+void AnnotateNew::trackStats(SVFGNode *node) {
+  if(auto stmt = dyn_cast<StmtSVFGNode>(node))
+    trackStats((Value *) stmt->getInst());
 }
 
 GlobalValue* getArgv(string argvName, Module &M) {
@@ -126,6 +169,8 @@ set<SVFGNode*> *AnnotateNew::dfs_rec(SVFGNode* root, std::function<vector<SVFGNo
   if(trackLoops)
     checkIfLoop(root);
 
+  trackStats(root);
+
   set<SVFGNode*> *output = new set<SVFGNode*>;
 
   if(condition(root)) {
@@ -167,6 +212,8 @@ set<Value*> *AnnotateNew::dfs_rec(Value* root, std::function<vector<Value*> (Val
 
   if(trackLoops)
     checkIfLoop(root);
+
+  trackStats(root);
   set<Value *> *output = new set<Value *>;
 
   if(condition(root)) {
@@ -321,7 +368,6 @@ vector<SVFGNode*> AnnotateNew::forwardDfsLambda(SVFGNode *current) {
     return worklist;
 
   forwardDp.insert(current);
-
   for(auto it = current->OutEdgeBegin(), end = current->OutEdgeEnd(); it != end; it++) {
     worklist.push_back((*it)->getDstNode());
   }
@@ -363,6 +409,7 @@ vector<Value*> AnnotateNew::genericScalarDfs(Value *current) {
 
   for(auto &use: current->uses()) {
     auto user = use.getUser();
+    errs() << "User : " << *user << "\n";
     worklist.push_back(user);
   }
   return worklist;
@@ -511,9 +558,10 @@ void AnnotateNew::getLoopBbs(Module *M) {
     }
 
     for(auto &L: loops) {
+      errs() << L->getHeader()->getName() << "\n";
       for(auto BB: L->getBlocks()) {
-        loopHeaders[BB] = L->getHeader();
-        errs() << "Adding header: " << *L->getHeader() << "\n";
+        loopHeaders[BB] = LI.getLoopFor(BB)->getHeader(); //get header for inner most loop
+        //errs() << "Adding header: " << *L->getHeader() << "\n";
       }
       i++;
     }
@@ -750,42 +798,63 @@ BasicBlock *getJoinBb(BasicBlock *current) {
 void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &singleLevelPointers, set<SVFGNode*> &storeSvfg, set<CallInst*> &calls) {
   //capture single level pointers as well as condition to capture output
 
+  static set<const Value *> slps;
   auto forwardDfsCondition = [&](SVFGNode* node) {
-    if(auto casted = dyn_cast<StmtSVFGNode>(node)) {
+    const Value *inst = NULL;
+    if(auto temp = dyn_cast<InterPHISVFGNode>(node)) {
+      errs() << *temp->getRes()->getValue() << " phinode\n";
+      inst = temp->getRes()->getValue();
+      auto pagNode = pag->getPAGNode(pag->getValueNode(inst));
+      auto svfgNode = svfg->getDefSVFGNode(pagNode);
+      //return true;
+    } 
+    auto casted = dyn_cast<StmtSVFGNode>(node);
+    if(casted) {
       if(casted->getInst()) {
         errs() << "Going forward on Instruction: " << *casted->getInst() << " in function " << casted->getInst()->getParent()->getParent()->getName() << "\n";
-
-        const Value *inst = casted->getInst();
-
-        if(auto point = dyn_cast<PointerType>(inst->getType())) {
-          if(!point->getElementType()->isPointerTy()) {
-            //errs() <<*point << " " << *inst<< "  ****************\n";
+        inst = casted->getInst(); 
+      }
+    }
+    if(inst) {
+      if(auto point = dyn_cast<PointerType>(inst->getType())) {
+        if(!point->getElementType()->isPointerTy()) {
+          //errs() <<*point << " " << *inst<< "  ****************\n";
+          if(slps.find(inst) == slps.end()) {
             singleLevelPointers.insert(inst);
+            slps.insert(inst);
           }
+        }
 
-          //check if involved in any strcpy or strncpy
-          //TODO this is a hack, and can be imporved by checking formalin at any callsite
-          for(auto &call: calls) {
-            bool found = false;
-            for(unsigned i = 0; i < call->getNumOperands(); i++) { 
-              if(call->getOperand(i) == casted->getInst()) {
-                //return true;
-                found = true;
-              }
+        //check if involved in any strcpy or strncpy
+        //TODO this is a hack, and can be imporved by checking formalin at any callsite
+        for(auto &call: calls) {
+          bool found = false;
+          for(unsigned i = 0; i < call->getNumOperands(); i++) { 
+            if(call->getOperand(i) == inst) {
+              //return true;
+              errs() << "call found\n" << " " << *call << "\n";
+              found = true;
             }
-            if(found) {
-              for(unsigned i = 0; i < call->getNumOperands(); i++) {
-                if(!call->getOperand(i)->getType()->isPointerTy())
-                  continue;
-                auto *pagNode = pag->getPAGNode((pag->getValueNode(call->getOperand(i))));
-                storeSvfg.insert((SVFGNode*) svfg->getDefSVFGNode(pagNode));
-              }
+          }
+          if(found) {
+            for(unsigned i = 0; i < call->getNumOperands(); i++) {
+              if(!call->getOperand(i)->getType()->isPointerTy())
+                continue;
+              auto *pagNode = pag->getPAGNode((pag->getValueNode(call->getOperand(i))));
+              storeSvfg.insert((SVFGNode*) svfg->getDefSVFGNode(pagNode));
+            }
+            if(call->getType()->isPointerTy()) {
+              auto *pagNode = pag->getPAGNode((pag->getValueNode(call)));
+              storeSvfg.insert((SVFGNode*)svfg->getDefSVFGNode(pagNode));
               calls.erase(call);
+              
             }
+            
           }
         }
       }
-
+    }
+    if(casted) {
       auto pagEdge = casted->getPAGEdge();
       if(dyn_cast<StorePE>(pagEdge) && casted->getInst())
         return true;
@@ -830,14 +899,21 @@ void AnnotateNew::getSourceAllocas(set<SVFGNode*> &svfgNodes, vector<const SVFGN
     if(auto casted = dyn_cast<StmtSVFGNode>(node)) {
       auto pagEdge = casted->getPAGEdge();
       if(pagEdge->getInst()) {
-        errs() << "Going backward on : " << *pagEdge->getInst() << " Node: " << node << "\n";
+
         //errs() << "In backward " << *pagEdge->getInst() << "\n";
         auto I = pagEdge->getInst();
+        string fname = "";
+        if(I->getParent() && I->getParent()->getParent())
+          fname = I->getParent()->getParent()->getName();
+
+        errs() << "Going backward on : " << *pagEdge->getInst() << " Node: " << node  << " Function: " << fname << "\n";
         if(dyn_cast<AllocaInst>(pagEdge->getInst()))
           return true;
 
         for(unsigned i = 0; i < I->getNumOperands(); i++) {
-          if(auto global = pointsToGlobal(dyn_cast<User>(I->getOperand(i)))) {
+          GlobalValue* global = dyn_cast<GlobalVariable>(I->getOperand(i));
+          if(global || (global = pointsToGlobal(dyn_cast<User>(I->getOperand(i))))) {
+            errs() << "GLOBAL: " << *global << dyn_cast<StmtSVFGNode>(getSvfgNode(global)) << "\n";
             worklistSvfg.push_back(getSvfgNode(global));
             trackedAllocas.insert(global); // hackish
           }
@@ -853,11 +929,14 @@ void AnnotateNew::getSourceAllocas(set<SVFGNode*> &svfgNodes, vector<const SVFGN
         }
 
         if(auto call = dyn_cast<CallInst>(pagEdge->getInst())) {
-          if (call->getCalledFunction()->getName() == "malloc") {
+          if (call->getCalledFunction()->getName() == "malloc" || call->getCalledFunction()->getName() == "calloc" || call->getCalledFunction()->isDeclaration()) {
+            errs() << "is external call " << *call->getCalledFunction() << "\n";
             return true;
           }
         }
       }
+    } else if(dyn_cast<MRSVFGNode>(node)) {
+      errs() << "TESTINGGG";
     }
     return false;
   };
@@ -957,7 +1036,7 @@ void trackIfMemory(const SVFGNode* current, set<const Value*> &trackedAllocas) {
         trackedAllocas.insert(casted->getInst());
 
       if(auto temp = dyn_cast<CallInst>(casted->getInst()))
-        if (temp->getCalledFunction()->getName() == "malloc")
+        if (temp->getCalledFunction()->getName() == "malloc" || temp->getCalledFunction()->getName() == "calloc")
           trackedAllocas.insert(temp);
     }
   }
@@ -1014,21 +1093,27 @@ void AnnotateNew::getLoadsOnSlps(Value* pointer, set<Value*> &singleLevelLoads) 
   //get non pointer data to track
   static set<Value *> processed;
 
-  auto isLoadOnSingleLevelPointer = [](Value *current) {
+  auto isLoadOnSingleLevelPointer = [&](Value *current) {
+    processed.insert(current);
     if(dyn_cast<LoadInst>(current))
       if(auto temp = dyn_cast<PointerType>(dyn_cast<User>(current)->getOperand(0)->getType()))
         return !current->getType()->isPointerTy(); 
+    if(auto call = dyn_cast<CallInst>(current))
+        return !call->getType()->isPointerTy();
     return false;
   };
 
-  if(processed.find(pointer) != processed.end())
+  if(processed.find(pointer) != processed.end()) {
+    errs() << "Already processed: " << *pointer << "\n";
     return;
+  }
 
   processed.insert(pointer);
   set<Value*> visited;
   set<Value *> *data = dfs_rec((Value*)pointer, genericScalarDfs, isLoadOnSingleLevelPointer, visited, NULL, true); //get all loads of single level pointer 
-  for(auto &value: *data)
+  for(auto &value: *data) {
     singleLevelLoads.insert(value);
+  }
 }
 
 void AnnotateNew::classifyVal(Value *value, set<SVFGNode*>& backwardPtr, set<const Value *> &singleLevelPointers, set<Value*>& scalar) {
@@ -1212,7 +1297,7 @@ void printAllAllocsMallocs(Module &M) {
         if (dyn_cast<AllocaInst>(&I))
           asd.insert(&I);
         if (auto temp = dyn_cast<CallInst>(&I))
-          if(temp->getCalledFunction() && temp->getCalledFunction()->getName() == "malloc")
+          if(temp->getCalledFunction() && (temp->getCalledFunction()->getName() == "malloc" || temp->getCalledFunction()->getName() == "calloc"))
             asd.insert(&I);
       }
     }
@@ -1291,7 +1376,7 @@ void markTestArgc(Value *argc) {
  *    and add them to the tainted data
  * 6) Repeat above steps untill no new tainted data
  */
-void AnnotateNew::run(GlobalValue* argv, Value *argc, set<const Value*> &trackedAllocas) {
+void AnnotateNew::run(vector<GlobalValue*> sources, Value *argc, set<const Value*> &trackedAllocas) {
 
   //set<const Value *> singleLevelPointers; //store single level pointers
 
@@ -1306,11 +1391,12 @@ void AnnotateNew::run(GlobalValue* argv, Value *argc, set<const Value*> &tracked
   map<Function*, PostDominatorTree *> postDoms;
   map<Value *, set<Value *> > branchDp;
 
-  {
-    const PAGNode *pagNode = pag->getPAGNode((pag->getValueNode(argv)));
+  for(auto &val: sources) {
+    const PAGNode *pagNode = pag->getPAGNode((pag->getValueNode(val)));
     auto svfgNode = svfg->getDefSVFGNode(pagNode);
     worklistSvfg.push_back(svfgNode);
-  } 
+    trackedAllocas.insert(val);
+  }
 
   // just for running tests
   if(argc && isTest) {
@@ -1322,7 +1408,6 @@ void AnnotateNew::run(GlobalValue* argv, Value *argc, set<const Value*> &tracked
     getSourceAllocas(storeSvfg, worklistSvfg, trackedAllocas);
   }
 
-  trackedAllocas.insert(argv);
   {
     set<SVFGNode*> svfgNodes;
     getBranchAndArgcInstructions(allBranches, calls, argcValues);
@@ -1362,10 +1447,20 @@ void AnnotateNew::run(GlobalValue* argv, Value *argc, set<const Value*> &tracked
       if(processed.find(current) != processed.end())
         continue;
 
-      errs() << "PROCESSING " << current;
-      if(auto temp = dyn_cast<StmtSVFGNode>(current))
-        if(temp->getInst())
+      errs() << "PROCESSING " << current << " Size: " << worklistSvfg.size() ;
+      if(auto temp = dyn_cast<StmtSVFGNode>(current)) {
+        if(temp->getInst()) {
           errs() << *temp->getInst();
+          currentValue = (Value *) temp->getInst();
+        } else {
+          auto srcNode = temp->getPAGSrcNode();
+          if(srcNode->hasValue()) {
+            auto t = (srcNode->getValue()); 
+            if(t)
+              currentValue = (Value *)t;
+          }
+        }
+      }
       errs() << "\n";
 
       trackIfMemory(current, trackedAllocas);
@@ -1376,18 +1471,18 @@ void AnnotateNew::run(GlobalValue* argv, Value *argc, set<const Value*> &tracked
       //traverse memory chain of this svfgnode, and get any stores 
       getMemoryFlow(current, singleLevelPointers, storeSvfg, calls);
       //go backward to get corresponding allocs/mallocs
-      getSourceAllocas(storeSvfg, worklistSvfg, trackedAllocas); 
+
+      set<Value*> stores;
+      getSlpStores(singleLevelPointers, stores); 
+      currentValue = NULL;
+      singleLevelPointers.clear();
+      if(stores.size()) {
+        getStoreSvfg(stores, storeSvfg);
+        //continue;
+      }
+      getSourceAllocas(storeSvfg,worklistSvfg, trackedAllocas);
     }
 
-    set<Value*> stores;
-    getSlpStores(singleLevelPointers, stores); 
-    singleLevelPointers.clear();
-    if(stores.size()) {
-      set<SVFGNode*> storeSvfg;
-      getStoreSvfg(stores, storeSvfg);
-      getSourceAllocas(storeSvfg,worklistSvfg, trackedAllocas);
-      continue;
-    }
 
     //get all branch instructions touching tainted data
     set<BranchInst*> trackedBranches; 
@@ -1446,7 +1541,7 @@ void AnnotateNew::run(GlobalValue* argv, Value *argc, set<const Value*> &tracked
           if(dyn_cast<AllocaInst>(&I)) {
             trackedAllocas.insert(&I);
           } else if(auto temp = dyn_cast<CallInst>(&I)) {
-            if(temp->getCalledFunction() && temp->getCalledFunction()->getName() == "malloc")
+            if(temp->getCalledFunction() && (temp->getCalledFunction()->getName() == "malloc" || temp->getCalledFunction()->getName() == "calloc"))
               trackedAllocas.insert(temp);
           } else {
             classifyValAndOperands(&I, backwardPtr, slps, scalars); 
@@ -1482,7 +1577,7 @@ void AnnotateNew::run(GlobalValue* argv, Value *argc, set<const Value*> &tracked
 
     processedLoops.insert(BB);
 
-    getLoopIterators(BB, trackedAllocas); 
+    //getLoopIterators(BB, trackedAllocas); 
     //annotateLoop(BB, loopFunc);
   }
 
@@ -1516,10 +1611,14 @@ Function *createFunction(Type *returnType, vector<Type*> &args, bool isVarArg, c
   return Function::Create(funcType, GlobalValue::LinkageTypes::ExternalLinkage, name, M);
 }
 
+double statFormula(Stat *a) {
+  return a->stores.size() * 0.4 + a->loads.size() * 0.6;
+}
 /**
  * TODO add preserves information
  */
 bool AnnotateNew::runOnModule(Module &M) {
+  auto started = std::chrono::high_resolution_clock::now();
   AndersenWaveDiff* ander = AndersenWaveDiff::createAndersenWaveDiff(M);
   SVFGBuilder builder;
 
@@ -1528,7 +1627,7 @@ bool AnnotateNew::runOnModule(Module &M) {
   svfg =  builder.buildSVFG(ander);
   pag = svfg->getPAG();
 
-  printAllAllocsMallocs(M);
+  //printAllAllocsMallocs(M);
 
 
   set<const Value*> trackedAllocas;
@@ -1537,6 +1636,7 @@ bool AnnotateNew::runOnModule(Module &M) {
   set<const Value *> singleLevelPointers; //store single level pointers
 
   Function *main = M.getFunction("main");
+  vector<GlobalValue *> sources;
   GlobalValue *argv;
   Value *argc = NULL;
   if(main->arg_begin() != main->arg_end())
@@ -1547,20 +1647,58 @@ bool AnnotateNew::runOnModule(Module &M) {
     return false;
   }
 
-  errs() << "ID: " << argvId << "\n";
+  sources.push_back(argv);
+  if(auto val = getArgv("optind", M))
+    sources.push_back(val);
 
-  run(argv, argc, trackedAllocas);
+  if(auto val = getArgv("optarg", M))
+    sources.push_back(val);
+
+  run(sources, argc, trackedAllocas); 
+  
+  errs() << "Printing stats: " << "\n";
+  vector<Stat *> statValues;
+  for(auto &kv: statMap) {
+    Stat *stat = &kv.second;
+    string name = "";
+    if(auto inst = dyn_cast<Instruction>(kv.first))
+        name = inst->getParent()->getParent()->getName();
+    errs() << "Current Value: " << *kv.first << " in function " << name << "\n";
+    errs() << "Printing loads for value" << *kv.first << ". Size: " << stat->loads.size() << "\n";
+    for(auto &val: stat->loads) {
+      errs() << "           Value: " << *val << " in Function: " << dyn_cast<Instruction>(val)->getParent()->getParent()->getName() << "\n"; 
+    }
+
+    errs() << "Printing stores for value" << *kv.first << ". Size: " << stat->stores.size() << "\n";
+    for(auto &val: stat->stores) {
+      errs() << "           Value: " << *val << " in Function: " << dyn_cast<Instruction>(val)->getParent()->getParent()->getName() << "\n"; 
+    }
+
+    errs() << "Printing branches for value" << *kv.first << ". Size: " << stat->branches.size() << "\n";
+    for(auto &val: stat->branches)
+        errs() << "           Value: " << *val << " in Function: " << dyn_cast<Instruction>(val)->getParent()->getParent()->getName() << "\n"; 
+    statValues.push_back(stat);
+  }
+
+  std::sort(statValues.begin(), statValues.end(), [](Stat *a, Stat *b) {
+    return statFormula(a) < statFormula(b);
+  });
 
   errs() << "SIZE" << trackedAllocas.size() << "\n";
-  for(auto I: trackedAllocas) {
-    errs() << *I << "\n";
+  errs() << "Sorted Values" << "\n";
+  for(int i = statValues.size() - 1; i >= 0; i--) { 
+    errs() << *statValues[i]->value << " with value: " << statFormula(statValues[i]) << "\n"; 
+    Value *I = statValues[i]->value;
+    unsigned num = (i - statValues.size()) + 1;
     LLVMContext &C = I->getContext();
-    MDNode *N = MDNode::get(C, MDString::get(C, "1"));
+    MDNode *N = MDNode::get(C, ConstantAsMetadata::get(ConstantInt::get(Type::getInt64Ty(C), num))); 
     if(dyn_cast<Instruction>(I))
       ((Instruction*)I)->setMetadata("track", N);
     else
       ((GlobalObject*)I)->setMetadata("track", N);
   }
+  auto done = std::chrono::high_resolution_clock::now();
+  errs()<< std::chrono::duration_cast<std::chrono::seconds>(done-started).count();
   return false;
 }
 
