@@ -108,8 +108,10 @@ void ConstantFolding::markInstMemNonConst(Instruction  *I) {
     return;
   }
 }
+
 /**
- * Process a single instruction appropriately
+ * Process a single instruction. 
+   Handles instructions according to Instruction Type, e.g., AllocaInst, StoreInst, LoadInst
  */
 void ConstantFolding::runOnInst(Instruction * I) {
   ProcResult result;
@@ -152,11 +154,13 @@ void ConstantFolding::runOnInst(Instruction * I) {
     result = tryfolding(I);
   }
 
+  //FIXME: Remove comment if dead code
   //if(isLoopTest())
     //updateLoopCost(result, I);
 }
+
 /*
-  run on each Instruction of the basic.
+  Run analysis on each Instruction of basic block BB
 */
 bool ConstantFolding::runOnBB(BasicBlock * BB) {
   bbOps.markVisited(BB);
@@ -193,12 +197,11 @@ bool ConstantFolding::isLoopTest() {
   return testStack.size();
 }
 /*
-  Run on a called Function(or main at start)
+  Run on callee Function(or main at analysis start)
   The context used for the entry basic block will be the same as the currBB
   at the point of function call.
   After completing execution of the function, the context before the function call
-  will have to be replaced by the context at the return Instruction of the called
-  function.    
+  will be replaced by the context at the return Instruction of the callee
 */
 void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
 
@@ -590,7 +593,9 @@ void ConstantFolding::collectCallGraphGlobals(CallGraph *CG) {
  * with value equal to the starting address of the allocated memory
  */
 ProcResult ConstantFolding::processAllocaInst(AllocaInst * ai) {
-  /*
+
+  // FIXME: Remove dead code? 
+ /*
   if(!isAllocaTracked(ai)) {
     debug(Abubakar) << "skipping untracked alloca\n";
     return NOTFOLDED;
@@ -606,7 +611,11 @@ ProcResult ConstantFolding::processAllocaInst(AllocaInst * ai) {
   debug(Abubakar) << "allocaInst : size " << size << " at address " << addr << "\n";
   return UNDECIDED;
 }
-ProcResult ConstantFolding::processMallocInst(CallInst * mi) {   
+
+//FIXME: Add comment
+ProcResult ConstantFolding::processMallocInst(CallInst * mi) {  
+
+  // FIXME: Remove dead code? 
   /*
   if(!isAllocaTracked(mi)) {
     debug(Abubakar) << "skipping untracked malloc\n";
@@ -629,6 +638,8 @@ ProcResult ConstantFolding::processMallocInst(CallInst * mi) {
 }
 
 ProcResult ConstantFolding::processReallocInst(CallInst * mi) {   
+
+  // FIXME: Remove dead code?
   /*
   if(!isAllocaTracked(mi)) {
     debug(Abubakar) << "skipping untracked malloc\n";
@@ -725,6 +736,8 @@ ProcResult ConstantFolding::processStoreInst(StoreInst * si) {
   bbOps.storeToMem(val, size, addr, currBB); 
   return UNDECIDED;
 }
+
+// FIXME: Add comment
 ProcResult ConstantFolding::processLoadInst(LoadInst * li) { 
   
   Value * ptr = li->getOperand(0);
@@ -752,7 +765,7 @@ ProcResult ConstantFolding::processLoadInst(LoadInst * li) {
   return UNDECIDED;
 }
 
-
+// FIXME: Add comment and explain why handling PtrtoInst is imp for our analysis
 ProcResult ConstantFolding::processPtrToIntInst(PtrToIntInst* pi){
   errs()<<"Invoked processPtrToIntInst\n";
   Value * ptr = pi->getOperand(0);
@@ -776,7 +789,7 @@ ProcResult ConstantFolding::processPtrToIntInst(PtrToIntInst* pi){
   return UNDECIDED;
 }
 
-
+// FIXME: Add Comment
 ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
   
   Value * ptr = gi->getOperand(0);
@@ -813,6 +826,8 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
   
   return UNDECIDED;
 }
+
+// FIXME: Add comment
 ProcResult ConstantFolding::processMemcpyInst(CallInst * memcpyInst) {
 
   Value * toPtr = memcpyInst->getOperand(0);
@@ -1136,6 +1151,7 @@ bool ConstantFolding::handleStat(CallInst *callInst) {
    
 }
 
+// FIXME: What does this function do? Rename this appropriately. Name doesn't tell much
 bool ConstantFolding::handleFileNo(CallInst *callInst) {	
 
    Value * f = callInst->getOperand(0);
@@ -1158,6 +1174,7 @@ bool ConstantFolding::handleFileNo(CallInst *callInst) {
   return true;   
 }
 
+// FIXME: Add comment and explain why this is important
 bool ConstantFolding::handleSysCall(CallInst *callInst) {
   Function *F;
   if(!(F = callInst->getCalledFunction()))
@@ -1225,6 +1242,7 @@ string ConstantFolding::removeCloneName(string name) {
   return name.substr(0, pos);
 }
 
+// FIXME: This is very much a "Policy" of our system. Document this with a proper comment
 bool ConstantFolding::exceedsRecursion(Function *called, Function *callee) {
   string calledName = removeCloneName(called->getName().str());
   string calleeName = removeCloneName(callee->getName().str());
@@ -1622,6 +1640,7 @@ bool ConstantFolding::hasTrackedMalloc(Function *F) {
   return false;
 }
 
+// FIXME: Add comment and explain purpose
 bool ConstantFolding::satisfyConds(Function * F, CallInst *ci) {
   if(fimap.find(F) == fimap.end()){
     debug(Usama) << " not found in map\n";
@@ -1634,6 +1653,7 @@ bool ConstantFolding::satisfyConds(Function * F, CallInst *ci) {
       Value *argument = ci->getArgOperand(i);
       if(Register *reg = processInstAndGetRegister(argument)) { //dyn_cast<Constant>(argument) || 
         if(reg->getTracked()) {
+          //FIXME: Properly break lines - Lines can NOT exceed 80 chars (soft engr practice)
           debug(Abubakar) << "(LOG) (SATISFYCONDS) Call " << *ci << " satisfied specializing conditions due to argument " <<  *argument << " at index " << i << "\n";
           return true;
         }
@@ -1641,6 +1661,8 @@ bool ConstantFolding::satisfyConds(Function * F, CallInst *ci) {
     }
 
     set<GlobalVariable *> &modData = getFuncModset(F);
+
+    // FIXME: Remove Dead code?
     //vector<Value *> intersection;
     
    /* for(auto &modD: modData)
@@ -1840,6 +1862,7 @@ bool ConstantFolding::handleMemInst(CallInst * callInst) {
   return true;  
 }
 
+// FIXME: Do not understand what this does. Document the purpose
 bool ConstantFolding::handleDbgCall(CallInst * callInst) {
   string name = callInst->getCalledFunction()->getName();
   if(name == PRNTDBGSTR) {
@@ -1895,6 +1918,7 @@ bool ConstantFolding::visitBB(BasicBlock * succ, BasicBlock *  from) {
 
 //File StringUtils.cpp
 
+// FIXME: bad naming? handleStrStr reveals nothing about the function. Rename appropriately
 bool ConstantFolding::handleStrStr(CallInst *callInst) {
   Value *val1 = callInst->getOperand(0);
   Value *val2 = callInst->getOperand(1);
@@ -2056,6 +2080,7 @@ bool ConstantFolding::handleStringFunc(CallInst * callInst) {
   return true;
 }
 
+// FIXME: "strncpy" is the name of a function so cant say Str*N*C*cpy. Replace with handleStrncpy
 void ConstantFolding::handleStrNCpy(CallInst *callInst) {
   Value *dest = callInst->getOperand(0);
   Value *src = callInst->getOperand(1);
@@ -2094,6 +2119,7 @@ void ConstantFolding::handleStrNCpy(CallInst *callInst) {
 }
 
 
+// FIXME: Do not understand what this does and why is this important. Add proper comment
 void ConstantFolding::handleCTypeFuncs(CallInst * callInst) {
 
    traitsTable = *(__ctype_b_loc());
@@ -2562,25 +2588,31 @@ void ConstantFolding::handleCIsDigit(CallInst* callInst){
   }
 }
 
+// FIXME: What does this comment mean? That these functions were extracted from FileIO.cpp? Should remove it
 //File FileIO.cpp
 
 /*
-   The following code specializes File IO Calls such as open, read, pread, lseek, fopen, fread, fgets, fseek, mmap, munmap, close,fclose
+   The following code specializes File IO Calls such as open, read, pread, lseek, 
+   fopen, fread, fgets, fseek, mmap, munmap, close,fclose
 
    For each opened file, a File Structure (FdInfo) is defined which stores its file pointer (in case of fopen()), 
-   file descriptor (in case of open()), file name, current offset and a tracked boolean, which tells whether it can be specialized 
-   or not. File Open calls will be only specialized if they are successful and have constant arguments.
+   file descriptor (in case of open()), file name, current offset and a tracked boolean, which 
+   tells whether it can be specialized. File Open calls will be only specialized if they 
+   are successful and have constant arguments.
 
    File Read calls will be specialized if they are successful and there exist a valid File structure associated with it 
    (initialized when file is opened) and a valid buffer,where the contents of file read will be stored. 
-   Also the size of the file contents to be read and the offset of the file should be constant. Similarly, for File Seek Calls,
-   offset and flag should be constant.
+   Also the size of the file contents to be read and the offset of the file should be constant. 
+   Similarly, for File Seek Calls, offset and flag should be constant.
 
-   After File Read Calls, the buffer where the file data is stored is marked as constant and the calls are replaced with memcpys instructions. 
-   
-   Additional File Seek calls are added for replacing File Read Calls in case the file is not completely specialized. We are handling partial specialization.
+   After File Read Calls, the buffer where the file data is stored is marked as constant and 
+   the calls are replaced with memcpys instructions. 
+  
+   Additional File Seek calls are added for replacing File Read Calls in case the file is not 
+   completely specialized. We are handling partial specialization.
 
-   All File IO calls are added to fileIOCalls map so that if they are successfully specialized, they can be deleted at the end.
+   All File IO calls are added to fileIOCalls map so that if they are successfully specialized, 
+   they can be deleted at the end.
 
 */
 
@@ -2878,6 +2910,7 @@ void ConstantFolding::handleGetLine(CallInst * ci) {
 
     
     Constant *hookFunc;
+    // FIXME: Line is overflowing - Properly break after 80 chars
     hookFunc = module->getOrInsertFunction("fseek", Type::getInt32Ty(module->getContext()),fptrVal->getType(),Type::getInt64Ty(module->getContext()),Type::getInt32Ty(module->getContext()),NULL);    
     Function *hook= cast<Function>(hookFunc);
 
@@ -2936,7 +2969,8 @@ void ConstantFolding::handleFOpen(CallInst * ci) {
 
 /**
  * Handle read() calls
- * Reads the file and if call is successful, it initializes and sets the buffer(where the file data is read to) to constant
+ * Reads the file and if call is successful, it initializes and sets the buffer(where 
+   the file data is read to) to constant
  * Add llvm.memcpy instruction to replace read calls
  * Also updates the file offset
  * Seek call added for partial specialization
@@ -2987,6 +3021,7 @@ void ConstantFolding::handleRead(CallInst * ci) {
   Instruction* MemCpyInst = Builder.CreateMemCpy(bufPtr,gv,bytes_read,1);
   
   Constant *hookFunc;
+  // FIXME: Break line
   hookFunc = module->getOrInsertFunction("lseek", Type::getInt64Ty(module->getContext()), Type::getInt32Ty(module->getContext()),Type::getInt64Ty(module->getContext()),Type::getInt32Ty(module->getContext()),NULL);    
   Function *hook= cast<Function>(hookFunc);
 
@@ -3005,7 +3040,8 @@ void ConstantFolding::handleRead(CallInst * ci) {
 
 /**
  * Handle pread() calls
- * Reads the file and if call is successful, it initializes and sets the buffer(where the file data is read to) to constant
+ * Reads the file and if call is successful, it initializes and sets the buffer
+   (where the file data is read to) to constant
  * Add llvm.memcpy instruction to replace read calls
  * Also updates the file offset
  */
@@ -3310,6 +3346,7 @@ void ConstantFolding::handleFGets(CallInst * ci) {
     setfptrOffset(sfd, fptr);
     debug(Abubakar) << "buffer value " << buffer << "\n";
     Constant * const_array = ConstantDataArray::getString(module->getContext(),StringRef(buffer),true);
+    // FIXME: break line
     GlobalVariable * gv = new GlobalVariable(*module,const_array->getType(),true,GlobalValue::ExternalLinkage,const_array,"");
     gv->setAlignment(1);
     IRBuilder<> Builder(ci);
@@ -3484,6 +3521,7 @@ void ConstantFolding::removeFileIOCallsFromMap(string buffer[],int sfd) {
   vector<Instruction*>::iterator it = insts.begin() ;
   while (it != insts.end()){
     CallInst *Inst = dyn_cast<CallInst>(*it); 
+    // FIXME: Break line
     if((Inst->getCalledFunction()->getName().str()).compare(buffer[0])==0 || (Inst->getCalledFunction()->getName().str()).compare(buffer[1])==0){
       it = insts.erase(it);
     }
@@ -3739,6 +3777,8 @@ Loop *ConstantFolding::isLoopHeader(BasicBlock *BB, LoopInfo &LI) {
 
   return L;
 }
+
+// FIXME:Remove if code below is dead
 
 /*
 void ConstantFolding::updateLoopCost(ProcResult result, Instruction * I) {
@@ -4027,6 +4067,7 @@ void ConstantFolding::markMemNonConst(Type *ty, uint64_t address, BasicBlock *BB
     markMemNonConst(t->getElementType(), value, BB);
   }
 
+  // FIXME: Break line
   errs() << "marking mem non const in loop at address " << address << " to " << address + DL->getTypeAllocSize(ty)  <<"\n";
   bbOps.setConstContigous(false, address, BB);
 }
