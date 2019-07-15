@@ -43,9 +43,9 @@ struct LoopUnrollTest {
   vector<Instruction *> indepInsts;
   map<Instruction *, ProcResult> InstResults; 
   unsigned numOrigInsts, partOfLoop, iterations; 
-  int id;
+  int id, fileTripCount;
   //vector<Instruction *> instrumented;
-  LoopUnrollTest(Loop * L, Module * module, bool tripCount, bool isFileIOLoop);
+  LoopUnrollTest(Loop * L, Module * module, bool tripCount, bool isFileIOLoop, int fileCount);
   string getExitName(); 
   string getIterName(); 
 

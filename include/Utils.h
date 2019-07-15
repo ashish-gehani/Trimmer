@@ -18,5 +18,8 @@ bool ignorefunc(Function * F);
 CallInst * getTestInst(string name, Module * module);
 Function *cloneFunc(Function *F, ValueToValueMapTy& vmap);
 CallInst *createFuncCall(Function *F, vector<Value*>& args);
+void getReadonlyFuncNames();
+bool checkIfReadOnlyFunc(Function * F);
+
 
 #endif

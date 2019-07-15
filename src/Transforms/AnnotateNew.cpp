@@ -13,7 +13,7 @@
 #include "MSSA/MemSSA.h"
 #include "llvm/Analysis/AssumptionCache.h"
 #include "LoopUnroller.h"
-
+#include <chrono>
 
 //getLoopIterator -> genericScalarDfsBackward -> isLoad (Memoized)
 //getBranchMemory -> genericScalarDfsBackward -> isLoadOrArgc (Memoized)
@@ -1618,6 +1618,7 @@ double statFormula(Stat *a) {
  * TODO add preserves information
  */
 bool AnnotateNew::runOnModule(Module &M) {
+  auto started = std::chrono::high_resolution_clock::now();
   AndersenWaveDiff* ander = AndersenWaveDiff::createAndersenWaveDiff(M);
   SVFGBuilder builder;
 
@@ -1696,6 +1697,8 @@ bool AnnotateNew::runOnModule(Module &M) {
     else
       ((GlobalObject*)I)->setMetadata("track", N);
   }
+  auto done = std::chrono::high_resolution_clock::now();
+  errs()<< std::chrono::duration_cast<std::chrono::seconds>(done-started).count();
   return false;
 }
 

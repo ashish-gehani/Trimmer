@@ -9,6 +9,7 @@
 using namespace llvm;
 using namespace std;
 
+// FIXME: Why is this needed? ADD comment. Also Perhaps consider renaming?
 bool simpleStrFunc(string name) {
   if(name == "strcmp" || name == "strcspn" 
      || name == "strspn" || name == "strncmp" || name == "strncasecmp"

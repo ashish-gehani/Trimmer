@@ -98,7 +98,7 @@ struct ConstantFolding : public ModulePass {
   list<string> configFileNames;
   int numConfigFiles;
   vector<MMapInfo*> mMapBuffer; 
-
+  const unsigned short int * traitsTable;
 
   ConstantFolding(): ModulePass(ID){}
   void getAnalysisUsage(AnalysisUsage &AU) const;
@@ -109,10 +109,10 @@ struct ConstantFolding : public ModulePass {
   ProcResult processGEPInst(GetElementPtrInst *);
   ProcResult processCallInst(CallInst *);
   ProcResult processMemcpyInst(CallInst *);
-  ProcResult processMemMoveInst(CallInst *);
   ProcResult processPtrToInt(PtrToIntInst *);
   ProcResult processIntToPtr(IntToPtrInst *);
   ProcResult processMemSetInst(CallInst *);
+  ProcResult processMemMoveInst(CallInst *); 
   ProcResult processMallocInst(CallInst *);
   ProcResult processReallocInst(CallInst *);
   ProcResult processCallocInst(CallInst *);
@@ -120,6 +120,7 @@ struct ConstantFolding : public ModulePass {
   ProcResult processPHINode(PHINode *);
   ProcResult processReturnInst(ReturnInst *);
   ProcResult processTermInst(TerminatorInst *);   
+  ProcResult processPtrToIntInst(PtrToIntInst *);
   ProcResult tryfolding(Instruction *);
 
   Register *processInstAndGetRegister(Value *);
@@ -152,6 +153,7 @@ struct ConstantFolding : public ModulePass {
   void handleStrpbrk(CallInst * );
   void handleStrnCpy(CallInst *);
   void handleStrCpy(CallInst *);
+  void handleStrNCpy(CallInst *);
   void handleStrrChr(CallInst *);
   void simplifyStrFunc(CallInst *);
   void handleAtoi(CallInst *);
@@ -161,6 +163,12 @@ struct ConstantFolding : public ModulePass {
   void handleStrCat(CallInst *);
   void handleStrTol(CallInst *);
   void handleStrnDup(CallInst *);
+  void handleCTypeFuncs(CallInst *);
+
+  void handleCIsSpace(CallInst *);
+  void handleCIsalnum(CallInst *);
+  void handleCToLower(CallInst *);
+  void handleCIsDigit(CallInst *);
 
   bool handleGetOpt(CallInst *);  
   bool handleLongArgs(CallInst *, option *, int *&);
@@ -182,9 +190,7 @@ struct ConstantFolding : public ModulePass {
   bool handleSysCall(CallInst *);
   bool handleGetUid(CallInst *);
   bool handleGetPwUid(CallInst *);
-  bool handleStat(CallInst *);
   bool handleGetCwd(CallInst *);
-  bool handleGetEnv(CallInst *);
   void handleOpen(CallInst *);
   void handleFOpen(CallInst *);
   void handleFEOF(CallInst *);
@@ -196,16 +202,21 @@ struct ConstantFolding : public ModulePass {
   void handleLSeek(CallInst *);
   void handleFSeek(CallInst *);
   void handleFGets(CallInst *);
+  void handleGetLine(CallInst *);
   void handleClose(CallInst *);
-  void handleFEof(CallInst *);
   void handleFClose(CallInst *);
   void removeFileIOCallsFromMap(string buffer[],int);
+  bool handleStat(CallInst *);
+  bool handleFileNo(CallInst *);
+  bool handleFStat(CallInst *);	
+  bool handleGetEnv(CallInst *);
+
       
   void replaceUses();
   void deleteFileIOCalls();
   void markArgsAsNonConst(CallInst* callInst);
   void addGlobals();
-  void addGlobal(GlobalVariable* );
+  uint64_t addGlobal(GlobalVariable* );
 
   void initializeGlobal(uint64_t, Constant *);
   

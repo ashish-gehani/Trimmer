@@ -66,7 +66,7 @@ def run_argspec(tool):
                         Cmd = opt + ' -load ' + build_path + 'AnnotateNew.so -mem2reg -loops -lcssa -loop-simplify -loop-rotate -indvars  -svfg --isAnnotated=' + str(tool.annot_flag) + ' --argvName=__argv_new__\
                             ' + add_file + ' -o ' + annotated_file
                         printDbgMsg(Cmd)
-                        subprocess.call(Cmd, shell = True)
+                        #subprocess.call(Cmd, shell = True)
                         disassemble(annotated_file)
                 else:
                         annotated_file = add_file
@@ -74,7 +74,7 @@ def run_argspec(tool):
 		Cmd = opt + ' -load ' + build_path + 'ConstantFolding.so -isAnnotated=' + str(tool.annot_flag) + ' -trackAllocas=' + str(tool.track_allocas) + ' -fileNames '  + str(tool.config_files) + ' -mem2reg -mergereturn -simplifycfg -loops -lcssa -loop-simplify -loop-rotate -inter-constprop ' + annotated_file + ' -o ' + constprop_file
 		printDbgMsg(Cmd)
 
-		Cmd = [opt, '-load', build_path + 'ConstantFolding.so', '-isAnnotated=' + str(tool.annot_flag), '-trackAllocas=' + str(tool.track_allocas), '-fileNames', str(tool.config_files),'-mem2reg','-mergereturn', '-simplifycfg', '-loops', '-lcssa', '-loop-simplify', '-loop-rotate', '-inter-constprop', annotated_file , '-o', constprop_file]
+		Cmd = [opt, '-load', build_path + 'ConstantFolding.so', '-isAnnotated=' + str(tool.annot_flag), '-trackAllocas=' + str(tool.track_allocas), '-fileNames', str(tool.config_files),'-mem2reg', '-mergereturn','-simplifycfg', '-loops', '-lcssa', '-loop-simplify', '-loop-rotate', '-inter-constprop', annotated_file , '-o', constprop_file]
 		f = open(constprop_log_file, "wb")
 		printDbgMsg(Cmd)
 
