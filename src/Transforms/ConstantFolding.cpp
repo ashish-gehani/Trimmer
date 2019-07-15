@@ -1688,10 +1688,15 @@ bool ConstantFolding::hasTrackedMalloc(Function *F) {
 }
 
 bool ConstantFolding::satisfyConds(Function * F, CallInst *ci) {
+  if(F->hasFnAttribute("track_func")) {
+    debug(Usama) << "(LOG) (SATISFYCONDS) satisfied specializing conditions due to track_func\n";
+    return true;
+  }
+
   if(fimap.find(F) == fimap.end()){
     debug(Usama) << " not found in map\n";
-    return false;}
-
+    return false;
+  }
   FuncInfo* fi = fimap[F];  
   if(trackAllocas) {
     //if any argument is being tracked 
