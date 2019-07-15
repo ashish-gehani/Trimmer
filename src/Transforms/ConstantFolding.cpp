@@ -2601,6 +2601,8 @@ int ConstantFolding::initfptr(FILE *fptr, char* fname) {
  */
 
 bool ConstantFolding::getfdi(int sfd, int & fd) {
+  if(fdInfoMap.find(sfd) == fdInfoMap.end())
+    return false;
   uint64_t addr = fdInfoMap[sfd];
   if(!bbOps.checkConstContigous(addr, currBB)) {
     debug(Abubakar) << "skipping non constant fd\n";
@@ -2622,6 +2624,9 @@ bool ConstantFolding::getfdi(int sfd, int & fd) {
  */
 
 bool ConstantFolding::getfptr(int sfd, FILE *& fptr) {
+  if(fdInfoMap.find(sfd) == fdInfoMap.end())
+    return false;
+
   uint64_t addr = fdInfoMap[sfd];
   if(!bbOps.checkConstContigous(addr,currBB)) {
     debug(Abubakar) << "skipping non constant fptr\n";
@@ -3291,6 +3296,9 @@ void ConstantFolding::handleClose(CallInst * ci) {
   if(!fdConst){
     debug(Abubakar) << "handleClose : failed to specialize\n";
     if(getSingleVal(fdVal, sfd)){
+      if(fdInfoMap.find(sfd) == fdInfoMap.end())
+        return;
+
       string funcNames[2];
       funcNames[0] = "open";
       funcNames[1] = "open";
