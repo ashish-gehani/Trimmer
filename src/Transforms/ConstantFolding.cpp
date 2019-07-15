@@ -1712,16 +1712,14 @@ bool ConstantFolding::satisfyConds(Function * F, CallInst *ci) {
 
     set<GlobalVariable *> &modData = getFuncModset(F);
     //vector<Value *> intersection;
-    /*
-    for(auto &modD: modData)
+    for(auto &modD: modData) {
+      if(modD->isConstant())
+        continue;
       if(trackedValues.find(modD) != trackedValues.end()) {
         debug(Usama) << "(LOG) (SATISFYCONDS) Call " << *ci << " satisfied specializing conditions due to modset" << "\n";
         return true;
       }
-      */
-    //set_intersection(modData.begin(), modData.end(), trackedValues.begin(), trackedValues.end(), intersection.begin());
-    //if(intersection.size()) {
-    //}
+    }
 
     //if function has a malloc
     if(hasTrackedMalloc(F))
