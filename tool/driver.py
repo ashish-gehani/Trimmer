@@ -67,6 +67,7 @@ def run_argspec(tool):
                         Cmd = opt + ' -load ' + build_path + 'AnnotateNew.so -mem2reg -mergereturn -simplifycfg -loops -lcssa -loop-simplify -loop-rotate -loop-rotate -indvars  -svfg --isAnnotated=' + str(tool.annot_flag) + ' --argvName=__argv_new__\
                             ' + add_file + ' -o ' + annotated_file
                         printDbgMsg(Cmd)
+
                         starttime =  datetime.now()
                         subprocess.call(Cmd, shell = True)
                         endtime = datetime.now()
