@@ -1,0 +1,10 @@
+{
+	"binary": "sans_fin", 
+	"native_libs": [], 
+	"name": "sans", 
+	"args": ["-c", "sans.conf"],
+	"modules": [], 
+	"ldflags": [], 
+	"main": "sans.bc",
+        "config_files":["sans.conf"]
+}
