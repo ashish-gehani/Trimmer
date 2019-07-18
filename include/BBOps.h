@@ -56,7 +56,7 @@ public:
   bool straightPath(BasicBlock * from, BasicBlock * to); 
   Value * foldPhiNode(PHINode * phiNode, vector<Value*>&);
   BasicBlock * getRfromPred(BasicBlock * BB);
-  void recomputeLoopInfo(Function * F, LoopInfo& LI);
+  void recomputeLoopInfo(Function * F, LoopInfo& LI, BasicBlock *);
   /* todo : how to recompute ancestors */
   void copyFuncBlocksInfo(Function * F, ValueToValueMapTy & vmap);
 
@@ -85,7 +85,11 @@ public:
   void copyContexts(Function *to, Function *from, ValueToValueMapTy& vmap, Module *);
   bool isContextDeleted(BasicBlock *);
   void getVisitedPreds(BasicBlock *BB, vector<BasicBlock *> &preds);
+
+  uint64_t getConstMemSize(BasicBlock *);
   uint64_t getSizeContigous(uint64_t, BasicBlock *);
+  Memory *getMemory(BasicBlock *);
+  bool contextMatch(Memory *, BasicBlock *);
 private:
   map<BasicBlock *, BBInfo *> BBInfoMap;
   BasicBlockContInfoMap BasicBlockContexts;

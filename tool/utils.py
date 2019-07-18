@@ -41,6 +41,7 @@ def parse_args(args):
 	icp_flag = True
         annot_flag = 1
         track_allocas = 1
+        contextType = 1
 	for i in range(2, len(args)):
 		if(args[i] == 'no-optimization'):
 			opt_flag = False
@@ -54,5 +55,6 @@ def parse_args(args):
                         annot_flag = 0 
                 elif(args[i] == 'no-track-allocas'):
                         track_allocas = 0
-		else: usage()
-	return (man_data, work_dir, opt_flag, spec_flag, strip_flag, icp_flag, annot_flag, track_allocas)
+                elif(args[i] == 'contextType'):
+                        contextType = args[i+1]
+	return (man_data, work_dir, opt_flag, spec_flag, strip_flag, icp_flag, annot_flag, track_allocas, contextType)

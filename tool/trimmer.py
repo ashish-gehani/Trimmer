@@ -7,7 +7,7 @@ debugPrint = 1
 
 class Trimmer:
 
-    def __init__(self, (man_data, work_dir, opt_flag, spec_flag, strip_flag, icp_flag, annot_flag, track_allocas)):
+    def __init__(self, (man_data, work_dir, opt_flag, spec_flag, strip_flag, icp_flag, annot_flag, track_allocas, context_type)):
 
         self.name = man_data["name"]
         self.main = man_data["main"]
@@ -17,7 +17,9 @@ class Trimmer:
         self.ldflags = ' '.join(man_data["ldflags"])
         self.native_libs = ' '.join(man_data["native_libs"])
         self.exe_name = man_data["binary"]
-        self.config_files = ','.join(man_data["config_files"])
+        self.config_files = ""
+        if("config_files" in man_data):
+            self.config_files = ','.join(man_data["config_files"])
         self.work_dir = work_dir
         self.opt_flag = opt_flag
         self.spec_flag = spec_flag
@@ -25,6 +27,7 @@ class Trimmer:
         self.icp_flag = icp_flag
         self.annot_flag = annot_flag
         self.track_allocas = track_allocas
+        self.context_type = context_type
         self.print_info()
 
     def print_info(self):
@@ -41,6 +44,7 @@ class Trimmer:
     def run(self):
         self.curr_file = self.work_dir + '/' + self.main
         utils.exists(self.main_path)
+        print self.main_path
         copyfile(self.main_path, self.work_dir + '/' + self.main)
         if(self.spec_flag):	
         # The following driver call runs the argument specialization transform

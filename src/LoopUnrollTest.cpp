@@ -53,6 +53,8 @@ Instruction *LoopUnrollTest::firstInst(BasicBlock * BB) {
 
 bool LoopUnrollTest::checkTestInst(Instruction * I, string testName) {
   if(CallInst * ci = dyn_cast<CallInst>(I)) {
+    errs() << "testname = " << testName << "\n"; 
+    errs() << "testing for " << *ci << "\n";
     if(ci->getCalledFunction() && ci->getCalledFunction()->getName().str() == testName)
       return true;
   }

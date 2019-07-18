@@ -18,6 +18,7 @@ def run_test(workdir, typ, lo, hi):
             continue
         print 'running test ' + str(i)
         Cmd = './' + script_file + ' inter' + str(i) + ' out' + str(i) + ' ' + workdir + ' ' + src_dir + ' ' + fileName
+        print Cmd
         subprocess.call(Cmd, shell = True)	
 
 def main():

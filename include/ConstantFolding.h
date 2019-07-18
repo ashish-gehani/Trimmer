@@ -61,6 +61,12 @@ struct Cycle {
   set<GlobalVariable *> values;
 };
 
+struct FuncSpecDetail {
+  Memory *context;
+  bool fail;
+  CallInst *call;
+};
+
 struct ConstantFolding : public ModulePass {
 
   static char ID;  
@@ -74,6 +80,8 @@ struct ConstantFolding : public ModulePass {
   RegOps regOps;
   map<Value*, Value*> ptrMap;
   map<Function *, set<GlobalVariable *> > modSet;
+  map<Function *, FuncSpecDetail *> funcSpecMap;
+  bool exit;
 
   set<Value *> trackedValues;
 
@@ -100,7 +108,7 @@ struct ConstantFolding : public ModulePass {
   vector<MMapInfo*> mMapBuffer; 
   const unsigned short int * traitsTable;
 
-  ConstantFolding(): ModulePass(ID){}
+  ConstantFolding(): ModulePass(ID){ exit = 0;}
   void getAnalysisUsage(AnalysisUsage &AU) const;
 
   ProcResult processAllocaInst(AllocaInst *);
@@ -142,7 +150,7 @@ struct ConstantFolding : public ModulePass {
   CallInst *cloneAndAddFuncCall(CallInst *);
   bool predecessorsVisited(BasicBlock *);
 
-  bool simplifyCallback(CallInst *);
+  Function *simplifyCallback(CallInst *);
   bool handleDbgCall(CallInst *);
   bool handleHeapAlloc(CallInst *);
   bool handleMemInst(CallInst *);
@@ -173,6 +181,7 @@ struct ConstantFolding : public ModulePass {
   bool handleGetOpt(CallInst *);  
   bool handleLongArgs(CallInst *, option *, int *&);
   
+  bool handleLibCCall(CallInst *callInst);
   bool handleBasename(CallInst *);
   bool handleCTypeBLoc(CallInst *callInst);
   bool handleCTypeBLocLower(CallInst *callInst);
@@ -300,6 +309,10 @@ struct ConstantFolding : public ModulePass {
   bool copyMemory(char *address, Type *ty, char *localAddress);
 
   bool handleStrStr(CallInst *);
+  bool processMallocUsableSize(CallInst *);
+  bool handleOverFlowInst(CallInst *callInst);
+  ProcResult handleExtractValue(ExtractValueInst *inst);
+
   bool handleToLower(CallInst *);
 };
 

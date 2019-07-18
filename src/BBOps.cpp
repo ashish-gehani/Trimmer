@@ -47,6 +47,10 @@ bool BBOps::partOfLoop(Value * val) {
 }
 bool BBOps::partOfLoop(BasicBlock * BB) {
   assert(BBInfoMap.find(BB) != BBInfoMap.end());
+  if(BBInfoMap.find(BB) == BBInfoMap.end()) {
+    debug(Usama) << "Error: partOfLoop, BB not found\n";
+    return false;
+  }
   return BBInfoMap[BB]->partOfLoop;
 }
 bool BBOps::writesToMemory(BasicBlock * BB) {
@@ -274,6 +278,8 @@ void BBOps::markSuccessorsAsUR(TerminatorInst * termInst, LoopInfo& LI) {
     if(BBInfoMap[successor]->URfrom < BBInfoMap[successor]->numPreds) {
       debug(Usama) << "Skipping " << successor->getName() << " as unreachable=" << BBInfoMap[successor]->URfrom << " and numPreds=" << BBInfoMap[successor]->numPreds;
       continue;
+    } else{
+      //debug(Usama) << successor->getName() << " adding unreachable: unrachable: " BBInfoMap[successor]->URfrom << " and numPreds=" << BBInfoMap[successor]->numPreds << "\n";
     }
     propagateUR(successor, LI);
   }
@@ -369,11 +375,20 @@ BasicBlock * BBOps::getRfromPred(BasicBlock * BB) {
   }    
   return NULL;
 }
-void BBOps::recomputeLoopInfo(Function * F, LoopInfo& LI) {
+void BBOps::recomputeLoopInfo(Function * F, LoopInfo& LI, BasicBlock *header) {
   for(Function::iterator bi = F->begin(), e = F->end(); bi != e; ++bi) {
     BasicBlock * BB = &*bi;
-    if(BBInfoMap.find(BB) != BBInfoMap.end())
+    if(BBInfoMap.find(BB) != BBInfoMap.end()) {
       BBInfoMap[BB]->partOfLoop = LI.getLoopFor(BB);
+      debug(Usama) << "Part of Loop: " << BBInfoMap[BB]->partOfLoop << "\n";
+    } else {
+      //BBInfoMap[BB] = new BBInfo(BB);
+      //BBInfoMap[BB]->partOfLoop = LI.getLoopFor(BB);
+      //if(BBInfoMap[BB]->partOfLoop)
+        //debug(Usama) << *LI.getLoopFor(BB)->getHeader()  << "\n";
+      //printBB("BBName: ", BB, ",", Usama);
+      //debug(Usama) << "Error: Could not find parent. part of loop: " << BBInfoMap[BB]->partOfLoop << "\n";
+    }
   }
 }
 
@@ -477,6 +492,13 @@ void BBOps::copyContexts(Function *to, Function *from, ValueToValueMapTy& vmap, 
  * Create new ContextInfo for a Basic Block
  */
 void BBOps::createNewContext(BasicBlock * BB, Module* module) {
+  assert(BasicBlockContexts.find(BB) == BasicBlockContexts.end());
+  if(BasicBlockContexts.find(BB) != BasicBlockContexts.end()) {
+    ContextInfo *ci = BasicBlockContexts[BB];
+    delete ci->memory;
+    BasicBlockContexts.erase(BB);
+    delete ci;
+  }
   BasicBlockContexts[BB] = new ContextInfo(module);
 }
 
@@ -485,10 +507,23 @@ bool BBOps::isContextDeleted(BasicBlock *BB) {
 }
 
 void BBOps::duplicateContext(BasicBlock * to, BasicBlock *from) {
+  if(BasicBlockContexts.find(to) != BasicBlockContexts.end()) {
+    ContextInfo *ci = BasicBlockContexts[to];
+    delete ci->memory;
+    BasicBlockContexts.erase(to);
+    delete ci;
+  }
   BasicBlockContexts[to] = BasicBlockContexts[from]->duplicate();
 }
 
 void BBOps::imageContext(BasicBlock * to, BasicBlock* from) {
+  assert(BasicBlockContexts.find(to) == BasicBlockContexts.end());
+  if(BasicBlockContexts.find(to) != BasicBlockContexts.end()) {
+    ContextInfo *ci = BasicBlockContexts[to];
+    delete ci->memory;
+    BasicBlockContexts.erase(to);
+    delete ci;
+  }
   BasicBlockContexts[to] = BasicBlockContexts[from]->image();
 }
 
@@ -567,13 +602,19 @@ ContextInfo *BBOps::getContextInfo(BasicBlock *bb) {
 }
 
 void BBOps::cleanUpFuncBBInfo(Function *f) {
+  debug(Usama) << "called for function: " << f->getName().str() << "\n";
   for(auto f_it = f->begin(), f_ite = f->end(); f_it != f_ite; ++f_it) {
     BasicBlock * BB = &*f_it;
     if(BasicBlockContexts.find(BB) == BasicBlockContexts.end())
       continue;
+    printBB("deleting for BB: ", BB, " ", Usama);
     ContextInfo * ci = BasicBlockContexts[BB];
-    if(!ci->deleted && !ci->imageOf)
+    debug(Usama) << "with ci address: " << ci << "\n";
+    debug(Usama) << ci->deleted << " " << ci->imageOf << "\n";
+    if(!ci->deleted && !ci->imageOf) {
+      debug(Usama) << "Deleting memory too: " << "\n";
       delete ci->memory;
+    }
     BasicBlockContexts.erase(BB);
     delete ci;
   }
@@ -590,6 +631,44 @@ void BBOps::getVisitedPreds(BasicBlock *BB, vector<BasicBlock *> &preds) {
   }
 }
 
+uint64_t BBOps::getConstMemSize(BasicBlock *BB) {
+  return BasicBlockContexts[BB]->memory->getConstMemSize();
+}
+
 uint64_t BBOps::getSizeContigous(uint64_t address, BasicBlock *BB) {
-  return BasicBlockContexts[BB]->memory->getSizeContigous(address);
+    return BasicBlockContexts[BB]->memory->getSizeContigous(address);
+}
+
+Memory *BBOps::getMemory(BasicBlock *BB) {
+  return BasicBlockContexts[BB]->memory;
+}
+
+bool BBOps::contextMatch(Memory *mem, BasicBlock *BB) {
+  Memory *other = BasicBlockContexts[BB]->memory;
+  if(mem->getStackIndex() != other->getStackIndex() || mem->getHeapIndex() != other->getHeapIndex())
+    return false;
+  uint64_t stackIndex = mem->getStackIndex();
+  uint64_t heapIndex = mem->getHeapIndex();
+
+  int8_t *stackOne = mem->getStack();
+  int8_t *stackTwo = other->getStack();
+  int8_t *heapOne = mem->getHeap();
+  int8_t *heapTwo = other->getHeap();
+
+  bool *stackConstOne = mem->getStackConst();
+  bool *stackConstTwo = other->getStackConst();
+  bool *heapConstOne = mem->getHeapConst();
+  bool *heapConstTwo = other->getHeapConst();
+
+  for(uint64_t i = 0; i < stackIndex; i++) {
+    if(stackOne[i] != stackTwo[i] || stackConstOne[i] != stackConstTwo[i])
+      return false;
+  }
+
+  for(uint64_t i = 0; i < heapIndex; i++) {
+    if(heapOne[i] != heapTwo[i] || heapConstOne[i] != heapConstTwo[i])
+      return false;
+  }
+
+  return true;
 }

@@ -3,6 +3,7 @@ import subprocess
 import config
 import os
 import utils
+from datetime import datetime
 
 trimmer_path = os.environ.get('TRIMMER_HOME')
 build_path = trimmer_path + '/build/'
@@ -63,22 +64,44 @@ def run_argspec(tool):
         disassemble(add_file)
 	if(tool.icp_flag): 
                 if(tool.track_allocas):
-                        Cmd = opt + ' -load ' + build_path + 'AnnotateNew.so -mem2reg -loops -lcssa -loop-simplify -loop-rotate -indvars  -svfg --isAnnotated=' + str(tool.annot_flag) + ' --argvName=__argv_new__\
+                        Cmd = opt + ' -load ' + build_path + 'AnnotateNew.so -mem2reg -mergereturn -simplifycfg -loops -lcssa -loop-simplify -loop-rotate -loop-rotate -indvars  -svfg --isAnnotated=' + str(tool.annot_flag) + ' --argvName=__argv_new__\
                             ' + add_file + ' -o ' + annotated_file
                         printDbgMsg(Cmd)
-                        #subprocess.call(Cmd, shell = True)
+                        starttime =  datetime.now()
+                        subprocess.call(Cmd, shell = True)
+                        endtime = datetime.now()
+                        delta = endtime-starttime
+                        combined = delta.seconds + delta.microseconds/1E6
+                        print(combined)
                         disassemble(annotated_file)
+                        #return
                 else:
                         annotated_file = add_file
+                #-simplifycfg
 		# interconstprop pass
-		Cmd = opt + ' -load ' + build_path + 'ConstantFolding.so -isAnnotated=' + str(tool.annot_flag) + ' -trackAllocas=' + str(tool.track_allocas) + ' -fileNames '  + str(tool.config_files) + ' -mem2reg -mergereturn -simplifycfg -loops -lcssa -loop-simplify -loop-rotate -inter-constprop ' + annotated_file + ' -o ' + constprop_file
+                # 
+		Cmd = opt + ' -load ' + build_path + 'ConstantFolding.so -isAnnotated=' + str(tool.annot_flag) + ' -trackAllocas=' + str(tool.track_allocas) + ' -fileNames '  + str(tool.config_files) + ' -mem2reg -globalopt -instcombine --disable-simplify-libcalls  -loops -lcssa -loop-simplify -loop-rotate -inter-constprop -__progName=ssh' + annotated_file + ' -o ' + constprop_file
 		printDbgMsg(Cmd)
-
-		Cmd = [opt, '-load', build_path + 'ConstantFolding.so', '-isAnnotated=' + str(tool.annot_flag), '-trackAllocas=' + str(tool.track_allocas), '-fileNames', str(tool.config_files),'-mem2reg', '-mergereturn','-simplifycfg', '-loops', '-lcssa', '-loop-simplify', '-loop-rotate', '-inter-constprop', annotated_file , '-o', constprop_file]
+#'-simplifycfg'
+                rotated_file = tool.work_dir + "/rotated.bc"
+                global_opt = tool.work_dir + "/global_opt.bc"
+                Cmd = [opt, "-loop-rotate", annotated_file, "-o", rotated_file]
+                subprocess.call(Cmd)
+ #"-instcombine",
+                Cmd = [opt, "-globalopt","-instcombine", '-mergereturn', '-loop-rotate', rotated_file, '-o', global_opt]
+                subprocess.call(Cmd)
+#'-loop-unswitch', '-loop-idiom', '-loop-accesses', '-loop-vectorize', '-loop-load-elim', '-loop-sink' '-lcssa', 
+		Cmd = [opt, '-load', build_path + 'ConstantFolding.so', '-isAnnotated=' + str(tool.annot_flag), '-trackAllocas=' + str(tool.track_allocas), '-contextType=' + str(tool.context_type), '-fileNames', str(tool.config_files),'-mem2reg', '-loops', '-loop-simplify', '-scalar-evolution', '-licm',  '-loop-rotate', '-indvars', '-loop-reduce', "-__progName=ssh",'-inter-constprop', annotated_file, '-o', constprop_file]
 		f = open(constprop_log_file, "wb")
-		printDbgMsg(Cmd)
+		printDbgMsg(" ".join(Cmd))
 
-		subprocess.call(Cmd, stderr=f)
+                starttime =  datetime.now() 
+		subprocess.call(Cmd)
+                endtime = datetime.now()
+                delta = endtime-starttime
+                combined = delta.seconds + delta.microseconds/1E6
+                print(combined)
+
 		f.close()
                 disassemble(constprop_file)
 		# remove pass

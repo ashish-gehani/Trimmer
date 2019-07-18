@@ -11,7 +11,7 @@
 #define PRNTDBGSTR "__print_debug_string__"
 #define SETDBGLEVEL "__set_debug_level__"
 
-#define DEFAULT_TRIP_COUNT 10
+#define DEFAULT_TRIP_COUNT 15
 
 using namespace std;
 using namespace llvm;

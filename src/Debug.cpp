@@ -6,7 +6,7 @@
 #include "Debug.h"
 #include "Utils.h"
 
-int debugLevel = DebugNone;
+int debugLevel = All;
 
 using namespace llvm;
 using namespace std;

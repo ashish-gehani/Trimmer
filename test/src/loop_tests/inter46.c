@@ -8,9 +8,9 @@ struct Config {
   int area, perimeter, length, breadth;
 };
 
-void branchPruned(struct Config config) {
-  if(config.area == 1 && config.perimeter == 1 && 
-  config.length == 5 && config.breadth == 10)
+void branchPruned(struct Config *config) {
+  if(config->area == 1 && config->perimeter == 1 && 
+  config->length == 5 && config->breadth == 10)
     printf("branchPruned\n");
 } 
 struct Config config;
@@ -48,6 +48,6 @@ int main() {
         break;
     }
   }
-  branchPruned(config);
+  branchPruned(&config);
   printf("%d\n", optind);
 }

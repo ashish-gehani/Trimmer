@@ -17,7 +17,7 @@ int main(int argc, char ** argv) {
   if(fd < 0) printf("file not found\n");
   int bytes_read = 0;
   int n = 30;
-  int i=30;
+  int i=0;
 
   while(i != 30)
   {

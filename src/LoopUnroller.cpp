@@ -34,21 +34,31 @@ bool LoopUnroller::testTerminated() {
 
 bool LoopUnroller::checkUnrollHint(BasicBlock * hdr, LoopInfo &LI, Module *module) {
   Value * unrollH = module->getNamedValue("unroll_loop");
-  if(!unrollH) return false;
-  for(Use &U : unrollH->uses()) {
-    Instruction * user = dyn_cast<Instruction>(U.getUser());
-    if(!user) continue;
-    BasicBlock * BB = user->getParent();
-    Loop * L = LI.getLoopFor(BB);
-    if(L && L->getHeader() == hdr) return true;
-  }
-  return false;
+  Value *unrollHTwo = module->getNamedValue("unroll_loop_two");
+
+  auto checkHint = [&](Value *unrollH) {
+    if(!unrollH)
+      return false;
+
+    for(Use &U : unrollH->uses()) {
+      Instruction * inst = dyn_cast<Instruction>(U.getUser());
+      BasicBlock * BB = inst->getParent();
+      Loop * L = LI.getLoopFor(BB);
+      if(L && L->getHeader() == hdr)
+        return true; 
+    }
+    return false;
+  };
+
+  return checkHint(unrollH) || checkHint(unrollHTwo); 
 }
 
 bool LoopUnroller::shouldSimplifyLoop(BasicBlock *BB, LoopInfo &LI, Module *m, bool useAnnotations) {
+  //return true;
   if(useAnnotations && !checkUnrollHint(BB, LI, m))
     return false;
   //expectation in loop rotated form
+  //return true;
   Loop *L = LI.getLoopFor(BB);
   BasicBlock* preheader = L->getLoopPreheader();
   auto terminator = preheader->getTerminator();
@@ -88,14 +98,27 @@ bool LoopUnroller::getTripCount(TargetLibraryInfo * TLI, AssumptionCache &AC, un
   ScalarEvolution SE(*F, *TLI, AC, DT, *LI);
   tripCount =  SE.getSmallConstantMaxTripCount(loop);
   debug(Usama) << "Trip Multiple " << SE.getSmallConstantTripMultiple(loop) << "\n";
+  if(tripCount >= 100000)
+    tripCount = 0;
 
-  if(!tripCount || tripCount > 100) {
+  for(auto &I: *header) {
+    errs() << I << "\n";
+      if(CallInst *call = dyn_cast<CallInst>(&I)) {
+        debug(Usama) << call->getName() << " name\n";
+        if(call->getCalledFunction() && call->getCalledFunction()->getName() == "unroll_loop_two") {
+          tripCount = dyn_cast<ConstantInt>(call->getOperand(1))->getZExtValue();
+          debug(Usama) << "Here : " << tripCount << "\n";
+        }
+      }
+  }
+
+  if(!tripCount || tripCount > 10000)
     if(isFileIOLoop)
       tripCount = fileTripCount + 5;
     else
       tripCount = DEFAULT_TRIP_COUNT + 5;
     return false;
-  }
+
   return true;
 }
 
@@ -129,6 +152,7 @@ bool LoopUnroller::doUnroll(TargetLibraryInfo * TLI, AssumptionCache &AC, unsign
   ScalarEvolution SE(*F, *TLI, AC, DT, *LI);
   Loop * L = LI->getLoopFor(loop->getHeader());
   OptimizationRemarkEmitter ORE(F); 
+  debug(Usama) << "Trying trip count: " << tripCount << "\n";
   int UnrollResult = UnrollLoop(L, tripCount, tripCount, true, false, false, 
                 true, false, 1, 0, LI, &SE, &DT, &AC, &ORE, PreserveLCSSA);
   if(!UnrollResult) {

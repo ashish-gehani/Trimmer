@@ -18,8 +18,10 @@ void Stats::functionCall(Function *child) {
 }
 
 inline FunctionStats *Stats::getRunningFunction() {
-  if(!stack.size())
+  if(!stack.size()) {
+    errs() << "stats: no running function\n";
     return NULL;
+  }
   return stack[stack.size()-1];
 }
 
@@ -109,6 +111,7 @@ void FunctionStats::functionReturn() {
 }
 
 void FunctionStats::loopStart(BasicBlock *BB) {
+  errs() << "pushing new loop " << BB->getName() << "for function " << this->f->getName() << "\n";
   loops.push_back(new LoopStats(BB));
 }
 
@@ -121,7 +124,7 @@ inline LoopStats *FunctionStats::getRunningLoop() {
   assert(loops.size());
   errs() << "loop size:" << loops.size() << "\n";
   for(i = loops.size() - 1; i >= 0 && loops[i]->hasLoopTerminated(); i--);
-  assert(i >= 0);
+  //assert(i >= 0);
   if(i < 0)
     return NULL;
   errs() << " i " << i << "\n";

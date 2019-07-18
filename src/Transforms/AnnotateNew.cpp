@@ -903,6 +903,13 @@ void AnnotateNew::getSourceAllocas(set<SVFGNode*> &svfgNodes, vector<const SVFGN
         //errs() << "In backward " << *pagEdge->getInst() << "\n";
         auto I = pagEdge->getInst();
         string fname = "";
+
+        if(dyn_cast<ReturnInst>(I)) {
+          Function *parent = (Function *) I->getParent()->getParent(); 
+          parent->addFnAttr("track_func", "true");
+          errs() << "track_func added to function " << parent->getName() << "\n";
+        }
+
         if(I->getParent() && I->getParent()->getParent())
           fname = I->getParent()->getParent()->getName();
 
@@ -1689,7 +1696,7 @@ bool AnnotateNew::runOnModule(Module &M) {
   for(int i = statValues.size() - 1; i >= 0; i--) { 
     errs() << *statValues[i]->value << " with value: " << statFormula(statValues[i]) << "\n"; 
     Value *I = statValues[i]->value;
-    unsigned num = (i - statValues.size()) + 1;
+    unsigned num = (statValues.size() - 1) - i + 1;
     LLVMContext &C = I->getContext();
     MDNode *N = MDNode::get(C, ConstantAsMetadata::get(ConstantInt::get(Type::getInt64Ty(C), num))); 
     if(dyn_cast<Instruction>(I))

@@ -20,6 +20,6 @@ int main(int argc) {
   }
   
   *temp = 'd';
-  branchPruned(a[0]);
+  branchNotPruned(a[0]);
   return 0;
 }
