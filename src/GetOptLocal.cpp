@@ -3,6 +3,7 @@
 #include "llvm/Support/raw_ostream.h"
 #include <cstring>
 
+// FIXME: Add top-level comment for what this source includes? Also comments for imp functions
 
 int contains(char* str, char c){
   if(!str)

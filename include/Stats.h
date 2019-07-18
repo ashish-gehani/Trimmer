@@ -11,6 +11,8 @@
 using namespace std;
 using namespace llvm;
 
+// FIXME: Need top-level comment to describe Stats class, atttributes and purpose
+
 template<class T>
 class StatNode {
   public:
