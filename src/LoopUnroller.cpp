@@ -112,12 +112,13 @@ bool LoopUnroller::getTripCount(TargetLibraryInfo * TLI, AssumptionCache &AC, un
       }
   }
 
-  if(!tripCount || tripCount > 10000)
+  if(!tripCount || tripCount > 10000){
     if(isFileIOLoop)
       tripCount = fileTripCount + 5;
     else
       tripCount = DEFAULT_TRIP_COUNT + 5;
     return false;
+  }
 
   return true;
 }
