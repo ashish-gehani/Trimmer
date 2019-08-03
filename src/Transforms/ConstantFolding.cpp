@@ -3346,9 +3346,8 @@ void ConstantFolding::handleGetLine(CallInst * ci) {
     ci->replaceAllUsesWith(sizeNum); 
 
     IRBuilder<> Builder(ci);
-
     Constant *mallocFunc;
-    mallocFunc = module->getOrInsertFunction("malloc",Type::getInt8PtrTy(module->getContext()),Type::getInt64Ty(module->getContext()),NULL);    
+    mallocFunc = module->getOrInsertFunction("malloc", Type::getInt8PtrTy(module->getContext()),Type::getInt64Ty(module->getContext()));// [CHANGED] REMOVED NULL
     Function *hookM= cast<Function>(mallocFunc);
 
     ConstantInt * arg1 = Builder.getInt64(strlen(newBuf) + 1);
@@ -3358,14 +3357,14 @@ void ConstantFolding::handleGetLine(CallInst * ci) {
     GlobalVariable * gv = new GlobalVariable(*module,const_array->getType(),true,GlobalValue::ExternalLinkage,const_array,"");
     gv->setAlignment(1);
 
-    Instruction* MemCpyInst = Builder.CreateMemCpy(malloc,gv,strlen(newBuf),1);
+    Instruction* MemCpyInst = Builder.CreateMemCpy(malloc,1,gv,1,strlen(newBuf)); // [CHANGED] // src DstAlignment and src Alignment 1
 
     StoreInst * store = Builder.CreateStore(malloc,bufPtr,false);
 
     
     Constant *hookFunc;
     // FIXME: Line is overflowing - Properly break after 80 chars
-    hookFunc = module->getOrInsertFunction("fseek", Type::getInt32Ty(module->getContext()),fptrVal->getType(),Type::getInt64Ty(module->getContext()),Type::getInt32Ty(module->getContext()),NULL);    
+    hookFunc = module->getOrInsertFunction("fseek", Type::getInt32Ty(module->getContext()),fptrVal->getType(),Type::getInt64Ty(module->getContext()),Type::getInt32Ty(module->getContext())); // [CHANGED]   
     Function *hook= cast<Function>(hookFunc);
 
     ConstantInt * arg2 = Builder.getInt64(getfptrOffset(sfd,fptr));
@@ -3472,11 +3471,11 @@ void ConstantFolding::handleRead(CallInst * ci) {
   GlobalVariable * gv = new GlobalVariable(*module,const_array->getType(),true,GlobalValue::ExternalLinkage,const_array,"");
   gv->setAlignment(1);
   IRBuilder<> Builder(ci);
-  Instruction* MemCpyInst = Builder.CreateMemCpy(bufPtr,gv,bytes_read,1);
+  Instruction* MemCpyInst = Builder.CreateMemCpy(bufPtr, 1, gv, 1,bytes_read);// [CHANGED] src and dest alignment
   
   Constant *hookFunc;
   // FIXME: Break line
-  hookFunc = module->getOrInsertFunction("lseek", Type::getInt64Ty(module->getContext()), Type::getInt32Ty(module->getContext()),Type::getInt64Ty(module->getContext()),Type::getInt32Ty(module->getContext()),NULL);    
+  hookFunc = module->getOrInsertFunction("lseek", Type::getInt64Ty(module->getContext()), Type::getInt32Ty(module->getContext()),Type::getInt64Ty(module->getContext()),Type::getInt32Ty(module->getContext())); //[CHANGED]   
   Function *hook= cast<Function>(hookFunc);
 
   ConstantInt * arg1 = Builder.getInt32(fd);
@@ -3541,7 +3540,7 @@ void ConstantFolding::handlePRead(CallInst * ci) {
   GlobalVariable * gv = new GlobalVariable(*module,const_array->getType(),true,GlobalValue::ExternalLinkage,const_array,"");
   gv->setAlignment(1);
   IRBuilder<> Builder(ci);
-  Instruction* MemCpyInst = Builder.CreateMemCpy(bufPtr,gv,bytes_read,1);
+  Instruction* MemCpyInst = Builder.CreateMemCpy(bufPtr, 1, gv, 1, bytes_read);// [CHANGED] src and dest allignment 1
   fileIOCalls[sfd]->insts.push_back(ci);
 }
 
@@ -3729,9 +3728,9 @@ void ConstantFolding::handleFRead(CallInst * ci) {
   GlobalVariable * gv = new GlobalVariable(*module,const_array->getType(),true,GlobalValue::ExternalLinkage,const_array,"");
   gv->setAlignment(1);
   IRBuilder<> Builder(ci);
-  Instruction* MemCpyInst = Builder.CreateMemCpy(bufPtr,gv,bytes_read,1);
+  Instruction* MemCpyInst = Builder.CreateMemCpy(bufPtr, 1,gv, 1,bytes_read);// [CHANGED] dest and src allignment
   Constant *hookFunc;
-  hookFunc = module->getOrInsertFunction("fseek", Type::getInt32Ty(module->getContext()),fptrVal->getType(),Type::getInt64Ty(module->getContext()),Type::getInt32Ty(module->getContext()),NULL);    
+  hookFunc = module->getOrInsertFunction("fseek", Type::getInt32Ty(module->getContext()),fptrVal->getType(),Type::getInt64Ty(module->getContext()),Type::getInt32Ty(module->getContext()));//[CHANGED]    
   Function *hook= cast<Function>(hookFunc);
 
   ConstantInt * arg2 = Builder.getInt64(getfptrOffset(sfd,fptr));
@@ -3829,10 +3828,10 @@ void ConstantFolding::handleFGets(CallInst * ci) {
     GlobalVariable * gv = new GlobalVariable(*module,const_array->getType(),true,GlobalValue::ExternalLinkage,const_array,"");
     gv->setAlignment(1);
     IRBuilder<> Builder(ci);
-    Instruction* MemCpyInst = Builder.CreateMemCpy(bufPtr,gv,strlen(bytes_read),1);
+    Instruction* MemCpyInst = Builder.CreateMemCpy(bufPtr, 1,gv, 1, strlen(bytes_read));// [CHANGED] dest and src allignment
     ci->replaceAllUsesWith(bufPtr);
     Constant *hookFunc;
-    hookFunc = module->getOrInsertFunction("fseek", Type::getInt32Ty(module->getContext()),fptrVal->getType(),Type::getInt64Ty(module->getContext()),Type::getInt32Ty(module->getContext()),NULL);    
+    hookFunc = module->getOrInsertFunction("fseek", Type::getInt32Ty(module->getContext()),fptrVal->getType(),Type::getInt64Ty(module->getContext()),Type::getInt32Ty(module->getContext())); // [CHANGED]   
     Function *hook= cast<Function>(hookFunc);
 
     ConstantInt * arg2 = Builder.getInt64(getfptrOffset(sfd,fptr));
