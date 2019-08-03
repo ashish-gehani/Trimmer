@@ -298,7 +298,7 @@ bool BBOps::foldToSingleSucc(TerminatorInst * termInst, vector<BasicBlock *> & r
     }
   } else if(SwitchInst * SI = dyn_cast<SwitchInst>(termInst)) {
     if(ConstantInt * CI = dyn_cast<ConstantInt>(SI->getCondition()))
-      single = SI->findCaseValue(CI).getCaseSuccessor();
+      single = SI->findCaseValue(CI)->getCaseSuccessor();
   }
   if(single) {
     printBB("folded to single successor ", single, "\n", Abubakar);
