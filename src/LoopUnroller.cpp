@@ -154,8 +154,8 @@ bool LoopUnroller::doUnroll(TargetLibraryInfo * TLI, AssumptionCache &AC, unsign
   Loop * L = LI->getLoopFor(loop->getHeader());
   OptimizationRemarkEmitter ORE(F); 
   debug(Usama) << "Trying trip count: " << tripCount << "\n";
-  int UnrollResult = UnrollLoop(L, tripCount, tripCount, true, false, false, 
-                true, false, 1, 0, LI, &SE, &DT, &AC, &ORE, PreserveLCSSA);
+  int UnrollResult = (int) UnrollLoop(L, tripCount, tripCount, true, false, false, 
+                true, false, 1, 0, false ,LI, &SE, &DT, &AC, &ORE, PreserveLCSSA);//unrollRemaineder set to false currently
   if(!UnrollResult) {
     debug(Abubakar) << "failed in unrolling\n";
     return false;
