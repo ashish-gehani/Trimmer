@@ -26,6 +26,7 @@
 #include "llvm/Analysis/CallGraph.h"
 #include "llvm/IR/InstrTypes.h"
 #include "llvm/IR/DerivedTypes.h"
+#include "llvm/Transforms/Utils.h" // [CHANGED] added New library for loopSimplifyID
 
 
 
