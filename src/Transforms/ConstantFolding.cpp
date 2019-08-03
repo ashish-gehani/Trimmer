@@ -2686,7 +2686,9 @@ void ConstantFolding::simplifyStrFunc(CallInst * callInst) {
   auto InstCombineRAUW = [this](Instruction *From, Value *With) {
     From->replaceAllUsesWith(With);
   };
-  LibCallSimplifier Simplifier(*DL, TLI, InstCombineRAUW);
+  Function * CalledFn = callInst->getCalledFunction();
+  OptimizationRemarkEmitter ORE(CalledFn);
+  LibCallSimplifier Simplifier(*DL, TLI, ORE,InstCombineRAUW); // [CHANGED] added ORE
   if (Value *With = Simplifier.optimizeCall(callInst)) {
     replaceIfNotFD(callInst, With);
   }
