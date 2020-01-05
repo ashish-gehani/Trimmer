@@ -92,12 +92,14 @@ namespace {
       llvmMemCpyArgs.push_back(Type::getInt8PtrTy(M.getContext()));
       llvmMemCpyArgs.push_back(Type::getInt8PtrTy(M.getContext()));
       llvmMemCpyArgs.push_back(Type::getInt64Ty(M.getContext()));
-      llvmMemCpyArgs.push_back(Type::getInt32Ty(M.getContext()));
+      //llvmMemCpyArgs.push_back(Type::getInt32Ty(M.getContext())); [LLVM-7 shifts alignment to parameter attribute instead of function argument]
       llvmMemCpyArgs.push_back(Type::getInt1Ty(M.getContext()));
 
       FunctionType * llvmMemCpyFT = FunctionType::get(Type::getVoidTy(M.getContext()), llvmMemCpyArgs, false);      
-      if(!llvmMemCpyFunc)
+      if(!llvmMemCpyFunc){
+        errs()<<"llvmMemCpyFT not found in module\n";
       	llvmMemCpyFunc = Function::Create(llvmMemCpyFT, GlobalValue::ExternalLinkage, "llvm.memcpy.p0i8.p0i8.i64", &M);
+      }
 
       ConstantInt * align = ConstantInt::get(int32Ty, 0);
       ConstantInt * isvolatile = ConstantInt::get(int1Ty, 0);
@@ -134,12 +136,14 @@ namespace {
           CallInst * mallocCall =  ir.CreateCall(mallocFunc, ArrayRef< Value *>(args));
           ir.CreateStore(mallocCall, newArgptr); 
           Value * destPtr = ir.CreateLoad(newArgptr);
+
+          //TODO: Do we need to set alignment for parameters?
+
           errs() << arguments[i] << " " << i << "\n";
           std::vector<Value*> functionArgs;
           functionArgs.push_back(destPtr);
           functionArgs.push_back(globals[i]);
           functionArgs.push_back(stringSize);
-          functionArgs.push_back(align);
           functionArgs.push_back(isvolatile);
           ir.CreateCall(llvmMemCpyFunc, ArrayRef<Value*>(functionArgs));
           Value * gep = ir.CreateConstGEP1_32(destPtr, arguments[i].size());
@@ -157,6 +161,7 @@ namespace {
       ir.CreateStore(nptr2, argptr);        
       replaceUsesOutsideBlock(argv, lptr, bb);
       ir.CreateBr(origbb);
+      errs()<<"Specialize-args pass completed...\n";
       return true;
     }
   };
