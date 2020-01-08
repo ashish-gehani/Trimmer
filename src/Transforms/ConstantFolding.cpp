@@ -2217,7 +2217,7 @@ ProcResult ConstantFolding::processReallocInst(CallInst *ci) {
   ConstantInt *size = dyn_cast<ConstantInt>(ci->getOperand(1));
   Register *reg = processInstAndGetRegister(ptr);
 
-  if(!ptr || !size) {
+  if(!ptr || !size || !reg) {
     debug(Usama) << "realloc: register not found or size not constant\n";
     return NOTFOLDED;
   }
@@ -4204,7 +4204,7 @@ bool ConstantFolding::handleGetOpt(CallInst * ci) {
     if(!handleLongArgs(ci, long_opts, long_index))
       return true;
     errs()<<"Calling getopt_long_local\n";
-    errs()<<"PRE_GETOPT_LONG: "<<*long_index<<"\n";
+    //errs()<<"PRE_GETOPT_LONG: "<<*long_index<<"\n";
     result = getopt_long_local(argcLimit, argv, opts, long_opts, long_index);
   } else 
     result = getopt_local(argcLimit, argv, opts);
