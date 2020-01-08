@@ -41,13 +41,17 @@ struct AnnotateNew: public ModulePass {
   unordered_map<const BasicBlock *, const BasicBlock *> loopHeaders;
 
 
+  void setDepthFunctions(int depth, set<const Function *>& depthCG, const Function* F);
+
   void getTaintedBranches(set<BranchInst *> &, map<Value *, set<Value *> > &, set<const Value*>&);
   void run(vector<GlobalValue*>, Value *, set<const Value*> &);
   void getBranchAndArgcInstructions(set<BranchInst*> &branches, set<CallInst*> &calls, set<Instruction*> &argcValues);
   void getMemoryFlow(const SVFGNode *current, set<const Value *> &singleLevelPointers, set<SVFGNode*> &storeSvfg, set<CallInst*> &calls);
   void getSourceAllocas(set<SVFGNode*> &, vector<const SVFGNode*> &, set<const Value*> &, bool trackLoops = true, bool dpMem = true);
   void getStoreSvfg(set<Value*> &, set<SVFGNode*> &);
-  SVFGNode *getSvfgNode(Value *);
+  //SVFGNode *getSvfgNode(Value *);
+  SVFGNode *getSvfgNode(const Value *);
+
   void getAnalysisUsage(AnalysisUsage &AU) const; 
   void classifyValAndOperands(Value *value, set<SVFGNode *> &backwardPtr, set<const Value *> &slps, set<Value*> &scalars); 
   void classifyVal(Value *value, set<SVFGNode*>& backwardPtr, set<const Value *> &singleLevelPointers, set<Value*>& scalar);
@@ -61,6 +65,11 @@ struct AnnotateNew: public ModulePass {
   static vector<Value*> genericScalarDfsBackward(Value *current);
   static vector<Value*> genericScalarDfs(Value *current);
   static vector<SVFGNode*> forwardDfsLambda(SVFGNode *current);
+  static vector<SVFGNode*> forwardDfsLambdaLimited(SVFGNode *current);
+
+
+  static vector<SVFGNode*> forwardLimitedDfsLambda(SVFGNode *current, int depth);
+
 
   void getLoadsOnSlps(Value* pointer, set<Value*> &singleLevelLoads);
   void getSlpStores(set<const Value *>& singleLevelPointers, set<Value*>& stores);
@@ -68,7 +77,11 @@ struct AnnotateNew: public ModulePass {
   void getScalarStores(Value *scalar, set<Value*>& stores);
 
   set<Value*> *dfs_rec(Value* root, std::function<vector<Value*> (Value*)> nextNodes, std::function<bool (Value *)> condition, set<Value *> &visited, map<Value *, set<Value *>* > *dpData = NULL, bool trackLoops = true);
+
+  
   set<SVFGNode*> *dfs_rec(SVFGNode* root, std::function<vector<SVFGNode*> (SVFGNode*)> nextNodes, std::function<bool (SVFGNode*)> condition, set<SVFGNode*> &visited, map<SVFGNode*, set<SVFGNode*>* > *dpData = NULL, bool trackLoops = true);
+  set<SVFGNode*> *dfs_rec_limit(SVFGNode* root, std::function<vector<SVFGNode*> (SVFGNode*, int)> nextNodes, std::function<bool (SVFGNode*)> condition, set<SVFGNode*> &visited,int depth, map<SVFGNode*, set<SVFGNode*>* > *dpData = NULL, bool trackLoops = true);
+
 
   void dfs(SVFGNode* root, std::function<vector<SVFGNode*> (SVFGNode*)> nextNodes, std::function<bool (SVFGNode*)> condition, set<SVFGNode*> &output);
   void dfs(Value* root, std::function<vector<Value*> (Value*)> nextNodes, std::function<bool (Value*)> condition, set<Value*> &output);
@@ -86,3 +99,4 @@ struct AnnotateNew: public ModulePass {
 };
 
 #endif
+
