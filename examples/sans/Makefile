@@ -38,7 +38,7 @@ tcp: ${OUT_DIR}
 .PHONY: ${SANS_BITCODE}
 ${SANS_BITCODE}: ${SANS_NAME}
 	cd ${SANS_NAME} && \
-	CC=${BITCODE_WRAPPER} CFLAGS="-O0 -fno-inline -fno-inline-functions" ./configure && \
+	CC=${BITCODE_WRAPPER} CFLAGS="-O0 -fno-inline -fno-inline-functions -Xclang -disable-O0-optnone" ./configure && \
 	CC=${BITCODE_WRAPPER} make && \
 	cd src/ && \
 	${BITCODE_EXTRACT} ${SANS} && \

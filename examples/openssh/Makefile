@@ -25,7 +25,7 @@ compress: ${OUT_DIR}
 .PHONY: ${SSH_BITCODE}
 ${SSH_BITCODE}: ${SSH_NAME}
 	cd ${SSH_NAME} && \
-	CC=${BITCODE_WRAPPER} CFLAGS="-O0 -fno-inline -fno-inline-functions" ./configure && \
+	CC=${BITCODE_WRAPPER} CFLAGS="-O0 -fno-inline -fno-inline-functions -Xclang -disable-O0-optnone" ./configure && \
 	CC=${BITCODE_WRAPPER} make && \
 	${BITCODE_EXTRACT} ${SSH} && \
 	mv ${SSH_BITCODE} ../

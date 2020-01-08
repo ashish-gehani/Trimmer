@@ -28,7 +28,7 @@ ${WGET_BITCODE}: ${WGET_NAME}
 	cp ${WGET_PATCH} ${WGET_NAME} && \
 	cd ${WGET_NAME} && \
 	patch -p0 -f -R -i ./${WGET_PATCH} && \
-	CC=${BITCODE_WRAPPER} CFLAGS="-O0 -fno-inline -fno-inline-functions" ./configure && \
+	CC=${BITCODE_WRAPPER} CFLAGS="-O0 -fno-inline -fno-inline-functions -Xclang -disable-O0-optnone" ./configure && \
 	CC=${BITCODE_WRAPPER} make && \
 	cd src && \
 	${BITCODE_EXTRACT} ${WGET} && \

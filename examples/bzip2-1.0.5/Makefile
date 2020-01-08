@@ -29,7 +29,7 @@ decompress: ${OUT_DIR} ${BZIP_BITCODE}
 
 ${BZIP_BITCODE}: ${BZIP_NAME}
 	cd ${BZIP_NAME} && \
-	sed -i 's/-O2 -g/ -fno-inline -fno-inline-functions/g' ./Makefile && \
+	sed -i 's/-O2 -g/ -fno-inline -fno-inline-functions -Xclang -disable-O0-optnone/g' ./Makefile && \
 	sed -i 's/CC=gcc/CC?=gcc/g' ./Makefile && \
 	CC=${BITCODE_WRAPPER} make && \
 	${BITCODE_EXTRACT} ${BZIP} && \

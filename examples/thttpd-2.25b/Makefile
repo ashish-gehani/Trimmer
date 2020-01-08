@@ -27,7 +27,7 @@ ${THTTPD_BITCODE}: ${THTTPD_NAME}
 	cp ${THTTPD_PATCH} ${THTTPD_NAME} && \
 	cd ${THTTPD_NAME} && \
 	patch -p0 -f < ./${THTTPD_PATCH} && \
-	CC=${BITCODE_WRAPPER} CFLAGS="-O0 -fno-inline -fno-inline-functions" ./configure && \
+	CC=${BITCODE_WRAPPER} CFLAGS="-O0 -fno-inline -fno-inline-functions -Xclang -disable-O0-optnone" ./configure && \
 	CC=${BITCODE_WRAPPER} make && \
 	${BITCODE_EXTRACT} ${THTTPD} && \
 	mv ${THTTPD_BITCODE} ../

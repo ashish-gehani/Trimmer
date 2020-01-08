@@ -25,7 +25,7 @@ dns: ${OUT_DIR} ${DNSPROXY_BITCODE}
 
 ${DNSPROXY_BITCODE}: ${DNSPROXY_NAME}
 	cd ${DNSPROXY_NAME} && \
-	CC=${BITCODE_WRAPPER} CFLAGS="-DHAVE_CONFIG_H -DVERSION="\"1.17\""" ./configure && \
+	CC=${BITCODE_WRAPPER} CFLAGS="-DHAVE_CONFIG_H -DVERSION="\"1.17\"" -Xclang -disable-O0-optnone" ./configure && \
 	CC=${BITCODE_WRAPPER} make && \
 	${BITCODE_EXTRACT} ${DNSPROXY} && \
 	mv ${DNSPROXY_BITCODE} ../

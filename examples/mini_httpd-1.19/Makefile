@@ -28,7 +28,7 @@ ${MINI_HTTPD_BITCODE}: ${MINI_HTTPD_NAME}
 	cp ${MINI_HTTPD_PATCH} ${MINI_HTTPD_NAME} && \
 	cd ${MINI_HTTPD_NAME} && \
 	sed -i 's/CC =		gcc/CC? = gcc/g' ./Makefile && \
-	sed -i 's/-O/ /g' ./Makefile && \
+	sed -i 's/-O/ -Xclang -disable-O0-optnone/g' ./Makefile && \
 	patch -p1 -f -R -i ./${MINI_HTTPD_PATCH} && \
 	CC=${BITCODE_WRAPPER} make && \
 	${BITCODE_EXTRACT} ${MINI_HTTPD} && \

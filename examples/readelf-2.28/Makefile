@@ -25,7 +25,7 @@ compress: ${OUT_DIR}
 .PHONY: ${READELF_BITCODE}
 ${READELF_BITCODE}: ${READELF_NAME}
 	cd ${READELF_NAME} && \
-	CC=${BITCODE_WRAPPER} CFLAGS="-DHAVE_CONFIG_H" ./configure && \
+	CC=${BITCODE_WRAPPER} CFLAGS="-DHAVE_CONFIG_H  -Xclang -disable-O0-optnone" ./configure && \
 	CC=${BITCODE_WRAPPER} make && \
 	cd ${BINUTILS} && \
 	${BITCODE_EXTRACT} ${READELF} && \
