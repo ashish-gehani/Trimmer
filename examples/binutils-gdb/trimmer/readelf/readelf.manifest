@@ -1,1 +1,0 @@
-{"binary": "readelf_fin", "native_libs": [], "name": "readelf", "args": ["-h", "-l", "-S", "-s", "-r", "-d", "_"], "modules": [], "ldflags": [], "main": "readelf.bc"}

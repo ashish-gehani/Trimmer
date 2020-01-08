@@ -3,7 +3,7 @@ WGET_BITCODE=${WGET}.bc
 WGET_VERSION=1.17.1
 WGET_NAME=${WGET}-${WGET_VERSION}
 WGET_TAR=${WGET_NAME}.orig.tar.gz
-WGET_RC=./wgetrc
+WGET_RC=wgetrc
 WGET_PATCH=wget.patch
 
 WGET_MANIFEST=${WGET}.manifest
@@ -17,11 +17,11 @@ BITCODE_EXTRACT?=extract-bc
 all: ${WGET_BITCODE}
 
 compress: ${OUT_DIR}
-	cp ${WGET_BITCODE} ${OUT_DIR}
+	cp ${WGET_BITCODE} ${OUT_DIR} && \
+	cp wgetrc ${OUT_DIR} && \
 	cd ${OUT_DIR} && \
-	cp ${WGET_RC} /usr/local/etc/wgetrc \
-  echo '{"binary": "wget_fin", "native_libs":[],"name": "wget", "args": ["--config=/usr/local/etc/wgetrc","_" ], "modules": [], "ldflags": ["-luuid","-lgnutls","-lpcre", "-lnettle", "-lidn", "-lz", "-lpthread"], "main": "wget.bc", "config_files": ["/usr/local/etc/wgetrc"]}' > ${WGET_MANIFEST} && \
-	python ${TRIMMER_HOME}/tool/trimmer.py ${WGET_MANIFEST} ./ 2> ${LOG_FILE}
+  echo '{"binary": "wget_fin", "native_libs":[],"name": "wget", "args": ["--config=wgetrc","_" ], "modules": [], "ldflags": ["-luuid","-lgnutls","-lpcre", "-lnettle", "-lidn", "-lz", "-lpthread"], "main": "wget.bc", "config_files": ["wgetrc"]}' > ${WGET_MANIFEST} && \
+	python ${TRIMMER_HOME}/tool/trimmer.py ${WGET_MANIFEST} ./work_dir 2> ${LOG_FILE}
 
 .PHONY: ${WGET_BITCODE}
 ${WGET_BITCODE}: ${WGET_NAME}

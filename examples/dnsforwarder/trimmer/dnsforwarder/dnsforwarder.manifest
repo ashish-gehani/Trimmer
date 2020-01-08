@@ -1,1 +1,0 @@
-{"binary": "dnsforwarder_fin", "native_libs": [], "name": "dnsforwarder", "args": [], "modules": [], "ldflags": ["-lpthread","-lcurl"], "main": "dnsforwarder.bc", "config_files": ["/home/abdulrafaenoor/.dnsforwarder/config"]}

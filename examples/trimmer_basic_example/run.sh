@@ -1,1 +1,0 @@
-python ../run.py curl.manifest work_dir

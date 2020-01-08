@@ -18,14 +18,14 @@ compress: ${OUT_DIR} ${BZIP_BITCODE}
 	cp ${BZIP_BITCODE} ${OUT_DIR}
 	cd ${OUT_DIR} && \
 	echo '{"binary": "bzip2_fin", "native_libs": [], "name": "bzip2", "args": ["-fkqs", "huffman.c"], "modules": [], "ldflags": ["-lbz2"], "main": "bzip2.bc", "config_files": []}' > ${BZIP_MANIFEST} && \
-	python ${TRIMMER_HOME}/tool/trimmer.py ${BZIP_MANIFEST} ./ 2> ${LOG_FILE}
+	python ${TRIMMER_HOME}/tool/trimmer.py ${BZIP_MANIFEST} ./work 2> ${LOG_FILE}
 
 
 decompress: ${OUT_DIR} ${BZIP_BITCODE}
 	cp ${BZIP_BITCODE} ${OUT_DIR}
 	cd ${OUT_DIR} && \
 	echo '{"binary": "bzip2_fin", "native_libs": [], "name": "bzip2", "args": ["-fdq", "huffman.c.bz2"], "modules": [], "ldflags": ["-lbz2"], "main": "bzip2.bc", "config_files": []}' > ${BZIP_MANIFEST} && \
-	python ${TRIMMER_HOME}/tool/trimmer.py ${BZIP_MANIFEST} ./ 2> ${LOG_FILE}
+	python ${TRIMMER_HOME}/tool/trimmer.py ${BZIP_MANIFEST} ./work 2> ${LOG_FILE}
 
 ${BZIP_BITCODE}: ${BZIP_NAME}
 	cd ${BZIP_NAME} && \

@@ -1,2 +1,0 @@
-# Set this to no to disable memcached.
-ENABLE_MEMCACHED=yes

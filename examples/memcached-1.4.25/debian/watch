@@ -1,2 +1,0 @@
-version=3
-http://memcached.org/downloads (?:|.*/)memcached(?:[_\-]v?|)(\d\S*)\.(?:tar\.xz|txz|tar\.bz2|tbz2|tar\.gz|tgz)

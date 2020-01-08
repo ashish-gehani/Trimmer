@@ -1,3 +1,0 @@
-version=3
-opts="dversionmangle=s/.debian//" \
-http://michael.toren.net/code/tcptraceroute/ tcptraceroute-(.*)\.tar\.gz

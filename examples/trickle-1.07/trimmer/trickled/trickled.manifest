@@ -1,1 +1,0 @@
-{"binary": "trickled_fin", "native_libs":[],"name": "trickled", "args": ["-c","/etc/trickled.conf"], "modules": [], "ldflags": ["-levent","-lbsd","-lnsl","-ldl"], "main": "trickled.bc", "config_files": ["/etc/trickled.conf"]}

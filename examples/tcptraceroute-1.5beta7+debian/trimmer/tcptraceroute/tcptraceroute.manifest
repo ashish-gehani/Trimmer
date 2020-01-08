@@ -1,1 +1,0 @@
-{"binary": "tcptraceroute_fin", "native_libs": [], "name": "tcptraceroute", "args": ["-i", "lo", "-n", "-A", "-m", "30", "google.com"], "modules": [], "ldflags": ["-lnet", "-lpcap"], "main": "tcptraceroute.bc"}
