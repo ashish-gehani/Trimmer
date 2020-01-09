@@ -76,6 +76,13 @@ class Stats {
     vector<FunctionStats *> stack;
     set<FunctionStats *> processed;
     void printStats(FunctionStats*);
+    unsigned libCallsSimplified;
+    unsigned loadsFolded;
+    unsigned totalLoads;
+    unsigned totalLibCalls;
+    unsigned functionsCloned;
+    unsigned loopsUnrolled;
+    unsigned trackedLoads;
   public:
     Stats();
     void functionCall(Function *);
@@ -86,6 +93,15 @@ class Stats {
     void loopFail();
     void printStats(Function *);
     void makeGraph(Function *);
+    void incrementLibCallsFolded();
+    void incrementTotalLoads();
+    void incrementLoadsFolded();
+    void incrementTrackedLoads();
+    void incrementTotalLibCalls();
+    void incrementFunctionsCloned();
+    void incrementLoopsUnrolled();
+    unsigned getTrackedLoads();
+
 
     bool getLoopTime(uint64_t &);
 };

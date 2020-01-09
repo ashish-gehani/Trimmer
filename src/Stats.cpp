@@ -8,6 +8,13 @@ using namespace std;
 
 Stats::Stats() {
   count = 0;
+  libCallsSimplified = 0;
+  loadsFolded = 0;
+  totalLoads = 0;
+  totalLibCalls = 0;
+  functionsCloned = 0;
+  loopsUnrolled = 0;
+  trackedLoads = 0;
 }
 
 void Stats::functionCall(Function *child) {
@@ -52,6 +59,10 @@ void Stats::loopSuccess() {
 
 //returns true if terminated
 bool Stats::getLoopTime(uint64_t &seconds) {
+  errs()<<"getLoopTime() in stats\n";
+  
+  if(getRunningLoop() == NULL)
+    return false;
   return getRunningLoop()->getLoopTime(seconds);
 }
 
@@ -76,6 +87,16 @@ void Stats::printStats(Function *main) {
   }
 
   printStats(root);
+  errs()<<"==================|Stats|===================="<<"\n";
+  errs()<<"# LibCalls Simplified: "<<libCallsSimplified<<"\n";
+  errs()<<"# Total LibCalls: "<<totalLibCalls<<"\n";
+  errs()<<"# Loads Folded: "<<loadsFolded<<"\n";
+  errs()<<"# Tracked Loads Folded: "<<trackedLoads<<"\n";
+  errs()<<"# Total Loads Encountered: "<< totalLoads<<"\n";
+  errs()<<"# Function Calls Analyzed: "<<count<<"\n";
+  errs()<<"# Functions Cloned: "<<functionsCloned<<"\n";
+  errs()<<"# Loops Unrolled: "<<loopsUnrolled<<"\n";
+
 }
 
 void Stats::swapFunction(Function *oldF, Function *newF) {
@@ -96,7 +117,17 @@ void Stats::makeGraph(Function *main) {
   errs() << str << "\n";
 }
 
+void Stats::incrementLibCallsFolded(){ libCallsSimplified++; }
+void Stats::incrementTotalLoads(){ totalLoads++; }
+void Stats::incrementLoadsFolded(){ loadsFolded++; }
+void Stats::incrementTotalLibCalls(){ totalLibCalls++; }
+void Stats::incrementFunctionsCloned() { functionsCloned++; }
+void Stats::incrementLoopsUnrolled() { loopsUnrolled++; } 
+void Stats::incrementTrackedLoads() { trackedLoads++;          }
+unsigned Stats::getTrackedLoads() { return trackedLoads; }
+
 bool FunctionStats::getLoopTime(uint64_t &seconds) {
+  errs()<<"getLoopTime(seconds) \n";
   return getRunningLoop()->getLoopTime(seconds);
 }
 
@@ -132,10 +163,12 @@ inline LoopStats *FunctionStats::getRunningLoop() {
 }
 
 void FunctionStats::loopSuccess() {
+  errs()<<"loopSuccess() in stats\n";
   getRunningLoop()->loopSuccess();   
 }
 
 void FunctionStats::loopFail() {
+  errs()<<"loopFail() in stats\n";
   getRunningLoop()->loopFail();   
 }
 
