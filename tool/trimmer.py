@@ -7,7 +7,7 @@ debugPrint = 1
 
 class Trimmer:
 
-    def __init__(self, (man_data, work_dir, opt_flag, spec_flag, strip_flag, icp_flag, annot_flag, track_allocas, context_type)):
+    def __init__(self, (man_data, work_dir, opt_flag, spec_flag, strip_flag, icp_flag, annot_flag, track_allocas, context_type, depth_flag, anot_depth,load_flag, load_percent)):
 
         self.name = man_data["name"]
         self.main = man_data["main"]
@@ -28,6 +28,10 @@ class Trimmer:
         self.annot_flag = annot_flag
         self.track_allocas = track_allocas
         self.context_type = context_type
+        self.depth_flag = depth_flag
+        self.anot_depth = anot_depth
+        self.load_flag = load_flag
+        self.load_percent = load_percent
         self.print_info()
 
     def print_info(self):
@@ -40,6 +44,10 @@ class Trimmer:
         print 'exe name is ' + self.exe_name
         print 'work_dir is ' + self.work_dir
         print 'config_files are ' + self.config_files
+        print 'Limiting Depth ? ' + str(self.depth_flag)
+        print 'annotation depth ' + str(self.anot_depth)
+        print 'Limiting Loads ? ' + str(self.load_flag)
+        print 'load percent ' + str(self.load_percent)
 
     def run(self):
         self.curr_file = self.work_dir + '/' + self.main

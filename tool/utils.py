@@ -31,6 +31,7 @@ def parse_args(args):
 
 	if not os.path.exists(work_dir):
 		os.makedirs(work_dir)
+
 	
         dir_path = os.path.dirname(os.path.realpath(manifest_file))
         man_data["main_path"] = os.path.join(dir_path, man_data["main"])
@@ -42,6 +43,10 @@ def parse_args(args):
         annot_flag = 1
         track_allocas = 1
         contextType = 1
+        isLimitedDepth = False
+        depthLimit = 0
+        isLoadsLimited = False
+        loadPercent = 100
 	for i in range(2, len(args)):
 		if(args[i] == 'no-optimization'):
 			opt_flag = False
@@ -57,4 +62,11 @@ def parse_args(args):
                         track_allocas = 0
                 elif(args[i] == 'contextType'):
                         contextType = args[i+1]
-	return (man_data, work_dir, opt_flag, spec_flag, strip_flag, icp_flag, annot_flag, track_allocas, contextType)
+                elif(args[i] == 'depthLimit'):
+                        isLimitedDepth = True
+                        depthLimit = args[i+1]
+                elif(args[i] == "loadPercent"):
+                        isLoadsLimited = True
+                        loadPercent = args[i+1]
+
+	return (man_data, work_dir, opt_flag, spec_flag, strip_flag, icp_flag, annot_flag, track_allocas, contextType, isLimitedDepth, depthLimit, isLoadsLimited, loadPercent)

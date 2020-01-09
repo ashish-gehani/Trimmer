@@ -62,10 +62,25 @@ def run_argspec(tool):
 	printDbgMsg(Cmd)
 	subprocess.call(Cmd, shell = True)	 
         disassemble(add_file)
+
+        depth_limit_str = ''
+        
+        load_percent_str = ' '
+
+        if tool.depth_flag:
+            depth_limit_str = '-isLimitedDepth=true -depthLimit='+str(tool.anot_depth)+ ' '
+
+        if tool.load_flag:
+            load_percent_str = ' -isLoadsLimited=true -loadPercent='+str(tool.load_percent)+' '
+
+
+
+
 	if(tool.icp_flag): 
                 if(tool.track_allocas):
                         Cmd = opt + ' -load ' + build_path + 'AnnotateNew.so -mem2reg -mergereturn -simplifycfg -loops -lcssa -loop-simplify -loop-rotate -loop-rotate -indvars  -svfg --isAnnotated=' + str(tool.annot_flag) + ' --argvName=__argv_new__\
-                            ' + add_file + ' -o ' + annotated_file
+                                ' +depth_limit_str+ load_percent_str+ add_file + ' -o ' + annotated_file
+
                         printDbgMsg(Cmd)
 
                         starttime =  datetime.now()
@@ -144,8 +159,8 @@ def link_libs(tool):
 		# strip dead prototypes
 		if(tool.strip_flag):
 			Cmd = opt + ' -strip -strip-dead-prototypes ' + mod + ' -o ' + mod
-			printDbgMsg(Cmd)
-			subprocess.call(Cmd, shell = True)		
+			#printDbgMsg(Cmd)
+			#subprocess.call(Cmd, shell = True)		
 
 		# linked file
 		Cmd = link + ' ' +  curr_file + ' ' + mod + ' -o ' + lib_lnkd_file
@@ -157,7 +172,7 @@ def link_libs(tool):
 	if(tool.strip_flag):
 		Cmd = opt + ' -strip -strip-dead-prototypes ' + curr_file + ' -o ' + curr_file
                 printDbgMsg(Cmd)                
-		subprocess.call(Cmd, shell = True)
+		#subprocess.call(Cmd, shell = True)
 
 	# Internalize pass
 	Cmd = opt + ' -load ' + build_path + 'Internalize.so -intern ' + curr_file\
@@ -231,3 +246,5 @@ def create_exe(tool):
 		Cmd = 'strip ' + exe_name + ' -o ' + exe_name
 		printDbgMsg(Cmd)
 		subprocess.call(Cmd, shell = True)	
+
+
