@@ -54,18 +54,20 @@ def run_argspec(tool):
 	# 	Cmd = opt + ' -load ' + build_path + 'Annotate.so -annotate ' + curr_file + ' -o ' \
 	# 	+ curr_file
 	# 	printDbgMsg(Cmd)
-	# 	subprocess.call(Cmd, shell = True)	
+	# 	subprocess.call(Cmd, shell = True)
 
 	Cmd = opt + ' -load ' + build_path + 'SpecializeArguments.so -specialize-args \
 	-args=' + tool.args + ' ' + curr_file + ' -o ' + add_file
 
 	printDbgMsg(Cmd)
-	subprocess.call(Cmd, shell = True)	 
+	subprocess.call(Cmd, shell = True)
         disassemble(add_file)
 
         depth_limit_str = ''
-        
+
         load_percent_str = ' '
+
+        use_glob_str = ' '
 
         if tool.depth_flag:
             depth_limit_str = '-isLimitedDepth=true -depthLimit='+str(tool.anot_depth)+ ' '
@@ -73,10 +75,13 @@ def run_argspec(tool):
         if tool.load_flag:
             load_percent_str = ' -isLoadsLimited=true -loadPercent='+str(tool.load_percent)+' '
 
+        if tool.use_glob:
+            use_glob_str = ' -useGlob=true '
 
 
 
-	if(tool.icp_flag): 
+
+	if(tool.icp_flag):
                 if(tool.track_allocas):
                         Cmd = opt + ' -load ' + build_path + 'AnnotateNew.so -mem2reg -mergereturn -simplifycfg -loops -lcssa -loop-simplify -loop-rotate -loop-rotate -indvars  -svfg --isAnnotated=' + str(tool.annot_flag) + ' --argvName=__argv_new__\
                                 ' +depth_limit_str+ load_percent_str+ add_file + ' -o ' + annotated_file
@@ -95,8 +100,8 @@ def run_argspec(tool):
                         annotated_file = add_file
                 #-simplifycfg
 		# interconstprop pass
-                # 
-		Cmd = opt + ' -load ' + build_path + 'ConstantFolding.so -isAnnotated=' + str(tool.annot_flag) + ' -trackAllocas=' + str(tool.track_allocas) + ' -fileNames '  + str(tool.config_files) + ' -mem2reg -globalopt -instcombine --disable-simplify-libcalls  -loops -lcssa -loop-simplify -loop-rotate -inter-constprop -__progName=ssh' + annotated_file + ' -o ' + constprop_file
+                #
+		Cmd = opt + ' -load ' + build_path + 'ConstantFolding.so -isAnnotated=' + str(tool.annot_flag) + ' -trackAllocas=' + str(tool.track_allocas) + use_glob_str +' -fileNames '  + str(tool.config_files) + ' -mem2reg -globalopt -instcombine --disable-simplify-libcalls  -loops -lcssa -loop-simplify -loop-rotate -inter-constprop -__progName=ssh' + annotated_file + ' -o ' + constprop_file
 		printDbgMsg(Cmd)
 #'-simplifycfg'
                 rotated_file = tool.work_dir + "/rotated.bc"
@@ -106,12 +111,12 @@ def run_argspec(tool):
  #"-instcombine",
                 Cmd = [opt, "-globalopt","-instcombine", '-mergereturn', '-loop-rotate', rotated_file, '-o', global_opt]
                 subprocess.call(Cmd)
-#'-loop-unswitch', '-loop-idiom', '-loop-accesses', '-loop-vectorize', '-loop-load-elim', '-loop-sink' '-lcssa', 
+#'-loop-unswitch', '-loop-idiom', '-loop-accesses', '-loop-vectorize', '-loop-load-elim', '-loop-sink' '-lcssa',
 		Cmd = [opt, '-load', build_path + 'ConstantFolding.so', '-isAnnotated=' + str(tool.annot_flag), '-trackAllocas=' + str(tool.track_allocas), '-contextType=' + str(tool.context_type), '-fileNames', str(tool.config_files),'-mem2reg', '-loops', '-loop-simplify', '-scalar-evolution', '-licm',  '-loop-rotate', '-indvars', '-loop-reduce', "-__progName=ssh",'-inter-constprop', annotated_file, '-o', constprop_file]
 		f = open(constprop_log_file, "wb")
 		printDbgMsg(" ".join(Cmd))
 
-                starttime =  datetime.now() 
+                starttime =  datetime.now()
 		subprocess.call(Cmd)
                 endtime = datetime.now()
                 delta = endtime-starttime
@@ -124,7 +129,7 @@ def run_argspec(tool):
 		Cmd = opt + ' -load ' + build_path + 'Remove.so -remove ' + constprop_file\
 		+ ' -o ' + libspec_file
 		printDbgMsg(Cmd)
-		subprocess.call(Cmd, shell = True)	
+		subprocess.call(Cmd, shell = True)
                 disassemble(libspec_file)
 	# inline pass
 	Cmd = opt + ' -always-inline ' + libspec_file + ' -o ' + inline_file
@@ -134,12 +139,12 @@ def run_argspec(tool):
 	# Internalize pass
 	Cmd = opt + ' -load ' + build_path + 'Internalize.so -intern ' + inline_file\
 	+ ' -o ' + intern_file
-        printDbgMsg(Cmd)	
+        printDbgMsg(Cmd)
 	subprocess.call(Cmd, shell = True)
 
 	# opt -O1
 	Cmd = opt + ' ' + intern_file + ' -O1 -o ' + spec_file
-        printDbgMsg(Cmd)       
+        printDbgMsg(Cmd)
 	subprocess.call(Cmd, shell = True)
 	tool.curr_file = spec_file
 
@@ -160,18 +165,18 @@ def link_libs(tool):
 		if(tool.strip_flag):
 			Cmd = opt + ' -strip -strip-dead-prototypes ' + mod + ' -o ' + mod
 			#printDbgMsg(Cmd)
-			#subprocess.call(Cmd, shell = True)		
+			#subprocess.call(Cmd, shell = True)
 
 		# linked file
 		Cmd = link + ' ' +  curr_file + ' ' + mod + ' -o ' + lib_lnkd_file
 		printDbgMsg(Cmd)
-		subprocess.call(Cmd, shell = True)	
+		subprocess.call(Cmd, shell = True)
 		curr_file = lib_lnkd_file
 
 	# strip pass
 	if(tool.strip_flag):
 		Cmd = opt + ' -strip -strip-dead-prototypes ' + curr_file + ' -o ' + curr_file
-                printDbgMsg(Cmd)                
+                printDbgMsg(Cmd)
 		#subprocess.call(Cmd, shell = True)
 
 	# Internalize pass
@@ -194,10 +199,10 @@ def run_opts(tool):
 
 	#inline for unspecialized
 	Cmd = opt + ' -always-inline ' + curr_file + ' -o ' + inline2_file
-        printDbgMsg(Cmd)	
+        printDbgMsg(Cmd)
 	subprocess.call(Cmd, shell = True)
 
-	# dce 
+	# dce
 	Cmd = opt + ' ' + inline2_file + ' -dce -globaldce -o ' + dce_file
         printDbgMsg(Cmd)
 	subprocess.call(Cmd, shell = True)
@@ -228,7 +233,7 @@ def create_exe(tool):
 	fname = tool.name
 	curr_file = tool.curr_file
 	exe_name = tool.work_dir + '/' + tool.exe_name
-	
+
 	# create object file
 	Cmd = llc + ' -filetype=obj ' + curr_file + ' -o ' + tool.work_dir + '/' + fname\
 	+ '.o'
@@ -245,6 +250,7 @@ def create_exe(tool):
 	if(tool.strip_flag):
 		Cmd = 'strip ' + exe_name + ' -o ' + exe_name
 		printDbgMsg(Cmd)
-		subprocess.call(Cmd, shell = True)	
+		subprocess.call(Cmd, shell = True)
+
 
 

@@ -35,7 +35,7 @@ def run_in_dir(cmd, directory):
     subprocess.call(cmd, shell=True, cwd = directory)
 
 def getMemoryStats(basename, directory):
-    cmd = "opt -load $TRIMMER_HOME/libTotalVariables.so -mycount "+basename+"_annotated.bc " 
+    cmd = "opt-4.0 -load $TRIMMER_HOME/libLLVMMyCount.so -mycount "+basename+"_annotated.bc " 
     run_in_dir(cmd, directory) 
 
     AnnotStats = {}

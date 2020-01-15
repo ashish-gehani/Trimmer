@@ -29,9 +29,7 @@
 #include "llvm/Analysis/ScalarEvolution.h"
 #include "llvm/Analysis/ScalarEvolutionExpressions.h"
 #include "llvm/Analysis/TargetTransformInfo.h"
-//#include "llvm/Analysis/OptimizationDiagnosticInfo.h"
 #include "llvm/Analysis/OptimizationRemarkEmitter.h"
-
 
 #include <getopt.h>
 #include <list>
@@ -202,6 +200,7 @@ struct ConstantFolding : public ModulePass {
   bool handleGetUid(CallInst *);
   bool handleGetPwUid(CallInst *);
   bool handleGetCwd(CallInst *);
+  bool handleCBM(CallInst *);
   void handleOpen(CallInst *);
   void handleFOpen(CallInst *);
   void handleFEOF(CallInst *);
@@ -307,6 +306,8 @@ struct ConstantFolding : public ModulePass {
 
 
   bool exceedsRecursion(Function *called, Function *callee);
+  bool exceedClone(string name, int level);
+  Value *getLoadSource(LoadInst *LI);
   string removeCloneName(string name);
   bool copyMemory(char *address, Type *ty, char *localAddress);
 

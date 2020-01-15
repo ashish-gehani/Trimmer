@@ -42,7 +42,7 @@ config_files = []
 annotated_file = progName+"_annotated.bc"
 preconstprop_file = progName+"_preconst.bc"
 constprop_file = progName+"_constprop.bc"
-opt = "opt"
+opt = "opt-4.0"
 
 build_path = os.getenv("TRIMMER_HOME")+"/"+"build"+"/"
 

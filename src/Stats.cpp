@@ -3,6 +3,7 @@
 #include "Stats.h"
 
 #include <chrono>
+#include <fstream>
 
 using namespace std;
 
@@ -96,6 +97,11 @@ void Stats::printStats(Function *main) {
   errs()<<"# Function Calls Analyzed: "<<count<<"\n";
   errs()<<"# Functions Cloned: "<<functionsCloned<<"\n";
   errs()<<"# Loops Unrolled: "<<loopsUnrolled<<"\n";
+  std::ofstream StatFile;
+  StatFile.open("constStats.JSON");
+  StatFile<<"{ \"LibCallsSimplified\": "<<libCallsSimplified<<", \"TotalLibCalls\":"<<totalLibCalls<<", \"LoadsFolded\":"<<loadsFolded<<", \"TrackedLoadsFolded\": "<<trackedLoads<<",\"TotalLoadsEncountered\":"<<totalLoads<<", \"FunctionCallsAnalyzed\":"<<count<<",\"FunctionsCloned\":"<<functionsCloned<<".\"LoopsUnrolled\":"<<loopsUnrolled<<",";
+  StatFile.close();
+
 
 }
 

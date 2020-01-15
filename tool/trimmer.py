@@ -7,7 +7,7 @@ debugPrint = 1
 
 class Trimmer:
 
-    def __init__(self, (man_data, work_dir, opt_flag, spec_flag, strip_flag, icp_flag, annot_flag, track_allocas, context_type, depth_flag, anot_depth,load_flag, load_percent)):
+    def __init__(self, (man_data, work_dir, opt_flag, spec_flag, strip_flag, icp_flag, annot_flag, track_allocas, context_type, depth_flag, anot_depth,load_flag, load_percent,use_glob)):
 
         self.name = man_data["name"]
         self.main = man_data["main"]
@@ -32,6 +32,7 @@ class Trimmer:
         self.anot_depth = anot_depth
         self.load_flag = load_flag
         self.load_percent = load_percent
+        self.use_glob = use_glob
         self.print_info()
 
     def print_info(self):
@@ -48,13 +49,14 @@ class Trimmer:
         print 'annotation depth ' + str(self.anot_depth)
         print 'Limiting Loads ? ' + str(self.load_flag)
         print 'load percent ' + str(self.load_percent)
+        print 'Use globals? ' + str(self.use_glob)
 
     def run(self):
         self.curr_file = self.work_dir + '/' + self.main
         utils.exists(self.main_path)
         print self.main_path
         copyfile(self.main_path, self.work_dir + '/' + self.main)
-        if(self.spec_flag):	
+        if(self.spec_flag):
         # The following driver call runs the argument specialization transform
             driver.run_argspec(self)
         driver.link_libs(self)
@@ -65,7 +67,8 @@ class Trimmer:
         copyfile(self.curr_file, self.work_dir + '/' + self.name + '-final.bc')
 
 def main(args):
-    print "\n******* TRIMMER *********** \n"     
+    print "\n******* TRIMMER *********** \n"
     Trimmer(utils.parse_args(args)).run()
 
 main(sys.argv[1:])
+

@@ -25,14 +25,14 @@ def parse_args(args):
 	manifest_file = args[0]
 	exists(manifest_file)
 
-	with open(manifest_file) as mfile:    
+	with open(manifest_file) as mfile:
 	    man_data = json.load(mfile)
 	work_dir = args[1]
 
 	if not os.path.exists(work_dir):
 		os.makedirs(work_dir)
 
-	
+
         dir_path = os.path.dirname(os.path.realpath(manifest_file))
         man_data["main_path"] = os.path.join(dir_path, man_data["main"])
 
@@ -47,6 +47,7 @@ def parse_args(args):
         depthLimit = 0
         isLoadsLimited = False
         loadPercent = 100
+        useGlob = False
 	for i in range(2, len(args)):
 		if(args[i] == 'no-optimization'):
 			opt_flag = False
@@ -57,7 +58,7 @@ def parse_args(args):
 		elif(args[i] == 'no-inter-constprop'):
 			icp_flag = False
                 elif(args[i] == 'no-annot'):
-                        annot_flag = 0 
+                        annot_flag = 0
                 elif(args[i] == 'no-track-allocas'):
                         track_allocas = 0
                 elif(args[i] == 'contextType'):
@@ -68,5 +69,8 @@ def parse_args(args):
                 elif(args[i] == "loadPercent"):
                         isLoadsLimited = True
                         loadPercent = args[i+1]
+                elif(args[i] == "useGlob"):
+                        useGlob = True
 
-	return (man_data, work_dir, opt_flag, spec_flag, strip_flag, icp_flag, annot_flag, track_allocas, contextType, isLimitedDepth, depthLimit, isLoadsLimited, loadPercent)
+	return (man_data, work_dir, opt_flag, spec_flag, strip_flag, icp_flag, annot_flag, track_allocas, contextType, isLimitedDepth, depthLimit, isLoadsLimited, loadPercent, useGlob)
+
