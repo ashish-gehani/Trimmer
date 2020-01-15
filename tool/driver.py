@@ -67,7 +67,7 @@ def run_argspec(tool):
 
         load_percent_str = ' '
 
-        use_glob_str = ' '
+        use_glob_str = '-useGlob=0'
 
         if tool.depth_flag:
             depth_limit_str = '-isLimitedDepth=true -depthLimit='+str(tool.anot_depth)+ ' '
@@ -76,7 +76,7 @@ def run_argspec(tool):
             load_percent_str = ' -isLoadsLimited=true -loadPercent='+str(tool.load_percent)+' '
 
         if tool.use_glob:
-            use_glob_str = ' -useGlob=true '
+            use_glob_str ='-useGlob=1'
 
 
 
@@ -101,7 +101,7 @@ def run_argspec(tool):
                 #-simplifycfg
 		# interconstprop pass
                 #
-		Cmd = opt + ' -load ' + build_path + 'ConstantFolding.so -isAnnotated=' + str(tool.annot_flag) + ' -trackAllocas=' + str(tool.track_allocas) + use_glob_str +' -fileNames '  + str(tool.config_files) + ' -mem2reg -globalopt -instcombine --disable-simplify-libcalls  -loops -lcssa -loop-simplify -loop-rotate -inter-constprop -__progName=ssh' + annotated_file + ' -o ' + constprop_file
+		Cmd = opt + ' -load ' + build_path + 'ConstantFolding.so -isAnnotated=' + str(tool.annot_flag) + ' -trackAllocas=' + str(tool.track_allocas)  +' -fileNames '  + str(tool.config_files) + ' -mem2reg -globalopt -instcombine --disable-simplify-libcalls  -loops -lcssa -loop-simplify -loop-rotate -inter-constprop -__progName=ssh' + annotated_file + ' -o ' + constprop_file
 		printDbgMsg(Cmd)
 #'-simplifycfg'
                 rotated_file = tool.work_dir + "/rotated.bc"
@@ -112,7 +112,7 @@ def run_argspec(tool):
                 Cmd = [opt, "-globalopt","-instcombine", '-mergereturn', '-loop-rotate', rotated_file, '-o', global_opt]
                 subprocess.call(Cmd)
 #'-loop-unswitch', '-loop-idiom', '-loop-accesses', '-loop-vectorize', '-loop-load-elim', '-loop-sink' '-lcssa',
-		Cmd = [opt, '-load', build_path + 'ConstantFolding.so', '-isAnnotated=' + str(tool.annot_flag), '-trackAllocas=' + str(tool.track_allocas), '-contextType=' + str(tool.context_type), '-fileNames', str(tool.config_files),'-mem2reg', '-loops', '-loop-simplify', '-scalar-evolution', '-licm',  '-loop-rotate', '-indvars', '-loop-reduce', "-__progName=ssh",'-inter-constprop', annotated_file, '-o', constprop_file]
+		Cmd = [opt, '-load', build_path + 'ConstantFolding.so', '-isAnnotated=' + str(tool.annot_flag), use_glob_str ,'-trackAllocas=' + str(tool.track_allocas),'-contextType=' + str(tool.context_type), '-fileNames', str(tool.config_files),'-mem2reg', '-loops', '-loop-simplify', '-scalar-evolution', '-licm',  '-loop-rotate', '-indvars', '-loop-reduce', "-__progName=ssh",'-inter-constprop', annotated_file, '-o', constprop_file]
 		f = open(constprop_log_file, "wb")
 		printDbgMsg(" ".join(Cmd))
 
