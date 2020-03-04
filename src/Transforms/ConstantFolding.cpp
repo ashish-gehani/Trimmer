@@ -4387,7 +4387,7 @@ void ConstantFolding::handleFClose(CallInst * ci) {
   Value * fptrVal = ci->getOperand(0);
   uint64_t sfd;
   FILE* fptr;
-  bool fdConst = getSingleVal(fptrVal, sfd)&& getfptr(sfd, fptr) && false;
+  bool fdConst = getSingleVal(fptrVal, sfd)&& getfptr(sfd, fptr);
   if(!fdConst){
     debug(Abubakar) << "handleFClose : failed to specialize\n";
     if(getSingleVal(fptrVal, sfd)){
