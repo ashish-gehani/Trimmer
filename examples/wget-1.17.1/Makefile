@@ -21,14 +21,14 @@ compress: ${OUT_DIR}
 	cp wgetrc ${OUT_DIR} && \
 	cd ${OUT_DIR} && \
   echo '{"binary": "wget_fin", "native_libs":[],"name": "wget", "args": ["--config=wgetrc","_" ], "modules": [], "ldflags": ["-luuid","-lgnutls","-lpcre", "-lnettle", "-lidn", "-lz", "-lpthread"], "main": "wget.bc", "config_files": ["wgetrc"]}' > ${WGET_MANIFEST} && \
-	python ${TRIMMER_HOME}/tool/trimmer.py ${WGET_MANIFEST} ./work_dir 2> ${LOG_FILE}
+	python ${TRIMMER_HOME}/tool/trimmer.py ${WGET_MANIFEST} ./work_dir useGlob disableExit useRegOffset exceedLimit 900 2> ${LOG_FILE}
 
 .PHONY: ${WGET_BITCODE}
 ${WGET_BITCODE}: ${WGET_NAME}
 	cp ${WGET_PATCH} ${WGET_NAME} && \
 	cd ${WGET_NAME} && \
 	patch -p0 -f -R -i ./${WGET_PATCH} && \
-	CC=${BITCODE_WRAPPER} CFLAGS="-O0 -fno-inline -fno-inline-functions -Xclang -disable-O0-optnone" ./configure && \
+	CC=${BITCODE_WRAPPER} CFLAGS="-O0 -Xclang -disable-O0-optnone -fno-inline -fno-inline-functions" ./configure && \
 	CC=${BITCODE_WRAPPER} make && \
 	cd src && \
 	${BITCODE_EXTRACT} ${WGET} && \
