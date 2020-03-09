@@ -17,11 +17,11 @@ BITCODE_EXTRACT?=extract-bc
 
 all: ${MINI_HTTPD_BITCODE}
 
-mini: ${OUT_DIR} ${MINI_HTTPD_BITCODE}
+mini: ${OUT_DIR} 
 	cp ${MINI_HTTPD_BITCODE} ${OUT_DIR} 
 	cp ${MINI_HTTPD_CONF} ${OUT_DIR}
 	cd ${OUT_DIR} && \echo '{"binary": "mini_httpd_fin", "native_libs": [], "name": "mini_httpd", "args": ["-C", "mini_httpd.conf"], "modules": [], "ldflags": ["-lcrypt"], "main": "mini_httpd.bc", "config_files": ["mini_httpd.conf"]}' > ${MINI_HTTPD_MANIFEST} && \
-	python ${TRIMMER_HOME}/tool/trimmer.py ${MINI_HTTPD_MANIFEST} ./ 2> ${LOG_FILE}
+	python ${TRIMMER_HOME}/tool/trimmer.py ${MINI_HTTPD_MANIFEST} ./work_dir 2> ${LOG_FILE}
 
 
 ${MINI_HTTPD_BITCODE}: ${MINI_HTTPD_NAME}
