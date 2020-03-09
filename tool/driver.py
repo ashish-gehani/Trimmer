@@ -69,6 +69,12 @@ def run_argspec(tool):
 
         use_glob_str = '-useGlob=0'
 
+        disable_exit_str = '-disableExit=0'
+
+        use_reg_offset_str = '-useRegOffset=0'
+
+        exceed_limit_str = '-exceedLimit=0'
+
         if tool.depth_flag:
             depth_limit_str = '-isLimitedDepth=true -depthLimit='+str(tool.anot_depth)+ ' '
 
@@ -77,6 +83,16 @@ def run_argspec(tool):
 
         if tool.use_glob:
             use_glob_str ='-useGlob=1'
+
+        if tool.disable_exit:
+            disable_exit_str = '-disableExit=1'
+
+        if tool.use_reg_offset:
+            use_reg_offset_str = '-useRegOffset=1'
+
+        if int(tool.exceed_limit) != 0:
+            exceed_limit_str ='-exceedLimit='+tool.exceed_limit
+        
 
 
 
@@ -102,7 +118,7 @@ def run_argspec(tool):
 		# interconstprop pass
                 #
 		Cmd = opt + ' -load ' + build_path + 'ConstantFolding.so -isAnnotated=' + str(tool.annot_flag) + ' -trackAllocas=' + str(tool.track_allocas)  +' -fileNames '  + str(tool.config_files) + ' -mem2reg -globalopt -instcombine --disable-simplify-libcalls  -loops -lcssa -loop-simplify -loop-rotate -inter-constprop -__progName=ssh' + annotated_file + ' -o ' + constprop_file
-		printDbgMsg(Cmd)
+		#printDbgMsg(Cmd)
 #'-simplifycfg'
                 rotated_file = tool.work_dir + "/rotated.bc"
                 global_opt = tool.work_dir + "/global_opt.bc"
@@ -112,7 +128,7 @@ def run_argspec(tool):
                 Cmd = [opt, "-globalopt","-instcombine", '-mergereturn', '-loop-rotate', rotated_file, '-o', global_opt]
                 subprocess.call(Cmd)
 #'-loop-unswitch', '-loop-idiom', '-loop-accesses', '-loop-vectorize', '-loop-load-elim', '-loop-sink' '-lcssa',
-		Cmd = [opt, '-load', build_path + 'ConstantFolding.so', '-isAnnotated=' + str(tool.annot_flag), use_glob_str ,'-trackAllocas=' + str(tool.track_allocas),'-contextType=' + str(tool.context_type), '-fileNames', str(tool.config_files),'-mem2reg', '-loops', '-loop-simplify', '-scalar-evolution', '-licm',  '-loop-rotate', '-indvars', '-loop-reduce', "-__progName=ssh",'-inter-constprop', annotated_file, '-o', constprop_file]
+		Cmd = [opt, '-load', build_path + 'ConstantFolding.so', '-isAnnotated=' + str(tool.annot_flag), use_glob_str ,disable_exit_str, use_reg_offset_str,exceed_limit_str,'-trackAllocas=' + str(tool.track_allocas),'-contextType=' + str(tool.context_type), '-fileNames', str(tool.config_files),'-mem2reg', '-loops', '-loop-simplify', '-scalar-evolution', '-licm',  '-loop-rotate', '-indvars', '-loop-reduce', "-__progName=ssh",'-inter-constprop', annotated_file, '-o', constprop_file]
 		f = open(constprop_log_file, "wb")
 		printDbgMsg(" ".join(Cmd))
 
@@ -248,7 +264,7 @@ def create_exe(tool):
 
 	# strip
 	if(tool.strip_flag):
-		Cmd = 'strip ' + exe_name + ' -o ' + exe_name
+		Cmd = 'strip ' + exe_name + ' -o ' + exe_name+"_stripped"
 		printDbgMsg(Cmd)
 		subprocess.call(Cmd, shell = True)
 

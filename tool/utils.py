@@ -48,6 +48,10 @@ def parse_args(args):
         isLoadsLimited = False
         loadPercent = 100
         useGlob = False
+        exceedLimit = 0
+        disableExit = False
+        useRegOffset = False
+
 	for i in range(2, len(args)):
 		if(args[i] == 'no-optimization'):
 			opt_flag = False
@@ -71,6 +75,15 @@ def parse_args(args):
                         loadPercent = args[i+1]
                 elif(args[i] == "useGlob"):
                         useGlob = True
+                elif(args[i] == "exceedLimit"):
+                        exceedLimit = args[i+1]
+                elif(args[i] == "disableExit"):
+                        disableExit = True
+                elif(args[i] == "useRegOffset"):
+                        useRegOffset = True
 
-	return (man_data, work_dir, opt_flag, spec_flag, strip_flag, icp_flag, annot_flag, track_allocas, contextType, isLimitedDepth, depthLimit, isLoadsLimited, loadPercent, useGlob)
+
+
+
+	return (man_data, work_dir, opt_flag, spec_flag, strip_flag, icp_flag, annot_flag, track_allocas, contextType, isLimitedDepth, depthLimit, isLoadsLimited, loadPercent, useGlob,exceedLimit,disableExit,useRegOffset)
 
