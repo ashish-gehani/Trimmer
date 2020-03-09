@@ -76,7 +76,18 @@ static cl::opt<std::string> progName("__progName", cl::init(""));
 
 static cl::opt<int> contextType("contextType", cl::init(1));
 
-static cl::opt<int> useGlob("useGlob",cl::init(0));
+static cl::opt<int> useGlob("useGlob",
+        cl::desc("are the globals mod-ref to be used in choosing function specialisation"),cl::init(0));
+static cl::opt<int> exceedLimit("exceedLimit",
+        cl::desc("heuristic to limit function cloning to a limitted number"),cl::init(0));
+static cl::opt<int> disableExit("disableExit",
+        cl::desc("disable exiting on fork/pthread function"),cl::init(0));
+static cl::opt<int> useRegOffset("useRegOffset",
+        cl::desc("using trimmer's stored registers for offset (in addition to scalarevolution) in GEPs"),cl::init(0));
+
+
+
+
 
 unsigned trackedLoads = 0;
 unsigned fSkipped = 0;
@@ -142,7 +153,9 @@ void ConstantFolding::runOnInst(Instruction * I) {
     if(auto CI = dyn_cast<CallInst>(I)) {
       if(CI->getCalledFunction() && (CI->getCalledFunction()->getName() == "fork" || CI->getCalledFunction()->getName().substr(0, 7) == "pthread")) {
         errs() <<"XXX fork or pthread invoked ...\n";
-        //exit = 1;
+        if (!disableExit){
+            exit = 1;
+        }
         return;
       }
     }
@@ -1075,7 +1088,7 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
   Value *offsetVal = gi->getOperand(1);
   Register *regOffset = processInstAndGetRegister(offsetVal);
 
-  if(!isConst && !regOffset) {
+  if((useRegOffset && !isConst  && !regOffset) || (!useRegOffset && !isConst)) {
     //TODO recursively mark memory non constant
     debug(Abubakar) << "GepInst : offset not constant\n";
     bbOps.setConstContigous(false, reg->getValue(), currBB);
@@ -1094,7 +1107,7 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
   }
   uint64_t val;
 
-  if(regOffset && !isConst){
+  if(useRegOffset && regOffset && !isConst){
     val = reg->getValue() + regOffset->getValue();
     errs()<<"Register Offset value: "<<regOffset->getValue()<<"\n";
   } else { 
@@ -1752,7 +1765,10 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
   string name = calledFunction->getName().str();
 
   if(name == "fork" || name.substr(0,7) == "pthread") {
-    //exit = 1;
+
+    if(!disableExit){
+        exit = 1;
+    }
     return NOTFOLDED;
   }
 
@@ -1775,7 +1791,7 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
       addFuncInfo(calledFunction, fi);
     }
 
-    if((useAnnotations && !satisfyConds(calledFunction, callInst)) || calledFunction->getName().str() == "authmethod_is_enabled"){// || exceedsRecursion(calledFunction, callInst->getParent()->getParent())) {
+    if((useAnnotations && !satisfyConds(calledFunction, callInst)) || calledFunction->getName().str() == "authmethod_is_enabled" || (exceedLimit && exceedsRecursion(calledFunction, callInst->getParent()->getParent()))) {
       fSkipped++;
       debug(Abubakar) << "skipping function : does not satisfy conds\n";
 
@@ -1818,7 +1834,7 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
       /*
        *
        * Experiment with heuristic to limit Cloning when cloned a function above a specified limit */
-      if(exceedClone(clonedInst->getCalledFunction()->getName(), 1100)){
+      if(exceedLimit && exceedClone(clonedInst->getCalledFunction()->getName(), exceedLimit)){
         debug(Abubakar) << "skipping function : does not satisfy conds\n";
         markArgsAsNonConst(callInst);
         markGlobAsNonConst(calledFunction);
