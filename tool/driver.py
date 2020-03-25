@@ -75,6 +75,8 @@ def run_argspec(tool):
 
         exceed_limit_str = '-exceedLimit=0'
 
+        readelf_example = tool.is_readelf
+
         if tool.depth_flag:
             depth_limit_str = '-isLimitedDepth=true -depthLimit='+str(tool.anot_depth)+ ' '
 
@@ -101,6 +103,12 @@ def run_argspec(tool):
                 if(tool.track_allocas):
                         Cmd = opt + ' -load ' + build_path + 'AnnotateNew.so -mem2reg -mergereturn -simplifycfg -loops -lcssa -loop-simplify -loop-rotate -loop-rotate -indvars  -svfg --isAnnotated=' + str(tool.annot_flag) + ' --argvName=__argv_new__\
                                 ' +depth_limit_str+ load_percent_str+ add_file + ' -o ' + annotated_file
+
+                        if readelf_example:
+                            # Aatira Anot
+                            Cmd = opt + ' -load ' + build_path + 'AnnotateNew.so -mem2reg -loops -lcssa -loop-simplify -loop-rotate -indvars  -svfg --isAnnotated=' + str(tool.annot_flag) + ' --argvName=__argv_new__\
+                                    ' +depth_limit_str+ load_percent_str+ add_file + ' -o ' + annotated_file
+
 
                         printDbgMsg(Cmd)
 
@@ -129,6 +137,11 @@ def run_argspec(tool):
                 subprocess.call(Cmd)
 #'-loop-unswitch', '-loop-idiom', '-loop-accesses', '-loop-vectorize', '-loop-load-elim', '-loop-sink' '-lcssa',
 		Cmd = [opt, '-load', build_path + 'ConstantFolding.so', '-isAnnotated=' + str(tool.annot_flag), use_glob_str ,disable_exit_str, use_reg_offset_str,exceed_limit_str,'-trackAllocas=' + str(tool.track_allocas),'-contextType=' + str(tool.context_type), '-fileNames', str(tool.config_files),'-mem2reg', '-loops', '-loop-simplify', '-scalar-evolution', '-licm',  '-loop-rotate', '-indvars', '-loop-reduce', "-__progName=ssh",'-inter-constprop', annotated_file, '-o', constprop_file]
+
+                if readelf_example:
+                    # Aatira Constant Folding
+                    Cmd = [opt, '-load', build_path + 'ConstantFolding.so', '-isAnnotated=' + str(tool.annot_flag), '-trackAllocas=' + str(tool.track_allocas), '-contextType=' + str(tool.context_type), '-fileNames', str(tool.config_files),'-mem2reg','-mergereturn','-simplifycfg','-loops','-lcssa','-loop-simplify','-scalar-evolution' ,'-licm','-loop-rotate','-indvars' ,'-loop-reduce',"-__progName=ssh",'-inter-constprop', annotated_file, '-o', constprop_file]
+
 		f = open(constprop_log_file, "wb")
 		printDbgMsg(" ".join(Cmd))
 

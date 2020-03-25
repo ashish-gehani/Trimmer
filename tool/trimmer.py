@@ -7,7 +7,7 @@ debugPrint = 1
 
 class Trimmer:
 
-    def __init__(self, (man_data, work_dir, opt_flag, spec_flag, strip_flag, icp_flag, annot_flag, track_allocas, context_type, depth_flag, anot_depth,load_flag, load_percent,use_glob,exceed_limit,disable_exit,use_reg_offset)):
+    def __init__(self, (man_data, work_dir, opt_flag, spec_flag, strip_flag, icp_flag, annot_flag, track_allocas, context_type, depth_flag, anot_depth,load_flag, load_percent,use_glob,exceed_limit,disable_exit,use_reg_offset,is_readelf)):
 
         self.name = man_data["name"]
         self.main = man_data["main"]
@@ -36,6 +36,7 @@ class Trimmer:
         self.exceed_limit = exceed_limit
         self.disable_exit = disable_exit
         self.use_reg_offset = use_reg_offset
+        self.is_readelf = is_readelf
         self.print_info()
 
     def print_info(self):
@@ -56,6 +57,7 @@ class Trimmer:
         print 'exceedLimit ' + str(self.exceed_limit)
         print 'disable_exit ? '+ str(self.disable_exit)
         print 'use_reg_offset ? '+ str(self.use_reg_offset)
+        print 'is_readelf ? '+ str(self.is_readelf)
 
     def run(self):
         self.curr_file = self.work_dir + '/' + self.main

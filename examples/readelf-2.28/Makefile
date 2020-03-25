@@ -20,12 +20,12 @@ compress: ${OUT_DIR}
 	cp ${READELF_BITCODE} ${OUT_DIR}
 	cd ${OUT_DIR} && \
 	echo '{"binary": "readelf_fin", "native_libs": [], "name": "readelf", "args": ["-a", "name"], "modules": [], "ldflags": ["-lz","-ldl"], "main": "readelf.bc", "config_files": []}' > ${READELF_MANIFEST} && \
-	python ${TRIMMER_HOME}/tool/trimmer.py ${READELF_MANIFEST} ./ 2> ${LOG_FILE}
+	python ${TRIMMER_HOME}/tool/trimmer.py ${READELF_MANIFEST} ./work_dir readelf 2> ${LOG_FILE}
 
 .PHONY: ${READELF_BITCODE}
 ${READELF_BITCODE}: ${READELF_NAME}
 	cd ${READELF_NAME} && \
-	CC=${BITCODE_WRAPPER} CFLAGS="-DHAVE_CONFIG_H  -Xclang -disable-O0-optnone" ./configure && \
+	CC=${BITCODE_WRAPPER} CFLAGS="-DHAVE_CONFIG_H -O0 -fno-inline -fno-inline-functions -Xclang -disable-O0-optnone" ./configure && \
 	CC=${BITCODE_WRAPPER} make && \
 	cd ${BINUTILS} && \
 	${BITCODE_EXTRACT} ${READELF} && \
