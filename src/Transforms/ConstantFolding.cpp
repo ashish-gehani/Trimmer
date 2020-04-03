@@ -3637,7 +3637,7 @@ bool ConstantFolding::handleFileIOCall(CallInst * ci) {
   else if(name == "pread")  handlePRead(ci);
   else if(name == "mmap" || name == "mmap64")   handleMMap(ci);
   else if(name == "munmap")  handleMUnmap(ci);
-  else if(name == "fgets")  handleFGets(ci);
+  else if(name == "fgets" || name == "fgets_unlocked")  handleFGets(ci);
   else if(name == "getline")  handleGetLine(ci);
   else if (name == "close")  handleClose(ci);
   else if (name == "fclose")  handleFClose(ci);
