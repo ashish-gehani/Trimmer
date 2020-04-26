@@ -112,7 +112,7 @@ bool LoopUnroller::getTripCount(TargetLibraryInfo * TLI, AssumptionCache &AC, un
       }
   }
 
-  if(!tripCount || tripCount > 10000){
+  if(!tripCount || tripCount > 10000 || tripCount > 1000){
     if(isFileIOLoop)
       tripCount = fileTripCount + 5;
     else
@@ -154,8 +154,10 @@ bool LoopUnroller::doUnroll(TargetLibraryInfo * TLI, AssumptionCache &AC, unsign
   Loop * L = LI->getLoopFor(loop->getHeader());
   OptimizationRemarkEmitter ORE(F); 
   debug(Usama) << "Trying trip count: " << tripCount << "\n";
-  int UnrollResult = (int) UnrollLoop(L, tripCount, tripCount, true, false, false, 
-                true, false, 1, 0, false ,LI, &SE, &DT, &AC, &ORE, PreserveLCSSA);//unrollRemaineder set to false currently
+  bool allowRuntime = false;
+  bool unrollRemainder = false;
+  int UnrollResult = (int) UnrollLoop(L, tripCount, tripCount, true, allowRuntime, false, 
+                true, false, 1, 0, unrollRemainder ,LI, &SE, &DT, &AC, &ORE, PreserveLCSSA);//unrollRemaineder set to false currently
   if(!UnrollResult) {
     debug(Abubakar) << "failed in unrolling\n";
     return false;

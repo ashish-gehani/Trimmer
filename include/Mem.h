@@ -7,7 +7,7 @@
 #define MEM_H_
 
 #define DEFAULTINITSIZE 20000
-#define MAXSTACKSIZE 1000000
+#define MAXSTACKSIZE 10000000
 
 using namespace llvm;
 using namespace std;
@@ -149,7 +149,7 @@ public:
 		uint64_t address = heapIndex;
 		heapIndex += size;
 		heapIndex++; // space of 1 between each allocation
-        errs() << "allocating" << "\n";
+        //errs() << "allocating" << "\n";
 		while(heapIndex >= heapTotalSize)
 			resize(heap, heapConst, heapTotalSize);
 		heapStartIndices.push_back(address);
@@ -250,10 +250,10 @@ public:
 	uint64_t getHeapTotalSize() {
 		return heapTotalSize;
 	}							
-	vector<unsigned> getStackStartIndices() {
+	vector<uint64_t> getStackStartIndices() {
 		return stackStartIndices;
 	}	
-	vector<unsigned> getHeapStartIndices() {
+	vector<uint64_t> getHeapStartIndices() {
 		return heapStartIndices;
 	}		
 	map<unsigned, unsigned> getStackStartToSizeMap() {
@@ -349,7 +349,7 @@ private:
 	uint64_t stackTotalSize, heapTotalSize;
     uint64_t constMemSize;
 	map<unsigned, unsigned> stackStartToSizeMap, heapStartToSizeMap;
-	vector<unsigned> stackStartIndices, heapStartIndices;
+	vector<uint64_t> stackStartIndices, heapStartIndices;
     vector<unsigned> impMemIndices;
 
 	Module * module;

@@ -1081,6 +1081,8 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
   }
 
   unsigned OffsetBits = DL->getPointerTypeSizeInBits(gi->getType());
+  unsigned size = (DL->getPointerTypeSizeInBits(dyn_cast<PointerType>(gi->getType())->getElementType()))/8;
+  errs()<<"size: "<<size<<"\n";
   APInt offset(OffsetBits, 0); 
   bool isConst = gi->accumulateConstantOffset(*DL, offset);
   errs()<<"[processGEPInst]isConst: "<<isConst<<"\n";
@@ -1368,6 +1370,14 @@ bool ConstantFolding::handleGetUid(CallInst *callInst) {
   return true;
 }
 
+bool ConstantFolding::handleGetGid(CallInst *callInst){
+    gid_t groupId = getgid();
+    addSingleVal(callInst, (uint64_t)groupId, true, true);
+    stats.incrementTotalLibCalls();
+    stats.incrementLibCallsFolded();
+    return true;
+}
+
 bool ConstantFolding::copyMemory(char *address, Type *ty, char *localAddress) {
   errs() << "Copying over memory" << "\n";
   StructType *st = dyn_cast<StructType>(ty);
@@ -1422,6 +1432,8 @@ bool ConstantFolding::handleStat(CallInst *ci) {
   errs() << "calling stat on " << (char *) bbOps.getActualAddr(pathReg->getValue(), currBB) << " virtual addr = " << pathReg->getValue() << " statbuf addr = " << statBufRegister->getValue() << "\n";
   string name = string((char *) bbOps.getActualAddr(pathReg->getValue(), currBB));
   if(std::find(std::begin(configFileNames), std::end(configFileNames), name) == std::end(configFileNames)) {
+    errs()<<"stat: marking arguments non constant returning\n";
+    markArgsAsNonConst(ci);
     errs() << "stat: on non config file. returning\n";
     return false;
   }
@@ -1681,6 +1693,8 @@ bool ConstantFolding::handleSysCall(CallInst *callInst) {
 
   if(F->getName().str() == "getuid")
     return handleGetUid(callInst);
+  else if(F->getName().str() == "getgid")
+    return handleGetGid(callInst);
   else if(F->getName().str() == "getpwuid")
     return handleGetPwUid(callInst);
   else if(F->getName().str() == "stat" || F->getName().str() == "stat64")
@@ -1791,7 +1805,7 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
       addFuncInfo(calledFunction, fi);
     }
 
-    if((useAnnotations && !satisfyConds(calledFunction, callInst)) || calledFunction->getName().str() == "authmethod_is_enabled" || (exceedLimit && exceedsRecursion(calledFunction, callInst->getParent()->getParent()))) {
+    if((useAnnotations && !satisfyConds(calledFunction, callInst)) || calledFunction->getName().str() == "authmethod_is_enabled" || (exceedLimit  && exceedsRecursion(calledFunction, callInst->getParent()->getParent()))) {
       fSkipped++;
       debug(Abubakar) << "skipping function : does not satisfy conds\n";
 
@@ -1934,8 +1948,11 @@ bool ConstantFolding::exceedsRecursion(Function *called, Function *callee) {
   if(calledName != calleeName)
     return false;
 
-  //check call stack
   int max = 5;
+  if(worklistBB.size() < max){
+      return false;
+  }
+  //check call stack
   for(unsigned i = worklistBB.size() - 1; i >= max; i--) {
     string func = removeCloneName(worklistBB[i].back()->getParent()->getParent()->getName().str());
     if(func != calledName)
@@ -2373,7 +2390,7 @@ bool ConstantFolding::satisfyConds(Function * F, CallInst *ci) {
       FuncSpecDetail *detail = funcSpecMap[F];
       if(detail->fail) {
         errs() << "(SATISFYCONDS) << test already failed\n";
-        return false;
+        return false; // this is actually false
       }
 
       if(bbOps.contextMatch(detail->context, currBB)) {
@@ -2855,6 +2872,12 @@ void ConstantFolding::handleStrnCpy(CallInst *callInst) {
 
   Register *reg1 = processInstAndGetRegister(dest);
   Register *reg2 = processInstAndGetRegister(src);
+
+
+  if (!reg1){
+      errs()<<"strncpy: destination not found\n";
+      return;
+  }
 
   if(!reg2 || !bbOps.checkConstContigous(reg2->getValue(), currBB)) {
     errs() << "strncpy: source not found or non const\n";
@@ -3855,8 +3878,11 @@ void ConstantFolding::handleRead(CallInst * ci) {
   Value * bufPtr = ci->getOperand(1);
   Value * sizeVal = ci->getOperand(2);
   uint64_t size, sfd;
-  int fd;
+  int fd = 0;
   bool fdConst = getSingleVal(fdVal, sfd) && getfdi(sfd, fd);  
+
+  if (fd <=2) return; //What?
+
   Register * reg = processInstAndGetRegister(bufPtr);  
   if(!reg || !fdConst || !getSingleVal(sizeVal, size)) {
     debug(Abubakar) << "handleRead : failed to specialize\n";
@@ -4247,15 +4273,15 @@ void ConstantFolding::handleFGets(CallInst * ci) {
   }
 
   else{
-    bbOps.setConstMem(true, reg->getValue(), strlen(bytes_read),currBB);
+    bbOps.setConstMem(true, reg->getValue(), strlen(buffer),currBB);
     setfptrOffset(sfd, fptr);
-    debug(Abubakar) << "buffer value " << buffer << "\n";
+    debug(Abubakar) << "buffer value " << buffer <<" "<<strlen(buffer)<<" address: " <<reg->getValue()<< "\n";
     Constant * const_array = ConstantDataArray::getString(module->getContext(),StringRef(buffer),true);
     // FIXME: break line
     GlobalVariable * gv = new GlobalVariable(*module,const_array->getType(),true,GlobalValue::ExternalLinkage,const_array,"");
     gv->setAlignment(1);
     IRBuilder<> Builder(ci);
-    Instruction* MemCpyInst = Builder.CreateMemCpy(bufPtr,1,gv,1,strlen(bytes_read));
+    Instruction* MemCpyInst = Builder.CreateMemCpy(bufPtr,1,gv,1,strlen(buffer)+1);
     ci->replaceAllUsesWith(bufPtr);
     Constant *hookFunc;
     hookFunc = module->getOrInsertFunction("fseek", Type::getInt32Ty(module->getContext()),fptrVal->getType(),Type::getInt64Ty(module->getContext()),Type::getInt32Ty(module->getContext()));    
@@ -4285,8 +4311,12 @@ void ConstantFolding::handleLSeek(CallInst * ci) {
   Value * offSetVal = ci->getOperand(1);
   Value * flagVal = ci->getOperand(2);
   uint64_t offset,sfd,flag;
-  int fd;
+  int fd = 0;
   bool fdConst = getSingleVal(fdVal, sfd) && getfdi(sfd, fd);
+
+  if (fd <= 2){
+      return;
+  }
 
 
   if(!fdConst || !getSingleVal(offSetVal, offset) || 
@@ -5151,6 +5181,10 @@ void ConstantFolding::markMemNonConst(Type *ty, uint64_t address, BasicBlock *BB
     return;
   }
 
+  errs() << "marking mem non const in loop at address " << address << " to " << address + DL->getTypeAllocSize(ty)  <<"\n";
+  bbOps.setConstContigous(false, address, BB);
+
+
   if(ty->isStructTy()) {
 
     errs() << "is struct type" << "\n";
@@ -5211,6 +5245,4 @@ void ConstantFolding::markMemNonConst(Type *ty, uint64_t address, BasicBlock *BB
   }
 
   // FIXME: Break line
-  errs() << "marking mem non const in loop at address " << address << " to " << address + DL->getTypeAllocSize(ty)  <<"\n";
-  bbOps.setConstContigous(false, address, BB);
-}
+  }

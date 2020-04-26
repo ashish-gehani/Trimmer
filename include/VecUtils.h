@@ -71,5 +71,5 @@ map<Ty1, Ty2 *> duplicateMap(map<Ty1, Ty2 *> &oldMap) {
   }
   return oldMap;
 }
-unsigned binarySearchIndices(vector<unsigned> indices, unsigned lo, unsigned hi, unsigned val);
+uint64_t binarySearchIndices(vector<uint64_t> indices, uint64_t lo, uint64_t hi, uint64_t val);
 #endif

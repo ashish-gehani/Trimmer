@@ -44,7 +44,7 @@ struct AnnotateNew: public ModulePass {
   void setDepthFunctions(int depth, set<const Function *>& depthCG, const Function* F);
 
   void getTaintedBranches(set<BranchInst *> &, map<Value *, set<Value *> > &, set<const Value*>&);
-  void run(vector<GlobalValue*>, Value *, set<const Value*> &);
+  void run(vector<Value*>, Value *, set<const Value*> &);
   void getBranchAndArgcInstructions(set<BranchInst*> &branches, set<CallInst*> &calls, set<Instruction*> &argcValues);
   void getMemoryFlow(const SVFGNode *current, set<const Value *> &singleLevelPointers, set<SVFGNode*> &storeSvfg, set<CallInst*> &calls);
   void getSourceAllocas(set<SVFGNode*> &, vector<const SVFGNode*> &, set<const Value*> &, bool trackLoops = true, bool dpMem = true);

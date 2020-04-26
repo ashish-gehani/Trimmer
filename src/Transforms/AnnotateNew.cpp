@@ -498,6 +498,7 @@ bool isInLoop(Value* value) {
   return false;
 }
 
+/*
 template <typename T>
 set<T> *dfs_rec(T root, std::function<vector<T> (T)> nextNodes, std::function<bool (T)> condition, set<T> &visited, map<T, set<T>* > *dpData = NULL) {
   //static map<T, set<T>* > dpData;
@@ -527,8 +528,9 @@ set<T> *dfs_rec(T root, std::function<vector<T> (T)> nextNodes, std::function<bo
   if(dpData)
     (*dpData)[root] = output;
   return output;
-}
+}*/
 
+/*
 void AnnotateNew::dfs(Value* root, std::function<vector<Value*> (Value*)> nextNodes, std::function<bool (Value*)> condition, set<Value*> &output) {
   vector<Value*> worklist;
   worklist.push_back(root);
@@ -559,6 +561,7 @@ void AnnotateNew::dfs(Value* root, std::function<vector<Value*> (Value*)> nextNo
     }
   }
 }
+
 void AnnotateNew::dfs(SVFGNode* root, std::function<vector<SVFGNode*> (SVFGNode*)> nextNodes, std::function<bool (SVFGNode*)> condition, set<SVFGNode*> &output) {
   vector<SVFGNode*> worklist;
   worklist.push_back(root);
@@ -588,7 +591,8 @@ void AnnotateNew::dfs(SVFGNode* root, std::function<vector<SVFGNode*> (SVFGNode*
       //errs() << "Instruction :" << *casted->getInst() << "\n";
     }
   }
-}
+}*/
+
 //function SVFGNode*, vector<SVFGNode *> -> void
 template <typename T>
 void dfs(T root, std::function<vector<T> (T)> nextNodes, std::function<bool (T)> condition, set<T> &output) {
@@ -610,9 +614,9 @@ void dfs(T root, std::function<vector<T> (T)> nextNodes, std::function<bool (T)>
     }
 
     vector<T> children = nextNodes(currentNode);
-    //errs() << "Parent:  " << *root << "\n";
+    errs() << "Parent:  " << *root << "\n";
     for(auto child : children) {
-      //errs() << "Child : " << *child << "\n";
+      errs() << "Child : " << *child << "\n";
       worklist.push_back(child);
       //if(auto casted = dyn_cast<StmtSVFGNode>(child))
       //if(casted->getInst())
@@ -1824,16 +1828,18 @@ void printAllAllocsMallocs(Module &M) {
         if (dyn_cast<AllocaInst>(&I))
           asd.insert(&I);
         if (auto temp = dyn_cast<CallInst>(&I))
-          if(temp->getCalledFunction() && (temp->getCalledFunction()->getName() == "malloc" || temp->getCalledFunction()->getName() == "calloc"))
+          if(temp->getCalledFunction() && (temp->getCalledFunction()->getName() == "malloc" || temp->getCalledFunction()->getName() == "calloc" || temp->getCalledFunction()->getName() == "xmalloc" || temp->getCalledFunction()->getName() == "xcalloc"))
             asd.insert(&I);
       }
     }
   }
 
+  errs()<<"asd size allocs "<<asd.size()<<"\n";
   for(auto it = M.global_object_begin(), end = M.global_object_end(); it != end; it++)
     if(!dyn_cast<Function>(&*it))
       asd.insert(&*it);
 
+  errs()<<"asd size total "<<asd.size()<<"\n";
   errs() << "Size : " << asd.size() << "\n";
   for(auto &I: asd) {
     errs() << *I << "\n";
@@ -1885,7 +1891,7 @@ void AnnotateNew::getTrackedBranchBBs(BranchInst *I, set<BasicBlock *> &markedBB
   getBbsTillJoin(join, markedBBs, I);
 }
 
-void markTestArgc(Value *argc) {
+void markArgcUsers(Value *argc) {
   for(auto user: argc->users())
     if(auto inst = dyn_cast<Instruction>(user))
       inst->setMetadata("track_argc", MDNode::get(inst->getContext(), MDString::get(inst->getContext(), "1"))); 
@@ -1903,7 +1909,7 @@ void markTestArgc(Value *argc) {
  *    and add them to the tainted data
  * 6) Repeat above steps untill no new tainted data
  */
-void AnnotateNew::run(vector<GlobalValue*> sources, Value *argc, set<const Value*> &trackedAllocas) {
+void AnnotateNew::run(vector<Value*> sources, Value *argc, set<const Value*> &trackedAllocas) {
 
   //set<const Value *> singleLevelPointers; //store single level pointers
 
@@ -1927,7 +1933,7 @@ void AnnotateNew::run(vector<GlobalValue*> sources, Value *argc, set<const Value
 
   // just for running tests
   if(argc && isTest) {
-    markTestArgc(argc);
+    markArgcUsers(argc);
     set<Value*> stores;
     set<SVFGNode*> storeSvfg;
     getScalarStores(argc, stores);
@@ -1936,6 +1942,7 @@ void AnnotateNew::run(vector<GlobalValue*> sources, Value *argc, set<const Value
   }
 
   {
+    markArgcUsers(argc);
     set<SVFGNode*> svfgNodes;
     getBranchAndArgcInstructions(allBranches, calls, argcValues);
     //getSourceAllocas(svfgNodes, worklistSvfg, trackedAllocas);
@@ -2082,7 +2089,7 @@ void AnnotateNew::run(vector<GlobalValue*> sources, Value *argc, set<const Value
           if(dyn_cast<AllocaInst>(&I)) {
             trackedAllocas.insert(&I);
           } else if(auto temp = dyn_cast<CallInst>(&I)) {
-            if(temp->getCalledFunction() && (temp->getCalledFunction()->getName() == "malloc" || temp->getCalledFunction()->getName() == "calloc"))
+            if(temp->getCalledFunction() && (temp->getCalledFunction()->getName() == "malloc" || temp->getCalledFunction()->getName() == "calloc" || temp->getCalledFunction()->getName() == "xmalloc" || temp->getCalledFunction()->getName() == "xcalloc"))
               trackedAllocas.insert(temp);
           } else {
             classifyValAndOperands(&I, backwardPtr, slps, scalars); 
@@ -2170,6 +2177,8 @@ bool AnnotateNew::runOnModule(Module &M) {
   pag = svfg->getPAG();
 
 
+
+
   globPag = pag;
   globSvfg = svfg;
 
@@ -2181,21 +2190,31 @@ bool AnnotateNew::runOnModule(Module &M) {
 
 
   set<const Value*> trackedAllocas;
-  vector<const SVFGNode *> worklistSvfg; //worklist of pointers to track
-  set<const SVFGNode *> processed;
-  set<const Value *> singleLevelPointers; //store single level pointers
+
+  //vector<const SVFGNode *> worklistSvfg; //worklist of pointers to track
+  //set<const SVFGNode *> processed;
+  //set<const Value *> singleLevelPointers; //store single level pointers
 
   Function *main = M.getFunction("main");
-  vector<GlobalValue *> sources;
-  GlobalValue *argv;
+  vector<Value *> sources;
+  Value *argv;
   Value *argc = NULL;
   if(main->arg_begin() != main->arg_end())
     argc = &*main->arg_begin();
 
+  int i =0;
+
+  for (auto start = main->arg_begin(), end = main->arg_end(); start!=end; ++start){
+      if(i==1)
+          argv = &*start;
+      i++;
+  }
+  /*
   if(!(argv = getArgv(argvName,M))) {
     errs() << "Argv not found \n";
     return false;
-  }
+  }*/
+
 
   sources.push_back(argv);
   if(auto val = getArgv("optind", M))
@@ -2280,6 +2299,8 @@ bool AnnotateNew::runOnModule(Module &M) {
 
     unsigned totalTracked = statMap.size();
 
+    unsigned global_count = 0;
+
     errs() << "SIZE" << trackedAllocas.size() << "\n";
     errs() << "Sorted Values" << "\n";
     if (!isLoadsLimited) {
@@ -2295,6 +2316,7 @@ bool AnnotateNew::runOnModule(Module &M) {
         else {
           ((GlobalObject*)I)->setMetadata("track", N);
           errs()<< "statGlob: "<< *((GlobalObject*)I)<<"\n";
+          global_count++;
         }
       } 
     } else {
@@ -2365,7 +2387,7 @@ bool AnnotateNew::runOnModule(Module &M) {
     std::ofstream StatFile;
     StatFile.open("anotStats.JSON");
 
-    StatFile<<"{ \"trackedAllocas\": "<<totalTracked<<" , \"globals\": "<< 0 <<"}\n"; 
+    StatFile<<"{ \"trackedAllocas\": "<<totalTracked<<" , \"globals\": "<< global_count <<"}\n"; 
     StatFile.close();
 
 

@@ -160,10 +160,11 @@ inline LoopStats *FunctionStats::getRunningLoop() {
   int i;
   assert(loops.size());
   errs() << "loop size:" << loops.size() << "\n";
-  for(i = loops.size() - 1; i >= 0 && loops[i]->hasLoopTerminated(); i--);
-  //assert(i >= 0);
-  if(i < 0)
-    return NULL;
+
+  i = loops.size() -1;
+
+  loops[i]->hasLoopTerminated();
+
   errs() << " i " << i << "\n";
   return loops[i];
 }

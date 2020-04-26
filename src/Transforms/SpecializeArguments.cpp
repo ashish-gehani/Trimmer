@@ -59,6 +59,7 @@ namespace {
       ConstantInt* argcConst = ConstantInt::get(int32Ty, index_count);
       Function::arg_iterator ai = _main->arg_begin();
       Value* argc = (Value*) &(*ai); 
+      /*
       for(auto use: argc->users()) {
         if(auto I = dyn_cast<Instruction>(use)) {
           errs() << *I << "\n";
@@ -66,7 +67,7 @@ namespace {
           MDNode *N = MDNode::get(C, MDString::get(C, "1"));
           I->setMetadata("track_argc", N);
         }
-      }
+      }*/
       argc->replaceAllUsesWith(argcConst);   
       
 
@@ -119,6 +120,10 @@ namespace {
       errs() << "creating argv_new\n";
       GlobalVariable * argv_new = new GlobalVariable(M, argv->getType(), false, 
       		     GlobalValue::ExternalLinkage, nptr1, Twine("__argv_new__"));
+
+      LLVMContext &C = argv_new->getContext();
+      MDNode *N = MDNode::get(C, ConstantAsMetadata::get(ConstantInt::get(Type::getInt64Ty(C), 0))); 
+      ((GlobalObject*)argv_new)->setMetadata("track", N);
 
       errs() << *argv_new << "\n";
       vector<Value *> args;
