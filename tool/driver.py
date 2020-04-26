@@ -2,8 +2,10 @@
 import subprocess
 import config
 import os
+from os import sys
 import utils
 from datetime import datetime
+from threading import Timer
 
 trimmer_path = os.environ.get('TRIMMER_HOME')
 build_path = trimmer_path + '/build/'
@@ -13,6 +15,7 @@ opt = config.env_version('opt')
 dis = config.env_version("llvm-dis")
 clang = config.env_version('clang++')
 llc = config.env_version('llc')
+exit = 0
 
 
 debugPrint = 1
@@ -24,11 +27,17 @@ def printDbgMsg(msg):
 def disassemble(path):
     os.system(dis + " " + path)
 
+def kill (process,msg):
+    process.kill()
+    print(msg)
+    global exit
+    exit = 1
+
 def run_argspec(tool):
 
 	fname = tool.name
 	curr_file = tool.curr_file
-	# strip_file = tool.work_dir + '/' + fname + '_strip.bc'
+	strip_file = tool.work_dir + '/' + fname + '_strip.bc'
 	add_file = tool.work_dir + '/' + fname + '_added.bc'
         annotated_file = tool.work_dir + '/' + fname + '_annotated.bc'
 	unroll_file = tool.work_dir + '/' + fname + '_unroll.bc'
@@ -56,12 +65,12 @@ def run_argspec(tool):
 	# 	printDbgMsg(Cmd)
 	# 	subprocess.call(Cmd, shell = True)
 
-	Cmd = opt + ' -load ' + build_path + 'SpecializeArguments.so -specialize-args \
-	-args=' + tool.args + ' ' + curr_file + ' -o ' + add_file
+	#Cmd = opt + ' -load ' + build_path + 'SpecializeArguments.so -specialize-args \
+	#-args=' + tool.args + ' ' + curr_file + ' -o ' + add_file
 
-	printDbgMsg(Cmd)
-	subprocess.call(Cmd, shell = True)
-        disassemble(add_file)
+	#printDbgMsg(Cmd)
+	#subprocess.call(Cmd, shell = True)
+        #disassemble(add_file)
 
         depth_limit_str = ''
 
@@ -101,13 +110,13 @@ def run_argspec(tool):
 
 	if(tool.icp_flag):
                 if(tool.track_allocas):
-                        Cmd = opt + ' -load ' + build_path + 'AnnotateNew.so -mem2reg -mergereturn -simplifycfg -loops -lcssa -loop-simplify -loop-rotate -loop-rotate -indvars  -svfg --isAnnotated=' + str(tool.annot_flag) + ' --argvName=__argv_new__\
-                                ' +depth_limit_str+ load_percent_str+ add_file + ' -o ' + annotated_file
+                        Cmd = opt + ' -load ' + build_path + 'AnnotateNew.so -mem2reg -loops -lcssa -loop-simplify -loop-rotate -indvars -svfg  --isAnnotated=' + str(tool.annot_flag) + ' --argvName=__argv_new__\
+                                ' +depth_limit_str+ load_percent_str+ curr_file + ' -o ' + annotated_file
 
                         if readelf_example:
                             # Aatira Anot
                             Cmd = opt + ' -load ' + build_path + 'AnnotateNew.so -mem2reg -loops -lcssa -loop-simplify -loop-rotate -indvars  -svfg --isAnnotated=' + str(tool.annot_flag) + ' --argvName=__argv_new__\
-                                    ' +depth_limit_str+ load_percent_str+ add_file + ' -o ' + annotated_file
+                                    ' +depth_limit_str+ load_percent_str+ curr_file + ' -o ' + annotated_file
 
 
                         printDbgMsg(Cmd)
@@ -121,10 +130,30 @@ def run_argspec(tool):
                         disassemble(annotated_file)
                         #return
                 else:
-                        annotated_file = add_file
+                        annotated_file = curr_file
                 #-simplifycfg
 		# interconstprop pass
                 #
+                Cmd = opt + ' -load ' + build_path + 'SpecializeArguments.so -specialize-args -args=' + tool.args + ' ' + annotated_file + ' -o ' + add_file
+                printDbgMsg(Cmd)
+                subprocess.call(Cmd, shell = True)   
+                disassemble(add_file)
+                                                    
+                Cmd = opt + ' -mem2reg -mergereturn -simplifycfg -loops -lcssa -loop-simplify -loop-rotate -indvars ' + add_file + ' -o ' + add_file
+                printDbgMsg(Cmd)
+                subprocess.call(Cmd, shell = True)
+                disassemble(add_file)
+                
+                rotated_file = tool.work_dir + "/rotated.bc"
+                global_opt = tool.work_dir + "/global_opt.bc"
+                Cmd = [opt, "-loop-rotate", annotated_file, "-o", rotated_file]
+                subprocess.call(Cmd)
+                #"-instcombine",
+                Cmd = [opt, "-globalopt","-instcombine", '-mergereturn', '-loop-rotate', rotated_file, '-o', global_opt]
+                subprocess.call(Cmd)
+
+
+
 		Cmd = opt + ' -load ' + build_path + 'ConstantFolding.so -isAnnotated=' + str(tool.annot_flag) + ' -trackAllocas=' + str(tool.track_allocas)  +' -fileNames '  + str(tool.config_files) + ' -mem2reg -globalopt -instcombine --disable-simplify-libcalls  -loops -lcssa -loop-simplify -loop-rotate -inter-constprop -__progName=ssh' + annotated_file + ' -o ' + constprop_file
 		#printDbgMsg(Cmd)
 #'-simplifycfg'
@@ -135,8 +164,12 @@ def run_argspec(tool):
  #"-instcombine",
                 Cmd = [opt, "-globalopt","-instcombine", '-mergereturn', '-loop-rotate', rotated_file, '-o', global_opt]
                 subprocess.call(Cmd)
+
 #'-loop-unswitch', '-loop-idiom', '-loop-accesses', '-loop-vectorize', '-loop-load-elim', '-loop-sink' '-lcssa',
-		Cmd = [opt, '-load', build_path + 'ConstantFolding.so', '-isAnnotated=' + str(tool.annot_flag), use_glob_str ,disable_exit_str, use_reg_offset_str,exceed_limit_str,'-trackAllocas=' + str(tool.track_allocas),'-contextType=' + str(tool.context_type), '-fileNames', str(tool.config_files),'-mem2reg', '-loops', '-loop-simplify', '-scalar-evolution', '-licm',  '-loop-rotate', '-indvars', '-loop-reduce', "-__progName=ssh",'-inter-constprop', annotated_file, '-o', constprop_file]
+
+
+
+		Cmd = [opt, '-load', build_path + 'ConstantFolding.so', '-isAnnotated=' + str(tool.annot_flag), use_glob_str ,disable_exit_str, use_reg_offset_str,exceed_limit_str,'-trackAllocas=' + str(tool.track_allocas),'-contextType=' + str(tool.context_type), '-fileNames', str(tool.config_files),'-mem2reg','-mergereturn', '-simplifycfg' ,'-loops','-lcssa','-loop-simplify','-scalar-evolution' ,'-licm','-loop-rotate','-indvars' ,'-loop-reduce',"-__progName=ssh",'-inter-constprop',add_file, '-o', constprop_file]
 
                 if readelf_example:
                     # Aatira Constant Folding
@@ -145,14 +178,28 @@ def run_argspec(tool):
 		f = open(constprop_log_file, "wb")
 		printDbgMsg(" ".join(Cmd))
 
+                ping = subprocess.Popen(Cmd,stderr=f)
+                msg = "The program has timeout after 6 hours"
+
+                my_timer = Timer(21600,kill, [ping,msg])
+
                 starttime =  datetime.now()
-		subprocess.call(Cmd)
+		#subprocess.call(Cmd)
+                try:
+                    my_timer.start()
+                    stdout, stderr = ping.communicate()
+                finally:
+                    my_timer.cancel()
+
                 endtime = datetime.now()
                 delta = endtime-starttime
                 combined = delta.seconds + delta.microseconds/1E6
                 print(combined)
 
 		f.close()
+                print(exit)
+                if exit == 1:
+                    return 1
                 disassemble(constprop_file)
 		# remove pass
 		Cmd = opt + ' -load ' + build_path + 'Remove.so -remove ' + constprop_file\
