@@ -3,7 +3,11 @@
 Build
 ======
 
+We provide a bash script `build.sh` to build the dependencies to run TRIMMER, namely LLVM and Clang (Version 7.0.0) and [SVG](https://github.com/SVF-tools/SVF).
+
+
 ```
+bash build.sh
 mkdir build
 export TRIMMER_HOME=/path/to/root/directory
 export LLVM_COMPILER=clang
@@ -14,26 +18,33 @@ make
    
 If you have non conventional names for LLVM or CLANG you will have to set certain enviornment variables.
 
-e.g. if you have version 4.0
+e.g. if you have version build according to the instructions above: 
     
 ```
-export LLVM_CC_NAME=clang-4.0
-export LLVM_CXX_NAME=clang++-4.0
-export LLVM_LINK_NAME=llvm-link-4.0
-export LLVM_DIS_NAME=llvm-dis-4.0
-export LLVM_AR_NAME=llvm-ar-4.0
-export LLVM_AS_NAME=llvm-as-4.0
-export LLVM_LD_NAME=llvm-ld-4.0
-export LLVM_LLC_NAME=llc-4.0
-export LLVM_OPT_NAME=opt-4.0
-export LLVM_NM_NAME=llvm-nm-4.0
+export LLVM_CC_NAME=clang
+export LLVM_CXX_NAME=clang++
+export LLVM_LINK_NAME=llvm-link
+export LLVM_DIS_NAME=llvm-dis
+export LLVM_AR_NAME=llvm-ar
+export LLVM_AS_NAME=llvm-as
+export LLVM_LD_NAME=llvm-ld
+export LLVM_LLC_NAME=llc
+export LLVM_OPT_NAME=opt
+export LLVM_NM_NAME=llvm-nm
 ```
+
+TRIMMER also requires either wllvm
+
+```
+pip install wllvm
+```
+
 
 Synopsis
 ========
 
 ```
-python tool/trimmer.py [manifest-file] [working-directory]
+python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory]
 ```
 
 Description of manifest file 
@@ -58,7 +69,7 @@ Examples
 ========
 ```
 mkdir examples/tool_name/work_dir
-python tool/trimmer.py   examples/tool_name/tool.manifest  examples/tool_name/work_dir      
+python ${TRIMMER_HOME}/tool/trimmer.py   ${TRIMMER_HOME}/examples/tool_name/tool.manifest  ${TRIMMER_HOME}/examples/tool_name/work_dir      
 ```
 
 Running test cases

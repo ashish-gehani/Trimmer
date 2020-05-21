@@ -18,11 +18,13 @@ add_library(Internalize MODULE
 add_library(TestPass MODULE
   TestPass.cpp
   )
-add_library(Annotate MODULE
-  Annotate.cpp
-  ../Debug.cpp
-  ../VecUtils.cpp
-  )
+
+#add_library(Annotate MODULE
+#  Annotate.cpp
+#  ../Debug.cpp
+#  ../VecUtils.cpp
+#  )
+
 add_library(SpecializeArguments MODULE
   SpecializeArguments.cpp
   )
@@ -48,7 +50,7 @@ add_library(AnnotateNew MODULE
 target_compile_features(ConstantFolding PRIVATE cxx_range_for cxx_auto_type)
 target_compile_features(Internalize PRIVATE cxx_range_for cxx_auto_type)
 target_compile_features(TestPass PRIVATE cxx_range_for cxx_auto_type)
-target_compile_features(Annotate PRIVATE cxx_range_for cxx_auto_type)
+#target_compile_features(Annotate PRIVATE cxx_range_for cxx_auto_type)
 target_compile_features(SpecializeArguments PRIVATE cxx_range_for cxx_auto_type)
 target_compile_features(Remove PRIVATE cxx_range_for cxx_auto_type)
 #target_compile_features(RemFuncBody PRIVATE cxx_range_for cxx_auto_type)
@@ -57,7 +59,7 @@ target_compile_features(AnnotateNew PRIVATE cxx_range_for cxx_auto_type)
 
 # LLVM is (typically) built with no C++ RTTI. We need to match that;
 # otherwise, we'll get linker errors about missing RTTI data.
-set_target_properties(ConstantFolding Internalize TestPass Annotate SpecializeArguments Remove ListFunctions #RemFuncBody 
+set_target_properties(ConstantFolding Internalize TestPass SpecializeArguments Remove ListFunctions #RemFuncBody 
   PROPERTIES
   COMPILE_FLAGS "-fPIC -D__GLIBCXX_USE_CXX11_ABI=0 -fno-rtti -DNDEBUG"
   LINK_FLAGS "-rdynamic"

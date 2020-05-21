@@ -1,3 +1,7 @@
+#  Note that these instructions have been tested on Ubuntu 16.04.6 
+#  You may need to adjust according to your system requirements
+
+
 #  Install required programs
 sudo apt-get install git wget cmake build-essential
 
