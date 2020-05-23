@@ -33,7 +33,7 @@ export LLVM_OPT_NAME=opt
 export LLVM_NM_NAME=llvm-nm
 ```
 
-TRIMMER also requires either wllvm
+TRIMMER also requires either wllvm or gclang
 
 ```
 pip install wllvm
