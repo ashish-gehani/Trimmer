@@ -84,7 +84,6 @@ def run_argspec(tool):
 
         exceed_limit_str = '-exceedLimit=0'
 
-        readelf_example = tool.is_readelf
 
         if tool.depth_flag:
             depth_limit_str = '-isLimitedDepth=true -depthLimit='+str(tool.anot_depth)+ ' '
@@ -112,12 +111,6 @@ def run_argspec(tool):
                 if(tool.track_allocas):
                         Cmd = opt + ' -load ' + build_path + 'AnnotateNew.so -mem2reg -loops -lcssa -loop-simplify -loop-rotate -indvars -svfg  --isAnnotated=' + str(tool.annot_flag) + ' --argvName=__argv_new__\
                                 ' +depth_limit_str+ load_percent_str+ curr_file + ' -o ' + annotated_file
-
-                        if readelf_example:
-                            # Aatira Anot
-                            Cmd = opt + ' -load ' + build_path + 'AnnotateNew.so -mem2reg -loops -lcssa -loop-simplify -loop-rotate -indvars  -svfg --isAnnotated=' + str(tool.annot_flag) + ' --argvName=__argv_new__\
-                                    ' +depth_limit_str+ load_percent_str+ curr_file + ' -o ' + annotated_file
-
 
                         printDbgMsg(Cmd)
 
@@ -170,10 +163,6 @@ def run_argspec(tool):
 
 
 		Cmd = [opt, '-load', build_path + 'ConstantFolding.so', '-isAnnotated=' + str(tool.annot_flag), use_glob_str ,disable_exit_str, use_reg_offset_str,exceed_limit_str,'-trackAllocas=' + str(tool.track_allocas),'-contextType=' + str(tool.context_type), '-fileNames', str(tool.config_files),'-mem2reg','-mergereturn', '-simplifycfg' ,'-loops','-lcssa','-loop-simplify','-scalar-evolution' ,'-licm','-loop-rotate','-indvars' ,'-loop-reduce',"-__progName=ssh",'-inter-constprop',add_file, '-o', constprop_file]
-
-                if readelf_example:
-                    # Aatira Constant Folding
-                    Cmd = [opt, '-load', build_path + 'ConstantFolding.so', '-isAnnotated=' + str(tool.annot_flag), '-trackAllocas=' + str(tool.track_allocas), '-contextType=' + str(tool.context_type), '-fileNames', str(tool.config_files),'-mem2reg','-mergereturn','-simplifycfg','-loops','-lcssa','-loop-simplify','-scalar-evolution' ,'-licm','-loop-rotate','-indvars' ,'-loop-reduce',"-__progName=ssh",'-inter-constprop', annotated_file, '-o', constprop_file]
 
 		f = open(constprop_log_file, "wb")
 		printDbgMsg(" ".join(Cmd))
@@ -268,6 +257,7 @@ def run_opts(tool):
 	curr_file = tool.curr_file
 	inline2_file = tool.work_dir + '/' + fname + '_inline2.bc'
 	dce_file = tool.work_dir + '/' + fname + '_dce.bc'
+	opt0_file = tool.work_dir + '/' + fname + '_opt0.bc'
 	opt1_file = tool.work_dir + '/' + fname + '_opt1.bc'
 	opt2_file = tool.work_dir + '/' + fname + '_opt2.bc'
 	opt3_file = tool.work_dir + '/' + fname + '_opt3.bc'
@@ -283,26 +273,39 @@ def run_opts(tool):
         printDbgMsg(Cmd)
 	subprocess.call(Cmd, shell = True)
 
+    # opt -O1
+	if(tool.opt_level=='0'):
+		Cmd = opt + ' ' + dce_file + ' -O0 -o ' + opt0_file
+        	printDbgMsg(Cmd)
+		subprocess.call(Cmd, shell = True)
+		tool.curr_file = opt0_file
+
 	# opt -O1
-	Cmd = opt + ' ' + dce_file + ' -O1 -o ' + opt1_file
-        printDbgMsg(Cmd)
-	subprocess.call(Cmd, shell = True)
+	elif(tool.opt_level=='1'):
+		Cmd = opt + ' ' + dce_file + ' -O1 -o ' + opt1_file
+        	printDbgMsg(Cmd)
+		subprocess.call(Cmd, shell = True)
+		tool.curr_file = opt1_file
 
 	# opt -O2
-	Cmd = opt + ' ' + dce_file + ' -O2 -o ' + opt2_file
-        printDbgMsg(Cmd)
-	subprocess.call(Cmd, shell = True)
+	elif(tool.opt_level=='2'):
+		Cmd = opt + ' ' + dce_file + ' -O2 -o ' + opt2_file
+        	printDbgMsg(Cmd)
+		subprocess.call(Cmd, shell = True)
+		tool.curr_file = opt2_file
 
 	# opt -O3
-	Cmd = opt + ' ' + dce_file + ' -O3 -o ' + opt3_file
-	printDbgMsg(Cmd)
-	subprocess.call(Cmd, shell = True)
-
+	elif(tool.opt_level=='3'):
+		Cmd = opt + ' ' + dce_file + ' -O3 -o ' + opt3_file
+		printDbgMsg(Cmd)
+		subprocess.call(Cmd, shell = True)
+		tool.curr_file = opt3_file
 	# opt -Os
-	Cmd = opt + ' ' + dce_file + ' -Os -o ' + opts_file
-	printDbgMsg(Cmd)
-	subprocess.call(Cmd, shell = True)
-	tool.curr_file = opt3_file
+	elif(tool.opt_level=='s'):
+		Cmd = opt + ' ' + dce_file + ' -Os -o ' + opts_file
+		printDbgMsg(Cmd)
+		subprocess.call(Cmd, shell = True)
+		tool.curr_file = opts_file
 
 def create_exe(tool):
 
