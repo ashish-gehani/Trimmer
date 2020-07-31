@@ -7,9 +7,10 @@ debugPrint = 1
 
 class Trimmer:
 
-    def __init__(self, (man_data, work_dir, opt_flag, spec_flag, strip_flag, icp_flag, annot_flag, track_allocas, context_type, depth_flag, anot_depth,load_flag, load_percent,use_glob,exceed_limit,disable_exit,use_reg_offset,opt_level)):
+    def __init__(self, (manifest_file,man_data, work_dir, opt_flag, spec_flag, strip_flag, icp_flag, annot_flag, track_allocas, context_type, depth_flag, anot_depth,load_flag, load_percent,use_glob,exceed_limit,disable_exit,use_reg_offset,opt_level)):
 
-        self.name = man_data["name"]
+	self.manifestFile = manifest_file        
+	self.name = man_data["name"]
         self.main = man_data["main"]
         self.main_path = man_data["main_path"]
         self.args = utils.format_args(self.name, man_data["args"])

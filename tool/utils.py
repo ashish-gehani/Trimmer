@@ -36,8 +36,8 @@ def parse_args(args):
         dir_path = os.path.dirname(os.path.realpath(manifest_file))
         man_data["main_path"] = os.path.join(dir_path, man_data["main"])
 
-	opt_flag = False
-	opt_level = 0
+	opt_flag = True
+	opt_level = '3'
 	spec_flag = True
 	strip_flag = True
 	icp_flag = True
@@ -56,8 +56,9 @@ def parse_args(args):
 
 	for i in range(2, len(args)):
 		if(args[i] == 'optLevel'):
-			opt_flag = True
 			opt_level = args[i+1]
+			if(opt_level == 'none'):
+				opt_flag = False
 		elif(args[i] == 'no-specialization'):
 			spec_flag = False
 		elif(args[i] == 'no-strip'):
@@ -87,5 +88,5 @@ def parse_args(args):
                 
 
 
-	return (man_data, work_dir, opt_flag, spec_flag, strip_flag, icp_flag, annot_flag, track_allocas, contextType, isLimitedDepth, depthLimit, isLoadsLimited, loadPercent, useGlob,exceedLimit,disableExit,useRegOffset,opt_level)
+	return (manifest_file,man_data, work_dir, opt_flag, spec_flag, strip_flag, icp_flag, annot_flag, track_allocas, contextType, isLimitedDepth, depthLimit, isLoadsLimited, loadPercent, useGlob,exceedLimit,disableExit,useRegOffset,opt_level)
 

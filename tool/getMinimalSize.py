@@ -8,6 +8,7 @@
 import argparse
 import os
 import json
+import sys
 
 import opentuner
 from opentuner import ConfigurationManipulator
@@ -18,11 +19,6 @@ from opentuner import Result
 
 TRIMMER_FLAGS = [
   'useGlob', 'disableExit','useRegOffset'
-]
-
-# (name, min, max)
-TRIMMER_PARAMS = [
-  ('exceedLimit', 0, 1000),
 ]
 
 trimmer_path = os.environ.get('TRIMMER_HOME')
@@ -39,13 +35,13 @@ class TrimmerFlagsTuner(MeasurementInterface):
     """
     manipulator = ConfigurationManipulator()
     manipulator.add_parameter(
-      EnumParameter('opt_level', ['default','0','1','2','3','s']))
+      EnumParameter('opt_level', ['default','none','0','1','2','3','s']))
+    manipulator.add_parameter(
+      EnumParameter('exceedLimit', ['default','0','50','100','150','200','250','300','350','400','450','500','550','600','650','700','750','800','850','900','950','1000']))
+
     for flag in TRIMMER_FLAGS:
       manipulator.add_parameter(
         EnumParameter(flag, ['on', 'off','default']))
-    for param, min, max in TRIMMER_PARAMS:
-      manipulator.add_parameter(
-        IntegerParameter(param, min, max))
     return manipulator
 
     
@@ -54,12 +50,11 @@ class TrimmerFlagsTuner(MeasurementInterface):
     trimmer_cmd = 'python ' + trimmer_path + '/tool/trimmer.py ' + args.source +  ' workdir{0}'.format(id) 
     if cfg['opt_level'] != 'default':
     	trimmer_cmd += ' optLevel {0}'.format(cfg['opt_level'])
+    if cfg['exceedLimit'] != 'default':
+    	trimmer_cmd += ' exceedLimit {0}'.format(cfg['exceedLimit'])
     for flag in TRIMMER_FLAGS:
       if cfg[flag] == 'on':
         trimmer_cmd += ' {0}'.format(flag)
-    for param, min, max in TRIMMER_PARAMS:
-      trimmer_cmd += ' {0} {1}'.format(
-        param, cfg[param])
     try:    
         print(trimmer_cmd)
         run_result = self.call_program(trimmer_cmd)
@@ -67,8 +62,10 @@ class TrimmerFlagsTuner(MeasurementInterface):
         with open(args.source) as mfile:
 	        man_data = json.load(mfile)
         binaryName = man_data['binary']
-        print(binaryName)
-        result_size = os.stat('workdir{0}/'.format(id) + binaryName + '_stripped').st_size
+        if os.path.isfile('workdir{0}/'.format(id) + binaryName + '_stripped'):
+		result_size = os.stat('workdir{0}/'.format(id) + binaryName + '_stripped').st_size
+        else
+		result_size = sys.float_info.max
     finally:
         self.call_program('rm -r workdir{0}'.format(id))
    

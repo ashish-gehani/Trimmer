@@ -306,6 +306,11 @@ def run_opts(tool):
 		printDbgMsg(Cmd)
 		subprocess.call(Cmd, shell = True)
 		tool.curr_file = opts_file
+        elif(tool.opt_level=='auto'):
+		Cmd = 'python optimizeTrimmerResult.py ' + tool.work_dir + ' ' + tool.manifestFile + ' --test-limit 20000'
+		printDbgMsg(Cmd)
+		subprocess.call(Cmd, shell = True)
+		tool.curr_file = tool.work_dir + '/final.bc'
 
 def create_exe(tool):
 
