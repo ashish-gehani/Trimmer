@@ -1,9 +1,9 @@
-# Trimmer
+Trimmer
 =======
 
 
 Build
-======
+-----
 
 We provide a bash script `build.sh` to build the dependencies to run TRIMMER, namely LLVM and Clang (Version 7.0.0) and [SVG](https://github.com/SVF-tools/SVF).
 
@@ -43,14 +43,14 @@ pip install wllvm
 
 
 Synopsis
-========
+--------
 
 ```
 python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory]
 ```
 
 Description of manifest file 
-============================
+----------------------------
     
 The manifest file for curl (one of the example programs) is shown below:
 
@@ -68,15 +68,15 @@ The manifest file for curl (one of the example programs) is shown below:
  ```
 
 Examples
-========
+--------
 ```
 mkdir examples/tool_name/work_dir
 python ${TRIMMER_HOME}/tool/trimmer.py   ${TRIMMER_HOME}/examples/tool_name/tool.manifest  ${TRIMMER_HOME}/examples/tool_name/work_dir      
 ```
 
 Running test cases
-==================
-    
+------------------
+
 Test cases directory: /test/src
       
 * Includes a suite of multiple test cases used to measure the effectiveness of TRIMMER in debloating unused code 
