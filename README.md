@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Trimmer
 =======
 
@@ -89,7 +88,7 @@ For tests placed in test/src, where ${prefix} is the prefix of the folder in tes
 ```
 cd test/scripts
 python test.py ${path_to_workdir} ${prefix} ${test_start} ${test_end} 
- 
+``` 
  
  **Running test examples**:
 
@@ -123,7 +122,4 @@ In all test cases, we include functions with names 'branchPruned' and 'branchNot
 **Measuring Code Elimination**: If specialization is successful, the branchPruned function should 
                                      only contain the printf call that was conditional on the 
                                      branch. The branchNotPruned function should remain 
-                                     unmodified (no code removed)    
-    
-    
->>>>>>> b11b09e97a695b611f11e2b1f2ffdf1c0aa8c84b
+                                     unmodified (no code removed)
