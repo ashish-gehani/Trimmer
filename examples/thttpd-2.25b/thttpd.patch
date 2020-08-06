@@ -1,0 +1,48 @@
+diff -c -r ./fdwatch.c "../../thttpd-2.25b src/fdwatch.c"
+*** ./fdwatch.c	2005-06-29 22:51:01.000000000 +0500
+--- "../../thttpd-2.25b src/fdwatch.c"	2019-07-19 13:12:41.132862952 +0500
+***************
+*** 197,203 ****
+  	fd_rw[i] = -1;
+      if ( INIT( nfiles ) == -1 )
+  	return -1;
+! 
+      return nfiles;
+      }
+  
+--- 197,203 ----
+  	fd_rw[i] = -1;
+      if ( INIT( nfiles ) == -1 )
+  	return -1;
+!     printf("%i\n",nfiles);
+      return nfiles;
+      }
+  
+diff -c -r ./thttpd.c "../../thttpd-2.25b src/thttpd.c"
+*** ./thttpd.c	2005-06-29 22:50:59.000000000 +0500
+--- "../../thttpd-2.25b src/thttpd.c"	2019-07-19 13:12:41.136864864 +0500
+***************
+*** 1029,1036 ****
+  	    /* Find next whitespace. */
+  	    cp2 = cp + strcspn( cp, " \t\n\r" );
+  	    /* Insert EOS and advance next-word pointer. */
+! 	    while ( *cp2 == ' ' || *cp2 == '\t' || *cp2 == '\n' || *cp2 == '\r' )
+! 		*cp2++ = '\0';
+  	    /* Split into name and value. */
+  	    name = cp;
+  	    value = strchr( name, '=' );
+--- 1029,1041 ----
+  	    /* Find next whitespace. */
+  	    cp2 = cp + strcspn( cp, " \t\n\r" );
+  	    /* Insert EOS and advance next-word pointer. */
+! 	    for(int i=0;i<strlen(cp2);i++)
+!             {
+!               if(*cp2=='\t' || *cp2=='\n' || *cp2 == ' '|| *cp2 == '\r')
+!                 *cp2++ = '\0';
+!               else
+!                 break;
+!             }
+  	    /* Split into name and value. */
+  	    name = cp;
+  	    value = strchr( name, '=' );
+Only in .: thttpd.patch

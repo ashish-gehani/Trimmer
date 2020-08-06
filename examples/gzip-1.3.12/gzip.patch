@@ -1,0 +1,65 @@
+diff -c -r ../../gzip-1.3.12/gzip.c ./gzip.c
+*** ../../gzip-1.3.12/gzip.c	2019-07-18 18:25:41.955552768 +0500
+--- ./gzip.c	2019-07-18 18:33:52.178176640 +0500
+***************
+*** 1637,1643 ****
+  	}
+        }
+  
+!     if (cu_futimens (ofd, ofname, timespec) != 0)
+        {
+  	int e = errno;
+  	WARN ((stderr, "%s: ", program_name));
+--- 1637,1643 ----
+  	}
+        }
+  
+!     if (futimens (ofd, ofname, timespec) != 0)
+        {
+  	int e = errno;
+  	WARN ((stderr, "%s: ", program_name));
+diff -c -r ../../gzip-1.3.12/lib/utimens.c ./lib/utimens.c
+*** ../../gzip-1.3.12/lib/utimens.c	2019-07-18 18:24:29.095209196 +0500
+--- ./lib/utimens.c	2007-01-18 13:33:34.000000000 +0500
+***************
+*** 75,81 ****
+     Return 0 on success, -1 (setting errno) on failure.  */
+  
+  int
+! cu_futimens (int fd ATTRIBUTE_UNUSED,
+  	  char const *file, struct timespec const timespec[2])
+  {
+    /* Some Linux-based NFS clients are buggy, and mishandle time stamps
+--- 75,81 ----
+     Return 0 on success, -1 (setting errno) on failure.  */
+  
+  int
+! futimens (int fd ATTRIBUTE_UNUSED,
+  	  char const *file, struct timespec const timespec[2])
+  {
+    /* Some Linux-based NFS clients are buggy, and mishandle time stamps
+***************
+*** 185,189 ****
+  int
+  utimens (char const *file, struct timespec const timespec[2])
+  {
+!   return cu_futimens (-1, file, timespec);
+  }
+--- 185,189 ----
+  int
+  utimens (char const *file, struct timespec const timespec[2])
+  {
+!   return futimens (-1, file, timespec);
+  }
+diff -c -r ../../gzip-1.3.12/lib/utimens.h ./lib/utimens.h
+*** ../../gzip-1.3.12/lib/utimens.h	2019-07-18 18:24:49.155302131 +0500
+--- ./lib/utimens.h	2007-02-23 23:25:21.000000000 +0500
+***************
+*** 1,3 ****
+  #include <time.h>
+! int cu_futimens (int, char const *, struct timespec const [2]);
+  int utimens (char const *, struct timespec const [2]);
+--- 1,3 ----
+  #include <time.h>
+! int futimens (int, char const *, struct timespec const [2]);
+  int utimens (char const *, struct timespec const [2]);
