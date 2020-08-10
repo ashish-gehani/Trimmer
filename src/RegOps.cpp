@@ -1,3 +1,7 @@
+// Copyright (c) 2020 SRI International All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 #include "RegOps.h"
 
 void RegOps::addGlobalRegister(Value * val, Type * ty, uint64_t toStore) {

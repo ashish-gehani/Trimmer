@@ -1,3 +1,7 @@
+# Copyright (c) 2020 SRI International All rights reserved.
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file.
+
 """
 Slider is a tool which allows varying of the dept of the Control Flow Graph considered in 
 annotation during the AnnotateNew pass used in Trimmer. During the process it collects statistics

@@ -1,3 +1,7 @@
+# Copyright (c) 2020 SRI International All rights reserved.
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file.
+
 """
 A neat little wrapper script which invokes the variable annotaton analysis on a given program
 by varying call graph depth between 0 and 5 and percentage loads between 10 and 70.

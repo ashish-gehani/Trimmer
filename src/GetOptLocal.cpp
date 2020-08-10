@@ -1,3 +1,7 @@
+// Copyright (c) 2020 SRI International All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 #include "VecUtils.h"
 #include "GetOptLocal.h"
 #include "llvm/Support/raw_ostream.h"

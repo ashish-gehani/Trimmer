@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2020 SRI International All rights reserved.
+ * Use of this source code is governed by a BSD-style
+ * license that can be found in the LICENSE file.
+ */
+
 /* This test aims at testing whether the Pass skips the specialization of 'func' and 'func2', 
 since they are not called once. 'func' is called twice from the 'main' function, while func2 is called in a loop */
 

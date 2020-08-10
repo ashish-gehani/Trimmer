@@ -1,3 +1,7 @@
+# Copyright (c) 2020 SRI International All rights reserved.
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file.
+
 #  Note that these instructions have been tested on Ubuntu 16.04.6 
 #  You may need to adjust according to your system requirements
 

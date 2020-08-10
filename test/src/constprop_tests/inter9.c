@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2020 SRI International All rights reserved.
+ * Use of this source code is governed by a BSD-style
+ * license that can be found in the LICENSE file.
+ */
+
 /* This Test is expected to specialized the func function such that the branch is pruned out */
 
 #include<stdio.h>

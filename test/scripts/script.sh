@@ -1,3 +1,7 @@
+# Copyright (c) 2020 SRI International All rights reserved.
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file.
+
 cd ${4}
 ${LLVM_CC_NAME} -O0 -emit-llvm -o $3/${1}t1.bc -c ${1}.c
 ${LLVM_OPT_NAME} -mem2reg -mergereturn -simplifycfg -loops -lcssa -loop-simplify -loop-rotate $3/${1}t1.bc -o $3/${1}t2.bc
