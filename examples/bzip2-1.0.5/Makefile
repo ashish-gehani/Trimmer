@@ -18,8 +18,22 @@ compress: ${OUT_DIR} ${BZIP_BITCODE}
 	cp ${BZIP_BITCODE} ${OUT_DIR}
 	cd ${OUT_DIR} && \
 	echo '{"binary": "bzip2_fin", "native_libs": [], "name": "bzip2", "args": ["-fkqs", "huffman.c"], "modules": [], "ldflags": ["-lbz2"], "main": "bzip2.bc", "config_files": []}' > ${BZIP_MANIFEST} && \
-	python ${TRIMMER_HOME}/tool/trimmer.py ${BZIP_MANIFEST} ./work 2> ${LOG_FILE}
+	python ${TRIMMER_HOME}/tool/trimmer.py ${BZIP_MANIFEST} ./work 2> ${LOG_FILE} 
 
+test_compress: 
+	@# Testing if compressed file produced
+	@cp huffman.c ${OUT_DIR}/work && \
+	cd ${OUT_DIR}/work && \
+	./bzip2_fin_stripped && \
+	test -f huffman.c.bz2 && echo "bzip2 test compress passed!" || echo "bzip2 test compress failed!" 
+
+	@# Printing File sizes
+	@echo -n "Source File Size:\t"
+	@stat -L -c %s huffman.c
+	@echo -n "Compressed File Size:\t"
+	@stat -L -c %s ${OUT_DIR}/work/huffman.c.bz2
+
+	
 
 decompress: ${OUT_DIR} ${BZIP_BITCODE}
 	cp ${BZIP_BITCODE} ${OUT_DIR}
@@ -27,12 +41,30 @@ decompress: ${OUT_DIR} ${BZIP_BITCODE}
 	echo '{"binary": "bzip2_fin", "native_libs": [], "name": "bzip2", "args": ["-fdq", "huffman.c.bz2"], "modules": [], "ldflags": ["-lbz2"], "main": "bzip2.bc", "config_files": []}' > ${BZIP_MANIFEST} && \
 	python ${TRIMMER_HOME}/tool/trimmer.py ${BZIP_MANIFEST} ./work 2> ${LOG_FILE}
 
+test_decompress:
+	@# Testing if decompressed file produced
+	@cp huffman.c.bz2 ${OUT_DIR}/work && \
+	cd ${OUT_DIR}/work && \
+	./bzip2_fin_stripped && \
+	test -f huffman.c && echo "bzip2 test decompress passed!" || echo "bzip2 test decompress failed!" 
+
+	@# Printing File sizes
+	@echo -n "Source File Size:\t"
+	@stat -L -c %s huffman.c.bz2
+	@echo -n "Decompressed File Size:\t"
+	@stat -L -c %s ${OUT_DIR}/work/huffman.c
+
+
+
 ${BZIP_BITCODE}: ${BZIP_NAME}
 	cd ${BZIP_NAME} && \
 	sed -i 's/-O2 -g/ -fno-inline -fno-inline-functions -Xclang -disable-O0-optnone/g' ./Makefile && \
 	sed -i 's/CC=gcc/CC?=gcc/g' ./Makefile && \
 	CC=${BITCODE_WRAPPER} make && \
 	${BITCODE_EXTRACT} ${BZIP} && \
+	cp huffman.c ../ && \
+	./bzip2 -fkqs huffman.c && \
+	mv huffman.c.bz2 ../ && \
 	mv ${BZIP_BITCODE} ../
 		
 ${OUT_DIR}:
@@ -44,4 +76,6 @@ ${BZIP_NAME}:
 clean:
 	rm -r ${BZIP_NAME}
 	rm *.bc
+	rm huffman.c
+	rm huffman.c.bz2
 	rm -r ${OUT_DIR}
