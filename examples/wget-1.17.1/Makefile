@@ -21,7 +21,14 @@ compress: ${OUT_DIR}
 	cp wgetrc ${OUT_DIR} && \
 	cd ${OUT_DIR} && \
   echo '{"binary": "wget_fin", "native_libs":[],"name": "wget", "args": ["--config=wgetrc","_" ], "modules": [], "ldflags": ["-luuid","-lgnutls","-lpcre", "-lnettle", "-lidn", "-lz", "-lpthread"], "main": "wget.bc", "config_files": ["wgetrc"]}' > ${WGET_MANIFEST} && \
-	python ${TRIMMER_HOME}/tool/trimmer.py ${WGET_MANIFEST} ./work_dir useGlob disableExit useRegOffset exceedLimit 900 optLevel 3 2> ${LOG_FILE}
+	python ${TRIMMER_HOME}/tool/trimmer.py ${WGET_MANIFEST} ./work_dir useGlob useRegOffset exceedLimit 300 optLevel none 2> ${LOG_FILE}
+
+test_compress:
+	cd ${OUT_DIR}/work_dir && \
+	./wget_fin_stripped a https://releases.llvm.org/7.0.0/cfe-7.0.0.src.tar.xz && \
+	test -f cfe-7.0.0.src.tar.xz && echo "wget test passed!" || echo "wget test failed!" 
+
+
 
 .PHONY: ${WGET_BITCODE}
 ${WGET_BITCODE}: ${WGET_NAME}
