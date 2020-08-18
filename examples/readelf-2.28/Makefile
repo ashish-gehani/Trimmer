@@ -14,11 +14,15 @@ READELF_MANIFEST=${READELF}.manifest
 OBJDUMP_MANIFEST=${OBJDUMP}.manifest
 
 
+
 OUT_DIR?=trimmer
 LOG_FILE?=logs
 
 BITCODE_WRAPPER?=wllvm
 BITCODE_EXTRACT?=extract-bc
+
+CHECK_READELF=$(shell cd ${OUT_DIR}/work_dir && ./readelf_fin_stripped | grep 'ELF Header')
+
 
 all: ${READELF_BITCODE}
 
@@ -27,6 +31,16 @@ readelf: ${OUT_DIR}
 	cd ${OUT_DIR} && \
 	echo '{"binary": "readelf_fin", "native_libs": [], "name": "readelf", "args": ["-a", "name"], "modules": [], "ldflags": ["-lz","-ldl"], "main": "readelf.bc", "config_files": []}' > ${READELF_MANIFEST} && \
 	python ${TRIMMER_HOME}/tool/trimmer.py ${READELF_MANIFEST} ./work_dir readelf 2> ${LOG_FILE}
+
+test_readelf:
+	@cd ${OUT_DIR}/work_dir && \
+	cp readelf_fin name
+ifeq ('$(CHECK_READELF)',)
+	@echo "readelf test failed!"
+else
+	@echo "readelf test passed!"
+endif
+
 
 
 objdump: ${OUT_DIR}
