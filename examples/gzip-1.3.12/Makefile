@@ -20,6 +20,23 @@ compress: ${OUT_DIR}
 	cd ${OUT_DIR} && \
 	echo '{"binary": "gzip_fin", "native_libs": [], "name": "gzip", "args": ["--force",  "--quiet",  "huffman.c"], "modules": [], "ldflags": ["-lbz2"], "main": "gzip.bc", "config_files": []}' > ${GZIP_MANIFEST} && \
 	python ${TRIMMER_HOME}/tool/trimmer.py ${GZIP_MANIFEST} ./work_dir 2> ${LOG_FILE}
+	cp huffman.c ${OUT_DIR}/work_dir
+
+
+test_compress: 
+	@# Testing if compressed file produced
+	@cp huffman.c ${OUT_DIR}/work_dir && \
+	cd ${OUT_DIR}/work_dir && \
+	./gzip_fin_stripped && \
+	test -f huffman.c.gz && echo "gzip test compress passed!" || echo "gzip test compress failed!" 
+
+	@# Printing File sizes
+	@echo -n "Source File Size:\t"
+	@stat -L -c %s huffman.c
+	@echo -n "Compressed File Size:\t"
+	@stat -L -c %s ${OUT_DIR}/work_dir/huffman.c.gz
+
+
 
 .PHONY: ${GZIP_BITCODE}
 ${GZIP_BITCODE}: ${GZIP_NAME}
