@@ -24,9 +24,29 @@ compress: ${OUT_DIR}
 	python ${TRIMMER_HOME}/tool/trimmer.py ${WGET_MANIFEST} ./work_dir useGlob useRegOffset exceedLimit 300 optLevel none 2> ${LOG_FILE}
 
 test_compress:
+	@echo "\t\tTest Wget"
 	cd ${OUT_DIR}/work_dir && \
 	./wget_fin_stripped a https://releases.llvm.org/7.0.0/cfe-7.0.0.src.tar.xz && \
-	test -f cfe-7.0.0.src.tar.xz && echo "wget test passed!" || echo "wget test failed!" 
+	@echo "File Existence Check" && \
+	test -f cfe-7.0.0.src.tar.xz && echo "\twget test file exist? Passed!" || echo "\twget test file exist? Failed!" 
+	
+	cp wgetrc ${WGET_NAME}/src 
+	cd ${WGET_NAME}/src && \
+	./wget --config=wgetrc https://releases.llvm.org/7.0.0/cfe-7.0.0.src.tar.xz
+
+	echo "Output comparison to Baseline:"
+	@cmp -s ${WGET_NAME}/src/cfe-7.0.0.src.tar.xz ${OUT_DIR}/work_dir/cfe-7.0.0.src.tar.xz; \
+	RETVAL=$$?; \
+	if [ $$RETVAL -eq 0 ]; then \
+		echo "\twget test baseline compare? Passed!"; \
+	else \
+		echo "\twget test baseline compare? Failed!"; \
+	fi
+
+	
+	
+
+
 
 
 
