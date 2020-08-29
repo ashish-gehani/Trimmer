@@ -36,6 +36,22 @@ aircrack_crack: ${OUT_DIR}
 	echo '{"binary": "aircrack-ng_fin", "native_libs": [], "name": "aircrack-ng", "args": ["-w", "password.lst","wpa.cap"], "modules": [], "ldflags": ["-lssl","-lcrypto","-lpthread","sha1-sse2.S"], "main": "aircrack-ng.bc", "config_files": []}' > ${AIRCRACK-NG_MANIFEST} && \
 	python ${TRIMMER_HOME}/tool/trimmer.py ${AIRCRACK-NG_MANIFEST} ./aircrack  2> ${LOG_FILE}
 
+CHECK_AIRCRACK=$(shell cd ${OUT_DIR}/aircrack && ./aircrack-ng_fin_stripped | grep 'biscotte')
+
+test_aircrack_crack:
+	@echo "\t\tTest Aircrack-ng"
+	@echo "Checking if aircrack output valid:"
+	@cp ${OUT_DIR}/password.lst ${OUT_DIR}/aircrack/ && \
+	cp ${OUT_DIR}/wpa.cap ${OUT_DIR}/aircrack/
+ifeq ('$(CHECK_AIRCRACK)',)
+	@echo "\taircrack test valid? Failed!"
+else
+	@echo "\taircrack test valid? Passed!"
+endif
+
+
+
+
 
 
 airtun: ${OUT_DIR}
