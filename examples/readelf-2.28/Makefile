@@ -33,13 +33,31 @@ readelf: ${OUT_DIR}
 	python ${TRIMMER_HOME}/tool/trimmer.py ${READELF_MANIFEST} ./work_dir readelf 2> ${LOG_FILE}
 
 test_readelf:
+	@echo "\t\tTest Readelf"
+	@echo "Checking if readelf producing valid file"
 	@cd ${OUT_DIR}/work_dir && \
 	cp readelf_fin name
 ifeq ('$(CHECK_READELF)',)
-	@echo "readelf test failed!"
+	@echo "\treadelf test valid? Failed!"
 else
-	@echo "readelf test passed!"
+	@echo "\treadelf test valid? Passed!"
 endif
+	@cp ${READELF_NAME}/${BINUTILS}/${READELF} ./name && \
+	${OUT_DIR}/work_dir/readelf_fin_stripped > t_out && \
+	${READELF_NAME}/${BINUTILS}/${READELF} -a ./name > o_out
+	@echo "Output comparison to Baseline:"
+	@cmp -s ./t_out o_out; \
+	RETVAL=$$?; \
+	if [ $$RETVAL -eq 0 ]; then \
+		echo "\treadelf test baseline compare? Passed!"; \
+	else \
+		echo "\treadlef test baseline compare? Failed!"; \
+	fi
+	@rm ./o_out
+	@rm ./t_out
+	@rm ./name
+
+
 
 
 
