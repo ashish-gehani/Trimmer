@@ -24,6 +24,23 @@ netstat: ${OUT_DIR}
 	echo '{"binary": "netstat_fin", "native_libs": [], "name": "netstat", "args": ["-a", "-e","-p","-s"], "modules": [], "ldflags": [], "main": "netstat.bc", "config_files": []}' > ${NETSTAT_MANIFEST} && \
 	python ${TRIMMER_HOME}/tool/trimmer.py ${NETSTAT_MANIFEST} ./work_dir  2> ${LOG_FILE}
 
+test_netstat:
+	@echo "\t\tTest Netstat" && \
+	${NETSTAT_NAME}/netstat -a -e -p > o_out && \
+	${OUT_DIR}/work_dir/netstat_fin_stripped > t_out
+	@echo "Output comparison to Baseline:"
+	@cmp -s ./o_out t_out; \
+	RETVAL=$$?; \
+	if [ $$RETVAL -eq 0 ]; then \
+		echo "\tnetstat test baseline compare? Passed!"; \
+	else \
+		echo "\tnetstat test baseline compare? Failed!"; \
+	fi
+	@rm o_out
+	@rm t_out
+
+
+
 .PHONY: ${NETSTAT_BITCODE}
 ${NETSTAT_BITCODE}: ${NETSTAT_NAME}
 	cd ${NETSTAT_NAME} && \
