@@ -21,17 +21,33 @@ compress: ${OUT_DIR} ${BZIP_BITCODE}
 	python ${TRIMMER_HOME}/tool/trimmer.py ${BZIP_MANIFEST} ./work 2> ${LOG_FILE} 
 
 test_compress: 
+	@echo "\t\tTest Compress"
+	@echo "File Existence Check:"
 	@# Testing if compressed file produced
 	@cp huffman.c ${OUT_DIR}/work && \
 	cd ${OUT_DIR}/work && \
 	./bzip2_fin_stripped && \
-	test -f huffman.c.bz2 && echo "bzip2 test compress passed!" || echo "bzip2 test compress failed!" 
+	test -f huffman.c.bz2 && echo "\tbzip2 test compress file exist? Passed!" || echo "\tbzip2 test compress file exist?  Failed!" 
 
+	@echo "Comparing File Sizes:"
 	@# Printing File sizes
-	@echo -n "Source File Size:\t"
+	@echo -n "\tSource File Size:\t"
 	@stat -L -c %s huffman.c
-	@echo -n "Compressed File Size:\t"
+	@echo -n "\tCompressed File Size:\t"
 	@stat -L -c %s ${OUT_DIR}/work/huffman.c.bz2
+
+	@echo "Output comparison to Baseline:"
+	@cmp -s ./huffman.c.bz2 ${OUT_DIR}/work/huffman.c.bz2; \
+	RETVAL=$$?; \
+	if [ $$RETVAL -eq 0 ]; then \
+		echo "\tbzip2 test baseline compare? Passed!"; \
+	else \
+		echo "\tbzip2 test baseline compare? Failed!"; \
+	fi
+
+
+
+	
 
 	
 
@@ -42,17 +58,30 @@ decompress: ${OUT_DIR} ${BZIP_BITCODE}
 	python ${TRIMMER_HOME}/tool/trimmer.py ${BZIP_MANIFEST} ./work 2> ${LOG_FILE}
 
 test_decompress:
+	@echo "\t\tTest Decompress"
+	@echo "File Existence Check:"
 	@# Testing if decompressed file produced
 	@cp huffman.c.bz2 ${OUT_DIR}/work && \
 	cd ${OUT_DIR}/work && \
 	./bzip2_fin_stripped && \
-	test -f huffman.c && echo "bzip2 test decompress passed!" || echo "bzip2 test decompress failed!" 
+	test -f huffman.c && echo "\tbzip2 test decompress file exist? Passed!" || echo "\tbzip2 test decompress file exist? Failed!" 
 
+	@echo "Comparing File Sizes:"
 	@# Printing File sizes
-	@echo -n "Source File Size:\t"
+	@echo -n "\tSource File Size:\t"
 	@stat -L -c %s huffman.c.bz2
-	@echo -n "Decompressed File Size:\t"
+	@echo -n "\tDecompressed File Size:\t"
 	@stat -L -c %s ${OUT_DIR}/work/huffman.c
+
+	@echo "Output comparison to Baseline:"
+	@cmp -s ./huffman.c ${OUT_DIR}/work/huffman.c; \
+	RETVAL=$$?; \
+	if [ $$RETVAL -eq 0 ]; then \
+		echo "\tbzip2 test baseline compare? Passed!"; \
+	else \
+		echo "\tbzip2 test baseline compare? Failed!"; \
+	fi
+
 
 
 
