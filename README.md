@@ -5,7 +5,7 @@ Trimmer
 Build
 -----
 
-We provide a bash script `build.sh` to build the dependencies to run TRIMMER, namely LLVM and Clang (Version 7.0.0) and [SVG](https://github.com/SVF-tools/SVF).
+We provide a bash script `build.sh` to build the dependencies to run TRIMMER, namely LLVM and Clang (Version 7.0.0) and [SVF](https://github.com/SVF-tools/SVF).
 
 
 ```
