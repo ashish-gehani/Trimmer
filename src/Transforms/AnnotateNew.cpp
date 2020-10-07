@@ -1223,7 +1223,7 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
             if(call->getType()->isPointerTy()) {
               auto *pagNode = pag->getPAGNode((pag->getValueNode(call)));
               storeSvfg.insert((SVFGNode*)svfg->getDefSVFGNode(pagNode));
-              calls.erase(call);
+              //calls.erase(call);
 
             }
 
@@ -1327,7 +1327,7 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
             if(call->getType()->isPointerTy()) {
               auto *pagNode = pag->getPAGNode((pag->getValueNode(call)));
               storeSvfg.insert((SVFGNode*)svfg->getDefSVFGNode(pagNode));
-              calls.erase(call);
+              //calls.erase(call);
 
             }
 
