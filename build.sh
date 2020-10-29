@@ -21,23 +21,23 @@ cd openssl-1.0.2g
 ./config shared
 sudo make install
 
-ln -s /usr/local/ssl/bin/c_rehash /usr/local/bin/
-ln -s /usr/local/ssl/bin/openssl /usr/local/bin/
+sudo ln -s /usr/local/ssl/bin/c_rehash /usr/local/bin/
+sudo ln -s /usr/local/ssl/bin/openssl /usr/local/bin/
 
-ln -s /usr/local/ssl/include/openssl /usr/local/include/
+sudo ln -s /usr/local/ssl/include/openssl /usr/local/include/
 
-ln -s /usr/local/ssl/lib/engines /usr/local/lib/
-ln -s /usr/local/ssl/lib/libcrypto.a /usr/local/lib/ 
-ln -s /usr/local/ssl/lib/libcrypto.so /usr/local/lib/
-ln -s /usr/local/ssl/lib/libcrypto.so.1.0.0 /usr/local/lib/
-ln -s /usr/local/ssl/lib/libssl.a /usr/local/lib/
-ln -s /usr/local/ssl/lib/libssl.so /usr/local/lib/
-ln -s /usr/local/ssl/lib/libssl.so.1.0.0 /usr/local/lib/
+sudo ln -s /usr/local/ssl/lib/engines /usr/local/lib/
+sudo ln -s /usr/local/ssl/lib/libcrypto.a /usr/local/lib/ 
+sudo ln -s /usr/local/ssl/lib/libcrypto.so /usr/local/lib/
+sudo ln -s /usr/local/ssl/lib/libcrypto.so.1.0.0 /usr/local/lib/
+sudo ln -s /usr/local/ssl/lib/libssl.a /usr/local/lib/
+sudo ln -s /usr/local/ssl/lib/libssl.so /usr/local/lib/
+sudo ln -s /usr/local/ssl/lib/libssl.so.1.0.0 /usr/local/lib/
 
-mkdir /usr/local/lib/pkgconfig
-ln -s /usr/local/ssl/lib/pkgconfig/libcrypto.pc /usr/local/lib/pkgconfig/
-ln -s /usr/local/ssl/lib/pkgconfig/libssl.pc /usr/local/lib/pkgconfig/
-ln -s /usr/local/ssl/lib/pkgconfig/openssl.pc /usr/local/lib/pkgconfig/
+sudo mkdir /usr/local/lib/pkgconfig
+sudo ln -s /usr/local/ssl/lib/pkgconfig/libcrypto.pc /usr/local/lib/pkgconfig/
+sudo ln -s /usr/local/ssl/lib/pkgconfig/libssl.pc /usr/local/lib/pkgconfig/
+sudo ln -s /usr/local/ssl/lib/pkgconfig/openssl.pc /usr/local/lib/pkgconfig/
 
 #These environment variables should be set before building aircrack-ng. Better to put it in .bash_profile
 
@@ -47,8 +47,8 @@ export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
 
 
 echo /usr/local/lib > /etc/ld.so.conf.d/usr_local_lib.conf
-ldconfig
-ldconfig -v
+sudo ldconfig
+sudo ldconfig -v
 
 #  Download LLVM source files
 
