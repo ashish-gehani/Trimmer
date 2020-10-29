@@ -73,7 +73,7 @@ objdump: ${OUT_DIR}
 ${READELF_BITCODE}: ${READELF_NAME}
 	cd ${READELF_NAME} && \
 	CC=${BITCODE_WRAPPER} CFLAGS="-DHAVE_CONFIG_H -O0 -fno-inline -fno-inline-functions -Xclang -disable-O0-optnone" ./configure && \
-	CC=${BITCODE_WRAPPER} make && \
+	CC=${BITCODE_WRAPPER} make all-binutils && \
 	cd ${BINUTILS} && \
 	${BITCODE_EXTRACT} ${READELF} && \
 	mv ${READELF_BITCODE} ../.. && \
