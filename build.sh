@@ -9,6 +9,47 @@
 #  Install required programs
 sudo apt-get install git wget cmake build-essential
 
+# Install missing libraries for examples to build
+sudo apt-get install groff-base
+sudo apt-get install gnutls-dev
+sudo apt-get install -y pkg-config
+
+#Install SSL Library version 1.0.2g (compatible with aircrack-ng example) 
+wget https://www.openssl.org/source/openssl-1.0.2g.tar.gz
+tar xvfz openssl-1.0.2g.tar.gz
+cd openssl-1.0.2g
+./config shared
+sudo make install
+
+ln -s /usr/local/ssl/bin/c_rehash /usr/local/bin/
+ln -s /usr/local/ssl/bin/openssl /usr/local/bin/
+
+ln -s /usr/local/ssl/include/openssl /usr/local/include/
+
+ln -s /usr/local/ssl/lib/engines /usr/local/lib/
+ln -s /usr/local/ssl/lib/libcrypto.a /usr/local/lib/ 
+ln -s /usr/local/ssl/lib/libcrypto.so /usr/local/lib/
+ln -s /usr/local/ssl/lib/libcrypto.so.1.0.0 /usr/local/lib/
+ln -s /usr/local/ssl/lib/libssl.a /usr/local/lib/
+ln -s /usr/local/ssl/lib/libssl.so /usr/local/lib/
+ln -s /usr/local/ssl/lib/libssl.so.1.0.0 /usr/local/lib/
+
+mkdir /usr/local/lib/pkgconfig
+ln -s /usr/local/ssl/lib/pkgconfig/libcrypto.pc /usr/local/lib/pkgconfig/
+ln -s /usr/local/ssl/lib/pkgconfig/libssl.pc /usr/local/lib/pkgconfig/
+ln -s /usr/local/ssl/lib/pkgconfig/openssl.pc /usr/local/lib/pkgconfig/
+
+#These environment variables should be set before building aircrack-ng. Better to put it in .bash_profile
+
+export CPATH=/usr/local/include:$CPATH
+export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib/engines:$LD_LIBRARY_PATH
+export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
+
+
+echo /usr/local/lib > /etc/ld.so.conf.d/usr_local_lib.conf
+ldconfig
+ldconfig -v
+
 #  Download LLVM source files
 
 echo "=== Downloading LLVM & Clang Source Files ==="
