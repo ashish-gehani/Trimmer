@@ -20,7 +20,7 @@ dns: ${OUT_DIR} ${DNSPROXY_BITCODE}
 	cp ${DNSPROXY_BITCODE} ${OUT_DIR} 
 	cp ${DNSPROXY_CONF} ${OUT_DIR}
 	cd ${OUT_DIR} && \echo '{"binary": "dnsproxy_fin", "native_libs": [], "name": "dnsproxy", "args": ["-c", "dnsproxy.conf"], "modules": [], "ldflags": ["-levent"], "main": "dnsproxy.bc", "config_files": ["dnsproxy.conf"]}' > ${DNSPROXY_MANIFEST} && \
-	python ${TRIMMER_HOME}/tool/trimmer.py ${DNSPROXY_MANIFEST} ./ 2> ${LOG_FILE}
+	python ${TRIMMER_HOME}/tool/trimmer.py ${DNSPROXY_MANIFEST} ./workdir 2> ${LOG_FILE}
 
 
 ${DNSPROXY_BITCODE}: ${DNSPROXY_NAME}
