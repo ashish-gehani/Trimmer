@@ -13,6 +13,10 @@ sudo apt-get install git wget cmake build-essential
 sudo apt-get install groff-base
 sudo apt-get install gnutls-dev
 sudo apt-get install -y pkg-config
+sudo apt-get install libevent-dev
+sudo apt-get install libpcre3-dev
+sudo apt-get install libidn11-dev
+sudo apt-get install uuid-dev
 
 #Install SSL Library version 1.0.2g (compatible with aircrack-ng example) 
 wget https://www.openssl.org/source/openssl-1.0.2g.tar.gz
