@@ -79,6 +79,9 @@ static cl::opt<bool> trackAlloc("trackAllocas",cl::init(false),
 static cl::opt<std::string> progName("__progName", cl::init(""));
 
 static cl::opt<int> contextType("contextType", cl::init(1));
+static cl::opt<int> fileSpecialize("fileSpecialize", cl::init(1));
+static cl::opt<int> stringSpecialize("stringSpecialize", cl::init(1));
+static cl::opt<int> loopUnroll("loopUnroll", cl::init(1));
 
 static cl::opt<int> useGlob("useGlob",
         cl::desc("are the globals mod-ref to be used in choosing function specialisation"),cl::init(0));
@@ -334,7 +337,7 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
     Loop *L = NULL;
 
     assert(current->getParent() == currfn);
-    if((L = isLoopHeader(current, *LI)) && LoopUnroller::shouldSimplifyLoop(current, *LI, module, useAnnotations && contextType == 1)) {
+    if((L = isLoopHeader(current, *LI)) && loopUnroll && LoopUnroller::shouldSimplifyLoop(current, *LI, module, useAnnotations && contextType == 1)) {
       ValueToValueMapTy vmap;
       if(auto *unroller= unrollLoopInClone(currfn, L, vmap, funcValStack)) {
         addToWorklistBB(current); 
@@ -2909,6 +2912,9 @@ void ConstantFolding::handleStrnCpy(CallInst *callInst) {
 }
 
 bool ConstantFolding::handleStringFunc(CallInst * callInst) {
+
+  if(!stringSpecialize)
+    return false;
   string name = callInst->getCalledFunction()->getName();
 
   if(name == "strtol") handleStrTol(callInst);
@@ -3693,7 +3699,7 @@ void ConstantFolding::handleOpen(CallInst * ci) {
     debug(Abubakar) << "handleOpen : flag not constant\n";
     return;   
   }
-  if (std::find(std::begin(configFileNames), std::end(configFileNames), fname) != std::end(configFileNames) && flag==0){
+  if (std::find(std::begin(configFileNames), std::end(configFileNames), fname) != std::end(configFileNames) && fileSpecialize && flag==0){
     int fd = open(fname, flag);
     if(fd < 0) return;
     stats.incrementLibCallsFolded();
@@ -3849,7 +3855,7 @@ void ConstantFolding::handleFOpen(CallInst * ci) {
     debug(Abubakar) << "handleFOpen : fmode not found in map\n";
     return;   
   }
-  if (std::find(std::begin(configFileNames), std::end(configFileNames), fname) != std::end(configFileNames) && (strcmp(fmode,"rb")==0 || strcmp(fmode,"r")==0)){
+  if (std::find(std::begin(configFileNames), std::end(configFileNames), fname) != std::end(configFileNames) && fileSpecialize && (strcmp(fmode,"rb")==0 || strcmp(fmode,"r")==0)){
     FILE* fptr = fopen(fname, fmode);
     if(!fptr) {
       debug(Abubakar) << "handleFOpen : fopen error\n";
