@@ -111,8 +111,8 @@ def run_argspec(tool):
 
 
 
-	if(tool.icp_flag):
-                if(tool.track_allocas):
+
+        if(tool.track_allocas):
                         Cmd = opt + ' -load ' + build_path + 'AnnotateNew.so -mem2reg -loops -lcssa -loop-simplify -loop-rotate -indvars -svfg  --isAnnotated=' + str(tool.annot_flag) + ' --argvName=__argv_new__\
                                 ' +depth_limit_str+ load_percent_str+ curr_file + ' -o ' + annotated_file
 
@@ -126,80 +126,82 @@ def run_argspec(tool):
                         print(combined)
                         disassemble(annotated_file)
                         #return
-                else:
+        else:
                         annotated_file = curr_file
                 #-simplifycfg
 		# interconstprop pass
                 #
-                Cmd = opt + ' -load ' + build_path + 'SpecializeArguments.so -specialize-args -args=' + tool.args + ' ' + annotated_file + ' -o ' + add_file
-                printDbgMsg(Cmd)
-                subprocess.call(Cmd, shell = True)   
-                disassemble(add_file)
+        Cmd = opt + ' -load ' + build_path + 'SpecializeArguments.so -specialize-args -args=' + tool.args + ' ' + annotated_file + ' -o ' + add_file
+        printDbgMsg(Cmd)
+        subprocess.call(Cmd, shell = True)   
+        disassemble(add_file)
                                                     
-                Cmd = opt + ' -mem2reg -mergereturn -simplifycfg -loops -lcssa -loop-simplify -loop-rotate -indvars ' + add_file + ' -o ' + add_file
-                printDbgMsg(Cmd)
-                subprocess.call(Cmd, shell = True)
-                disassemble(add_file)
+        Cmd = opt + ' -mem2reg -mergereturn -simplifycfg -loops -lcssa -loop-simplify -loop-rotate -indvars ' + add_file + ' -o ' + add_file
+        printDbgMsg(Cmd)
+        subprocess.call(Cmd, shell = True)
+        disassemble(add_file)
                 
-                rotated_file = tool.work_dir + "/rotated.bc"
-                global_opt = tool.work_dir + "/global_opt.bc"
-                Cmd = [opt, "-loop-rotate", annotated_file, "-o", rotated_file]
-                subprocess.call(Cmd)
+        rotated_file = tool.work_dir + "/rotated.bc"
+        global_opt = tool.work_dir + "/global_opt.bc"
+        Cmd = [opt, "-loop-rotate", annotated_file, "-o", rotated_file]
+        subprocess.call(Cmd)
                 #"-instcombine",
-                Cmd = [opt, "-globalopt","-instcombine", '-mergereturn', '-loop-rotate', rotated_file, '-o', global_opt]
-                subprocess.call(Cmd)
+        Cmd = [opt, "-globalopt","-instcombine", '-mergereturn', '-loop-rotate', rotated_file, '-o', global_opt]
+        subprocess.call(Cmd)
 
 
 
-		Cmd = opt + ' -load ' + build_path + 'ConstantFolding.so -isAnnotated=' + str(tool.annot_flag) + ' -trackAllocas=' + str(tool.track_allocas)  +' -fileNames '  + str(tool.config_files) + ' -mem2reg -globalopt -instcombine --disable-simplify-libcalls  -loops -lcssa -loop-simplify -loop-rotate -inter-constprop -__progName=ssh' + annotated_file + ' -o ' + constprop_file
+        Cmd = opt + ' -load ' + build_path + 'ConstantFolding.so -isAnnotated=' + str(tool.annot_flag) + ' -trackAllocas=' + str(tool.track_allocas)  +' -fileNames '  + str(tool.config_files) + ' -mem2reg -globalopt -instcombine --disable-simplify-libcalls  -loops -lcssa -loop-simplify -loop-rotate -inter-constprop -__progName=ssh' + annotated_file + ' -o ' + constprop_file
 		#printDbgMsg(Cmd)
 #'-simplifycfg'
-                rotated_file = tool.work_dir + "/rotated.bc"
-                global_opt = tool.work_dir + "/global_opt.bc"
-                Cmd = [opt, "-loop-rotate", annotated_file, "-o", rotated_file]
-                subprocess.call(Cmd)
+        rotated_file = tool.work_dir + "/rotated.bc"
+        global_opt = tool.work_dir + "/global_opt.bc"
+        Cmd = [opt, "-loop-rotate", annotated_file, "-o", rotated_file]
+        subprocess.call(Cmd)
  #"-instcombine",
-                Cmd = [opt, "-globalopt","-instcombine", '-mergereturn', '-loop-rotate', rotated_file, '-o', global_opt]
-                subprocess.call(Cmd)
+        Cmd = [opt, "-globalopt","-instcombine", '-mergereturn', '-loop-rotate', rotated_file, '-o', global_opt]
+        subprocess.call(Cmd)
 
 #'-loop-unswitch', '-loop-idiom', '-loop-accesses', '-loop-vectorize', '-loop-load-elim', '-loop-sink' '-lcssa',
 
 
+        if tool.icp_flag:
+		  Cmd = [opt, '-load', build_path + 'ConstantFolding.so', '-isAnnotated=' + str(tool.annot_flag), use_glob_str ,disable_exit_str, use_reg_offset_str,exceed_limit_str,'-trackAllocas=' + str(tool.track_allocas),'-contextType=' + str(tool.context_type), '-fileSpecialize=' + str(tool.file_specialize), '-stringSpecialize=' + str(tool.string_specialize),'-loopUnroll=' + str(tool.loop_unroll),'-fileNames', str(tool.config_files),'-mem2reg','-mergereturn', '-simplifycfg' ,'-loops','-lcssa','-loop-simplify','-scalar-evolution' ,'-licm','-loop-rotate','-indvars' ,'-loop-reduce',"-__progName=ssh",'-inter-constprop',add_file, '-o', constprop_file]
 
-		Cmd = [opt, '-load', build_path + 'ConstantFolding.so', '-isAnnotated=' + str(tool.annot_flag), use_glob_str ,disable_exit_str, use_reg_offset_str,exceed_limit_str,'-trackAllocas=' + str(tool.track_allocas),'-contextType=' + str(tool.context_type), '-fileNames', str(tool.config_files),'-mem2reg','-mergereturn', '-simplifycfg' ,'-loops','-lcssa','-loop-simplify','-scalar-evolution' ,'-licm','-loop-rotate','-indvars' ,'-loop-reduce',"-__progName=ssh",'-inter-constprop',add_file, '-o', constprop_file]
+		  f = open(constprop_log_file, "wb")
+		  printDbgMsg(" ".join(Cmd))
 
-		f = open(constprop_log_file, "wb")
-		printDbgMsg(" ".join(Cmd))
+                  ping = subprocess.Popen(Cmd,stderr=f)
+                  msg = "The program has timeout after 6 hours"
 
-                ping = subprocess.Popen(Cmd,stderr=f)
-                msg = "The program has timeout after 6 hours"
+                  my_timer = Timer(21600,kill, [ping,msg])
 
-                my_timer = Timer(21600,kill, [ping,msg])
-
-                starttime =  datetime.now()
+                  starttime =  datetime.now()
 		#subprocess.call(Cmd)
-                try:
+                  try:
                     my_timer.start()
                     stdout, stderr = ping.communicate()
-                finally:
+                  finally:
                     my_timer.cancel()
 
-                endtime = datetime.now()
-                delta = endtime-starttime
-                combined = delta.seconds + delta.microseconds/1E6
-                print(combined)
+                  endtime = datetime.now()
+                  delta = endtime-starttime
+                  combined = delta.seconds + delta.microseconds/1E6
+                  print(combined)
 
-		f.close()
-                print(exit)
-                if exit == 1:
+                  f.close()
+                  print(exit)
+                  if exit == 1:
                     return 1
-                disassemble(constprop_file)
+                  disassemble(constprop_file)
+        else:
+		  constprop_file = add_file
 		# remove pass
-		Cmd = opt + ' -load ' + build_path + 'Remove.so -remove ' + constprop_file\
+	Cmd = opt + ' -load ' + build_path + 'Remove.so -remove ' + constprop_file\
 		+ ' -o ' + libspec_file
-		printDbgMsg(Cmd)
-		subprocess.call(Cmd, shell = True)
-                disassemble(libspec_file)
+	printDbgMsg(Cmd)
+	subprocess.call(Cmd, shell = True)
+        disassemble(libspec_file)
 	# inline pass
 	Cmd = opt + ' -always-inline ' + libspec_file + ' -o ' + inline_file
         printDbgMsg(Cmd)

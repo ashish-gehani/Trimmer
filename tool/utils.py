@@ -47,6 +47,9 @@ def parse_args(args):
 	icp_flag = True
         annot_flag = 1
         track_allocas = 1
+        file_specialize = 1
+        string_specialize = 1
+        loop = 1
         contextType = 1
         isLimitedDepth = False
         depthLimit = 0
@@ -73,6 +76,12 @@ def parse_args(args):
                         annot_flag = 0
                 elif(args[i] == 'no-track-allocas'):
                         track_allocas = 0
+                elif(args[i] == 'no-file-specialize'):
+                        file_specialize = 0  
+                elif(args[i] == 'no-string-specialize'):
+                        string_specialize = 0              
+                elif(args[i] == 'no-loop-unroll'):
+                        loop = 0                    
                 elif(args[i] == 'contextType'):
                         contextType = args[i+1]
                 elif(args[i] == 'depthLimit'):
@@ -92,5 +101,5 @@ def parse_args(args):
                 
 
 
-	return (manifest_file,man_data, work_dir, opt_flag, spec_flag, strip_flag, icp_flag, annot_flag, track_allocas, contextType, isLimitedDepth, depthLimit, isLoadsLimited, loadPercent, useGlob,exceedLimit,disableExit,useRegOffset,opt_level)
+	return (manifest_file,man_data, work_dir, opt_flag, spec_flag, strip_flag, icp_flag, annot_flag, track_allocas, contextType, isLimitedDepth, depthLimit, isLoadsLimited, loadPercent, useGlob,exceedLimit,disableExit,useRegOffset,opt_level,file_specialize,loop,string_specialize)
 
