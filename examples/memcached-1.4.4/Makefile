@@ -28,6 +28,7 @@ ${MEMCACHED_BITCODE}: ${MEMCACHED_NAME}
 	cd ${MEMCACHED_NAME} && \
 	CC=${BITCODE_WRAPPER} ./configure && \
 	sed -i 's/CFLAGS = -g -O2 -pthread -Wall -Werror -pedantic -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls/CFLAGS = -Xclang -disable-O0-optnone -pthread/g' ./Makefile && \
+	sed -i 's/memcached_debug_CFLAGS = -fprofile-arcs -ftest-coverage/#memcached_debug_CFLAGS = -fprofile-arcs -ftest-coverage/g' ./Makefile && \
 	CC=${BITCODE_WRAPPER} make && \
 	${BITCODE_EXTRACT} ${MEMCACHED} && \
 	${OPT_NAME} ${CFLAGS} ${MEMCACHED_BITCODE} -o ${MEMCACHED_BITCODE} && \
