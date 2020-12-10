@@ -52,6 +52,29 @@ python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory]
 Description of manifest file 
 ----------------------------
     
+
+Trimmer provides a simplistic but powerful representation for specifying the details for program specialization. The manifest file format is a specific instance of the JSON representation where Trimmer users fill-in key,value pairs. The structure of a manifest file is shown below:
+
+```
+{ "main" : "prog.bc"
+, "binary" : "progfin"
+, "modules" : []
+, "nativelibs"  : [ "−lm" , ... ]
+, "ldflags" : [ "−static" , ... ]
+, "name" : "prog"
+, "args" : [ "arg1" , ... ]
+, "config_files": []
+}
+```
+
+-   **main** : a path to the bitcode module containing the main entry point.
+-   **modules** : a list of paths to the other bitcode modules needed.
+-   **binary** : the name of the desired executable.
+-   **native libs** : a list of flags (-lm, -lc, -lpthread) or paths to native objects (.o, .a, .so)
+-   **ldflags** : a list of linker flags such as --static, --nostdlib
+-   **args** : the list of arguments you wish to specialize in the main() of main.
+-   **config_files** : the list of application-specific configuration files
+
 The manifest file for curl (one of the example programs) is shown below:
 
 ``` 
