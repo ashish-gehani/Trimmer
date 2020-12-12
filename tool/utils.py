@@ -6,7 +6,7 @@ import os
 import json
 
 def format_args(fname, args):
-	return ("'" + " " + "'").join([fname] + args)
+	return (' ').join([fname] + args)
 
 def exists(fname):
 	if not os.path.exists(fname):
