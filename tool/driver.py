@@ -41,14 +41,13 @@ def run_argspec(tool):
 
 	fname = tool.name
 	curr_file = tool.curr_file
-	strip_file = tool.work_dir + '/' + fname + '_strip.bc'
 	add_file = tool.work_dir + '/' + fname + '_added.bc'
+        specialize_log_file =  tool.work_dir + '/specialize_log.txt'
         annotated_file = tool.work_dir + '/' + fname + '_annotated.bc'
-	unroll_file = tool.work_dir + '/' + fname + '_unroll.bc'
 	libspec_file = tool.work_dir + '/' + fname + '_ls.bc'
-	annot_file = tool.work_dir + '/' + fname + '_annot.bc'
+	annot_log_file =  tool.work_dir + '/annot_log.txt'
 	constprop_file = tool.work_dir + '/' + fname + '_constprop.bc'
-	constprop_log_file =  tool.work_dir + '/log.txt'
+	constprop_log_file =  tool.work_dir + '/constprop_log.txt'
 	remove_file = tool.work_dir + '/' + fname + '_remove.bc'
 	inline_file = tool.work_dir + '/' + fname + '_inline.bc'
 	intern_file = tool.work_dir + '/' + fname + '_intern.bc'
@@ -76,9 +75,9 @@ def run_argspec(tool):
 	#subprocess.call(Cmd, shell = True)
         #disassemble(add_file)
 
-        depth_limit_str = ''
+        depth_limit_str = '-isLimitedDepth=false'
 
-        load_percent_str = ' '
+        load_percent_str = '-isLoadsLimited=false'
 
         use_glob_str = '-useGlob=0'
 
@@ -113,27 +112,30 @@ def run_argspec(tool):
 
 
         if(tool.track_allocas):
-                        Cmd = opt + ' -load ' + build_path + 'AnnotateNew.so -mem2reg -loops -lcssa -loop-simplify -loop-rotate -indvars -svfg  --isAnnotated=' + str(tool.annot_flag) + ' --argvName=__argv_new__\
-                                ' +depth_limit_str+ load_percent_str+ curr_file + ' -o ' + annotated_file
+                        Cmd = [opt, '-load', build_path + 'AnnotateNew.so', '-isAnnotated=' + str(tool.annot_flag),depth_limit_str,load_percent_str,'-mem2reg', '-loops', '-lcssa', '-loop-simplify', '-loop-rotate', '-indvars', '-svfg', curr_file, '-o', annotated_file]
+                                             
 
-                        printDbgMsg(Cmd)
-
+                        printDbgMsg(" ".join(Cmd))
+  		        f = open(annot_log_file, "wb")
                         starttime =  datetime.now()
-                        subprocess.call(Cmd, shell = True)
+                        subprocess.call(Cmd,stderr=f)
                         endtime = datetime.now()
+                        f.close()
                         delta = endtime-starttime
                         combined = delta.seconds + delta.microseconds/1E6
-                        print(combined)
+                        print("Annotation Pass takes " + str(combined) + " seconds")
                         disassemble(annotated_file)
                         #return
         else:
                         annotated_file = curr_file
                 #-simplifycfg
 		# interconstprop pass
-                #
-        Cmd = opt + ' -load ' + build_path + 'SpecializeArguments.so -specialize-args -args=' + tool.args + ' ' + annotated_file + ' -o ' + add_file
-        printDbgMsg(Cmd)
-        subprocess.call(Cmd, shell = True)   
+                #        
+        Cmd = [opt,'-load', build_path + 'SpecializeArguments.so', '-args=' + tool.args,'-specialize-args', annotated_file,'-o',add_file]
+        printDbgMsg(' '.join(Cmd))
+        f = open(specialize_log_file, "wb")
+        subprocess.call(Cmd, stderr=f)
+        f.close()   
         disassemble(add_file)
                                                     
         Cmd = opt + ' -mem2reg -mergereturn -simplifycfg -loops -lcssa -loop-simplify -loop-rotate -indvars ' + add_file + ' -o ' + add_file
@@ -177,7 +179,7 @@ def run_argspec(tool):
                   my_timer = Timer(21600,kill, [ping,msg])
 
                   starttime =  datetime.now()
-		#subprocess.call(Cmd)
+
                   try:
                     my_timer.start()
                     stdout, stderr = ping.communicate()
@@ -187,10 +189,9 @@ def run_argspec(tool):
                   endtime = datetime.now()
                   delta = endtime-starttime
                   combined = delta.seconds + delta.microseconds/1E6
-                  print(combined)
+                  print("Constant Folding Pass takes " + str(combined) + " seconds")
 
                   f.close()
-                  print(exit)
                   if exit == 1:
                     return 1
                   disassemble(constprop_file)
@@ -235,8 +236,8 @@ def link_libs(tool):
 		# strip dead prototypes
 		if(tool.strip_flag):
 			Cmd = opt + ' -strip -strip-dead-prototypes ' + mod + ' -o ' + mod
-			#printDbgMsg(Cmd)
-			#subprocess.call(Cmd, shell = True)
+			printDbgMsg(Cmd)
+			subprocess.call(Cmd, shell = True)
 
 		# linked file
 		Cmd = link + ' ' +  curr_file + ' ' + mod + ' -o ' + lib_lnkd_file
@@ -248,7 +249,7 @@ def link_libs(tool):
 	if(tool.strip_flag):
 		Cmd = opt + ' -strip -strip-dead-prototypes ' + curr_file + ' -o ' + curr_file
                 printDbgMsg(Cmd)
-		#subprocess.call(Cmd, shell = True)
+		subprocess.call(Cmd, shell = True)
 
 	# Internalize pass
 	Cmd = opt + ' -load ' + build_path + 'Internalize.so -intern ' + curr_file\

@@ -57,21 +57,23 @@ class Trimmer:
         print 'exe name is ' + self.exe_name
         print 'work_dir is ' + self.work_dir
         print 'config_files are ' + self.config_files
-        print 'Limiting Depth ? ' + str(self.depth_flag)
+        print 'limiting depth  ' + str(self.depth_flag)
         print 'annotation depth ' + str(self.anot_depth)
-        print 'Limiting Loads ? ' + str(self.load_flag)
+        print 'limiting loads  ' + str(self.load_flag)
         print 'load percent ' + str(self.load_percent)
-        print 'Use globals? ' + str(self.use_glob)
+        print 'Use globals ' + str(self.use_glob)
         print 'exceedLimit ' + str(self.exceed_limit)
-        print 'disable_exit ? '+ str(self.disable_exit)
-        print 'use_reg_offset ? '+ str(self.use_reg_offset)
-        print 'opt_level ? '+ str(self.opt_level)
+        print 'disable_exit '+ str(self.disable_exit)
+        print 'use_reg_offset '+ str(self.use_reg_offset)
+        print 'opt_level '+ str(self.opt_level)
+        print 'loop unroll '+ str(self.loop_unroll)
+        print 'string specialize '+ str(self.string_specialize)
+        print 'file specialize '+ str(self.file_specialize)
 
 
     def run(self):
         self.curr_file = self.work_dir + '/' + self.main
         utils.exists(self.main_path)
-        print self.main_path
         copyfile(self.main_path, self.work_dir + '/' + self.main)
         if(self.spec_flag):
         # The following driver call runs the argument specialization transform
