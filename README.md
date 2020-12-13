@@ -97,4 +97,20 @@ mkdir examples/tool_name/work_dir
 python ${TRIMMER_HOME}/tool/trimmer.py   ${TRIMMER_HOME}/examples/tool_name/tool.manifest  ${TRIMMER_HOME}/examples/tool_name/work_dir      
 ```
 
+Debug
+-----
+By default, debug messages are off. If you want to see debug messages,
+```
+export TRIMMER_DEBUG= Yes
+```
+Three files will be created. 
+1. annot_log.txt will contain Annotation Pass log.
+2. specialize_log.txt will contain Specialization Pass log.
+3. constprop_log.txt will contain ConstantFolding Pass log.
+
+
+
+
+
+
 This material is based upon work supported by the National Science Foundation under Grant [ACI-1440800](http://www.nsf.gov/awardsearch/showAward?AWD_ID=1440800). Any opinions, findings, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the National Science Foundation.
