@@ -13,12 +13,10 @@
 using namespace llvm;
 using namespace std;
 
-#define DebugNone 0
-#define Abubakar 1
-#define Hashim 2
-#define Maaz 4
-#define Usama 8
-#define All 1023
+#define No 0
+#define Yes 1
+
+
 
 extern int debugLevel; 
 class debug {
