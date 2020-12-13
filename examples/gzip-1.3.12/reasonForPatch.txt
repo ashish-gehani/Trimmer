@@ -1,0 +1,1 @@
+Function futimens in lib/utimens.c contradicts with sys/stat.h futimens function so the name of the function is changed from futimens to cu_futimens; otherwise there will be compilation error.
