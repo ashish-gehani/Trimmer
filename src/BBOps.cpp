@@ -52,7 +52,7 @@ bool BBOps::partOfLoop(Value * val) {
 bool BBOps::partOfLoop(BasicBlock * BB) {
   assert(BBInfoMap.find(BB) != BBInfoMap.end());
   if(BBInfoMap.find(BB) == BBInfoMap.end()) {
-    debug(Usama) << "Error: partOfLoop, BB not found\n";
+    debug(Yes) << "Error: partOfLoop, BB not found\n";
     return false;
   }
   return BBInfoMap[BB]->partOfLoop;
@@ -166,7 +166,7 @@ bool BBOps::predecessorsVisited(BasicBlock * BB, LoopInfo &LI) {
   return true;
 }
 bool BBOps::mergeContext(BasicBlock * BB, BasicBlock * prev) {
-  printBB("merging context for ", BB, "\n", Abubakar);
+  printBB("merging context for ", BB, "\n", Yes);
   vector<ContextInfo *> predConts; 
   for(auto it = pred_begin(BB), et = pred_end(BB); it != et; it++) {
     BasicBlock * predecessor = *it;
@@ -216,7 +216,7 @@ void BBOps::freeBB(BasicBlock * BB) {
         (succCi->imageOf == ci || succCi->imageOf == ci->imageOf))
       return;
   }
-  printBB("freeing BB ", BB, "\n", Abubakar); 
+  printBB("freeing BB ", BB, "\n", Yes); 
   delete ci->memory;
   if(ci->imageOf)
     ci->imageOf->deleted = true;
@@ -239,7 +239,7 @@ void BBOps::propagateUR(BasicBlock * BB, LoopInfo& LI) {
     worklist.erase(worklist.begin());
     if(isUnReachable(worker)) 
       continue;
-    debug(Usama) << "Adding bb " << BB->getName() << " to unreachable set \n";
+    debug(Yes) << "Adding bb " << BB->getName() << " to unreachable set \n";
     unReachable.insert(worker);
     markSuccessorsAsUR(worker->getTerminator(), LI);
     const vector<DomTreeNodeBase<BasicBlock> *> children = 
@@ -280,10 +280,10 @@ void BBOps::markSuccessorsAsUR(TerminatorInst * termInst, LoopInfo& LI) {
     BBInfoMap[successor]->URfrom++;
     checkReadyToVisit(successor);
     if(BBInfoMap[successor]->URfrom < BBInfoMap[successor]->numPreds) {
-      debug(Usama) << "Skipping " << successor->getName() << " as unreachable=" << BBInfoMap[successor]->URfrom << " and numPreds=" << BBInfoMap[successor]->numPreds;
+      debug(Yes) << "Skipping " << successor->getName() << " as unreachable=" << BBInfoMap[successor]->URfrom << " and numPreds=" << BBInfoMap[successor]->numPreds;
       continue;
     } else{
-      //debug(Usama) << successor->getName() << " adding unreachable: unrachable: " BBInfoMap[successor]->URfrom << " and numPreds=" << BBInfoMap[successor]->numPreds << "\n";
+      //debug(Yes) << successor->getName() << " adding unreachable: unrachable: " BBInfoMap[successor]->URfrom << " and numPreds=" << BBInfoMap[successor]->numPreds << "\n";
     }
     propagateUR(successor, LI);
   }
@@ -305,7 +305,7 @@ bool BBOps::foldToSingleSucc(TerminatorInst * termInst, vector<BasicBlock *> & r
       single = SI->findCaseValue(CI)->getCaseSuccessor();
   }
   if(single) {
-    printBB("folded to single successor ", single, "\n", Abubakar);
+    printBB("folded to single successor ", single, "\n", Yes);
     BBInfoMap[termInst->getParent()]->singleSucc = single;
     this->readyToVisit.clear();
     markSuccessorsAsUR(termInst, LI);
@@ -354,7 +354,7 @@ Value * BBOps::foldPhiNode(PHINode * phiNode, vector<Value*> &incPtrs) {
 
   for(unsigned i = 0; i < incV.size(); i++) {
     if(val && val != phiNode->getIncomingValue(incV[i])) {
-      debug(Abubakar) << "phiNode not constant\n";
+      debug(Yes) << "phiNode not constant\n";
       return NULL;
     }
     val = phiNode->getIncomingValue(incV[i]);
@@ -384,14 +384,14 @@ void BBOps::recomputeLoopInfo(Function * F, LoopInfo& LI, BasicBlock *header) {
     BasicBlock * BB = &*bi;
     if(BBInfoMap.find(BB) != BBInfoMap.end()) {
       BBInfoMap[BB]->partOfLoop = LI.getLoopFor(BB);
-      debug(Usama) << "Part of Loop: " << BBInfoMap[BB]->partOfLoop << "\n";
+      debug(Yes) << "Part of Loop: " << BBInfoMap[BB]->partOfLoop << "\n";
     } else {
       //BBInfoMap[BB] = new BBInfo(BB);
       //BBInfoMap[BB]->partOfLoop = LI.getLoopFor(BB);
       //if(BBInfoMap[BB]->partOfLoop)
-        //debug(Usama) << *LI.getLoopFor(BB)->getHeader()  << "\n";
-      //printBB("BBName: ", BB, ",", Usama);
-      //debug(Usama) << "Error: Could not find parent. part of loop: " << BBInfoMap[BB]->partOfLoop << "\n";
+        //debug(Yes) << *LI.getLoopFor(BB)->getHeader()  << "\n";
+      //printBB("BBName: ", BB, ",", Yes);
+      //debug(Yes) << "Error: Could not find parent. part of loop: " << BBInfoMap[BB]->partOfLoop << "\n";
     }
   }
 }
@@ -419,7 +419,7 @@ void BBOps::copyFuncBlocksInfo(Function * F, ValueToValueMapTy & vmap) {
       //copy over ancestors
       for(auto it = bbi->ancestors.begin(), end = bbi->ancestors.end(); it != end; it++) {
         if(vmap.find(*it) == vmap.end()) {
-            errs() << "BB not found :" << *it << "\n";
+            debug(Yes) << "BB not found :" << *it << "\n";
         }else {
             nbbi->ancestors.push_back(dyn_cast<BasicBlock>(vmap[*it]));  
         }
@@ -428,7 +428,7 @@ void BBOps::copyFuncBlocksInfo(Function * F, ValueToValueMapTy & vmap) {
       //TODO do we need to recompute loopLatches?
       for(auto it = bbi->loopLatchesWithEdge.begin(), end = bbi->loopLatchesWithEdge.end(); it != end; it++) {
         if(vmap.find(*it) == vmap.end()) {
-            errs() << "BB not found :" << *it << "\n";
+            debug(Yes) << "BB not found :" << *it << "\n";
         }else {
             nbbi->loopLatchesWithEdge.push_back(dyn_cast<BasicBlock>(vmap[*it]));
         }
@@ -449,10 +449,10 @@ void BBOps::copyContexts(Function *to, Function *from, ValueToValueMapTy& vmap, 
 
     ContextInfo *oldCi = BasicBlockContexts[oldBB];
     if(!oldCi->deleted && !oldCi->imageOf) {
-      printBB("duplicating in copyContexts", newBB, "\n", Usama);
+      printBB("duplicating in copyContexts", newBB, "\n", Yes);
       duplicateContext(newBB, oldBB);
     } else {
-      printBB("creating new in copyContexts", newBB, "\n", Usama);
+      printBB("creating new in copyContexts", newBB, "\n", Yes);
       BasicBlockContexts[newBB] = new ContextInfo(); //will set memory pointer later, since parent ci might not have been intiialized
     }
 
@@ -606,17 +606,17 @@ ContextInfo *BBOps::getContextInfo(BasicBlock *bb) {
 }
 
 void BBOps::cleanUpFuncBBInfo(Function *f) {
-  debug(Usama) << "called for function: " << f->getName().str() << "\n";
+  debug(Yes) << "called for function: " << f->getName().str() << "\n";
   for(auto f_it = f->begin(), f_ite = f->end(); f_it != f_ite; ++f_it) {
     BasicBlock * BB = &*f_it;
     if(BasicBlockContexts.find(BB) == BasicBlockContexts.end())
       continue;
-    printBB("deleting for BB: ", BB, " ", Usama);
+    printBB("deleting for BB: ", BB, " ", Yes);
     ContextInfo * ci = BasicBlockContexts[BB];
-    debug(Usama) << "with ci address: " << ci << "\n";
-    debug(Usama) << ci->deleted << " " << ci->imageOf << "\n";
+    debug(Yes) << "with ci address: " << ci << "\n";
+    debug(Yes) << ci->deleted << " " << ci->imageOf << "\n";
     if(!ci->deleted && !ci->imageOf) {
-      debug(Usama) << "Deleting memory too: " << "\n";
+      debug(Yes) << "Deleting memory too: " << "\n";
       delete ci->memory;
     }
     BasicBlockContexts.erase(BB);

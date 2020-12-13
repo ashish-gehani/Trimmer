@@ -57,8 +57,8 @@ Instruction *LoopUnrollTest::firstInst(BasicBlock * BB) {
 
 bool LoopUnrollTest::checkTestInst(Instruction * I, string testName) {
   if(CallInst * ci = dyn_cast<CallInst>(I)) {
-    errs() << "testname = " << testName << "\n"; 
-    errs() << "testing for " << *ci << "\n";
+    debug(Yes) << "testname = " << testName << "\n"; 
+    debug(Yes) << "testing for " << *ci << "\n";
     if(ci->getCalledFunction() && ci->getCalledFunction()->getName().str() == testName)
       return true;
   }
@@ -84,7 +84,7 @@ void LoopUnrollTest::updateIter(Instruction * I) {
 bool LoopUnrollTest::checkPassed() {
   if(!terminated) return false;
   if(elapsedTime > 300) return false;
-  errs() << "iterations = " << iterations << "\n";
+  debug(Yes) << "iterations = " << iterations << "\n";
   if(!ConstTripCount){ 
     if(isFileIOLoop)
      return iterations < fileTripCount + 5;
@@ -96,7 +96,7 @@ bool LoopUnrollTest::checkPassed() {
 
 void LoopUnrollTest::updateTime(Instruction *I, uint64_t seconds) {
   elapsedTime = seconds;
-  //debug(Usama) << "updateTime: seconds = " << seconds << "\n";
+  //debug(Yes) << "updateTime: seconds = " << seconds << "\n";
   Module *m = I->getParent()->getParent()->getParent();
   //CallInst *iterCall = getTestInst(getIterName(), module);
   Function *f = m->getFunction(getExitName());
@@ -108,14 +108,14 @@ void LoopUnrollTest::updateTime(Instruction *I, uint64_t seconds) {
   }
 
   if(!call) {
-    debug(Usama) << "updateTime: call not found\n";
+    debug(Yes) << "updateTime: call not found\n";
     return;
   }
 
   //if in the same function, only then fail the test
   if(I->getParent()->getParent() == call->getParent()->getParent())
     if(elapsedTime > 300) {
-      debug(Usama) << "updateTime: loop terminated due to overtime\n";
+      debug(Yes) << "updateTime: loop terminated due to overtime\n";
       terminated = true;
     }
 }

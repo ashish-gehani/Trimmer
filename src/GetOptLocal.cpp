@@ -94,10 +94,10 @@ int getopt_long_local(int argc, char ** argv, char * opts, struct option * long_
     //errs()<<long_opts[i].name<<" has args\n";
     if(hasEqual != -1 && found){
       optarg = &argv[optind][hasEqual+2+1];//2 for -- and 1 for = 
-      errs()<<"optarg: "<<optarg<<"\n";
+      //errs()<<"optarg: "<<optarg<<"\n";
     } else if(optind < argc - 1 && argv[optind + 1][0] != '-') {
       optarg = argv[optind + 1];
-      errs()<<"optarg: "<<optarg<<"\n";
+      //errs()<<"optarg: "<<optarg<<"\n";
     } else {  
       err_local = "optarg not specified\n";
       optind++;
@@ -110,6 +110,6 @@ int getopt_long_local(int argc, char ** argv, char * opts, struct option * long_
     *long_opts[i].flag = long_opts[i].val;
     return 0;
   } 
-  errs()<<"Returning: "<<long_opts[i].val<<"\n";
+  //errs()<<"Returning: "<<long_opts[i].val<<"\n";
   return long_opts[i].val;
 }

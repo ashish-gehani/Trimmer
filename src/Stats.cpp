@@ -5,9 +5,10 @@
 #include "llvm/Support/raw_ostream.h"
 
 #include "Stats.h"
-
+#include "Debug.h"
 #include <chrono>
 #include <fstream>
+
 
 using namespace std;
 
@@ -31,7 +32,7 @@ void Stats::functionCall(Function *child) {
 
 inline FunctionStats *Stats::getRunningFunction() {
   if(!stack.size()) {
-    errs() << "stats: no running function\n";
+    debug(Yes) << "stats: no running function\n";
     return NULL;
   }
   return stack[stack.size()-1];
@@ -43,7 +44,7 @@ LoopStats *Stats::getRunningLoop() {
     if(stack[i]->loops.size() && stack[i]->getRunningLoop())
       return stack[i]->getRunningLoop();
   }
-  errs() << "getRunningLoop: returned NULL\n";
+  debug(Yes) << "getRunningLoop: returned NULL\n";
   return NULL;
 }
 
@@ -64,7 +65,7 @@ void Stats::loopSuccess() {
 
 //returns true if terminated
 bool Stats::getLoopTime(uint64_t &seconds) {
-  errs()<<"getLoopTime() in stats\n";
+  debug(Yes)<<"getLoopTime() in stats\n";
   
   if(getRunningLoop() == NULL)
     return false;
@@ -92,15 +93,15 @@ void Stats::printStats(Function *main) {
   }
 
   printStats(root);
-  errs()<<"==================|Stats|===================="<<"\n";
-  errs()<<"# LibCalls Simplified: "<<libCallsSimplified<<"\n";
-  errs()<<"# Total LibCalls: "<<totalLibCalls<<"\n";
-  errs()<<"# Loads Folded: "<<loadsFolded<<"\n";
-  errs()<<"# Tracked Loads Folded: "<<trackedLoads<<"\n";
-  errs()<<"# Total Loads Encountered: "<< totalLoads<<"\n";
-  errs()<<"# Function Calls Analyzed: "<<count<<"\n";
-  errs()<<"# Functions Cloned: "<<functionsCloned<<"\n";
-  errs()<<"# Loops Unrolled: "<<loopsUnrolled<<"\n";
+  debug(Yes)<<"==================|Stats|===================="<<"\n";
+  debug(Yes)<<"# LibCalls Simplified: "<<libCallsSimplified<<"\n";
+  debug(Yes)<<"# Total LibCalls: "<<totalLibCalls<<"\n";
+  debug(Yes)<<"# Loads Folded: "<<loadsFolded<<"\n";
+  debug(Yes)<<"# Tracked Loads Folded: "<<trackedLoads<<"\n";
+  debug(Yes)<<"# Total Loads Encountered: "<< totalLoads<<"\n";
+  debug(Yes)<<"# Function Calls Analyzed: "<<count<<"\n";
+  debug(Yes)<<"# Functions Cloned: "<<functionsCloned<<"\n";
+  debug(Yes)<<"# Loops Unrolled: "<<loopsUnrolled<<"\n";
   std::ofstream StatFile;
   StatFile.open("constStats.JSON");
   StatFile<<"{ \"LibCallsSimplified\": "<<libCallsSimplified<<", \"TotalLibCalls\":"<<totalLibCalls<<", \"LoadsFolded\":"<<loadsFolded<<", \"TrackedLoadsFolded\": "<<trackedLoads<<",\"TotalLoadsEncountered\":"<<totalLoads<<", \"FunctionCallsAnalyzed\":"<<count<<",\"FunctionsCloned\":"<<functionsCloned<<".\"LoopsUnrolled\":"<<loopsUnrolled<<",";
@@ -124,7 +125,7 @@ void Stats::makeGraph(Function *main) {
   string str = "digraph D { \n";
   root->makeGraph(str);
   str += "}";
-  errs() << str << "\n";
+  debug(Yes) << str << "\n";
 }
 
 void Stats::incrementLibCallsFolded(){ libCallsSimplified++; }
@@ -137,7 +138,7 @@ void Stats::incrementTrackedLoads() { trackedLoads++;          }
 unsigned Stats::getTrackedLoads() { return trackedLoads; }
 
 bool FunctionStats::getLoopTime(uint64_t &seconds) {
-  errs()<<"getLoopTime(seconds) \n";
+  debug(Yes)<<"getLoopTime(seconds) \n";
   return getRunningLoop()->getLoopTime(seconds);
 }
 
@@ -152,7 +153,7 @@ void FunctionStats::functionReturn() {
 }
 
 void FunctionStats::loopStart(BasicBlock *BB) {
-  errs() << "pushing new loop " << BB->getName() << "for function " << this->f->getName() << "\n";
+  debug(Yes) << "pushing new loop " << BB->getName() << "for function " << this->f->getName() << "\n";
   loops.push_back(new LoopStats(BB));
 }
 
@@ -163,23 +164,23 @@ void FunctionStats::setFunction(Function *f) {
 inline LoopStats *FunctionStats::getRunningLoop() {
   int i;
   assert(loops.size());
-  errs() << "loop size:" << loops.size() << "\n";
+  debug(Yes) << "loop size:" << loops.size() << "\n";
 
   i = loops.size() -1;
 
   loops[i]->hasLoopTerminated();
 
-  errs() << " i " << i << "\n";
+  debug(Yes) << " i " << i << "\n";
   return loops[i];
 }
 
 void FunctionStats::loopSuccess() {
-  errs()<<"loopSuccess() in stats\n";
+  debug(Yes)<<"loopSuccess() in stats\n";
   getRunningLoop()->loopSuccess();   
 }
 
 void FunctionStats::loopFail() {
-  errs()<<"loopFail() in stats\n";
+  debug(Yes)<<"loopFail() in stats\n";
   getRunningLoop()->loopFail();   
 }
 
@@ -188,9 +189,9 @@ Function *FunctionStats::getFunction() {
 }
 
 void FunctionStats::printStats() {
-  errs() << "Function Name: " << getFunction()->getName() << " time: " << getRunTime() << "\n";
+  debug(Yes) << "Function Name: " << getFunction()->getName() << " time: " << getRunTime() << "\n";
   for(auto &loop: loops) {
-    errs() << "           Loop BB header: " << loop->getHeader()->getName() << " time: " << loop->getRunTime() << "\n";
+    debug(Yes) << "           Loop BB header: " << loop->getHeader()->getName() << " time: " << loop->getRunTime() << "\n";
   }
 }
 

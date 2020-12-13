@@ -9,7 +9,7 @@ using namespace llvm;
 using namespace std;
 
 uint64_t binarySearchIndices(vector<uint64_t> indices, uint64_t lo, uint64_t hi, uint64_t val) {
-  debug(Usama) << "lo =" << lo << " high=" << hi << "\n";
+  debug(Yes) << "lo =" << lo << " high=" << hi << "\n";
   assert(hi < indices.size() && lo < indices.size());
   if(indices.size() == 1) return indices[0];
   uint64_t mid = lo + (hi - lo)/2;
@@ -19,7 +19,7 @@ uint64_t binarySearchIndices(vector<uint64_t> indices, uint64_t lo, uint64_t hi,
 }
 
 /*int64_t binarySearchIndices(vector<unsigned> indices, int64_t lo, int64_t hi, unsigned val) {
-  debug(Usama) << "lo =" << lo << " high=" << hi << "\n";
+  debug(Yes) << "lo =" << lo << " high=" << hi << "\n";
   assert(hi < indices.size() && lo < indices.size());
   //if(indices.size() == 1) return indices[0];
   if(hi <= lo) {

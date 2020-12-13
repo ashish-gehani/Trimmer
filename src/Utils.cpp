@@ -76,7 +76,7 @@ void getReadonlyFuncNames()
   FILE * stream = fopen(fileName,"r");
   if(stream == NULL)
   {
-    errs()<<"File not found\n";
+    //errs()<<"File not found\n";
     exit(1);
   }
   char buffer[100];
@@ -100,7 +100,7 @@ bool checkIfReadOnlyFunc(Function * F)
 
   if (it != readOnlyFuncs.end())
   {
-    errs()<<"FOUND\n";
+    //errs()<<"FOUND\n";
     return true;
   }
   if(F->isIntrinsic())

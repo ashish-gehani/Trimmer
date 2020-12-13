@@ -26,7 +26,7 @@ void LoopUnroller::checkTermInst(Instruction * I, uint64_t seconds) {
     return;
   if(ti->checkBreakInst(I)) {
     ti->terminated = true;
-    //debug(Abubakar) << "marking test at level " << testStack.size() << " as terminated\n";
+    //debug(Yes) << "marking test at level " << testStack.size() << " as terminated\n";
   } else ti->updateIter(I); 
   ti->updateTime(I, seconds);
 }
@@ -68,30 +68,30 @@ bool LoopUnroller::shouldSimplifyLoop(BasicBlock *BB, LoopInfo &LI, Module *m, b
   auto terminator = preheader->getTerminator();
 
   if(pred_begin(preheader) == pred_end(preheader)) {
-    debug(Usama) << "shouldSimplifyLoop: preheader has no predecessor\n";
+    debug(Yes) << "shouldSimplifyLoop: preheader has no predecessor\n";
   } else {
     preheader = *pred_begin(preheader);
     terminator = preheader->getTerminator();
   }
 
-  debug(Usama) << "shouldSimplifyLoop: " << *terminator << "\n";
+  debug(Yes) << "shouldSimplifyLoop: " << *terminator << "\n";
   if(auto branch = dyn_cast<BranchInst>(terminator)) {
     if(branch->isUnconditional()) {
-      debug(Usama) << "shouldSimplifyLoop: unconditional branch\n";
+      debug(Yes) << "shouldSimplifyLoop: unconditional branch\n";
       return true;
     } else {
       if(dyn_cast<Constant>(branch->getCondition())) {
-        debug(Usama) << "shouldSimplifyLoop: constant condition\n";
+        debug(Yes) << "shouldSimplifyLoop: constant condition\n";
         return true;
       }
     }
   } else if(auto branch = dyn_cast<SwitchInst>(terminator)) {
     if(auto si = dyn_cast<Constant>(branch->getCondition())) {
-      debug(Usama) << "shouldSimplifyLoop: constant condition\n";
+      debug(Yes) << "shouldSimplifyLoop: constant condition\n";
       return true;
     }
   }
-  debug(Usama) << "shouldSimplifyLoop: false\n";
+  debug(Yes) << "shouldSimplifyLoop: false\n";
   return false;
 }
 
@@ -101,17 +101,17 @@ bool LoopUnroller::getTripCount(TargetLibraryInfo * TLI, AssumptionCache &AC, un
   DominatorTree DT(*F);
   ScalarEvolution SE(*F, *TLI, AC, DT, *LI);
   tripCount =  SE.getSmallConstantMaxTripCount(loop);
-  debug(Usama) << "Trip Multiple " << SE.getSmallConstantTripMultiple(loop) << "\n";
+  debug(Yes) << "Trip Multiple " << SE.getSmallConstantTripMultiple(loop) << "\n";
   if(tripCount >= 100000)
     tripCount = 0;
 
   for(auto &I: *header) {
-    errs() << I << "\n";
+    debug(Yes) << I << "\n";
       if(CallInst *call = dyn_cast<CallInst>(&I)) {
-        debug(Usama) << call->getName() << " name\n";
+        debug(Yes) << call->getName() << " name\n";
         if(call->getCalledFunction() && call->getCalledFunction()->getName() == "unroll_loop_two") {
           tripCount = dyn_cast<ConstantInt>(call->getOperand(1))->getZExtValue();
-          debug(Usama) << "Here : " << tripCount << "\n";
+          debug(Yes) << "Here : " << tripCount << "\n";
         }
       }
   }
@@ -135,9 +135,9 @@ bool LoopUnroller::runtest(TargetLibraryInfo * TLI, AssumptionCache &AC, RegOps 
   //getBranchMemory(loop);
   bool constTripCount = getTripCount(TLI, AC, tripCount, isFileIOLoop);
 
-  debug(Abubakar) << "ConstTripCount :" << constTripCount << "\n";
+  debug(Yes) << "ConstTripCount :" << constTripCount << "\n";
 
-  debug(Abubakar) << "TripCount :" << tripCount << "\n";
+  debug(Yes) << "TripCount :" << tripCount << "\n";
   ti = new LoopUnrollTest(loop, module, constTripCount, isFileIOLoop,fileTripCount);
 
   if(!doUnroll(TLI, AC, tripCount)) {
@@ -157,16 +157,16 @@ bool LoopUnroller::doUnroll(TargetLibraryInfo * TLI, AssumptionCache &AC, unsign
   ScalarEvolution SE(*F, *TLI, AC, DT, *LI);
   Loop * L = LI->getLoopFor(loop->getHeader());
   OptimizationRemarkEmitter ORE(F); 
-  debug(Usama) << "Trying trip count: " << tripCount << "\n";
+  debug(Yes) << "Trying trip count: " << tripCount << "\n";
   bool allowRuntime = false;
   bool unrollRemainder = false;
   int UnrollResult = (int) UnrollLoop(L, tripCount, tripCount, true, allowRuntime, false, 
                 true, false, 1, 0, unrollRemainder ,LI, &SE, &DT, &AC, &ORE, PreserveLCSSA);//unrollRemaineder set to false currently
   if(!UnrollResult) {
-    debug(Abubakar) << "failed in unrolling\n";
+    debug(Yes) << "failed in unrolling\n";
     return false;
   }
-  debug(Abubakar) << "succeeded in unrolling for " << tripCount << " iterations\n";
+  debug(Yes) << "succeeded in unrolling for " << tripCount << " iterations\n";
   return true;
 }
 
@@ -217,7 +217,7 @@ bool LoopUnroller::deleteLoop(BasicBlock *failed) {
   }
 
   for(auto &del: toDelete) {
-    errs() << "DELETING: " << *del << "\n";
+    debug(Yes) << "DELETING: " << *del << "\n";
     del->dropAllReferences();
     del->eraseFromParent();
   }
@@ -246,11 +246,11 @@ bool LoopUnroller::checkIfFileIOLoop(Loop * L, RegOps regOps,BBOps bbOps,map<int
               uint64_t fileId = r->getValue();
               uint64_t addr = fdInfoMap[fileId];
               FdInfo * fdi = (FdInfo *) bbOps.getActualAddr(addr, currBB); 
-              debug(Abubakar)<<fdi->fileName;  
+              debug(Yes)<<fdi->fileName;  
               if(ConstantInt * CI = dyn_cast<ConstantInt>(sizeVal))
                 size =  CI->getZExtValue();
               fileTripCount = getNumCharacters(fdi->fileName,size);  
-              debug(Abubakar)<<"numcharacters"<<fileTripCount; 
+              debug(Yes)<<"numcharacters"<<fileTripCount; 
               return true;
             }
           }
@@ -264,12 +264,12 @@ bool LoopUnroller::checkIfFileIOLoop(Loop * L, RegOps regOps,BBOps bbOps,map<int
               uint64_t fileId = r->getValue();
               uint64_t addr = fdInfoMap[fileId];
               FdInfo * fdi = (FdInfo *) bbOps.getActualAddr(addr, currBB); 
-              debug(Abubakar)<<fdi->fileName;  
+              debug(Yes)<<fdi->fileName;  
               if(ConstantInt * CI = dyn_cast<ConstantInt>(sizeVal))
                 if(ConstantInt * CI2 = dyn_cast<ConstantInt>(numVal))
                   size =  CI->getZExtValue() * CI2->getZExtValue();
               fileTripCount = getNumCharacters(fdi->fileName,size);  
-              debug(Abubakar)<<"numcharacters"<<fileTripCount; 
+              debug(Yes)<<"numcharacters"<<fileTripCount; 
               return true;
             }
           
@@ -283,7 +283,7 @@ bool LoopUnroller::checkIfFileIOLoop(Loop * L, RegOps regOps,BBOps bbOps,map<int
               uint64_t fileId = r->getValue();
               uint64_t addr = fdInfoMap[fileId];
               FdInfo * fdi = (FdInfo *) bbOps.getActualAddr(addr, currBB); 
-              debug(Abubakar)<<fdi->fileName; 
+              debug(Yes)<<fdi->fileName; 
               fileTripCount = getNumLines(fdi->fileName);         
               return true;
             }
@@ -297,7 +297,7 @@ bool LoopUnroller::checkIfFileIOLoop(Loop * L, RegOps regOps,BBOps bbOps,map<int
               uint64_t fileId = r->getValue();
               uint64_t addr = fdInfoMap[fileId];
               FdInfo * fdi = (FdInfo *) bbOps.getActualAddr(addr, currBB); 
-              debug(Abubakar)<<fdi->fileName;  
+              debug(Yes)<<fdi->fileName;  
               fileTripCount = getNumLines(fdi->fileName);   
               return true;
             }

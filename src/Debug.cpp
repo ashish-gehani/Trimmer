@@ -10,7 +10,7 @@
 #include "Debug.h"
 #include "Utils.h"
 
-int debugLevel = All;
+int debugLevel = No;
 
 using namespace llvm;
 using namespace std;
@@ -31,15 +31,10 @@ void initDebugLevel() {
 }
 
 void addToDebugLevel(char * str) {
-  errs() << str << "\n";
-  if(!strncmp(str, "Abubakar", 8))
-      debugLevel |= Abubakar;
-  else if(!strncmp(str, "Hashim", 6))
-      debugLevel |= Hashim;
-  else if(!strncmp(str, "Maaz", 4))
-    debugLevel |= Maaz;
-  else if(!strncmp(str, "All", 3))
-      debugLevel |= All;  
+  if(!strncmp(str, "Yes", 3))
+      debugLevel |= Yes;
+  else if(!strncmp(str, "No", 2))
+    debugLevel |= No;
 }
 
 void printBB(string before, BasicBlock * BB, string after, int level) {
