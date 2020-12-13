@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//This pass creates a global variable for each command-line argument provided in the manifest file. It creates a new global variable argv_new (a character double pointer) and sets it to global variables made for each command-line argument by adding instructions at the start of the main function.
 
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Module.h"
@@ -17,6 +18,7 @@
 #include <string> 
 #include <unistd.h> 
 #include "ParseArgs.h"
+#include "Debug.h"
 
 using namespace llvm;
 using namespace std;
@@ -50,9 +52,10 @@ namespace {
     addArguments() : ModulePass(ID) {}
     bool runOnModule(Module& M) {
       vector<string> arguments = parse_args(args);
+      initDebugLevel();
       int index_count = arguments.size();
       for(unsigned i = 0; i < arguments.size(); i++)
-        errs() << arguments[i] << "\n";
+        debug(Yes) << arguments[i] << "\n";
       IntegerType* int64Ty = IntegerType::get(M.getContext(), 64);
       IntegerType* int32Ty = IntegerType::get(M.getContext(), 32);
       IntegerType* int8Ty = IntegerType::get(M.getContext(), 8);
@@ -66,7 +69,7 @@ namespace {
       /*
       for(auto use: argc->users()) {
         if(auto I = dyn_cast<Instruction>(use)) {
-          errs() << *I << "\n";
+          debug(Yes) << *I << "\n";
           LLVMContext &C = I->getContext();
           MDNode *N = MDNode::get(C, MDString::get(C, "1"));
           I->setMetadata("track_argc", N);
@@ -102,7 +105,7 @@ namespace {
 
       FunctionType * llvmMemCpyFT = FunctionType::get(Type::getVoidTy(M.getContext()), llvmMemCpyArgs, false);      
       if(!llvmMemCpyFunc){
-        errs()<<"llvmMemCpyFT not found in module\n";
+        debug(Yes)<<"llvmMemCpyFT not found in module\n";
       	llvmMemCpyFunc = Function::Create(llvmMemCpyFT, GlobalValue::ExternalLinkage, "llvm.memcpy.p0i8.p0i8.i64", &M);
       }
 
@@ -115,13 +118,13 @@ namespace {
 
       vector<Value*> globals; 
       for(unsigned i = 0; i < arguments.size(); i++) {
-        errs() << "creating global for " << arguments[i] << "\n";
+        debug(Yes) << "creating global for " << arguments[i] << "\n";
         GlobalVariable* gv = materializeStringLiteral(M, arguments[i].c_str());
         PointerType * gvT = gv->getType();
         globals.push_back(ir.CreateConstGEP2_32(gvT->getElementType(), gv, 0, 0));
       }
 
-      errs() << "creating argv_new\n";
+      debug(Yes) << "creating argv_new\n";
       GlobalVariable * argv_new = new GlobalVariable(M, argv->getType(), false, 
       		     GlobalValue::ExternalLinkage, nptr1, Twine("__argv_new__"));
 
@@ -129,7 +132,7 @@ namespace {
       MDNode *N = MDNode::get(C, ConstantAsMetadata::get(ConstantInt::get(Type::getInt64Ty(C), 0))); 
       ((GlobalObject*)argv_new)->setMetadata("track", N);
 
-      errs() << *argv_new << "\n";
+      debug(Yes) << *argv_new << "\n";
       vector<Value *> args;
       args.push_back(ConstantInt::get(int64Ty, (index_count + 1) * 8)); 
       CallInst * mallocCall =  ir.CreateCall(mallocFunc, ArrayRef<Value *>(args));
@@ -148,7 +151,7 @@ namespace {
 
           //TODO: Do we need to set alignment for parameters?
 
-          errs() << arguments[i] << " " << i << "\n";
+          debug(Yes) << arguments[i] << " " << i << "\n";
           std::vector<Value*> functionArgs;
           functionArgs.push_back(destPtr);
           functionArgs.push_back(globals[i]);
@@ -158,8 +161,8 @@ namespace {
           Value * gep = ir.CreateConstGEP1_32(destPtr, arguments[i].size());
           ir.CreateStore(strTerm, gep);
         } else {
-          errs() << "_" << i << "\n";
-          errs() << *argv << "\n";
+          debug(Yes) << "_" << i << "\n";
+          debug(Yes) << *argv << "\n";
           Value* oldArgptr = ir.CreateConstGEP1_32(argv, i);
           Value* load = ir.CreateLoad(oldArgptr);   
           ir.CreateStore(load, newArgptr);                             
@@ -170,7 +173,7 @@ namespace {
       ir.CreateStore(nptr2, argptr);        
       replaceUsesOutsideBlock(argv, lptr, bb);
       ir.CreateBr(origbb);
-      errs()<<"Specialize-args pass completed...\n";
+      debug(Yes)<<"Specialize-args pass completed...\n";
       return true;
     }
   };

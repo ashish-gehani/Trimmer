@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//This pass sets the linkages of Globals(variables and functions) as Internal.
+
 
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Module.h"
@@ -24,7 +26,6 @@ namespace {
       switch (l) {
 	// TODO I'm not sure if all external definitions have an appropriate internal counterpart
       default:
-	errs() << "Got other linkage! " << l << "\n";
 	return l;
       case GlobalValue::ExternalLinkage:
 	return GlobalValue::InternalLinkage;

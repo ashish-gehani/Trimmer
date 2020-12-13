@@ -27,6 +27,8 @@ add_library(TestPass MODULE
 
 add_library(SpecializeArguments MODULE
   SpecializeArguments.cpp
+  ../Debug.cpp
+  ../Utils.cpp
   )
 add_library(Remove MODULE
   Remove.cpp
@@ -43,6 +45,8 @@ add_library(ListFunctions MODULE
 add_library(AnnotateNew MODULE
   AnnotateNew.cpp
   ../LoopUnroller.cpp
+  ../Debug.cpp
+  ../Utils.cpp
   )
 
 

@@ -2,7 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+
+//This pass uses SVF to generate Value Flow Graph (VFG). Starting from argv, it marks the objects (allocas, mallocs), which are directly or indirectly related to argv, as annotated by setting their metadata to tracked by using the VFG. Loops that uses these configuration objects are annotated by placing a function call (loop_unroll) as the first statement of the loop, so that the ConstantFolding pass knows which loops are to be unrolled.
+
 #include "AnnotateNew.h"
+#include "Debug.h"
 
 #include "llvm/ADT/DenseMap.h"
 #include "llvm/IR/IRBuilder.h"
@@ -128,7 +132,7 @@ bool myComparator(Value* valA, Value* valB){
 
   if(LoadsOnSource.find(srcNodeA) == LoadsOnSource.end() ||
       LoadsOnSource.find(srcNodeB) == LoadsOnSource.end()){
-    errs()<<"\n in CMP, one node doesn't have a source\n";
+    debug(Yes)<<"\n in CMP, one node doesn't have a source\n";
   }
   return (LoadsOnSource[srcNodeA] > LoadsOnSource[srcNodeB]);
 
@@ -189,7 +193,7 @@ bool isMemTransfer(const Value *inst) {
 
   if(auto casted =dyn_cast<CallInst>(inst)) {
     if(casted->getCalledFunction())
-      errs() << casted->getCalledFunction()->getName() << "\n"; 
+      debug(Yes) << casted->getCalledFunction()->getName() << "\n"; 
 
     if(casted->getCalledFunction() && (casted->getCalledFunction()->getName() == "strncpy" || casted->getCalledFunction()->getName() == "strcpy"))
       return true;
@@ -238,7 +242,7 @@ void AnnotateNew::checkIfLoop(SVFGNode *node) {
       const BasicBlock * data = partOfLoop(stmt->getInst()->getParent());
       if(data) {
         if(markedLoops.insert(data).second) {
-          errs() << "(LOG) (LOOP) Marking loop for BB " <<  data->getName() << " in function " <<  data->getParent()->getName() << " for instruction " << *stmt->getInst() << "\n";
+          debug(Yes) << "(LOG) (LOOP) Marking loop for BB " <<  data->getName() << " in function " <<  data->getParent()->getName() << " for instruction " << *stmt->getInst() << "\n";
         }
       }
     }
@@ -250,7 +254,7 @@ void AnnotateNew::checkIfLoop(Value *node) {
     const BasicBlock *data = partOfLoop(inst->getParent());
     if(data) {
       if(markedLoops.insert(data).second) {
-        errs() << "(LOG) (LOOP) Marking loop for BB " << data->getName() << " in function " << data->getParent()->getName() << " for instruction " << *inst << "\n";
+        debug(Yes) << "(LOG) (LOOP) Marking loop for BB " << data->getName() << " in function " << data->getParent()->getName() << " for instruction " << *inst << "\n";
       }
     }
   }
@@ -264,11 +268,11 @@ set<SVFGNode*> *AnnotateNew::dfs_rec(SVFGNode* root, std::function<vector<SVFGNo
   if(visited.find(root) != visited.end()) {
     return NULL;
   }
-  errs()<<"dfs_rec\n";
+  debug(Yes)<<"dfs_rec\n";
 
   visited.insert(root);
   if(dpData && dpData->find(root) != dpData->end()) {
-    errs() << "Found in dp svfg" << "\n";
+    debug(Yes) << "Found in dp svfg" << "\n";
     set<SVFGNode*> *temp = dpData->find(root)->second;
     return temp;
   }
@@ -281,7 +285,7 @@ set<SVFGNode*> *AnnotateNew::dfs_rec(SVFGNode* root, std::function<vector<SVFGNo
   set<SVFGNode*> *output = new set<SVFGNode*>;
 
   if(condition(root)) {
-    errs()<<"Adding root to output\n";
+    debug(Yes)<<"Adding root to output\n";
     output->insert(root);
   }
 
@@ -292,7 +296,7 @@ set<SVFGNode*> *AnnotateNew::dfs_rec(SVFGNode* root, std::function<vector<SVFGNo
       output->insert(childOutput->begin(), childOutput->end());
     //if(auto casted = dyn_cast<StmtSVFGNode>(child))
     //if(casted->getInst())
-    //errs() << "Instruction :" << *casted->getInst() << "\n";
+    //debug(Yes) << "Instruction :" << *casted->getInst() << "\n";
   }
   if(dpData)
     (*dpData)[root] = output;
@@ -312,11 +316,11 @@ set<SVFGNode*> *AnnotateNew::dfs_rec_limit(SVFGNode* root, std::function<vector<
 
      visited.insert(root);*/
 
-  errs()<<"dfs_rec_limit with depth: "<<depth<<"\n";
+  debug(Yes)<<"dfs_rec_limit with depth: "<<depth<<"\n";
 
 
   if(dpData && dpData->find(root) != dpData->end()) {
-    errs() << "Found in dp svfg" << "\n";
+    debug(Yes) << "Found in dp svfg" << "\n";
     set<SVFGNode*> *temp = dpData->find(root)->second;
     return temp;
   }
@@ -329,18 +333,18 @@ set<SVFGNode*> *AnnotateNew::dfs_rec_limit(SVFGNode* root, std::function<vector<
   set<SVFGNode*> *output = new set<SVFGNode*>;
 
 
-  errs()<<"\n";
+  debug(Yes)<<"\n";
   if(auto rootStmt = dyn_cast<StmtSVFGNode>(root)){
-    errs()<<"\nRoot is a StmtSVFGNode!\n";
+    debug(Yes)<<"\nRoot is a StmtSVFGNode!\n";
     auto* inst = rootStmt->getInst();
 
     if(inst == NULL){//Function argument?
-      errs()<<"Roots value is null\n";
+      debug(Yes)<<"Roots value is null\n";
     } else {
-      errs()<<"Root's function is "<<inst->getParent()->getParent()->getName()<<"\n";
+      debug(Yes)<<"Root's function is "<<inst->getParent()->getParent()->getName()<<"\n";
       auto* F = inst->getParent()->getParent();
       if(depthFunctions.find(F) == depthFunctions.end()){
-        errs()<<"In function not in CallGraph depth\n";
+        debug(Yes)<<"In function not in CallGraph depth\n";
         return output;
       }
     }
@@ -350,32 +354,32 @@ set<SVFGNode*> *AnnotateNew::dfs_rec_limit(SVFGNode* root, std::function<vector<
     if(auto* ARG = dyn_cast<Argument>(phi->getRes()->getValue())){
       auto* F = ARG->getParent();
       if(depthFunctions.find(F) == depthFunctions.end()){
-        errs()<<"In function not in CallGraph depth\n";
+        debug(Yes)<<"In function not in CallGraph depth\n";
         return output;
       }
 
-      errs()<<"CallGraph Function: "<<ARG->getParent()->getName()<<"\n";
-      errs()<<"Root is an ARGUMENT, decrement depth of "<<depth<<"\n";
+      debug(Yes)<<"CallGraph Function: "<<ARG->getParent()->getName()<<"\n";
+      debug(Yes)<<"Root is an ARGUMENT, decrement depth of "<<depth<<"\n";
       depth--;
     }
   } else if(auto parm = dyn_cast<FormalParmSVFGNode>(root)){
-    errs()<<"FormalParmSVFGNode for function: "<<parm->getFun()->getName()<<"\n";
+    debug(Yes)<<"FormalParmSVFGNode for function: "<<parm->getFun()->getName()<<"\n";
     depth--;
   } else if(auto parm = dyn_cast<ActualParmSVFGNode>(root)){
-    errs()<<"Actual Parm!!!\n";
+    debug(Yes)<<"Actual Parm!!!\n";
     depth--;
   } else if(auto in = dyn_cast<FormalINSVFGNode>(root)){
     auto* F = in->getFun();
     if(depthFunctions.find(F) == depthFunctions.end()){
-      errs()<<"In function not in CallGraph depth\n";
+      debug(Yes)<<"In function not in CallGraph depth\n";
       return output;
     }
 
-    errs()<<"FormalINSVFGNode for function: "<<in->getFun()->getName()<<"\n";
+    debug(Yes)<<"FormalINSVFGNode for function: "<<in->getFun()->getName()<<"\n";
     depth--;
   } else {
 
-    errs()<<"NEITHER CASE!!!!\n";
+    debug(Yes)<<"NEITHER CASE!!!!\n";
 
 
   }
@@ -385,7 +389,7 @@ set<SVFGNode*> *AnnotateNew::dfs_rec_limit(SVFGNode* root, std::function<vector<
 
 
   if(condition(root) && depth != 0) {
-    errs()<<"adding root to output\n";
+    debug(Yes)<<"adding root to output\n";
     output->insert(root);
   }
 
@@ -393,15 +397,15 @@ set<SVFGNode*> *AnnotateNew::dfs_rec_limit(SVFGNode* root, std::function<vector<
 
 
   if(!depth){
-    errs()<<"0 depth remaining, returning from forwardDfs\n";
+    debug(Yes)<<"0 depth remaining, returning from forwardDfs\n";
     return output;
   }
 
-  errs()<<"non-zero depth, go to children...\n";
+  debug(Yes)<<"non-zero depth, go to children...\n";
 
   vector<SVFGNode*> children = nextNodes(root,depth);
   for(auto child : children) {
-    errs()<<"Giving Child depth val: "<<depth<<"\n";
+    debug(Yes)<<"Giving Child depth val: "<<depth<<"\n";
     int childDepth = depth;
 
 
@@ -409,20 +413,20 @@ set<SVFGNode*> *AnnotateNew::dfs_rec_limit(SVFGNode* root, std::function<vector<
        if(auto parentStmt = dyn_cast<StmtSVFGNode>(root)){
 
        if(auto childStmt = dyn_cast<StmtSVFGNode>(child)){
-       errs()<<"Both child and parent are StmtNodes!!!\n";
+       debug(Yes)<<"Both child and parent are StmtNodes!!!\n";
        auto* parentInst = parentStmt->getInst();
        auto* childInst = childStmt->getInst();
 
        if(parentInst)
-       errs()<<"ParentInst: "<<*parentInst<<"\n";
+       debug(Yes)<<"ParentInst: "<<*parentInst<<"\n";
        else 
-       errs()<<"parent has null inst\n"; //Possible for argc arguments
+       debug(Yes)<<"parent has null inst\n"; //Possible for argc arguments
 
 
        if(childInst)
-       errs()<<"ChildInst: "<<*childInst<<"\n";
+       debug(Yes)<<"ChildInst: "<<*childInst<<"\n";
        else 
-       errs()<<"child has null inst\n";
+       debug(Yes)<<"child has null inst\n";
 
 
        if(parentInst && childInst){
@@ -431,8 +435,8 @@ set<SVFGNode*> *AnnotateNew::dfs_rec_limit(SVFGNode* root, std::function<vector<
 
 
 
-       errs()<<"\n[DFS_REC_LIMIT] ParentInst: "<<*parentStmt->getInst()<<" , childInst: "<<*childStmt->getInst()<<"\n";
-       errs()<<"[DFS_REC_LIMIT] ParentFunction: "<<parentFunc->getName()<<", ChildFunction: "<<childFunc->getName()<<"\n";
+       debug(Yes)<<"\n[DFS_REC_LIMIT] ParentInst: "<<*parentStmt->getInst()<<" , childInst: "<<*childStmt->getInst()<<"\n";
+       debug(Yes)<<"[DFS_REC_LIMIT] ParentFunction: "<<parentFunc->getName()<<", ChildFunction: "<<childFunc->getName()<<"\n";
 
 
        if(parentFunc != childFunc){
@@ -447,7 +451,7 @@ set<SVFGNode*> *AnnotateNew::dfs_rec_limit(SVFGNode* root, std::function<vector<
       output->insert(childOutput->begin(), childOutput->end());
     //if(auto casted = dyn_cast<StmtSVFGNode>(child))
     //if(casted->getInst())
-    //errs() << "Instruction :" << *casted->getInst() << "\n";
+    //debug(Yes) << "Instruction :" << *casted->getInst() << "\n";
   }
   if(dpData)
     (*dpData)[root] = output;
@@ -468,7 +472,7 @@ set<Value*> *AnnotateNew::dfs_rec(Value* root, std::function<vector<Value*> (Val
 
   visited.insert(root);
   if(dpData && dpData->find(root) != dpData->end()) {
-    errs() << "Found in dp: " << *root << "\n";
+    debug(Yes) << "Found in dp: " << *root << "\n";
     set<Value *> *temp = dpData->find(root)->second;
     return temp;
   }
@@ -490,7 +494,7 @@ set<Value*> *AnnotateNew::dfs_rec(Value* root, std::function<vector<Value*> (Val
       output->insert(childOutput->begin(), childOutput->end());
     //if(auto casted = dyn_cast<StmtSVFGNode>(child))
     //if(casted->getInst())
-    //errs() << "Instruction :" << *casted->getInst() << "\n";
+    //debug(Yes) << "Instruction :" << *casted->getInst() << "\n";
   }
   if(dpData)
     (*dpData)[root] = output;
@@ -527,7 +531,7 @@ set<T> *dfs_rec(T root, std::function<vector<T> (T)> nextNodes, std::function<bo
       output->insert(childOutput->begin(), childOutput->end());
     //if(auto casted = dyn_cast<StmtSVFGNode>(child))
     //if(casted->getInst())
-    //errs() << "Instruction :" << *casted->getInst() << "\n";
+    //debug(Yes) << "Instruction :" << *casted->getInst() << "\n";
   }
   if(dpData)
     (*dpData)[root] = output;
@@ -555,13 +559,13 @@ void AnnotateNew::dfs(Value* root, std::function<vector<Value*> (Value*)> nextNo
     }
 
     vector<Value*> children = nextNodes(currentNode);
-    //errs() << "Parent:  " << *root << "\n";
+    //debug(Yes) << "Parent:  " << *root << "\n";
     for(auto child : children) {
-      //errs() << "Child : " << *child << "\n";
+      //debug(Yes) << "Child : " << *child << "\n";
       worklist.push_back(child);
       //if(auto casted = dyn_cast<StmtSVFGNode>(child))
       //if(casted->getInst())
-      //errs() << "Instruction :" << *casted->getInst() << "\n";
+      //debug(Yes) << "Instruction :" << *casted->getInst() << "\n";
     }
   }
 }
@@ -586,13 +590,13 @@ void AnnotateNew::dfs(SVFGNode* root, std::function<vector<SVFGNode*> (SVFGNode*
     }
 
     vector<SVFGNode*> children = nextNodes(currentNode);
-    //errs() << "Parent:  " << *root << "\n";
+    //debug(Yes) << "Parent:  " << *root << "\n";
     for(auto child : children) {
-      //errs() << "Child : " << *child << "\n";
+      //debug(Yes) << "Child : " << *child << "\n";
       worklist.push_back(child);
       //if(auto casted = dyn_cast<StmtSVFGNode>(child))
       //if(casted->getInst())
-      //errs() << "Instruction :" << *casted->getInst() << "\n";
+      //debug(Yes) << "Instruction :" << *casted->getInst() << "\n";
     }
   }
 }*/
@@ -618,13 +622,13 @@ void dfs(T root, std::function<vector<T> (T)> nextNodes, std::function<bool (T)>
     }
 
     vector<T> children = nextNodes(currentNode);
-    errs() << "Parent:  " << *root << "\n";
+    debug(Yes) << "Parent:  " << *root << "\n";
     for(auto child : children) {
-      errs() << "Child : " << *child << "\n";
+      debug(Yes) << "Child : " << *child << "\n";
       worklist.push_back(child);
       //if(auto casted = dyn_cast<StmtSVFGNode>(child))
       //if(casted->getInst())
-      //errs() << "Instruction :" << *casted->getInst() << "\n";
+      //debug(Yes) << "Instruction :" << *casted->getInst() << "\n";
     }
   }
 }
@@ -638,12 +642,12 @@ vector<SVFGNode*> AnnotateNew::forwardDfsLambda(SVFGNode *current) {
   for(auto it = current->OutEdgeBegin(), end = current->OutEdgeEnd(); it != end; it++) {
     worklist.push_back((*it)->getDstNode());
   }
-  errs()<<"forwardDfsLambda with return size: "<<worklist.size()<<"\n";
+  debug(Yes)<<"forwardDfsLambda with return size: "<<worklist.size()<<"\n";
   return worklist;
 }
 
 vector<SVFGNode*> AnnotateNew::forwardDfsLambdaLimited(SVFGNode *current) {
-  errs()<<"forwardDfsLambdaLimited invoked\n";
+  debug(Yes)<<"forwardDfsLambdaLimited invoked\n";
   vector<SVFGNode*> worklist;
   if(forwardDp.find(current) !=forwardDp.end())
     return worklist;
@@ -652,13 +656,13 @@ vector<SVFGNode*> AnnotateNew::forwardDfsLambdaLimited(SVFGNode *current) {
   if(auto rootStmt = dyn_cast<StmtSVFGNode>(current)){
     auto* inst = rootStmt->getInst();
     if(inst == NULL){//Function argument?
-      errs()<<"Roots value is null\n";
+      debug(Yes)<<"Roots value is null\n";
     } else {
-      errs()<<"Root's function is "<<inst->getParent()->getParent()->getName()<<"\n";
-      errs()<<"Inst: "<<*inst<<"\n";
+      debug(Yes)<<"Root's function is "<<inst->getParent()->getParent()->getName()<<"\n";
+      debug(Yes)<<"Inst: "<<*inst<<"\n";
       auto* F = inst->getParent()->getParent();
       if(depthFunctions.find(F) == depthFunctions.end()){
-        errs()<<"In function not in CallGraph depth\n";
+        debug(Yes)<<"In function not in CallGraph depth\n";
         return worklist;
       }
     }
@@ -667,26 +671,26 @@ vector<SVFGNode*> AnnotateNew::forwardDfsLambdaLimited(SVFGNode *current) {
     if(auto* ARG = dyn_cast<Argument>(phi->getRes()->getValue())){
       auto* F = ARG->getParent();
       if(depthFunctions.find(F) == depthFunctions.end()){
-        errs()<<"In function not in CallGraph\n";
+        debug(Yes)<<"In function not in CallGraph\n";
         return worklist;
       }
-      errs()<<"CallGraph Function: "<<ARG->getParent()->getName()<<"\n";
+      debug(Yes)<<"CallGraph Function: "<<ARG->getParent()->getName()<<"\n";
     }
   } else if(auto in = dyn_cast<FormalINSVFGNode>(current)){
     auto* F = in->getFun();
     if(depthFunctions.find(F) == depthFunctions.end()){
-      errs()<<"In function not in CallGraph depth\n";
+      debug(Yes)<<"In function not in CallGraph depth\n";
       return worklist;
     }
-    errs()<<"FormalINSVFGNode for function: "<<in->getFun()->getName()<<"\n";
+    debug(Yes)<<"FormalINSVFGNode for function: "<<in->getFun()->getName()<<"\n";
   }
 
   forwardDp.insert(current);
   for(auto it = current->OutEdgeBegin(), end = current->OutEdgeEnd(); it != end; it++) {
-    errs()<<"Inserting outgoing child!\n";
+    debug(Yes)<<"Inserting outgoing child!\n";
     worklist.push_back((*it)->getDstNode());
   }
-  errs()<<"Returning with children of size "<<worklist.size()<<"\n";
+  debug(Yes)<<"Returning with children of size "<<worklist.size()<<"\n";
   return worklist;
 }
 
@@ -707,7 +711,7 @@ vector<SVFGNode*> AnnotateNew::forwardLimitedDfsLambda(SVFGNode *current, int de
   for(auto it = current->OutEdgeBegin(), end = current->OutEdgeEnd(); it != end; it++) {
     worklist.push_back((*it)->getDstNode());
   }
-  errs()<<"forwardLimitedDfsLambda with return size: "<<worklist.size()<<"\n";
+  debug(Yes)<<"forwardLimitedDfsLambda with return size: "<<worklist.size()<<"\n";
   return worklist;
 }
 
@@ -742,7 +746,7 @@ vector<SVFGNode*> backwardDfsLambdaDp(SVFGNode *current) {
 
     worklist.push_back((*it)->getSrcNode());
   }
-  errs() << "Node: " << current << " Size: " <<  worklist.size() << "\n";
+  debug(Yes) << "Node: " << current << " Size: " <<  worklist.size() << "\n";
   return worklist;
 }
 
@@ -751,7 +755,7 @@ vector<SVFGNode*> backwardDfsLambda(SVFGNode *current) {
   for(auto it = current->InEdgeBegin(), end = current->InEdgeEnd(); it != end; it++) {
     worklist.push_back((*it)->getSrcNode());
   }
-  errs() << "Node: " << current << " Size: " <<  worklist.size() << "\n";
+  debug(Yes) << "Node: " << current << " Size: " <<  worklist.size() << "\n";
   return worklist;
 }
 
@@ -768,7 +772,7 @@ vector<Value*> AnnotateNew::genericScalarDfs(Value *current) {
 
   for(auto &use: current->uses()) {
     auto user = use.getUser();
-    errs() << "User : " << *user << "\n";
+    debug(Yes) << "User : " << *user << "\n";
     worklist.push_back(user);
   }
   return worklist;
@@ -791,7 +795,7 @@ vector<Value*> AnnotateNew::genericScalarDfsBackward(Value *current) {
 bool supportedInst(Value *v) {
   if(dyn_cast<AllocaInst>(v) || dyn_cast<PHINode>(v) || dyn_cast<StoreInst>(v) || dyn_cast<LoadInst>(v) || dyn_cast<GetElementPtrInst>(v) || dyn_cast<BitCastInst>(v) || dyn_cast<GlobalValue>(v) || dyn_cast<SelectInst>(v) || dyn_cast<SwitchInst>(v) || dyn_cast<ReturnInst>(v) || dyn_cast<CmpInst>(v) || dyn_cast<BranchInst>(v) || dyn_cast<BinaryOperator>(v) || dyn_cast<CallInst>(v))
     return true;
-  errs() << "Unsupported inst :" << *v << "\n";
+  debug(Yes) << "Unsupported inst :" << *v << "\n";
   return false;
 }
 
@@ -815,7 +819,7 @@ struct dfsInfo {
  for(int i = 0; i < terminator->getNumSuccessors(); i++) {
  auto succ = terminator->getSuccessor(i);
  auto it = dfsData.find(succ);
- errs() << current << "-> " << succ << "\n";
+ debug(Yes) << current << "-> " << succ << "\n";
  if(it == dfsData.end()) {
  dfsData[succ] = new dfsInfo;
  dfsData[succ]->type = 't';
@@ -825,7 +829,7 @@ struct dfsInfo {
 //if(dfsData[current]->distance >= it->second->distance) {
 //it->second->parent = current;
 it->second->type = 'c';
-//errs() << "yeahh **********************";
+//debug(Yes) << "yeahh **********************";
 //}
 }
 }
@@ -852,7 +856,7 @@ PHINode* getLoopInductionVariable(Loop *L, ScalarEvolution *SE) {
     if (!AddRec || !AddRec->isAffine())
       continue;
     const SCEV *Step = AddRec->getStepRecurrence(*SE);
-    errs() << !isa<SCEVConstant>(Step) << "\n";
+    debug(Yes) << !isa<SCEVConstant>(Step) << "\n";
     if (!isa<SCEVConstant>(Step))
       continue;
     // Found the induction variable.
@@ -911,22 +915,22 @@ void AnnotateNew::getLoopBbs(Module *M) {
 
     for(auto it = LI.begin(), end = LI.end(); it != end; it++) {
       Loop *L = *it;
-      //errs() << *L->getHeader();
+      //debug(Yes) << *L->getHeader();
       getNestedLoops(L); 
       //getLoopInductionVariable(L, &SE); 
     }
 
     for(auto &L: loops) {
-      errs() << L->getHeader()->getName() << "\n";
+      debug(Yes) << L->getHeader()->getName() << "\n";
       for(auto BB: L->getBlocks()) {
         loopHeaders[BB] = LI.getLoopFor(BB)->getHeader(); //get header for inner most loop
-        //errs() << "Adding header: " << *L->getHeader() << "\n";
+        //debug(Yes) << "Adding header: " << *L->getHeader() << "\n";
       }
       i++;
     }
   }
 
-  errs() << "TOTAL LOOPS: " << i << "\n";
+  debug(Yes) << "TOTAL LOOPS: " << i << "\n";
 }
 
 void AnnotateNew::getLoopIterators(const BasicBlock *BB, set<const Value *> &trackedAllocas) {
@@ -948,21 +952,21 @@ void AnnotateNew::getLoopIterators(const BasicBlock *BB, set<const Value *> &tra
   ScalarEvolution SE(*F, *TLI, AC, *DT, LI);
   /*
      if(isAnnotated && !LoopUnroller::checkUnrollHint(L->getHeader(), LI, &M)) {
-     errs() << "Skipping unannotated loop \n";
+     debug(Yes) << "Skipping unannotated loop \n";
      continue;
      }
      */
-  //errs() << "LOOP INDUCTION VAR" << getLoopInductionVariable(L, &SE) << "\n";
+  //debug(Yes) << "LOOP INDUCTION VAR" << getLoopInductionVariable(L, &SE) << "\n";
   if(auto phi = getLoopInductionVariable(L, &SE)) {
     for(unsigned i = 0; i < phi->getNumIncomingValues(); i++) {
-      //errs() << *phi->getIncomingValue(i) << "\n";
+      //debug(Yes) << *phi->getIncomingValue(i) << "\n";
       set<Value *> possible;
       Value *current = phi->getIncomingValue(i);
 
       if(dyn_cast<Constant>(current))
         continue;
 
-      //errs() << "current processing: "<< *current << "\n";
+      //debug(Yes) << "current processing: "<< *current << "\n";
       if(!current->getType()->isPointerTy()) {
         set<Value *> processed;
         set<Value *> *vals = dfs_rec(current, genericScalarDfsBackward, isLoad, processed, &isLoadDp);
@@ -973,7 +977,7 @@ void AnnotateNew::getLoopIterators(const BasicBlock *BB, set<const Value *> &tra
       }
 
       for(auto &V: possible) {
-        errs() << "Loop: adding : " << *V << "\n";
+        debug(Yes) << "Loop: adding : " << *V << "\n";
         SVFGNode* svfgNode;
         if(V->getType()->isPointerTy())
           svfgNode = getSvfgNode(V);     
@@ -985,7 +989,7 @@ void AnnotateNew::getLoopIterators(const BasicBlock *BB, set<const Value *> &tra
   } else {
     for(auto BB: L->getBlocks())
       for(auto &I: *BB){
-        errs() << "loop value :" << I << "\n";
+        debug(Yes) << "loop value :" << I << "\n";
         classifyValAndOperands(&I, backwardPtr, slps, scalars); 
       }
   }
@@ -1008,7 +1012,7 @@ void AnnotateNew::getBranchAndArgcInstructions(set<BranchInst*> &branches, set<C
       for(auto &I: BB) {
 
         if(I.getMetadata("track_argc")) {
-          errs() <<"argc value :" << I << "\n";
+          debug(Yes) <<"argc value :" << I << "\n";
           argcValues.insert(&I);
         }
 
@@ -1031,7 +1035,7 @@ bool AnnotateNew::isLoad(Value *V) {
 void AnnotateNew::getTaintedBranches(set<BranchInst *> &trackedBranches, map<Value *, set<Value *> > &branchDp, set<const Value*>& trackedAllocas) {
 
   for(auto it = branchDp.begin(), end = branchDp.end(); it != end; it++) {
-    errs()<<"BRANCHDP exists!!!\n";
+    debug(Yes)<<"BRANCHDP exists!!!\n";
     Value *current = it->first;
     set<Value *> &values = it->second;
 
@@ -1062,7 +1066,7 @@ void AnnotateNew::getTaintedBranches(set<BranchInst *> &trackedBranches, map<Val
   if(found)
   break;
 
-  errs() << "Condition: " << *condition->getOperand(i)<< "\n";
+  debug(Yes) << "Condition: " << *condition->getOperand(i)<< "\n";
   User *condValue = dyn_cast<User>(condition->getOperand(i));
 
   if(!condValue)
@@ -1073,7 +1077,7 @@ void AnnotateNew::getTaintedBranches(set<BranchInst *> &trackedBranches, map<Val
   //if scalar, get loads. if pointer and supported by svfg, get allocas
   for(unsigned i = 0; i < condValue->getNumOperands(); i++) {
   Value *current = condValue->getOperand(i);
-  errs() << "Condition operand :" << *current << "\n";
+  debug(Yes) << "Condition operand :" << *current << "\n";
 
   if(!current->getType()->isPointerTy())
   dfs<Value*>(current, genericScalarDfsBackward, isLoad, possible);
@@ -1107,14 +1111,14 @@ void AnnotateNew::getTaintedBranches(set<BranchInst *> &trackedBranches, map<Val
 
   //track back to possible alloca
   for(auto value: possible) {
-  errs() << *value << "\n";
+  debug(Yes) << *value << "\n";
   const PAGNode* pagNode;
   //single level loads
   if(auto load = dyn_cast<LoadInst>(value))
   if(!value->getType()->isPointerTy())
   value = load->getPointerOperand();
 
-  errs() << *value << "\n";
+  debug(Yes) << *value << "\n";
   pagNode = pag->getPAGNode(pag->getValueNode(value));
   auto svfgNode = svfg->getDefSVFGNode(pagNode);
   dfs<SVFGNode*>((SVFGNode*) svfgNode, backwardDfsLambda, conditionLambda, poss); 
@@ -1123,7 +1127,7 @@ for(auto &a: poss)
   allocs.insert((Value*)dyn_cast<StmtSVFGNode>(a)->getInst()); 
 
   if(poss.size()) {
-    errs() << "Tracking branch : " << *branchInst << "\n"; 
+    debug(Yes) << "Tracking branch : " << *branchInst << "\n"; 
     found = true;
     trackedBranches.insert(branchInst);
     break;
@@ -1167,13 +1171,13 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
        }*/
     const Value *inst = NULL;
     if(auto temp = dyn_cast<InterPHISVFGNode>(node)) {
-      errs() << *temp->getRes()->getValue() << " phinode\n";
+      debug(Yes) << *temp->getRes()->getValue() << " phinode\n";
       inst = temp->getRes()->getValue();
-      errs()<<"\nPHINode inst: "<<*inst<<"\n";
+      debug(Yes)<<"\nPHINode inst: "<<*inst<<"\n";
       if(auto* ARG= dyn_cast<Argument>(inst)){
-        errs()<<"ArgParent: "<<ARG->getParent()->getName()<<"\n";
+        debug(Yes)<<"ArgParent: "<<ARG->getParent()->getName()<<"\n";
       }
-      //errs()<<"ParentFunc:"<<inst->getParent()->getParent()->getName()<<"\n";
+      //debug(Yes)<<"ParentFunc:"<<inst->getParent()->getParent()->getName()<<"\n";
       auto pagNode = pag->getPAGNode(pag->getValueNode(inst));
       auto svfgNode = svfg->getDefSVFGNode(pagNode);
       //return true;
@@ -1185,14 +1189,14 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
          LoadsOnSource[node]->insert(LI->getInst());
          }*/
       if(casted->getInst()) {
-        errs() << "Going forward on Instruction: " << *casted->getInst() << " in function " << casted->getInst()->getParent()->getParent()->getName() << "\n";
+        debug(Yes) << "Going forward on Instruction: " << *casted->getInst() << " in function " << casted->getInst()->getParent()->getParent()->getName() << "\n";
         inst = casted->getInst(); 
       }
     }
     if(inst) {
       if(auto point = dyn_cast<PointerType>(inst->getType())) {
         if(!point->getElementType()->isPointerTy()) { // Only a single level pointer
-          //errs() <<*point << " " << *inst<< "  ****************\n";
+          //debug(Yes) <<*point << " " << *inst<< "  ****************\n";
           if(slps.find(inst) == slps.end()) {
             singleLevelPointers.insert(inst);
             slps.insert(inst);
@@ -1206,16 +1210,16 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
           for(unsigned i = 0; i < call->getNumOperands(); i++) { 
             if(call->getOperand(i) == inst) {
               //return true;
-              errs() << "call found\n" << " " << *call << "\n";
+              debug(Yes) << "call found\n" << " " << *call << "\n";
               found = true;
             }
           }
           if(found) { // CallInst operand is inst to be used
-            errs()<<"call with found true: "<<*call<<"\n";
+            debug(Yes)<<"call with found true: "<<*call<<"\n";
             for(unsigned i = 0; i < call->getNumOperands(); i++) {
               if(!call->getOperand(i)->getType()->isPointerTy())
                 continue;
-              errs()<<"Adding to storeSet "<<*call->getOperand(i)<<"\n";
+              debug(Yes)<<"Adding to storeSet "<<*call->getOperand(i)<<"\n";
               auto *pagNode = pag->getPAGNode((pag->getValueNode(call->getOperand(i)))); // [Q] Tracking all pointer operands???
               storeSvfg.insert((SVFGNode*) svfg->getDefSVFGNode(pagNode)); //[Q] InterProceduralFlow limiting? (Within same function. Is it valid?
               //If original flow is considered then this should also?
@@ -1256,17 +1260,17 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
        }*/
     const Value *inst = NULL;
     if(auto temp = dyn_cast<InterPHISVFGNode>(node)) {
-      errs() << *temp->getRes()->getValue() << " phinode\n";
+      debug(Yes) << *temp->getRes()->getValue() << " phinode\n";
       inst = temp->getRes()->getValue();
-      errs()<<"\nPHINode inst: "<<*inst<<"\n";
+      debug(Yes)<<"\nPHINode inst: "<<*inst<<"\n";
       if(auto* ARG= dyn_cast<Argument>(inst)){
-        errs()<<"ArgParent: "<<ARG->getParent()->getName()<<"\n";
+        debug(Yes)<<"ArgParent: "<<ARG->getParent()->getName()<<"\n";
         if(depthFunctions.find(ARG->getParent()) == depthFunctions.end()){
-          errs()<<"ARG Parent not in depthFunctions, returning...\n";
+          debug(Yes)<<"ARG Parent not in depthFunctions, returning...\n";
           return false;
         }
       }
-      //errs()<<"ParentFunc:"<<inst->getParent()->getParent()->getName()<<"\n";
+      //debug(Yes)<<"ParentFunc:"<<inst->getParent()->getParent()->getName()<<"\n";
       auto pagNode = pag->getPAGNode(pag->getValueNode(inst));
       auto svfgNode = svfg->getDefSVFGNode(pagNode);
       //return true;
@@ -1278,7 +1282,7 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
          LoadsOnSource[node]->insert(LI->getInst());
          }*/
       if(casted->getInst()) {
-        //errs() << "Going forward on Instruction: " << *casted->getInst() << " in function " << casted->getInst()->getParent()->getParent()->getName() << "\n";
+        //debug(Yes) << "Going forward on Instruction: " << *casted->getInst() << " in function " << casted->getInst()->getParent()->getParent()->getName() << "\n";
         inst = casted->getInst(); 
       }
     }
@@ -1287,7 +1291,7 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
       if(auto* instruct = dyn_cast<Instruction>(inst)){
         auto* F = instruct->getParent()->getParent();
         if(F && depthFunctions.find(((Instruction*)inst)->getParent()->getParent()) == depthFunctions.end()){
-          errs()<<"[DepthFu] ARG Parent not in depthFunctions, returning...\n";
+          debug(Yes)<<"[DepthFu] ARG Parent not in depthFunctions, returning...\n";
           return false;
         }
 
@@ -1296,7 +1300,7 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
 
       if(auto point = dyn_cast<PointerType>(inst->getType())) {
         if(!point->getElementType()->isPointerTy()) { // Only a single level pointer
-          //errs() <<*point << " " << *inst<< "  ****************\n";
+          //debug(Yes) <<*point << " " << *inst<< "  ****************\n";
           if(slps.find(inst) == slps.end()) {
             singleLevelPointers.insert(inst);
             slps.insert(inst);
@@ -1310,16 +1314,16 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
           for(unsigned i = 0; i < call->getNumOperands(); i++) { 
             if(call->getOperand(i) == inst) {
               //return true;
-              errs() << "call found\n" << " " << *call << "\n";
+              debug(Yes) << "call found\n" << " " << *call << "\n";
               found = true;
             }
           }
           if(found) { // CallInst operand is inst to be used
-            errs()<<"call with found true: "<<*call<<"\n";
+            debug(Yes)<<"call with found true: "<<*call<<"\n";
             for(unsigned i = 0; i < call->getNumOperands(); i++) {
               if(!call->getOperand(i)->getType()->isPointerTy())
                 continue;
-              errs()<<"Adding to storeSet "<<*call->getOperand(i)<<"\n";
+              debug(Yes)<<"Adding to storeSet "<<*call->getOperand(i)<<"\n";
               auto *pagNode = pag->getPAGNode((pag->getValueNode(call->getOperand(i)))); // [Q] Tracking all pointer operands???
               storeSvfg.insert((SVFGNode*) svfg->getDefSVFGNode(pagNode)); //[Q] InterProceduralFlow limiting? (Within same function. Is it valid?
               //If original flow is considered then this should also?
@@ -1359,14 +1363,14 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
   set<SVFGNode *> visited;
   set<SVFGNode *> * data;
   if(isLimitedDepth){
-    errs()<<"[LIMITED CHECK]"<<"\n";
+    debug(Yes)<<"[LIMITED CHECK]"<<"\n";
     data = dfs_rec_limit((SVFGNode*)current, forwardLimitedDfsLambda, forwardDfsCondition, visited,depthLimit+1, NULL, true);
     //data = dfs_rec((SVFGNode*)current, forwardDfsLambdaLimited, forwardLimitedDfsCondition, visited, NULL, true);
 
   } else {
     data = dfs_rec((SVFGNode*)current, forwardDfsLambda, forwardDfsCondition, visited, NULL, true);
   }
-  errs()<<"FINISHED FORWARD DFS\n";
+  debug(Yes)<<"FINISHED FORWARD DFS\n";
 
 
   for(auto &node: *data) {
@@ -1395,27 +1399,27 @@ void AnnotateNew::getSourceAllocas(set<SVFGNode*> &svfgNodes, vector<const SVFGN
       auto pagEdge = casted->getPAGEdge();
       if(pagEdge->getInst()) {
 
-        //errs() << "In backward " << *pagEdge->getInst() << "\n";
+        //debug(Yes) << "In backward " << *pagEdge->getInst() << "\n";
         auto I = pagEdge->getInst();
         string fname = "";
 
         if(dyn_cast<ReturnInst>(I)) {
           Function *parent = (Function *) I->getParent()->getParent(); 
           parent->addFnAttr("track_func", "true");
-          errs() << "track_func added to function " << parent->getName() << "\n";
+          debug(Yes) << "track_func added to function " << parent->getName() << "\n";
         }
 
         if(I->getParent() && I->getParent()->getParent())
           fname = I->getParent()->getParent()->getName();
 
-        errs() << "Going backward on : " << *pagEdge->getInst() << " Node: " << node  << " Function: " << fname << "\n";
+        debug(Yes) << "Going backward on : " << *pagEdge->getInst() << " Node: " << node  << " Function: " << fname << "\n";
         if(dyn_cast<AllocaInst>(pagEdge->getInst()))
           return true;
 
         for(unsigned i = 0; i < I->getNumOperands(); i++) {
           GlobalValue* global = dyn_cast<GlobalVariable>(I->getOperand(i));
           if(global || (global = pointsToGlobal(dyn_cast<User>(I->getOperand(i))))) {
-            errs() << "GLOBAL: " << *global << dyn_cast<StmtSVFGNode>(getSvfgNode(global)) << "\n";
+            debug(Yes) << "GLOBAL: " << *global << dyn_cast<StmtSVFGNode>(getSvfgNode(global)) << "\n";
             worklistSvfg.push_back(getSvfgNode(global));
             trackedAllocas.insert(global); // hackish
           }
@@ -1432,13 +1436,13 @@ void AnnotateNew::getSourceAllocas(set<SVFGNode*> &svfgNodes, vector<const SVFGN
 
         if(auto call = dyn_cast<CallInst>(pagEdge->getInst())) {
           if (call->getCalledFunction()->getName() == "malloc" || call->getCalledFunction()->getName() == "calloc" || call->getCalledFunction()->isDeclaration()) {
-            errs() << "is external call " << *call->getCalledFunction() << "\n";
+            debug(Yes) << "is external call " << *call->getCalledFunction() << "\n";
             return true;
           }
         }
       }
     } else if(dyn_cast<MRSVFGNode>(node)) {
-      errs() << "TESTINGGG";
+      debug(Yes) << "TESTINGGG";
     }
     return false;
   };
@@ -1450,22 +1454,22 @@ void AnnotateNew::getSourceAllocas(set<SVFGNode*> &svfgNodes, vector<const SVFGN
     set<SVFGNode*>* data = NULL;
     set<SVFGNode*> visited;
     if(temp->getInst()) {
-      errs() << "Backward dp size:" << backwardDp.size() << "\n";
+      debug(Yes) << "Backward dp size:" << backwardDp.size() << "\n";
       if(dpMem)
         data = dfs_rec(*it, backwardDfsLambdaDp, backwardDfsCondition, visited, &backwardDp, trackLoops);
       else
         data = dfs_rec(*it, backwardDfsLambda, backwardDfsCondition, visited, &backwardDp, trackLoops);
-      errs() << "Data: " << data << "\n";
+      debug(Yes) << "Data: " << data << "\n";
     }
 
     if(!data)
       continue;
 
-    errs() << data->size() << "size\n";
+    debug(Yes) << data->size() << "size\n";
     for(auto val: *data) { 
       Instruction *current = (Instruction*)dyn_cast<StmtSVFGNode>(val)->getPAGEdge()->getInst(); 
-      errs() << *current << " here\n"; 
-      //errs() << "ALLOCAAA : " << *current << "\n";
+      debug(Yes) << *current << " here\n"; 
+      //debug(Yes) << "ALLOCAAA : " << *current << "\n";
       if(auto global = pointsToGlobal(dyn_cast<User>(current))) {
         trackedAllocas.insert(global);
         worklistSvfg.push_back(getSvfgNode(global));
@@ -1490,7 +1494,7 @@ void AnnotateNew::getScalarStores(Value *scalar, set<Value*>& stores) {
   worklist.push_back(scalar);
   //traverse use chain of load and get any getElementPtr or stores
   assert(!scalar->getType()->isPointerTy());
-  errs() << *scalar << " getting uses of scalar \n";
+  debug(Yes) << *scalar << " getting uses of scalar \n";
   static set<Value*> processed;
   while(worklist.size()) {
     Value *current = worklist.back();
@@ -1502,13 +1506,13 @@ void AnnotateNew::getScalarStores(Value *scalar, set<Value*>& stores) {
     if(dyn_cast<Constant>(current)) {
       continue;
     }
-    //errs() << "Use: " << *current << "\n";
+    //debug(Yes) << "Use: " << *current << "\n";
     for(auto &use: current->uses()) {
       auto user = use.getUser();
-      //errs() << "User: " << *user << "\n";
-      //errs() << 
+      //debug(Yes) << "User: " << *user << "\n";
+      //debug(Yes) << 
       if(isMemTransfer(user)) {
-        errs() << "STOREEEE: " << *user << "\n";
+        debug(Yes) << "STOREEEE: " << *user << "\n";
         stores.insert(user);
       }
 
@@ -1532,7 +1536,7 @@ void trackIfMemory(const SVFGNode* current, set<const Value*> &trackedAllocas) {
     if(casted->getInst()) {
       auto inst = casted->getInst();
       //TODO remove this debug statement
-      //errs() << "Going forward on Instruction : " << *inst << " in function " <<  inst->getParent()->getParent()->getName() << "\n";
+      //debug(Yes) << "Going forward on Instruction : " << *inst << " in function " <<  inst->getParent()->getParent()->getName() << "\n";
 
       if(dyn_cast<AllocaInst>(casted->getInst()) || dyn_cast<GlobalValue>(casted->getInst()))
         trackedAllocas.insert(casted->getInst());
@@ -1542,7 +1546,7 @@ void trackIfMemory(const SVFGNode* current, set<const Value*> &trackedAllocas) {
           trackedAllocas.insert(temp);
     }
   } else {
-    errs()<<"TrackIfMemory: source node is not stmt\n";
+    debug(Yes)<<"TrackIfMemory: source node is not stmt\n";
 
   }
 }
@@ -1550,32 +1554,32 @@ void trackIfMemory(const SVFGNode* current, set<const Value*> &trackedAllocas) {
 /*
    SVFGNode *AnnotateNew::getSvfgNode(Value *V) {
    const Value* Vconst = (const Value*) V;
-   errs()<<"Normval (Casted to const) Value: "<<*Vconst<<"\n";
+   debug(Yes)<<"Normval (Casted to const) Value: "<<*Vconst<<"\n";
    auto valNode = pag->getValueNode(Vconst);
-   errs()<<"ValNode: "<<valNode<<"\n";
+   debug(Yes)<<"ValNode: "<<valNode<<"\n";
    if(!pag->findPAGNode(pag->getValueNode(Vconst))){
-   errs()<<*Vconst<<" has no PAGNode...\n";
+   debug(Yes)<<*Vconst<<" has no PAGNode...\n";
    return NULL;
    } else {
-   errs()<<"PAG has a PAGNode for "<<*Vconst<<"\n";
+   debug(Yes)<<"PAG has a PAGNode for "<<*Vconst<<"\n";
    }
 
    auto pagNode = pag->getPAGNode(pag->getValueNode(Vconst));
    if(!svfg->hasSVFGNode(pag->getValueNode(Vconst))){
-   errs()<<"SVFG has no def for PAGNode of Value: "<<*Vconst<<"\n";
+   debug(Yes)<<"SVFG has no def for PAGNode of Value: "<<*Vconst<<"\n";
    return NULL;
    } else {
-   errs()<<"HAS SVFGNODE .. \n";
+   debug(Yes)<<"HAS SVFGNODE .. \n";
    }
-   errs()<<"getSvfg returning for "<<*Vconst<<" with pagNode "<<pagNode<<"\n";
+   debug(Yes)<<"getSvfg returning for "<<*Vconst<<" with pagNode "<<pagNode<<"\n";
    return (SVFGNode*)svfg->getDefSVFGNode(pagNode);
    }
    */
 
 SVFGNode *AnnotateNew::getSvfgNode(const Value *V) {
-  errs()<<"Const Value: "<<*V<<"\n";
+  debug(Yes)<<"Const Value: "<<*V<<"\n";
   auto valNode = pag->getValueNode(V);
-  errs()<<"ValNode: "<<valNode<<"\n";
+  debug(Yes)<<"ValNode: "<<valNode<<"\n";
 
   auto pagNode = pag->getPAGNode(pag->getValueNode(V));
   return (SVFGNode*)svfg->getDefSVFGNode(pagNode);
@@ -1586,22 +1590,22 @@ void AnnotateNew::getStoreSvfg(set<Value*> &stores, set<SVFGNode*> &storeSvfg) {
   for(auto &value: stores) {
     if(!isMemTransfer(value))
       assert("Must be a memory transfer value" && false);
-    //errs() << "in store svfg: " << *value << "    - >  "  << *dyn_cast<User>(value)->getOperand(1) << "\n";
+    //debug(Yes) << "in store svfg: " << *value << "    - >  "  << *dyn_cast<User>(value)->getOperand(1) << "\n";
 
     Value *val = dyn_cast<User>(value)->getOperand(1);
 
     val = val->stripPointerCasts();
 
-    //errs() << "stripping : " << *val << "\n";
+    //debug(Yes) << "stripping : " << *val << "\n";
     storeSvfg.insert(getSvfgNode(val));
-    //errs() << *dyn_cast<User>(value)->getOperand(1) <<"\n";
+    //debug(Yes) << *dyn_cast<User>(value)->getOperand(1) <<"\n";
   }
 }
 
 void getBbsTillJoin(BasicBlock *join, set<BasicBlock*>& markedBBs, BranchInst *I) {
   for(int i = 0; i < I->getNumSuccessors(); i++) {
-    //errs() << "In successor " << i << "\n";
-    //errs() << I->getSuccessor(i) << "\n";
+    //debug(Yes) << "In successor " << i << "\n";
+    //debug(Yes) << I->getSuccessor(i) << "\n";
     bool found = false; 
     //do dfs until found the join node, and get all BBs in the path
     auto lambdaCondition = [&](BasicBlock *temp) {
@@ -1639,7 +1643,7 @@ void AnnotateNew::getLoadsOnSlps(Value* pointer, set<Value*> &singleLevelLoads) 
   };
 
   if(processed.find(pointer) != processed.end()) {
-    errs() << "Already processed: " << *pointer << "\n";
+    debug(Yes) << "Already processed: " << *pointer << "\n";
     return;
   }
 
@@ -1652,7 +1656,7 @@ void AnnotateNew::getLoadsOnSlps(Value* pointer, set<Value*> &singleLevelLoads) 
 }
 
 void AnnotateNew::classifyVal(Value *value, set<SVFGNode*>& backwardPtr, set<const Value *> &singleLevelPointers, set<Value*>& scalar) {
-  //errs() << "Classifying :" << *value << "\n";
+  //debug(Yes) << "Classifying :" << *value << "\n";
   if(value->getType()->isPointerTy() && supportedInst(value)) {
     auto pagNode = pag->getPAGNode(pag->getValueNode(value));
     auto svfgNode = svfg->getDefSVFGNode(pagNode);
@@ -1666,13 +1670,13 @@ void AnnotateNew::classifyVal(Value *value, set<SVFGNode*>& backwardPtr, set<con
     //get any stores later on these scalars 
     scalar.insert(value);
   } else {
-    errs() << "Unable to classify " << *value << "\n";
+    debug(Yes) << "Unable to classify " << *value << "\n";
   }
 }
 
 void AnnotateNew::getBranchMemory(set<BranchInst *> &allBranches, map<Value *, set<Value *> > &dp, set<BranchInst*>& argcBranches) {
 
-  errs() << "Total Branches = " << allBranches.size() << "\n";
+  debug(Yes) << "Total Branches = " << allBranches.size() << "\n";
   int i = 0;
   for(auto branchInst: allBranches) {
     if(branchInst->isUnconditional())
@@ -1688,8 +1692,8 @@ void AnnotateNew::getBranchMemory(set<BranchInst *> &allBranches, map<Value *, s
 
     //argc values are marked by specialize arguments before specializing
     //check if branch depends on argc
-    //errs() << "Processing branch: " << *branchInst << "\n"; 
-    errs() << "Processing branch :" << i << "\n"; 
+    //debug(Yes) << "Processing branch: " << *branchInst << "\n"; 
+    debug(Yes) << "Processing branch :" << i << "\n"; 
     i++;
 
     set<const Value *> allocs;
@@ -1699,7 +1703,7 @@ void AnnotateNew::getBranchMemory(set<BranchInst *> &allBranches, map<Value *, s
       //if(found)
       //break;
 
-      //errs() << "Condition: " << *condition<< "\n";
+      //debug(Yes) << "Condition: " << *condition<< "\n";
       Value *current = condition->getOperand(i);
 
       //if(!condValue)
@@ -1729,7 +1733,7 @@ void AnnotateNew::getBranchMemory(set<BranchInst *> &allBranches, map<Value *, s
       //if scalar, get loads. if pointer and supported by svfg, get allocas
       //for(unsigned i = 0; i < condValue->getNumOperands(); i++) {
       //Value *current = condValue->getOperand(i);
-      //errs() << "Condition operand :" << *current << "\n";
+      //debug(Yes) << "Condition operand :" << *current << "\n";
 
       if(!current->getType()->isPointerTy()) {
         set<Value *> visited;
@@ -1760,7 +1764,7 @@ void AnnotateNew::getBranchMemory(set<BranchInst *> &allBranches, map<Value *, s
          auto conditionLambda = [&](SVFGNode *node) {
          if(auto temp = dyn_cast<StmtSVFGNode>(node)) {
          if(auto inst = temp->getInst()) {
-      //errs() << "CONDITION LAMBDA: " << *inst << "\n";
+      //debug(Yes) << "CONDITION LAMBDA: " << *inst << "\n";
       if(dyn_cast<AllocaInst>(inst))
       return true;
 
@@ -1791,7 +1795,7 @@ void AnnotateNew::getBranchMemory(set<BranchInst *> &allBranches, map<Value *, s
           if(!value->getType()->isPointerTy())
             value = load->getPointerOperand();
 
-        //errs() << *value << "\n";
+        //debug(Yes) << *value << "\n";
         pagNode = pag->getPAGNode(pag->getValueNode(value));
         auto svfgNode = svfg->getDefSVFGNode(pagNode);
         svfgNodes.insert((SVFGNode*)svfgNode);
@@ -1803,7 +1807,7 @@ void AnnotateNew::getBranchMemory(set<BranchInst *> &allBranches, map<Value *, s
       //set<SVFGNode*> *poss = dfs_rec<SVFGNode*>((SVFGNode*) svfgNode, backwardDfsLambda, conditionLambda, visited);  
       /*
          if(poss.size()) {
-         errs() << "Tracking branch : " << *branchInst << "\n"; 
+         debug(Yes) << "Tracking branch : " << *branchInst << "\n"; 
          found = true;
          trackedBranches.insert(branchInst);
          break;
@@ -1814,7 +1818,7 @@ void AnnotateNew::getBranchMemory(set<BranchInst *> &allBranches, map<Value *, s
     for(auto &a: worklistSvfg)
       if(auto temp = dyn_cast<StmtSVFGNode>(a)) {
         if(temp->getInst()) {
-          errs() << "Inserting branch: " << *temp->getInst() << "\n";
+          debug(Yes) << "Inserting branch: " << *temp->getInst() << "\n";
           allocs.insert((Value*)dyn_cast<StmtSVFGNode>(a)->getInst());
         }
       }
@@ -1838,15 +1842,15 @@ void printAllAllocsMallocs(Module &M) {
     }
   }
 
-  errs()<<"asd size allocs "<<asd.size()<<"\n";
+  debug(Yes)<<"asd size allocs "<<asd.size()<<"\n";
   for(auto it = M.global_object_begin(), end = M.global_object_end(); it != end; it++)
     if(!dyn_cast<Function>(&*it))
       asd.insert(&*it);
 
-  errs()<<"asd size total "<<asd.size()<<"\n";
-  errs() << "Size : " << asd.size() << "\n";
+  debug(Yes)<<"asd size total "<<asd.size()<<"\n";
+  debug(Yes) << "Size : " << asd.size() << "\n";
   for(auto &I: asd) {
-    errs() << *I << "\n";
+    debug(Yes) << *I << "\n";
   }
 }
 
@@ -1882,12 +1886,12 @@ void AnnotateNew::getTrackedBranchBBs(BranchInst *I, set<BasicBlock *> &markedBB
   }
 
   if(!join) {
-    errs() << "Could not find join for branch " << *I << " in BB : " << *I->getParent() << "\n";
+    debug(Yes) << "Could not find join for branch " << *I << " in BB : " << *I->getParent() << "\n";
     //assert(false); //FIXME
     return;
   }
 
-  errs() << "Join found for branch: " << *I << "\n";
+  debug(Yes) << "Join found for branch: " << *I << "\n";
 
   for(auto it = join->begin(); dyn_cast<PHINode>(&*it); it++)
     phis.insert(dyn_cast<PHINode>(&*it));
@@ -1958,7 +1962,7 @@ void AnnotateNew::run(vector<Value*> sources, Value *argc, set<const Value*> &tr
     for(auto &I: argcValues) {
       set<Value*> stores;
       set<SVFGNode*> storeSvfg;
-      errs() << *I << "\n";
+      debug(Yes) << *I << "\n";
       if(dyn_cast<StoreInst>(I)) {
         worklistSvfg.push_back(getSvfgNode(dyn_cast<User>(I)->getOperand(1)));
       } else if (I->getType()->isPointerTy()) {
@@ -1987,10 +1991,10 @@ void AnnotateNew::run(vector<Value*> sources, Value *argc, set<const Value*> &tr
       if(processed.find(current) != processed.end())
         continue;
 
-      errs() << "PROCESSING " << current << " Size: " << worklistSvfg.size() ;
+      debug(Yes) << "PROCESSING " << current << " Size: " << worklistSvfg.size() ;
       if(auto temp = dyn_cast<StmtSVFGNode>(current)) {
         if(temp->getInst()) {
-          errs() << *temp->getInst();
+          debug(Yes) << *temp->getInst();
           currentValue = (Value *) temp->getInst();
         } else {
           auto srcNode = temp->getPAGSrcNode();
@@ -1999,17 +2003,17 @@ void AnnotateNew::run(vector<Value*> sources, Value *argc, set<const Value*> &tr
             if(t)
               currentValue = (Value *)t;
             else 
-              errs()<<"Source has no value associated with it...\n";
+              debug(Yes)<<"Source has no value associated with it...\n";
           }
         }
       } else {
-        errs()<<"CURRENT IS NOT A STMT NODE...\n";
+        debug(Yes)<<"CURRENT IS NOT A STMT NODE...\n";
       }
       if(current != NULL){
         valToNode[currentValue] = current;
       }
 
-      errs() << "\n";
+      debug(Yes) << "\n";
 
       trackIfMemory(current, trackedAllocas);
 
@@ -2030,7 +2034,7 @@ void AnnotateNew::run(vector<Value*> sources, Value *argc, set<const Value*> &tr
       }
       getSourceAllocas(storeSvfg,worklistSvfg, trackedAllocas);
     }
-    errs()<<"WorkList has ended...\n";
+    debug(Yes)<<"WorkList has ended...\n";
 
 
     //get all branch instructions touching tainted data
@@ -2039,16 +2043,16 @@ void AnnotateNew::run(vector<Value*> sources, Value *argc, set<const Value*> &tr
 
     //TODO this runs only for the first iteration really. Hacky. fix this
     if(argcBranches.size()) {
-      errs()<<"HACKY argcBranches executes\n";
+      debug(Yes)<<"HACKY argcBranches executes\n";
       trackedBranches.insert(argcBranches.begin(), argcBranches.end());
       argcBranches.clear();
     }
 
-    errs() << "Tracked Branches size: " << trackedBranches.size() << "\n";
+    debug(Yes) << "Tracked Branches size: " << trackedBranches.size() << "\n";
     if(!trackedBranches.size())
       break;
     else 
-      errs()<<"Tracked branches non-empty...\n";
+      debug(Yes)<<"Tracked branches non-empty...\n";
 
     for(auto branch: trackedBranches) {
       branchDp.erase(branch);
@@ -2077,16 +2081,16 @@ void AnnotateNew::run(vector<Value*> sources, Value *argc, set<const Value*> &tr
       set<const Value *> slps;
 
       for(auto &phi: phis) {
-        errs() << "PHI " << *phi << "\n";
+        debug(Yes) << "PHI " << *phi << "\n";
         classifyVal(phi, backwardPtr, slps, scalars);
         for(unsigned i = 0; i < phi->getNumIncomingValues(); i++) {
           Value *value = phi->getIncomingValue(i);
-          errs() << "PHI " << *value << "\n";
+          debug(Yes) << "PHI " << *value << "\n";
           classifyVal(value, backwardPtr, slps, scalars);
         }
       }
 
-      errs() << "Scalar size : " << scalars.size() << "\n";
+      debug(Yes) << "Scalar size : " << scalars.size() << "\n";
       for(auto &BB: markedBBs) {
         for(auto &I: *BB) {
           //handle pointers
@@ -2098,7 +2102,7 @@ void AnnotateNew::run(vector<Value*> sources, Value *argc, set<const Value*> &tr
           } else {
             classifyValAndOperands(&I, backwardPtr, slps, scalars); 
           }
-          errs() << "In branch : " << I << "\n";
+          debug(Yes) << "In branch : " << I << "\n";
         }
       }
       //getSourceAllocas(backwardPtr, worklistSvfg, trackedAllocas);
@@ -2118,13 +2122,13 @@ void AnnotateNew::run(vector<Value*> sources, Value *argc, set<const Value*> &tr
     } 
   }
 
-  errs() << "Printing loops " << "\n";
+  debug(Yes) << "Printing loops " << "\n";
 
   set<const BasicBlock *> processedLoops;
   Function *loopFunc = insertLoopFuncAnnot(module, "unroll_loop");
-  errs()<<"markedLoops size: "<<markedLoops.size()<<"\n";
+  debug(Yes)<<"markedLoops size: "<<markedLoops.size()<<"\n";
   for(auto &BB: markedLoops) {
-    errs() << BB->getName() << "\n";
+    debug(Yes) << BB->getName() << "\n";
     if(processedLoops.find(BB) != processedLoops.end())
       continue;
 
@@ -2134,7 +2138,7 @@ void AnnotateNew::run(vector<Value*> sources, Value *argc, set<const Value*> &tr
     //annotateLoop(BB, loopFunc);
   }
 
-  errs() << "MARKED LOOPS: " << markedLoops.size() << "\n";
+  debug(Yes) << "MARKED LOOPS: " << markedLoops.size() << "\n";
   for(auto &BB: markedLoops) {
     annotateLoop(BB, loopFunc, LOOP_ID);
     LOOP_ID++;
@@ -2172,6 +2176,7 @@ double statFormula(Stat *a) {
  */
 bool AnnotateNew::runOnModule(Module &M) {
   auto started = std::chrono::high_resolution_clock::now();
+  initDebugLevel();
   AndersenWaveDiff* ander = AndersenWaveDiff::createAndersenWaveDiff(M);
   SVFGBuilder builder;
 
@@ -2186,9 +2191,9 @@ bool AnnotateNew::runOnModule(Module &M) {
   globPag = pag;
   globSvfg = svfg;
 
-  errs()<<"[ARGS]\n";
-  errs()<<"isLimitedDepth: "<<isLimitedDepth<<"\n";
-  errs()<<"depthLimit: "<<depthLimit<<"\n";
+  debug(Yes)<<"[ARGS]\n";
+  debug(Yes)<<"isLimitedDepth: "<<isLimitedDepth<<"\n";
+  debug(Yes)<<"depthLimit: "<<depthLimit<<"\n";
 
   //printAllAllocsMallocs(M);
 
@@ -2215,7 +2220,7 @@ bool AnnotateNew::runOnModule(Module &M) {
   }
   /*
   if(!(argv = getArgv(argvName,M))) {
-    errs() << "Argv not found \n";
+    debug(Yes) << "Argv not found \n";
     return false;
   }*/
 
@@ -2232,28 +2237,28 @@ bool AnnotateNew::runOnModule(Module &M) {
     const Function* mainFunc = M.getFunction("main");
     depthFunctions.insert(mainFunc);
     setDepthFunctions(depthLimit, depthFunctions ,mainFunc);
-    errs()<<"CallGraph functions considered: "<<depthFunctions.size()<<"\n";
+    debug(Yes)<<"CallGraph functions considered: "<<depthFunctions.size()<<"\n";
   }
 
   run(sources, argc, trackedAllocas); 
 
-  errs() << "Printing stats: " << "\n";
+  debug(Yes) << "Printing stats: " << "\n";
   vector<Stat *> statValues;
 
   vector<Value *> sortedLoads;
   vector<Value *> MemCpy;
 
-  errs()<<"statMapSize: "<<statMap.size()<<"\n";
+  debug(Yes)<<"statMapSize: "<<statMap.size()<<"\n";
   for(auto &kv: statMap) {
-    errs()<<"StatMap iter...\n";
+    debug(Yes)<<"StatMap iter...\n";
     Stat *stat = &kv.second;
-    errs()<<"kv.first: "<<*kv.first<<"\n";
+    debug(Yes)<<"kv.first: "<<*kv.first<<"\n";
 
     if(isLoadsLimited){
-      errs()<<"Performing instrinisc check...\n";
+      debug(Yes)<<"Performing instrinisc check...\n";
 
       if(!isa<IntrinsicInst>(kv.first)){   //!isa<MemCpyInst>(kv.first)){
-        errs()<<"Not instrinsic inst: "<<*kv.first<<"\n";
+        debug(Yes)<<"Not instrinsic inst: "<<*kv.first<<"\n";
 
 
         const SVFGNode* srcNode = valToNode[kv.first]; //getSvfgNode(kv.first);
@@ -2267,7 +2272,7 @@ bool AnnotateNew::runOnModule(Module &M) {
           sortedLoads.push_back(kv.first);
         }
       } else {
-        errs()<<"MemCpyInst :" <<*kv.first<<"\n";
+        debug(Yes)<<"MemCpyInst :" <<*kv.first<<"\n";
         MemCpy.push_back(kv.first);
       }
       }
@@ -2275,22 +2280,22 @@ bool AnnotateNew::runOnModule(Module &M) {
       string name = "";
       if(auto inst = dyn_cast<Instruction>(kv.first))
         name = inst->getParent()->getParent()->getName();
-      errs() << "Current Value: " << *kv.first << " in function " << name << "\n";
-      errs() << "Printing loads for value" << *kv.first << ". Size: " << stat->loads.size() << "\n";
+      debug(Yes) << "Current Value: " << *kv.first << " in function " << name << "\n";
+      debug(Yes) << "Printing loads for value" << *kv.first << ". Size: " << stat->loads.size() << "\n";
       for(auto &val: stat->loads) {
-        errs() << "           Value: " << *val << " in Function: " << dyn_cast<Instruction>(val)->getParent()->getParent()->getName() << "\n"; 
+        debug(Yes) << "           Value: " << *val << " in Function: " << dyn_cast<Instruction>(val)->getParent()->getParent()->getName() << "\n"; 
       }
 
-      errs() << "Printing stores for value" << *kv.first << ". Size: " << stat->stores.size() << "\n";
+      debug(Yes) << "Printing stores for value" << *kv.first << ". Size: " << stat->stores.size() << "\n";
       for(auto &val: stat->stores) {
-        errs() << "           Value: " << *val << " in Function: " << dyn_cast<Instruction>(val)->getParent()->getParent()->getName() << "\n"; 
+        debug(Yes) << "           Value: " << *val << " in Function: " << dyn_cast<Instruction>(val)->getParent()->getParent()->getName() << "\n"; 
       }
 
-      errs() << "Printing branches for value" << *kv.first << ". Size: " << stat->branches.size() << "\n";
+      debug(Yes) << "Printing branches for value" << *kv.first << ". Size: " << stat->branches.size() << "\n";
       for(auto &val: stat->branches)
-        errs() << "           Value: " << *val << " in Function: " << dyn_cast<Instruction>(val)->getParent()->getParent()->getName() << "\n"; 
+        debug(Yes) << "           Value: " << *val << " in Function: " << dyn_cast<Instruction>(val)->getParent()->getParent()->getName() << "\n"; 
       statValues.push_back(stat);
-      errs()<<"Inserted "<<*kv.first<< "into statValues\n";
+      debug(Yes)<<"Inserted "<<*kv.first<< "into statValues\n";
     }
 
 
@@ -2305,13 +2310,13 @@ bool AnnotateNew::runOnModule(Module &M) {
 
     unsigned global_count = 0;
 
-    errs() << "SIZE" << trackedAllocas.size() << "\n";
-    errs() << "Sorted Values" << "\n";
+    debug(Yes) << "SIZE" << trackedAllocas.size() << "\n";
+    debug(Yes) << "Sorted Values" << "\n";
     if (!isLoadsLimited) {
       for(int i = statValues.size() - 1; i >= 0; i--) { 
-        errs() << *statValues[i]->value << " with value: " << (int) statFormula(statValues[i]) << "\n"; 
+        debug(Yes) << *statValues[i]->value << " with value: " << (int) statFormula(statValues[i]) << "\n"; 
         Value *I = statValues[i]->value;
-        errs()<<"Is value in tracked allocas? : "<<(trackedAllocas.find((const Value*) statValues[i]->value) != trackedAllocas.end())<<"\n";
+        debug(Yes)<<"Is value in tracked allocas? : "<<(trackedAllocas.find((const Value*) statValues[i]->value) != trackedAllocas.end())<<"\n";
         unsigned num = (statValues.size() - 1) - i + 1;
         LLVMContext &C = I->getContext();
         MDNode *N = MDNode::get(C, ConstantAsMetadata::get(ConstantInt::get(Type::getInt64Ty(C), num))); 
@@ -2319,13 +2324,13 @@ bool AnnotateNew::runOnModule(Module &M) {
           ((Instruction*)I)->setMetadata("track", N);
         else {
           ((GlobalObject*)I)->setMetadata("track", N);
-          errs()<< "statGlob: "<< *((GlobalObject*)I)<<"\n";
+          debug(Yes)<< "statGlob: "<< *((GlobalObject*)I)<<"\n";
           global_count++;
         }
       } 
     } else {
       int topNValue = (loadPercent/100.0) * sortedLoads.size();
-      errs()<<"Considering only top "<<topNValue<<" values + memcpy insts # "<<MemCpy.size() <<"\n";
+      debug(Yes)<<"Considering only top "<<topNValue<<" values + memcpy insts # "<<MemCpy.size() <<"\n";
 
       unsigned remaining = topNValue;
 
@@ -2345,12 +2350,12 @@ bool AnnotateNew::runOnModule(Module &M) {
           ((GlobalObject*)I)->setMetadata("track", N);
         }
       }
-      errs()<<"==================\nMemCpy Tracking\n ";
+      debug(Yes)<<"==================\nMemCpy Tracking\n ";
 
       for(auto it = MemCpy.begin(); it != MemCpy.end(); it++){
         Value* I = *it;
 
-        errs()<<"[TRACKING] "<< *I<<" "<<"NA"<<"\n";
+        debug(Yes)<<"[TRACKING] "<< *I<<" "<<"NA"<<"\n";
         unsigned num = (topNValue - 1);
         LLVMContext &C = I->getContext();
         MDNode *N = MDNode::get(C, ConstantAsMetadata::get(ConstantInt::get(Type::getInt64Ty(C), num))); 
@@ -2367,7 +2372,7 @@ bool AnnotateNew::runOnModule(Module &M) {
 
 
 
-    errs()<<"Total Tracked Variables: "<<totalTracked<<"\n";
+    debug(Yes)<<"Total Tracked Variables: "<<totalTracked<<"\n";
 
 
 
@@ -2379,14 +2384,14 @@ bool AnnotateNew::runOnModule(Module &M) {
 
 
 
-    errs()<<"TRACKED ALLOCAS SIZE : "<<trackedAllocas.size()<<"\n";
+    debug(Yes)<<"TRACKED ALLOCAS SIZE : "<<trackedAllocas.size()<<"\n";
     
-    errs()<<"\n===== Stats =====\n";
-    errs()<<"# Number of Config Variables being tracked: "<<statValues.size()<<"\n";
-    errs()<<"# Tracked number size: "<<totalTracked<<"\n";//trackedAllocas.size()<<"\n";
-    errs()<<"# Total Nodes in PAG: "<<pag->getPAGNodeNum()<<"\n";
-    errs()<<"# Total StmtNodes (PAGEdge): "<<pag->getPAGEdgeNum()<<"\n";
-    errs()<<"# Total Globals: "<<0<<"\n";//trackedGlobals<<"\n";
+    debug(Yes)<<"\n===== Stats =====\n";
+    debug(Yes)<<"# Number of Config Variables being tracked: "<<statValues.size()<<"\n";
+    debug(Yes)<<"# Tracked number size: "<<totalTracked<<"\n";//trackedAllocas.size()<<"\n";
+    debug(Yes)<<"# Total Nodes in PAG: "<<pag->getPAGNodeNum()<<"\n";
+    debug(Yes)<<"# Total StmtNodes (PAGEdge): "<<pag->getPAGEdgeNum()<<"\n";
+    debug(Yes)<<"# Total Globals: "<<0<<"\n";//trackedGlobals<<"\n";
 
     std::ofstream StatFile;
     StatFile.open("anotStats.JSON");
@@ -2397,7 +2402,7 @@ bool AnnotateNew::runOnModule(Module &M) {
 
 
     auto done = std::chrono::high_resolution_clock::now();
-    errs()<< std::chrono::duration_cast<std::chrono::seconds>(done-started).count();
+    debug(Yes)<< std::chrono::duration_cast<std::chrono::seconds>(done-started).count();
     return false;
   }
 
