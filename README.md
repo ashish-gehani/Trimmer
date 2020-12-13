@@ -101,7 +101,7 @@ Debug
 -----
 By default, debug messages are off. If you want to see debug messages,
 ```
-export TRIMMER_DEBUG= Yes
+export TRIMMER_DEBUG=Yes
 ```
 Three files will be created. 
 1. annot_log.txt will contain Annotation Pass log.
