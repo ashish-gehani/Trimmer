@@ -202,8 +202,6 @@ void ConstantFolding::runOnInst(Instruction * I) {
     result = processPtrToIntInst(ptrinst);
   } else if(ExtractValueInst *ev = dyn_cast<ExtractValueInst>(I)) {
     result = handleExtractValue(ev);
-    //else if(PtrToIntInst *ptr = dyn_cast<PtrToIntInst>(I)) {
-    //result = processPtrToInt(ptr);  }
   } else if(IntToPtrInst *inst = dyn_cast<IntToPtrInst>(I)) {
     result = processIntToPtr(inst);  
   } else {
@@ -213,6 +211,7 @@ void ConstantFolding::runOnInst(Instruction * I) {
   //FIXME: Remove comment if dead code
   //if(isLoopTest())
   //updateLoopCost(result, I);
+  
 }
 
 ProcResult ConstantFolding::processIntToPtr(IntToPtrInst *inst) {
@@ -317,8 +316,6 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
   Function * temp = currfn;
   BasicBlock *tempBB  = currBB; //preserve across recursion of this function
   currfn = toRun; //update to callee
-  //BasicBlock* oldPrevious = previousBB;
-  //previousBB = currBB;
 
   BasicBlock * entry = &toRun->getEntryBlock();
 
@@ -326,7 +323,6 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
   addToWorklistBB(entry);
 
   while(worklistBB[worklistBB.size() - 1].size()) {
-    //debug(Yes)<<"# WorkList: "<<currfn->getName()<<"\n";
 
     if(exit)
       return;
@@ -677,7 +673,6 @@ set<GlobalVariable *> ConstantFolding::dfs(CallGraphNode *root, map<Function *, 
     set<GlobalVariable *> childData = dfs(called, modSet, openNodes, recStack, cycles);
 
     data.insert(childData.begin(), childData.end());
-    //if(calledNode.second->getFunction())
   }
 
   openNodes.erase(F);
@@ -688,7 +683,6 @@ set<GlobalVariable *> ConstantFolding::dfs(CallGraphNode *root, map<Function *, 
 }
 
 set<GlobalVariable *> &ConstantFolding::getFuncModset(Function *F) {
-  //assert(modSet.find(F) != modSet.end());
   if(modSet.find(F) != modSet.end())
     return modSet[F];
   else {
@@ -729,24 +723,6 @@ void ConstantFolding::collectCallGraphGlobals(CallGraph *CG) {
   set<Function *> openNodes_two;
 }
 
-/*
-   ProcResult ConstantFolding::processPtrToInt(PtrToIntInst *pi) {
-   Value *pointer = pi->getPointerOperand();
-   Register *reg = processInstAndGetRegister(pointer);
-
-   if(!reg) {
-   debug(Yes) << "failed to fold pointer inst. Register not found\n";
-   return NOTFOLDED;
-   }
-
-//PtrToIntInst *clone = cast<PtrToIntInst>(pi->clone());
-ConstantInt *constantPtr = cast<ConstantInt>(ConstantInt::get(pi->getType(), reg->getValue()));
-
-debug(Yes) << "trying to fold " << *constantPtr<< "\n";
-addSingleVal(pi, constantPtr->getZExtValue(), true, true);
-return FOLDED;
-}
-*/
 //File ProcessInstructions.cpp
 
 /**
@@ -757,13 +733,14 @@ return FOLDED;
  */
 ProcResult ConstantFolding::processAllocaInst(AllocaInst * ai) {
 
-  // FIXME: Remove dead code? 
+	// FIXME: Remove dead code?
   /*
      if(!isAllocaTracked(ai)) {
      debug(Yes) << "skipping untracked alloca\n";
      return NOTFOLDED;
-     }  
+     }
      */
+
   Type * ty = ai->getAllocatedType();
   unsigned size = DL->getTypeAllocSize(ty);
   uint64_t addr = bbOps.allocateStack(size, currBB);
@@ -780,13 +757,14 @@ ProcResult ConstantFolding::processMallocInst(CallInst * mi) {
 
   stats.incrementTotalLibCalls();
 
-  // FIXME: Remove dead code? 
+  // FIXME: Remove dead code?
   /*
      if(!isAllocaTracked(mi)) {
      debug(Yes) << "skipping untracked malloc\n";
      return NOTFOLDED;
      }
      */
+
   Value * sizeVal = mi->getOperand(0);
   uint64_t size;
   if(!getSingleVal(sizeVal, size)) {
@@ -804,12 +782,6 @@ ProcResult ConstantFolding::processMallocInst(CallInst * mi) {
 }
 
 ProcResult ConstantFolding::processCallocInst(CallInst * ci) {   
-  /*
-     if(!isAllocaTracked(ci)) {
-     debug(Yes) << "skipping untracked calloc\n";
-     return NOTFOLDED;
-     }
-     */
   stats.incrementTotalLibCalls();
   Value * numVal = ci->getOperand(0);
   Value * sizeVal = ci->getOperand(1);
@@ -847,7 +819,6 @@ ProcResult ConstantFolding::processBitCastInst(BitCastInst * bi) {
   if(!reg) {
     //try function
     if(dyn_cast<Function>(ptr)) {
-      //addSingleVal(bi, (uint64_t) ptr, false, true);
       return NOTFOLDED;
     }
     debug(Yes) << "BitCastInst : Not found in Map\n";
@@ -1006,41 +977,8 @@ ProcResult ConstantFolding::processLoadInst(LoadInst * li) {
   }
 
 
-  /*
-     Value * source = getLoadSource(li);
-     debug(Yes)<<"Load Source: "<<*source<<"\n";
-
-     if(auto GO = dyn_cast<GlobalObject>(source)){
-     if(GO->hasMetadata() && GO->getMetadata("track")){
-     debug(Yes)<<"Loading from tracked Global!\n";
-     stats.incrementTrackedLoads();
-     }
-     } else if(auto Ins = dyn_cast<Instruction>(source)){
-     if(Ins->hasMetadata() && Ins->getMetadata("track")){
-     debug(Yes)<<"Loading from instruction which is tracked!\n";
-     stats.incrementTrackedLoads();
-     }
-     }*/
   debug(Yes)<<"TrackedLoads: "<<stats.getTrackedLoads()<<"\n";
 
-
-  /*
-     if(auto GE =  dyn_cast<GetElementPtrInst>(ptr)){
-     Value * ptrOp = GE->getPointerOperand();
-     if(Instruction* Ins = dyn_cast<Instruction>(ptrOp)){
-     if(Ins->hasMetadata() && Ins->getMetadata("track")){
-     debug(Yes)<<"Operand of GEPInst in load is: "<<*Ins<<" which is tracked!\n";
-     }
-     }
-     } else if(Instruction* Ins = dyn_cast<Instruction>(ptr)){
-     if(Ins->hasMetadata() && Ins->getMetadata("track")){
-     debug(Yes)<<"LoadInst operand from tracked memory: "<<*Ins<<"in function "<<Ins->getParent()->getParent()->getName()<<"\n";;
-     }
-     } else if(GlobalObject* GO = dyn_cast<GlobalObject>(ptr)){
-     if(GO->hasMetadata() && GO->getMetadata("track")){
-     debug(Yes)<<"LoadInst operand GlobalObject is tracked!\n";
-     }
-     } */
 
 
   uint64_t val = bbOps.loadMem(addr, size, currBB);
@@ -1863,7 +1801,6 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
         markGlobAsNonConst(calledFunction);
 
 
-        //clonedInst->getCalledFunction()->dropAllReferences();
         delete clonedInst;
 
 
@@ -1915,7 +1852,6 @@ string ConstantFolding::removeCloneName(string name) {
 
 
 bool ConstantFolding::exceedClone(string name, int level){
-  //debug(Yes)<<"exceedClone invoked on: "<<name<<" and level: "<<level<<"\n";
   size_t pos = name.find("_clone.");
 
   if(pos == string::npos){
@@ -2822,7 +2758,6 @@ bool ConstantFolding::handleStrSep(CallInst *callInst) {
     debug(Yes) << "after storing null: " << bbOps.loadMem(reg1->getValue(), DL->getPointerSize(), currBB) << "\n";
     debug(Yes) << "storing null" << "\n";
   }
-  //addSingleVal(arg1, reg1->getValue() + (stringpCopy - stringp), true, true); //@TODO memory leak for register overwriting
   debug(Yes) << "strsep: returned " << result << "\n";
   return true;
 }
@@ -4601,10 +4536,6 @@ bool ConstantFolding::handleGetOpt(CallInst * ci) {
     return true;
   }
 
-  //custom getopt implementations
-  //if(!ci->getCalledFunction()->isDeclaration())
-  //return false;
-
   uint64_t argc;
   Register * argvReg = processInstAndGetRegister(ci->getOperand(1));
   Register * optsReg = processInstAndGetRegister(ci->getOperand(2));
@@ -4625,7 +4556,6 @@ bool ConstantFolding::handleGetOpt(CallInst * ci) {
 
 
 
-  //debug(Yes) << "handleGetOpt => optind : " <<  bbOps.checkConstContigous(optindReg->getValue(), currBB) << " argvReg : " <<  bbOps.checkConstContigous(argvReg->getValue(), currBB) << "\n";
 
   debug(Yes)<<"Obtaining argvSize...\n";
   uint64_t ptrSize = DL->getTypeAllocSize(argvReg->getType());
@@ -4734,155 +4664,6 @@ bool ConstantFolding::handleGetOpt(CallInst * ci) {
   return true;
 }
 
-
-
-/*
-
-   bool ConstantFolding::handleGetOpt(CallInst * ci) {
-// Right now if atleast one arg is non-const, it will reject all. However we want to
-// add the condition that if the last one is "_" we don't mark all non const and return -1;
-// In the case the last arg is "_", we run the loop till argc -1 after wards
-debug(Yes)<<"Invoked handleGetOpt\n";
-auto start = std::chrono::high_resolution_clock::now();
-
-string name = ci->getCalledFunction()->getName().str();
-if(name.size() < 6 || name.substr(0, 6) != "getopt")
-return false;
-
-stats.incrementTotalLibCalls();
-
-if(name == "getopt_long_only") {
-debug(Yes) << "case not handled " << name << "\n";
-return true;
-}
-
-//custom getopt implementations
-//if(!ci->getCalledFunction()->isDeclaration())
-//return false;
-
-uint64_t argc;
-Register * argvReg = processInstAndGetRegister(ci->getOperand(1));
-Register * optsReg = processInstAndGetRegister(ci->getOperand(2));
-Register * optindReg = processInstAndGetRegister(module->getNamedGlobal("optind"));
-if(!getSingleVal(ci->getOperand(0), argc) || !argvReg || 
-!optsReg || !optindReg || (optindReg && !bbOps.checkConstContigous(optindReg->getValue(), currBB))) {
-debug(Yes) << "conditions not satisfied\n";
-return true;
-}
-
-debug(Yes) << "handleGetOpt => optind : " <<  bbOps.checkConstContigous(optindReg->getValue(), currBB) << " argvReg : " <<  bbOps.checkConstContigous(argvReg->getValue(), currBB) << "\n";
-
-debug(Yes)<<"Obtaining argvSize...\n";
-uint64_t ptrSize = DL->getTypeAllocSize(argvReg->getType());
-uint64_t intSize = DL->getTypeAllocSize(ci->getType());
-
-uint64_t argvSize = bbOps.getSizeContigous(argvReg->getValue(),currBB) - ptrSize;
-debug(Yes)<<"argvSize: "<<argvSize<<"(Excluding NULL ptr)\n";
-uint64_t argcLimit = 10000;
-
-debug(Yes)<<"Check getopt from: "<<argvReg->getValue()<<", to "<<argvReg->getValue() + argvSize<<"\n";
-
-if(!getSingleVal(ci->getOperand(0), argc) || !argvReg || 
-!optsReg || !optindReg || !bbOps.checkConstContigous(argvReg->getValue(), currBB) ||
-!bbOps.checkConstContigous(optindReg->getValue(), currBB)) {
-
-debug(Yes)<<"GETOPT FAIL CASE\n";
-bool onlyLastNonConst = true;
-
-for(uint64_t start = argvReg->getValue(); start < argvReg->getValue() + argvSize; start += ptrSize){
-debug(Yes)<<"Checking address: "<<start<<"\n";
-if(!bbOps.checkConstMem(start,ptrSize, currBB) && start != argvReg->getValue() + argvSize - ptrSize){
-debug(Yes)<<"[ArgvReg] starting at "<<start<<" for "<<ptrSize<<" bytes is non const\n";
-onlyLastNonConst = false;
-debug(Yes)<<"flipping onlyLastNonConst to false\n";
-} 
-}
-
-if(!onlyLastNonConst){
-debug(Yes) << "conditions not satisfied\n";
-return true;
-} else {
-debug(Yes)<<"Only last is non constant, hence we can continue onwards\n";
-argcLimit = argc-1; // ignore last arg
-}
-}
-
-if(argcLimit == 10000){ // if we didn't enter the failing condition, argcLimit should be same as argc
-  argcLimit = argc;
-}
-
-uint64_t optindAddr = optindReg->getValue();
-optind = bbOps.loadMem(optindAddr, intSize, currBB);
-char ** argv = (char **) malloc(sizeof(char *) * argc);
-uint64_t addr = argvReg->getValue();
-map<char *, uint64_t> realToVirt;
-for(unsigned i = 0, iter = addr; i < argcLimit; i++, iter += ptrSize) {
-  uint64_t strAddr = bbOps.loadMem(iter, ptrSize, currBB);
-  debug(Yes) << "Checking for index: " << i << "\n";
-  if(!getStr(strAddr, argv[i])) {
-    debug(Yes) << "handleGetOpt: Non Constant argv at index" << i << "\n";
-    if(i == optind) {
-      debug(Yes) << "handleGetOpt: Flag not constant. Can not handle getopt \n";
-      return true;
-    }
-  }
-  debug(Yes)<<"Got String "<<argv[i]<<"\n";
-
-  realToVirt[argv[i]] = strAddr;
-}
-char * opts = (char *) bbOps.getActualAddr(optsReg->getValue(), currBB);
-int result;
-if(name == "getopt_long") { 
-  debug(Yes)<<"handleGetOpt: getopt_long\n";
-  option * long_opts = (option *) malloc(sizeof(option) * 350); //@FIXME 350 is arbitrary for long opts length
-  int * long_index;
-  if(!handleLongArgs(ci, long_opts, long_index))
-    return true;
-  debug(Yes)<<"Calling getopt_long_local\n";
-  //debug(Yes)<<"PRE_GETOPT_LONG: "<<*long_index<<"\n";
-  result = getopt_long_local(argcLimit, argv, opts, long_opts, long_index);
-} else 
-result = getopt_local(argcLimit, argv, opts);
-
-stats.incrementLibCallsFolded();
-
-IntegerType * intTy = IntegerType::get(module->getContext(), intSize * 8);
-ConstantInt * resInt = ConstantInt::get(intTy, result);
-
-debug(Yes) << "getopt returned " << (char) result << "\n";
-replaceIfNotFD(ci, resInt);
-
-if(optarg && bbOps.checkConstMem(addr + (optind - 1) * ptrSize, ptrSize, currBB)) {
-  debug(Yes) << "optarg is " << optarg << "\n";
-  Register * optargReg = processInstAndGetRegister(module->getNamedGlobal("optarg"));
-  uint64_t optArgAddr = optargReg->getValue();
-  uint64_t strAddr = bbOps.loadMem(optArgAddr, ptrSize, currBB);
-  debug(Yes)<<"optArgAddr: "<<optArgAddr<<", strAddr "<<strAddr<<"\n";
-  if(!strAddr) {
-    Type * ty = optargReg->getType()->getContainedType(0);
-    uint64_t charSize = DL->getTypeAllocSize(ty);
-    strAddr = bbOps.allocateHeap(charSize * 100, currBB);
-    bbOps.storeToMem(strAddr, ptrSize, optArgAddr, currBB);
-    debug(Yes) << "created new string at " << strAddr << "\n";
-  }
-  char * source = (char *) bbOps.getActualAddr(strAddr, currBB);
-  memcpy(source, optarg, strlen(optarg));
-  bbOps.setConstContigous(true, strAddr, currBB);
-  source[strlen(optarg)] = '\0';
-  debug(Yes)<<"Pasted string: "<<source<<" to addr "<<strAddr<<"\n";
-}
-
-bbOps.storeToMem(optind, intSize, optindAddr, currBB);
-for(unsigned i = 0, iter = addr; i < argcLimit; i++, iter += ptrSize)
-bbOps.storeToMem(realToVirt[argv[i]], ptrSize, iter, currBB);
-debug(Yes)<<"Returning from handleGetOpt\n";
-auto stop = std::chrono::high_resolution_clock::now();
-auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-debug(Yes)<<"[GETOPT] Analysis took: "<<duration.count()<<" microseconds... \n";
-
-return true;
-}
-*/
 
 
 
