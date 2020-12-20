@@ -56,7 +56,6 @@ namespace {
       for (Module::alias_iterator i = M.alias_begin(), e = M.alias_end(); i != e; ++i) {
         if (i->hasExternalLinkage() || i->hasWeakLinkage()) {
           i->setLinkage(GlobalValue::InternalLinkage);
-          //i->setLinkage(localizeLinkage(i->getLinkage()));
         }
       }
 

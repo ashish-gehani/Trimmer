@@ -66,15 +66,7 @@ namespace {
       ConstantInt* argcConst = ConstantInt::get(int32Ty, index_count);
       Function::arg_iterator ai = _main->arg_begin();
       Value* argc = (Value*) &(*ai); 
-      /*
-      for(auto use: argc->users()) {
-        if(auto I = dyn_cast<Instruction>(use)) {
-          debug(Yes) << *I << "\n";
-          LLVMContext &C = I->getContext();
-          MDNode *N = MDNode::get(C, MDString::get(C, "1"));
-          I->setMetadata("track_argc", N);
-        }
-      }*/
+     
       argc->replaceAllUsesWith(argcConst);   
       
 
@@ -100,7 +92,6 @@ namespace {
       llvmMemCpyArgs.push_back(Type::getInt8PtrTy(M.getContext()));
       llvmMemCpyArgs.push_back(Type::getInt8PtrTy(M.getContext()));
       llvmMemCpyArgs.push_back(Type::getInt64Ty(M.getContext()));
-      //llvmMemCpyArgs.push_back(Type::getInt32Ty(M.getContext())); [LLVM-7 shifts alignment to parameter attribute instead of function argument]
       llvmMemCpyArgs.push_back(Type::getInt1Ty(M.getContext()));
 
       FunctionType * llvmMemCpyFT = FunctionType::get(Type::getVoidTy(M.getContext()), llvmMemCpyArgs, false);      
