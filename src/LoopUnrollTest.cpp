@@ -96,9 +96,7 @@ bool LoopUnrollTest::checkPassed() {
 
 void LoopUnrollTest::updateTime(Instruction *I, uint64_t seconds) {
   elapsedTime = seconds;
-  //debug(Yes) << "updateTime: seconds = " << seconds << "\n";
   Module *m = I->getParent()->getParent()->getParent();
-  //CallInst *iterCall = getTestInst(getIterName(), module);
   Function *f = m->getFunction(getExitName());
   CallInst *call = NULL;
 

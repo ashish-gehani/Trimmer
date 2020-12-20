@@ -26,7 +26,6 @@ void LoopUnroller::checkTermInst(Instruction * I, uint64_t seconds) {
     return;
   if(ti->checkBreakInst(I)) {
     ti->terminated = true;
-    //debug(Yes) << "marking test at level " << testStack.size() << " as terminated\n";
   } else ti->updateIter(I); 
   ti->updateTime(I, seconds);
 }
@@ -58,7 +57,6 @@ bool LoopUnroller::checkUnrollHint(BasicBlock * hdr, LoopInfo &LI, Module *modul
 }
 
 bool LoopUnroller::shouldSimplifyLoop(BasicBlock *BB, LoopInfo &LI, Module *m, bool useAnnotations) {
-  //return true;
   if(useAnnotations && !checkUnrollHint(BB, LI, m))
     return false;
   //expectation in loop rotated form
@@ -132,7 +130,6 @@ bool LoopUnroller::runtest(TargetLibraryInfo * TLI, AssumptionCache &AC, RegOps 
   unsigned tripCount;
   bool isFileIOLoop = checkIfFileIOLoop(loop, regOps, bbOps,fdInfoMap, currBB);
 
-  //getBranchMemory(loop);
   bool constTripCount = getTripCount(TLI, AC, tripCount, isFileIOLoop);
 
   debug(Yes) << "ConstTripCount :" << constTripCount << "\n";

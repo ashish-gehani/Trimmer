@@ -135,12 +135,6 @@ bool AnnotateTest::runOnModule(Module &M) {
 
   errs() << "Test passed" << "\n";
   return false;
-  //errs() << expected->getAsString() << "\n";
-  /*
-     for(unsigned i = 0; i < expected->getNumElements(); i++) {
-     Constant *temp = expected->getElementAsConstant(i);
-     errs() << *dyn_cast<ConstantDataArray>(expected)<< "\n";
-     }
-     */
+
   return false;
 }

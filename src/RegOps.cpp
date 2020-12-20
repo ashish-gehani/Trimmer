@@ -34,7 +34,6 @@ Register * RegOps::getRegister(Value * ptr) {
 
 void RegOps::cleanUpFuncBBRegisters(Function * f, ValSet valSet) { 
   for(auto val : valSet) {
-    //assert(Registers.find(val) != Registers.end() && "unexpected behavior");
     if(Registers.find(val) == Registers.end())
       return;
     Register * reg = Registers[val];
