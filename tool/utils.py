@@ -76,12 +76,18 @@ def parse_args(args):
                         annot_flag = 0
                 elif(args[i] == 'no-track-allocas'):
                         track_allocas = 0
-                elif(args[i] == 'no-file-specialize'):
+                elif(args[i] == 'file-specialize'):
+                        file_specialize = 1  
+                        string_specialize = 0
+                        loop = 0
+                elif(args[i] == 'string-specialize'):
                         file_specialize = 0  
-                elif(args[i] == 'no-string-specialize'):
-                        string_specialize = 0              
-                elif(args[i] == 'no-loop-unroll'):
-                        loop = 0                    
+                        string_specialize = 1
+                        loop = 0              
+                elif(args[i] == 'loop-unroll'):
+                        file_specialize = 0  
+                        string_specialize = 0
+                        loop = 1                    
                 elif(args[i] == 'contextType'):
                         contextType = args[i+1]
                 elif(args[i] == 'depthLimit'):
