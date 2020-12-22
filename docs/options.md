@@ -26,31 +26,26 @@ Constant Propagation consists of loop unrolling, file I/O specialization and str
 python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory] no-inter-constprop
 ```
 
-Loop Unrolling
---------------
+Loop Unrolling, File I/O Specialization and String Specialization
+-----------------------------------------------------------------
 
-By default, loop unrolling is ON. To OFF it, run
+By default, loop unrolling, file I/O specialization and string specialization is ON. 
 
-```
-python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory] no-loop-unroll
-```
-
-File I/O Specialization
------------------------
-
-By default, file I/O specialization is ON. To OFF it, run
+To only ON loop unrolling, run
 
 ```
-python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory] no-file-specialize
+python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory] loop-unroll
 ```
-
-String Specialization
----------------------
-
-By default, string specialization is ON. To OFF it, run
+To only ON file I/O specialization, run
 
 ```
-python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory] no-string-specialize
+python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory] file-specialize
+```
+
+To only ON string specialization, run
+
+```
+python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory] string-specialize
 ```
 
 Clone Limit
