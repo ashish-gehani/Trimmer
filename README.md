@@ -103,10 +103,8 @@ By default, debug messages are off. If you want to see debug messages,
 ```
 export TRIMMER_DEBUG=Yes
 ```
-Three files will be created. 
-1. annot_log.txt will contain Annotation Pass log.
-2. specialize_log.txt will contain Specialization Pass log.
-3. constprop_log.txt will contain ConstantFolding Pass log.
+The debug messages will be printed in log.txt file.
+
 
 
 
