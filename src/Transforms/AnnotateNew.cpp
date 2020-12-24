@@ -1739,7 +1739,6 @@ double statFormula(Stat *a) {
  * TODO add preserves information
  */
 bool AnnotateNew::runOnModule(Module &M) {
-  auto started = std::chrono::high_resolution_clock::now();
   initDebugLevel();
   AndersenWaveDiff* ander = AndersenWaveDiff::createAndersenWaveDiff(M);
   SVFGBuilder builder;
@@ -1952,10 +1951,6 @@ bool AnnotateNew::runOnModule(Module &M) {
     StatFile<<"{ \"trackedAllocas\": "<<totalTracked<<" , \"globals\": "<< global_count <<"}\n"; 
     StatFile.close();
 
-
-
-    auto done = std::chrono::high_resolution_clock::now();
-    debug(Yes)<< std::chrono::duration_cast<std::chrono::seconds>(done-started).count();
     return false;
   }
 
