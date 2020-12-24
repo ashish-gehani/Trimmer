@@ -42,12 +42,10 @@ def run_argspec(tool):
 	fname = tool.name
 	curr_file = tool.curr_file
 	add_file = tool.work_dir + '/' + fname + '_added.bc'
-        specialize_log_file =  tool.work_dir + '/specialize_log.txt'
         annotated_file = tool.work_dir + '/' + fname + '_annotated.bc'
 	libspec_file = tool.work_dir + '/' + fname + '_ls.bc'
-	annot_log_file =  tool.work_dir + '/annot_log.txt'
 	constprop_file = tool.work_dir + '/' + fname + '_constprop.bc'
-	constprop_log_file =  tool.work_dir + '/constprop_log.txt'
+	log_file =  tool.work_dir + '/log.txt'
 	remove_file = tool.work_dir + '/' + fname + '_remove.bc'
 	inline_file = tool.work_dir + '/' + fname + '_inline.bc'
 	intern_file = tool.work_dir + '/' + fname + '_intern.bc'
@@ -116,7 +114,7 @@ def run_argspec(tool):
                                              
 
                         printDbgMsg(" ".join(Cmd))
-  		        f = open(annot_log_file, "wb")
+  		        f = open(log_file, "wb")
                         starttime =  datetime.now()
                         subprocess.call(Cmd,stderr=f)
                         endtime = datetime.now()
@@ -133,7 +131,7 @@ def run_argspec(tool):
                 #        
         Cmd = [opt,'-load', build_path + 'SpecializeArguments.so', '-args=' + tool.args,'-specialize-args', annotated_file,'-o',add_file]
         printDbgMsg(' '.join(Cmd))
-        f = open(specialize_log_file, "wb")
+        f = open(log_file, "ab")
         subprocess.call(Cmd, stderr=f)
         f.close()   
         disassemble(add_file)
@@ -170,7 +168,7 @@ def run_argspec(tool):
         if tool.icp_flag:
 		  Cmd = [opt, '-load', build_path + 'ConstantFolding.so', '-isAnnotated=' + str(tool.annot_flag), use_glob_str ,disable_exit_str, use_reg_offset_str,exceed_limit_str,'-trackAllocas=' + str(tool.track_allocas),'-contextType=' + str(tool.context_type), '-fileSpecialize=' + str(tool.file_specialize), '-stringSpecialize=' + str(tool.string_specialize),'-loopUnroll=' + str(tool.loop_unroll),'-fileNames', str(tool.config_files),'-mem2reg','-mergereturn', '-simplifycfg' ,'-loops','-lcssa','-loop-simplify','-scalar-evolution' ,'-licm','-loop-rotate','-indvars' ,'-loop-reduce',"-__progName=ssh",'-inter-constprop',add_file, '-o', constprop_file]
 
-		  f = open(constprop_log_file, "wb")
+		  f = open(log_file, "ab")
 		  printDbgMsg(" ".join(Cmd))
 
                   ping = subprocess.Popen(Cmd,stderr=f)

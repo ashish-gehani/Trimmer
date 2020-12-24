@@ -50,6 +50,9 @@ def parse_args(args):
         file_specialize = 1
         string_specialize = 1
         loop = 1
+        file_flag = False
+        string_flag = False
+        loop_flag= False
         contextType = 1
         isLimitedDepth = False
         depthLimit = 0
@@ -77,17 +80,26 @@ def parse_args(args):
                 elif(args[i] == 'no-track-allocas'):
                         track_allocas = 0
                 elif(args[i] == 'file-specialize'):
-                        file_specialize = 1  
-                        string_specialize = 0
-                        loop = 0
+                        file_flag = True
+                        file_specialize = 1
+                        if string_flag == False:
+                         string_specialize = 0
+                        if loop_flag == False:
+                         loop=0
                 elif(args[i] == 'string-specialize'):
-                        file_specialize = 0  
+                        string_flag = True
                         string_specialize = 1
-                        loop = 0              
+                        if file_flag==False:
+                         file_specialize = 0
+                        if loop_flag == False:
+                         loop = 0              
                 elif(args[i] == 'loop-unroll'):
-                        file_specialize = 0  
-                        string_specialize = 0
-                        loop = 1                    
+                        loop_flag = True
+                        loop = 1
+                        if file_flag==False:
+                         file_specialize = 0
+                        if string_flag == False:
+                         string_specialize = 0                               
                 elif(args[i] == 'contextType'):
                         contextType = args[i+1]
                 elif(args[i] == 'depthLimit'):
