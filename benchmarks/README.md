@@ -8,7 +8,7 @@ Running Trimmer on all applications with runbench script
 3) Run the following commands
 
 ```
- 1) cp OCCAM-Benchmarks /
+ 1) cp -r OCCAM-Benchmarks /
  2) cd OCCAM-Benchmarks
  3) ./runbench.py --sets="trimmer.set" --slash-opts=""
 ```
