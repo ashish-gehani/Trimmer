@@ -1,0 +1,9 @@
+{"binary": "stty_fin",
+"native_libs":[],
+"name": "stty",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "stty.bc"
+}
+

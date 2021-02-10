@@ -1,0 +1,9 @@
+{"binary": "expand_fin",
+"native_libs":[],
+"name": "expand",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "expand.bc"
+}
+

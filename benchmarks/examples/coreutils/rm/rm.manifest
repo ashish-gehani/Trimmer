@@ -1,0 +1,9 @@
+{"binary": "rm_fin",
+"native_libs":[],
+"name": "rm",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "rm.bc"
+}
+

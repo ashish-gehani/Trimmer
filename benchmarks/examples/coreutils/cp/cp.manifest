@@ -1,0 +1,9 @@
+{"binary": "cp_fin",
+"native_libs":[],
+"name": "cp",
+"static_args": [],
+"modules": [],
+"ldflags": ["-lselinux","-lpcre","-ldl","-lpthread", "-lacl", "-lattr" ],
+"main": "cp.bc"
+}
+

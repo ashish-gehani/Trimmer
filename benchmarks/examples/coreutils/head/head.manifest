@@ -1,0 +1,9 @@
+{"binary": "head_fin",
+"native_libs":[],
+"name": "head",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "head.bc"
+}
+

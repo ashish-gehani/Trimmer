@@ -1,0 +1,9 @@
+{"binary": "basename_fin",
+"native_libs":[],
+"name": "basename",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "basename.bc"
+}
+

@@ -1,0 +1,9 @@
+{"binary": "wc_fin",
+"native_libs":[],
+"name": "wc",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "wc.bc"
+}
+

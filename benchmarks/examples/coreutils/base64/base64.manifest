@@ -1,0 +1,9 @@
+{"binary": "base64_fin",
+"native_libs":[],
+"name": "base64",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "base64.bc"
+}
+

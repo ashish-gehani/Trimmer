@@ -1,0 +1,9 @@
+{"binary": "pr_fin",
+"native_libs":[],
+"name": "pr",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "pr.bc"
+}
+

@@ -1,0 +1,9 @@
+{"binary": "getlimits_fin",
+"native_libs":[],
+"name": "getlimits",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "getlimits.bc"
+}
+

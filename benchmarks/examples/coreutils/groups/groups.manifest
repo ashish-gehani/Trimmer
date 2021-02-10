@@ -1,0 +1,9 @@
+{"binary": "groups_fin",
+"native_libs":[],
+"name": "groups",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "groups.bc"
+}
+

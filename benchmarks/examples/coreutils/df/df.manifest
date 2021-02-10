@@ -1,0 +1,9 @@
+{"binary": "df_fin",
+"native_libs":[],
+"name": "df",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "df.bc"
+}
+

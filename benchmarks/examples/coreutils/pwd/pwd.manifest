@@ -1,0 +1,9 @@
+{"binary": "pwd_fin",
+"native_libs":[],
+"name": "pwd",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "pwd.bc"
+}
+

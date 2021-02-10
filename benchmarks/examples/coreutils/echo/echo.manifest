@@ -1,0 +1,9 @@
+{"binary": "echo_fin",
+"native_libs":[],
+"name": "echo",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "echo.bc"
+}
+

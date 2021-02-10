@@ -1,0 +1,9 @@
+{"binary": "base32_fin",
+"native_libs":[],
+"name": "base32",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "base32.bc"
+}
+

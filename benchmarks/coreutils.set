@@ -1,0 +1,545 @@
+{
+    "benchmarks": [
+        {
+            "dirname": "examples/coreutils/chown", 
+            "enabled": "true", 
+            "execname": "chown"
+        }, 
+        {
+            "dirname": "examples/coreutils/link", 
+            "enabled": "true", 
+            "execname": "link"
+        }, 
+        {
+            "dirname": "examples/coreutils/echo", 
+            "enabled": "true", 
+            "execname": "echo"
+        }, 
+        {
+            "dirname": "examples/coreutils/uname", 
+            "enabled": "true", 
+            "execname": "uname"
+        }, 
+        {
+            "dirname": "examples/coreutils/cat", 
+            "enabled": "true", 
+            "execname": "cat"
+        }, 
+        {
+            "dirname": "examples/coreutils/od", 
+            "enabled": "true", 
+            "execname": "od"
+        }, 
+        {
+            "dirname": "examples/coreutils/logname", 
+            "enabled": "true", 
+            "execname": "logname"
+        }, 
+        {
+            "dirname": "examples/coreutils/cp", 
+            "enabled": "true", 
+            "execname": "cp"
+        }, 
+        {
+            "dirname": "examples/coreutils/mktemp", 
+            "enabled": "true", 
+            "execname": "mktemp"
+        }, 
+        {
+            "dirname": "examples/coreutils/stty", 
+            "enabled": "true", 
+            "execname": "stty"
+        }, 
+        {
+            "dirname": "examples/coreutils/join", 
+            "enabled": "true", 
+            "execname": "join"
+        }, 
+        {
+            "dirname": "examples/coreutils/pinky", 
+            "enabled": "true", 
+            "execname": "pinky"
+        }, 
+        {
+            "dirname": "examples/coreutils/pwd", 
+            "enabled": "true", 
+            "execname": "pwd"
+        }, 
+        {
+            "dirname": "examples/coreutils/uniq", 
+            "enabled": "true", 
+            "execname": "uniq"
+        }, 
+        {
+            "dirname": "examples/coreutils/cksum", 
+            "enabled": "true", 
+            "execname": "cksum"
+        }, 
+        {
+            "dirname": "examples/coreutils/id", 
+            "enabled": "true", 
+            "execname": "id"
+        }, 
+        {
+            "dirname": "examples/coreutils/nice", 
+            "enabled": "true", 
+            "execname": "nice"
+        }, 
+        {
+            "dirname": "examples/coreutils/tty", 
+            "enabled": "true", 
+            "execname": "tty"
+        }, 
+        {
+            "dirname": "examples/coreutils/sync", 
+            "enabled": "true", 
+            "execname": "sync"
+        }, 
+        {
+            "dirname": "examples/coreutils/chcon", 
+            "enabled": "true", 
+            "execname": "chcon"
+        }, 
+        {
+            "dirname": "examples/coreutils/tac", 
+            "enabled": "true", 
+            "execname": "tac"
+        }, 
+        {
+            "dirname": "examples/coreutils/kill", 
+            "enabled": "true", 
+            "execname": "kill"
+        }, 
+        {
+            "dirname": "examples/coreutils/pr", 
+            "enabled": "true", 
+            "execname": "pr"
+        }, 
+        {
+            "dirname": "examples/coreutils/shuf", 
+            "enabled": "true", 
+            "execname": "shuf"
+        }, 
+        {
+            "dirname": "examples/coreutils/fold", 
+            "enabled": "true", 
+            "execname": "fold"
+        }, 
+        {
+            "dirname": "examples/coreutils/cut", 
+            "enabled": "true", 
+            "execname": "cut"
+        }, 
+        {
+            "dirname": "examples/coreutils/sha224sum", 
+            "enabled": "true", 
+            "execname": "sha224sum"
+        }, 
+        {
+            "dirname": "examples/coreutils/mknod", 
+            "enabled": "true", 
+            "execname": "mknod"
+        }, 
+        {
+            "dirname": "examples/coreutils/env", 
+            "enabled": "true", 
+            "execname": "env"
+        }, 
+        {
+            "dirname": "examples/coreutils/printf", 
+            "enabled": "true", 
+            "execname": "printf"
+        }, 
+        {
+            "dirname": "examples/coreutils/whoami", 
+            "enabled": "true", 
+            "execname": "whoami"
+        }, 
+        {
+            "dirname": "examples/coreutils/runcon", 
+            "enabled": "true", 
+            "execname": "runcon"
+        }, 
+        {
+            "dirname": "examples/coreutils/rmdir", 
+            "enabled": "true", 
+            "execname": "rmdir"
+        }, 
+        {
+            "dirname": "examples/coreutils/pathchk", 
+            "enabled": "true", 
+            "execname": "pathchk"
+        }, 
+        {
+            "dirname": "examples/coreutils/shred", 
+            "enabled": "true", 
+            "execname": "shred"
+        }, 
+        {
+            "dirname": "examples/coreutils/sha384sum", 
+            "enabled": "true", 
+            "execname": "sha384sum"
+        }, 
+        {
+            "dirname": "examples/coreutils/csplit", 
+            "enabled": "true", 
+            "execname": "csplit"
+        }, 
+        {
+            "dirname": "examples/coreutils/nl", 
+            "enabled": "true", 
+            "execname": "nl"
+        }, 
+        {
+            "dirname": "examples/coreutils/tee", 
+            "enabled": "true", 
+            "execname": "tee"
+        }, 
+        {
+            "dirname": "examples/coreutils/mv", 
+            "enabled": "true", 
+            "execname": "mv"
+        }, 
+        {
+            "dirname": "examples/coreutils/expand", 
+            "enabled": "true", 
+            "execname": "expand"
+        }, 
+        {
+            "dirname": "examples/coreutils/nohup", 
+            "enabled": "true", 
+            "execname": "nohup"
+        }, 
+        {
+            "dirname": "examples/coreutils/split", 
+            "enabled": "true", 
+            "execname": "split"
+        }, 
+        {
+            "dirname": "examples/coreutils/test", 
+            "enabled": "true", 
+            "execname": "test"
+        }, 
+        {
+            "dirname": "examples/coreutils/fmt", 
+            "enabled": "true", 
+            "execname": "fmt"
+        }, 
+        {
+            "dirname": "examples/coreutils/sha512sum", 
+            "enabled": "true", 
+            "execname": "sha512sum"
+        }, 
+        {
+            "dirname": "examples/coreutils/unlink", 
+            "enabled": "true", 
+            "execname": "unlink"
+        }, 
+        {
+            "dirname": "examples/coreutils/ginstall", 
+            "enabled": "true", 
+            "execname": "ginstall"
+        }, 
+        {
+            "dirname": "examples/coreutils/base64", 
+            "enabled": "true", 
+            "execname": "base64"
+        }, 
+        {
+            "dirname": "examples/coreutils/df", 
+            "enabled": "true", 
+            "execname": "df"
+        }, 
+        {
+            "dirname": "examples/coreutils/uptime", 
+            "enabled": "true", 
+            "execname": "uptime"
+        }, 
+        {
+            "dirname": "examples/coreutils/ls", 
+            "enabled": "true", 
+            "execname": "ls"
+        }, 
+        {
+            "dirname": "examples/coreutils/base32", 
+            "enabled": "true", 
+            "execname": "base32"
+        }, 
+        {
+            "dirname": "examples/coreutils/hostid", 
+            "enabled": "true", 
+            "execname": "hostid"
+        }, 
+        {
+            "dirname": "examples/coreutils/tail", 
+            "enabled": "true", 
+            "execname": "tail"
+        }, 
+        {
+            "dirname": "examples/coreutils/mkdir", 
+            "enabled": "true", 
+            "execname": "mkdir"
+        }, 
+        {
+            "dirname": "examples/coreutils/stat", 
+            "enabled": "true", 
+            "execname": "stat"
+        }, 
+        {
+            "dirname": "examples/coreutils/getlimits", 
+            "enabled": "true", 
+            "execname": "getlimits"
+        }, 
+        {
+            "dirname": "examples/coreutils/head", 
+            "enabled": "true", 
+            "execname": "head"
+        }, 
+        {
+            "dirname": "examples/coreutils/expr", 
+            "enabled": "true", 
+            "execname": "expr"
+        }, 
+        {
+            "dirname": "examples/coreutils/sha1sum", 
+            "enabled": "true", 
+            "execname": "sha1sum"
+        }, 
+        {
+            "dirname": "examples/coreutils/groups", 
+            "enabled": "true", 
+            "execname": "groups"
+        }, 
+        {
+            "dirname": "examples/coreutils/factor", 
+            "enabled": "false", 
+            "execname": "factor"
+        }, 
+        {
+            "dirname": "examples/coreutils/sha256sum", 
+            "enabled": "true", 
+            "execname": "sha256sum"
+        }, 
+        {
+            "dirname": "examples/coreutils/touch", 
+            "enabled": "true", 
+            "execname": "touch"
+        }, 
+        {
+            "dirname": "examples/coreutils/timeout", 
+            "enabled": "true", 
+            "execname": "timeout"
+        }, 
+        {
+            "dirname": "examples/coreutils/comm", 
+            "enabled": "true", 
+            "execname": "comm"
+        }, 
+        {
+            "dirname": "examples/coreutils/date", 
+            "enabled": "true", 
+            "execname": "date"
+        }, 
+        {
+            "dirname": "examples/coreutils/truncate", 
+            "enabled": "true", 
+            "execname": "truncate"
+        }, 
+        {
+            "dirname": "examples/coreutils/basenc", 
+            "enabled": "true", 
+            "execname": "basenc"
+        }, 
+        {
+            "dirname": "examples/coreutils/wc", 
+            "enabled": "true", 
+            "execname": "wc"
+        }, 
+        {
+            "dirname": "examples/coreutils/dirname", 
+            "enabled": "true", 
+            "execname": "dirname"
+        }, 
+        {
+            "dirname": "examples/coreutils/seq", 
+            "enabled": "true", 
+            "execname": "seq"
+        }, 
+        {
+            "dirname": "examples/coreutils/sort", 
+            "enabled": "true", 
+            "execname": "sort"
+        }, 
+        {
+            "dirname": "examples/coreutils/stdbuf", 
+            "enabled": "true", 
+            "execname": "stdbuf"
+        }, 
+        {
+            "dirname": "examples/coreutils/true", 
+            "enabled": "true", 
+            "execname": "true"
+        }, 
+        {
+            "dirname": "examples/coreutils/ln", 
+            "enabled": "true", 
+            "execname": "ln"
+        }, 
+        {
+            "dirname": "examples/coreutils/mkfifo", 
+            "enabled": "true", 
+            "execname": "mkfifo"
+        }, 
+        {
+            "dirname": "examples/coreutils/unexpand", 
+            "enabled": "true", 
+            "execname": "unexpand"
+        }, 
+        {
+            "dirname": "examples/coreutils/tr", 
+            "enabled": "true", 
+            "execname": "tr"
+        }, 
+        {
+            "dirname": "examples/coreutils/dircolors", 
+            "enabled": "true", 
+            "execname": "dircolors"
+        }, 
+        {
+            "dirname": "examples/coreutils/rm", 
+            "enabled": "true", 
+            "execname": "rm"
+        }, 
+        {
+            "dirname": "examples/coreutils/tsort", 
+            "enabled": "true", 
+            "execname": "tsort"
+        }, 
+        {
+            "dirname": "examples/coreutils/users", 
+            "enabled": "true", 
+            "execname": "users"
+        }, 
+        {
+            "dirname": "examples/coreutils/chgrp", 
+            "enabled": "true", 
+            "execname": "chgrp"
+        }, 
+        {
+            "dirname": "examples/coreutils/md5sum", 
+            "enabled": "true", 
+            "execname": "md5sum"
+        }, 
+        {
+            "dirname": "examples/coreutils/readlink", 
+            "enabled": "true", 
+            "execname": "readlink"
+        }, 
+        {
+            "dirname": "examples/coreutils/paste", 
+            "enabled": "true", 
+            "execname": "paste"
+        }, 
+        {
+            "dirname": "examples/coreutils/[", 
+            "enabled": "true", 
+            "execname": "["
+        }, 
+        {
+            "dirname": "examples/coreutils/ptx", 
+            "enabled": "true", 
+            "execname": "ptx"
+        }, 
+        {
+            "dirname": "examples/coreutils/true", 
+            "enabled": "true", 
+            "execname": "true"
+        }, 
+        {
+            "dirname": "examples/coreutils/b2sum", 
+            "enabled": "true", 
+            "execname": "b2sum"
+        }, 
+        {
+            "dirname": "examples/coreutils/dir", 
+            "enabled": "true", 
+            "execname": "dir"
+        }, 
+        {
+            "dirname": "examples/coreutils/vdir", 
+            "enabled": "true", 
+            "execname": "vdir"
+        }, 
+        {
+            "dirname": "examples/coreutils/nproc", 
+            "enabled": "true", 
+            "execname": "nproc"
+        }, 
+        {
+            "dirname": "examples/coreutils/sum", 
+            "enabled": "true", 
+            "execname": "sum"
+        }, 
+        {
+            "dirname": "examples/coreutils/make-prime-list", 
+            "enabled": "true", 
+            "execname": "make-prime-list"
+        }, 
+        {
+            "dirname": "examples/coreutils/chmod", 
+            "enabled": "true", 
+            "execname": "chmod"
+        }, 
+        {
+            "dirname": "examples/coreutils/sleep", 
+            "enabled": "true", 
+            "execname": "sleep"
+        }, 
+        {
+            "dirname": "examples/coreutils/numfmt", 
+            "enabled": "true", 
+            "execname": "numfmt"
+        }, 
+        {
+            "dirname": "examples/coreutils/printenv", 
+            "enabled": "true", 
+            "execname": "printenv"
+        }, 
+        {
+            "dirname": "examples/coreutils/yes", 
+            "enabled": "true", 
+            "execname": "yes"
+        }, 
+        {
+            "dirname": "examples/coreutils/du", 
+            "enabled": "true", 
+            "execname": "du"
+        }, 
+        {
+            "dirname": "examples/coreutils/chroot", 
+            "enabled": "true", 
+            "execname": "chroot"
+        }, 
+        {
+            "dirname": "examples/coreutils/dd", 
+            "enabled": "true", 
+            "execname": "dd"
+        }, 
+        {
+            "dirname": "examples/coreutils/who", 
+            "enabled": "true", 
+            "execname": "who"
+        }, 
+        {
+            "dirname": "examples/coreutils/basename", 
+            "enabled": "true", 
+            "execname": "basename"
+        }, 
+        {
+            "dirname": "examples/coreutils/realpath", 
+            "enabled": "true", 
+            "execname": "realpath"
+        }
+    ]
+}
+

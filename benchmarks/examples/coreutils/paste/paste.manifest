@@ -1,0 +1,9 @@
+{"binary": "paste_fin",
+"native_libs":[],
+"name": "paste",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "paste.bc"
+}
+

@@ -1,0 +1,9 @@
+{"binary": "numfmt_fin",
+"native_libs":[],
+"name": "numfmt",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "numfmt.bc"
+}
+

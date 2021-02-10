@@ -1,0 +1,9 @@
+{"binary": "runcon_fin",
+"native_libs":[],
+"name": "runcon",
+"static_args": [],
+"modules": [],
+"ldflags": ["-lselinux","-lpcre","-ldl","-lpthread"],
+"main": "runcon.bc"
+}
+

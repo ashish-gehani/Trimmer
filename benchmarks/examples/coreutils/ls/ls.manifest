@@ -1,0 +1,9 @@
+{"binary": "ls_fin",
+"native_libs":[],
+"name": "ls",
+"static_args": [],
+"modules": [],
+"ldflags": ["-lselinux","-lpcre","-ldl","-lpthread"],
+"main": "ls.bc"
+}
+

@@ -1,0 +1,9 @@
+{"binary": "expr_fin",
+"native_libs":[],
+"name": "expr",
+"static_args": [],
+"modules": [],
+"ldflags": ["-lgmp"],
+"main": "expr.bc"
+}
+

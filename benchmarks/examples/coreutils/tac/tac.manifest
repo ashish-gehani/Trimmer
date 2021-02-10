@@ -1,0 +1,9 @@
+{"binary": "tac_fin",
+"native_libs":[],
+"name": "tac",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "tac.bc"
+}
+

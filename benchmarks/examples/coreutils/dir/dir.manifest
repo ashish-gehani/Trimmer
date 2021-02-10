@@ -1,0 +1,9 @@
+{"binary": "dir_fin",
+"native_libs":[],
+"name": "dir",
+"static_args": [],
+"modules": [],
+"ldflags": ["-lpcre", "-ldl", "-lselinux"],
+"main": "dir.bc"
+}
+

@@ -1,0 +1,9 @@
+{"binary": "chown_fin",
+"native_libs":[],
+"name": "chown",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "chown.bc"
+}
+

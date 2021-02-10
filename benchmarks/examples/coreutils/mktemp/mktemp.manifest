@@ -1,0 +1,9 @@
+{"binary": "mktemp_fin",
+"native_libs":[],
+"name": "mktemp",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "mktemp.bc"
+}
+

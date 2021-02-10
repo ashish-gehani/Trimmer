@@ -1,0 +1,9 @@
+{"binary": "tsort_fin",
+"native_libs":[],
+"name": "tsort",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "tsort.bc"
+}
+

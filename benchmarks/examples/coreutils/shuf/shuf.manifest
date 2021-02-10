@@ -1,0 +1,9 @@
+{"binary": "shuf_fin",
+"native_libs":[],
+"name": "shuf",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "shuf.bc"
+}
+

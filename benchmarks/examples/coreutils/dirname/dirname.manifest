@@ -1,0 +1,9 @@
+{"binary": "dirname_fin",
+"native_libs":[],
+"name": "dirname",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "dirname.bc"
+}
+

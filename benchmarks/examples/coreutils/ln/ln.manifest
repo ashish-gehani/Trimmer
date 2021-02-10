@@ -1,0 +1,9 @@
+{"binary": "ln_fin",
+"native_libs":[],
+"name": "ln",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "ln.bc"
+}
+

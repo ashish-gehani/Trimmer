@@ -1,0 +1,9 @@
+{"binary": "md5sum_fin",
+"native_libs":[],
+"name": "md5sum",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "md5sum.bc"
+}
+

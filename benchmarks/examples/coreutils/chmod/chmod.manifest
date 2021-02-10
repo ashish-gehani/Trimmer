@@ -1,0 +1,9 @@
+{"binary": "chmod_fin",
+"native_libs":[],
+"name": "chmod",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "chmod.bc"
+}
+

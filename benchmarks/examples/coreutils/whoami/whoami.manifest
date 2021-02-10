@@ -1,0 +1,9 @@
+{"binary": "whoami_fin",
+"native_libs":[],
+"name": "whoami",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "whoami.bc"
+}
+

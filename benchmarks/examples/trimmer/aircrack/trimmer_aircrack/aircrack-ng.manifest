@@ -1,0 +1,1 @@
+{"binary": "aircrack-ng_fin", "native_libs": [], "name": "aircrack-ng", "args": ["-w", "password.lst","wpa.cap"], "modules": [], "ldflags": ["-lssl","-lcrypto","-lpthread","sha1-sse2.S"], "main": "aircrack-ng.bc", "config_files": []}

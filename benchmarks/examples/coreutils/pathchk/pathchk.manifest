@@ -1,0 +1,9 @@
+{"binary": "pathchk_fin",
+"native_libs":[],
+"name": "pathchk",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "pathchk.bc"
+}
+

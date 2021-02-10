@@ -1,0 +1,9 @@
+{"binary": "cut_fin",
+"native_libs":[],
+"name": "cut",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "cut.bc"
+}
+

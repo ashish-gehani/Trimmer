@@ -1,0 +1,9 @@
+{"binary": "sort_fin",
+"native_libs":[],
+"name": "sort",
+"static_args": [],
+"modules": [],
+"ldflags": ["-lpthread"],
+"main": "sort.bc"
+}
+

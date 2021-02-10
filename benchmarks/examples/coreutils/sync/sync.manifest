@@ -1,0 +1,9 @@
+{"binary": "sync_fin",
+"native_libs":[],
+"name": "sync",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "sync.bc"
+}
+

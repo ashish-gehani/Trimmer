@@ -1,0 +1,9 @@
+{"binary": "join_fin",
+"native_libs":[],
+"name": "join",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "join.bc"
+}
+

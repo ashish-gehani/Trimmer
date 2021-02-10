@@ -1,0 +1,9 @@
+{"binary": "chgrp_fin",
+"native_libs":[],
+"name": "chgrp",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "chgrp.bc"
+}
+

@@ -1,0 +1,9 @@
+{"binary": "nl_fin",
+"native_libs":[],
+"name": "nl",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "nl.bc"
+}
+

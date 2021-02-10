@@ -1,0 +1,9 @@
+{"binary": "uname_fin",
+"native_libs":[],
+"name": "uname",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "uname.bc"
+}
+

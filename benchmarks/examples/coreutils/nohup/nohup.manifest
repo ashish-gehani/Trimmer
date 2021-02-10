@@ -1,0 +1,9 @@
+{"binary": "nohup_fin",
+"native_libs":[],
+"name": "nohup",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "nohup.bc"
+}
+

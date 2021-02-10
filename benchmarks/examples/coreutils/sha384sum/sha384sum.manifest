@@ -1,0 +1,9 @@
+{"binary": "sha384sum_fin",
+"native_libs":[],
+"name": "sha384sum",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "sha384sum.bc"
+}
+

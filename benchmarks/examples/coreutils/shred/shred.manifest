@@ -1,0 +1,9 @@
+{"binary": "shred_fin",
+"native_libs":[],
+"name": "shred",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "shred.bc"
+}
+

@@ -1,0 +1,9 @@
+{"binary": "split_fin",
+"native_libs":[],
+"name": "split",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "split.bc"
+}
+

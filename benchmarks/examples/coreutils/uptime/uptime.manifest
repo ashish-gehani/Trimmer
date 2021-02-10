@@ -1,0 +1,9 @@
+{"binary": "uptime_fin",
+"native_libs":[],
+"name": "uptime",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "uptime.bc"
+}
+

@@ -1,0 +1,9 @@
+{"binary": "comm_fin",
+"native_libs":[],
+"name": "comm",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "comm.bc"
+}
+

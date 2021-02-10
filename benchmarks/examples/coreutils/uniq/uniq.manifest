@@ -1,0 +1,9 @@
+{"binary": "uniq_fin",
+"native_libs":[],
+"name": "uniq",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "uniq.bc"
+}
+

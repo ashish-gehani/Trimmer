@@ -1,0 +1,9 @@
+{"binary": "test_fin",
+"native_libs":[],
+"name": "test",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "test.bc"
+}
+

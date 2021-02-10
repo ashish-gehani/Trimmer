@@ -1,0 +1,9 @@
+{"binary": "sha512sum_fin",
+"native_libs":[],
+"name": "sha512sum",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "sha512sum.bc"
+}
+

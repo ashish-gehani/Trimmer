@@ -1,0 +1,9 @@
+{"binary": "cat_fin",
+"native_libs":[],
+"name": "cat",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "cat.bc"
+}
+

@@ -1,0 +1,9 @@
+{"binary": "basenc_fin",
+"native_libs":[],
+"name": "basenc",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "basenc.bc"
+}
+

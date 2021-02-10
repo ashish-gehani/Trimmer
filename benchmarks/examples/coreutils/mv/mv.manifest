@@ -1,0 +1,9 @@
+{"binary": "mv_fin",
+"native_libs":[],
+"name": "mv",
+"static_args": [],
+"modules": [],
+"ldflags": ["-lselinux","-lpcre","-ldl","-lpthread", "-lacl", "-lattr" ],
+"main": "mv.bc"
+}
+

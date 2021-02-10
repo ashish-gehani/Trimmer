@@ -1,0 +1,9 @@
+{"binary": "fmt_fin",
+"native_libs":[],
+"name": "fmt",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "fmt.bc"
+}
+

@@ -1,0 +1,9 @@
+{"binary": "cksum_fin",
+"native_libs":[],
+"name": "cksum",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "cksum.bc"
+}
+

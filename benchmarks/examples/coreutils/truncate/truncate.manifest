@@ -1,0 +1,9 @@
+{"binary": "truncate_fin",
+"native_libs":[],
+"name": "truncate",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "truncate.bc"
+}
+

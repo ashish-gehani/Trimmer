@@ -1,0 +1,9 @@
+{"binary": "touch_fin",
+"native_libs":[],
+"name": "touch",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "touch.bc"
+}
+

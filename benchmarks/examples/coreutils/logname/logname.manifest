@@ -1,0 +1,9 @@
+{"binary": "logname_fin",
+"native_libs":[],
+"name": "logname",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "logname.bc"
+}
+

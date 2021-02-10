@@ -1,0 +1,9 @@
+{"binary": "hostid_fin",
+"native_libs":[],
+"name": "hostid",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "hostid.bc"
+}
+

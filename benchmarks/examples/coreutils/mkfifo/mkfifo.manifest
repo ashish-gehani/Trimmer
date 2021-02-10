@@ -1,0 +1,9 @@
+{"binary": "mkfifo_fin",
+"native_libs":[],
+"name": "mkfifo",
+"static_args": [],
+"modules": [],
+"ldflags": ["-lselinux","-lpcre","-ldl","-lpthread"],
+"main": "mkfifo.bc"
+}
+

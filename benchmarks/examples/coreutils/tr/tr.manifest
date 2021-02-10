@@ -1,0 +1,9 @@
+{"binary": "tr_fin",
+"native_libs":[],
+"name": "tr",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "tr.bc"
+}
+

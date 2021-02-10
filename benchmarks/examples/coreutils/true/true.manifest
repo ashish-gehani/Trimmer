@@ -1,0 +1,9 @@
+{"binary": "true_fin",
+"native_libs":[],
+"name": "true",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "true.bc"
+}
+

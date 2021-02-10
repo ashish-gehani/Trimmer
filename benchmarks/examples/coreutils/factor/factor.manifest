@@ -1,0 +1,9 @@
+{"binary": "factor_fin",
+"native_libs":[],
+"name": "factor",
+"static_args": [],
+"modules": [],
+"ldflags": ["-lgmp"],
+"main": "factor.bc"
+}
+

@@ -1,0 +1,9 @@
+{"binary": "chcon_fin",
+"native_libs":[],
+"name": "chcon",
+"static_args": [],
+"modules": [],
+"ldflags": ["-lselinux","-lpcre","-ldl","-lpthread"],
+"main": "chcon.bc"
+}
+

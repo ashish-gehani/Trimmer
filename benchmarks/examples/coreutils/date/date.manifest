@@ -1,0 +1,9 @@
+{"binary": "date_fin",
+"native_libs":[],
+"name": "date",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "date.bc"
+}
+

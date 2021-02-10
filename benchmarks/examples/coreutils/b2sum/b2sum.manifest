@@ -1,0 +1,9 @@
+{"binary": "b2sum_fin",
+"native_libs":[],
+"name": "b2sum",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "b2sum.bc"
+}
+

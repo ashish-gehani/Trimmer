@@ -1,0 +1,9 @@
+{"binary": "nproc_fin",
+"native_libs":[],
+"name": "nproc",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "nproc.bc"
+}
+

@@ -1,0 +1,9 @@
+{"binary": "yes_fin",
+"native_libs":[],
+"name": "yes",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "yes.bc"
+}
+

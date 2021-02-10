@@ -1,0 +1,9 @@
+{"binary": "dircolors_fin",
+"native_libs":[],
+"name": "dircolors",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "dircolors.bc"
+}
+

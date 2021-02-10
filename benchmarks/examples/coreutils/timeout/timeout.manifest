@@ -1,0 +1,9 @@
+{"binary": "timeout_fin",
+"native_libs":[],
+"name": "timeout",
+"static_args": [],
+"modules": [],
+"ldflags": ["-lrt","-lpthread"],
+"main": "timeout.bc"
+}
+

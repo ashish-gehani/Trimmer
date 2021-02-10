@@ -1,0 +1,9 @@
+{"binary": "link_fin",
+"native_libs":[],
+"name": "link",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "link.bc"
+}
+

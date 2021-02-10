@@ -1,0 +1,9 @@
+{"binary": "ptx_fin",
+"native_libs":[],
+"name": "ptx",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "ptx.bc"
+}
+

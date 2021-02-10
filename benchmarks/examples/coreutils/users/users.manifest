@@ -1,0 +1,9 @@
+{"binary": "users_fin",
+"native_libs":[],
+"name": "users",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "users.bc"
+}
+

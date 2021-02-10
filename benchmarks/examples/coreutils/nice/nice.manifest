@@ -1,0 +1,9 @@
+{"binary": "nice_fin",
+"native_libs":[],
+"name": "nice",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "nice.bc"
+}
+

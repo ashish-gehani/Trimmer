@@ -1,0 +1,9 @@
+{"binary": "pinky_fin",
+"native_libs":[],
+"name": "pinky",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "pinky.bc"
+}
+

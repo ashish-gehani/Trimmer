@@ -1,0 +1,9 @@
+{"binary": "kill_fin",
+"native_libs":[],
+"name": "kill",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "kill.bc"
+}
+

@@ -1,0 +1,9 @@
+{"binary": "mkdir_fin",
+"native_libs":[],
+"name": "mkdir",
+"static_args": [],
+"modules": [],
+"ldflags": ["-lselinux","-lpcre","-ldl","-lpthread"],
+"main": "mkdir.bc"
+}
+

@@ -1,0 +1,9 @@
+{"binary": "id_fin",
+"native_libs":[],
+"name": "id",
+"static_args": [],
+"modules": [],
+"ldflags": ["-lselinux","-lpcre","-ldl","-lpthread"],
+"main": "id.bc"
+}
+

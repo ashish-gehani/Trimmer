@@ -1,0 +1,64 @@
+diff -c -r mini_httpd-new/htpasswd.c mini_httpd-1.19/htpasswd.c
+*** mini_httpd-new/htpasswd.c	2019-09-27 02:32:34.507421361 -0700
+--- mini_httpd-1.19/htpasswd.c	2019-09-27 02:40:12.000000000 -0700
+***************
+*** 49,55 ****
+      while((line[y++] = line[x++]));
+  }
+  
+! static int getline1(char *s, int n, FILE *f) {
+      register int i=0;
+  
+      while(1) {
+--- 49,55 ----
+      while((line[y++] = line[x++]));
+  }
+  
+! static int getline(char *s, int n, FILE *f) {
+      register int i=0;
+  
+      while(1) {
+***************
+*** 189,195 ****
+      strcpy(user,argv[2]);
+  
+      found = 0;
+!     while(!(getline1(line,MAX_STRING_LEN,f))) {
+          if(found || (line[0] == '#') || (!line[0])) {
+              putline(tfp,line);
+              continue;
+--- 189,195 ----
+      strcpy(user,argv[2]);
+  
+      found = 0;
+!     while(!(getline(line,MAX_STRING_LEN,f))) {
+          if(found || (line[0] == '#') || (!line[0])) {
+              putline(tfp,line);
+              continue;
+diff -c -r mini_httpd-new/mini_httpd.c mini_httpd-1.19/mini_httpd.c
+*** mini_httpd-new/mini_httpd.c	2019-09-27 02:31:50.370698863 -0700
+--- mini_httpd-1.19/mini_httpd.c	2019-09-27 02:39:35.000000000 -0700
+***************
+*** 897,909 ****
+  	    /* Find next whitespace. */
+  	    cp2 = cp + strcspn( cp, " \t\012\015" );
+  	    /* Insert EOS and advance next-word pointer. */
+! 	    for(int i=0;i<strlen(cp2);i++)
+!                  {
+!                    if(*cp2 == '\t' || *cp2 == ' ' || *cp2=='\012' || *cp2=='\015')
+!                       *cp2++ = '\0';
+!                     else
+!                      break;
+!                  }
+  	    /* Split into name and value. */
+  	    name = cp;
+  	    value = strchr( name, '=' );
+--- 897,904 ----
+  	    /* Find next whitespace. */
+  	    cp2 = cp + strcspn( cp, " \t\012\015" );
+  	    /* Insert EOS and advance next-word pointer. */
+! 	    while ( *cp2 == ' ' || *cp2 == '\t' || *cp2 == '\012' || *cp2 == '\015' )
+!  		*cp2++ = '\0';
+  	    /* Split into name and value. */
+  	    name = cp;
+  	    value = strchr( name, '=' );

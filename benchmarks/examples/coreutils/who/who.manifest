@@ -1,0 +1,9 @@
+{"binary": "who_fin",
+"native_libs":[],
+"name": "who",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "who.bc"
+}
+

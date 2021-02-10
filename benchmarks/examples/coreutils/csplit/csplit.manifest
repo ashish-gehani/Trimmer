@@ -1,0 +1,9 @@
+{"binary": "csplit_fin",
+"native_libs":[],
+"name": "csplit",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "csplit.bc"
+}
+

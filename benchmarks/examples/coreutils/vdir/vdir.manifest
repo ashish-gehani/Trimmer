@@ -1,0 +1,9 @@
+{"binary": "vdir_fin",
+"native_libs":[],
+"name": "vdir",
+"static_args": [],
+"modules": [],
+"ldflags": ["-lselinux","-lpcre","-ldl","-lpthread"],
+"main": "vdir.bc"
+}
+

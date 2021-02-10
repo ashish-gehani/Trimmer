@@ -1,0 +1,9 @@
+{"binary": "printf_fin",
+"native_libs":[],
+"name": "printf",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "printf.bc"
+}
+

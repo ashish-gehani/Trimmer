@@ -1,0 +1,9 @@
+{"binary": "make-prime-list_fin",
+"native_libs":[],
+"name": "make-prime-list",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "make-prime-list.bc"
+}
+

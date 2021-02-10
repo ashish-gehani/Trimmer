@@ -1,0 +1,9 @@
+{"binary": "fold_fin",
+"native_libs":[],
+"name": "fold",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "fold.bc"
+}
+

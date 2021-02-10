@@ -1,0 +1,9 @@
+{"binary": "du_fin",
+"native_libs":[],
+"name": "du",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "du.bc"
+}
+

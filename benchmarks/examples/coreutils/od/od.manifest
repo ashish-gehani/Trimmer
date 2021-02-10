@@ -1,0 +1,9 @@
+{"binary": "od_fin",
+"native_libs":[],
+"name": "od",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "od.bc"
+}
+

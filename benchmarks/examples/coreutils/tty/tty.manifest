@@ -1,0 +1,9 @@
+{"binary": "tty_fin",
+"native_libs":[],
+"name": "tty",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "tty.bc"
+}
+

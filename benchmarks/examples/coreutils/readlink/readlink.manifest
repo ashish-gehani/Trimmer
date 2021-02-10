@@ -1,0 +1,9 @@
+{"binary": "readlink_fin",
+"native_libs":[],
+"name": "readlink",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "readlink.bc"
+}
+

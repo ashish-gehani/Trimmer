@@ -1,0 +1,9 @@
+{"binary": "stat_fin",
+"native_libs":[],
+"name": "stat",
+"static_args": [],
+"modules": [],
+"ldflags": ["-lselinux","-lpcre","-ldl","-lpthread"],
+"main": "stat.bc"
+}
+

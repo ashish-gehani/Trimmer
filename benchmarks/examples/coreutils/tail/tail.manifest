@@ -1,0 +1,9 @@
+{"binary": "tail_fin",
+"native_libs":[],
+"name": "tail",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "tail.bc"
+}
+

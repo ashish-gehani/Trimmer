@@ -1,0 +1,9 @@
+{"binary": "realpath_fin",
+"native_libs":[],
+"name": "realpath",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "realpath.bc"
+}
+

@@ -1,0 +1,9 @@
+{"binary": "sum_fin",
+"native_libs":[],
+"name": "sum",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "sum.bc"
+}
+

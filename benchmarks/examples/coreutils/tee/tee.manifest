@@ -1,0 +1,9 @@
+{"binary": "tee_fin",
+"native_libs":[],
+"name": "tee",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "tee.bc"
+}
+

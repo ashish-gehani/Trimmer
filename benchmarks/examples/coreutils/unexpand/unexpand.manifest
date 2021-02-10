@@ -1,0 +1,9 @@
+{"binary": "unexpand_fin",
+"native_libs":[],
+"name": "unexpand",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "unexpand.bc"
+}
+

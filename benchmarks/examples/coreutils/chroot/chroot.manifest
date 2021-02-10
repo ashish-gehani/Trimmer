@@ -1,0 +1,9 @@
+{"binary": "chroot_fin",
+"native_libs":[],
+"name": "chroot",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "chroot.bc"
+}
+

@@ -1,0 +1,9 @@
+{"binary": "stdbuf_fin",
+"native_libs":[],
+"name": "stdbuf",
+"static_args": [],
+"modules": [],
+"ldflags": [],
+"main": "stdbuf.bc"
+}
+
