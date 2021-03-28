@@ -18,14 +18,18 @@
 #ifndef ANNOTATE_NEW
 #define ANNOTATE_NEW
 
-#include "MSSA/SVFGOPT.h"
-#include "MSSA/SVFG.h"
+#include "Graphs/SVFGOPT.h"
+#include "Graphs/SVFG.h"
 
 #include <map>
 #include <unordered_map>
 
 using namespace llvm;
 using namespace std;
+typedef SVF::SVFGNode SVFGNode;
+typedef SVF::PAG PAG;
+typedef SVF::SVFG SVFG;
+typedef SVF::SVFGOPT SVFGOPT;
 
 Function *createFunction(Type *returnType, vector<Type*> &args, bool isVarArg, const string &name, Module *M);
 struct AnnotateNew: public ModulePass {
