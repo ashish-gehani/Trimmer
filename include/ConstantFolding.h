@@ -133,7 +133,7 @@ struct ConstantFolding : public ModulePass {
   ProcResult processBitCastInst(BitCastInst *);  
   ProcResult processPHINode(PHINode *);
   ProcResult processReturnInst(ReturnInst *);
-  ProcResult processTermInst(TerminatorInst *);   
+  ProcResult processTermInst(Instruction *);   
   ProcResult processPtrToIntInst(PtrToIntInst *);
   ProcResult tryfolding(Instruction *);
 

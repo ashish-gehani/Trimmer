@@ -26,10 +26,18 @@
 
 using namespace llvm;
 using namespace std;
-typedef SVF::SVFGNode SVFGNode;
-typedef SVF::PAG PAG;
-typedef SVF::SVFG SVFG;
-typedef SVF::SVFGOPT SVFGOPT;
+// typedef SVF::SVFGNode SVFGNode;
+// typedef SVF::PAG PAG;
+// typedef SVF::SVFG SVFG;
+// typedef SVF::SVFGOPT SVFGOPT;
+// typedef SVF::LoadSVFGNode LoadSVFGNode;
+// typedef SVF::StmtSVFGNode StmtSVFGNode;
+// typedef SVF::InterPHISVFGNode InterPHISVFGNode;
+// typedef SVF::FormalINSVFGNode FormalINSVFGNode;
+// typedef SVF::StorePE StorePE;
+// typedef SVF::PAGNode PAGNode;
+// typedef SVF::MRSVFGNode MRSVFGNode;
+using namespace SVF;
 
 Function *createFunction(Type *returnType, vector<Type*> &args, bool isVarArg, const string &name, Module *M);
 struct AnnotateNew: public ModulePass {

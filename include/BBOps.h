@@ -56,8 +56,8 @@ public:
   void freeBB(BasicBlock * BB); 
   void propagateUR(BasicBlock * BB, LoopInfo& LI);  
   void checkReadyToVisit(BasicBlock * BB); 
-  void markSuccessorsAsUR(TerminatorInst * termInst, LoopInfo& LI);  
-  bool foldToSingleSucc(TerminatorInst * termInst, vector<BasicBlock *> & readyToVisit, 
+  void markSuccessorsAsUR(Instruction * termInst, LoopInfo& LI);  
+  bool foldToSingleSucc(Instruction * termInst, vector<BasicBlock *> & readyToVisit, 
       LoopInfo& LI);
   bool straightPath(BasicBlock * from, BasicBlock * to); 
   Value * foldPhiNode(PHINode * phiNode, vector<Value*>&);
