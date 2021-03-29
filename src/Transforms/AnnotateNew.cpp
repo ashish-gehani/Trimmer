@@ -351,7 +351,7 @@ set<SVFGNode*> *AnnotateNew::dfs_rec_limit(SVFGNode* root, std::function<vector<
     debug(Yes)<<"Actual Parm!!!\n";
     depth--;
   } else if(auto in = dyn_cast<FormalINSVFGNode>(root)){
-    auto* F = in->getFun();
+    auto* F = in->getFun()->getLLVMFun();
     if(depthFunctions.find(F) == depthFunctions.end()){
       debug(Yes)<<"In function not in CallGraph depth\n";
       return output;
@@ -519,7 +519,7 @@ vector<SVFGNode*> AnnotateNew::forwardDfsLambdaLimited(SVFGNode *current) {
       debug(Yes)<<"CallGraph Function: "<<ARG->getParent()->getName()<<"\n";
     }
   } else if(auto in = dyn_cast<FormalINSVFGNode>(current)){
-    auto* F = in->getFun();
+    auto* F = in->getFun()->getLLVMFun();
     if(depthFunctions.find(F) == depthFunctions.end()){
       debug(Yes)<<"In function not in CallGraph depth\n";
       return worklist;
