@@ -157,8 +157,24 @@ bool LoopUnroller::doUnroll(TargetLibraryInfo * TLI, AssumptionCache &AC, unsign
   debug(Yes) << "Trying trip count: " << tripCount << "\n";
   bool allowRuntime = false;
   bool unrollRemainder = false;
-  int UnrollResult = (int) UnrollLoop(L, tripCount, tripCount, true, allowRuntime, false, 
-                true, false, 1, 0, unrollRemainder ,LI, &SE, &DT, &AC, &ORE, PreserveLCSSA);//unrollRemaineder set to false currently
+  // int UnrollResult = (int) UnrollLoop(L, tripCount, tripCount, true, allowRuntime, false, 
+                // true, false, 1, 0, unrollRemainder ,LI, &SE, &DT, &AC, &ORE, PreserveLCSSA);//unrollRemaineder set to false currently
+  
+  UnrollLoopOptions unroll_opts = {
+    tripCount, // Count
+    tripCount, // TripCount
+    true, // Force
+    allowRuntime, // AllowRuntime
+    false, // AllowExpensiveTripCount
+    true, // PreserveCondBr
+    false, // PreserveOnlyFirst
+    1, // TripMultiple
+    0, // PeelCount
+    unrollRemainder, // UnrollRemainder
+    false //ForgetAllSCEV
+  };
+
+  int UnrollResult = (int) UnrollLoop(L, unroll_opts, LI, &SE, &DT, &AC, &ORE, PreserveLCSSA); //unrollRemaineder set to false currently
   if(!UnrollResult) {
     debug(Yes) << "failed in unrolling\n";
     return false;
