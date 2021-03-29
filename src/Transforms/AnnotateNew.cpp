@@ -95,7 +95,7 @@ map<Value *, Stat > statMap;
 Value *currentValue;
 
 using namespace std;
-using namespace analysisUtil;
+// using namespace analysisUtil;
 using namespace llvm;
 
 char AnnotateNew::ID = 0;

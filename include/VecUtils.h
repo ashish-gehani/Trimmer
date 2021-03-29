@@ -22,7 +22,7 @@ bool findInVect(vector<Ty> & vect, Ty val) {
 }
 
 template <typename Ty>
-bool findInVect(SmallVector<Ty, 16> &vect, Ty val) {
+bool findInVect(llvm::SmallVector<Ty, 16> &vect, Ty val) {
   for(unsigned i = 0; i < vect.size(); i++) {
     if(vect[i] == val)
       return true;
