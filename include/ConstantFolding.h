@@ -36,6 +36,11 @@
 #include "llvm/Analysis/ScalarEvolutionExpressions.h"
 #include "llvm/Analysis/TargetTransformInfo.h"
 #include "llvm/Analysis/OptimizationRemarkEmitter.h"
+#include "llvm/Analysis/ProfileSummaryInfo.h"
+#include "llvm/Analysis/BlockFrequencyInfo.h"
+
+#include "llvm/Support/CommandLine.h"
+
 
 #include <getopt.h>
 #include <list>
@@ -87,9 +92,10 @@ struct ConstantFolding : public ModulePass {
   map<Value*, Value*> ptrMap;
   map<Function *, set<GlobalVariable *> > modSet;
   map<Function *, FuncSpecDetail *> funcSpecMap;
-  bool exit;
-
+  ProfileSummaryInfo *PSI;
+  BlockFrequencyInfo *BFE;
   set<Value *> trackedValues;
+  int exit;
 
   BasicBlock * currBB;
   bool terminateBB;

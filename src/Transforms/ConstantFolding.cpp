@@ -480,7 +480,7 @@ void ConstantFolding::getTrackedValues(set<Value *> &trackedValues) {
     }
   }
 
-  for(auto it = module->global_object_begin(), end = module->global_object_end(); it != end; it++)
+  for(auto it = module->global_objects().begin(), end = module->global_objects().end(); it != end; it++)
     if(it->getMetadata("track"))
       trackedValues.insert(&*it);
 }
@@ -492,10 +492,11 @@ bool ConstantFolding::runOnModule(Module & M) {
   initDebugLevel();
   debug(Yes) << "  ---------------- ** inter-constprop ** ----------------\n";
   module = &M;
-  TLI = &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI();
   DL = new DataLayout(module);   
   CG = &getAnalysis<CallGraphWrapperPass>().getCallGraph();  
   PreserveLCSSA = mustPreserveAnalysisID(LCSSAID);
+  PSI = &getAnalysis<ProfileSummaryInfoWrapperPass>().getPSI();
+  BFE = &getAnalysis<BlockFrequencyInfoWrapperPass>().getBFI();
 
   useAnnotations = isAnnotated;  
   trackAllocas = trackAlloc;
@@ -522,6 +523,8 @@ bool ConstantFolding::runOnModule(Module & M) {
   getReadonlyFuncNames();
 
   Function * func = module->getFunction(StringRef("main"));
+  TLI = &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI(*func);
+
   BasicBlock * entry = &func->getEntryBlock();
 
   if (!isFuncInfoInitialized(func)) {
@@ -3058,7 +3061,7 @@ void ConstantFolding::simplifyStrFunc(CallInst * callInst) {
   };
   Function* CalledFn = callInst->getCalledFunction();
   OptimizationRemarkEmitter ORE(CalledFn);
-  LibCallSimplifier Simplifier(*DL,TLI,ORE,InstCombineRAUW);
+  LibCallSimplifier Simplifier(*DL,TLI,ORE, BFE, PSI);
 
   if (Value *With = Simplifier.optimizeCall(callInst)) {
     replaceIfNotFD(callInst, With);

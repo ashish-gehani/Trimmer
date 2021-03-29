@@ -76,7 +76,7 @@ set_target_properties(ConstantFolding Internalize TestPass SpecializeArguments R
 set_target_properties(AnnotateNew
   PROPERTIES
   COMPILE_FLAGS "-fPIC -fno-rtti -O3"
-  LINK_FLAGS "-rdynamic -lLLVMSvf"
+  LINK_FLAGS "-rdynamic"
   ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/"
   LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/"
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/"
@@ -88,10 +88,9 @@ set_target_properties(AnnotateNew
 
 set_target_properties(LLVMSvf 
     PROPERTIES
-    IMPORTED_LOCATION /usr/local/lib/libLLVMSvf.a)
-
 ]]
-target_link_libraries(AnnotateNew LLVMSvf LLVMCudd)
+
+target_link_libraries(AnnotateNew)
 # Get proper shared-library behavior (where symbols are not necessarily
 # resolved when the shared library is linked) on OS X.
 if(APPLE)
