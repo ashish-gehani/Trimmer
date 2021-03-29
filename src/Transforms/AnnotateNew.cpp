@@ -731,7 +731,6 @@ void AnnotateNew::getLoopBbs(Module *M) {
 
 void AnnotateNew::getLoopIterators(const BasicBlock *BB, set<const Value *> &trackedAllocas) {
 
-  TargetLibraryInfo *TLI = &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI();
 
   set<SVFGNode*> backwardPtr;
   set<Value *> scalars; //scalars
@@ -739,6 +738,8 @@ void AnnotateNew::getLoopIterators(const BasicBlock *BB, set<const Value *> &tra
   vector<const SVFGNode *> worklistSvfg;
 
   Function *F = (Function *)BB->getParent();
+  TargetLibraryInfo *TLI = &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI(*F);
+
   AssumptionCache &AC = getAnalysis<AssumptionCacheTracker>(*F).getAssumptionCache(*F);
   DominatorTree * DT = new DominatorTree(*F);
   LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*F).getLoopInfo();
