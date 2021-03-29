@@ -18,7 +18,9 @@
 #include "WPA/Andersen.h"
 #include "Graphs/PAG.h"
 #include "MSSA/SVFGBuilder.h"
+#include "SVF-FE/PAGBuilder.h"
 #include "MSSA/MemSSA.h"
+#include "SVF-FE/LLVMModule.h"
 #include "llvm/Analysis/AssumptionCache.h"
 #include "LoopUnroller.h"
 #include <chrono>
@@ -1741,12 +1743,20 @@ double statFormula(Stat *a) {
  */
 bool AnnotateNew::runOnModule(Module &M) {
   initDebugLevel();
-  AndersenWaveDiff* ander = AndersenWaveDiff::createAndersenWaveDiff(M);
+
+  // TODO: Revisit this. Might be too slow. We are extracting an unoptimized SVF and then optimizing it
+  SVFModule* svfModule = LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(M);  
+  PAGBuilder pag_builder;
+	PAG* svf_pag = pag_builder.build(svfModule);
+
+  AndersenWaveDiff* ander = AndersenWaveDiff::createAndersenWaveDiff(svf_pag);
+  // AndersenWaveDiff* ander = AndersenWaveDiff::createAndersenWaveDiff(svfModule);
   SVFGBuilder builder;
 
   LOOP_ID = 0;
   module = &M;
-  svfg =  builder.buildSVFG(ander);
+  SVFG* unoptimized_svfg =  builder.buildFullSVFG(ander);
+  svfg =  new SVFGOPT(unoptimized_svfg->getMSSA(), VFG::FULLSVFG_OPT);
   pag = svfg->getPAG();
 
 
