@@ -169,7 +169,7 @@ void ConstantFolding::runOnInst(Instruction * I) {
       }
     }
 
-    if(!isa<TerminatorInst>(I)) { //need terminator instruction to make BB graphs
+    if(!isa<Instruction>(I)) { //need terminator instruction to make BB graphs
       return;
     }
   }
@@ -188,7 +188,7 @@ void ConstantFolding::runOnInst(Instruction * I) {
     result = processPHINode(phiNode);
   } else if(ReturnInst * retInst = dyn_cast<ReturnInst>(I)) {
     result = processReturnInst(retInst);
-  } else if(TerminatorInst * termInst = dyn_cast<TerminatorInst>(I)) {
+  } else if(Instruction * termInst = dyn_cast<Instruction>(I)) {
     result = processTermInst(termInst);
   } else if(MemCpyInst * memcpyInst = dyn_cast<MemCpyInst>(I)) {
     result = processMemcpyInst(dyn_cast<CallInst>(memcpyInst));
@@ -1229,7 +1229,7 @@ ProcResult ConstantFolding::tryfolding(Instruction * I) {
    single successor and BB is NOT that successor.
    e.g. if %i above is true bbOps.isnotSingleSucc(%y) will return true.
    */
-ProcResult ConstantFolding::processTermInst(TerminatorInst * termInst) {  
+ProcResult ConstantFolding::processTermInst(Instruction * termInst) {  
   vector<BasicBlock *> readyToVisit;
   debug(Yes) << "current function name " << currfn->getName() << "\n";
   LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();

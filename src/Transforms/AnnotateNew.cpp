@@ -16,7 +16,7 @@
 #include <set>
 #include <map>
 #include "WPA/Andersen.h"
-#include "MemoryModel/PAG.h"
+#include "Graphs/PAG.h"
 #include "MSSA/SVFGBuilder.h"
 #include "MSSA/MemSSA.h"
 #include "llvm/Analysis/AssumptionCache.h"
