@@ -1420,7 +1420,7 @@ void printAllAllocsMallocs(Module &M) {
   }
 
   debug(Yes)<<"asd size allocs "<<asd.size()<<"\n";
-  for(auto it = M.global_object_begin(), end = M.global_object_end(); it != end; it++)
+  for(auto it = M.global_objects().begin(), end = M.global_objects().end(); it != end; it++)
     if(!dyn_cast<Function>(&*it))
       asd.insert(&*it);
 
@@ -1711,7 +1711,7 @@ void AnnotateNew::run(vector<Value*> sources, Value *argc, set<const Value*> &tr
 }
 
 void AnnotateNew::annotateLoop(const BasicBlock *BB, Function *F, unsigned loop_id) {
-  IRBuilder<> builder((BasicBlock *) BB);
+  llvm::IRBuilder<> builder((BasicBlock *) BB);
 
   builder.SetInsertPoint((Instruction *) BB->getFirstNonPHI());
   vector<Value *> args;
