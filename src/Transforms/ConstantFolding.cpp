@@ -3739,12 +3739,12 @@ void ConstantFolding::handleGetLine(CallInst * ci) {
 
     IRBuilder<> Builder(ci);
 
-    Constant *mallocFunc;
+    FunctionCallee mallocFunc;
     mallocFunc = module->getOrInsertFunction("malloc",Type::getInt8PtrTy(module->getContext()),Type::getInt64Ty(module->getContext()));    
-    Function *hookM= cast<Function>(mallocFunc);
+    // Function *hookM= cast<Function>(mallocFunc);
 
     ConstantInt * arg1 = Builder.getInt64(strlen(newBuf) + 1);
-    CallInst * malloc = Builder.CreateCall(hookM,arg1);   
+    CallInst * malloc = Builder.CreateCall(mallocFunc,arg1);   
 
     Constant * const_array = ConstantDataArray::getString(module->getContext(),StringRef(newBuf),true);
     GlobalVariable * gv = new GlobalVariable(*module,const_array->getType(),true,GlobalValue::ExternalLinkage,const_array,"");
@@ -3755,10 +3755,10 @@ void ConstantFolding::handleGetLine(CallInst * ci) {
     StoreInst * store = Builder.CreateStore(malloc,bufPtr,false);
 
 
-    Constant *hookFunc;
+    FunctionCallee fseekFunc;
     // FIXME: Line is overflowing - Properly break after 80 chars
-    hookFunc = module->getOrInsertFunction("fseek", Type::getInt32Ty(module->getContext()),fptrVal->getType(),Type::getInt64Ty(module->getContext()),Type::getInt32Ty(module->getContext()));    
-    Function *hook= cast<Function>(hookFunc);
+    fseekFunc = module->getOrInsertFunction("fseek", Type::getInt32Ty(module->getContext()),fptrVal->getType(),Type::getInt64Ty(module->getContext()),Type::getInt32Ty(module->getContext()));    
+    // Function *hook= cast<Function>(hookFunc);
 
     ConstantInt * arg2 = Builder.getInt64(getfptrOffset(sfd,fptr));
     ConstantInt * arg3 = Builder.getInt32(0);
@@ -3766,7 +3766,7 @@ void ConstantFolding::handleGetLine(CallInst * ci) {
     putsArgs.push_back(fptrVal);
     putsArgs.push_back(arg2);
     putsArgs.push_back(arg3);
-    CallInst * seek = Builder.CreateCall(hook,putsArgs);
+    CallInst * seek = Builder.CreateCall(fseekFunc,putsArgs);
 
     fileIOCalls[sfd]->insts.push_back(ci);
     fileIOCalls[sfd]->insertedSeekCalls.push_back(seek);
@@ -3871,10 +3871,10 @@ void ConstantFolding::handleRead(CallInst * ci) {
   IRBuilder<> Builder(ci);
   Instruction* MemCpyInst = Builder.CreateMemCpy(bufPtr,1,gv,1,bytes_read);
 
-  Constant *hookFunc;
+  FunctionCallee lseekFunc;
   // FIXME: Break line
-  hookFunc = module->getOrInsertFunction("lseek", Type::getInt64Ty(module->getContext()), Type::getInt32Ty(module->getContext()),Type::getInt64Ty(module->getContext()),Type::getInt32Ty(module->getContext()));    
-  Function *hook= cast<Function>(hookFunc);
+  lseekFunc = module->getOrInsertFunction("lseek", Type::getInt64Ty(module->getContext()), Type::getInt32Ty(module->getContext()),Type::getInt64Ty(module->getContext()),Type::getInt32Ty(module->getContext()));    
+  // Function *hook= cast<Function>(hookFunc);
 
   ConstantInt * arg1 = Builder.getInt32(fd);
   ConstantInt * arg2 = Builder.getInt64(getfdiOffset(sfd,fd));
@@ -3883,7 +3883,7 @@ void ConstantFolding::handleRead(CallInst * ci) {
   putsArgs.push_back(arg1);
   putsArgs.push_back(arg2);
   putsArgs.push_back(arg3);
-  CallInst * seek = Builder.CreateCall(hook,putsArgs);
+  CallInst * seek = Builder.CreateCall(lseekFunc,putsArgs);
 
   fileIOCalls[sfd]->insts.push_back(ci);
   fileIOCalls[sfd]->insertedSeekCalls.push_back(seek);
@@ -4131,9 +4131,9 @@ void ConstantFolding::handleFRead(CallInst * ci) {
   gv->setAlignment(1);
   IRBuilder<> Builder(ci);
   Instruction* MemCpyInst = Builder.CreateMemCpy(bufPtr,1,gv,1,bytes_read);
-  Constant *hookFunc;
-  hookFunc = module->getOrInsertFunction("fseek", Type::getInt32Ty(module->getContext()),fptrVal->getType(),Type::getInt64Ty(module->getContext()),Type::getInt32Ty(module->getContext()));    
-  Function *hook= cast<Function>(hookFunc);
+  FunctionCallee fseekFunc;
+  fseekFunc = module->getOrInsertFunction("fseek", Type::getInt32Ty(module->getContext()),fptrVal->getType(),Type::getInt64Ty(module->getContext()),Type::getInt32Ty(module->getContext()));    
+  // Function *hook= cast<Function>(hookFunc);
 
   ConstantInt * arg2 = Builder.getInt64(getfptrOffset(sfd,fptr));
   ConstantInt * arg3 = Builder.getInt32(0);
@@ -4141,7 +4141,7 @@ void ConstantFolding::handleFRead(CallInst * ci) {
   putsArgs.push_back(fptrVal);
   putsArgs.push_back(arg2);
   putsArgs.push_back(arg3);
-  CallInst * seek = Builder.CreateCall(hook,putsArgs);
+  CallInst * seek = Builder.CreateCall(fseekFunc,putsArgs);
 
   fileIOCalls[sfd]->insts.push_back(ci);
   fileIOCalls[sfd]->insertedSeekCalls.push_back(seek);
@@ -4233,9 +4233,9 @@ void ConstantFolding::handleFGets(CallInst * ci) {
     IRBuilder<> Builder(ci);
     Instruction* MemCpyInst = Builder.CreateMemCpy(bufPtr,1,gv,1,strlen(buffer)+1);
     ci->replaceAllUsesWith(bufPtr);
-    Constant *hookFunc;
-    hookFunc = module->getOrInsertFunction("fseek", Type::getInt32Ty(module->getContext()),fptrVal->getType(),Type::getInt64Ty(module->getContext()),Type::getInt32Ty(module->getContext()));    
-    Function *hook= cast<Function>(hookFunc);
+    FunctionCallee fseekFunc;
+    fseekFunc = module->getOrInsertFunction("fseek", Type::getInt32Ty(module->getContext()),fptrVal->getType(),Type::getInt64Ty(module->getContext()),Type::getInt32Ty(module->getContext()));    
+    // Function *hook= cast<Function>(hookFunc);
 
     ConstantInt * arg2 = Builder.getInt64(getfptrOffset(sfd,fptr));
     ConstantInt * arg3 = Builder.getInt32(0);
@@ -4243,7 +4243,7 @@ void ConstantFolding::handleFGets(CallInst * ci) {
     putsArgs.push_back(fptrVal);
     putsArgs.push_back(arg2);
     putsArgs.push_back(arg3);
-    CallInst * seek = Builder.CreateCall(hook,putsArgs);
+    CallInst * seek = Builder.CreateCall(fseekFunc,putsArgs);
 
     fileIOCalls[sfd]->insts.push_back(ci);
     fileIOCalls[sfd]->insertedSeekCalls.push_back(seek);
