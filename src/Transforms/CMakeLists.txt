@@ -89,7 +89,7 @@ set_target_properties(AnnotateNew
 
 set_target_properties(Svf 
     PROPERTIES
-    IMPORTED_LOCATION usr/local/include/Release-build/lib/libSvf.a)
+    IMPORTED_LOCATION usr/local/lib/libSvf.a)
 ]]
 
 target_link_libraries(AnnotateNew Svf Cudd)

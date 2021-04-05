@@ -27,7 +27,7 @@ void AnnotateTest::getTrackedVariables(set<Value *> &tracked, Module &M) {
     }
   }
 
-  for(auto it = M.global_object_begin(), end = M.global_object_end(); it != end; it++)
+  for(auto it = M.global_objects().begin(), end = M.global_objects().end(); it != end; it++)
     if(!dyn_cast<Function>(&*it))
       tracked.insert(&*it);
 }
