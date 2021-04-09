@@ -1,1 +1,1 @@
-{"binary": "airtun-ng_fin", "native_libs": [], "name": "airtun-ng", "args": ["-a", "00:0c:29:52:aa:56","-w","1234567890","eth0"], "modules": [], "ldflags": ["-lssl","-lcrypto"], "main": "airtun-ng.bc", "config_files": []}
+{"binary": "airtun-ng_fin", "native_libs": [], "name": "airtun-ng", "args": ["-a", "_","-w","_","_"], "modules": [], "ldflags": ["-lssl","-lcrypto"], "main": "airtun-ng.bc", "config_files": []}
