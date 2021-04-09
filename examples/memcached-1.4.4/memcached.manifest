@@ -1,1 +1,1 @@
-{"binary": "memcached_fin", "native_libs": [], "name": "memcached", "args": ["-m","64","-l","127.0.0.1"], "modules": [], "ldflags": ["-levent","-lpthread"], "main": "memcached.bc", "config_files": []}
+{"binary": "memcached_fin", "native_libs": [], "name": "memcached", "args": ["-m","_","-l","_"], "modules": [], "ldflags": ["-levent","-lpthread"], "main": "memcached.bc", "config_files": []}
