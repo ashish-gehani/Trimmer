@@ -21,7 +21,7 @@ all: ${NETPERF_BITCODE}
 netperf: ${OUT_DIR}
 	cp ${NETPERF_BITCODE} ${OUT_DIR} && \
 	cd ${OUT_DIR} && \
-	echo '{"binary": "netperf_fin", "native_libs": [], "name": "netperf", "args": ["-H", "localhost","-t","TCP_RR"], "modules": [], "ldflags": ["-lm"], "main": "netperf.bc", "config_files": []}' > ${NETPERF_MANIFEST} && \
+	echo '{"binary": "netperf_fin", "native_libs": [], "name": "netperf", "args": ["-H", "localhost","-t","TCP_RR","-D","5,G","-i","15,1"], "modules": [], "ldflags": ["-lm"], "main": "netperf.bc", "config_files": []}' > ${NETPERF_MANIFEST} && \
 	python ${TRIMMER_HOME}/tool/trimmer.py ${NETPERF_MANIFEST} ./work_dir  2> ${LOG_FILE}
 
 .PHONY: ${NETPERF_BITCODE}
@@ -34,6 +34,18 @@ ${NETPERF_BITCODE}: ${NETPERF_NAME}
 	${BITCODE_EXTRACT} src/${NETPERF} && \
 	${OPT_NAME} ${CFLAGS} src/${NETPERF_BITCODE} -o src/${NETPERF_BITCODE} && \
 	mv src/${NETPERF_BITCODE} ../ 
+
+test_netperf:
+	@echo "\t\tTest netperf"
+	${NETPERF_NAME}/src/netserver && \
+	${OUT_DIR}/work_dir/netperf_fin_stripped > t_out && \
+	if grep -q 'TCP REQUEST/RESPONSE TEST' t_out; then \
+		echo "\tnetperf test baseline compare? Passed!"; \
+	else \
+		echo "\tnetperf test baseline compare? Failed!"; \
+	fi
+	@rm ./t_out
+
     
 		
 ${OUT_DIR}:
