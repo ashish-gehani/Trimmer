@@ -4,7 +4,7 @@ THTTPD_VERSION=2.25b
 THTTPD_NAME=${THTTPD}-${THTTPD_VERSION}
 THTTPD_TAR=${THTTPD_NAME}.tar.gz
 THTTPD_PATCH=thttpd.patch
-
+THTTPD_CONF=./thttpd.conf
 THTTPD_MANIFEST=${THTTPD}.manifest
 
 OUT_DIR?=trimmer
@@ -31,6 +31,29 @@ ${THTTPD_BITCODE}: ${THTTPD_NAME}
 	CC=${BITCODE_WRAPPER} make && \
 	${BITCODE_EXTRACT} ${THTTPD} && \
 	mv ${THTTPD_BITCODE} ../
+
+test_thttpd:
+	@echo "\t\tTesting Thttpd"
+	@cp ${THTTPD_CONF} ${THTTPD_NAME}
+	@cd ${THTTPD_NAME}  && \
+	sed -i 's/8089/8199/g' ${THTTPD_CONF}
+	@test -f workdir && echo "workdir already exists" || mkdir workdir 
+	@echo '<HTML><HEAD><TITLE>Index of ./</TITLE></HEAD><BODY BGCOLOR="#99cc99" TEXT="#000000" LINK="#2020ff" VLINK="#4040cc"><H4>Index of ./</H4></HTML>' > workdir/index.html
+
+	${THTTPD_NAME}/thttpd -C ${THTTPD_NAME}/thttpd.conf
+	wget 127.0.0.1:8190/ 
+	@cd ${OUT_DIR}/work_dir/ && \
+        mkdir workdir && \
+	echo '<HTML><HEAD><TITLE>Index of ./</TITLE></HEAD><BODY BGCOLOR="#99cc99" TEXT="#000000" LINK="#2020ff" VLINK="#4040cc"><H4>Index of ./</H4></HTML>' > workdir/index.html && \
+	./thttpd_fin_stripped  && \
+	wget 127.0.0.1:8089/
+	@cmp -s ./index.html ${OUT_DIR}/work_dir/index.html; \
+	RETVAL=$$?; \
+	if [ $$RETVAL -eq 0 ]; then \
+		echo "\tthttpd test baseline compare? Passed!"; \
+	else \
+		echo "\tthttpd test baseline compare? Failed!"; \
+	fi
 		
 ${OUT_DIR}:
 	mkdir -p ${OUT_DIR}
