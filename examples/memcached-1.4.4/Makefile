@@ -34,6 +34,8 @@ ${MEMCACHED_BITCODE}: ${MEMCACHED_NAME}
 	${OPT_NAME} ${CFLAGS} ${MEMCACHED_BITCODE} -o ${MEMCACHED_BITCODE} && \
 	mv ${MEMCACHED_BITCODE} ../
 		
+test_men:
+	python3 test_mem.py
 ${OUT_DIR}:
 	mkdir -p ${OUT_DIR}
 
