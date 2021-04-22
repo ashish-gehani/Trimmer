@@ -36,7 +36,9 @@ ${TOTD_BITCODE}: ${TOTD_NAME}
 	CC=${BITCODE_WRAPPER} make && \
 	${BITCODE_EXTRACT} ${TOTD} && \
 	mv ${TOTD_BITCODE} ../
-		
+	
+test_totd:
+	python3 test_totd.py
 ${OUT_DIR}:
 	mkdir -p ${OUT_DIR}
 
