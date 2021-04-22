@@ -21,6 +21,7 @@ Stats::Stats() {
   functionsCloned = 0;
   loopsUnrolled = 0;
   trackedLoads = 0;
+  instructionsFolded = 0;
 }
 
 void Stats::functionCall(Function *child) {
@@ -102,6 +103,7 @@ void Stats::printStats(Function *main) {
   debug(Yes)<<"# Function Calls Analyzed: "<<count<<"\n";
   debug(Yes)<<"# Functions Cloned: "<<functionsCloned<<"\n";
   debug(Yes)<<"# Loops Unrolled: "<<loopsUnrolled<<"\n";
+  debug(Yes)<<"# Instructions Folded: "<<instructionsFolded<<"\n";
   std::ofstream StatFile;
   StatFile.open("constStats.JSON");
   StatFile<<"{ \"LibCallsSimplified\": "<<libCallsSimplified<<", \"TotalLibCalls\":"<<totalLibCalls<<", \"LoadsFolded\":"<<loadsFolded<<", \"TrackedLoadsFolded\": "<<trackedLoads<<",\"TotalLoadsEncountered\":"<<totalLoads<<", \"FunctionCallsAnalyzed\":"<<count<<",\"FunctionsCloned\":"<<functionsCloned<<".\"LoopsUnrolled\":"<<loopsUnrolled<<",";
@@ -133,9 +135,11 @@ void Stats::incrementTotalLoads(){ totalLoads++; }
 void Stats::incrementLoadsFolded(){ loadsFolded++; }
 void Stats::incrementTotalLibCalls(){ totalLibCalls++; }
 void Stats::incrementFunctionsCloned() { functionsCloned++; }
+void Stats::decrementFunctionsCloned() { functionsCloned--; }
 void Stats::incrementLoopsUnrolled() { loopsUnrolled++; } 
 void Stats::incrementTrackedLoads() { trackedLoads++;          }
 unsigned Stats::getTrackedLoads() { return trackedLoads; }
+void Stats::incrementInstructionsFolded(){ instructionsFolded++; }
 
 bool FunctionStats::getLoopTime(uint64_t &seconds) {
   debug(Yes)<<"getLoopTime(seconds) \n";
