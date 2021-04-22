@@ -89,6 +89,7 @@ class Stats {
     unsigned functionsCloned;
     unsigned loopsUnrolled;
     unsigned trackedLoads;
+    unsigned instructionsFolded;
   public:
     Stats();
     void functionCall(Function *);
@@ -105,7 +106,9 @@ class Stats {
     void incrementTrackedLoads();
     void incrementTotalLibCalls();
     void incrementFunctionsCloned();
+    void decrementFunctionsCloned();
     void incrementLoopsUnrolled();
+    void incrementInstructionsFolded();
     unsigned getTrackedLoads();
 
 
