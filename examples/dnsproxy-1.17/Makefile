@@ -22,7 +22,8 @@ dns: ${OUT_DIR} ${DNSPROXY_BITCODE}
 	cd ${OUT_DIR} && \echo '{"binary": "dnsproxy_fin", "native_libs": [], "name": "dnsproxy", "args": ["-c", "dnsproxy.conf"], "modules": [], "ldflags": ["-levent"], "main": "dnsproxy.bc", "config_files": ["dnsproxy.conf"]}' > ${DNSPROXY_MANIFEST} && \
 	python ${TRIMMER_HOME}/tool/trimmer.py ${DNSPROXY_MANIFEST} ./workdir 2> ${LOG_FILE}
 
-
+test_dns: 
+	python3 test_dns.py
 ${DNSPROXY_BITCODE}: ${DNSPROXY_NAME}
 	cd ${DNSPROXY_NAME} && \
 	CC=${BITCODE_WRAPPER} CFLAGS="-DHAVE_CONFIG_H -DVERSION="\"1.17\"" -Xclang -disable-O0-optnone" ./configure && \
