@@ -43,7 +43,8 @@ tcp: ${OUT_DIR}
 	echo '{"binary": "sans_fin",  "native_libs": [], "name": "sans", "args": ["-c", "sanss.conf"], "modules": [], "ldflags": [], "main": "sans.bc", "config_files":["sanss.conf"] }' > ${SANS_MANIFEST} && \
 	python ${TRIMMER_HOME}/tool/trimmer.py ${SANS_MANIFEST} ./tcp 2> ${LOG_FILE}
 
-
+test_sans:
+	python3 test_sans.py 
 .PHONY: ${SANS_BITCODE}
 ${SANS_BITCODE}: ${SANS_NAME}
 	cd ${SANS_NAME} && \
