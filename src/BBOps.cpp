@@ -516,7 +516,6 @@ void BBOps::imageContext(BasicBlock * to, BasicBlock* from) {
   assert(BasicBlockContexts.find(to) == BasicBlockContexts.end());
   if(BasicBlockContexts.find(to) != BasicBlockContexts.end()) {
     ContextInfo *ci = BasicBlockContexts[to];
-    delete ci->memory;
     BasicBlockContexts.erase(to);
     delete ci;
   }
