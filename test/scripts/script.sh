@@ -3,7 +3,7 @@
 # license that can be found in the LICENSE file.
 
 cd ${4}
-${LLVM_CC_NAME} -O0 -emit-llvm -o $3/${1}t1.bc -c ${1}.c
+${LLVM_CC_NAME} -O0 -Xclang -disable-O0-optnone -emit-llvm -o $3/${1}t1.bc -c ${1}.c
 ${LLVM_OPT_NAME} -mem2reg -mergereturn -simplifycfg -loops -lcssa -loop-simplify -loop-rotate $3/${1}t1.bc -o $3/${1}t2.bc
 ${LLVM_OPT_NAME} -load ${TRIMMER_HOME}/build/ConstantFolding.so -isAnnotated=false -fileNames $5 -inter-constprop $3/${1}t2.bc -o $3/${1}t3.bc
 ${LLVM_OPT_NAME} -load ${TRIMMER_HOME}/build/Remove.so -remove $3/${1}t3.bc -o $3/${1}t4.bc
