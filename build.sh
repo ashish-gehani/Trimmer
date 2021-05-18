@@ -88,8 +88,8 @@ echo "=== Downloading LLVM & Clang Source Files ==="
 
 echo "=== Exporting required environment variables ==="
 
-export LLVM_SRC=$(pwd)/llvm-7.0.0.src
-export LLVM_OBJ=$(pwd)/llvm-7.0.0.obj
+#export LLVM_SRC=$(pwd)/llvm-7.0.0.src
+#export LLVM_OBJ=$(pwd)/llvm-7.0.0.obj
 export LLVM_DIR=/usr/local/llvm-10.0
 export PATH=$LLVM_DIR/bin:$PATH
 
@@ -102,11 +102,11 @@ git clone https://github.com/SVF-tools/SVF.git SVF
 
 #  Specific commit used for TRIMMER development
 cd SVF
-# git checkout 0b75f3e0c10db04d65b6eafd91da5da9be71ecaa
+git checkout f36990a672abdc7cdfb9de613aa05be96ece20f0
 
 # Add -fPIC to CMakeLists.txt in SVF
-sed -i '/set(CMAKE_CXX_FLAGS "-std=gnu++11 -O3 -fno-rtti")/c\\t\tset(CMAKE_CXX_FLAGS "-std=gnu++11 -O3 -fno-rtti -fPIC")' CMakeLists.txt 
-sed -i '/set(CMAKE_CXX_FLAGS "-std=gnu++11 -O0 -fno-rtti")/c\\t\tset(CMAKE_CXX_FLAGS "-std=gnu++11 -O0 -fno-rtti -fPIC")' CMakeLists.txt 
+sed -i '/set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMMON_FLAGS} -O0 -fno-rtti")/c\\t\tset(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMMON_FLAGS} -O0 -fno-rtti -fPIC")' CMakeLists.txt 
+sed -i '/set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COMMON_FLAGS} -O0")/c\\t\tset(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COMMON_FLAGS} -O0 -fPIC")' CMakeLists.txt 
 
 sed -i '/set_target_properties(Cudd PROPERTIES COMPILE_FLAGS "-Wno-format -Wno-int-to-pointer-cast -Wno-pointer-to-int-cast -O3 -w -DHAVE_IEEE_754 -DSIZEOF_VOID_P=8 -DSIZEOF_LONG=8")/c\set_target_properties(Cudd PROPERTIES COMPILE_FLAGS "-Wno-format -Wno-int-to-pointer-cast -Wno-pointer-to-int-cast -O3 -w -DHAVE_IEEE_754 -DSIZEOF_VOID_P=8 -DSIZEOF_LONG=8 -fPIC")' lib/CUDD/CMakeLists.txt 
 
@@ -116,17 +116,19 @@ sed -i '/set_target_properties(LLVMCudd PROPERTIES COMPILE_FLAGS "-Wno-format -W
 #  Build SVF
 
 echo "=== Begin building SVF ==="
-mkdir Release-build
-cd Release-build
-cmake ../
-make -j2
-sudo make install
-cd ../
+# mkdir Release-build
+# cd Release-build
+# cmake ../
+# make -j2
+# sudo make install
+# cd ../
+sudo bash build.sh
 
 #  Copy Library Headers
 echo "=== Copy SVF headers ==="
 cd include/
 sudo cp -r * /usr/local/include/
+sudo cp -r * /usr/local/lib/
 
 
 echo "******** TRIMMER Dependencies Built! ********"

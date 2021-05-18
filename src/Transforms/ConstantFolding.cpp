@@ -169,7 +169,7 @@ void ConstantFolding::runOnInst(Instruction * I) {
       }
     }
 
-    if(!isa<Instruction>(I)) { //need terminator instruction to make BB graphs
+    if(!I->isTerminator()) { //need terminator instruction to make BB graphs
       return;
     }
   }
@@ -188,8 +188,8 @@ void ConstantFolding::runOnInst(Instruction * I) {
     result = processPHINode(phiNode);
   } else if(ReturnInst * retInst = dyn_cast<ReturnInst>(I)) {
     result = processReturnInst(retInst);
-  } else if(Instruction * termInst = dyn_cast<Instruction>(I)) {
-    result = processTermInst(termInst);
+  } else if(I->isTerminator()) {
+    result = processTermInst(I);
   } else if(MemCpyInst * memcpyInst = dyn_cast<MemCpyInst>(I)) {
     result = processMemcpyInst(dyn_cast<CallInst>(memcpyInst));
   } else if(MemMoveInst *memmoveInst = dyn_cast<MemMoveInst>(I)) {
@@ -495,8 +495,9 @@ bool ConstantFolding::runOnModule(Module & M) {
   DL = new DataLayout(module);   
   CG = &getAnalysis<CallGraphWrapperPass>().getCallGraph();  
   PreserveLCSSA = mustPreserveAnalysisID(LCSSAID);
-  PSI = &getAnalysis<ProfileSummaryInfoWrapperPass>().getPSI();
-  BFE = &getAnalysis<BlockFrequencyInfoWrapperPass>().getBFI();
+  // TODO: PSI and BFE are used in optimizeFPuts calls that is called by optimizeCall. Uncommenting the below lines gives a segmenetation fault. Need to figure out a way to get correct profile information
+  // PSI = &getAnalysis<ProfileSummaryInfoWrapperPass>().getPSI();
+  // BFE = &getAnalysis<BlockFrequencyInfoWrapperPass>().getBFI();
 
   useAnnotations = isAnnotated;  
   trackAllocas = trackAlloc;
@@ -3061,7 +3062,7 @@ void ConstantFolding::simplifyStrFunc(CallInst * callInst) {
   };
   Function* CalledFn = callInst->getCalledFunction();
   OptimizationRemarkEmitter ORE(CalledFn);
-  LibCallSimplifier Simplifier(*DL,TLI,ORE, BFE, PSI);
+  LibCallSimplifier Simplifier(*DL,TLI,ORE, BFE, PSI, InstCombineRAUW);
 
   if (Value *With = Simplifier.optimizeCall(callInst)) {
     replaceIfNotFD(callInst, With);
