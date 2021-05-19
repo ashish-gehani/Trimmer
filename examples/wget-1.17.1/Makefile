@@ -54,7 +54,6 @@ test_compress:
 ${WGET_BITCODE}: ${WGET_NAME}
 	cp ${WGET_PATCH} ${WGET_NAME} && \
 	cd ${WGET_NAME} && \
-	patch -p0 -f -R -i ./${WGET_PATCH} && \
 	CC=${BITCODE_WRAPPER} CFLAGS="-O0 -Xclang -disable-O0-optnone -fno-inline -fno-inline-functions" ./configure && \
 	CC=${BITCODE_WRAPPER} make && \
 	cd src && \
