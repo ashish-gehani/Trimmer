@@ -1,1 +1,1 @@
-{"binary": "yices_main_fin", "native_libs":[],"name": "yices_main", "args": ["--logic=QF_AUFBV", "_"], "modules": [], "ldflags": ["-lgmp","libyices.a"], "main": "yices_main.bc", "config_files": []}
+{"binary": "yices_main_fin", "native_libs":[],"name": "yices_main", "args": ["--logic=QF_AUFBV", "abc.ys"], "modules": [], "ldflags": ["-lgmp","libyices.a"], "main": "yices_main.bc", "config_files": []}
