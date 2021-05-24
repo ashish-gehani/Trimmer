@@ -56,4 +56,13 @@ By default a function clone limit is unlimited. If you want to limit the number 
 ```
 python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory] exceedLimit limit (where limit is the number of clones that a function can not exceed)
 ```
+ContextType
+-----------
+
+Trimmer supports context-insensitive(CI), sparse context-sensitive(sparse-CS) and full context-sensitive(full-CS) constant propagation. By default, the context is sparse-CS. To run other context types, use
+
+```
+python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory] contextType 0,1 or 2 (where 0 stands for CI, 1 stands for sparse-CS and 2 stands for full-CS.)
+```
+
 
