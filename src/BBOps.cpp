@@ -105,6 +105,7 @@ bool BBOps::needToduplicate(BasicBlock * BB, BasicBlock * from) {
       singlePredFrom = false;
     } 
   }
+  //bool noMemWrite = !BBInfoMap[BB]->writesToMemory; 
   bool singleSuccTo = BBInfoMap[from]->singleSucc != NULL;
   return !(singlePredFrom && singleSuccTo);
 }
@@ -282,6 +283,7 @@ void BBOps::markSuccessorsAsUR(TerminatorInst * termInst, LoopInfo& LI) {
       debug(Yes) << "Skipping " << successor->getName() << " as unreachable=" << BBInfoMap[successor]->URfrom << " and numPreds=" << BBInfoMap[successor]->numPreds;
       continue;
     } else{
+      //debug(Yes) << successor->getName() << " adding unreachable: unrachable: " BBInfoMap[successor]->URfrom << " and numPreds=" << BBInfoMap[successor]->numPreds << "\n";
     }
     propagateUR(successor, LI);
   }
@@ -384,7 +386,13 @@ void BBOps::recomputeLoopInfo(Function * F, LoopInfo& LI, BasicBlock *header) {
       BBInfoMap[BB]->partOfLoop = LI.getLoopFor(BB);
       debug(Yes) << "Part of Loop: " << BBInfoMap[BB]->partOfLoop << "\n";
     } else {
-       }
+      //BBInfoMap[BB] = new BBInfo(BB);
+      //BBInfoMap[BB]->partOfLoop = LI.getLoopFor(BB);
+      //if(BBInfoMap[BB]->partOfLoop)
+        //debug(Yes) << *LI.getLoopFor(BB)->getHeader()  << "\n";
+      //printBB("BBName: ", BB, ",", Yes);
+      //debug(Yes) << "Error: Could not find parent. part of loop: " << BBInfoMap[BB]->partOfLoop << "\n";
+    }
   }
 }
 
@@ -440,6 +448,7 @@ void BBOps::copyContexts(Function *to, Function *from, ValueToValueMapTy& vmap, 
     BasicBlock *newBB = dyn_cast<BasicBlock>(vmap[oldBB]);
 
     ContextInfo *oldCi = BasicBlockContexts[oldBB];
+    
     if(!oldCi->deleted && !oldCi->imageOf) {
       printBB("duplicating in copyContexts", newBB, "\n", Yes);
       duplicateContext(newBB, oldBB);
@@ -509,6 +518,7 @@ void BBOps::duplicateContext(BasicBlock * to, BasicBlock *from) {
     BasicBlockContexts.erase(to);
     delete ci;
   }
+  
   BasicBlockContexts[to] = BasicBlockContexts[from]->duplicate();
 }
 
@@ -516,6 +526,10 @@ void BBOps::imageContext(BasicBlock * to, BasicBlock* from) {
   assert(BasicBlockContexts.find(to) == BasicBlockContexts.end());
   if(BasicBlockContexts.find(to) != BasicBlockContexts.end()) {
     ContextInfo *ci = BasicBlockContexts[to];
+    printBB("imaging for BB: ", to, " ", Yes);
+    //if(ci->memory){
+      //delete ci->memory;
+    //}
     BasicBlockContexts.erase(to);
     delete ci;
   }
