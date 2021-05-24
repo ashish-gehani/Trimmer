@@ -189,7 +189,6 @@ void ConstantFolding::runOnInst(Instruction * I) {
   } else if(ReturnInst * retInst = dyn_cast<ReturnInst>(I)) {
     result = processReturnInst(retInst);
   } else if(TerminatorInst * termInst = dyn_cast<TerminatorInst>(I)) {
-    errs()<<"in term inst\n";
     result = processTermInst(termInst);
   } else if(MemCpyInst * memcpyInst = dyn_cast<MemCpyInst>(I)) {
     result = processMemcpyInst(dyn_cast<CallInst>(memcpyInst));
@@ -210,25 +209,6 @@ void ConstantFolding::runOnInst(Instruction * I) {
   } else {
     result = tryfolding(I);
   }
-
-  /*for(auto it = currfn->begin(), end = currfn->end(); it != end; it++) {
-    if(!bbOps.hasContext(&*it))
-      continue;
-
-    BasicBlock *oldBB = &*it;
-
-    ContextInfo *oldCi = bbOps.getContextInfo(oldBB);
-    if(oldCi){
-    if(oldCi->memory){
-    oldBB->printAsOperand(errs(), false);
-    errs()<<"in total run on inst stack"<<oldCi->memory->getStackTotalSize()<<"\n";
-    errs()<<" in index run on inst  stack "<<oldCi->memory->getStackIndex()<<"\n";
-    errs()<<"in total run on inst  heap"<<oldCi->memory->getHeapTotalSize()<<"\n";
-    errs()<<" in index run on inst  heap "<<oldCi->memory->getHeapIndex()<<"\n";
-     }
-    
-    }
-  }*/
 
   //FIXME: Remove comment if dead code
   //if(isLoopTest())
@@ -287,42 +267,8 @@ bool ConstantFolding::runOnBB(BasicBlock * BB) {
 
 void ConstantFolding::copyFuncIntoClone(Function *cloned, ValueToValueMapTy &vmap, Function *current, vector<ValSet> &funcValStack) {
 
-  /*for(auto it = current->begin(), end = current->end(); it != end; it++) {
-    if(!bbOps.hasContext(&*it))
-      continue;
-
-    BasicBlock *oldBB = &*it;
-   
-    ContextInfo *oldCi = bbOps.getContextInfo(oldBB);
-    if(oldCi){
-    if(oldCi->memory){
-    printBB("copyFuncinClone before copyFuncsBlocksInfo", oldBB, "\n", Yes);
-    errs()<<"in total copyFuncIntoClone stack total"<<oldCi->memory->getStackTotalSize()<<"\n";
-    errs()<<"in index copyFuncIntoClone stack index "<<oldCi->memory->getStackIndex()<<"\n";
-    errs()<<"in total copyFuncIntoClone heap total"<<oldCi->memory->getHeapTotalSize()<<"\n";
-    errs()<<"in index copyFuncIntoClone heap index "<<oldCi->memory->getHeapIndex()<<"\n";
-     }
-    }
-  }*/
   bbOps.copyFuncBlocksInfo(current, vmap); //copy over old function bbinfo into cloned function
-  /*for(auto it = current->begin(), end = current->end(); it != end; it++) {
-    if(!bbOps.hasContext(&*it))
-      continue;
-
-    BasicBlock *oldBB = &*it;
-   
-    ContextInfo *oldCi = bbOps.getContextInfo(oldBB);
-    if(oldCi){
-    if(oldCi->memory){
-    printBB("copyFuncinClone", oldBB, "\n", Yes);
-    errs()<<"in total copyFuncIntoClone stack total"<<oldCi->memory->getStackTotalSize()<<"\n";
-    errs()<<"in index copyFuncIntoClone stack index "<<oldCi->memory->getStackIndex()<<"\n";
-    errs()<<"in total copyFuncIntoClone heap total"<<oldCi->memory->getHeapTotalSize()<<"\n";
-    errs()<<"in index copyFuncIntoClone heap index "<<oldCi->memory->getHeapIndex()<<"\n";
-     }
-    }
-  }*/
-  
+    
   bbOps.copyContexts(cloned, current, vmap, module);
 
   assert(funcValStack.size() >= 2);
@@ -551,7 +497,7 @@ void ConstantFolding::getTrackedValues(set<Value *> &trackedValues) {
    */
 bool ConstantFolding::runOnModule(Module & M) {
   initDebugLevel();
-  debug(Yes) << "  ---------------- ** inter-constprop ** ----------------\n";
+  debug(Yes) << "...................................ConstantFolding Pass started.......................................................................\n";
   module = &M;
   TLI = &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI();
   DL = new DataLayout(module);   
@@ -562,12 +508,6 @@ bool ConstantFolding::runOnModule(Module & M) {
   trackAllocas = trackAlloc;
   if(trackAllocas)
     getTrackedValues(trackedValues);
-
-  if(useAnnotations && !trackAllocas) {
-    createAnnotationList();
-    // createAnnotationList2();
-  }
-
 
   for (auto &fileName:fileNames){
     debug(Yes) <<fileName <<"\n";
@@ -615,13 +555,15 @@ bool ConstantFolding::runOnModule(Module & M) {
   debug(Yes)<<"[DELETEFILEIO] Analysis took: "<<Dduration.count()<<" microseconds... \n";
 
   stats.printStats(module->getFunction("main"));
-  //stats.makeGraph(module->getFunction("main"));
+
   debug(Yes)<<"ConstantFolding Pass completed!\n";
   debug(Yes)<<"Functions Skipped: "<<fSkipped<<"\n";
   debug(Yes)<<"TrackedLoads = "<<trackedLoads<<"\n";
   std::ofstream StatFile("constStats.JSON",std::ios_base::app);
   StatFile<<"\"FunctionsSkipped\":"<<fSkipped<<", \"TrackedLoads\":"<<trackedLoads<<"}\n";
   StatFile.close();
+
+  debug(Yes) << "...................................ConstantFolding Pass ended.......................................................................\n";
   return true;
 }   
 
@@ -1167,7 +1109,7 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
   Value *offsetVal = gi->getOperand(1);
   Register *regOffset = processInstAndGetRegister(offsetVal);
 
-  if((useRegOffset && !isConst  && !regOffset) || (!useRegOffset && !isConst)) {
+  if((/*useRegOffset && */ !isConst  && !regOffset) /*|| (!useRegOffset && !isConst)*/) {
     //TODO recursively mark memory non constant
     debug(Yes) << "GepInst : offset not constant\n";
     bbOps.setConstContigous(false, reg->getValue(), currBB);
@@ -1186,7 +1128,7 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
   }
   uint64_t val;
 
-  if(useRegOffset && regOffset && !isConst){
+  if(/*useRegOffset &&*/ regOffset && !isConst){
     val = reg->getValue() + regOffset->getValue();
     debug(Yes)<<"Register Offset value: "<<regOffset->getValue()<<"\n";
   } else { 
@@ -2633,8 +2575,6 @@ bool ConstantFolding::getSingleVal(Value * val, uint64_t& num) {
     int size = DL->getTypeAllocSize(callback->getType());
     uint64_t addr = bbOps.allocateStack(size,currBB);
     uint64_t faddr = (uint64_t) callback;
-    errs()<<"Address "<<addr <<"\n";
-    errs()<<"faddr "<<faddr <<"\n";
     bbOps.storeToMem(faddr, size, addr, currBB);
     debug(Yes) << "stored callback for function " << callback->getName() << "\n";
     num = faddr;
@@ -2727,7 +2667,6 @@ Function *ConstantFolding::simplifyCallback(CallInst * callInst) {
   Register * reg = processInstAndGetRegister(callInst->getCalledValue());
   if(!reg) return NULL;
   Function * calledFunction = (Function *) reg->getValue();
-  errs()<<reg->getValue();
   //auto CE = dyn_cast<ConstantExpr>(callInst->getCalledValue());
   callInst->setCalledFunction(calledFunction);
   debug(Yes) << "set called Function to " << calledFunction->getName() << "\n";
@@ -4750,9 +4689,6 @@ bool ConstantFolding::handleGetEnv(CallInst *ci) {
 
 
 bool ConstantFolding::handleGetOpt(CallInst * ci) { 
-  // Right now if atleast one arg is non-const, it will reject all. However we want to
-  // add the condition that if the last one is "_" we don't mark all non const and return -1;
-  // In the case the last arg is "_", we run the loop till argc -1 after wards
   debug(Yes)<<"Invoked handleGetOpt\n";
 
   string name = ci->getCalledFunction()->getName().str();
@@ -4790,9 +4726,6 @@ bool ConstantFolding::handleGetOpt(CallInst * ci) {
     return true;
   }
 
-
-
-  //debug(Yes) << "handleGetOpt => optind : " <<  bbOps.checkConstContigous(optindReg->getValue(), currBB) << " argvReg : " <<  bbOps.checkConstContigous(argvReg->getValue(), currBB) << "\n";
 
   debug(Yes)<<"Obtaining argvSize...\n";
   uint64_t ptrSize = DL->getTypeAllocSize(argvReg->getType());
@@ -5260,27 +5193,8 @@ void ConstantFolding::copyWorklistBB(ValueToValueMapTy& vmap, vector<BBList> &wo
  */
 LoopUnroller *ConstantFolding::unrollLoopInClone(Function *currfn, Loop *L, ValueToValueMapTy &vmap, vector<ValSet> &funcValStack) {
 
-  /*for(auto it = currfn->begin(), end = currfn->end(); it != end; it++) {
-    if(!bbOps.hasContext(&*it))
-      continue;
-
-    BasicBlock *oldBB = &*it;
-   
-    ContextInfo *oldCi = bbOps.getContextInfo(oldBB);
-    if(oldCi){
-    if(oldCi->memory){
-    printBB("unrollLoopinClone start ", oldBB, "\n", Yes);
-    errs()<<"in total unrollLoopinClone stack total"<<oldCi->memory->getStackTotalSize()<<"\n";
-    errs()<<"in index unrollLoopinClone stack index "<<oldCi->memory->getStackIndex()<<"\n";
-    errs()<<"in total unrollLoopinClone heap total"<<oldCi->memory->getHeapTotalSize()<<"\n";
-    errs()<<"in index unrollLoopinClone heap index "<<oldCi->memory->getHeapIndex()<<"\n";
-     }
-    }
-  }*/
   LoopUnroller *unroller;
-
   Function *cloned = cloneFunc(currfn, vmap); //clone function
-  //stats.incrementFunctionsCloned();
 
   push_back(funcValStack);
   copyFuncIntoClone(cloned, vmap, currfn, funcValStack);
@@ -5320,8 +5234,8 @@ void ConstantFolding::eraseToReplace(CallInst *ci, vector<InstPair> &toReplace) 
 }
 
 void ConstantFolding::renameFunctions(Function *currFn, Function *oldFn) {
-  errs()<<" Current Function Name "<<currFn->getName().str()<<"\n";
-  errs()<<" Old Function Name "<<oldFn->getName().str()<<"\n";
+   debug(Yes)<<" Current Function Name "<<currFn->getName().str()<<"\n";
+   debug(Yes)<<" Old Function Name "<<oldFn->getName().str()<<"\n";
   if (currFn->getName().str().substr(0,12) == "branchPruned") {
     oldFn->setName(oldFn->getName() + "_old");
 

@@ -54,6 +54,8 @@ namespace {
       vector<string> arguments = parse_args(args);
       initDebugLevel();
       int index_count = arguments.size();
+      debug(Yes) << "...................................SpecializeArguments Pass started.......................................................................\n";
+      debug(Yes) << "Arguments Provided in Manifest File: \n";
       for(unsigned i = 0; i < arguments.size(); i++)
         debug(Yes) << arguments[i] << "\n";
       IntegerType* int64Ty = IntegerType::get(M.getContext(), 64);
@@ -66,7 +68,6 @@ namespace {
       ConstantInt* argcConst = ConstantInt::get(int32Ty, index_count);
       Function::arg_iterator ai = _main->arg_begin();
       Value* argc = (Value*) &(*ai); 
-     
       argc->replaceAllUsesWith(argcConst);   
       
 
@@ -96,7 +97,6 @@ namespace {
 
       FunctionType * llvmMemCpyFT = FunctionType::get(Type::getVoidTy(M.getContext()), llvmMemCpyArgs, false);      
       if(!llvmMemCpyFunc){
-        debug(Yes)<<"llvmMemCpyFT not found in module\n";
       	llvmMemCpyFunc = Function::Create(llvmMemCpyFT, GlobalValue::ExternalLinkage, "llvm.memcpy.p0i8.p0i8.i64", &M);
       }
 
@@ -153,7 +153,6 @@ namespace {
           ir.CreateStore(strTerm, gep);
         } else {
           debug(Yes) << "_" << i << "\n";
-          debug(Yes) << *argv << "\n";
           Value* oldArgptr = ir.CreateConstGEP1_32(argv, i);
           Value* load = ir.CreateLoad(oldArgptr);   
           ir.CreateStore(load, newArgptr);                             
@@ -164,7 +163,7 @@ namespace {
       ir.CreateStore(nptr2, argptr);        
       replaceUsesOutsideBlock(argv, lptr, bb);
       ir.CreateBr(origbb);
-      debug(Yes)<<"Specialize-args pass completed...\n";
+      debug(Yes) << "...................................SpecializeArguments Pass ended.......................................................................\n";
       return true;
     }
   };
