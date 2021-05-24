@@ -1,0 +1,1 @@
+A loop in function process_command_line of yices_reval.c is not unrolled by llvm (due to limitations), so the loop is converted into an equivalent loop, which can be unrolled by llvm.
