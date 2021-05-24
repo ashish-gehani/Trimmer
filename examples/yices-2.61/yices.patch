@@ -1,0 +1,301 @@
+*** yices-2.6.1new/src/frontend/yices/yices_reval.c	2021-01-27 04:03:17.000000000 -0800
+--- yices-2.6.1/src/frontend/yices/yices_reval.c	2018-10-26 15:27:02.000000000 -0700
+***************
+*** 394,402 ****
+    int32_t arch_code;
+    int32_t mode_code;
+    int32_t v;
+-   int finish = 0;
+-   int badUsage = 0;
+-   int quickExit = 0;
+  
+    // set all options to their default value
+    input_filename = NULL;
+--- 394,399 ----
+***************
+*** 413,431 ****
+  
+    init_cmdline_parser(&parser, options, NUM_OPTIONS, argv, argc);
+  
+!   for (int i=0;i<argc;i++) {
+      cmdline_parse_element(&parser, &elem);
+      switch (elem.status) {
+      case cmdline_done:
+!       finish = 1;
+!       break;
+      case cmdline_argument:
+        if (input_filename == NULL) {
+          input_filename = elem.arg;
+        } else {
+          fprintf(stderr, "%s: can't have several input files\n", parser.command_name);
+!         badUsage =1;
+!         break;
+        }
+        break;
+  
+--- 410,427 ----
+  
+    init_cmdline_parser(&parser, options, NUM_OPTIONS, argv, argc);
+  
+!   for (;;) {
+      cmdline_parse_element(&parser, &elem);
+      switch (elem.status) {
+      case cmdline_done:
+!       goto done;
+! 
+      case cmdline_argument:
+        if (input_filename == NULL) {
+          input_filename = elem.arg;
+        } else {
+          fprintf(stderr, "%s: can't have several input files\n", parser.command_name);
+!         goto bad_usage;
+        }
+        break;
+  
+***************
+*** 437,449 ****
+            logic_code = smt_logic_code(logic_name);
+            if (logic_code == SMT_UNKNOWN) {
+              fprintf(stderr, "%s: invalid logic %s\n", parser.command_name, logic_name);
+!             badUsage =1;
+!             break;
+            }
+          } else if (strcmp(logic_name, elem.s_value) != 0) {
+            fprintf(stderr, "%s: only one logic can be specified\n", parser.command_name);
+!           badUsage =1;
+!           break;
+          }
+          break;
+  
+--- 433,443 ----
+            logic_code = smt_logic_code(logic_name);
+            if (logic_code == SMT_UNKNOWN) {
+              fprintf(stderr, "%s: invalid logic %s\n", parser.command_name, logic_name);
+!             goto bad_usage;
+            }
+          } else if (strcmp(logic_name, elem.s_value) != 0) {
+            fprintf(stderr, "%s: only one logic can be specified\n", parser.command_name);
+!           goto bad_usage;
+          }
+          break;
+  
+***************
+*** 453,466 ****
+            arith_code = arith_solver_code(arith_name);
+            if (arith_code == ARITH_UNKNOWN) {
+              fprintf(stderr, "%s: invalid arithmetic solver %s\n", parser.command_name, arith_name);
+!             badUsage =1;
+!             break;
+            }
+          } else if (strcmp(arith_name, elem.s_value) != 0) {
+            fprintf(stderr, "%s: only one arithmetic solver can be specified\n", parser.command_name);
+!             badUsage =1;
+!             break;
+! 
+          }
+          break;
+  
+--- 447,457 ----
+            arith_code = arith_solver_code(arith_name);
+            if (arith_code == ARITH_UNKNOWN) {
+              fprintf(stderr, "%s: invalid arithmetic solver %s\n", parser.command_name, arith_name);
+!             goto bad_usage;
+            }
+          } else if (strcmp(arith_name, elem.s_value) != 0) {
+            fprintf(stderr, "%s: only one arithmetic solver can be specified\n", parser.command_name);
+!           goto bad_usage;
+          }
+          break;
+  
+***************
+*** 470,497 ****
+            mode_code = context_mode_code(mode_name);
+            if (mode_code < 0) {
+              fprintf(stderr, "%s: invalid mode %s\n", parser.command_name, mode_name);
+!             badUsage =1;
+!             break;
+! 
+            }
+          } else if (strcmp(mode_name, elem.s_value) != 0) {
+            fprintf(stderr, "%s: only one mode can be specified\n", parser.command_name);
+!             badUsage =1;
+!             break;
+! 
+          }
+          break;
+  
+        case version_flag:
+          print_version(stdout);
+!         quickExit=1;
+!         break;
+  
+        case help_flag:
+          print_help(parser.command_name);
+!             quickExit =1;
+!             break;
+! 
+  
+        case print_success_flag:
+  	print_success = true;
+--- 461,481 ----
+            mode_code = context_mode_code(mode_name);
+            if (mode_code < 0) {
+              fprintf(stderr, "%s: invalid mode %s\n", parser.command_name, mode_name);
+!             goto bad_usage;
+            }
+          } else if (strcmp(mode_name, elem.s_value) != 0) {
+            fprintf(stderr, "%s: only one mode can be specified\n", parser.command_name);
+!           goto bad_usage;
+          }
+          break;
+  
+        case version_flag:
+          print_version(stdout);
+!         goto quick_exit;
+  
+        case help_flag:
+          print_help(parser.command_name);
+!         goto quick_exit;
+  
+        case print_success_flag:
+  	print_success = true;
+***************
+*** 501,509 ****
+  	v = elem.i_value;
+  	if (v < 0) {
+  	  fprintf(stderr, "%s: the verbosity level must be non-negative\n", parser.command_name);
+!             badUsage =1;
+!             break;
+! 
+  	}
+          verbosity = v;
+          break;
+--- 485,491 ----
+  	v = elem.i_value;
+  	if (v < 0) {
+  	  fprintf(stderr, "%s: the verbosity level must be non-negative\n", parser.command_name);
+! 	  goto bad_usage;
+  	}
+          verbosity = v;
+          break;
+***************
+*** 516,538 ****
+  
+      case cmdline_error:
+        cmdline_print_error(&parser, &elem);
+!             badUsage =1;
+!             break;
+! 
+      }
+-     if(finish==1 || badUsage==1 || quickExit==1)
+-       break;
+    }
+  
+!  if (quickExit==1)
+!   exit(YICES_EXIT_SUCCESS);
+! 
+!  if (badUsage == 1){
+!   print_usage(parser.command_name);
+!   exit(YICES_EXIT_USAGE);}
+! 
+! 
+!  if (finish == 1){
+    /*
+     * convert logic and arith solver codes to context architecture + mode
+     * also set iflag and qflag
+--- 498,508 ----
+  
+      case cmdline_error:
+        cmdline_print_error(&parser, &elem);
+!       goto bad_usage;
+      }
+    }
+  
+!  done:
+    /*
+     * convert logic and arith solver codes to context architecture + mode
+     * also set iflag and qflag
+***************
+*** 548,556 ****
+      if (logic_code == SMT_UNKNOWN) {
+        if (arith_code == ARITH_FLOYD_WARSHALL) {
+  	fprintf(stderr, "%s: please specify the logic (either QF_IDL or QF_RDL)\n", parser.command_name);
+!         print_usage(parser.command_name);
+!         exit(YICES_EXIT_USAGE);
+! 
+        }
+        // use default settings
+        arch = CTX_ARCH_EGFUNSPLXBV;
+--- 518,524 ----
+      if (logic_code == SMT_UNKNOWN) {
+        if (arith_code == ARITH_FLOYD_WARSHALL) {
+  	fprintf(stderr, "%s: please specify the logic (either QF_IDL or QF_RDL)\n", parser.command_name);
+! 	goto bad_usage;
+        }
+        // use default settings
+        arch = CTX_ARCH_EGFUNSPLXBV;
+***************
+*** 577,585 ****
+      case SMT_UNKNOWN:
+        if (arith_code == ARITH_FLOYD_WARSHALL) {
+  	fprintf(stderr, "%s: please specify the logic (either QF_IDL or QF_RDL)\n", parser.command_name);
+!         print_usage(parser.command_name);
+!         exit(YICES_EXIT_USAGE);
+! 
+        }
+        // use default settings
+        arch = CTX_ARCH_EGFUNSPLXBV;
+--- 545,551 ----
+      case SMT_UNKNOWN:
+        if (arith_code == ARITH_FLOYD_WARSHALL) {
+  	fprintf(stderr, "%s: please specify the logic (either QF_IDL or QF_RDL)\n", parser.command_name);
+! 	goto bad_usage;
+        }
+        // use default settings
+        arch = CTX_ARCH_EGFUNSPLXBV;
+***************
+*** 671,690 ****
+      if ((logic_code == QF_IDL || logic_code == QF_RDL) && arch != CTX_ARCH_SPLX) {
+        if (mode != CTX_MODE_ONECHECK) {
+          fprintf(stderr, "%s: the Floyd-Warshall solvers support only mode='one-shot'\n", parser.command_name);
+!         print_usage(parser.command_name);
+!         exit(YICES_EXIT_USAGE);
+! 
+        }
+      }
+      if (arch == CTX_ARCH_MCSAT && mode_code == CTX_MODE_INTERACTIVE) {
+        fprintf(stderr, "%s: the non-linear solver does not support mode='interactive'\n", parser.command_name);
+!       print_usage(parser.command_name);
+!       exit(YICES_EXIT_USAGE);
+      }
+    }
+  
+!  }
+  
+  }
+  
+  
+--- 637,659 ----
+      if ((logic_code == QF_IDL || logic_code == QF_RDL) && arch != CTX_ARCH_SPLX) {
+        if (mode != CTX_MODE_ONECHECK) {
+          fprintf(stderr, "%s: the Floyd-Warshall solvers support only mode='one-shot'\n", parser.command_name);
+!         goto bad_usage;
+        }
+      }
+      if (arch == CTX_ARCH_MCSAT && mode_code == CTX_MODE_INTERACTIVE) {
+        fprintf(stderr, "%s: the non-linear solver does not support mode='interactive'\n", parser.command_name);
+!       goto bad_usage;
+      }
+    }
+  
+!   return;
+  
++  quick_exit:
++   exit(YICES_EXIT_SUCCESS);
++ 
++  bad_usage:
++   print_usage(parser.command_name);
++   exit(YICES_EXIT_USAGE);
+  }
+  
+  

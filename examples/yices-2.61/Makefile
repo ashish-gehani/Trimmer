@@ -5,6 +5,7 @@ YICES_NAME=${YICES}-${YICES_VERSION}
 YICES_TAR=${YICES_NAME}.tar.gz
 
 YICES_MANIFEST=${YICES}.manifest
+YICES_PATCH=${YICES}.patch
 
 OUT_DIR?=trimmer
 LOG_FILE?=logs
@@ -24,7 +25,9 @@ compress: ${OUT_DIR} ${YICES_BITCODE}
 
 
 ${YICES_BITCODE}: ${YICES_NAME}
+	cp ${YICES_PATCH} ${YICES_NAME} && \
 	cd ${YICES_NAME} && \
+	patch -p1 -f -R -i ./${YICES_PATCH} && \
 	sed -i 's/gcc/wllvm -fno-inline -fno-inline-functions -Xclang -disable-O0-optnone/g' src/Makefile && \
 	CC=${BITCODE_WRAPPER} make && \
 	${BITCODE_EXTRACT} build/x86_64-pc-linux-gnu-release/bin/${YICES}_main && \
