@@ -64,5 +64,15 @@ Trimmer supports context-insensitive(CI), sparse context-sensitive(sparse-CS) an
 ```
 python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory] contextType 0,1 or 2 (where 0 stands for CI, 1 stands for sparse-CS and 2 stands for full-CS.)
 ```
+Track Global Variables
+-----------
+
+By default, sparse-CS only clone functions that have atleast one tainted arguments. If you want to clone function that contains tainted global variables, you have to use useGlob option like below:
+
+```
+python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory] useGlob
+```
+
+
 
 
