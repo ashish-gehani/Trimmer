@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//This pass removes the function whose name is given as an argument to the pass.
 
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Module.h"
