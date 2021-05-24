@@ -11,7 +11,7 @@ debugPrint = 1
 
 class Trimmer:
 
-    def __init__(self, (manifest_file,man_data, work_dir, opt_flag, spec_flag, strip_flag, icp_flag, annot_flag, track_allocas, context_type, depth_flag, anot_depth,load_flag, load_percent,use_glob,exceed_limit,disable_exit,use_reg_offset,opt_level,file,loop,string)):
+    def __init__(self, (manifest_file,man_data, work_dir, opt_flag, strip_flag, icp_flag, annot_flag, track_allocas, context_type, depth_flag, anot_depth,load_flag, load_percent,use_glob,exceed_limit,disable_exit,use_reg_offset,opt_level,file,loop,string,spec_flag)):
 
 	self.manifestFile = manifest_file        
 	self.name = man_data["name"]
@@ -57,18 +57,13 @@ class Trimmer:
         print 'exe name is ' + self.exe_name
         print 'work_dir is ' + self.work_dir
         print 'config_files are ' + self.config_files
-        print 'limiting depth  ' + str(self.depth_flag)
-        print 'annotation depth ' + str(self.anot_depth)
-        print 'limiting loads  ' + str(self.load_flag)
-        print 'load percent ' + str(self.load_percent)
         print 'Use globals ' + str(self.use_glob)
         print 'exceedLimit ' + str(self.exceed_limit)
-        print 'disable_exit '+ str(self.disable_exit)
-        print 'use_reg_offset '+ str(self.use_reg_offset)
         print 'opt_level '+ str(self.opt_level)
         print 'loop unroll '+ str(self.loop_unroll)
         print 'string specialize '+ str(self.string_specialize)
         print 'file specialize '+ str(self.file_specialize)
+        print 'contextType '+ str(self.context_type)
 
 
     def run(self):

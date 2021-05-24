@@ -69,16 +69,16 @@ def parse_args(args):
 			opt_level = args[i+1]
 			if(opt_level == 'none'):
 				opt_flag = False
-		elif(args[i] == 'no-specialization'):
-			spec_flag = False
 		elif(args[i] == 'no-strip'):
 			strip_flag = False
+		elif(args[i] == 'no-specialization'):
+			spec_flag = False
+
 		elif(args[i] == 'no-inter-constprop'):
 			icp_flag = False
-                elif(args[i] == 'no-annot'):
-                        annot_flag = 0
                 elif(args[i] == 'no-track-allocas'):
                         track_allocas = 0
+                        annot_flag = 0
                 elif(args[i] == 'file-specialize'):
                         file_flag = True
                         file_specialize = 1
@@ -112,12 +112,10 @@ def parse_args(args):
                         useGlob = True
                 elif(args[i] == "exceedLimit"):
                         exceedLimit = args[i+1]
-                elif(args[i] == "disableExit"):
-                        disableExit = True
                 elif(args[i] == "useRegOffset"):
                         useRegOffset = True
                 
 
 
-	return (manifest_file,man_data, work_dir, opt_flag, spec_flag, strip_flag, icp_flag, annot_flag, track_allocas, contextType, isLimitedDepth, depthLimit, isLoadsLimited, loadPercent, useGlob,exceedLimit,disableExit,useRegOffset,opt_level,file_specialize,loop,string_specialize)
+	return (manifest_file,man_data, work_dir, opt_flag, strip_flag, icp_flag, annot_flag, track_allocas, contextType, isLimitedDepth, depthLimit, isLoadsLimited, loadPercent, useGlob,exceedLimit,disableExit,useRegOffset,opt_level,file_specialize,loop,string_specialize,spec_flag)
 
