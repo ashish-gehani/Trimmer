@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//This pass removes the extra function calls added in the bitcode file by Annotation and ConstantFolding pass, One such example is loop_unroll function calls, which are added as the first instruction of the loops that are to be unrolled.
+/*This pass removes the extra function calls added in the bitcode file by Annotation and ConstantFolding pass. 
+One such example is loop_unroll function calls, which are added as the first instruction of the loops that are to be unrolled.*/
 
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Module.h"
