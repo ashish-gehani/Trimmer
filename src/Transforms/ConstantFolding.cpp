@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//This pass goes through the instructions in the bitcode file, folding and propagating constants, cloning functions, unrolling loops, specializing file I/O and strings.
+/*This pass goes through the instructions in the bitcode file, folding and propagating constants, cloning functions, unrolling loops, 
+specializing file I/O and strings.*/
 
 #include "llvm/Pass.h"
 #include "llvm/IR/Function.h"
