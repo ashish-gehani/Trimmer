@@ -5,7 +5,7 @@
 
 /*This pass uses SVF to generate Value Flow Graph (VFG). Starting from argv, it marks the objects (allocas, mallocs), 
 which are directly or indirectly related to argv, as annotated by setting their metadata to tracked by using the VFG. 
-Loops that uses these configuration objects are annotated by placing a function call (loop_unroll) as the first statement of the loop, 
+Loops that uses these configuration objects are annotated by placing a function call (loop_unroll) as the first instruction of the loop, 
 so that the ConstantFolding pass knows which loops are to be unrolled.*/
 
 #include "AnnotateNew.h"
