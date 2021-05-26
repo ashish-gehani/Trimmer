@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//This pass creates a global variable for each command-line argument provided in the manifest file. It creates a new global variable argv_new (a character double pointer) and sets it to global variables made for each command-line argument by adding instructions at the start of the main function.
+/*This pass creates a global variable for each command-line argument provided in the manifest file. 
+It creates a new global variable argv_new (a character double pointer) and sets it to global variables made for each command-line argument 
+by adding instructions at the start of the main function.*/
 
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Module.h"
