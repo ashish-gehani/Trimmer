@@ -2,6 +2,16 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
+"""
+This file contains utility functions such as format_args to format the arguments mentioned in the manifest file in a way that is accepted by the LLVM pass,
+exists to check the existence of manifest file and report error if it does not exist, usage to print how to run trimmer in case user runs it incorrectly and 
+parse_args, which parses the parameters and options provided by user when running trimmer.py and creates a Trimmer object (see trimmer.py).
+
+
+
+
+"""
+
 import os
 import json
 
