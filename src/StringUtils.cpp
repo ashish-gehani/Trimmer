@@ -13,7 +13,12 @@
 using namespace llvm;
 using namespace std;
 
-// FIXME: Why is this needed? ADD comment. Also Perhaps consider renaming?
+// This file contains string functions such as getting string length and contant string from value. 
+
+
+/*Since LLVM supports simpilfying results of some string functions, this function returns true if we are using LLVM support and false if we are handling
+it in our code.*/
+  
 bool simpleStrFunc(string name) {
   if(name == "strcmp" || name == "strcspn" 
      || name == "strspn" || name == "strncmp" || name == "strncasecmp"
