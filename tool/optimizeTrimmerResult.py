@@ -3,12 +3,18 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
-#
-# Optimize blocksize of apps/mmm_block.cpp
-#
-# This is an extremely simplified version meant only for tutorials
-#
-#import adddeps  # fix sys.path
+"""
+To understand this file, you need to know about opentuner and driver.py file.
+
+This file is run by the run_opts function in driver.py, if we use the value auto as optLevel, which means to tune the clang optimization passes in 
+such a way that it produces final bitcode file with minimum size.
+
+The final set of optimization passes are written to size_config.json file.
+
+opentuner can be installed using pip install opentuner.
+
+
+"""
 
 import opentuner
 from opentuner import ConfigurationManipulator
