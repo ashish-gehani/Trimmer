@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+/* This file contains some utils functions such as split string, cloning function, creating function call, get argument at index i of a function, read names of
+read-only functions from dat/readOnlyFunc.txt and test whether the function is read-only or not.*/ 
+
 #include "Utils.h"
 
 using namespace llvm;
