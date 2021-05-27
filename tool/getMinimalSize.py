@@ -7,6 +7,8 @@
 This file uses opentuner to tune the options (useGlob, optLevel, exceedLimit) provided to the trimmer.py in a way that it creates the final binary executable,
 which is minimum in size. It takes the path to the manifest file as a parameter.
 
+The final set of options are written to minimumSize.json file.
+
 To learn about options, see doc/options.md in the repository.
 
 opentuner can be installed using pip install opentuner.
