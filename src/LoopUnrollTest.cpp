@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+/* This file assists Loop Unrolling in checking whether the loop has terminated within the time and number of iterations, it should be. It inserts call
+instructions in every iteration and exit blocks of the loop, which is used to determine the termination of the loop.*/
+
 #include "LoopUnrollTest.h"
 #include "llvm/Analysis/LoopInfo.h"
 
