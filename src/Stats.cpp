@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-/*This file contain methods to keep track of statistics and print statistics such as total loads, function cloned, loop unrolled etc. Fo example incrementFunctionCloned() is 
-called whenever we clone a function.*/
+/*This file contain methods to keep track of statistics and print statistics such as total loads, function cloned, loop unrolled etc. Fo example 
+incrementFunctionCloned() is called whenever we clone a function.*/
 
 
 #include "llvm/Support/raw_ostream.h"
