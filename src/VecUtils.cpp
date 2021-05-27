@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+/*This file contains binarySearchIndices function which is used to search for starting address of a particular byte location in the stack or heap 
+as the memory is byte-wise arranged (See include/Mem.h). Vector indices contains indices of the starting addresses of the global variables or allocas.*/  
+
 #include "VecUtils.h"
 #include "Debug.h"
 
