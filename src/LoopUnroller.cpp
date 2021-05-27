@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+/*This file contain methods for loop unrolling such as getting trip count, whether the loop is a File I/O loop, whether the loop should be unrolled etc
+and performs loop unrolling using UnrollLoop function in LLVM.*/
+
 #include "LoopUnroller.h"
 
 LoopUnroller::LoopUnroller(Module *m, bool preserveLcssa, bool useAnnot, Loop *L, LoopInfo *li) {
