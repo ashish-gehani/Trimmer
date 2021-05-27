@@ -2,6 +2,15 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
+"""
+This is the main python file which is used to run Trimmer. It contains Trimmer class with attributes such as name of the manifest file, 
+values set in the manifest file (arguments, native libraries etc) and options specified by user (such as optLevel, useGlob, etc). It contains
+two functions print_info ( to print the attributes of the class) and run ( to run Trimmer passes, do optimization, link dynamic libraries and 
+create a final binary executable.   
+
+
+"""
+
 import os, sys
 from shutil import copyfile
 import utils, driver
