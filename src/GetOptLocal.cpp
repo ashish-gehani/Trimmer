@@ -7,7 +7,7 @@
 #include "llvm/Support/raw_ostream.h"
 #include <cstring>
 
-// FIXME: Add top-level comment for what this source includes? Also comments for imp functions
+// This file contains getopt functions which actually imitates functionality of the getopt function in getopt.h.
 
 int contains(char* str, char c){
   if(!str)
