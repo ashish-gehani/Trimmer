@@ -2,6 +2,16 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
+"""
+This file consists of a function env_version, which gets the environmental variables ( such as those mentioned in the readme.md file) set by the user.
+In case environmental variables are not set by user, it uses default value mentioned in env dictionary.
+
+
+
+
+
+"""
+
 import os
 import platform
 import sys
