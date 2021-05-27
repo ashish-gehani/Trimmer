@@ -3,11 +3,16 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
-#
-# Autotune flags to g++ to optimize the performance of apps/raytracer.cpp
-#
-# This is an extremely simplified version meant only for tutorials
-#
+"""
+This file uses opentuner to tune the options (useGlob, optLevel, exceedLimit) provided to the trimmer.py in a way that it creates the final binary executable,
+which is minimum in size. It takes the path to the manifest file as a parameter.
+
+To learn about options, see doc/options.md in the repository.
+
+opentuner can be installed using pip install opentuner.
+
+
+"""
 
 import argparse
 import os
@@ -22,7 +27,7 @@ from opentuner import MeasurementInterface
 from opentuner import Result
 
 TRIMMER_FLAGS = [
-  'useGlob', 'disableExit','useRegOffset'
+  'useGlob'
 ]
 
 trimmer_path = os.environ.get('TRIMMER_HOME')
