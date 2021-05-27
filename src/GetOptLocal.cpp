@@ -7,7 +7,7 @@
 #include "llvm/Support/raw_ostream.h"
 #include <cstring>
 
-// This file contains getopt functions which actually imitates functionality of the getopt function in getopt.h.
+// This file contains getopt functions which actually imitate functionality of the getopt function in getopt.h.
 
 int contains(char* str, char c){
   if(!str)
