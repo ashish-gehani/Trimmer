@@ -1,9 +1,9 @@
-Trimmer: Impact on Code Reductions
-==================================
+Trimmer: Impact on Code Size Reductions
+=======================================
 
 The following table shows the percentage reduction in code size for each benchmark.
 
-|Benchmark  |Baseline(-O3) Size||Debloated Size|Percentage Reduction|
+|Benchmark  |Baseline(-O3) Size|Debloated Size|Percentage Reduction|
 |:---------:|:----------------:|:-------------:|:------------------:|
 |dnsproxy   |18.9 Kb           |14.7 Kb        |22.5%               |
 |mini_httpd |58.9 Kb           |46.4 Kb        |21.2%               |
