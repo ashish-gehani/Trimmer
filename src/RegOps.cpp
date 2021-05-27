@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 /*This file contain registers operations such as adding or retrieving registers. A register consists of type of the pointer value and a uint64_t variable, which is 
-the location of the memory (See Mem.h) where the where the object pointed to is stored.*/
+the location of the memory (See Mem.h) where the object pointed to is stored.*/
 
 #include "RegOps.h"
 
