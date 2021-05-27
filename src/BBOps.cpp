@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 /*This file contains methods for Basic Block (BB) operations such as initailzing BB information, maarking BB visited or unreachable, 
-creating/merging/duplicating/copying contextetc.*/
+creating/merging/duplicating/copying context etc.*/
 
 
 #include <unistd.h>
