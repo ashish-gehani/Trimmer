@@ -4,6 +4,10 @@
  * license that can be found in the LICENSE file.
  */
 
+/*This file is the main header file for LoopUnrollTest. It contains a structure LoopUnrollTest that assists Loop Unrolling in checking whether the loop 
+has terminated  within the time and number of iterations, it should be. It inserts call instructions in every iteration and exit blocks of the loop, 
+which is used to determine the termination of the loop. All the methods of the structure are defined in src/LoopUnrollTest.cpp.*/
+
 #include "Debug.h"
 #include "Mem.h"
 
