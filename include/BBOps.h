@@ -4,6 +4,10 @@
  * license that can be found in the LICENSE file.
  */
 
+/*This is the main header file for the BBOps. It defines a class BBOps, which contains attributes and methods for Basic Block (BB) operations such as 
+initailzing BB information, maarking BB visited or unreachable, creating/merging/duplicating/copying context etc.. All the methods 
+of the class are defined in src/BBOps.cpp.*/
+
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
 #include "llvm/Pass.h"
 #include "llvm/Analysis/LoopInfo.h"
