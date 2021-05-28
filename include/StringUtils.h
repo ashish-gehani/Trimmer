@@ -4,6 +4,8 @@
  * license that can be found in the LICENSE file.
  */
 
+// This file contains function prototypes for StringUtils.cpp.
+
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/Value.h"
 #include "llvm/ADT/StringRef.h"
