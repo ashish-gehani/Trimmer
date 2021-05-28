@@ -3,7 +3,8 @@
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
-
+ /* This is the main header file for the ConstantFolding Pass. It defines a class ConstantFolding, which is inherited from LLVM Module Pass. All the methods 
+of the class are defined in src/Transforms/ConstantFolding.cpp.*/
 
 #include "llvm/Pass.h"
 #include "llvm/IR/Function.h"
