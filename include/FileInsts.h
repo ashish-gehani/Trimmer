@@ -4,7 +4,7 @@
  * license that can be found in the LICENSE file.
  */
 
-// The file consists of a structure used for tracking File IO instructions.
+// The file consists of a structure FileInsts used for tracking File IO instructions.
 
 
 
