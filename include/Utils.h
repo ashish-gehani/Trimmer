@@ -4,6 +4,8 @@
  * license that can be found in the LICENSE file.
  */
 
+//This file contains function prototypes for src/Utils.cpp.
+
 #ifndef UTILS_H_
 #define UTILS_H_
 
