@@ -12,9 +12,7 @@
 using namespace std;
 using namespace llvm;
 
-/*
- * structure keeping track of basic BB info   
- */
+// This file consists of a structure BBInfo, which stores information about a particular Basic Block.
 
 struct BBInfo {
   bool writesToMemory, partOfLoop, isHeader;
