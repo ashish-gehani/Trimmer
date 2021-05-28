@@ -4,6 +4,9 @@
  * license that can be found in the LICENSE file.
  */
 
+/* This file consists of a structure FuncInfo keeping track of basic function information as well as value returned and context at return.*/
+
+
 #include "Mem.h"
 
 #ifndef FUNCINFO_H_
@@ -12,7 +15,6 @@
 using namespace std;
 using namespace llvm;
 
-/* This file consists of a structure FuncInfo keeping track of basic function information as well as value returned and context at return.*/
 
 struct FuncInfo {
   Memory * context;
