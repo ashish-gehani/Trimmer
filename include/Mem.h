@@ -4,10 +4,27 @@
  * license that can be found in the LICENSE file.
  */
 
+/* This file contains two main classes: Memory and Register. 
+
+ Memory consists of
+ 
+ * stack - byte array
+ * heap  - byte array
+ * stackConst - byte array to check whether stack at location i is constant
+ * heapConst  - byte array to check whether heap at location i is constant
+ * startToSizeMap - hashMap which keeps track of how much memory was contigously allocated at each location
+ 
+ Register consists of
+ 
+ * Type of value stored
+ * Address location of the memory (index of stack or heap) where this value is stored
+ 
+ Registers are used to track values with pointer types.
+*/
+
 #include "llvm/IR/Module.h"
 #include "VecUtils.h"
 #include "llvm/Support/raw_ostream.h"
-//#include "LoopUnrollTest.h"
 
 #ifndef MEM_H_
 #define MEM_H_
@@ -18,15 +35,7 @@
 using namespace llvm;
 using namespace std;
 
-/**
- * 5 main structures in the Memory
- * stack - byte array
- * heap  - byte array
- * stackConst - byte array to check whether stack at location i is constant
- * heapConst  - byte array to check whether heap at location i is constant
- * startToSizeMap - hashMap which keeps track of how much memory was contigously allocated
- * at each location
-*/
+
 
 class Memory {
 public:
