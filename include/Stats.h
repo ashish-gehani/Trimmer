@@ -4,6 +4,10 @@
  * license that can be found in the LICENSE file.
  */
 
+/* This is the main header file for statistics.It consists of classes that keep track of statistics and print statistics such as 
+total loads, function cloned, loop unrolled etc. Fo example incrementFunctionCloned()of class Stat is called whenever we clone a function.
+The methods of class Stat are defined in src/Stats.cpp.*/
+
 #ifndef STAT_H
 #define STAT_H
 
@@ -17,7 +21,6 @@
 using namespace std;
 using namespace llvm;
 
-// FIXME: Need top-level comment to describe Stats class, atttributes and purpose
 
 template<class T>
 class StatNode {
