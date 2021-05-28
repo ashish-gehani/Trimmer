@@ -5,7 +5,7 @@
  */
 
 /* This is the main header file for the Annotation Pass. It defines a class AnnotateNew, which is inherited from LLVM Module Pass. All the methods 
-of the class are defined in src/AnnotateNew.cpp.*/
+of the class are defined in src/Transform/AnnotateNew.cpp.*/
 
 #include "llvm/Pass.h"
 #include "llvm/IR/Function.h"
