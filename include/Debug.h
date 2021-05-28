@@ -4,6 +4,9 @@
  * license that can be found in the LICENSE file.
  */
 
+/* This the main header class for debug purposes. It contains methods regarding debugging such as initailzaing debugging Level, 
+printing memory, instructions and basic blocks. All the methods  of the class are defined in src/Debug.cpp.*/
+
 #ifndef DEBUG_H_
 #define DEBUG_H_
 
