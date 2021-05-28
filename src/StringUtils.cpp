@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// This file contains string functions such as getting string length and contant string from value. 
+
+
 #include "llvm/Pass.h"
 #include "llvm/IR/Operator.h"
 
@@ -13,7 +16,6 @@
 using namespace llvm;
 using namespace std;
 
-// This file contains string functions such as getting string length and contant string from value. 
 
 
 /*Since LLVM supports simpilfying results of some string functions, this function returns true if we are using LLVM support and false if we are handling
