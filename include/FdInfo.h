@@ -4,14 +4,14 @@
  * license that can be found in the LICENSE file.
  */
 
+/*This file consists of the structure FdInfo used for tracking fileIO descriptors.*/
+
+
 #ifndef FD_INFO_H
 #define FD_INFO_H
 # include <stdio.h>
 
-/*
- * The structure used for tracking fileIO descriptors
- * open, read, pread, lseek, fopen, fread, fseek, fgets, mmap, munmap,close, fclose
-*/
+ 
 struct FdInfo {
   FILE *fptr; //for fopen, fread, fseek, fgets, fclose calls
   char * fileName; //File name
