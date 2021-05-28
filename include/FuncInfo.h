@@ -12,10 +12,7 @@
 using namespace std;
 using namespace llvm;
 
-/*
- * structure keeping track of basic function info 
- * as well as value returned and context at return.
- */
+/* This file consists of a structure FuncInfo keeping track of basic function information as well as value returned and context at return.*/
 
 struct FuncInfo {
   Memory * context;
