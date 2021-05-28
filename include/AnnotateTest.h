@@ -4,6 +4,10 @@
  * license that can be found in the LICENSE file.
  */
 
+/*This is the main header file for the AnnotationTest Pass. It defines a class AnnotateTest, which is inherited from LLVM Module Pass. All the methods 
+of the class are defined in src/AnnotateTest.cpp.*/
+
+
 #ifndef ANNOTATE_TEST_H
 #define ANNOTATE_TEST_H
 
