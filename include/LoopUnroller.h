@@ -4,6 +4,10 @@
  * license that can be found in the LICENSE file.
  */
 
+/* This file is the header class for LoopUnroller. It contains methods for loop unrolling such as getting trip count, whether the loop is a File I/O loop, 
+whether the loop should be unrolled etc and performs loop unrolling using UnrollLoop function in LLVM. All the methods  of the class are defined in 
+src/LoopUnroller.cpp.*/
+
 #include "llvm/IR/Module.h"
 #include "llvm/Analysis/AssumptionCache.h"
 #include "llvm/Analysis/ScalarEvolution.h"
