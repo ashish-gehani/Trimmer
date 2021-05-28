@@ -4,6 +4,10 @@
  * license that can be found in the LICENSE file.
  */
 
+/* This is the main header class for ContextInfo. It contains methods for Basic Block context such as duplicating/imaging context. ContextInfo contains memory, 
+a boolean variable deleted, a BasicBlock iterator and a pointer to the context information of the Basic Block it is equal to (if it is). All the methods 
+of the class are defined in src/ContextInfo.cpp.*/
+
 #include "llvm/IR/BasicBlock.h"
 #include "Mem.h"
 
