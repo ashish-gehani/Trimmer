@@ -4,6 +4,8 @@
  * license that can be found in the LICENSE file.
  */
 
+// This file consists of a structure BBInfo, which stores information about a particular Basic Block.
+
 #include "llvm/IR/BasicBlock.h"
 
 #ifndef BBINFO_H_
@@ -12,7 +14,6 @@
 using namespace std;
 using namespace llvm;
 
-// This file consists of a structure BBInfo, which stores information about a particular Basic Block.
 
 struct BBInfo {
   bool writesToMemory, partOfLoop, isHeader;
