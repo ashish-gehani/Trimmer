@@ -4,6 +4,9 @@
  * license that can be found in the LICENSE file.
  */
 
+/* this is the main header file for getOptLocal. It  contains getopt functions which actually imitate functionality of the getopt function in getopt.h.
+All the methods are defined in src/GetOptLocal.cpp.*/
+
 #include <string>
 #include <unistd.h>
 #include <getopt.h>
