@@ -4,6 +4,9 @@
  * license that can be found in the LICENSE file.
  */
 
+/* This file contains function prototype for src/VebUtils.cpp. It also contains template methods for finding items in vector/set/map, inserting in vector
+and deleting from vector.*/
+
 #ifndef STD_UTILS__
 #define STD_UTILS__
 
