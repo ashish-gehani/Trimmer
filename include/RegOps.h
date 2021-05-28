@@ -4,6 +4,10 @@
  * license that can be found in the LICENSE file.
  */
 
+/* This file is the main header file for RegOps. It contain methods for registers operations such as adding or retrieving registers. A register consists 
+of type of the pointer value and a uint64_t variable, which is he location of the memory (See Mem.h) where the value pointed to is stored. 
+All the methods of this class are defined in src/RegOps.cpp.*/
+
 #include "llvm/IR/Value.h"
 #include "llvm/IR/Instruction.h"
 #include "llvm/IR/Constants.h"
