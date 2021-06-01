@@ -10,10 +10,8 @@ NETSTAT_MANIFEST=${NETSTAT}.manifest
 OUT_DIR?=trimmer
 LOG_FILE?=logs
 
-BITCODE_WRAPPER?=wllvm
-BITCODE_EXTRACT?=extract-bc
-OPT_NAME=opt
-CFLAGS = -mem2reg -loops -lcssa -loop-simplify -loop-rotate -indvars
+BITCODE_WRAPPER=wllvm
+BITCODE_EXTRACT=extract-bc
 
 
 all: ${NETSTAT_BITCODE}
@@ -26,7 +24,7 @@ netstat: ${OUT_DIR}
 
 test_netstat:
 	@echo "\t\tTest Netstat" && \
-	${NETSTAT_NAME}/netstat -a -e -p > o_out && \
+	${NETSTAT_NAME}/netstat -a -e -p -s> o_out && \
 	${OUT_DIR}/work_dir/netstat_fin_stripped > t_out
 	@echo "Output comparison to Baseline:"
 	@cmp -s ./o_out t_out; \
@@ -45,9 +43,9 @@ test_netstat:
 ${NETSTAT_BITCODE}: ${NETSTAT_NAME}
 	cd ${NETSTAT_NAME} && \
 	sed -i 's/CC	= gcc//g' ./Makefile && \
+	sed -i 's/COPTS = -D_GNU_SOURCE -Wall/COPTS = -D_GNU_SOURCE -Wall -Xclang -disable-O0-optnone/g' ./Makefile && \
 	CC=${BITCODE_WRAPPER} make && \
 	${BITCODE_EXTRACT} ${NETSTAT} && \
-	${OPT_NAME} ${CFLAGS} ${NETSTAT_BITCODE} -o ${NETSTAT_BITCODE} && \
 	mv ${NETSTAT_BITCODE} ../ 
     
 		
