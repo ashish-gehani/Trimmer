@@ -62,7 +62,8 @@ struct DfsDepthInfo {
 
 
 PAG* globPag = NULL;
-SVFGOPT* globSvfg = NULL;
+SVFG* globSvfg = NULL;
+// SVFGOPT* globSvfg = NULL;
 set<SVFGNode*> forwardDp;
 map<SVFGNode* ,DfsDepthInfo*> forwardDepthDp;
 set<Value*> slpLoadDp;
@@ -223,7 +224,7 @@ GlobalValue* getArgv(string argvName, Module &M) {
   return NULL;  
 }
 
-static RegisterPass<AnnotateNew> X("svfg", "Constant Folding for strings", false, false);
+static RegisterPass<AnnotateNew> X("annotateNew", "Constant Folding for strings", false, false);
 
 const BasicBlock *AnnotateNew::partOfLoop(const BasicBlock *BB) {
   if(loopHeaders.find(BB) != loopHeaders.end())
@@ -1744,6 +1745,8 @@ double statFormula(Stat *a) {
 bool AnnotateNew::runOnModule(Module &M) {
   initDebugLevel();
 
+  debug(Yes) << "...................................Annotation Pass started.......................................................................\n";
+
   // TODO: Revisit this. Might be too slow. We are extracting an unoptimized SVF and then optimizing it
   SVFModule* svfModule = LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(M);  
   PAGBuilder pag_builder;
@@ -1755,8 +1758,9 @@ bool AnnotateNew::runOnModule(Module &M) {
 
   LOOP_ID = 0;
   module = &M;
-  SVFG* unoptimized_svfg =  builder.buildFullSVFG(ander);
-  svfg =  new SVFGOPT(unoptimized_svfg->getMSSA(), VFG::FULLSVFG_OPT);
+  // SVFG* unoptimized_svfg =  builder.buildFullSVFG(ander);
+  svfg =  builder.buildFullSVFG(ander);
+  // svfg =  new SVFGOPT(unoptimized_svfg->getMSSA(), VFG::FULLSVFG_OPT);
   pag = svfg->getPAG();
 
 

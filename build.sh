@@ -18,12 +18,15 @@ sudo apt-get install libpcre3-dev
 sudo apt-get install libidn11-dev
 sudo apt-get install uuid-dev
 
+echo "Downloading openssl"
 #Install SSL Library version 1.0.2g (compatible with aircrack-ng example) 
 wget https://www.openssl.org/source/openssl-1.0.2g.tar.gz
 tar xvfz openssl-1.0.2g.tar.gz
 cd openssl-1.0.2g
 ./config shared
 sudo make install
+
+echo "openssl done"
 
 sudo ln -s /usr/local/ssl/bin/c_rehash /usr/local/bin/
 sudo ln -s /usr/local/ssl/bin/openssl /usr/local/bin/

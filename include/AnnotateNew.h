@@ -51,7 +51,8 @@ struct AnnotateNew: public ModulePass {
   bool runOnModule(Module &);
   string print(SVFGNode *node, SVFG *graph);
   PAG *pag;
-  SVFGOPT *svfg; 
+  // SVFGOPT *svfg; 
+  SVFG *svfg; 
   map<Value*, set<Value*> *> isLoadOrArgcDp;
   map<Value*, set<Value*> *> isLoadDp;
   map<SVFGNode*, set<SVFGNode*> *> backwardDp;
