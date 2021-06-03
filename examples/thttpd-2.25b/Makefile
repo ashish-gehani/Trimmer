@@ -48,7 +48,7 @@ test_thttpd:
         mkdir workdir && \
 	echo '<HTML><HEAD><TITLE>Index of ./</TITLE></HEAD><BODY BGCOLOR="#99cc99" TEXT="#000000" LINK="#2020ff" VLINK="#4040cc"><H4>Index of ./</H4></HTML>' > workdir/index.html && \
 	./thttpd_fin_stripped  && \
-	wget 127.0.0.1:8089/
+	wget 127.0.0.1:8087/
 	@cmp -s ./index.html ${OUT_DIR}/work_dir/index.html; \
 	RETVAL=$$?; \
 	if [ $$RETVAL -eq 0 ]; then \
