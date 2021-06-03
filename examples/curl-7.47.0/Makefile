@@ -18,7 +18,7 @@ all: ${curl_BITCODE}
 compress: ${OUT_DIR}
 	cp ${curl_BITCODE} ${OUT_DIR}
 	cd ${OUT_DIR} && \
-	echo '{"binary": "curl_fin", "native_libs": [], "name": "curl", "args": ["--compress", "--http1.1", "--ipv4", "--ssl", "http://localhost:8070/"], "modules": [], "ldflags": ["-lz", "-lcurl"], "main": "curl.bc"}' > ${curl_MANIFEST} && \
+	echo '{"binary": "curl_fin", "native_libs": [], "name": "curl", "args": ["--compress", "--http1.1", "--ipv4", "--ssl", "_"], "modules": [], "ldflags": ["-lz", "-lcurl"], "main": "curl.bc"}' > ${curl_MANIFEST} && \
 	python ${TRIMMER_HOME}/tool/trimmer.py ${curl_MANIFEST} ./work_dir 2> ${LOG_FILE}
 
 .PHONY: ${curl_BITCODE}
@@ -33,20 +33,7 @@ ${curl_BITCODE}: ${curl_NAME}
         ${BITCODE_EXTRACT} ../${curl}
 
 test_curl:
-	@echo "\t\tTest Curl"
-	
-	${OUT_DIR}/work_dir/curl_fin_stripped > t_out && \
-	curl --compress --http1.1 --ipv4 --ssl http://www.google.com > o_out
-	@echo "Output comparison to Baseline:"
-	@cmp -s ./t_out o_out; \
-	RETVAL=$$?; \
-	if [ $$RETVAL -eq 0 ]; then \
-		echo "\tcurl test baseline compare? Passed!"; \
-	else \
-		echo "\tcurl test baseline compare? Failed!"; \
-	fi
-	#@rm ./o_out
-	#@rm ./t_out
+	python3 test_curl.py
 
 
 		
