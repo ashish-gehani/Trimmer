@@ -6,7 +6,7 @@ import os
 
 def main():
     # Note the -u here: essential for not buffering the stdout of the subprocess
-    proc = subprocess.Popen(['trimmer/mem/memcached_fin_stripped'],
+    proc = subprocess.Popen(['trimmer/mem/memcached_fin_stripped','-m','64','-l','127.0.0.1'],
                             stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT)
 
