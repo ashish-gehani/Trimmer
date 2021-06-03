@@ -20,7 +20,7 @@ all: ${MEMCACHED_BITCODE}
 compress: ${OUT_DIR}
 	cp ${MEMCACHED_BITCODE} ${OUT_DIR} && \
 	cd ${OUT_DIR} && \
-	echo '{"binary": "memcached_fin", "native_libs": [], "name": "memcached", "args": ["-m","64","-l","127.0.0.1"], "modules": [], "ldflags": ["-levent","-lpthread"], "main": "memcached.bc", "config_files": []}' > ${MEMCACHED_MANIFEST} && \
+	echo '{"binary": "memcached_fin", "native_libs": [], "name": "memcached", "args": ["-m","_","-l","_"], "modules": [], "ldflags": ["-levent","-lpthread"], "main": "memcached.bc", "config_files": []}' > ${MEMCACHED_MANIFEST} && \
 	python ${TRIMMER_HOME}/tool/trimmer.py ${MEMCACHED_MANIFEST} ./mem useGlob 2> ${LOG_FILE}
 
 .PHONY: ${MEMCACHED_BITCODE}
@@ -28,14 +28,15 @@ ${MEMCACHED_BITCODE}: ${MEMCACHED_NAME}
 	cd ${MEMCACHED_NAME} && \
 	CC=${BITCODE_WRAPPER} ./configure && \
 	sed -i 's/CFLAGS = -g -O2 -pthread -Wall -Werror -pedantic -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls/CFLAGS = -Xclang -disable-O0-optnone -pthread/g' ./Makefile && \
-	sed -i 's/memcached_debug_CFLAGS = -fprofile-arcs -ftest-coverage/#memcached_debug_CFLAGS = -fprofile-arcs -ftest-coverage/g' ./Makefile && \
+	#sed -i 's/memcached_debug_CFLAGS = -fprofile-arcs -ftest-coverage/#memcached_debug_CFLAGS = -fprofile-arcs -ftest-coverage/g' ./Makefile && \
 	CC=${BITCODE_WRAPPER} make && \
 	${BITCODE_EXTRACT} ${MEMCACHED} && \
 	${OPT_NAME} ${CFLAGS} ${MEMCACHED_BITCODE} -o ${MEMCACHED_BITCODE} && \
 	mv ${MEMCACHED_BITCODE} ../
-		
-test_men:
+
+test_mem:
 	python3 test_mem.py
+		
 ${OUT_DIR}:
 	mkdir -p ${OUT_DIR}
 
