@@ -18,7 +18,7 @@ all: ${knockd_BITCODE}
 compress: ${OUT_DIR}
 	cp ${knockd_BITCODE} ${OUT_DIR}
 	cd ${OUT_DIR} && \
-	echo '{"binary": "knockd_fin", "native_libs": [], "name": "knockd", "args": ["-i","ens33","-v"], "modules": [], "ldflags": ["-lpcap"], "main": "knockd.bc", "config_files": []}' > ${knockd_MANIFEST} && \
+	echo '{"binary": "knockd_fin", "native_libs": [], "name": "knockd", "args": ["-i","eth0"], "modules": [], "ldflags": ["-lpcap"], "main": "knockd.bc", "config_files": []}' > ${knockd_MANIFEST} && \
 	python ${TRIMMER_HOME}/tool/trimmer.py ${knockd_MANIFEST} ./work_dir 2> ${LOG_FILE}
 
 .PHONY: ${knockd_BITCODE}
