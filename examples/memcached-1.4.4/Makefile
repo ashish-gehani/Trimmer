@@ -11,8 +11,6 @@ LOG_FILE?=logs
 
 BITCODE_WRAPPER?=wllvm
 BITCODE_EXTRACT?=extract-bc
-OPT_NAME=opt
-CFLAGS = -mem2reg -loops -lcssa -loop-simplify -loop-rotate -indvars
 
 
 all: ${MEMCACHED_BITCODE}
