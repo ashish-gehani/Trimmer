@@ -18,7 +18,7 @@ all: ${GZIP_BITCODE}
 compress: ${OUT_DIR}
 	cp ${GZIP_BITCODE} ${OUT_DIR}
 	cd ${OUT_DIR} && \
-	echo '{"binary": "gzip_fin", "native_libs": [], "name": "gzip", "args": ["--force",  "--quiet",  "huffman.c"], "modules": [], "ldflags": ["-lbz2"], "main": "gzip.bc", "config_files": []}' > ${GZIP_MANIFEST} && \
+	echo '{"binary": "gzip_fin", "native_libs": [], "name": "gzip", "args": ["--force",  "--quiet",  "_"], "modules": [], "ldflags": ["-lbz2"], "main": "gzip.bc", "config_files": []}' > ${GZIP_MANIFEST} && \
 	python ${TRIMMER_HOME}/tool/trimmer.py ${GZIP_MANIFEST} ./work_dir 2> ${LOG_FILE}
 	cp huffman.c ${OUT_DIR}/work_dir
 
@@ -29,7 +29,7 @@ test_compress:
 	@# Testing if compressed file produced
 	@cp huffman.c ${OUT_DIR}/work_dir && \
 	cd ${OUT_DIR}/work_dir && \
-	./gzip_fin_stripped && \
+	./gzip_fin_stripped --force --quiet huffman.c && \
 	test -f huffman.c.gz && echo "\tgzip test compress file exist? Passed!" || echo "gzip test compress file exist? Failed!" 
 	@echo "Comparing File Sizes:"
 	@# Printing File sizes
