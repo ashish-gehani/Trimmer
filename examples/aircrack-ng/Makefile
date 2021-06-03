@@ -14,18 +14,9 @@ LOG_FILE?=logs
 
 BITCODE_WRAPPER=wllvm
 BITCODE_EXTRACT=extract-bc
-OPT_NAME=opt
-CFLAGS = -mem2reg -loops -lcssa -loop-simplify -loop-rotate -indvars
 
 
 all: ${AIRCRACK-NG_BITCODE}
-
-aircrack: ${OUT_DIR}
-	cp ${AIRCRACK-NG_BITCODE} ${OUT_DIR} && \
-	cp sha1-sse2.S ${OUT_DIR} && \
-	cd ${OUT_DIR} && \
-	echo '{"binary": "aircrack-ng_fin", "native_libs": [], "name": "aircrack-ng", "args": ["-b", "00:0c:29:52:aa:56","-a","wpa","-s","-w","dictionary.lst","chargen-tcp.pcap"], "modules": [], "ldflags": ["-lssl","-lcrypto","-lpthread","sha1-sse2.S"], "main": "aircrack-ng.bc", "config_files": []}' > ${AIRCRACK-NG_MANIFEST} && \
-	python ${TRIMMER_HOME}/tool/trimmer.py ${AIRCRACK-NG_MANIFEST} ./aircrack  2> ${LOG_FILE}
 
 airtun: ${OUT_DIR}
 	cp ${AIRCTUN-NG_BITCODE} ${OUT_DIR} && \
@@ -34,22 +25,22 @@ airtun: ${OUT_DIR}
 	python ${TRIMMER_HOME}/tool/trimmer.py ${AIRTUN-NG_MANIFEST} ./airtun  2> ${LOG_FILE}
 
 
-aircrack_crack: ${OUT_DIR}
+aircrack: ${OUT_DIR}
 	cp ${AIRCRACK-NG_BITCODE} ${OUT_DIR} && \
 	cp sha1-sse2.S ${OUT_DIR} && \
 	cp password.lst ${OUT_DIR} && \
 	cp wpa.cap ${OUT_DIR} && \
 	cd ${OUT_DIR} && \
 	echo '{"binary": "aircrack-ng_fin", "native_libs": [], "name": "aircrack-ng", "args": ["-b", "_","-a","wpa","-s","-w","password.lst","_"], "modules": [], "ldflags": ["-lssl","-lcrypto","-lpthread","sha1-sse2.S"], "main": "aircrack-ng.bc", "config_files": []}' > ${AIRCRACK-NG_MANIFEST} && \
-	python ${TRIMMER_HOME}/tool/trimmer.py ${AIRCRACK-NG_MANIFEST} ./aircrack  2> ${LOG_FILE}
+	python2 ${TRIMMER_HOME}/tool/trimmer.py ${AIRCRACK-NG_MANIFEST} ./aircrack  > ${LOG_FILE} 
+	@cp ${OUT_DIR}/password.lst ${OUT_DIR}/aircrack/ && \
+	cp ${OUT_DIR}/wpa.cap ${OUT_DIR}/aircrack/ 
 
-CHECK_AIRCRACK=$(shell cd ${OUT_DIR}/aircrack && ./aircrack-ng_fin_stripped | grep 'biscotte')
+CHECK_AIRCRACK:= $(shell cd ${OUT_DIR}/aircrack && ./aircrack-ng_fin_stripped -b 00:0D:93:EB:B0:8C -a wpa -s -w password.lst wpa.cap | grep 'biscotte') 
 
 test_aircrack_crack:
 	@echo "\t\tTest Aircrack-ng"
 	@echo "Checking if aircrack output valid:"
-	@cp ${OUT_DIR}/password.lst ${OUT_DIR}/aircrack/ && \
-	cp ${OUT_DIR}/wpa.cap ${OUT_DIR}/aircrack/
 ifeq ('$(CHECK_AIRCRACK)',)
 	@echo "\taircrack test valid? Failed!"
 else
@@ -57,15 +48,6 @@ else
 endif
 
 
-
-
-
-
-airtun: ${OUT_DIR}
-	cp ${AIRTUN-NG_BITCODE} ${OUT_DIR} && \
-	cd ${OUT_DIR} && \
-	echo '{"binary": "airtun-ng_fin", "native_libs": [], "name": "airtun-ng", "args": ["-a", "_","-w","_","_"], "modules": [], "ldflags": ["-lssl","-lcrypto"], "main": "airtun-ng.bc", "config_files": []}' > ${AIRTUN-NG_MANIFEST} && \
-	python ${TRIMMER_HOME}/tool/trimmer.py ${AIRTUN-NG_MANIFEST} ./airtun  2> ${LOG_FILE}
 
 .PHONY: ${AIRCRACK-NG_BITCODE}
 ${AIRCRACK-NG_BITCODE}: ${AIRCRACK-NG_NAME}
@@ -91,4 +73,6 @@ clean:
 	rm -rf ${AIRCRACK-NG_NAME}
 	rm *.bc
 	rm -r ${OUT_DIR}
+
+
 
