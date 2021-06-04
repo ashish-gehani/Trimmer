@@ -1,1 +1,1 @@
-{"binary": "totd_fin", "native_libs": [], "name": "totd", "args": ["-c", "totdipv4.conf", "-d2"],"modules": [], "ldflags": [], "main": "totd.bc","config_files":["totdipv4.conf"]}
+{"binary": "totd_fin", "native_libs": [], "name": "totd", "args": ["-c", "totdipv6.conf", "-d2"],"modules": [], "ldflags": [], "main": "totd.bc","config_files":["totdipv6.conf"]}
