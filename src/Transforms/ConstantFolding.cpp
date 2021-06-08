@@ -211,9 +211,6 @@ void ConstantFolding::runOnInst(Instruction * I) {
     result = tryfolding(I);
   }
 
-  //FIXME: Remove comment if dead code
-  //if(isLoopTest())
-  //updateLoopCost(result, I);
 }
 
 ProcResult ConstantFolding::processIntToPtr(IntToPtrInst *inst) {
@@ -757,13 +754,6 @@ return FOLDED;
  */
 ProcResult ConstantFolding::processAllocaInst(AllocaInst * ai) {
 
-  // FIXME: Remove dead code? 
-  /*
-     if(!isAllocaTracked(ai)) {
-     debug(Yes) << "skipping untracked alloca\n";
-     return NOTFOLDED;
-     }  
-     */
   Type * ty = ai->getAllocatedType();
   unsigned size = DL->getTypeAllocSize(ty);
   uint64_t addr = bbOps.allocateStack(size, currBB);
@@ -781,14 +771,7 @@ ProcResult ConstantFolding::processMallocInst(CallInst * mi) {
 
   stats.incrementTotalLibCalls();
 
-  // FIXME: Remove dead code? 
-  /*
-     if(!isAllocaTracked(mi)) {
-     debug(Yes) << "skipping untracked malloc\n";
-     return NOTFOLDED;
-     }
-     */
-  Value * sizeVal = mi->getOperand(0);
+   Value * sizeVal = mi->getOperand(0);
   uint64_t size;
   if(!getSingleVal(sizeVal, size)) {
     debug(Yes) << "mallocInst : size not constant\n";
@@ -5058,75 +5041,6 @@ Loop *ConstantFolding::isLoopHeader(BasicBlock *BB, LoopInfo &LI) {
 
   return L;
 }
-
-// FIXME:Remove if code below is dead
-
-/*
-   void ConstantFolding::updateLoopCost(ProcResult result, Instruction * I) {
-   if(!I->getParent()) // constant expressions etc
-   return;
-   if(!testStack.size())
-   return;
-   LoopUnrollTest *ti = testStack[testStack.size() - 1];
-   if(ti->testTerminated())
-   return;
-   if(findInMap(ti->InstResults, I))
-   return;
-   if(bbOps.partOfLoop(I->getParent())) {
-   ti->InstResults[I] = PARTOFLOOP;
-   ti->partOfLoop++;
-   return;
-   }
-   ti->InstResults[I] = result;
-   bool found = false;
-   for(unsigned i = 0; i < I->getNumOperands(); i++) {
-   Value * val = I->getOperand(i);
-   if(!isa<Instruction>(val))
-   continue;
-   if(findInMap(ti->InstResults, dyn_cast<Instruction>(val))) {
-   found = true;
-   break;
-   }
-   }
-   if(!found)
-   ti->indepInsts.push_back(I);
-   }
-
-   unsigned ConstantFolding::getNumNodesBelow(Instruction * I, 
-   map<Instruction *, unsigned> & cache, LoopUnrollTest *ti) {
-   if(findInMap(cache, I))
-   return cache[I];
-// getNumNodesBelow called on a use outside the loop
-if(!findInMap(ti->InstResults, I))
-return 1;
-ProcResult result = ti->InstResults[I];
-if(result == FOLDED || result == PARTOFLOOP)
-return 0;
-unsigned num = 0;
-for(Use &U : I->uses()) {
-Instruction * user = dyn_cast<Instruction>(U.getUser());
-assert(user);
-if(!bbOps.isVisited(user->getParent()))
-continue;
-num += getNumNodesBelow(user, cache, ti);      
-}      
-num = num > 0 ? num + 1 : result; // 0 if undecided, 1 if not folded
-cache[I] = num;
-return num;
-}
-
-unsigned ConstantFolding::getCost(LoopUnrollTest *ti) {
-unsigned cost = 0;
-map<Instruction *, unsigned> cache;
-for(unsigned i = 0; i < ti->indepInsts.size(); i++) {
-unsigned num = 0;
-Instruction * I = ti->indepInsts[i];
-num = getNumNodesBelow(I, cache, ti);
-cost += num;   
-}
-return cost + ti->partOfLoop;
-}
-*/
 
 void ConstantFolding::duplicateContext(BasicBlock * to, BasicBlock *from) {
   if (!bbOps.isBBInfoInitialized(to)) {
