@@ -56,7 +56,7 @@ test_readelf:
 gprof: ${OUT_DIR}
 	cp ${GPROF_BITCODE} ${OUT_DIR}
 	cd ${OUT_DIR} && \
-	echo '{"binary": "gprof_fin", "native_libs":[],"name": "gprof", "args": ["-c","-r","-i","-s", "name"], "modules": [], "ldflags": [], "main": "gprof.bc", "config_files": []}' > ${GPROF_MANIFEST} && \
+	echo '{"binary": "gprof_fin", "native_libs":[],"name": "gprof", "args": ["-q", "name"], "modules": [], "ldflags": [], "main": "gprof.bc", "config_files": []}' > ${GPROF_MANIFEST} && \
 	python ${TRIMMER_HOME}/tool/trimmer.py ${GPROF_MANIFEST} ./gprof  exceedLimit 400 2> ${LOG_FILE}
 
 test_gprof:
