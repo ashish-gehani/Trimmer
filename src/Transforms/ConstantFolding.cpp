@@ -65,7 +65,7 @@ specializing file I/O and strings.*/
 #include "FdInfo.h"
 #include "FileInsts.h"
 #include "MMapInfo.h"
-#include "GetOptLocal.h"
+
 
 using namespace llvm;
 using namespace std;
@@ -4803,9 +4803,9 @@ bool ConstantFolding::handleGetOpt(CallInst * ci) {
     if(!handleLongArgs(ci, long_opts, long_index))
       return true;
     debug(Yes)<<"Calling getopt_long_local\n";
-    result = getopt_long_local(argcLimit, argv, opts, long_opts, long_index);
+    result = getopt_long(argcLimit, argv, opts, long_opts, long_index);
   } else 
-    result = getopt_local(argcLimit, argv, opts);
+    result = getopt(argcLimit, argv, opts);
 
   IntegerType * intTy = IntegerType::get(module->getContext(), intSize * 8);
   ConstantInt * resInt = ConstantInt::get(intTy, result);
