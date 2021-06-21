@@ -6,7 +6,7 @@ import os
 
 def main():
     # Note the -u here: essential for not buffering the stdout of the subprocess
-    proc = subprocess.Popen(['trimmer/real/sans_fin_stripped'],
+    proc = subprocess.Popen(['trimmer/udp/sans_fin_stripped'],
                             stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT)
 
@@ -15,7 +15,7 @@ def main():
         #resp = urllib.request.urlopen('http://localhost:8070/o_out')
         #resp1 = urllib.request.urlopen('http://localhost:8070/a.html')
         f = open('t_out','w')
-        proc1 = subprocess.call(['dig','@127.0.0.1','-p', '5300' ,'www.google.com'],stdout=f)
+        proc1 = subprocess.call(['dig','@127.0.0.1','www.google.com'],stdout=f)
         f.close()
         f = open('t_out','r')
         a = f.read()
