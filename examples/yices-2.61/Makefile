@@ -19,9 +19,10 @@ all: ${YICES_BITCODE}
 
 compress: ${OUT_DIR} ${YICES_BITCODE}
 	cp ${YICES_BITCODE} ${OUT_DIR}
+	cp libyices.a ${OUT_DIR} && \
 	cd ${OUT_DIR} && \
 	echo '{"binary": "yices_main_fin", "native_libs":[],"name": "yices_main", "args": ["--logic=QF_AUFBV", "abc.ys"], "modules": [], "ldflags": ["-lgmp","libyices.a"], "main": "yices_main.bc", "config_files": []}' > ${YICES_MANIFEST} && \
-	python ${TRIMMER_HOME}/tool/trimmer.py ${YICES_MANIFEST} ./ 2> ${LOG_FILE}
+	python ${TRIMMER_HOME}/tool/trimmer.py ${YICES_MANIFEST} work_dir 2> ${LOG_FILE}
 
 
 ${YICES_BITCODE}: ${YICES_NAME}
@@ -36,7 +37,7 @@ ${YICES_BITCODE}: ${YICES_NAME}
 test_yices:
 	@echo "\t\tTest Yices"
 	
-	${OUT_DIR}/yices_main_fin_stripped > t_out && \
+	${OUT_DIR}/work_dir/yices_main_fin_stripped > t_out && \
 	${YICES_NAME}/build/x86_64-pc-linux-gnu-release/bin/yices_main --logic=QF_AUFBV abc.ys > o_out
 	@echo "Output comparison to Baseline:"
 	@cmp -s ./t_out o_out; \
