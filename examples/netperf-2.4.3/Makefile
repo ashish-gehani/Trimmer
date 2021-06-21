@@ -31,7 +31,6 @@ ${NETPERF_BITCODE}: ${NETPERF_NAME}
 	sed -i 's/CC = gcc//g' ./src/Makefile && \
 	CC=${BITCODE_WRAPPER} make && \
 	${BITCODE_EXTRACT} src/${NETPERF} && \
-	${OPT_NAME} ${CFLAGS} src/${NETPERF_BITCODE} -o src/${NETPERF_BITCODE} && \
 	mv src/${NETPERF_BITCODE} ../ 
 
 test_netperf:
