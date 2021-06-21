@@ -33,7 +33,7 @@ ${TOTD_BITCODE}: ${TOTD_NAME}
 	cd ${TOTD_NAME} && \
 	sed -i 's/-g -O2/ -Xclang -disable-O0-optnone/g' ./Makefile && \
 	sed -i 's/CC = gcc/CC? = gcc/g' ./Makefile && \
-	CC=${BITCODE_WRAPPER} make &&
+	CC=${BITCODE_WRAPPER} make && \
 	${BITCODE_EXTRACT} ${TOTD} && \
 	mv ${TOTD_BITCODE} ../
 	
