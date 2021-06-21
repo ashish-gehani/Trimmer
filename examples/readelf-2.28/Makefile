@@ -63,7 +63,7 @@ test_gprof:
 	@echo "\t\tTest gprof"
 	
 	${OUT_DIR}/gprof/gprof_fin_stripped > t_out && \
-	${READELF_NAME}/${GPROF}/${GPROF} -c -r -i -s name > o_out
+	${READELF_NAME}/${GPROF}/${GPROF} -q name > o_out
 	@echo "Output comparison to Baseline:"
 	@cmp -s ./t_out o_out; \
 	RETVAL=$$?; \
