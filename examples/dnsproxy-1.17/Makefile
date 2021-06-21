@@ -23,7 +23,7 @@ dns: ${OUT_DIR} ${DNSPROXY_BITCODE}
 	python ${TRIMMER_HOME}/tool/trimmer.py ${DNSPROXY_MANIFEST} ./workdir 2> ${LOG_FILE}
 
 test_dns: 
-	python3 test_dns.py
+	sudo python3 test_dns.py
 ${DNSPROXY_BITCODE}: ${DNSPROXY_NAME}
 	cd ${DNSPROXY_NAME} && \
 	CC=${BITCODE_WRAPPER} CFLAGS="-DHAVE_CONFIG_H -DVERSION="\"1.17\"" -Xclang -disable-O0-optnone" ./configure && \
