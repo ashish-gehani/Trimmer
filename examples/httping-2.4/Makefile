@@ -18,7 +18,7 @@ all: ${httping_BITCODE}
 compress: ${OUT_DIR}
 	cp ${httping_BITCODE} ${OUT_DIR}
 	cd ${OUT_DIR} && \
-	echo '{"binary": "httping_fin", "native_libs": [], "name": "httping", "args": ["-G",  "-s",  "-X","-b","-B","_"], "modules": [], "ldflags": ["-lm","-lssl",-lcrypto"], "main": "httping.bc", "config_files": []}' > ${httping_MANIFEST} && \
+	echo '{"binary": "httping_fin", "native_libs": [], "name": "httping", "args": ["-G",  "-s",  "-X","-b","-B","_"], "modules": [], "ldflags": ["-lm","-lssl","-lcrypto"], "main": "httping.bc", "config_files": []}' > ${httping_MANIFEST} && \
 	python ${TRIMMER_HOME}/tool/trimmer.py ${httping_MANIFEST} ./work_dir 2> ${LOG_FILE}
 
 .PHONY: ${httping_BITCODE}
