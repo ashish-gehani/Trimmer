@@ -6,7 +6,7 @@ import os
 
 def main():
     # Note the -u here: essential for not buffering the stdout of the subprocess
-    proc = subprocess.Popen(['trimmer/work_dir/dnsproxy_fin_stripped'],
+    proc = subprocess.Popen(['trimmer/workdir/dnsproxy_fin_stripped'],
                             stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT)
 
