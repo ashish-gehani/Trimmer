@@ -174,7 +174,7 @@ def run_argspec(tool):
 	subprocess.call(Cmd, shell = True)
 
 	# Internalize pass
-	Cmd = opt + ' -load ' + build_path + 'Internalize.so -intern ' + libspec_file\
+	Cmd = opt + ' -load ' + build_path + 'Internalize.so -intern ' + inline_file\
 	+ ' -o ' + intern_file
         printDbgMsg(Cmd)
 	subprocess.call(Cmd, shell = True)
