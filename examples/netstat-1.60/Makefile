@@ -24,7 +24,7 @@ netstat: ${OUT_DIR}
 
 test_netstat:
 	@echo "\t\tTest Netstat" && \
-	${NETSTAT_NAME}/netstat -a -e -p -s> o_out && \
+	${NETSTAT_NAME}/netstat -a -e -p > o_out && \
 	${OUT_DIR}/work_dir/netstat_fin_stripped > t_out
 	@echo "Output comparison to Baseline:"
 	@cmp -s ./o_out t_out; \
