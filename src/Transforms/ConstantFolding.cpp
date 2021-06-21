@@ -850,7 +850,7 @@ ProcResult ConstantFolding::processBitCastInst(BitCastInst * bi) {
   if(!reg) {
     //try function
     if(dyn_cast<Function>(ptr)) {
-      //addSingleVal(bi, (uint64_t) ptr, false, true);
+      addSingleVal(bi, (uint64_t) ptr, false, true);
       return NOTFOLDED;
     }
     debug(Yes) << "BitCastInst : Not found in Map\n";
@@ -1813,7 +1813,9 @@ ProcResult ConstantFolding::handleExtractValue(ExtractValueInst *inst) {
 
 ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
 
+
   if(!callInst->getCalledFunction() && !simplifyCallback(callInst)) {
+    debug(Yes)<<" called function is null\n";
     //TODO: mark all globals as non constant?
     markArgsAsNonConst(callInst);
     return NOTFOLDED;
