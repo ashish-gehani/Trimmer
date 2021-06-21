@@ -20,7 +20,7 @@ compress: ${OUT_DIR}
 	cp ${THTTPD}.conf ${OUT_DIR} && \
 	cd ${OUT_DIR} && \
 	echo '{"binary": "thttpd_fin", "native_libs": [], "name": "thttpd", "args": ["-C",  "thttpd.conf"], "modules": [], "ldflags": ["-lcrypt"], "main": "thttpd.bc", "config_files": ["thttpd.conf"]}' > ${THTTPD_MANIFEST} && \
-	python2 ${TRIMMER_HOME}/tool/trimmer.py ${THTTPD_MANIFEST} ./work_dir 2> ${LOG_FILE}
+	python ${TRIMMER_HOME}/tool/trimmer.py ${THTTPD_MANIFEST} ./work_dir 2> ${LOG_FILE}
 
 .PHONY: ${THTTPD_BITCODE}
 ${THTTPD_BITCODE}: ${THTTPD_NAME}
