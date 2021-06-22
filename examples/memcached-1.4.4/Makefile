@@ -29,7 +29,6 @@ ${MEMCACHED_BITCODE}: ${MEMCACHED_NAME}
 	#sed -i 's/memcached_debug_CFLAGS = -fprofile-arcs -ftest-coverage/#memcached_debug_CFLAGS = -fprofile-arcs -ftest-coverage/g' ./Makefile && \
 	CC=${BITCODE_WRAPPER} make && \
 	${BITCODE_EXTRACT} ${MEMCACHED} && \
-	${OPT_NAME} ${CFLAGS} ${MEMCACHED_BITCODE} -o ${MEMCACHED_BITCODE} && \
 	mv ${MEMCACHED_BITCODE} ../
 
 test_mem:
