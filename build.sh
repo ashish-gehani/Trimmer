@@ -1,7 +1,7 @@
 # Copyright (c) 2020 SRI International All rights reserved.
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
-
+#
 #  Note that these instructions have been tested on Ubuntu 16.04.6 
 #  You may need to adjust according to your system requirements
 
@@ -17,42 +17,23 @@ sudo apt-get install libevent-dev
 sudo apt-get install libpcre3-dev
 sudo apt-get install libidn11-dev
 sudo apt-get install uuid-dev
+sudo apt-get install libssl-dev
 
 #Install SSL Library version 1.0.2g (compatible with aircrack-ng example) 
 wget https://www.openssl.org/source/openssl-1.0.2g.tar.gz
 tar xvfz openssl-1.0.2g.tar.gz
 cd openssl-1.0.2g
-./config shared
+./config --prefix=/usr/local shared
 sudo make install
 
-sudo ln -s /usr/local/ssl/bin/c_rehash /usr/local/bin/
-sudo ln -s /usr/local/ssl/bin/openssl /usr/local/bin/
-
-sudo ln -s /usr/local/ssl/include/openssl /usr/local/include/
-
-sudo ln -s /usr/local/ssl/lib/engines /usr/local/lib/
-sudo ln -s /usr/local/ssl/lib/libcrypto.a /usr/local/lib/ 
-sudo ln -s /usr/local/ssl/lib/libcrypto.so /usr/local/lib/
-sudo ln -s /usr/local/ssl/lib/libcrypto.so.1.0.0 /usr/local/lib/
-sudo ln -s /usr/local/ssl/lib/libssl.a /usr/local/lib/
-sudo ln -s /usr/local/ssl/lib/libssl.so /usr/local/lib/
-sudo ln -s /usr/local/ssl/lib/libssl.so.1.0.0 /usr/local/lib/
-
-sudo mkdir /usr/local/lib/pkgconfig
-sudo ln -s /usr/local/ssl/lib/pkgconfig/libcrypto.pc /usr/local/lib/pkgconfig/
-sudo ln -s /usr/local/ssl/lib/pkgconfig/libssl.pc /usr/local/lib/pkgconfig/
-sudo ln -s /usr/local/ssl/lib/pkgconfig/openssl.pc /usr/local/lib/pkgconfig/
+cd ../
 
 #These environment variables should be set before building aircrack-ng. Better to put it in .bash_profile
 
 export CPATH=/usr/local/include:$CPATH
-export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib/engines:$LD_LIBRARY_PATH
+export LIBRARY_PATH=/usr/local/lib:/usr/local/lib/engines:$LIBRARY_PATH
 export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
 
-
-echo /usr/local/lib > /etc/ld.so.conf.d/usr_local_lib.conf
-sudo ldconfig
-sudo ldconfig -v
 
 #  Download LLVM source files
 
@@ -62,11 +43,13 @@ cd llvm7
 
 wget https://releases.llvm.org/7.0.0/llvm-7.0.0.src.tar.xz 
 wget https://releases.llvm.org/7.0.0/cfe-7.0.0.src.tar.xz 
+wget https://releases.llvm.org/7.0.0/compiler-rt-7.0.0.src.tar.xz 
 tar xf llvm-7.0.0.src.tar.xz
 tar xf cfe-7.0.0.src.tar.xz
+tar xf compiler-rt-7.0.0.src.tar.xz
 
 mv cfe-7.0.0.src/ llvm-7.0.0.src/tools/clang
-
+mv compiler-rt-7.0.0.src/ llvm-7.0.0.src/projects
 
 
 
