@@ -187,7 +187,7 @@ void ConstantFolding::runOnInst(Instruction * I) {
     result = processGEPInst(GEPInst);
   } else if(PHINode * phiNode = dyn_cast<PHINode>(I)) {
     result = processPHINode(phiNode);
-  } else if(ReturnInst * retInst = dyn_cast<ReturnInst>(I)) {
+  } else if(ReturnInst * retInst = dyn_cast<ReturnInst>(I)){ 
     result = processReturnInst(retInst);
   } else if(TerminatorInst * termInst = dyn_cast<TerminatorInst>(I)) {
     result = processTermInst(termInst);
@@ -845,12 +845,14 @@ ProcResult ConstantFolding::processCallocInst(CallInst * ci) {
  * as %b but type ty1
  */
 ProcResult ConstantFolding::processBitCastInst(BitCastInst * bi) {
+
   Value * ptr = bi->getOperand(0);
   Register * reg = processInstAndGetRegister(ptr);
   if(!reg) {
     //try function
     if(dyn_cast<Function>(ptr)) {
       addSingleVal(bi, (uint64_t) ptr, false, true);
+      debug(Yes)<<"in bitcast inst\n";
       return NOTFOLDED;
     }
     debug(Yes) << "BitCastInst : Not found in Map\n";
@@ -1101,7 +1103,7 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
   
 
   unsigned OffsetBits = DL->getPointerTypeSizeInBits(gi->getType());
-  unsigned size = (DL->getPointerTypeSizeInBits(dyn_cast<PointerType>(gi->getType())->getElementType()))/8;
+  uint64_t  size = DL->getTypeAllocSize(dyn_cast<PointerType>(gi->getType())->getElementType());
   debug(Yes)<<"size: "<<size<<"\n";
   APInt offset(OffsetBits, 0); 
   bool isConst = gi->accumulateConstantOffset(*DL, offset);
@@ -1141,6 +1143,7 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
     debug(Yes)<< " Register non constant\n";
     return NOTFOLDED;
   }
+
   debug(Yes)<<"Resultant Address: "<<val<<"\n";
   pushFuncStack(gi);
   regOps.addRegister(gi, gi->getType(), val, reg->getTracked());
@@ -1813,7 +1816,7 @@ ProcResult ConstantFolding::handleExtractValue(ExtractValueInst *inst) {
 
 ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
 
-
+  debug(Yes)<<"in call inst\n";
   if(!callInst->getCalledFunction() && !simplifyCallback(callInst)) {
     debug(Yes)<<" called function is null\n";
     //TODO: mark all globals as non constant?
@@ -1950,7 +1953,7 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
         debug(Yes)<<"ContextType is 0/NULL...\n";
         funcSpecMap[calledFunction] = detail;
       }
-
+       debug(Yes)<<"in call inst run on function\n";
       runOnFunction(clonedInst, clonedInst->getCalledFunction());
     }
   }
@@ -2041,6 +2044,17 @@ void ConstantFolding::propagateArgs(CallInst *ci, Function *toRun) {
       arg++, index++) {
     Value * callerVal = ci->getOperand(index);
     Value * calleeVal = getArg(toRun, index);
+    if(callerVal->getType() != calleeVal->getType()){
+       debug(Yes)<< " type mismatched\n";
+       IRBuilder<> Builder(ci);
+       Value* BitcastInst = Builder.CreateBitCast(callerVal, calleeVal->getType());
+       ci->setOperand(index,BitcastInst);
+       Register * reg = processInstAndGetRegister(callerVal);
+       regOps.addRegister(BitcastInst, BitcastInst->getType(), reg->getValue(), reg->getTracked());
+       replaceOrCloneRegister(calleeVal, BitcastInst);
+       continue;
+       
+    }
     replaceOrCloneRegister(calleeVal, callerVal);
   }
 }
