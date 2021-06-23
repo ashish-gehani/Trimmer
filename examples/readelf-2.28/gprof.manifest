@@ -1,1 +1,0 @@
-{"binary": "gprof_fin", "native_libs":[],"name": "gprof", "args": ["-q","name"], "modules": [], "ldflags": ["-ldl"], "main": "gprof.bc", "config_files": []}
