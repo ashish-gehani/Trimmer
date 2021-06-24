@@ -853,8 +853,8 @@ ProcResult ConstantFolding::processBitCastInst(BitCastInst * bi) {
     /*if(dyn_cast<Function>(ptr)) {
       addSingleVal(bi, (uint64_t) ptr, false, true);
       debug(Yes)<<"in bitcast inst\n";
-      return NOTFOLDED;*/
-    }
+      return NOTFOLDED;
+    }*/
     debug(Yes) << "BitCastInst : Not found in Map\n";
     return NOTFOLDED;
   }
