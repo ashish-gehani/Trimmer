@@ -850,10 +850,10 @@ ProcResult ConstantFolding::processBitCastInst(BitCastInst * bi) {
   Register * reg = processInstAndGetRegister(ptr);
   if(!reg) {
     //try function
-    if(dyn_cast<Function>(ptr)) {
+    /*if(dyn_cast<Function>(ptr)) {
       addSingleVal(bi, (uint64_t) ptr, false, true);
       debug(Yes)<<"in bitcast inst\n";
-      return NOTFOLDED;
+      return NOTFOLDED;*/
     }
     debug(Yes) << "BitCastInst : Not found in Map\n";
     return NOTFOLDED;
@@ -2044,7 +2044,7 @@ void ConstantFolding::propagateArgs(CallInst *ci, Function *toRun) {
       arg++, index++) {
     Value * callerVal = ci->getOperand(index);
     Value * calleeVal = getArg(toRun, index);
-    if(callerVal->getType() != calleeVal->getType()){
+    /*if(callerVal->getType() != calleeVal->getType()){
        debug(Yes)<< " type mismatched\n";
        IRBuilder<> Builder(ci);
        Value* BitcastInst = Builder.CreateBitCast(callerVal, calleeVal->getType());
@@ -2054,7 +2054,7 @@ void ConstantFolding::propagateArgs(CallInst *ci, Function *toRun) {
        replaceOrCloneRegister(calleeVal, BitcastInst);
        continue;
        
-    }
+    }*/
     replaceOrCloneRegister(calleeVal, callerVal);
   }
 }
