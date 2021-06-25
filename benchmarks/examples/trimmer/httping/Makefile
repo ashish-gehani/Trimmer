@@ -17,13 +17,13 @@ all: ${httping_BITCODE}
 compress: ${OUT_DIR}
 	cp ${httping_BITCODE} ${OUT_DIR}
 	cd ${OUT_DIR} && \
-	echo '{"binary": "httping_fin", "native_libs": [], "name": "httping", "args": ["-G",  "-s",  "-X","-b","-B","_"], "modules": [], "ldflags": ["-lm","-lssl","-lcrypto"], "main": "httping.bc", "config_files": []}' > ${httping_MANIFEST} && \
+	echo '{"binary": "httping_fin", "native_libs": [], "name": "httping", "args": ["-G",  "-s",  "-X","-b","-B","_"], "modules": [], "ldflags": ["-lm"], "main": "httping.bc", "config_files": []}' > ${httping_MANIFEST} && \
 	python ${TRIMMER_HOME}/tool/trimmer.py ${httping_MANIFEST} ./work_dir 2> ${LOG_FILE}
 
 .PHONY: ${httping_BITCODE}
 ${httping_BITCODE}: ${httping_NAME}
 	cd ${httping_NAME} && \
-	CC=${BITCODE_WRAPPER} ./configure && \
+	./configure && \
 	sed -i 's/WFLAGS=-Wall -W -Wextra -pedantic -D_FORTIFY_SOURCE=2/WFLAGS=-Xclang -disable-O0-optnone/g' ./Makefile && \
 	sed -i 's/DEBUG=yes/DEBUG=no/g' ./Makefile && \
 	CC=${BITCODE_WRAPPER} make && \
@@ -42,7 +42,7 @@ ${httping_NAME}:
 base:
 	opt -O3 ${httping_BITCODE} -o ${httping}_opt.bc
 	llc -filetype=obj ${httping}_opt.bc -o ${httping}_opt.o
-	clang++ -O3 ${httping}_opt.o -lm -lssl -lcrypto  -o ${httping}_bin 
+	clang++ -O3 ${httping}_opt.o -lm -o ${httping}_bin 
 	strip ${httping}_bin -o ${httping}_base_stripped
 
 clean:
