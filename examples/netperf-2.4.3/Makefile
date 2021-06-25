@@ -38,7 +38,7 @@ ${NETPERF_BITCODE}: ${NETPERF_NAME}
 	sed -i 's/(...) bitcast (void ()\*/ /g' src/${NETPERF_LL} && \
 	sed -i 's/ to void (...)\*)//g' src/${NETPERF_LL} && \
 	${BITCODE_AS} src/${NETPERF_LL} && \
-	#rm src/${NETPERF_LL} && \
+	rm src/${NETPERF_LL} && \
 	mv src/${NETPERF_BITCODE} ../
 
 test_netperf:
