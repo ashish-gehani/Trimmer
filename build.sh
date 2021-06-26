@@ -18,6 +18,13 @@ sudo apt-get install libpcre3-dev
 sudo apt-get install libidn11-dev
 sudo apt-get install uuid-dev
 sudo apt-get install libssl-dev
+sudo apt-get install gettext
+sudo apt-get install libpcap-dev
+sudo apt-get install libbz2-dev
+
+# Install missing tools to test applications
+sudo apt-get install -y wireless-tools
+sudo apt-get install libmemcached-tools
 
 #Install SSL Library version 1.0.2g (compatible with aircrack-ng example) 
 wget https://www.openssl.org/source/openssl-1.0.2g.tar.gz
