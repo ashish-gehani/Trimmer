@@ -77,4 +77,4 @@ clean:
 	-rm *.bc
 	-rm -r ${OUT_DIR}
 	-rm *_bin *_stripped *.o
-
+	-rm huffman.c.gz

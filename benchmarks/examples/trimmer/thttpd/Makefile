@@ -4,7 +4,7 @@ THTTPD_VERSION=2.25b
 THTTPD_NAME=${THTTPD}-${THTTPD_VERSION}
 THTTPD_TAR=${THTTPD_NAME}.tar.gz
 THTTPD_PATCH=thttpd.patch
-THTTPD_CONF=./thttpd.conf
+THTTPD_CONF=thttpd.conf
 THTTPD_MANIFEST=${THTTPD}.manifest
 
 OUT_DIR?=trimmer
@@ -37,19 +37,23 @@ ${THTTPD_BITCODE}: ${THTTPD_NAME}
 test_thttpd:
 	@echo "\t\tTesting Thttpd"
 	@cd ${OUT_DIR}/work_dir/ && \
-        mkdir -p workdir && \
+	mkdir -p workdir && \
 	echo '<HTML><HEAD><TITLE>Index of ./</TITLE></HEAD><BODY BGCOLOR="#99cc99" TEXT="#000000" LINK="#2020ff" VLINK="#4040cc"><H4>Index of ./</H4></HTML>' > workdir/index.html && \
-	./thttpd_fin_stripped  && \
+	./thttpd_fin_stripped && \
+	cd ../../ && \
+	sleep 1
 	wget 127.0.0.1:8087/
 
-	@cp ${THTTPD_CONF} ${THTTPD_NAME}
-	@cd ${THTTPD_NAME}  && \
-	sed -i 's/8087/8199/g' ${THTTPD_CONF}
-	@mkdir -p workdir 
-	@echo '<HTML><HEAD><TITLE>Index of ./</TITLE></HEAD><BODY BGCOLOR="#99cc99" TEXT="#000000" LINK="#2020ff" VLINK="#4040cc"><H4>Index of ./</H4></HTML>' > workdir/index.html && \
-	${THTTPD_NAME}/thttpd -C ${THTTPD_NAME}/thttpd.conf
+	cp ${THTTPD_CONF} ${THTTPD_NAME}
+	sed -i 's/8087/8199/g' ${THTTPD_NAME}/${THTTPD_CONF}
+	@mkdir -p ${THTTPD_NAME}/workdir 
+	@echo '<HTML><HEAD><TITLE>Index of ./</TITLE></HEAD><BODY BGCOLOR="#99cc99" TEXT="#000000" LINK="#2020ff" VLINK="#4040cc"><H4>Index of ./</H4></HTML>' > ${THTTPD_NAME}/workdir/index.html && \
+	cd ${THTTPD_NAME} && \
+	./thttpd -C ${THTTPD_CONF}
+	sleep 1
+	cd ${THTTPD_NAME} && \
 	wget 127.0.0.1:8199/ 
-	@cmp -s ./index.html ${OUT_DIR}/work_dir/index.html; \
+	@cmp -s ${THTTPD_NAME}/index.html index.html; \
 	RETVAL=$$?; \
 	if [ $$RETVAL -eq 0 ]; then \
 		echo "\tthttpd test baseline compare? Passed!"; \
@@ -74,3 +78,4 @@ clean:
 	-rm *.bc
 	-rm -r ${OUT_DIR}
 	-rm *_bin *_stripped *.o
+	-rm index*

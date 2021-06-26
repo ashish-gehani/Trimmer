@@ -5,6 +5,9 @@ MEMCACHED_BITCODE=${MEMCACHED}.bc
 memcached.bc:
 	bash make.sh
 
+test:
+	python3 test_mem.py
+
 base:
 	opt -O3 ${MEMCACHED_BITCODE} -o ${MEMCACHED}_opt.bc
 	llc -filetype=obj ${MEMCACHED}_opt.bc -o ${MEMCACHED}_opt.o

@@ -55,13 +55,7 @@ ${READELF_BITCODE}: ${READELF_NAME}
 	CC=${BITCODE_WRAPPER} make && \
 	cd ${BINUTILS} && \
 	${BITCODE_EXTRACT} ${READELF} && \
-	mv ${READELF_BITCODE} ../.. && \
-	${BITCODE_EXTRACT} ${OBJDUMP} && \
-	mv ${OBJDUMP_BITCODE} ../.. && \
-        cd ../${GPROF} && \
-	${BITCODE_EXTRACT} ${GPROF} && \
-	mv ${GPROF_BITCODE} ../.. 
-        
+	mv ${READELF_BITCODE} ../..
 		
 ${OUT_DIR}:
 	mkdir -p ${OUT_DIR}
