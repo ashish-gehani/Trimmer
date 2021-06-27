@@ -35,7 +35,7 @@ export LLVM_OPT_NAME=opt
 export LLVM_NM_NAME=llvm-nm
 ```
 
-TRIMMER also requires either wllvm or gclang
+TRIMMER also requires either wllvm or gclang. The examples in the trimmer benchmarks currently use wllvm but can be modified to use gclang.
 
 ```
 pip install wllvm
