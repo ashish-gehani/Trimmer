@@ -4,7 +4,7 @@ Trimmer
 Build
 -----
 
-We provide a bash script `build.sh` to install the dependencies needed to build and run **Trimmer**, namely [LLVM](https://llvm.org)'s `clang` (version 7) sources and [SVF](https://github.com/SVF-tools/SVF).
+We provide a script `build.sh` to install the dependencies needed to build and run **Trimmer**, namely [LLVM](https://llvm.org)'s `clang` (version 7) sources and [SVF](https://github.com/SVF-tools/SVF).
 
 ```
 bash build.sh
