@@ -1,12 +1,10 @@
 Trimmer
 =======
 
-
 Build
 -----
 
-We provide a bash script `build.sh` to build the dependencies to run TRIMMER, namely LLVM and Clang (Version 7.0.0) and [SVF](https://github.com/SVF-tools/SVF).
-
+We provide a bash script `build.sh` to install the dependencies needed to build and run **Trimmer**, namely [LLVM](https://llvm.org)'s `clang` (version 7) sources and [SVF](https://github.com/SVF-tools/SVF).
 
 ```
 bash build.sh
@@ -18,10 +16,8 @@ cmake ../
 make
 ```
    
-If you have non conventional names for LLVM or CLANG you will have to set certain enviornment variables.
+If your system has unconventional names / locations for LLVM utilities, adjust the below environment variables as needed:
 
-e.g. if you have version build according to the instructions above: 
-    
 ```
 export LLVM_CC_NAME=clang
 export LLVM_CXX_NAME=clang++
@@ -35,7 +31,7 @@ export LLVM_OPT_NAME=opt
 export LLVM_NM_NAME=llvm-nm
 ```
 
-TRIMMER also requires either wllvm or gclang. The examples in the trimmer benchmarks currently use wllvm but can be modified to use gclang.
+**Trimmer** also requires either [wllvm](https://github.com/SRI-CSL/whole-program-llvm) or [gllvm](https://github.com/SRI-CSL/gllvm). The examples in the **Trimmer** benchmarks currently use `wllvm` but can be modified to use `gllvm`.
 
 ```
 pip install wllvm
@@ -53,7 +49,7 @@ Description of manifest file
 ----------------------------
     
 
-Trimmer provides a simplistic but powerful representation for specifying the details for program specialization. The manifest file format is a specific instance of the JSON representation where Trimmer users fill-in key,value pairs. The structure of a manifest file is shown below:
+**Trimmer** provides a simple but powerful mechanism for specifying the deployment context to be used for program specialization, modeled after the approach used by [OCCAM](https://github.com/ashish-gehani/OCCAM/). This consists of a _manifest_ file of key-valeue pairs in JSON format to describe the context for a target application:
 
 ```
 { "main" : "prog.bc"
@@ -67,15 +63,15 @@ Trimmer provides a simplistic but powerful representation for specifying the det
 }
 ```
 
--   **main** : a path to the bitcode module containing the main entry point.
--   **modules** : a list of paths to the other bitcode modules needed.
--   **binary** : the name of the desired executable.
+-   **main** : a path to the bitcode module containing the main entry point
+-   **modules** : a list of paths to the other bitcode modules needed
+-   **binary** : the name of the desired executable
 -   **native libs** : a list of flags (-lm, -lc, -lpthread) or paths to native objects (.o, .a, .so)
 -   **ldflags** : a list of linker flags such as --static, --nostdlib
--   **args** : the list of arguments you wish to specialize in the main() of main.
+-   **args** : the list of arguments you wish to specialize in the main() function
 -   **config_files** : the list of application-specific configuration files
 
-The manifest file for curl (one of the example programs) is shown below:
+The manifest file for `curl` (which is one of the examples provided) is shown below:
 
 ``` 
 {
@@ -99,16 +95,12 @@ python ${TRIMMER_HOME}/tool/trimmer.py   ${TRIMMER_HOME}/examples/tool_name/tool
 
 Debug
 -----
-By default, debug messages are off. If you want to see debug messages,
+By default, debug messages are not printed. To activate this ouput, use:
 ```
 export TRIMMER_DEBUG=Yes
 ```
-The debug messages will be printed in log.txt file.
+The messages will be printed in a `log.txt` file.
 
-
-
-
-
-
+<HR>
 
 This material is based upon work supported by the National Science Foundation under Grant [ACI-1440800](http://www.nsf.gov/awardsearch/showAward?AWD_ID=1440800). Any opinions, findings, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the National Science Foundation.
