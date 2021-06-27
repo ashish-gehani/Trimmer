@@ -49,7 +49,7 @@ Description of manifest file
 ----------------------------
     
 
-**Trimmer** provides a simple but powerful mechanism for specifying the deployment context to be used for program specialization, modeled after the approach used by [OCCAM](https://github.com/ashish-gehani/OCCAM/). This consists of a _manifest_ file of key-valeue pairs in JSON format to describe the context for a target application:
+**Trimmer** provides a simple but powerful mechanism for specifying the deployment context to be used for program specialization, similar to the approach used by [OCCAM](https://github.com/ashish-gehani/OCCAM/). This consists of a _manifest_ file of key-valeue pairs in JSON format to describe the context for a target application:
 
 ```
 { "main" : "prog.bc"
