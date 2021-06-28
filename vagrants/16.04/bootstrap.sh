@@ -8,10 +8,14 @@
 sudo apt-get update
 sudo apt-get install -y build-essential cmake git gettext gnutls-dev groff-base libbz2-dev libevent-dev libidn11-dev libmemcached-tools libpcap-dev libpcre3-dev libssl-dev pkg-config python-minimal uuid-dev wget wireless-tools
 
+# Setup environment
+cp `dirname $BASH_SOURCE`/bash_profile $HOME/.bash_profile
+. $HOME/.bash_profile
+
 # aircrack-ng dependencies
 mkdir -p build
 cd build
-# needs SSL 1.0.2g                                                
+# needs SSL 1.0.2g
 wget https://www.openssl.org/source/openssl-1.0.2g.tar.gz
 tar xvfz openssl-1.0.2g.tar.gz
 cd openssl-1.0.2g
@@ -19,22 +23,16 @@ cd openssl-1.0.2g
 sudo make install
 cd ../..
 
-# Setup environment
-cp bash_profile $HOME/.bash_profile
-. $HOME/.bash_profile
-
 # Install WLLVM
-cd $HOME
 curl "https://bootstrap.pypa.io/pip/2.7/get-pip.py" -o "get-pip.py"
 python get-pip.py
 pip install wllvm
 
 # Download LLVM7 and clang sources
-cd $HOME
 mkdir $LLVM_HOME
 cd $LLVM_HOME
-wget https://releases.llvm.org/7.0.0/llvm-7.0.0.src.tar.xz 
-wget https://releases.llvm.org/7.0.0/cfe-7.0.0.src.tar.xz 
+wget https://releases.llvm.org/7.0.0/llvm-7.0.0.src.tar.xz
+wget https://releases.llvm.org/7.0.0/cfe-7.0.0.src.tar.xz
 tar xvf llvm-7.0.0.src.tar.xz
 tar xvf cfe-7.0.0.src.tar.xz
 mv cfe-7.0.0.src/ llvm-7.0.0.src/tools/clang
@@ -47,7 +45,6 @@ make -j16
 sudo make install
 
 # Download SVF
-cd $HOME
 git clone https://github.com/SVF-tools/SVF
 cd SVF
 # Trimmer developed with below version
