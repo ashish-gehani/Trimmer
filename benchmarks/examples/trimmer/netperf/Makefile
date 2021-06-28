@@ -5,15 +5,17 @@ NETPERF_NAME=${NETPERF}-${NETPERF_VERSION}
 NETPERF_TAR=${NETPERF_NAME}.tar.gz
 
 NETPERF_MANIFEST=${NETPERF}.manifest
-
+NETPERF_LL=${NETPERF}.ll
 
 OUT_DIR?=trimmer
 LOG_FILE?=logs
 
-BITCODE_WRAPPER?=wllvm
-BITCODE_EXTRACT?=extract-bc
-OPT_NAME=opt
-CFLAGS = -mem2reg -loops -lcssa -loop-simplify -loop-rotate -indvars
+BITCODE_WRAPPER=wllvm
+BITCODE_EXTRACT=extract-bc
+BITCODE_DIS=llvm-dis
+BITCODE_AS=llvm-as
+
+#FIXME Currently not handling bitcast calls (under progress). Replacing one instance occuring in netperf.
 
 
 all: ${NETPERF_BITCODE}
@@ -21,8 +23,8 @@ all: ${NETPERF_BITCODE}
 netperf: ${OUT_DIR}
 	cp ${NETPERF_BITCODE} ${OUT_DIR} && \
 	cd ${OUT_DIR} && \
-	echo '{"binary": "netperf_fin", "native_libs": [], "name": "netperf", "args": ["-H", "_","-t","TCP_RR"], "modules": [], "ldflags": ["-lm"], "main": "netperf.bc", "config_files": []}' > ${NETPERF_MANIFEST} && \
-	python ${TRIMMER_HOME}/tool/trimmer.py ${NETPERF_MANIFEST} ./work_dir  2> ${LOG_FILE}
+	echo '{"binary": "netperf_fin", "native_libs": [], "name": "netperf", "args": ["-H", "_","-t","TCP_RR", "-v","0"], "modules": [], "ldflags": ["-lm"], "main": "netperf.bc", "config_files": []}' > ${NETPERF_MANIFEST} && \
+	python2 ${TRIMMER_HOME}/tool/trimmer.py ${NETPERF_MANIFEST} ./work_dir  2> ${LOG_FILE}
 
 .PHONY: ${NETPERF_BITCODE}
 ${NETPERF_BITCODE}: ${NETPERF_NAME}
@@ -32,13 +34,20 @@ ${NETPERF_BITCODE}: ${NETPERF_NAME}
 	sed -i 's/CC = gcc//g' ./src/Makefile && \
 	CC=${BITCODE_WRAPPER} make && \
 	${BITCODE_EXTRACT} src/${NETPERF} && \
-	cp src/${NETPERF_BITCODE} ../ 
+	${BITCODE_DIS} src/${NETPERF_BITCODE} && \
+	sed -i 's/(...) bitcast (void ()\*/ /g' src/${NETPERF_LL} && \
+	sed -i 's/ to void (...)\*)//g' src/${NETPERF_LL} && \
+	${BITCODE_AS} src/${NETPERF_LL} && \
+	rm src/${NETPERF_LL} && \
+	mv src/${NETPERF_BITCODE} ../
 
 test_netperf:
-	@echo "\t\tTest netperf"
+	@echo "\t\tTest netperf"  
 	${NETPERF_NAME}/src/netserver && \
 	${OUT_DIR}/work_dir/netperf_fin_stripped -H localhost -t TCP_RR > t_out && \
-	if grep -q 'TCP REQUEST/RESPONSE TEST' t_out; then \
+	@grep -q 'TCP REQUEST/RESPONSE TEST' t_out; \
+        RETVAL=$$?; \
+        if [ $$RETVAL -eq 1 ]; then \
 		echo "\tnetperf test baseline compare? Passed!"; \
 	else \
 		echo "\tnetperf test baseline compare? Failed!"; \
