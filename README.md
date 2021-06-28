@@ -4,19 +4,19 @@ Trimmer
 Build
 -----
 
-We provide a script `build.sh` to install the dependencies needed to build and run **Trimmer**, namely [LLVM](https://llvm.org)'s `clang` (version 7) sources and [SVF](https://github.com/SVF-tools/SVF).
+We provide a script [bootstrap.sh](vagrants/16.04/bootstrap.sh) to install the dependencies needed, including [LLVM](https://llvm.org)'s `clang` (version 7) sources and [SVF](https://github.com/SVF-tools/SVF), to build **Trimmer** and run it on the included examples. (**Note**: It replaces `~/.bash_profile`. Adjust as needed.)
 
+At its core, the Trimmer build is effected with:
 ```
-bash build.sh
 mkdir build
-export TRIMMER_HOME=/path/to/root/directory
+export TRIMMER_HOME=<path to top-level of Trimmer>
 export LLVM_COMPILER=clang
 cd build
 cmake ../
 make
 ```
    
-If your system has unconventional names / locations for LLVM utilities, adjust the below environment variables as needed:
+If your system has unconventional names / locations for LLVM utilities, adjust the below environment variables as needed :
 
 ```
 export LLVM_CC_NAME=clang
@@ -31,7 +31,7 @@ export LLVM_OPT_NAME=opt
 export LLVM_NM_NAME=llvm-nm
 ```
 
-**Trimmer** also requires either [wllvm](https://github.com/SRI-CSL/whole-program-llvm) or [gllvm](https://github.com/SRI-CSL/gllvm). The examples in the **Trimmer** benchmarks currently use `wllvm` but can be modified to use `gllvm`.
+**Trimmer** requires either [wllvm](https://github.com/SRI-CSL/whole-program-llvm) or [gllvm](https://github.com/SRI-CSL/gllvm). The examples in the **Trimmer** benchmarks currently use `wllvm` but can be modified to use `gllvm`.
 
 ```
 pip install wllvm
