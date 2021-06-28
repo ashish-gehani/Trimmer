@@ -1,64 +1,56 @@
 # Copyright (c) 2020 SRI International All rights reserved.
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
-#
-#  Note that these instructions have been tested on Ubuntu 16.04.6 
-#  You may need to adjust according to your system requirements
 
+#!/usr/bin/env bash
 
-#  Install required programs
-sudo apt-get install git wget cmake build-essential
+# Install dependencies
+sudo apt-get update
+sudo apt-get install -y build-essential cmake git gettext gnutls-dev groff-base libbz2-dev libevent-dev libidn11-dev libmemcached-tools libpcap-dev libpcre3-dev libssl-dev pkg-config python-minimal uuid-dev wget wireless-tools
 
-# Install missing libraries for examples to build
-sudo apt-get install gnutls-dev groff-base pkg-config libevent-dev libidn11-dev libpcre3-dev libssl-dev uuid-dev
-
-#Install SSL Library version 1.0.2g (compatible with aircrack-ng example) 
+# aircrack-ng dependencies
+mkdir -p build
+cd build
+# needs SSL 1.0.2g                                                
 wget https://www.openssl.org/source/openssl-1.0.2g.tar.gz
 tar xvfz openssl-1.0.2g.tar.gz
 cd openssl-1.0.2g
 ./config --prefix=/usr/local shared
 sudo make install
-cd ../
+cd ../..
 
-#These environment variables should be set before building aircrack-ng. Better to put it in .bash_profile
-export CPATH=/usr/local/include:$CPATH
-export LIBRARY_PATH=/usr/local/lib:/usr/local/lib/engines:$LIBRARY_PATH
-export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
+# Setup environment
+cp bash_profile $HOME/.bash_profile
+. $HOME/.bash_profile
 
-#  Download LLVM source files
-echo "=== Downloading LLVM & Clang Source Files ==="
-mkdir llvm7 
-cd llvm7
+# Install WLLVM
+cd $HOME
+curl "https://bootstrap.pypa.io/pip/2.7/get-pip.py" -o "get-pip.py"
+python get-pip.py
+pip install wllvm
+
+# Download LLVM7 and clang sources
+cd $HOME
+mkdir $LLVM_HOME
+cd $LLVM_HOME
 wget https://releases.llvm.org/7.0.0/llvm-7.0.0.src.tar.xz 
 wget https://releases.llvm.org/7.0.0/cfe-7.0.0.src.tar.xz 
-wget https://releases.llvm.org/7.0.0/compiler-rt-7.0.0.src.tar.xz 
-tar xf llvm-7.0.0.src.tar.xz
-tar xf cfe-7.0.0.src.tar.xz
-tar xf compiler-rt-7.0.0.src.tar.xz
+tar xvf llvm-7.0.0.src.tar.xz
+tar xvf cfe-7.0.0.src.tar.xz
 mv cfe-7.0.0.src/ llvm-7.0.0.src/tools/clang
-mv compiler-rt-7.0.0.src/ llvm-7.0.0.src/projects
 
-#  Build LLVM-7 from source
-echo "=== Starting the build process ==="
-mkdir llvm-7.0.0.obj && cd llvm-7.0.0.obj
+# Build and install LLVM7 / clang
+mkdir llvm-7.0.0.obj
+cd llvm-7.0.0.obj
 cmake -DCMAKE_BUILD_TYPE=MinSizeRel ../llvm-7.0.0.src
-make -j2
+make -j16
 sudo make install
-cd ../
 
-#  export environment variables
-echo "=== Exporting required environment variables ==="
-export LLVM_SRC=$(pwd)/llvm-7.0.0.src
-export LLVM_OBJ=$(pwd)/llvm-7.0.0.obj
-export LLVM_DIR=$(pwd)/llvm-7.0.0.obj
-export PATH=$LLVM_DIR/bin:$PATH
-
-#  Clone SVF dependency and adjust for LLVM-7
-echo "=== Downloading SVF Pointer Analysis ==="
-git clone https://github.com/SVF-tools/SVF.git SVF
-
-#  Specific commit used for TRIMMER development
+# Download SVF
+cd $HOME
+git clone https://github.com/SVF-tools/SVF
 cd SVF
+# Trimmer developed with below version
 git checkout 0b75f3e0c10db04d65b6eafd91da5da9be71ecaa
 
 # Add -fPIC to CMakeLists.txt in SVF
@@ -67,18 +59,19 @@ sed -i '/set(CMAKE_CXX_FLAGS "-std=gnu++11 -O0 -fno-rtti")/c\\t\tset(CMAKE_CXX_F
 sed -i '/set_target_properties(Cudd PROPERTIES COMPILE_FLAGS "-Wno-format -Wno-int-to-pointer-cast -Wno-pointer-to-int-cast -O3 -w -DHAVE_IEEE_754 -DSIZEOF_VOID_P=8 -DSIZEOF_LONG=8")/c\set_target_properties(Cudd PROPERTIES COMPILE_FLAGS "-Wno-format -Wno-int-to-pointer-cast -Wno-pointer-to-int-cast -O3 -w -DHAVE_IEEE_754 -DSIZEOF_VOID_P=8 -DSIZEOF_LONG=8 -fPIC")' lib/CUDD/CMakeLists.txt 
 sed -i '/set_target_properties(LLVMCudd PROPERTIES COMPILE_FLAGS "-Wno-format -Wno-int-to-pointer-cast -Wno-pointer-to-int-cast -O3 -w -DHAVE_IEEE_754 -DSIZEOF_VOID_P=8 -DSIZEOF_LONG=8")/c\set_target_properties(LLVMCudd PROPERTIES COMPILE_FLAGS "-Wno-format -Wno-int-to-pointer-cast -Wno-pointer-to-int-cast -O3 -w -DHAVE_IEEE_754 -DSIZEOF_VOID_P=8 -DSIZEOF_LONG=8 -fPIC")' lib/CUDD/CMakeLists.txt 
 
-#  Build SVF
-echo "=== Begin building SVF ==="
+# Build and install SVF
 mkdir Release-build
 cd Release-build
-cmake ../
-make -j2
+cmake ..
+make -j16
 sudo make install
-cd ../
-
-#  Copy Library Headers
-echo "=== Copy SVF headers ==="
-cd include/
+cd ../include/
 sudo cp -r * /usr/local/include/
 
-echo "******** TRIMMER Dependencies Built! ********"
+# Build Trimmer
+cd $TRIMMER_HOME
+mkdir build
+cd build
+cmake ..
+make
+
