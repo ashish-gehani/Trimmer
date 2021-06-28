@@ -191,19 +191,26 @@ def pretty_printing_ropgadget(results):
     pptable.pprint_table(out,table)
     
     
-def run_trimmer(dirname, execname, workdir, cpu, mem, trimmer_opts= []):
+def run_trimmer(dirname, execname, workdir, cpu, mem, delete_temps, trimmer_opts= []):
     #benchmark_name = os.path.basename(os.path.normpath(dirname))
     benchmark_name = execname
     outfile = benchmark_name + ".trimmer.out"
     errfile = benchmark_name + ".trimmer.err"
-    outfd = open(os.path.join(workdir, outfile), "w")
-    errfd = open(os.path.join(workdir, errfile), "w")
+    outfileName = os.path.join(workdir, outfile)
+    errfileName = os.path.join(workdir, errfile)
+    outfd = open(outfileName, "w")
+    errfd = open(errfileName, "w")
     res_before, res_after = None, None
     #1. Generate bitcode: run `make`
     returncode,_,_,_ = cmd.run_limited_cmd(['make'], outfd, errfd, benchmark_name, dirname)
     if returncode <> 0:
-        cmd.warning("something failed while running \"make\"" + benchmark_name + "\n" + \
-                    "Read logs " + outfile + " and " + errfile)
+        if (delete_temps):
+            cmd.warning("something failed while running \"make\"" + benchmark_name + "\n" + \
+                        "Turn on logging to generate logs")
+        else:
+            cmd.warning("something failed while running \"make\"" + benchmark_name + "\n" + \
+                        "\"" + benchmark_name + "\n" + \
+                        "Read logs at " + outfileName + " and " + errfileName)
     else:
         #2. Run Trimmer on it: `build.sh opts`
         trimmer_args = ['./build.sh']
@@ -212,9 +219,14 @@ def run_trimmer(dirname, execname, workdir, cpu, mem, trimmer_opts= []):
         returncode,_,_,_ = \
          cmd.run_limited_cmd(trimmer_args, outfd, errfd, benchmark_name, dirname, cpu, mem)
         if returncode <> 0:
-            cmd.warning("something failed while running \"" + ' '.join(trimmer_args) + \
-                        "\"" + benchmark_name + "\n" + \
-                        "Read logs " + outfile + " and " + errfile)
+            if (delete_temps):
+                cmd.warning("something failed while running \"" + ' '.join(trimmer_args) + \
+                            "\"" + benchmark_name + "\n" + \
+                            "Turn on logging to generate logs")
+            else:
+                cmd.warning("something failed while running \"" + ' '.join(trimmer_args) + \
+                            "\"" + benchmark_name + "\n" + \
+                            "Read logs at " + outfileName + " and " + errfileoutfileName)
         
     outfd.close()
     errfd.close()
@@ -302,12 +314,12 @@ def run_ropgadget(dirname, execname, workdir, cpu, mem):
 
 def parse_opt (argv):
     p = a.ArgumentParser (description='Benchmark Runner for Trimmer')
-    p.add_argument ('--save-temps', '--keep-temps',
-                    dest="save_temps",
-                    help="Do not delete temporary files",
+    p.add_argument ('--remove-temps', '--delete-temps',
+                    dest="delete_temps",
+                    help="Delete temporary files",
                     action="store_true", default=False)
     p.add_argument ('--temp-dir', dest='temp_dir', metavar='DIR',
-                    help="Temporary directory", default=None)
+                    help="Temporary directory", default="Logs")
     p.add_argument ('--cpu', type=int, dest='cpu', metavar='SEC',
                     help='CPU time limit (seconds)', default=-1)
     p.add_argument ('--mem', type=int, dest='mem', metavar='MB',
@@ -327,7 +339,7 @@ def parse_opt (argv):
 
 def main (argv):
     args = parse_opt (argv[1:])
-    workdir = cmd.create_work_dir(args.temp_dir, args.save_temps)
+    workdir = cmd.create_work_dir(args.temp_dir, not args.delete_temps)
     sets = []
     trimmer_opts = []
     trimmer_tab = list()
@@ -362,7 +374,7 @@ def main (argv):
                     cmd.raise_error(t['dirname'] + " is not a directory")
                     
             execname = t['execname']
-            res = run_trimmer(dirname, execname, workdir, args.cpu, args.mem, trimmer_opts)
+            res = run_trimmer(dirname, execname, workdir, args.cpu, args.mem, args.delete_temps, trimmer_opts)
             trimmer_tab.append(res)
             if args.rop:
                 res = run_ropgadget(dirname, execname, workdir, args.cpu, args.mem)
