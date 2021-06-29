@@ -1,1 +1,0 @@
-{"binary": "dnsproxy_fin", "native_libs": [], "name": "dnsproxy", "args": ["-c", "dnsproxy.conf"], "modules": [], "ldflags": ["-levent"], "main": "dnsproxy.bc", "config_files": ["dnsproxy.conf"]}

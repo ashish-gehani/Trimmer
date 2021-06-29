@@ -1,0 +1,6 @@
+The test for mini_httpd can be run by: make test_mini
+
+Error fixes:
+-> "bind: Address already in use": You probably need to kill a process using the port in your config or change the port in config and rerun trimmer
+-> "mkdir: cannot create directory ‘workdir’: File exists": Delete the workdir directory before running test
+-> Permission error: run the test as a superuser: sudo make test_mini

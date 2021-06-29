@@ -1,1 +1,0 @@
-{"binary": "netperf_fin", "native_libs": [], "name": "netperf", "args": ["-H", "_","-t","TCP_RR","-v","0"], "modules": [], "ldflags": ["-lm"], "main": "netperf.bc", "config_files": []}

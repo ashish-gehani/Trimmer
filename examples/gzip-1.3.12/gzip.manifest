@@ -1,1 +1,0 @@
-{"binary": "gzip_fin", "native_libs": [], "name": "gzip", "args": ["--force",  "--quiet",  "_"], "modules": [], "ldflags": ["-lbz2"], "main": "gzip.bc", "config_files": []}

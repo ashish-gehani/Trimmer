@@ -1,1 +1,0 @@
-{"binary": "knockd_fin", "native_libs": [], "name": "knockd", "args": ["-i","eth0"], "modules": [], "ldflags": ["-lpcap"], "main": "knockd.bc", "config_files": []}

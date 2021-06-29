@@ -1,0 +1,34 @@
+*** /home/abdulrafaenoor/Desktop/Trimmer/TRIMMER-newmodel/examples/wget-1.17.1/lib/basename-lgpl.c	2019-04-05 12:27:20.477136405 +0300
+--- ./lib/basename-lgpl.c	2015-12-11 20:35:56.000000000 +0300
+***************
+*** 36,54 ****
+    while (ISSLASH (*base))
+      base++;
+  
+-   int i = strlen(name) - 1;
+-   for(;i >= 0; i--) {
+-     if(ISSLASH(base[i]))
+-       break;
+-   }
+- 
+-   if(i >= 0) {
+-     return base + i + 1;
+-   }
+- 
+-   return base;
+- 
+-   /*
+    for (p = base; *p; p++)
+      {
+        if (ISSLASH (*p))
+--- 36,41 ----
+***************
+*** 61,67 ****
+      }
+  
+    return (char *) base;
+-   */
+  }
+  
+  /* Return the length of the basename NAME.  Typically NAME is the
+--- 48,53 ----
