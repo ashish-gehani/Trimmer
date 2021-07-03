@@ -1114,10 +1114,6 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
     debug(Yes)<<"APInt Offset value: "<<offset.getZExtValue()<<"\n";
   }
   
-  if(!bbOps.checkConstStr(val, currBB)){
-    debug(Yes)<< " Register non constant\n";
-    return NOTFOLDED;
-  }
 
   debug(Yes)<<"Resultant Address: "<<val<<"\n";
   pushFuncStack(gi);
