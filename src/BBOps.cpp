@@ -606,7 +606,7 @@ bool BBOps::checkConstStr(uint64_t addr, uint64_t max, BasicBlock *from) {
     if(!checkConstMem(addr + i, 1, from))
       return false; 
   }
-  return true;
+  return checkConstMem(addr, 1, from); // if the string starts with '\0'
 }
 
 ContextInfo *BBOps::getContextInfo(BasicBlock *bb) {
