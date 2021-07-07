@@ -12,17 +12,10 @@ struct temp {
 int testing = 0;
 int *temp;
 void branchPruned(int);
-void test1() {
-  testing = 1;
-  test1(10);
-}
+
 void branchPruned(int test) {
   if (test == 10)
     printf("branchPruned");
-  else {
-    branchPruned(test-1);
-    test1();
-  }
 
 }
 
@@ -37,9 +30,7 @@ int main(int argc, char **argv) {
   z->a = 10;
   t.a = 10; 
     
-  //struct temp t2;
-  //checkptCall();
+  checkptCall();
 
-  test1(); 
   branchPruned(z->a);
 }
