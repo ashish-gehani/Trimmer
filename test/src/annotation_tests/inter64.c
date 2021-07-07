@@ -10,12 +10,8 @@
 /*
  * Annotation test. Check if conditionals dependent on argv work
  */
-char * argv[] = {"test", "-a", "-b", "-s", "hello"};
-int argc = 5;
 
-char *expected[] = {"temp", "argv", "temp2"};
-
-int main(int argc) {
+int main(int argc, char ** argv) {
     char *temp TRACK;
     int temp2 TRACK;
     (unsigned)&temp & (unsigned) &temp2;

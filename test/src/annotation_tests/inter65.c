@@ -10,12 +10,9 @@
 /*
  * Annotation test. Check if scalars dependent on argv conditionals are tracked
  */
-char * argv[] = {"test", "-a", "-b", "-s", "hello"};
-int argc = 5;
 
-char *expected[] = {"temp", "argv", "temp3"};
 
-int main(int argc) {
+int main(int argc, char ** argv) {
     char *temp TRACK;
     int temp2 = 0;
     int temp3 TRACK;

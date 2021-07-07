@@ -12,7 +12,7 @@
  */
 char * argv[] = {"test", "-a", "-b", "-s", "hello"};
 
-int main(argc) {
+int main(int argc, char ** argv) {
     char *temp = argv[1];
     char *temp2 = argv[0];
     if(temp == temp2)

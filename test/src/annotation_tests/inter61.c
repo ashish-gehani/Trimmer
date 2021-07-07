@@ -10,14 +10,15 @@
 #include <unistd.h>
 #include <string.h>
 
-char *argv[] = {"abcdefg"};
+//char *argv[] = {"abcdefg"};
 char progName[1024];
 
 void copyFileName(char *to, char*from) {
-    strncpy(progName, argv[0], 6);
+    strncpy(to, from, 6);
 }
 
-int main() {
+int main(int argc, char **argv) {
     copyFileName ( progName, argv[0] );
+   printf("%s\n",progName);
     return 0;
 }

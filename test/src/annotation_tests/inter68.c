@@ -15,12 +15,10 @@ struct list {
  * Annotation test. Check if struct memory is tracked inside loop with
  * known induction variable involving structs
  */
-char * argv[] = {"test", "-a", "-b", "-s", "hello"};
-int argc = 5;
 
 
 int external();
-int main(argc) {
+int main(int argc, char ** argv) {
     int temp TRACK;
     int temp2 TRACK;
     int temp3;

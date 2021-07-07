@@ -10,10 +10,9 @@
 /*
  * Annotation test. Check if memcpy, strcpy, strncpy work
  */
-char * argv[] = {"test", "-a", "-b", "-s", "hello"};
-int argc = 5;
 
-int main(int argc) {
+
+int main(int argc, char ** argv) {
     char temp[4] TRACK;     
     char temp1[4] TRACK;
     char temp2[4] TRACK;

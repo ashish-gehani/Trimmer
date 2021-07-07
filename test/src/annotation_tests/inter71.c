@@ -10,9 +10,9 @@
 /*
  * Annotation test. Check whether argc values are being tracked
  */
-char * argv[] = {"test", "-a", "-b", "-s", "hello"};
 
-int main(argc) {
+
+int main(int argc, char ** argv) {
     int *temp TRACK;
     if(argc) {
         temp+= 1;
