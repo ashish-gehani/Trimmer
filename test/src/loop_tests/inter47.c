@@ -33,10 +33,10 @@ int main() {
   bufffer2[2] = '\0';
   int cond, i, j;
   cond = i = j = 0;
-  while(i < 26) {
+  while(i < 19) {
     unroll_loop(1);
     bufffer2[0] = 97 + i;
-    while(j < 26) {
+    while(j < 19) {
       unroll_loop(2); 
       bufffer2[1] = 97 + j;
       if(!strcmp(buffer1, bufffer2)) {
