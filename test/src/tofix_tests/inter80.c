@@ -8,33 +8,35 @@
 #include <string.h>
 
 /*
- * Loop Test. Check if we can remove branches in loop
- * with one unroll
+ * This loop will not be unrolled as condition depends upon an external function.
+ * 
  */
+
 char * argv[] = {"test", "-a", "-b", "-s", "hello"};
 int argc = 5;
 struct temp {
     int a;
 };
 
-void branchPruned(struct temp *t ) {
-    if(t->a == 10)
+void branchNotPruned(struct temp *t ) {
+    if(t->a == 116)
         printf("branchPruned");
 }
 
 int externa();
-int main(int argc) {
+int main() {
     struct temp t;
     int i; 
     t.a = argv[0][0];
+    printf("%d\n",t.a);
     for(i = 0; i < external(); i++) {
-        if(t.a == 10) {
-            printf("a = 10");
+        if(t.a == 116) {
+           printf("a = 116");
         } else {
             t.a++;
         }
     }
 
-    branchPruned(&t);
+    branchNotPruned(&t);
     return 0;
 }

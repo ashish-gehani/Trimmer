@@ -5,6 +5,7 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 
 /**
  * Without the check for not replacing pointer size
@@ -13,9 +14,18 @@
  * of argc in the IR, since it was casted to an
  * integer. This needs to be fixed in a better way.
  */
-void external(uint64_t);
-int main(int argc) {
-    uint64_t temp = &argc;
-    external(temp);
+
+void branchPruned(int x)
+{
+  if(x==5)
+    printf("branchNotPruned");
+
+}
+
+int main(int argc, char ** argv) {
+    uint64_t temp = &argc;  
+    int * b = temp; 
+    *b = 5;
+    branchPruned(argc);
     return temp;
 }
