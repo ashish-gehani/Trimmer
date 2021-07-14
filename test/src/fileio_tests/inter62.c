@@ -44,13 +44,13 @@ static void  read_config(char* filename )    {
     /* Split into name and value. */
     name = cp;
     printf("name: %s\n",name);
-    printf("namesize: %i\n",strlen(name));
+    printf("namesize: %lu\n",strlen(name));
     value = strchr( name, '=' );
     
     if ( value != (char*) 0 ){
       *value++ = '\0';
       printf("value: %s\n",value);
-    printf("valuesize: %i\n",strlen(value));}
+    printf("valuesize: %lu\n",strlen(value));}
 
      /* Interpret. */
     if ( strcasecmp( name, "debug" ) == 0 )

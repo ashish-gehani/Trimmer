@@ -79,7 +79,7 @@ void read_config( char* filename )
 
 	/* Skip leading whitespace. */
 	cp = line;
-        printf("strspn= %i\n",strspn( cp, "\012" ));
+        printf("strspn= %lu\n",strspn( cp, "\012" ));
 	cp += strspn( cp, " \t\012\015" );
         printf("cp= %s\n",cp);
 
