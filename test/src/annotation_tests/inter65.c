@@ -14,7 +14,7 @@
 
 int main(int argc, char ** argv) {
     char *temp TRACK;
-    int temp2 = 0;
+    int temp2 TRACK;
     int temp3 TRACK;
     (unsigned)&temp & (unsigned) &temp3;
 

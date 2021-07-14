@@ -11,7 +11,6 @@
  * Annotation test. Check if memcpy, strcpy, strncpy work
  */
 
-
 int main(int argc, char ** argv) {
     char temp[4] TRACK;     
     char temp1[4] TRACK;

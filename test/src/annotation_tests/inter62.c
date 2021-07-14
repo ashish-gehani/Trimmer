@@ -10,7 +10,6 @@
  * Basic annotation test. Check if temp is added to track set
  */
 
-
 int main(int argc, char ** argv) {
     char *temp[1] TRACK;
     char **temp2[1] TRACK;

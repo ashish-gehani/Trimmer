@@ -6,11 +6,11 @@
 
 #include <ctype.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <annotate.h>
 
-//char *argv[] = {"abcdefg"};
+
 char progName[1024];
 
 void copyFileName(char *to, char*from) {
@@ -19,6 +19,6 @@ void copyFileName(char *to, char*from) {
 
 int main(int argc, char **argv) {
     copyFileName ( progName, argv[0] );
-   printf("%s\n",progName);
+    printf("%s\n",progName);
     return 0;
 }

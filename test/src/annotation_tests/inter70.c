@@ -11,11 +11,12 @@
  * Annotation test. Check if pointer to non pointer casts
  * are tracked
  */
-char * argv[] = {"test", "-a", "-b", "-s", "hello"};
-int argc = 5;
 
-int main(argc) {
-    int *temp TRACK;
-    temp = (int) argv[0];
+
+int main(int argc, char ** argv) {
+    int * temp TRACK;
+    char * temp1 TRACK;
+    temp1 = argv[0];
+    temp = (int)temp1;
     return 0;
 }

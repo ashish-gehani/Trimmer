@@ -14,7 +14,9 @@
 
 int main(int argc, char ** argv) {
     int *temp TRACK;
-    if(argc) {
+    int temp2 TRACK;
+    temp2 = argc;
+    if(temp2) {
         temp+= 1;
     }
     return 0;

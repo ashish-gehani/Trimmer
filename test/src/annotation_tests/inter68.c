@@ -24,7 +24,8 @@ int main(int argc, char ** argv) {
     int temp3;
     (unsigned) &temp &  (unsigned) &temp3;
     temp = argc;
-    struct list *head = (struct list *) malloc(sizeof(struct list));
+    struct list * head TRACK;
+    head = (struct list *) malloc(sizeof(struct list));
     head->data = 1;
 
     while(temp2 < 10 ) {

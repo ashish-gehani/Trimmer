@@ -11,18 +11,18 @@
  * Annotation test. Check if pointers being traced across function
  * calls
  */
-char * argv[] = {"test", "-a", "-b", "-s", "hello"};
-int argc = 5;
 
 
-void test(int **pointer) {
-    if(strcmp(argv[0], "test"))
+void test(char * a,int **pointer) {
+    if(strcmp(a, "test"))
         *pointer = malloc(sizeof(int));
 }
 
-int main(argc) {
+int main(int argc, char ** argv) {
     int *temp TRACK;
+    char * a TRACK;
     (unsigned) &temp;
-    test(&temp);
+    a = argv[0];
+    test(a,&temp);
     return 0;
 }

@@ -5,6 +5,7 @@
  */
 
 #include <stdio.h>
+#include <annotate.h>
 struct temp {
   int **a;
 };
@@ -20,10 +21,11 @@ int main(int argc, char **argv) {
   int *a = malloc(sizeof(int));
   int *b = malloc(sizeof(int)); 
   int *d = malloc(sizeof(int));
-  int **c;
-  *a = 10;
-  *b = 20;
-  *d = 13;
+  int **c TRACK;
+  *a = argv[0][0];
+  *b = argv[0][1];
+  *d = argv[0][2];
+
   if(argc == 10) {
     c = &a;
     printf("asd");
@@ -33,7 +35,6 @@ int main(int argc, char **argv) {
   }
 
   *c = d;
-  (*a) = 14;
 
   branchNotPruned(*b);
 }
