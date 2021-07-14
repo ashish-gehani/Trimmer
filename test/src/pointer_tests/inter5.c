@@ -3,7 +3,7 @@
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
-
+#include <stdio.h>
 #include <stdlib.h>
 struct test {
   int a;
@@ -17,7 +17,7 @@ void branchNotPruned(int a) {
 void external(int );
 void external2(int );
 
-int main(int argc) {
+int main(int argc, char ** argv) {
   struct test one;
   struct test two;
   int *pointer;

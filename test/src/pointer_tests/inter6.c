@@ -5,6 +5,8 @@
  */
 
 #include <string.h>
+#include <stdio.h>
+
 char a[] = "asd";
 char b[] = "afg";
 
@@ -14,7 +16,7 @@ void branchNotPruned(char a) {
   if(a == 'a')
     printf("branchNotPruned");
 }
-int main(int argc) {
+int main(int argc, char ** argv) {
   char *temp;
   int i = 0;
   for(i = 0; i < argc; i++) {

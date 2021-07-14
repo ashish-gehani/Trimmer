@@ -14,7 +14,7 @@ void branchNotPruned(int test) {
     printf("branchPruned");
 }
 int external(int );
-int main(int argc) {
+int main(int argc, char ** argv) {
   int a = 10;
   int b = 20; 
   struct temp t;

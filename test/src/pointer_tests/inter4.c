@@ -17,7 +17,7 @@ void external2(int );
 int t = 1;
 int q = 2;
 
-int main(int argc) {
+int main(int argc, char ** argv) {
     int *pointer;
     if(argc == 2) {
         pointer = &t;
@@ -29,5 +29,5 @@ int main(int argc) {
 
    *pointer = 10;
    branchNotPruned(t);
-   printf("%lx", t);
+   printf("%i", t);
 }

@@ -17,7 +17,7 @@ void branchPruned(int t) {
 }
 void external(int );
 void external2(int );
-int main(int argc) {
+int main(int argc, char ** argv) {
     int t;
     struct a test;
     struct a test1;
@@ -31,5 +31,5 @@ int main(int argc) {
     }
 
    branchPruned(t);
-   printf("%lx", t);
+   printf("%i", t);
 }
