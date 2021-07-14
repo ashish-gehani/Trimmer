@@ -1,0 +1,9 @@
+annotation,60,105
+bugfix,76,76
+constprop,1,24
+fileio,30,64
+loop,6,75
+misc,150,151
+pointer,1,6
+stress,99,99
+tofix,1,90
