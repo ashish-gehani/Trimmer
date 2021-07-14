@@ -8,14 +8,16 @@
 #include<string.h>
 #include<stdlib.h>
 
-int branchPruned(int x) {
-    int count = 0;
-    for(int i = 0; i <= 100000; i++)
-        count += i;
-    return count; 
+void branchPruned(int x) {
+    if(x==705082704)
+      printf("branchPruned");
 }
 
 int main(){
-  int a = branchPruned(1);
-  return a;
+  int count = 0;
+    for(int i = 0; i <= 100000; i++)
+        count += i;
+
+  branchPruned(count);
+  return count;
 }
