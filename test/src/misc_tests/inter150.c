@@ -5,6 +5,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 struct temp {
   int a;
 };
@@ -16,7 +17,6 @@ void branchPruned(int);
 void branchPruned(int test) {
   if (test == 10)
     printf("branchPruned");
-
 }
 
 int external();
@@ -31,6 +31,7 @@ int main(int argc, char **argv) {
   t.a = 10; 
     
   checkptCall();
+
 
   branchPruned(z->a);
 }
