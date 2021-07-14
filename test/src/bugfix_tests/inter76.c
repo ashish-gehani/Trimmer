@@ -17,7 +17,7 @@ void branchNotPruned(int a) {
         printf("branchPruned\n");
 }
 
-int main(int argc) {
+int main(int argc, char ** argv) {
     int x = 0;
     int total = 0;
     if(argc == 2) {
