@@ -3,7 +3,7 @@ Trimmer
 
 
 
-Running test cases
+Running Test Cases
 ------------------
 
 Test cases directory: /test/src
@@ -11,7 +11,7 @@ Test cases directory: /test/src
 * Includes a suite of multiple test cases used to measure the effectiveness of TRIMMER in debloating unused code. 
   
  
- **Running test examples**:
+ **Running Test Examples**:
 
 ```
 cd test/scripts
