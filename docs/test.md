@@ -51,18 +51,12 @@ The test cases directory, test/src contains following subdirectories:
 **Guidelines for Writing Additional Test Cases**:
 
 In all test cases (except annotation_tests), we include functions with names 'branchPruned' and 'branchNotPruned'
-  * **branchPruned** contains code branches that we expect should be eliminated by debloating
-  * **branchNotPruned** contains code branches that should NOT be eliminated by debloating 
-                        - this checks cases where the variable under consideration is not a 'provably' constant value, and hence the branch should not be folded.
+  * **branchPruned** contains code branches that we expect should be eliminated by debloating. branchPruned should contain only one branch. As a result of specialization we expect this branch to evaluate to true. The underlying block should contain a printf call. Multiple branches can be joined by using '&&'.
 
-  * branchPruned should contain only one branch. As a result of specialization we expect 
-           this branch to evaluate to true. The underlying block should contain a 
-           printf call. Multiple branches can be joined by using '&&'.
-  * branchNotPruned should also contain only one branch. Multiple branches 
-           can be joined by using '||'. The underlying block should contain a printf call.
+  * **branchNotPruned** contains code branches that should NOT be eliminated by debloating. This checks cases where the variable under consideration is not a 'provably' constant value, and hence the branch should not be folded. branchNotPruned should also contain only one branch. Multiple branches  can be joined by using '||'. The underlying block should contain a printf call.
 
 If specialization is successful, the branchPruned function should only contain the printf call that was conditional on the branch. 
-The branchNotPruned function should remain unmodified (no code removed)
+The branchNotPruned function should remain unmodified (no code removed).
 
 For annotation test cases, write TRACK in front of variable declaration, you want annotation pass to taint e.g,
 
