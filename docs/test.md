@@ -31,7 +31,7 @@ will run test case inter1.c in test/src/pointer_tests.
 python test.py ./work_dir constprop 1 10
 ```
     
-will run 10 test cases including inter1.c to inter10.c in test/src/constprop_tests (inclusive).
+will run test cases including inter1.c to inter10.c in test/src/constprop_tests (inclusive).
 
 **Test Cases Directory Structure**:
 
