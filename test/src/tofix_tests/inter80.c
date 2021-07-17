@@ -9,6 +9,7 @@
 
 /*
  * This loop will not be unrolled as condition depends upon an external function.
+   Can we remove the branch in the loop as we can see that it will not run in any condition?
  * 
  */
 
