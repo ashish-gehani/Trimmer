@@ -8,54 +8,74 @@ Running test cases
 
 Test cases directory: /test/src
       
-* Includes a suite of multiple test cases used to measure the effectiveness of TRIMMER in debloating unused code 
- 
- **Test script synopsis**:
-
-For tests placed in test/src, where ${prefix} is the prefix of the folder in test/src
- 
-```
-cd test/scripts
-python test.py ${path_to_workdir} ${prefix} ${test_start} ${test_end} 
-``` 
+* Includes a suite of multiple test cases used to measure the effectiveness of TRIMMER in debloating unused code. 
+  
  
  **Running test examples**:
 
 ```
 cd test/scripts
-python test.py ./work_dir pointer 1 1 
+python test.py ./work_dir all 1 1
 ```
     
- will run the test case for inter1.c placed in test/src/pointer_tests
+will run all the test cases placed in test/src.
+
+```
+python test.py ./work_dir pointer 1 1
+```
+    
+will run test case inter1.c in test/src/pointer_tests.
+
     
 ```
 python test.py ./work_dir constprop 1 10
 ```
     
-will run 10 test cases including inter1.c to inter10.c in test/src/constprop (inclusive)
+will run 10 test cases including inter1.c to inter10.c in test/src/constprop_tests (inclusive).
 
- ```
-python test.py ./work_dir all 1 1
-```
- 
- will run all the test cases in all the directories.
+**Test Cases Directory Structure**:
 
+The test cases directory, test/src contains following subdirectories:
 
-In all test cases (excluding annotation tests), we include functions with names 'branchPruned' and 'branchNotPruned'
+  * **annotation_tests** contains test cases to test annotation pass.
+  * **loop_tests** contains test cases to test loop unrolling.
+  * **fileio_tests** contains test cases to test file I/O specialization.
+  * **constprop_tests** contains test cases to test constant propagation.
+  * **pointer_tests** contains test cases that deal with pointers.
+  * **stress_tests** contains large test cases (e.g., dealing with large loop unroll count).
+  * **bugfix_tests** contains test cases that fixes some bugs.  
+  * **tofix_tests** contains test cases that needs fixing in a better way (for developers only).
+  * **misc_tests** contains various other test cases that do not fit in other categories.
+  * **data** contains text files used by test cases in fileio_tests.
+      
+**Guidelines for Writing Additional Test Cases**:
+
+In all test cases (except annotation_tests), we include functions with names 'branchPruned' and 'branchNotPruned'
   * **branchPruned** contains code branches that we expect should be eliminated by debloating
   * **branchNotPruned** contains code branches that should NOT be eliminated by debloating 
                         - this checks cases where the variable under consideration is not a 'provably' constant value, and hence the branch should not be folded.
-      
-**Guidelines for Writing Additional Test Cases**:
+
   * branchPruned should contain only one branch. As a result of specialization we expect 
            this branch to evaluate to true. The underlying block should contain a 
            printf call. Multiple branches can be joined by using '&&'.
   * branchNotPruned should also contain only one branch. Multiple branches 
            can be joined by using '||'. The underlying block should contain a printf call.
 
-**Measuring Code Elimination**: If specialization is successful, the branchPruned function should 
-                                     only contain the printf call that was conditional on the 
-                                     branch. The branchNotPruned function should remain 
-                                     unmodified (no code removed)
+If specialization is successful, the branchPruned function should only contain the printf call that was conditional on the branch. 
+The branchNotPruned function should remain unmodified (no code removed)
 
+For annotation test cases, write TRACK in front of variable declaration, you want annotation pass to taint e.g,
+
+```
+int main(int argc, char ** argv) {
+    char *temp[1] TRACK;
+    temp[0] = argv[argc]; 
+    return 0;
+}
+```
+
+In this test case, we are checking whether "temp" is annotated by Trimmer annotation pass or not. If yes, then the test case passes else it fails.
+
+To include additional test cases as part of all the test cases, modify tests.txt in test/scripts. In tests.txt, we mention start number and end number of test cases 
+in each subdirectory in test/src. 
 ---
