@@ -76,6 +76,4 @@ int main(int argc, char ** argv) {
 
 In this test case, we are checking whether "temp" is annotated by Trimmer annotation pass or not. If yes, then the test case passes else it fails.
 
-To include additional test cases as part of all the test cases, modify tests.txt in test/scripts. In tests.txt, we mention start number and end number of test cases 
-in each subdirectory in test/src. 
----
+To include additional test cases as part of all the test cases, modify tests.txt in test/scripts. In tests.txt, we mention start number and end number of test cases in each subdirectory in test/src. 
