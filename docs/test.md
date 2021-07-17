@@ -58,7 +58,7 @@ In all test cases (except annotation_tests), we include functions with names 'br
 If specialization is successful, the branchPruned function should only contain the printf call that was conditional on the branch. 
 The branchNotPruned function should remain unmodified (no code removed).
 
-For annotation test cases, write TRACK in front of variable declaration, you want annotation pass to taint e.g,
+For annotation test cases, write **TRACK** in front of variable declaration, you want annotation pass to taint e.g,
 
 ```
 int main(int argc, char ** argv) {
