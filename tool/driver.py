@@ -77,12 +77,17 @@ def run_argspec(tool):
 
         exceed_limit_str = '-exceedLimit=0'
 
+	depth_limit_value = "-depthLimit=100"
+	load_percent_value = "-loadPercent=100"
+
 
         if tool.depth_flag:
-            depth_limit_str = '-isLimitedDepth=true -depthLimit='+str(tool.anot_depth)+ ' '
+            depth_limit_str = '-isLimitedDepth=1'
+            depth_limit_value = "-depthLimit="+tool.anot_depth
 
         if tool.load_flag:
-            load_percent_str = ' -isLoadsLimited=true -loadPercent='+str(tool.load_percent)+' '
+            load_percent_str = '-isLoadsLimited=1'
+	    load_percent_value = "-loadPercent="+tool.load_percent
 
         if tool.use_glob:
             use_glob_str ='-useGlob=1'
@@ -95,14 +100,10 @@ def run_argspec(tool):
 
         if int(tool.exceed_limit) != 0:
             exceed_limit_str ='-exceedLimit='+tool.exceed_limit
-        
-
-
-
 
 
         if(tool.track_allocas):
-                        Cmd = [opt, '-load', build_path + 'AnnotateNew.so', depth_limit_str,load_percent_str,'-mem2reg', '-loops', '-lcssa', '-loop-simplify', '-loop-rotate', '-indvars', '-svfg', curr_file, '-o', annotated_file]
+                        Cmd = [opt, '-load', build_path + 'AnnotateNew.so', depth_limit_str, depth_limit_value, load_percent_str, load_percent_value,'-mem2reg', '-loops', '-lcssa', '-loop-simplify', '-loop-rotate', '-indvars', '-svfg', curr_file, '-o', annotated_file]
                                              
                                          
                         printDbgMsg(" ".join(Cmd))
