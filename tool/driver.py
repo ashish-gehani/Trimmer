@@ -67,7 +67,7 @@ def run_argspec(tool):
 
         depth_limit_str = '-isLimitedDepth=false'
 
-        load_percent_str = '-isLoadsLimited=false'
+        trakced_percent_str = '-isTrackedLimited=false'
 
         use_glob_str = '-useGlob=0'
 
@@ -78,16 +78,16 @@ def run_argspec(tool):
         exceed_limit_str = '-exceedLimit=0'
 
 	depth_limit_value = "-depthLimit=100"
-	load_percent_value = "-loadPercent=100"
+	tracked_percent_value = "-trackedPercent=100"
 
 
         if tool.depth_flag:
             depth_limit_str = '-isLimitedDepth=1'
             depth_limit_value = "-depthLimit="+tool.anot_depth
 
-        if tool.load_flag:
-            load_percent_str = '-isLoadsLimited=1'
-	    load_percent_value = "-loadPercent="+tool.load_percent
+        if tool.tracked_flag:
+            tracked_percent_str = '-isTrackedLimited=1'
+	    tracked_percent_value = "-trackedPercent="+tool.tracked_percent
 
         if tool.use_glob:
             use_glob_str ='-useGlob=1'
@@ -103,7 +103,7 @@ def run_argspec(tool):
 
 
         if(tool.track_allocas):
-                        Cmd = [opt, '-load', build_path + 'AnnotateNew.so', depth_limit_str, depth_limit_value, load_percent_str, load_percent_value,'-mem2reg', '-loops', '-lcssa', '-loop-simplify', '-loop-rotate', '-indvars', '-svfg', curr_file, '-o', annotated_file]
+                        Cmd = [opt, '-load', build_path + 'AnnotateNew.so', depth_limit_str, depth_limit_value, tracked_percent_str, tracked_percent_value,'-mem2reg', '-loops', '-lcssa', '-loop-simplify', '-loop-rotate', '-indvars', '-svfg', curr_file, '-o', annotated_file]
                                              
                                          
                         printDbgMsg(" ".join(Cmd))

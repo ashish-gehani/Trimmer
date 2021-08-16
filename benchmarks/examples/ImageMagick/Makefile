@@ -37,7 +37,7 @@ magick: ${OUT_DIR} ${IMG_MAGICK_BITCODE}
 	cp ${IMG_MAGICK_BITCODE} ${OUT_DIR}
 	cd ${OUT_DIR} && \
         echo '{ "main" : "magick_combined.bc" , "binary"  : "magick_fin" , "modules"    : [] , "native_libs" : [] , "ldflags" : ["-lm", "-lbz2", "-lz", "-lpthread"] , "name"    : "magick" , "args" : ["convert", "_", "_", "_"]}' > ${MANIFEST} && \
-        python ${TRIMMER_HOME}/tool/trimmer.py ${MANIFEST} ./work loadPercent 50 2> ${LOG_FILE}
+        python ${TRIMMER_HOME}/tool/trimmer.py ${MANIFEST} ./work trackedPercent 50 2> ${LOG_FILE}
 
 ${IMG_MAGICK_TARBALL}:
 	wget ${IMG_MAGICK_URL} --no-check-certificate

@@ -48,10 +48,10 @@ static cl::opt<bool> isLimitedDepth("isLimitedDepth",cl::init(false),
 
 static cl::opt<int> depthLimit("depthLimit", cl::init(1));
 
-static cl::opt<bool> isLoadsLimited("isLoadsLimited",cl::init(false),
+static cl::opt<bool> isTrackedLimited("isTrackedLimited",cl::init(false),
     cl::desc("do we want to consider only a limited \% of the sources sorted on number of loads dependent on them"));
 
-static cl::opt<int> loadPercent("loadPercent", cl::init(100));
+static cl::opt<int> trackedPercent("trackedPercent", cl::init(100));
 
 struct DfsDepthInfo {
   SVFGNode* node;
@@ -1842,7 +1842,7 @@ bool AnnotateNew::runOnModule(Module &M) {
     Stat *stat = &kv.second;
     debug(Yes)<<"kv.first: "<<*kv.first<<"\n";
 
-    if(isLoadsLimited){
+    if(isTrackedLimited){
       debug(Yes)<<"Performing instrinisc check...\n";
 
       if(!isa<IntrinsicInst>(kv.first)){   //!isa<MemCpyInst>(kv.first)){
@@ -1900,7 +1900,7 @@ bool AnnotateNew::runOnModule(Module &M) {
 
     debug(Yes) << "SIZE" << trackedAllocas.size() << "\n";
     debug(Yes) << "Sorted Values" << "\n";
-    if (!isLoadsLimited) {
+    if (!isTrackedLimited) {
       for(int i = statValues.size() - 1; i >= 0; i--) { 
         debug(Yes) << *statValues[i]->value << " with value: " << (int) statFormula(statValues[i]) << "\n"; 
         Value *I = statValues[i]->value;
@@ -1917,7 +1917,7 @@ bool AnnotateNew::runOnModule(Module &M) {
         }
       } 
     } else {
-      int topNValue = (loadPercent/100.0) * sortedLoads.size();
+      int topNValue = (trackedPercent/100.0) * sortedLoads.size();
       debug(Yes)<<"Considering only top "<<topNValue<<" values + memcpy insts # "<<MemCpy.size() <<"\n";
 
       unsigned remaining = topNValue;

@@ -159,7 +159,7 @@ percentLabels = {
         "detail_str": "Sorted Percentage",
         "dir_name_prefix": "ANOT_PERCENT_",
         "log_name_prefix": "ANOT_LOG_",
-        "slider_flag":" loadPercent ",
+        "slider_flag":" trackedPercent ",
         "step":10,
         "csv_col":"Top N Percent Sources",
         "plot_detail_str":"_Percent_Vary_",
