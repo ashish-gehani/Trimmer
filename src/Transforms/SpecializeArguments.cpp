@@ -131,6 +131,7 @@ namespace {
       CallInst * mallocCall =  ir.CreateCall(mallocFunc, ArrayRef<Value *>(args));
       Value * bitcast =  ir.CreateBitCast(mallocCall, argv->getType());
       ir.CreateStore(bitcast, argv_new);   
+      unsigned dynamicArg = 1;
       for (unsigned i = 0; i < arguments.size(); i++) {
         Value * lptr = ir.CreateLoad(argv_new);
         Value * newArgptr = ir.CreateConstGEP1_32(lptr, i);
@@ -154,10 +155,11 @@ namespace {
           Value * gep = ir.CreateConstGEP1_32(destPtr, arguments[i].size());
           ir.CreateStore(strTerm, gep);
         } else {
-          debug(Yes) << "_" << i << "\n";
-          Value* oldArgptr = ir.CreateConstGEP1_32(argv, i);
+          debug(Yes) << "_" << dynamicArg << "\n";
+          Value* oldArgptr = ir.CreateConstGEP1_32(argv, dynamicArg);
           Value* load = ir.CreateLoad(oldArgptr);   
-          ir.CreateStore(load, newArgptr);                             
+          ir.CreateStore(load, newArgptr);         
+          dynamicArg++;                    
         }
       }
       Value * lptr = ir.CreateLoad(argv_new);
