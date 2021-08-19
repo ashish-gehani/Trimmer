@@ -13,7 +13,7 @@ def main():
     try:
         time.sleep(20)
         f = open('../b.html','w')
-        proc1 = subprocess.call(['trimmer/work_dir/curl_fin_stripped', '--compress', '--http1.1', '--ssl', '--ipv4', 'http://localhost:8070/'],stdout=f)
+        proc1 = subprocess.call(['trimmer/work_dir/curl_fin_stripped', 'http://localhost:8070/'],stdout=f)
         f.close()
         f1 = open('../c.html','w')
         proc2 = subprocess.call(['curl', '--compress', '--http1.1', '--ssl', '--ipv4', 'http://localhost:8070/'],stdout=f1)
