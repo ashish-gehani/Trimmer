@@ -1808,8 +1808,7 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
    }
 
   /* specialize for functions defined in string.h e.g strcmp, strchr */
-  if(handleDbgCall(callInst)) {}
-  else if(handleGetOpt(callInst)) {}
+  if(handleGetOpt(callInst)) {}
   else if(handleMemInst(callInst)) {}
   else if(handleStringFunc(callInst)) {} 
   else if(handleFileIOCall(callInst)) {} 
@@ -2488,7 +2487,6 @@ bool ConstantFolding::satisfyConds(Function * F, CallInst *ci) {
       Value *argument = ci->getArgOperand(i);
       if(Register *reg = processInstAndGetRegister(argument)) { //dyn_cast<Constant>(argument) || 
         if(reg->getTracked()) {
-          //FIXME: Properly break lines - Lines can NOT exceed 80 chars (soft engr practice)
           debug(Yes) << "(LOG) (SATISFYCONDS) Call " << *ci << " satisfied specializing conditions due to argument " <<  *argument << " at index " << i << "\n";
           return true;
         }
@@ -2729,25 +2727,6 @@ bool ConstantFolding::handleMemInst(CallInst * callInst) {
   return true;  
 }
 
-// FIXME: Do not understand what this does.
-bool ConstantFolding::handleDbgCall(CallInst * callInst) {
-  string name = callInst->getCalledFunction()->getName();
-  if(name == PRNTDBGSTR) {
-    for(unsigned i = 0; i < callInst->getNumArgOperands(); i++) {
-      Value * ptrVal = callInst->getOperand(i);
-      char * str;
-      if(getStr(ptrVal, str, 100)) debug(Yes) << str;
-    }
-  } else if(name == SETDBGLEVEL) {
-    Value * lVal = callInst->getOperand(0);
-    if(ConstantInt * cint = dyn_cast<ConstantInt>(lVal)) {
-      debugLevel = cint->getZExtValue();
-      debug(Yes) << "set debugLevel to " << debugLevel << "\n";
-    }
-  } else return false;
-  stats.incrementInstructionsFolded();
-  return true;
-}
 
 void ConstantFolding::visitReadyToVisit(vector<BasicBlock *> readyToVisit) {
   
@@ -2787,9 +2766,9 @@ bool ConstantFolding::visitBB(BasicBlock * succ, BasicBlock *  from) {
   return true;
 }
 
-//File StringUtils.cpp
 
-// FIXME: bad naming? handleStrStr reveals nothing about the function. Rename appropriately
+// This function handles string function strstr that returns pointer to first occurrence of the string argument2 in string argument 1.
+
 bool ConstantFolding::handleStrStr(CallInst *callInst) {
   Value *val1 = callInst->getOperand(0);
   Value *val2 = callInst->getOperand(1);
@@ -3006,7 +2985,10 @@ bool ConstantFolding::handleStringFunc(CallInst * callInst) {
 
 
 
-// FIXME: Do not understand what this does and why is this important. Add proper comment
+// Handle __ctype_b_loc function in ctype.h, which returns a pointer to a 'traits' table containing some flags related with the characteristics 
+//of each single character.
+
+
 void ConstantFolding::handleCTypeFuncs(CallInst * callInst) {
 
   traitsTable = *(__ctype_b_loc());
@@ -3523,7 +3505,6 @@ void ConstantFolding::handleCIsDigit(CallInst* callInst){
   }
 }
 
-// FIXME: What does this comment mean? That these functions were extracted from FileIO.cpp? Should remove it
 
 /*
    The following code specializes File IO Calls such as open, read, pread, lseek, 
@@ -3855,8 +3836,9 @@ void ConstantFolding::handleGetLine(CallInst * ci) {
 
 
     Constant *hookFunc;
-    // FIXME: Line is overflowing - Properly break after 80 chars
-    hookFunc = module->getOrInsertFunction("fseek", Type::getInt32Ty(module->getContext()),fptrVal->getType(),Type::getInt64Ty(module->getContext()),Type::getInt32Ty(module->getContext()));    
+    // Properly break after 80 characters
+    hookFunc = module->getOrInsertFunction("fseek", Type::getInt32Ty(module->getContext()),
+                                           fptrVal->getType(),Type::getInt64Ty(module->getContext()),Type::getInt32Ty(module->getContext()));    
     Function *hook= cast<Function>(hookFunc);
 
     ConstantInt * arg2 = Builder.getInt64(getfptrOffset(sfd,fptr));
@@ -3973,7 +3955,6 @@ void ConstantFolding::handleRead(CallInst * ci) {
   Instruction* MemCpyInst = Builder.CreateMemCpy(bufPtr,1,gv,1,bytes_read);
 
   Constant *hookFunc;
-  // FIXME: Break line
   hookFunc = module->getOrInsertFunction("lseek", Type::getInt64Ty(module->getContext()), Type::getInt32Ty(module->getContext()),Type::getInt64Ty(module->getContext()),Type::getInt32Ty(module->getContext()));    
   Function *hook= cast<Function>(hookFunc);
 
@@ -4334,9 +4315,7 @@ void ConstantFolding::handleFGets(CallInst * ci) {
     bbOps.setConstMem(true, reg->getValue(), strlen(buffer),currBB);
     setfptrOffset(sfd, fptr);
     debug(Yes) << "buffer value " << buffer <<" "<<strlen(buffer)<<" address: " <<reg->getValue()<< "\n";
-    Constant * const_array = ConstantDataArray::getString(module->getContext(),StringRef(buffer),true);
-    // FIXME: break line
-    GlobalVariable * gv = new GlobalVariable(*module,const_array->getType(),true,GlobalValue::ExternalLinkage,const_array,"");
+    Constant * const_array = ConstantDataArray::getString(module->getContext(),StringRef(buffer),true);    GlobalVariable * gv = new GlobalVariable(*module,const_array->getType(),true,GlobalValue::ExternalLinkage,const_array,"");
     gv->setAlignment(1);
     IRBuilder<> Builder(ci);
     Instruction* MemCpyInst = Builder.CreateMemCpy(bufPtr,1,gv,1,strlen(buffer)+1);
@@ -4528,7 +4507,6 @@ void ConstantFolding::removeFileIOCallsFromMap(string buffer[],int sfd) {
   vector<Instruction*>::iterator it = insts.begin() ;
   while (it != insts.end()){
     CallInst *Inst = dyn_cast<CallInst>(*it); 
-    // FIXME: Break line
     if(((Inst->getCalledFunction()->getName().str()).compare(buffer[0])==0 || (Inst->getCalledFunction()->getName().str()).compare(buffer[1])==0)){
       it = insts.erase(it);
     }
@@ -5111,7 +5089,5 @@ void ConstantFolding::markMemNonConst(Type *ty, uint64_t address, BasicBlock *BB
       markMemNonConst(t->getElementType(), value, BB);
     }
   }
-
-  // FIXME: Break line
   }
 
