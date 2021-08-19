@@ -55,7 +55,6 @@ void AnnotateTest::getCheckValues(Value *user, set<Value *> &toCheck) {
     if(processed.find(current) != processed.end())
       continue;
 
-    //errs() << *current << "asdasd \n";
     processed.insert(current);
 
     if(dyn_cast<AllocaInst>(current) || dyn_cast<GlobalVariable>(current)) {
@@ -122,7 +121,6 @@ bool AnnotateTest::runOnModule(Module &M) {
     bool found = false;
     for(auto &track: tracked) {
       if(track->getName() == a.substr(0, a.size() - 1)) {
-        //errs() << "found " << track->getName() << " -> " << a.substr(0, a.size() - 1) << "\n";
         found = true;
         break;
       }
