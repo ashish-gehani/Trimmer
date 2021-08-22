@@ -79,7 +79,8 @@ def run_argspec(tool):
 
 	depth_limit_value = "-depthLimit=100"
 	tracked_percent_value = "-trackedPercent=100"
-
+        tracked_percent_str = '-isTrackedLimited=0'
+	depth_limit_str = '-isLimitedDepth=0'
 
         if tool.depth_flag:
             depth_limit_str = '-isLimitedDepth=1'

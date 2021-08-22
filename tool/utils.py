@@ -67,7 +67,7 @@ def parse_args(args):
         isLimitedDepth = False
         depthLimit = 0
         isTrackedLimited = False
-        trakcedPercent = 100
+        trackedPercent = 100
         useGlob = False
         exceedLimit = 0
         disableExit = False
