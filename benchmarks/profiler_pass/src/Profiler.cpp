@@ -1,3 +1,7 @@
+// Copyright (c) 2020 SRI International All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 #include "Profiler.h"
 
 #include "llvm/ADT/SCCIterator.h"
@@ -363,11 +367,6 @@ bool ProfilerPass::runOnModule(Module &M) {
   Ctx = &M.getContext();
 
   if (ShowCallGraphInfo) {
-    /// Look at the callgraph
-    // CallGraphWrapperPass *cgwp = &getAnalysis<CallGraphWrapperPass>();
-    // if (cgwp) {
-    //   cgwp->print(errs(), &M);
-    // }
     CallGraph &CG = getAnalysis<CallGraphWrapperPass>().getCallGraph();
     typedef std::pair<Function *, std::pair<unsigned, unsigned>> func_ty;
     std::vector<func_ty> funcs;
@@ -433,12 +432,6 @@ bool ProfilerPass::runOnModule(Module &M) {
   } else {
     printCounters(errs());
   }
-
-  // if (DisplayDeclarations) {
-  //   errs() << "[Non-analyzed (external) functions]\n";
-  //   for(auto &p: ExtFuncs)
-  //     errs() << p.getKey() << "\n";
-  // }
 
   return false;
 }
@@ -524,36 +517,6 @@ void ProfilerPass::printCounters(raw_ostream &O) {
     O << format("\t%*u %-*s\n", MaxValLen, c.getValue(), MaxNameLen,
                 c.getDesc().c_str());
   }
-
-  // { // Division counters
-  //   MaxNameLen = MaxValLen = 0;
-  //   std::vector<Counter> div_counters
-  //   {SafeIntDiv,UnsafeIntDiv,SafeFPDiv,UnsafeFPDiv,DivIntUnknown,DivFPUnknown};
-  //   formatCounters(div_counters, MaxNameLen, MaxValLen,false);
-  //   O << "[Division by zero analysis]\n";
-  //   for (auto c: div_counters) {
-  //     O << format("%*u %-*s\n",
-  //                 MaxValLen,
-  //                 c.getValue(),
-  //                 MaxNameLen,
-  //                 c.getDesc().c_str());
-  //   }
-  // }
-
-  // { // left shift
-  //   MaxNameLen = MaxValLen = 0;
-  //   std::vector<Counter> lsh_counters
-  //   {SafeLeftShift,UnsafeLeftShift,UnknownLeftShift};
-  //   formatCounters(lsh_counters, MaxNameLen, MaxValLen,false);
-  //   O << "[Oversized left shifts analysis]\n";
-  //   for (auto c: lsh_counters) {
-  //     O << format("%*u %-*s\n",
-  //                 MaxValLen,
-  //                 c.getValue(),
-  //                 MaxNameLen,
-  //                 c.getDesc().c_str());
-  //   }
-  // }
 }
 
 char ProfilerPass::ID = 0;
