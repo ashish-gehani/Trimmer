@@ -766,8 +766,13 @@ ProcResult ConstantFolding::processAllocaInst(AllocaInst * ai) {
   return UNDECIDED;
 }
 
-//FIXME: Add comment
-ProcResult ConstantFolding::processMallocInst(CallInst * mi) {  
+/*
+ * Process Malloc Instruction :
+ * %a = malloc ty1, uint %b
+ * If the size of the malloc call (i.e. %b) is constant, tracks the malloc call by 
+ * allocation memory of size %b in the shadow memory 
+ */
+ ProcResult ConstantFolding::processMallocInst(CallInst * mi) {  
 
   stats.incrementTotalLibCalls();
 
@@ -991,43 +996,7 @@ ProcResult ConstantFolding::processLoadInst(LoadInst * li) {
     trackedLoads++;
   }
 
-
-  /*
-     Value * source = getLoadSource(li);
-     debug(Yes)<<"Load Source: "<<*source<<"\n";
-
-     if(auto GO = dyn_cast<GlobalObject>(source)){
-     if(GO->hasMetadata() && GO->getMetadata("track")){
-     debug(Yes)<<"Loading from tracked Global!\n";
-     stats.incrementTrackedLoads();
-     }
-     } else if(auto Ins = dyn_cast<Instruction>(source)){
-     if(Ins->hasMetadata() && Ins->getMetadata("track")){
-     debug(Yes)<<"Loading from instruction which is tracked!\n";
-     stats.incrementTrackedLoads();
-     }
-     }*/
   debug(Yes)<<"TrackedLoads: "<<stats.getTrackedLoads()<<"\n";
-
-
-  /*
-     if(auto GE =  dyn_cast<GetElementPtrInst>(ptr)){
-     Value * ptrOp = GE->getPointerOperand();
-     if(Instruction* Ins = dyn_cast<Instruction>(ptrOp)){
-     if(Ins->hasMetadata() && Ins->getMetadata("track")){
-     debug(Yes)<<"Operand of GEPInst in load is: "<<*Ins<<" which is tracked!\n";
-     }
-     }
-     } else if(Instruction* Ins = dyn_cast<Instruction>(ptr)){
-     if(Ins->hasMetadata() && Ins->getMetadata("track")){
-     debug(Yes)<<"LoadInst operand from tracked memory: "<<*Ins<<"in function "<<Ins->getParent()->getParent()->getName()<<"\n";;
-     }
-     } else if(GlobalObject* GO = dyn_cast<GlobalObject>(ptr)){
-     if(GO->hasMetadata() && GO->getMetadata("track")){
-     debug(Yes)<<"LoadInst operand GlobalObject is tracked!\n";
-     }
-     } */
-
 
   uint64_t val = bbOps.loadMem(addr, size, currBB);
   debug(Yes)<<"LoadInst currBB: "<<currBB->getParent()->getName()<<"\n";
@@ -1972,7 +1941,11 @@ bool ConstantFolding::exceedClone(string name, int level){
 
 }
 
-// FIXME: This is very much a "Policy" of our system. Document this with a proper comment
+/* 
+* Checks if the depth of code recursion has exceeded a maximum value. Returns true if the
+* maximum depth has been exceeded, false otherwise. The default limit for recursion
+* depth is set to 5. 
+*/
 bool ConstantFolding::exceedsRecursion(Function *called, Function *callee) {
   string calledName = removeCloneName(called->getName().str());
   string calleeName = removeCloneName(callee->getName().str());
@@ -2484,8 +2457,9 @@ bool ConstantFolding::satisfyConds(Function * F, CallInst *ci) {
       Value *argument = ci->getArgOperand(i);
       if(Register *reg = processInstAndGetRegister(argument)) { //dyn_cast<Constant>(argument) || 
         if(reg->getTracked()) {
-          //FIXME: Properly break lines - Lines can NOT exceed 80 chars (soft engr practice)
-          debug(Yes) << "(LOG) (SATISFYCONDS) Call " << *ci << " satisfied specializing conditions due to argument " <<  *argument << " at index " << i << "\n";
+          debug(Yes) << "(LOG) (SATISFYCONDS) Call " << *ci 
+                     << " satisfied specializing conditions due to argument " 
+                     <<  *argument << " at index " << i << "\n";
           return true;
         }
       }
@@ -2988,7 +2962,6 @@ bool ConstantFolding::handleStringFunc(CallInst * callInst) {
   else if(name == "strcat") handleStrCat(callInst);
   else if(name == "strstr") handleStrStr(callInst);
   else if(name == "strsep") handleStrSep(callInst);
-  else if(name == "strncpy") handleStrNCpy(callInst);
   else if(name == "__ctype_b_loc")  handleCTypeFuncs(callInst);
   else if(name == "c_isspace") handleCIsSpace(callInst); 
   else if(name == "c_isalnum") handleCIsalnum(callInst);
@@ -2999,47 +2972,6 @@ bool ConstantFolding::handleStringFunc(CallInst * callInst) {
   stats.incrementTotalLibCalls();
   return true;
 }
-
-// FIXME: "strncpy" is the name of a function so cant say Str*N*C*cpy. Replace with handleStrncpy
-void ConstantFolding::handleStrNCpy(CallInst *callInst) {
-  Value *dest = callInst->getOperand(0);
-  Value *src = callInst->getOperand(1);
-  Value *sizeVal = callInst->getOperand(2);
-  uint64_t size;
-
-  Register *srcReg = processInstAndGetRegister(src);
-  Register *destReg = processInstAndGetRegister(dest);
-  if(!srcReg || !bbOps.checkConstContigous(srcReg->getValue(), currBB) || !getSingleVal(sizeVal,size)) {
-    debug(Yes) << "strncpy: source string not constant" << "\n";
-    //mark destination as non constant too
-    if(destReg)
-      bbOps.setConstContigous(false, destReg->getValue(), currBB);
-    else
-      debug(Yes) << "strncpy: (Warning) strcpy, destination unknown" << "\n";
-
-    return;
-  }
-
-  if(!destReg) {
-    debug(Yes) << "strncpy: Destination not found\n";
-    return;
-  }
-
-  //get untill NULL
-
-  char *addr = (char *) bbOps.getActualAddr(srcReg->getValue(), currBB);
-  char *destAddr = (char *) bbOps.getActualAddr(destReg->getValue(), currBB);
-  char *temp = addr;
-
-  memcpy(destAddr, addr, size);
-  stats.incrementLibCallsFolded();
-  stats.incrementInstructionsFolded();
-  addSingleVal(callInst, destReg->getValue(), true, true);
-
-  debug(Yes) << "strncpy: Successfully folded" << destAddr <<"\n";
-  return;
-}
-
 
 // FIXME: Do not understand what this does and why is this important. Add proper comment
 void ConstantFolding::handleCTypeFuncs(CallInst * callInst) {
@@ -3890,8 +3822,12 @@ void ConstantFolding::handleGetLine(CallInst * ci) {
 
 
     Constant *hookFunc;
-    // FIXME: Line is overflowing - Properly break after 80 chars
-    hookFunc = module->getOrInsertFunction("fseek", Type::getInt32Ty(module->getContext()),fptrVal->getType(),Type::getInt64Ty(module->getContext()),Type::getInt32Ty(module->getContext()));    
+    hookFunc = module->getOrInsertFunction("fseek", 
+                                           Type::getInt32Ty(module->getContext()),
+                                           fptrVal->getType(),
+                                           Type::getInt64Ty(module->getContext()),
+                                           Type::getInt32Ty(module->getContext()));    
+
     Function *hook= cast<Function>(hookFunc);
 
     ConstantInt * arg2 = Builder.getInt64(getfptrOffset(sfd,fptr));
@@ -4008,8 +3944,12 @@ void ConstantFolding::handleRead(CallInst * ci) {
   Instruction* MemCpyInst = Builder.CreateMemCpy(bufPtr,1,gv,1,bytes_read);
 
   Constant *hookFunc;
-  // FIXME: Break line
-  hookFunc = module->getOrInsertFunction("lseek", Type::getInt64Ty(module->getContext()), Type::getInt32Ty(module->getContext()),Type::getInt64Ty(module->getContext()),Type::getInt32Ty(module->getContext()));    
+  hookFunc = module->getOrInsertFunction("lseek", 
+                                          Type::getInt64Ty(module->getContext()),
+                                          Type::getInt32Ty(module->getContext()),
+                                          Type::getInt64Ty(module->getContext()),
+                                          Type::getInt32Ty(module->getContext())); 
+
   Function *hook= cast<Function>(hookFunc);
 
   ConstantInt * arg1 = Builder.getInt32(fd);
@@ -4370,8 +4310,12 @@ void ConstantFolding::handleFGets(CallInst * ci) {
     setfptrOffset(sfd, fptr);
     debug(Yes) << "buffer value " << buffer <<" "<<strlen(buffer)<<" address: " <<reg->getValue()<< "\n";
     Constant * const_array = ConstantDataArray::getString(module->getContext(),StringRef(buffer),true);
-    // FIXME: break line
-    GlobalVariable * gv = new GlobalVariable(*module,const_array->getType(),true,GlobalValue::ExternalLinkage,const_array,"");
+    GlobalVariable * gv = new GlobalVariable(*module,
+                                             const_array->getType(),
+                                             true,
+                                             GlobalValue::ExternalLinkage,
+                                             const_array,
+                                             "");
     gv->setAlignment(1);
     IRBuilder<> Builder(ci);
     Instruction* MemCpyInst = Builder.CreateMemCpy(bufPtr,1,gv,1,strlen(buffer)+1);
@@ -4563,11 +4507,11 @@ void ConstantFolding::removeFileIOCallsFromMap(string buffer[],int sfd) {
   vector<Instruction*>::iterator it = insts.begin() ;
   while (it != insts.end()){
     CallInst *Inst = dyn_cast<CallInst>(*it); 
-    // FIXME: Break line
-    if(((Inst->getCalledFunction()->getName().str()).compare(buffer[0])==0 || (Inst->getCalledFunction()->getName().str()).compare(buffer[1])==0)){
+    if(((Inst->getCalledFunction()->getName().str()).compare(buffer[0])==0 ||
+        (Inst->getCalledFunction()->getName().str()).compare(buffer[1])==0)) {
       it = insts.erase(it);
     }
-    else{
+    else {
       ++it; 
     } 
   }   
@@ -5077,19 +5021,17 @@ void ConstantFolding::markMemNonConst(Type *ty, uint64_t address, BasicBlock *BB
 
   if(fdInfoMap.find(address) != fdInfoMap.end())
     return;
-  //if(!ty->isPointerTy())
-  //return;
   if(!bbOps.checkConstMem(address, DL->getTypeAllocSize(ty), BB)) {
     debug(Yes) << "Address already non constant: " << address << "\n";
     return;
   }
 
-  debug(Yes) << "marking mem non const in loop at address " << address << " to " << address + DL->getTypeAllocSize(ty)  <<"\n";
+  debug(Yes) << "marking mem non const in loop at address " << address 
+             << " to " << address + DL->getTypeAllocSize(ty)  <<"\n";
   bbOps.setConstContigous(false, address, BB);
 
 
   if(ty->isStructTy()) {
-
     debug(Yes) << "is struct type" << "\n";
     auto structLayout = DL->getStructLayout(dyn_cast<StructType>(ty));
     for(unsigned i = 0; i < ty->getStructNumElements(); i++) {
@@ -5121,32 +5063,30 @@ void ConstantFolding::markMemNonConst(Type *ty, uint64_t address, BasicBlock *BB
       markMemNonConst(dyn_cast<PointerType>(t)->getElementType(), val, BB); 
     }
   } else if(ty->isArrayTy() || ty->isVectorTy()) {
-    debug(Yes) << "is array type " << "\n";
-    auto *arrayTy = dyn_cast<SequentialType>(ty);
-    Type *t = arrayTy->getElementType();
-    unsigned offsetTotal = 0;
-    if(t->isPointerTy()) {
-      debug(Yes) << "array pointer ty " <<"\n";
-      for(unsigned i = 0; i < arrayTy->getNumElements(); i++) {
-        uint64_t offset = address + offsetTotal;
-        uint64_t ptrSize = DL->getPointerSize();
-        uint64_t value = bbOps.loadMem(offset, ptrSize, BB);
-        if(offset < address){ //uint64_t max exceeded
-          debug(Yes)<<"offset exceeds uint64_t max value; skipping markconst\n";
-          continue;
+      debug(Yes) << "is array type " << "\n";
+      auto *arrayTy = dyn_cast<SequentialType>(ty);
+      Type *t = arrayTy->getElementType();
+      unsigned offsetTotal = 0;
+      if(t->isPointerTy()) {
+        debug(Yes) << "array pointer ty " <<"\n";
+        for(unsigned i = 0; i < arrayTy->getNumElements(); i++) {
+          uint64_t offset = address + offsetTotal;
+          uint64_t ptrSize = DL->getPointerSize();
+          uint64_t value = bbOps.loadMem(offset, ptrSize, BB);
+          if(offset < address){ //uint64_t max exceeded
+            debug(Yes)<<"offset exceeds uint64_t max value; skipping markconst\n";
+            continue;
+          }
+          markMemNonConst(dyn_cast<PointerType>(t)->getElementType(), value, BB);
         }
-        markMemNonConst(dyn_cast<PointerType>(t)->getElementType(), value, BB);
       }
-    }
-  } else if(ty->isPointerTy()) {
-    debug(Yes) << *ty << " is of pointer type\n";
-    PointerType *t = dyn_cast<PointerType>(ty);
-    if(!t->getElementType()->isFunctionTy()) {
-      uint64_t value = bbOps.loadMem(address, DL->getTypeAllocSize(t->getElementType()), BB);
-      markMemNonConst(t->getElementType(), value, BB);
-    }
-  }
-
-  // FIXME: Break line
-  }
+   } else if(ty->isPointerTy()) {
+      debug(Yes) << *ty << " is of pointer type\n";
+      PointerType *t = dyn_cast<PointerType>(ty);
+      if(!t->getElementType()->isFunctionTy()) {
+        uint64_t value = bbOps.loadMem(address, DL->getTypeAllocSize(t->getElementType()), BB);
+        markMemNonConst(t->getElementType(), value, BB);
+      }
+   }
+}
 
