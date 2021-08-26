@@ -744,8 +744,6 @@ addSingleVal(pi, constantPtr->getZExtValue(), true, true);
 return FOLDED;
 }
 */
-//File ProcessInstructions.cpp
-
 /**
  * Process Alloca Instructions:
  * ty * %a = ty
@@ -767,12 +765,15 @@ ProcResult ConstantFolding::processAllocaInst(AllocaInst * ai) {
 }
 
 /*
+ * Review: 
  * Process Malloc Instruction :
  * %a = malloc ty1, uint %b
  * If the size of the malloc call (i.e. %b) is constant, tracks the malloc call by 
- * allocation memory of size %b in the shadow memory 
+ * allocation memory of size %b in the shadow heap memory 
+ * 
+ * Old comment: Process Malloc Instructions: Allocate heap memory
  */
- ProcResult ConstantFolding::processMallocInst(CallInst * mi) {  
+ProcResult ConstantFolding::processMallocInst(CallInst * mi) {  
 
   stats.incrementTotalLibCalls();
 
@@ -966,7 +967,7 @@ Value *ConstantFolding::getLoadSource(LoadInst* LI){
   return processing;
 }
 
-// FIXME: Add comment
+// Process Load instructions: load memory and map the load value to the memory address loaded
 ProcResult ConstantFolding::processLoadInst(LoadInst * li) { 
   stats.incrementTotalLoads();
 
@@ -1010,7 +1011,7 @@ ProcResult ConstantFolding::processLoadInst(LoadInst * li) {
   return UNDECIDED;
 }
 
-// FIXME: Add comment and explain why handling PtrtoInst is imp for our analysis
+// Process PtrToInst Instructions: map the pointer argument to a different type to be used in further instructions
 ProcResult ConstantFolding::processPtrToIntInst(PtrToIntInst* pi){
   debug(Yes)<<"Invoked processPtrToIntInst\n";
   Value * ptr = pi->getOperand(0);
@@ -1035,7 +1036,7 @@ ProcResult ConstantFolding::processPtrToIntInst(PtrToIntInst* pi){
   return UNDECIDED;
 }
 
-// FIXME: Add Comment
+// Process GetElementbyPtr Instructions: maps the GEP value to the resultant address in memory so that it can be used in further instructions.
 ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
 
   Value * ptr = gi->getOperand(0);
@@ -1126,7 +1127,7 @@ ProcResult ConstantFolding::processMemMoveInst(CallInst * memMoveInst) {
   return NOTFOLDED;
 }
 
-// FIXME: Add comment
+// Handle memcpy instructions: copy the string address to the destination address so that it can be used in further instructions.  
 ProcResult ConstantFolding::processMemcpyInst(CallInst * memcpyInst) {
 
   stats.incrementTotalLibCalls();
@@ -1644,7 +1645,7 @@ bool ConstantFolding::handleFStat(CallInst *callInst) {
 
 }
 
-// FIXME: What does this function do? Rename this appropriately. Name doesn't tell much
+// handle the fileno function of libc. This function is used to return file descriptors for a specific file stream.
 bool ConstantFolding::handleFileNo(CallInst *callInst) {	
   stats.incrementTotalLibCalls();
 
@@ -1671,7 +1672,7 @@ bool ConstantFolding::handleFileNo(CallInst *callInst) {
   return true;   
 }
 
-// FIXME: Add comment and explain why this is important
+// This function handles numerous system calls. This is used to get results from OS system calls for precise debloating. 
 bool ConstantFolding::handleSysCall(CallInst *callInst) {
   Function *F;
   if(!(F = callInst->getCalledFunction()))
@@ -1779,8 +1780,7 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
    }
 
   /* specialize for functions defined in string.h e.g strcmp, strchr */
-  if(handleDbgCall(callInst)) {}
-  else if(handleGetOpt(callInst)) {}
+  if(handleGetOpt(callInst)) {}
   else if(handleMemInst(callInst)) {}
   else if(handleStringFunc(callInst)) {} 
   else if(handleFileIOCall(callInst)) {} 
@@ -1942,9 +1942,12 @@ bool ConstantFolding::exceedClone(string name, int level){
 }
 
 /* 
+* Review:
 * Checks if the depth of code recursion has exceeded a maximum value. Returns true if the
 * maximum depth has been exceeded, false otherwise. The default limit for recursion
 * depth is set to 5. 
+* 
+* Old comment: If recursion is not folding within 5 recursive function calls, do not further specialize the call site.
 */
 bool ConstantFolding::exceedsRecursion(Function *called, Function *callee) {
   string calledName = removeCloneName(called->getName().str());
@@ -1977,9 +1980,7 @@ CallInst *ConstantFolding::cloneAndAddFuncCall(CallInst *callInst) {
   CallInst *clonedCall = createFuncCall(cloned, args);
   return clonedCall;
 }
-//File LoopUtils.cpp
 
-//File Utils.cpp
 void ConstantFolding::propagateArgs(CallInst *ci, Function *toRun) {
   unsigned index = 0;
   for(auto arg = toRun->arg_begin(); arg != toRun->arg_end();
@@ -2395,7 +2396,15 @@ bool ConstantFolding::hasTrackedMalloc(Function *F) {
   return false;
 }
 
-// FIXME: Add comment and explain purpose
+// This function is used to decide whether to specialize the function or not. 
+/* If contextType ==2 i.e. context-sensitive, then return true i.e. to specialize each call site of the function.
+If contextType == 0 i.e. context-insensitive, then check whether the function has already specialized or not. If already specialized and 
+the context (argument) matches, then replace the callsite to call the specialized functions, else do not clone the function again and replace call site already
+specialized with original function call.
+If contextType==1, then check its arguments. If one of the arguments is tracked (by annotation pass), then specialize the function and return true.
+
+*/
+
 bool ConstantFolding::satisfyConds(Function * F, CallInst *ci) {
   if(contextType == 2)
     return true;
@@ -2699,25 +2708,6 @@ bool ConstantFolding::handleMemInst(CallInst * callInst) {
   return true;  
 }
 
-// FIXME: Do not understand what this does. Document the purpose
-bool ConstantFolding::handleDbgCall(CallInst * callInst) {
-  string name = callInst->getCalledFunction()->getName();
-  if(name == PRNTDBGSTR) {
-    for(unsigned i = 0; i < callInst->getNumArgOperands(); i++) {
-      Value * ptrVal = callInst->getOperand(i);
-      char * str;
-      if(getStr(ptrVal, str, 100)) debug(Yes) << str;
-    }
-  } else if(name == SETDBGLEVEL) {
-    Value * lVal = callInst->getOperand(0);
-    if(ConstantInt * cint = dyn_cast<ConstantInt>(lVal)) {
-      debugLevel = cint->getZExtValue();
-      debug(Yes) << "set debugLevel to " << debugLevel << "\n";
-    }
-  } else return false;
-  stats.incrementInstructionsFolded();
-  return true;
-}
 
 void ConstantFolding::visitReadyToVisit(vector<BasicBlock *> readyToVisit) {
   
@@ -2757,9 +2747,9 @@ bool ConstantFolding::visitBB(BasicBlock * succ, BasicBlock *  from) {
   return true;
 }
 
-//File StringUtils.cpp
 
-// FIXME: bad naming? handleStrStr reveals nothing about the function. Rename appropriately
+// This function handles string function strstr that returns pointer to first occurrence of the string argument2 in string argument 1.
+
 bool ConstantFolding::handleStrStr(CallInst *callInst) {
   Value *val1 = callInst->getOperand(0);
   Value *val2 = callInst->getOperand(1);
@@ -2973,7 +2963,11 @@ bool ConstantFolding::handleStringFunc(CallInst * callInst) {
   return true;
 }
 
-// FIXME: Do not understand what this does and why is this important. Add proper comment
+
+
+
+// Handle __ctype_b_loc function in ctype.h, which returns a pointer to a 'traits' table containing some flags related with the characteristics 
+//of each single character.
 void ConstantFolding::handleCTypeFuncs(CallInst * callInst) {
 
   traitsTable = *(__ctype_b_loc());
@@ -3490,7 +3484,6 @@ void ConstantFolding::handleCIsDigit(CallInst* callInst){
   }
 }
 
-// FIXME: What does this comment mean? That these functions were extracted from FileIO.cpp? Should remove it
 
 /*
    The following code specializes File IO Calls such as open, read, pread, lseek, 
@@ -5080,13 +5073,13 @@ void ConstantFolding::markMemNonConst(Type *ty, uint64_t address, BasicBlock *BB
           markMemNonConst(dyn_cast<PointerType>(t)->getElementType(), value, BB);
         }
       }
-   } else if(ty->isPointerTy()) {
-      debug(Yes) << *ty << " is of pointer type\n";
-      PointerType *t = dyn_cast<PointerType>(ty);
-      if(!t->getElementType()->isFunctionTy()) {
-        uint64_t value = bbOps.loadMem(address, DL->getTypeAllocSize(t->getElementType()), BB);
-        markMemNonConst(t->getElementType(), value, BB);
-      }
-   }
+  } else if(ty->isPointerTy()) {
+    debug(Yes) << *ty << " is of pointer type\n";
+    PointerType *t = dyn_cast<PointerType>(ty);
+    if(!t->getElementType()->isFunctionTy()) {
+      uint64_t value = bbOps.loadMem(address, DL->getTypeAllocSize(t->getElementType()), BB);
+      markMemNonConst(t->getElementType(), value, BB);
+    }
+  }
 }
 

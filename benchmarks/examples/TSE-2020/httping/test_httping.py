@@ -7,7 +7,7 @@ import os
 def main():
     # Note the -u here: essential for not buffering the stdout of the subprocess
     f = open('t_out','w')
-    proc = subprocess.Popen(['trimmer/work_dir/httping_fin_stripped', '-G','s','X','b','B','http://www.facebook.com'],
+    proc = subprocess.Popen(['trimmer/work_dir/httping_fin_stripped','http://www.facebook.com'],
                             stdout=f,
                             stderr=subprocess.STDOUT)
 
