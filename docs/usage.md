@@ -1,13 +1,10 @@
-Running Specialized Binaries
+Executing Specialized Binaries
 ===============
 
-With Static Arguments
-------------------
+Specialized binaries can be executed by passing the dynamic arguments in order:
 
-If all the command line arguments for an application are provided in the manifest file (i.e. there are no dynamic arguments) then the specialized binary is run without providing any arguments. For example, bzip2 in the Trimmer benchmarks is specialized with the following arguments: `"args": ["-fkqs", "huffman.c"]` (i.e. compress the file huffman.c). Subsequently, after specialization, bzip2 can be run by simply running: `./bzip2_fin` (where bzip2_fin is the specialized binary). This will compress the file huffman.c.
+`./specialized_binary_name [dynamic_arg_1] [dynamic_arg_2] ...`
 
+For example, aircrack in the TSE-2020 benchmarks is specialized with the following arguments:`"args": ["-b", "_","-a","wpa","-s","-w","password.lst","_"]`. The second and the last arguments are dynamic. The specialized binary can be executed for a particular bssid and cap file using `./aircrack_specialized 00:0D:93:EB:B0:8C wpa.cap`, where aircrack_specialized is the specialized binary, 00:0D:93:EB:B0:8C is the bssid (first dynamic argument), and wpa.cap is the cap file (second dynamic argument).
 
-With Dynamic Arguments
---------------------
-
-If at least one of the command line arguments for an application is kept dynamic in the manifest file, then all the arguments (static+dynamic) are required to be provided when running the specialized binary. For example, httping in the Trimmer benchmarks is specialized with the following arguments:`"args": ["-G","-s","-X","-b","-B","_"]`. The last argument here represents the website to ping and is left to be dynamic in this example. To run the specialized httping on a particular website (let's say google.com), we need to provide all the arguments (i.e. `httping_fin -G -s -X -b -B www.google.com`, where httping_fin is the specialized binary).
+Similarly, for specialized binaries that do not have any dynamic arguments, the binary can be executed without providing any arguments. For example, bzip2 in the TSE-2020 benchmarks is specialized with the following arguments: `"args": ["-fkqs", "huffman.c"]` (i.e. compress the file huffman.c). Subsequently, after specialization, bzip2 can be executed by simply running: `./bzip2_specialized` (where bzip2_fin is the specialized binary). This will compress the file huffman.c.
