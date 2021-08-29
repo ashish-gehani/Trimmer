@@ -26,7 +26,7 @@ test_compress:
 	@echo "\t\tTest Wget"
 	cp ${OUT_DIR}/work_dir/wget_fin_stripped ./ && \
 	./wget_fin_stripped --config=wgetrc https://releases.llvm.org/7.0.0/cfe-7.0.0.src.tar.xz && \
-	@echo "File Existence Check" && \
+	echo "File Existence Check" && \
 	test -f cfe-7.0.0.src.tar.xz && echo "\twget test file exist? Passed!" || echo "\twget test file exist? Failed!" 
 	
 	cp wgetrc ${WGET_NAME}/src 
@@ -34,7 +34,7 @@ test_compress:
 	./wget --config=wgetrc https://releases.llvm.org/7.0.0/cfe-7.0.0.src.tar.xz
 
 	echo "Output comparison to Baseline:"
-	@cmp -s ${WGET_NAME}/src/cfe-7.0.0.src.tar.xz ${OUT_DIR}/work_dir/cfe-7.0.0.src.tar.xz; \
+	@cmp -s ${WGET_NAME}/src/cfe-7.0.0.src.tar.xz cfe-7.0.0.src.tar.xz; \
 	RETVAL=$$?; \
 	if [ $$RETVAL -eq 0 ]; then \
 		echo "\twget test baseline compare? Passed!"; \
