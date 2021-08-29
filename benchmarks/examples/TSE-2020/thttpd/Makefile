@@ -53,7 +53,8 @@ test_thttpd:
 	sleep 1
 	cd ${THTTPD_NAME} && \
 	wget 127.0.0.1:8199/ 
-	@cmp -s ${THTTPD_NAME}/index.html index.html; \
+	cd ..
+	@cmp -s ${THTTPD_NAME}/index.html.1 index.html; \
 	RETVAL=$$?; \
 	if [ $$RETVAL -eq 0 ]; then \
 		echo "\tthttpd test baseline compare? Passed!"; \
