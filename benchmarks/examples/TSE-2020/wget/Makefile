@@ -25,7 +25,7 @@ compress: ${OUT_DIR}
 test_compress:
 	@echo "\t\tTest Wget"
 	cp ${OUT_DIR}/work_dir/wget_fin_stripped ./ && \
-	./wget_fin_stripped --config=wgetrc https://releases.llvm.org/7.0.0/cfe-7.0.0.src.tar.xz && \
+	./wget_fin_stripped https://releases.llvm.org/7.0.0/cfe-7.0.0.src.tar.xz && \
 	echo "File Existence Check" && \
 	test -f cfe-7.0.0.src.tar.xz && echo "\twget test file exist? Passed!" || echo "\twget test file exist? Failed!" 
 	
@@ -68,3 +68,4 @@ clean:
 	-rm *.bc
 	-rm -r ${OUT_DIR}
 	-rm *_bin *_stripped *.o
+	-rm cfe*.tar.xz*
