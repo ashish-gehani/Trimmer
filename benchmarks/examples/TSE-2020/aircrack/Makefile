@@ -29,7 +29,7 @@ aircrack: ${OUT_DIR}
 	@cp ${OUT_DIR}/password.lst ${OUT_DIR}/aircrack/ && \
 	cp ${OUT_DIR}/wpa.cap ${OUT_DIR}/aircrack/ 
 
-CHECK_AIRCRACK:= $(shell cd ${OUT_DIR}/aircrack && ./aircrack-ng_fin_stripped -b 00:0D:93:EB:B0:8C -a wpa -s -w password.lst wpa.cap | grep 'biscotte') 
+CHECK_AIRCRACK:= $(shell cd ${OUT_DIR}/aircrack && ./aircrack-ng_fin_stripped 00:0D:93:EB:B0:8C wpa.cap | grep 'biscotte') 
 
 test_aircrack_crack:
 	@echo "\t\tTest Aircrack-ng"

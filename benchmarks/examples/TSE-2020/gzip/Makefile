@@ -29,7 +29,7 @@ test_compress:
 	@# Testing if compressed file produced
 	@cp huffman.c ${OUT_DIR}/work_dir && \
 	cd ${OUT_DIR}/work_dir && \
-	./gzip_fin_stripped --force --quiet huffman.c && \
+	./gzip_fin_stripped huffman.c && \
 	test -f huffman.c.gz && echo "\tgzip test compress file exist? Passed!" || echo "gzip test compress file exist? Failed!" 
 	@echo "Comparing File Sizes:"
 	@# Printing File sizes

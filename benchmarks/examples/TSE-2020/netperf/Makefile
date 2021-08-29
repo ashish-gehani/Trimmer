@@ -44,7 +44,7 @@ ${NETPERF_BITCODE}: ${NETPERF_NAME}
 test_netperf:
 	@echo "\t\tTest netperf"  
 	${NETPERF_NAME}/src/netserver && \
-	${OUT_DIR}/work_dir/netperf_fin_stripped -H localhost -t TCP_RR > t_out && \
+	${OUT_DIR}/work_dir/netperf_fin_stripped localhost > t_out && \
 	@grep -q 'TCP REQUEST/RESPONSE TEST' t_out; \
         RETVAL=$$?; \
         if [ $$RETVAL -eq 1 ]; then \

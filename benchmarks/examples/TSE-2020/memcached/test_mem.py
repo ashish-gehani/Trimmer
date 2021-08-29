@@ -6,14 +6,12 @@ import os
 
 def main():
     # Note the -u here: essential for not buffering the stdout of the subprocess
-    proc = subprocess.Popen(['trimmer/mem/memcached_fin_stripped','-m','64','-l','127.0.0.1'],
+    proc = subprocess.Popen(['trimmer/mem/memcached_fin_stripped','64','127.0.0.1'],
                             stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT)
 
     try:
         time.sleep(15)
-        #resp = urllib.request.urlopen('http://localhost:8070/o_out')
-        #resp1 = urllib.request.urlopen('http://localhost:8070/a.html')
         f = open('t_out','w')
         proc1 = subprocess.call(['memcslap','-s','127.0.0.1' ],stdout=f)
         f.close()
