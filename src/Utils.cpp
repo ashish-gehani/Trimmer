@@ -29,7 +29,6 @@ Function *cloneFunc(Function *F, ValueToValueMapTy& vmap) {
   ClonedCodeInfo info;
   string name = F->getName().str();
   Function * clonedFunc = llvm::CloneFunction(F, vmap, &info);
-  // F->getParent()->getFunctionList().push_back(clonedFunc);
   clonedFunc->setName(StringRef(name + "_clone")); 
   return clonedFunc;
 }

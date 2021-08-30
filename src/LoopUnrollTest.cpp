@@ -29,7 +29,6 @@ LoopUnrollTest::LoopUnrollTest(Loop * L, Module * module, bool tripCount, bool i
     BasicBlock * BB = ExitBlocks[i];
     Instruction *I = testCall->clone();
     I->insertBefore(firstInst(BB));
-    //instrumented.push_back(I);
   }
   testCall->dropAllReferences();
   BasicBlock * latchBB = L->getLoopLatch();

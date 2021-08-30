@@ -63,7 +63,6 @@ bool LoopUnroller::shouldSimplifyLoop(BasicBlock *BB, LoopInfo &LI, Module *m, b
   if(useAnnotations && !checkUnrollHint(BB, LI, m))
     return false;
   //expectation in loop rotated form
-  //return true;
   Loop *L = LI.getLoopFor(BB);
   BasicBlock* preheader = L->getLoopPreheader();
   auto terminator = preheader->getTerminator();
