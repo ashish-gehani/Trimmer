@@ -1281,21 +1281,6 @@ void AnnotateNew::getBranchMemory(set<BranchInst *> &allBranches, map<Value *, s
       if(!pointers.size())
         continue;
 
-      if(auto user = dyn_cast<User>(inst))
-      if(auto global = pointsToGlobal(user)) {
-      allocs.insert(global);
-      return true;
-      }
-
-      if(auto call = dyn_cast<CallInst>(inst))
-      if(call->getCalledFunction()->getName() == "malloc")
-      return true;
-      }
-      }
-      return false;
-      };
-      */
-
       set<SVFGNode*> svfgNodes;
       //track back to alloca
       for(auto value: pointers) {
