@@ -1015,7 +1015,7 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
   Value *offsetVal = gi->getOperand(1);
   Register *regOffset = processInstAndGetRegister(offsetVal);
 
-  if((/*useRegOffset && */ !isConst  && !regOffset) /*|| (!useRegOffset && !isConst)*/) {
+  if((!isConst  && !regOffset)) {
     //TODO recursively mark memory non constant
     debug(Yes) << "GepInst : offset not constant\n";
     bbOps.setConstContigous(false, reg->getValue(), currBB);
@@ -1034,7 +1034,7 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
   }
   uint64_t val;
 
-  if(/*useRegOffset &&*/ regOffset && !isConst){
+  if(regOffset && !isConst){
     val = reg->getValue() + regOffset->getValue();
     debug(Yes)<<"Register Offset value: "<<regOffset->getValue()<<"\n";
   } else { 
@@ -1940,17 +1940,6 @@ void ConstantFolding::propagateArgs(CallInst *ci, Function *toRun) {
       arg++, index++) {
     Value * callerVal = ci->getOperand(index);
     Value * calleeVal = getArg(toRun, index);
-    /*if(callerVal->getType() != calleeVal->getType()){
-       debug(Yes)<< " type mismatched\n";
-       IRBuilder<> Builder(ci);
-       Value* BitcastInst = Builder.CreateBitCast(callerVal, calleeVal->getType());
-       ci->setOperand(index,BitcastInst);
-       Register * reg = processInstAndGetRegister(callerVal);
-       regOps.addRegister(BitcastInst, BitcastInst->getType(), reg->getValue(), reg->getTracked());
-       replaceOrCloneRegister(calleeVal, BitcastInst);
-       continue;
-       
-    }*/
     replaceOrCloneRegister(calleeVal, callerVal);
   }
 }

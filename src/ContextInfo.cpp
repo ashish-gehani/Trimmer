@@ -9,7 +9,6 @@ to the context information of the Basic Block it is equal to (if it is).*/
 ContextInfo::ContextInfo() {
   deleted = false;
   imageOf = NULL;
-  //memory = new Memory(NULL);
 }
 
 ContextInfo::ContextInfo(Module * M) {

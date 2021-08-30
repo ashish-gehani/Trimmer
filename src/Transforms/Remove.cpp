@@ -48,7 +48,6 @@ namespace {
           }
         }
       }
-      // errs() << toRemove.size() << " removed\n";
       for(unsigned i = 0; i < toRemove.size(); i++)
         toRemove[i]->eraseFromParent();
       if(annotVar)
