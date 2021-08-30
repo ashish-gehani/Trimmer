@@ -113,7 +113,6 @@ void ConstantFolding::getAnalysisUsage(AnalysisUsage &AU) const {
   AU.addRequiredID(LCSSAID);
   AU.addPreservedID(LCSSAID);
   AU.addRequired<ScalarEvolutionWrapperPass>();
-  // AU.addPreserved<ScalarEvolutionWrapperPass>();
   AU.addRequired<TargetTransformInfoWrapperPass>();
   // FIXME: Loop unroll requires LCSSA. And LCSSA requires dom info.
   // If loop unroll does not preserve dom info then LCSSA pass on next
@@ -203,8 +202,6 @@ void ConstantFolding::runOnInst(Instruction * I) {
     result = processPtrToIntInst(ptrinst);
   } else if(ExtractValueInst *ev = dyn_cast<ExtractValueInst>(I)) {
     result = handleExtractValue(ev);
-    //else if(PtrToIntInst *ptr = dyn_cast<PtrToIntInst>(I)) {
-    //result = processPtrToInt(ptr);  }
   } else if(IntToPtrInst *inst = dyn_cast<IntToPtrInst>(I)) {
     result = processIntToPtr(inst);  
   } else {
@@ -287,7 +284,6 @@ bool ConstantFolding::isLoopTest() {
    After completing execution of the function, the context before the function call
    will be replaced by the context at the return Instruction of the callee
    */
-//BasicBlock* previousBB;
 std::vector<BasicBlock *> callStack;
 void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
   debug(Yes)<<"runOnFunction: "<<toRun->getName()<<"\n";
@@ -317,8 +313,6 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
   Function * temp = currfn;
   BasicBlock *tempBB  = currBB; //preserve across recursion of this function
   currfn = toRun; //update to callee
-  //BasicBlock* oldPrevious = previousBB;
-  //previousBB = currBB;
 
   BasicBlock * entry = &toRun->getEntryBlock();
 
@@ -326,8 +320,6 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
   addToWorklistBB(entry);
 
   while(worklistBB[worklistBB.size() - 1].size()) {
-    //debug(Yes)<<"# WorkList: "<<currfn->getName()<<"\n";
-
     if(exit)
       return;
 
@@ -448,7 +440,6 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
 
   debug(Yes)<<"runOnFunction(): worklist has ended...\n";
   stats.functionReturn();
-  //previousBB = oldPrevious;
   callStack.pop_back();
 
   currBB = tempBB;
@@ -645,9 +636,6 @@ set<GlobalVariable *> ConstantFolding::dfs(CallGraphNode *root, map<Function *, 
     for(auto &func: cycleFunctions)
       modSet[func].insert(newCycle->values.begin(), newCycle->values.end());
 
-    //for(auto &cycle: oldCycles)
-    //delete cycle;
-
     //update cycle reference
     for(auto &func: cycleFunctions)
       cycles[func] = newCycle;
@@ -674,7 +662,6 @@ set<GlobalVariable *> ConstantFolding::dfs(CallGraphNode *root, map<Function *, 
     set<GlobalVariable *> childData = dfs(called, modSet, openNodes, recStack, cycles);
 
     data.insert(childData.begin(), childData.end());
-    //if(calledNode.second->getFunction())
   }
 
   openNodes.erase(F);
@@ -685,7 +672,6 @@ set<GlobalVariable *> ConstantFolding::dfs(CallGraphNode *root, map<Function *, 
 }
 
 set<GlobalVariable *> &ConstantFolding::getFuncModset(Function *F) {
-  //assert(modSet.find(F) != modSet.end());
   if(modSet.find(F) != modSet.end())
     return modSet[F];
   else {
@@ -726,24 +712,6 @@ void ConstantFolding::collectCallGraphGlobals(CallGraph *CG) {
   set<Function *> openNodes_two;
 }
 
-/*
-   ProcResult ConstantFolding::processPtrToInt(PtrToIntInst *pi) {
-   Value *pointer = pi->getPointerOperand();
-   Register *reg = processInstAndGetRegister(pointer);
-
-   if(!reg) {
-   debug(Yes) << "failed to fold pointer inst. Register not found\n";
-   return NOTFOLDED;
-   }
-
-//PtrToIntInst *clone = cast<PtrToIntInst>(pi->clone());
-ConstantInt *constantPtr = cast<ConstantInt>(ConstantInt::get(pi->getType(), reg->getValue()));
-
-debug(Yes) << "trying to fold " << *constantPtr<< "\n";
-addSingleVal(pi, constantPtr->getZExtValue(), true, true);
-return FOLDED;
-}
-*/
 /**
  * Process Alloca Instructions:
  * ty * %a = ty
@@ -765,13 +733,10 @@ ProcResult ConstantFolding::processAllocaInst(AllocaInst * ai) {
 }
 
 /*
- * Review: 
  * Process Malloc Instruction :
  * %a = malloc ty1, uint %b
  * If the size of the malloc call (i.e. %b) is constant, tracks the malloc call by 
- * allocation memory of size %b in the shadow heap memory 
- * 
- * Old comment: Process Malloc Instructions: Allocate heap memory
+ * allocating memory of size %b in the shadow heap memory 
  */
 ProcResult ConstantFolding::processMallocInst(CallInst * mi) {  
 
@@ -833,12 +798,6 @@ ProcResult ConstantFolding::processBitCastInst(BitCastInst * bi) {
   Value * ptr = bi->getOperand(0);
   Register * reg = processInstAndGetRegister(ptr);
   if(!reg) {
-    //try function
-    /*if(dyn_cast<Function>(ptr)) {
-      addSingleVal(bi, (uint64_t) ptr, false, true);
-      debug(Yes)<<"in bitcast inst\n";
-      return NOTFOLDED;
-    }*/
     debug(Yes) << "BitCastInst : Not found in Map\n";
     return NOTFOLDED;
   }
@@ -954,7 +913,6 @@ Value *ConstantFolding::getLoadSource(LoadInst* LI){
         }
       }
       debug(Yes)<<"\nMoving to next iteration\n";
-      //foundSource = true;
     } else {
       debug(Yes)<<"ELSE CASE\n";
       debug(Yes)<<*(processing->getType())<<"\n";
@@ -1722,7 +1680,6 @@ bool ConstantFolding::handleOverFlowInst(CallInst *callInst) {
     uint64_t val = ((uint64_t)answer << 32);
     debug(Yes) << "adding single value " <<  answer << " shifted " << val << "\n";
     regOps.addRegister(callInst, llvm::IntegerType::getInt64Ty(module->getContext()), val, true);
-    //addSingleVal(callInst, val, false, true);
     return true;
   }
   return false;
@@ -1850,7 +1807,6 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
         markGlobAsNonConst(calledFunction);
 
 
-        //clonedInst->getCalledFunction()->dropAllReferences();
         delete clonedInst;
 
 
@@ -1907,7 +1863,6 @@ string ConstantFolding::removeCloneName(string name) {
 
 
 bool ConstantFolding::exceedClone(string name, int level){
-  //debug(Yes)<<"exceedClone invoked on: "<<name<<" and level: "<<level<<"\n";
   size_t pos = name.find("_clone.");
 
   if(pos == string::npos){
@@ -1942,12 +1897,10 @@ bool ConstantFolding::exceedClone(string name, int level){
 }
 
 /* 
-* Review:
 * Checks if the depth of code recursion has exceeded a maximum value. Returns true if the
 * maximum depth has been exceeded, false otherwise. The default limit for recursion
-* depth is set to 5. 
-* 
-* Old comment: If recursion is not folding within 5 recursive function calls, do not further specialize the call site.
+* depth is set to 5 (i.e. If recursion is not folding within 5 recursive function calls, 
+* do not further specialize the call site.)
 */
 bool ConstantFolding::exceedsRecursion(Function *called, Function *callee) {
   string calledName = removeCloneName(called->getName().str());
@@ -2021,7 +1974,6 @@ bool ConstantFolding::cloneRegister(Value * from, Value * with) {
   }
   pushFuncStack(from);
 
-  //addSingleVal(with, val, true, true);
   regOps.addRegister(from, from->getType(), val, true);
   return true;
 }
@@ -2175,7 +2127,6 @@ void ConstantFolding::initializeGlobal(uint64_t addr, Constant * CC) {
   } else {
     for(unsigned i = 0; i < CC->getNumOperands(); i++) {
       Constant * CGI = CC->getAggregateElement(i);
-      //debug(Yes) << "CGI: " << *CGI << "\n CC: " << *CC << "\n";
       if(!CGI) {
         debug(Yes) << "initializeGlobal: (Warning) aggregate element not found\n";
         return;
@@ -2200,7 +2151,6 @@ uint64_t ConstantFolding::addGlobal(GlobalVariable* gv){
   uint64_t size = DL->getTypeAllocSize(contTy);
   uint64_t addr = bbOps.allocateStack(size, currBB);
   debug(Yes) << "addGlobal : size " << size << " at address " << addr << "\n";
-  //pushFuncStack(gv);
   bool tracked = !!gv->getMetadata("track");
   regOps.addRegister(gv, contTy, addr, tracked);
 
@@ -2464,7 +2414,7 @@ bool ConstantFolding::satisfyConds(Function * F, CallInst *ci) {
     //if any argument is being tracked 
     for(unsigned i = 0; i < ci->getNumArgOperands(); i++) {
       Value *argument = ci->getArgOperand(i);
-      if(Register *reg = processInstAndGetRegister(argument)) { //dyn_cast<Constant>(argument) || 
+      if(Register *reg = processInstAndGetRegister(argument)) { 
         if(reg->getTracked()) {
           debug(Yes) << "(LOG) (SATISFYCONDS) Call " << *ci 
                      << " satisfied specializing conditions due to argument " 
@@ -2628,15 +2578,12 @@ void ConstantFolding::replaceIfNotFD(Value * from, Value * to) {
   if(Register *reg = regOps.getRegister(from))
     if(reg->getTracked()) 
       debug(Yes) << "replaced with " << *to << "\n";
-  //if(Instruction * I = dyn_cast<Instruction>(from))
-  //updateLoopCost(FOLDED, I);
 }
 
 Function *ConstantFolding::simplifyCallback(CallInst * callInst) {
   Register * reg = processInstAndGetRegister(callInst->getCalledValue());
   if(!reg) return NULL;
   Function * calledFunction = (Function *) reg->getValue();
-  //auto CE = dyn_cast<ConstantExpr>(callInst->getCalledValue());
   callInst->setCalledFunction(calledFunction);
   debug(Yes) << "set called Function to " << calledFunction->getName() << "\n";
   return calledFunction;
@@ -2839,7 +2786,6 @@ bool ConstantFolding::handleStrSep(CallInst *callInst) {
     debug(Yes) << "after storing null: " << bbOps.loadMem(reg1->getValue(), DL->getPointerSize(), currBB) << "\n";
     debug(Yes) << "storing null" << "\n";
   }
-  //addSingleVal(arg1, reg1->getValue() + (stringpCopy - stringp), true, true); //@TODO memory leak for register overwriting
   debug(Yes) << "strsep: returned " << result << "\n";
   return true;
 }
@@ -4551,7 +4497,6 @@ bool ConstantFolding::handleLongArgs(CallInst * callInst, option * long_opts,
   debug(Yes)<<"i: "<<i<<"\n";
   Value * indexVal = callInst->getOperand(4);
   debug(Yes) << indexVal << " indexVal printing" << "\n";
-  //debug(Yes) << *indexVal << "\n";
   if(dyn_cast<ConstantPointerNull>(indexVal)) {
     debug(Yes)<<"indexVal is a Constant Pointer Null\n";
     long_index = NULL;
@@ -4621,10 +4566,6 @@ bool ConstantFolding::handleGetOpt(CallInst * ci) {
     debug(Yes) << "case not handled " << name << "\n";
     return true;
   }
-
-  //custom getopt implementations
-  //if(!ci->getCalledFunction()->isDeclaration())
-  //return false;
 
   uint64_t argc;
   Register * argvReg = processInstAndGetRegister(ci->getOperand(1));
@@ -4815,7 +4756,6 @@ LoopUnroller *ConstantFolding::unrollLoop(BasicBlock * BB, BasicBlock *&entry) {
 }
 
 Loop *ConstantFolding::isLoopHeader(BasicBlock *BB, LoopInfo &LI) {
-  //debug(Yes)<<"isLoopHeader invoked for BB:"<<*BB<<"\n";
   if(!bbOps.partOfLoop(BB)) {
     return NULL; 
   }
@@ -4838,7 +4778,6 @@ void ConstantFolding::duplicateContext(BasicBlock * to, BasicBlock *from) {
 
 void ConstantFolding::pushFuncStack(Value *val) {
   assert(val);
-  //assert(funcValStack.size());
   if(funcValStack.size())
     funcValStack[funcValStack.size() - 1].insert(val);
 }
@@ -4877,7 +4816,6 @@ Register *ConstantFolding::processInstAndGetRegister(Value *ptr) {
 
 void ConstantFolding::addToWorklistBB(BasicBlock *BB) {
   assert(BB->getParent() == currfn);
-  //if(BB->getParent() != currfn)
   worklistBB[worklistBB.size()-1].push_back(BB);
 }
 
@@ -4885,7 +4823,6 @@ void ConstantFolding::copyWorklistBB(ValueToValueMapTy& vmap, vector<BBList> &wo
   int oldSize = worklistBB.size() - 2;
   for(auto it = worklistBB[oldSize].begin(), end = worklistBB[oldSize].end(); it != end; it++) {
     addToWorklistBB(dyn_cast<BasicBlock>(vmap[*it]));
-    //worklistBB[worklistBB.size() - 1].push_back(dyn_cast<BasicBlock>(vmap[*it]));
   }
 }
 
