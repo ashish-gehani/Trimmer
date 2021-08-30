@@ -69,7 +69,7 @@ test:
 	@# Testing if compressed file produced
 	@cp ${IMG_MAGICK}/images/smile.gif ./ && \
         cp ${OUT_DIR}/work/magick_fin_stripped ./ && \
-        ./magick_fin_stripped convert -negate smile.gif negate_trimmer.gif && \
+        ./magick_fin_stripped -negate smile.gif negate_trimmer.gif && \
         test -f negate_trimmer.gif && echo "\ttest file exist? Passed!" || echo "\ttest file exist?  Failed!" 
 
 	@${IMG_MAGICK_INSTALL}/bin/magick convert -negate smile.gif negate_magick.gif
