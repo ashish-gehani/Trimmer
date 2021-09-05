@@ -1755,9 +1755,7 @@ Function *createFunction(Type *returnType, vector<Type*> &args, bool isVarArg, c
 double statFormula(Stat *a) {
   return a->stores.size() * 0.0 + a->loads.size() * 1.0;
 }
-/**
- * TODO add preserves information
- */
+
 bool AnnotateNew::runOnModule(Module &M) {
   auto started = std::chrono::high_resolution_clock::now();
   initDebugLevel();
