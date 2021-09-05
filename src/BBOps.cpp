@@ -207,7 +207,7 @@ void BBOps::freeBB(BasicBlock * BB) {
   ContextInfo * ci = BasicBlockContexts[BB];
   if(ci->deleted)
     return;
-  if(ci->imageOf) // Todo : not efficient we should be able to delete it midway
+  if(ci->imageOf)
     return;
   TerminatorInst * ti = BB->getTerminator();
   for(unsigned i = 0; i < ti->getNumSuccessors(); i++) {
@@ -476,7 +476,6 @@ void BBOps::copyContexts(Function *to, Function *from, ValueToValueMapTy& vmap, 
     if(!oldCi->imageOf)
       continue;
 
-    //TODO do this a better way
     BasicBlock *temp = NULL;
     for(auto itB = BasicBlockContexts.begin(), endB = BasicBlockContexts.end(); itB != endB; itB++) {
       if(itB->second == oldCi->imageOf) {//find BB which this is image of
