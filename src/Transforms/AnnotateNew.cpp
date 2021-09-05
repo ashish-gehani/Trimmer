@@ -412,8 +412,8 @@ set<SVFGNode*> *AnnotateNew::dfs_rec_limit(SVFGNode* root, std::function<vector<
 }
 
 set<Value*> *AnnotateNew::dfs_rec(Value* root, std::function<vector<Value*> (Value*)> nextNodes, std::function<bool (Value *)> condition, set<Value *> &visited, map<Value *, set<Value *>* > *dpData, bool trackLoops) {
-  //static map<T, set<T>* > dpData;
-  dpData = NULL; //FIXME
+ 
+  dpData = NULL; 
   if(visited.find(root) != visited.end()) {
     if(dpData) {
       assert(dpData->find(root) != dpData->end());
@@ -830,7 +830,6 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
         }
 
         //check if involved in any strcpy or strncpy
-        //TODO this is a hack, and can be imporved by checking formalin at any callsite
         for(auto &call: calls) {
           bool found = false;
           for(unsigned i = 0; i < call->getNumOperands(); i++) { 
@@ -869,9 +868,6 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
         if(isMemTransfer(casted->getInst()))
           return true;
 
-      if(casted->getInst() && dyn_cast<BranchInst>(casted->getInst())) {
-        assert(false); //TODO remove?
-      }
     }
     return false;
   };
@@ -933,7 +929,6 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
         }
 
         //check if involved in any strcpy or strncpy
-        //TODO this is a hack, and can be imporved by checking formalin at any callsite
         for(auto &call: calls) {
           bool found = false;
           for(unsigned i = 0; i < call->getNumOperands(); i++) { 
@@ -949,7 +944,7 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
               if(!call->getOperand(i)->getType()->isPointerTy())
                 continue;
               debug(Yes)<<"Adding to storeSet "<<*call->getOperand(i)<<"\n";
-              auto *pagNode = pag->getPAGNode((pag->getValueNode(call->getOperand(i)))); // [Q] Tracking all pointer operands???
+              auto *pagNode = pag->getPAGNode((pag->getValueNode(call->getOperand(i)))); // Tracking all pointer operands
               storeSvfg.insert((SVFGNode*) svfg->getDefSVFGNode(pagNode)); //[Q] InterProceduralFlow limiting? (Within same function. Is it valid?
               //If original flow is considered then this should also?
             }
@@ -972,9 +967,7 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
         if(isMemTransfer(casted->getInst()))
           return true;
 
-      if(casted->getInst() && dyn_cast<BranchInst>(casted->getInst())) {
-        assert(false); //TODO remove?
-      }
+      
     }
     return false;
   };
@@ -1139,13 +1132,7 @@ void AnnotateNew::getScalarStores(Value *scalar, set<Value*>& stores) {
         stores.insert(user);
       }
 
-      //TODO can we skip this? Since if a scalar has a memory value,
-      //there must always be a load in it's chain, making this gep redundant?
-      //Can there be a gep in its chain without a load?
-      //if(dyn_cast<GetElementPtrInst>(user))
-      //stores.insert(user);
-      //assert(false);
-
+      
       worklist.push_back(user);
     }
   }
@@ -1577,6 +1564,11 @@ void AnnotateNew::run(vector<Value*> sources, Value *argc, set<const Value*> &tr
 
   set<BranchInst*> argcBranches;
   //getBranchMemory(allBranches, branchDp, argcBranches);
+    
+    if(argcBranches.size()) {
+      debug(Yes)<<"HACKY argcBranches executes\n";
+      trackedBranches.insert(argcBranches.begin(), argcBranches.end());
+    }
 
   //getArgc(trackedAllocas, M); 
 
@@ -1640,12 +1632,7 @@ void AnnotateNew::run(vector<Value*> sources, Value *argc, set<const Value*> &tr
     set<BranchInst*> trackedBranches; 
     getTaintedBranches(trackedBranches, branchDp, trackedAllocas);
 
-    //TODO this runs only for the first iteration really. Hacky. fix this
-    if(argcBranches.size()) {
-      debug(Yes)<<"HACKY argcBranches executes\n";
-      trackedBranches.insert(argcBranches.begin(), argcBranches.end());
-      argcBranches.clear();
-    }
+    
 
     debug(Yes) << "Tracked Branches size: " << trackedBranches.size() << "\n";
     if(!trackedBranches.size())
@@ -1992,5 +1979,11 @@ bool AnnotateNew::runOnModule(Module &M) {
     AU.addRequired<TargetLibraryInfoWrapperPass>();
     AU.addRequired<DominatorTreeWrapperPass>();
     AU.addRequired<PostDominatorTreeWrapperPass>();
+    AU.addPreserved<LoopInfoWrapperPass>();
+    AU.addPreserved<ScalarEvolutionWrapperPass>();
+    AU.addPreserved<TargetLibraryInfoWrapperPass>();
+    AU.addPreserved<DominatorTreeWrapperPass>();
+    AU.addPreserved<PostDominatorTreeWrapperPass>();
+
   }
 
