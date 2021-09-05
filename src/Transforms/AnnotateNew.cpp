@@ -1342,7 +1342,6 @@ void AnnotateNew::getBranchMemory(set<BranchInst *> &allBranches, map<Value *, s
       //set<SVFGNode*> poss;
 
       //condition for when a branch instruction is of our use.
-      //FIXME uses allocs directly
       /*
          auto conditionLambda = [&](SVFGNode *node) {
          if(auto temp = dyn_cast<StmtSVFGNode>(node)) {
@@ -1561,7 +1560,12 @@ void AnnotateNew::run(vector<Value*> sources, Value *argc, set<const Value*> &tr
 
   set<BranchInst*> argcBranches;
   //getBranchMemory(allBranches, branchDp, argcBranches);
-    
+  set<BranchInst*> trackedBranches; 
+
+    if(argcBranches.size()) {
+      debug(Yes)<<"HACKY argcBranches executes\n";
+      trackedBranches.insert(argcBranches.begin(), argcBranches.end());
+    }  
     
   //getArgc(trackedAllocas, M); 
 
@@ -1622,14 +1626,7 @@ void AnnotateNew::run(vector<Value*> sources, Value *argc, set<const Value*> &tr
 
 
     //get all branch instructions touching tainted data
-    set<BranchInst*> trackedBranches; 
     getTaintedBranches(trackedBranches, branchDp, trackedAllocas);
-
-    if(argcBranches.size()) {
-      debug(Yes)<<"HACKY argcBranches executes\n";
-      trackedBranches.insert(argcBranches.begin(), argcBranches.end());
-      argcBranches.clear();
-    }
 
 
     debug(Yes) << "Tracked Branches size: " << trackedBranches.size() << "\n";
@@ -1659,6 +1656,8 @@ void AnnotateNew::run(vector<Value*> sources, Value *argc, set<const Value*> &tr
      * 5) handle phi nodes
      * 6) handle scalars
      */
+      
+    trackedBranches.clear();  
     if(markedBBs.size()) {
       set<SVFGNode*> backwardPtr;
       set<Value *> scalars; //scalars
