@@ -1145,8 +1145,6 @@ void trackIfMemory(const SVFGNode* current, set<const Value*> &trackedAllocas) {
   if(auto casted = dyn_cast<StmtSVFGNode>(current)) {
     if(casted->getInst()) {
       auto inst = casted->getInst();
-      //TODO remove this debug statement
-      //debug(Yes) << "Going forward on Instruction : " << *inst << " in function " <<  inst->getParent()->getParent()->getName() << "\n";
 
       if(dyn_cast<AllocaInst>(casted->getInst()) || dyn_cast<GlobalValue>(casted->getInst()))
         trackedAllocas.insert(casted->getInst());
@@ -1268,7 +1266,6 @@ void AnnotateNew::getBranchMemory(set<BranchInst *> &allBranches, map<Value *, s
     if(branchInst->isUnconditional())
       continue;
 
-    //TODO ?
     CmpInst *condition = dyn_cast<CmpInst>(branchInst->getCondition());
     if(!condition)
       continue;
@@ -1565,11 +1562,7 @@ void AnnotateNew::run(vector<Value*> sources, Value *argc, set<const Value*> &tr
   set<BranchInst*> argcBranches;
   //getBranchMemory(allBranches, branchDp, argcBranches);
     
-    if(argcBranches.size()) {
-      debug(Yes)<<"HACKY argcBranches executes\n";
-      trackedBranches.insert(argcBranches.begin(), argcBranches.end());
-    }
-
+    
   //getArgc(trackedAllocas, M); 
 
   while(1) {
@@ -1632,7 +1625,12 @@ void AnnotateNew::run(vector<Value*> sources, Value *argc, set<const Value*> &tr
     set<BranchInst*> trackedBranches; 
     getTaintedBranches(trackedBranches, branchDp, trackedAllocas);
 
-    
+    if(argcBranches.size()) {
+      debug(Yes)<<"HACKY argcBranches executes\n";
+      trackedBranches.insert(argcBranches.begin(), argcBranches.end());
+      argcBranches.clear();
+    }
+
 
     debug(Yes) << "Tracked Branches size: " << trackedBranches.size() << "\n";
     if(!trackedBranches.size())
