@@ -2852,7 +2852,6 @@ bool ConstantFolding::handleStrSep(CallInst *callInst) {
     debug(Yes) << "after storing null: " << bbOps.loadMem(reg1->getValue(), DL->getPointerSize(), currBB) << "\n";
     debug(Yes) << "storing null" << "\n";
   }
-  //addSingleVal(arg1, reg1->getValue() + (stringpCopy - stringp), true, true); //@TODO memory leak for register overwriting
   debug(Yes) << "strsep: returned " << result << "\n";
   return true;
 }
