@@ -24,7 +24,7 @@ import commands as cmd
 
 verbose = False
 # named tuple for trimmer stats
-trimmer_stats = collections.namedtuple('TrimmerStats', 'funcs insts mem_insts bin_size')
+trimmer_stats = collections.namedtuple('TrimmerStats', 'funcs insts mem_insts bin_size test_status')
 
 def get_trimmer_home():
     path = os.environ.get('TRIMMER_HOME')
@@ -57,6 +57,7 @@ def get_benchmarks(name):
 def read_trimmer_output(logfile):
     b_funcs, b_insts, b_mem, b_size = 0, 0, 0, 0
     a_funcs, a_insts, a_mem, a_size = 0, 0, 0, 0
+    testStatus = "Failed"
     before_done = False    
     with open(logfile, 'r') as fd:
         for line in fd:
@@ -86,9 +87,12 @@ def read_trimmer_output(logfile):
                     b_size = n
                 else:
                     a_size = n
+            if re.search('Passed', line):
+                testStatus = "Passed"
 
-    before = trimmer_stats(funcs=b_funcs, insts=b_insts, mem_insts=b_mem, bin_size=b_size)
-    after = trimmer_stats(funcs=a_funcs, insts=a_insts, mem_insts=a_mem, bin_size=a_size)
+
+    before = trimmer_stats(funcs=b_funcs, insts=b_insts, mem_insts=b_mem, bin_size=b_size, test_status=testStatus)
+    after = trimmer_stats(funcs=a_funcs, insts=a_insts, mem_insts=a_mem, bin_size=a_size, test_status="NA")
     fd.close()
     return (before, after)
 
@@ -122,6 +126,7 @@ def pretty_printing_trimmer(results):
         if (before.mem_insts > 0):
             mem_red = (1.0 - (float(after.mem_insts) / float(before.mem_insts))) * 100.0
         tab.append([benchmark,
+                    before.test_status,
                     before.bin_size,
                     after.bin_size,
                     float("{0:.2f}".format(bin_red)),
@@ -136,6 +141,7 @@ def pretty_printing_trimmer(results):
                     float("{0:.2f}".format(mem_red))])
 
     table = [["Program", \
+              "Test", \
               "B Size", "A Size", "% Size Red", \
               "B Fun", "A Fun", "% Fun Red", \
               "B Ins", "A Ins", "% Ins Red", \
@@ -412,3 +418,4 @@ if __name__ == '__main__':
         pass
     finally:
         sys.exit(res)
+
