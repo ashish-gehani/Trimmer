@@ -89,6 +89,8 @@ def read_trimmer_output(logfile):
                     a_size = n
             if re.search('Passed', line):
                 testStatus = "Passed"
+            if re.search('Not Available', line):
+                testStatus = "Unavailable"
 
 
     before = trimmer_stats(funcs=b_funcs, insts=b_insts, mem_insts=b_mem, bin_size=b_size, test_status=testStatus)

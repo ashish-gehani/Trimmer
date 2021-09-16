@@ -17,3 +17,5 @@ opt -load ../libProfilerPass.so -Pprofiler < airtun-ng_opt3.bc > /dev/null
 bin_size_after=$(ls -l trimmer/airtun/airtun-ng_fin_stripped | awk '{print $5}')
 
 echo "Binary Size ${bin_size_after}" >&2
+
+echo "Test: Not Available" >&2
