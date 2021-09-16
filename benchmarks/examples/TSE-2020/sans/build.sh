@@ -19,3 +19,8 @@ opt -load ../libProfilerPass.so -Pprofiler < sans_opt3.bc > /dev/null
 bin_size_after=$(ls -l trimmer/udp/sans_fin_stripped | awk '{print $5}')
 
 echo "Binary Size ${bin_size_after}" >&2
+
+test_status=$(make test_sans_udp | grep "Passed")
+
+echo "Test: ${test_status}" >&2
+

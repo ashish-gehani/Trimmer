@@ -18,3 +18,8 @@ opt -load ../libProfilerPass.so -Pprofiler < wget_linked_intern.bc > /dev/null
 bin_size_after=$(ls -l trimmer/work_dir/wget_fin_stripped | awk '{print $5}')
 
 echo "Binary Size ${bin_size_after}" >&2
+
+test_status=$(make test_compress | grep "Passed")
+
+echo "Test: ${test_status}" >&2
+

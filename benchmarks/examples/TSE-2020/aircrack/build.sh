@@ -19,3 +19,7 @@ opt -load ../libProfilerPass.so -Pprofiler < aircrack-ng_opt3.bc > /dev/null
 bin_size_after=$(ls -l trimmer/aircrack/aircrack-ng_fin_stripped | awk '{print $5}')
 
 echo "Binary Size ${bin_size_after}" >&2
+
+test_status=$(make test_aircrack_crack | grep "Passed")
+
+echo "Test: ${test_status}" >&2
