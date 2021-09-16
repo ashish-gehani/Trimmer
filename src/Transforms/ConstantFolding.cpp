@@ -394,7 +394,6 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
         toRun = currfn;
 
         LI = &getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();
-        //TODO hackish way of running on old failed loopHeader
         LoopUnroller::deleteLoop(failedLoop);
         runOnBB(failedLoop);
       }else {
@@ -459,9 +458,6 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
   if(!fi->context) {
     fi->context = bbOps.duplicateMem(currBB);
     debug(Yes) << "Unexpected behavior -> no context returned : possible if cant return from function, or unreachable instruction hit\n";
-    //TODO: Can we hit unreachable and exit, even if there's a return present?
-    //currfn = temp;
-    //return;
   }
   debug(Yes)<<"[Rafae] Copying Context for "<<toRun->getName()<<"\n";
   debug(Yes)<<"CurrBB: "<<*currBB<<"\n";
@@ -1345,8 +1341,7 @@ ProcResult ConstantFolding::processReturnInst(ReturnInst * retInst) {
 
    If the callInst is an external call, internal call that we dont visit or
    an indirect function call that we fail to simplify we mark all its input 
-   arguments as non constant
-TODO : we should mark the globals accessed by it as non constant.
+   arguments and all globals as non constant
 
 */
 void ConstantFolding::markGlobAsNonConst(Function *F) {
@@ -2683,8 +2678,7 @@ ProcResult ConstantFolding::processReallocInst(CallInst *ci) {
     debug(Yes) << "realloc: register not found or size not constant\n";
     return NOTFOLDED;
   }
-
-  //@TODO not going to actually realloc. just allocate more memory. Warning, memory leak
+    
   uint64_t addr = bbOps.allocateHeap(size->getZExtValue(), currBB);
   char *oldAddr = (char *) bbOps.getActualAddr(reg->getValue(), currBB);
   uint64_t size_old = bbOps.getSizeContigous(reg->getValue(), currBB);
