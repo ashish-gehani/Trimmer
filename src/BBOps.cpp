@@ -428,7 +428,7 @@ void BBOps::copyFuncBlocksInfo(Function * F, ValueToValueMapTy & vmap) {
         }
       }
 
-      //TODO do we need to recompute loopLatches?
+      //copy over loop latches
       for(auto it = bbi->loopLatchesWithEdge.begin(), end = bbi->loopLatchesWithEdge.end(); it != end; it++) {
         if(vmap.find(*it) == vmap.end()) {
             debug(Yes) << "BB not found :" << *it << "\n";
