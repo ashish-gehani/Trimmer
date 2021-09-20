@@ -1041,7 +1041,6 @@ void AnnotateNew::getSourceAllocas(set<SVFGNode*> &svfgNodes, vector<const SVFGN
           }
         }
 
-        //FIXME Use MemObj instead of pointer hack
         if(auto user = dyn_cast<User>(pagEdge->getInst())){
           if(auto global = pointsToGlobal(user)) {
             //worklistSvfg.push_back(getSvfgNode(global));
