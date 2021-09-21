@@ -36,16 +36,15 @@ test_mini:
 	wget 127.0.0.1:8199/ 
 	@cd ${OUT_DIR}/work_dir/ && \
 	echo '<HTML><HEAD><TITLE>Index of ./</TITLE></HEAD><BODY BGCOLOR="#99cc99" TEXT="#000000" LINK="#2020ff" VLINK="#4040cc"><H4>Index of ./</H4></HTML>' > workdir/index.html && \
-	./mini_httpd_fin  && \
+	./mini_httpd_fin && \
 	wget 127.0.0.1:8087/
 	@cmp -s ./index.html ${OUT_DIR}/work_dir/index.html; \
 	RETVAL=$$?; \
 	if [ $$RETVAL -eq 0 ]; then \
-		echo "\tmini_httpd test baseline compare? Passed!"; \
+		echo "\tmini_httpd test baseline compare? Passed!" >&2; \
 	else \
-		echo "\tmini_httpd test baseline compare? Failed!"; \
-	fi
-
+		echo "\tmini_httpd test baseline compare? Failed!" >&2; \
+	fi;
 
 ${MINI_HTTPD_BITCODE}: ${MINI_HTTPD_NAME}
 	cp ${MINI_HTTPD_PATCH} ${MINI_HTTPD_NAME} && \
@@ -75,4 +74,4 @@ clean:
 	-rm -r ${OUT_DIR}
 	-rm index.html*
 	-rm -r workdir
-	-rm *_bin *_stripped *.o
+	-rm *_bin *_stripped *.o *.PID

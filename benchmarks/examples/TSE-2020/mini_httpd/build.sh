@@ -18,7 +18,8 @@ bin_size_after=$(ls -l trimmer/work_dir/mini_httpd_fin_stripped | awk '{print $5
 
 echo "Binary Size ${bin_size_after}" >&2
 
-test_status=$(make test_mini | grep "Passed")
+make test_mini
+#test_status=$(make test_mini)
 
-echo "Test: ${test_status}" >&2
+#echo "Test: ${test_status}" >&2
 
