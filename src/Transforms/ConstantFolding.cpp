@@ -331,7 +331,7 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
     if(exit)
       return;
 
-    LoopInfo *LI= &getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo(); //TODO should not recalculate on each iteration
+    LoopInfo *LI= &getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo(); 
     debug(Yes)<<"LoopInfo NULL?: "<<(LI==NULL)<<"\n";
     int size = worklistBB.size() - 1;
     BasicBlock *current = worklistBB[size].back();
@@ -4912,7 +4912,7 @@ LoopUnroller *ConstantFolding::unrollLoopInClone(Function *currfn, Loop *L, Valu
   addFuncInfo(cloned, fi);
 
   LoopInfo *LI = unroller->getLoopInfo();
-  LI= &getAnalysis<LoopInfoWrapperPass>(*cloned).getLoopInfo(); //TODO should not recalculate on each iteration
+  LI= &getAnalysis<LoopInfoWrapperPass>(*cloned).getLoopInfo(); 
   debug(Yes) << "unrollLoopInClone: recomputing loop info \n";
   bbOps.recomputeLoopInfo(cloned, *LI, header);
 
