@@ -1468,7 +1468,7 @@ void AnnotateNew::getTrackedBranchBBs(BranchInst *I, set<BasicBlock *> &markedBB
 
   if(!join) {
     debug(Yes) << "Could not find join for branch " << *I << " in BB : " << *I->getParent() << "\n";
-    //assert(false); //FIXME
+    assert(false); 
     return;
   }
 
