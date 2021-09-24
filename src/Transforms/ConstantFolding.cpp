@@ -4718,8 +4718,18 @@ bool ConstantFolding::handleGetOpt(CallInst * ci) {
   int result;
   if(name == "getopt_long") { 
     debug(Yes)<<"handleGetOpt: getopt_long\n";
-    option * long_opts = (option *) malloc(sizeof(option) * 350); //@FIXME 350 is arbitrary for long opts length
     int * long_index;
+    Register * longReg = processInstAndGetRegister(ci->getOperand(3));
+    if(!longReg){
+       debug(Yes)<<"long options not found\n";
+       return true;
+     }
+    uint64_t longAddr = longReg->getValue();
+    unsigned size = bbOps.getSizeContigous(longAddr, currBB);
+    size = (size/32) + 10;
+    debug(Yes)<<"size of long options "<<size<<"\n";
+    option * long_opts = (option *) malloc(sizeof(option) * size); 
+
     if(!handleLongArgs(ci, long_opts, long_index))
       return true;
     debug(Yes)<<"Calling getopt_long_local\n";
