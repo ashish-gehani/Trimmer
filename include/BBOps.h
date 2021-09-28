@@ -67,7 +67,6 @@ public:
   Value * foldPhiNode(PHINode * phiNode, vector<Value*>&);
   BasicBlock * getRfromPred(BasicBlock * BB);
   void recomputeLoopInfo(Function * F, LoopInfo& LI, BasicBlock *);
-  /* todo : how to recompute ancestors */
   void copyFuncBlocksInfo(Function * F, ValueToValueMapTy & vmap);
 
   void createNewContext(BasicBlock * BB, Module *);

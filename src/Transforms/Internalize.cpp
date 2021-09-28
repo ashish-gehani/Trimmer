@@ -24,7 +24,6 @@ namespace {
     localizeLinkage(GlobalValue::LinkageTypes l)
     {
       switch (l) {
-	// TODO I'm not sure if all external definitions have an appropriate internal counterpart
       default:
 	return l;
       case GlobalValue::ExternalLinkage:

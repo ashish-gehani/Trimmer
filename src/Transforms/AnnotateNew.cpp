@@ -395,7 +395,8 @@ set<SVFGNode*> *AnnotateNew::dfs_rec_limit(SVFGNode* root, std::function<vector<
 }
 
 set<Value*> *AnnotateNew::dfs_rec(Value* root, std::function<vector<Value*> (Value*)> nextNodes, std::function<bool (Value *)> condition, set<Value *> &visited, map<Value *, set<Value *>* > *dpData, bool trackLoops) {
-  dpData = NULL; //FIXME
+ 
+  dpData = NULL; 
   if(visited.find(root) != visited.end()) {
     if(dpData) {
       assert(dpData->find(root) != dpData->end());
@@ -802,7 +803,6 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
         }
 
         //check if involved in any strcpy or strncpy
-        //TODO this is a hack, and can be imporved by checking formalin at any callsite
         for(auto &call: calls) {
           bool found = false;
           for(unsigned i = 0; i < call->getNumOperands(); i++) { 
@@ -840,9 +840,6 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
         if(isMemTransfer(casted->getInst()))
           return true;
 
-      if(casted->getInst() && dyn_cast<BranchInst>(casted->getInst())) {
-        assert(false); //TODO remove?
-      }
     }
     return false;
   };
@@ -892,7 +889,6 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
         }
 
         //check if involved in any strcpy or strncpy
-        //TODO this is a hack, and can be imporved by checking formalin at any callsite
         for(auto &call: calls) {
           bool found = false;
           for(unsigned i = 0; i < call->getNumOperands(); i++) { 
@@ -907,7 +903,7 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
               if(!call->getOperand(i)->getType()->isPointerTy())
                 continue;
               debug(Yes)<<"Adding to storeSet "<<*call->getOperand(i)<<"\n";
-              auto *pagNode = pag->getPAGNode((pag->getValueNode(call->getOperand(i)))); // [Q] Tracking all pointer operands???
+              auto *pagNode = pag->getPAGNode((pag->getValueNode(call->getOperand(i)))); // Tracking all pointer operands
               storeSvfg.insert((SVFGNode*) svfg->getDefSVFGNode(pagNode)); //[Q] InterProceduralFlow limiting? (Within same function. Is it valid?
               //If original flow is considered then this should also?
             }
@@ -930,9 +926,7 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
         if(isMemTransfer(casted->getInst()))
           return true;
 
-      if(casted->getInst() && dyn_cast<BranchInst>(casted->getInst())) {
-        assert(false); //TODO remove?
-      }
+      
     }
     return false;
   };
@@ -1005,7 +999,6 @@ void AnnotateNew::getSourceAllocas(set<SVFGNode*> &svfgNodes, vector<const SVFGN
           }
         }
 
-        //FIXME Use MemObj instead of pointer hack
         if(auto user = dyn_cast<User>(pagEdge->getInst())){
           if(auto global = pointsToGlobal(user)) {
             return true; 
@@ -1086,13 +1079,7 @@ void AnnotateNew::getScalarStores(Value *scalar, set<Value*>& stores) {
         stores.insert(user);
       }
 
-      //TODO can we skip this? Since if a scalar has a memory value,
-      //there must always be a load in it's chain, making this gep redundant?
-      //Can there be a gep in its chain without a load?
-      //if(dyn_cast<GetElementPtrInst>(user))
-      //stores.insert(user);
-      //assert(false);
-
+      
       worklist.push_back(user);
     }
   }
@@ -1105,6 +1092,10 @@ void trackIfMemory(const SVFGNode* current, set<const Value*> &trackedAllocas) {
   if(auto casted = dyn_cast<StmtSVFGNode>(current)) {
     if(casted->getInst()) {
       auto inst = casted->getInst();
+<<<<<<< HEAD
+=======
+
+>>>>>>> 377cc3d8f37b589e0b5d380a8bb627bdde1a7ce5
       if(dyn_cast<AllocaInst>(casted->getInst()) || dyn_cast<GlobalValue>(casted->getInst()))
         trackedAllocas.insert(casted->getInst());
 
@@ -1218,7 +1209,6 @@ void AnnotateNew::getBranchMemory(set<BranchInst *> &allBranches, map<Value *, s
     if(branchInst->isUnconditional())
       continue;
 
-    //TODO ?
     CmpInst *condition = dyn_cast<CmpInst>(branchInst->getCondition());
     if(!condition)
       continue;
@@ -1361,6 +1351,7 @@ void AnnotateNew::getTrackedBranchBBs(BranchInst *I, set<BasicBlock *> &markedBB
 
   if(!join) {
     debug(Yes) << "Could not find join for branch " << *I << " in BB : " << *I->getParent() << "\n";
+    assert(false); 
     return;
   }
 
@@ -1448,6 +1439,15 @@ void AnnotateNew::run(vector<Value*> sources, Value *argc, set<const Value*> &tr
   }
 
   set<BranchInst*> argcBranches;
+  //getBranchMemory(allBranches, branchDp, argcBranches);
+  set<BranchInst*> trackedBranches; 
+
+    if(argcBranches.size()) {
+      debug(Yes)<<"HACKY argcBranches executes\n";
+      trackedBranches.insert(argcBranches.begin(), argcBranches.end());
+    }  
+    
+  //getArgc(trackedAllocas, M); 
 
   while(1) {
     while(worklistSvfg.size()) {
@@ -1505,15 +1505,8 @@ void AnnotateNew::run(vector<Value*> sources, Value *argc, set<const Value*> &tr
 
 
     //get all branch instructions touching tainted data
-    set<BranchInst*> trackedBranches; 
     getTaintedBranches(trackedBranches, branchDp, trackedAllocas);
 
-    //TODO this runs only for the first iteration really. Hacky. fix this
-    if(argcBranches.size()) {
-      debug(Yes)<<"HACKY argcBranches executes\n";
-      trackedBranches.insert(argcBranches.begin(), argcBranches.end());
-      argcBranches.clear();
-    }
 
     debug(Yes) << "Tracked Branches size: " << trackedBranches.size() << "\n";
     if(!trackedBranches.size())
@@ -1541,6 +1534,8 @@ void AnnotateNew::run(vector<Value*> sources, Value *argc, set<const Value*> &tr
      * 5) handle phi nodes
      * 6) handle scalars
      */
+      
+    trackedBranches.clear();  
     if(markedBBs.size()) {
       set<SVFGNode*> backwardPtr;
       set<Value *> scalars; //scalars
@@ -1633,9 +1628,7 @@ Function *createFunction(Type *returnType, vector<Type*> &args, bool isVarArg, c
 double statFormula(Stat *a) {
   return a->stores.size() * 0.0 + a->loads.size() * 1.0;
 }
-/**
- * TODO add preserves information
- */
+
 bool AnnotateNew::runOnModule(Module &M) {
   auto started = std::chrono::high_resolution_clock::now();
   initDebugLevel();
@@ -1852,5 +1845,11 @@ bool AnnotateNew::runOnModule(Module &M) {
     AU.addRequired<TargetLibraryInfoWrapperPass>();
     AU.addRequired<DominatorTreeWrapperPass>();
     AU.addRequired<PostDominatorTreeWrapperPass>();
+    AU.addPreserved<LoopInfoWrapperPass>();
+    AU.addPreserved<ScalarEvolutionWrapperPass>();
+    AU.addPreserved<TargetLibraryInfoWrapperPass>();
+    AU.addPreserved<DominatorTreeWrapperPass>();
+    AU.addPreserved<PostDominatorTreeWrapperPass>();
+
   }
 

@@ -114,11 +114,6 @@ void ConstantFolding::getAnalysisUsage(AnalysisUsage &AU) const {
   AU.addPreservedID(LCSSAID);
   AU.addRequired<ScalarEvolutionWrapperPass>();
   AU.addRequired<TargetTransformInfoWrapperPass>();
-  // FIXME: Loop unroll requires LCSSA. And LCSSA requires dom info.
-  // If loop unroll does not preserve dom info then LCSSA pass on next
-  // loop will receive invalid dom info.
-  // For now, recreate dom info, if loop is unrolled.
-  AU.addPreserved<DominatorTreeWrapperPass>();
 
 }
 
@@ -323,7 +318,7 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
     if(exit)
       return;
 
-    LoopInfo *LI= &getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo(); //TODO should not recalculate on each iteration
+    LoopInfo *LI= &getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo(); 
     debug(Yes)<<"LoopInfo NULL?: "<<(LI==NULL)<<"\n";
     int size = worklistBB.size() - 1;
     BasicBlock *current = worklistBB[size].back();
@@ -386,7 +381,6 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
         toRun = currfn;
 
         LI = &getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();
-        //TODO hackish way of running on old failed loopHeader
         LoopUnroller::deleteLoop(failedLoop);
         runOnBB(failedLoop);
       }else {
@@ -450,9 +444,6 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
   if(!fi->context) {
     fi->context = bbOps.duplicateMem(currBB);
     debug(Yes) << "Unexpected behavior -> no context returned : possible if cant return from function, or unreachable instruction hit\n";
-    //TODO: Can we hit unreachable and exit, even if there's a return present?
-    //currfn = temp;
-    //return;
   }
   debug(Yes)<<"[Rafae] Copying Context for "<<toRun->getName()<<"\n";
   debug(Yes)<<"CurrBB: "<<*currBB<<"\n";
@@ -1275,8 +1266,7 @@ ProcResult ConstantFolding::processReturnInst(ReturnInst * retInst) {
 
    If the callInst is an external call, internal call that we dont visit or
    an indirect function call that we fail to simplify we mark all its input 
-   arguments as non constant
-TODO : we should mark the globals accessed by it as non constant.
+   arguments and all globals as non constant
 
 */
 void ConstantFolding::markGlobAsNonConst(Function *F) {
@@ -2600,8 +2590,7 @@ ProcResult ConstantFolding::processReallocInst(CallInst *ci) {
     debug(Yes) << "realloc: register not found or size not constant\n";
     return NOTFOLDED;
   }
-
-  //@TODO not going to actually realloc. just allocate more memory. Warning, memory leak
+    
   uint64_t addr = bbOps.allocateHeap(size->getZExtValue(), currBB);
   char *oldAddr = (char *) bbOps.getActualAddr(reg->getValue(), currBB);
   uint64_t size_old = bbOps.getSizeContigous(reg->getValue(), currBB);
@@ -4649,8 +4638,18 @@ bool ConstantFolding::handleGetOpt(CallInst * ci) {
   int result;
   if(name == "getopt_long") { 
     debug(Yes)<<"handleGetOpt: getopt_long\n";
-    option * long_opts = (option *) malloc(sizeof(option) * 350); //@FIXME 350 is arbitrary for long opts length
     int * long_index;
+    Register * longReg = processInstAndGetRegister(ci->getOperand(3));
+    if(!longReg){
+       debug(Yes)<<"long options not found\n";
+       return true;
+     }
+    uint64_t longAddr = longReg->getValue();
+    unsigned size = bbOps.getSizeContigous(longAddr, currBB);
+    size = (size/32) + 10;
+    debug(Yes)<<"size of long options "<<size<<"\n";
+    option * long_opts = (option *) malloc(sizeof(option) * size); 
+
     if(!handleLongArgs(ci, long_opts, long_index))
       return true;
     debug(Yes)<<"Calling getopt_long_local\n";
@@ -4839,7 +4838,7 @@ LoopUnroller *ConstantFolding::unrollLoopInClone(Function *currfn, Loop *L, Valu
   addFuncInfo(cloned, fi);
 
   LoopInfo *LI = unroller->getLoopInfo();
-  LI= &getAnalysis<LoopInfoWrapperPass>(*cloned).getLoopInfo(); //TODO should not recalculate on each iteration
+  LI= &getAnalysis<LoopInfoWrapperPass>(*cloned).getLoopInfo(); 
   debug(Yes) << "unrollLoopInClone: recomputing loop info \n";
   bbOps.recomputeLoopInfo(cloned, *LI, header);
 

@@ -143,8 +143,6 @@ namespace {
           ir.CreateStore(mallocCall, newArgptr); 
           Value * destPtr = ir.CreateLoad(newArgptr);
 
-          //TODO: Do we need to set alignment for parameters?
-
           debug(Yes) << arguments[i] << " " << i << "\n";
           std::vector<Value*> functionArgs;
           functionArgs.push_back(destPtr);
