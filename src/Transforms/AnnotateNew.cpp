@@ -1092,10 +1092,6 @@ void trackIfMemory(const SVFGNode* current, set<const Value*> &trackedAllocas) {
   if(auto casted = dyn_cast<StmtSVFGNode>(current)) {
     if(casted->getInst()) {
       auto inst = casted->getInst();
-<<<<<<< HEAD
-=======
-
->>>>>>> 377cc3d8f37b589e0b5d380a8bb627bdde1a7ce5
       if(dyn_cast<AllocaInst>(casted->getInst()) || dyn_cast<GlobalValue>(casted->getInst()))
         trackedAllocas.insert(casted->getInst());
 
