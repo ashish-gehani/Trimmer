@@ -617,8 +617,7 @@ set<GlobalVariable *> ConstantFolding::dfs(CallGraphNode *root, map<Function *, 
 
     Cycle *newCycle;
 
-    //FIXME redundant in case of size = 1
-    if(oldCycles.size())
+    if(oldCycles.size() > 1)
       newCycle = mergeCycles(oldCycles);
     else
       newCycle = new Cycle;
@@ -631,9 +630,8 @@ set<GlobalVariable *> ConstantFolding::dfs(CallGraphNode *root, map<Function *, 
       newCycle->values.insert(modSet[func].begin(), modSet[func].end());
     }
 
-    //update mod sets. FIXME can just replace instead of merging here?
     for(auto &func: cycleFunctions)
-      modSet[func].insert(newCycle->values.begin(), newCycle->values.end());
+      modSet[func] = newCycle->values;
 
     //for(auto &cycle: oldCycles)
     //delete cycle;
@@ -1775,7 +1773,7 @@ ProcResult ConstantFolding::handleExtractValue(ExtractValueInst *inst) {
 ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
 
   if(!callInst->getCalledFunction() && !simplifyCallback(callInst)) {
-    //TODO: mark all globals as non constant?
+    //Assumption: Global variables not accessed in dynamic libraries.
     markArgsAsNonConst(callInst);
     return NOTFOLDED;
   }
@@ -4720,9 +4718,8 @@ bool ConstantFolding::handleGetOpt(CallInst * ci) {
      }
     uint64_t longAddr = longReg->getValue();
     unsigned size = bbOps.getSizeContigous(longAddr, currBB);
-    size = (size/32) + 10;
     debug(Yes)<<"size of long options "<<size<<"\n";
-    option * long_opts = (option *) malloc(sizeof(option) * size); 
+    option * long_opts = (option *) malloc(size); 
 
     if(!handleLongArgs(ci, long_opts, long_index))
       return true;
