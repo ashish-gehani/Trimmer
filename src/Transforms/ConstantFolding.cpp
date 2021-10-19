@@ -1074,10 +1074,23 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
   Register *regOffset = processInstAndGetRegister(offsetVal);
 
   if((/*useRegOffset && */ !isConst  && !regOffset) /*|| (!useRegOffset && !isConst)*/) {
-    //TODO recursively mark memory non constant
     debug(Yes) << "GepInst : offset not constant\n";
-    bbOps.setConstContigous(false, reg->getValue(), currBB);
-    return NOTFOLDED;
+    unsigned contSize = bbOps.getSizeContigous(reg->getValue(), currBB);
+    unsigned allocSize = DL->getTypeAllocSize(reg->getType());
+    unsigned numArray = contSize/allocSize;
+    uint64_t address = reg->getValue();
+    for(unsigned i=0;i<numArray;i++){
+  
+      if(reg->getType()->isPointerTy()){
+          debug(Yes)<<"Marking memory non const! \n";
+          markMemNonConst(dyn_cast<PointerType>(reg->getType())->getElementType(), address, currBB);
+      }
+
+      else{
+          debug(Yes)<<"Marking memory non const! \n";
+          markMemNonConst(reg->getType(), address, currBB);
+      }
+      address = address + allocSize;
   }
   if(reg->getValue()==999999999)
   {
@@ -5016,10 +5029,10 @@ void ConstantFolding::markMemNonConst(Type *ty, uint64_t address, BasicBlock *BB
     return;
   //if(!ty->isPointerTy())
   //return;
-  if(!bbOps.checkConstMem(address, DL->getTypeAllocSize(ty), BB)) {
+  /*if(!bbOps.checkConstMem(address, DL->getTypeAllocSize(ty), BB)) {
     debug(Yes) << "Address already non constant: " << address << "\n";
     return;
-  }
+  }*/
 
   debug(Yes) << "marking mem non const in loop at address " << address << " to " << address + DL->getTypeAllocSize(ty)  <<"\n";
   bbOps.setConstContigous(false, address, BB);
