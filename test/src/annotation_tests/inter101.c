@@ -5,7 +5,7 @@
  */
 
 #include <stdio.h>
-#include <annotate.h>
+#include "annotate.h"
 struct temp {
   int **a;
 };
