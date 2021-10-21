@@ -609,8 +609,7 @@ set<GlobalVariable *> ConstantFolding::dfs(CallGraphNode *root, map<Function *, 
 
     Cycle *newCycle;
 
-    //FIXME redundant in case of size = 1
-    if(oldCycles.size())
+    if(oldCycles.size() > 1)
       newCycle = mergeCycles(oldCycles);
     else
       newCycle = new Cycle;
@@ -623,9 +622,8 @@ set<GlobalVariable *> ConstantFolding::dfs(CallGraphNode *root, map<Function *, 
       newCycle->values.insert(modSet[func].begin(), modSet[func].end());
     }
 
-    //update mod sets. FIXME can just replace instead of merging here?
     for(auto &func: cycleFunctions)
-      modSet[func].insert(newCycle->values.begin(), newCycle->values.end());
+      modSet[func] = newCycle->values;
 
     //update cycle reference
     for(auto &func: cycleFunctions)
@@ -1006,11 +1004,24 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
   Value *offsetVal = gi->getOperand(1);
   Register *regOffset = processInstAndGetRegister(offsetVal);
 
-  if((!isConst  && !regOffset)) {
-    //TODO recursively mark memory non constant
+  if((/*useRegOffset && */ !isConst  && !regOffset) /*|| (!useRegOffset && !isConst)*/) {
     debug(Yes) << "GepInst : offset not constant\n";
-    bbOps.setConstContigous(false, reg->getValue(), currBB);
-    return NOTFOLDED;
+    unsigned contSize = bbOps.getSizeContigous(reg->getValue(), currBB);
+    unsigned allocSize = DL->getTypeAllocSize(reg->getType());
+    unsigned numArray = contSize/allocSize;
+    uint64_t address = reg->getValue();
+    for(unsigned i=0;i<numArray;i++){
+  
+      if(reg->getType()->isPointerTy()){
+          debug(Yes)<<"Marking memory non const! \n";
+          markMemNonConst(dyn_cast<PointerType>(reg->getType())->getElementType(), address, currBB);
+      }
+
+      else{
+          debug(Yes)<<"Marking memory non const! \n";
+          markMemNonConst(reg->getType(), address, currBB);
+      }
+      address = address + allocSize;
   }
   if(reg->getValue()==999999999)
   {
@@ -1705,7 +1716,7 @@ ProcResult ConstantFolding::handleExtractValue(ExtractValueInst *inst) {
 ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
 
   if(!callInst->getCalledFunction() && !simplifyCallback(callInst)) {
-    //TODO: mark all globals as non constant?
+    //Assumption: Global variables not accessed in dynamic libraries.
     markArgsAsNonConst(callInst);
     return NOTFOLDED;
   }
@@ -4646,9 +4657,8 @@ bool ConstantFolding::handleGetOpt(CallInst * ci) {
      }
     uint64_t longAddr = longReg->getValue();
     unsigned size = bbOps.getSizeContigous(longAddr, currBB);
-    size = (size/32) + 10;
     debug(Yes)<<"size of long options "<<size<<"\n";
-    option * long_opts = (option *) malloc(sizeof(option) * size); 
+    option * long_opts = (option *) malloc(size); 
 
     if(!handleLongArgs(ci, long_opts, long_index))
       return true;
@@ -4939,10 +4949,12 @@ void ConstantFolding::markMemNonConst(Type *ty, uint64_t address, BasicBlock *BB
 
   if(fdInfoMap.find(address) != fdInfoMap.end())
     return;
-  if(!bbOps.checkConstMem(address, DL->getTypeAllocSize(ty), BB)) {
+  //if(!ty->isPointerTy())
+  //return;
+  /*if(!bbOps.checkConstMem(address, DL->getTypeAllocSize(ty), BB)) {
     debug(Yes) << "Address already non constant: " << address << "\n";
     return;
-  }
+  }*/
 
   debug(Yes) << "marking mem non const in loop at address " << address 
              << " to " << address + DL->getTypeAllocSize(ty)  <<"\n";

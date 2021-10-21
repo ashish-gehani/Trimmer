@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
-#include <annotate.h>
+#include "annotate.h"
 
 
 char progName[1024];
