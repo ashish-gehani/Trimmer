@@ -30,7 +30,7 @@ gprof: ${OUT_DIR}
 	cp ${GPROF_BITCODE} ${OUT_DIR}
 	cd ${OUT_DIR} && \
 	echo '{"binary": "gprof_fin", "native_libs":[],"name": "gprof", "args": ["-q","name"], "modules": [], "ldflags": ["-ldl"], "main": "gprof.bc", "config_files": []}' > ${GPROF_MANIFEST} && \
-	python ${TRIMMER_HOME}/tool/trimmer.py ${GPROF_MANIFEST} ./gprof  exceedLimit 400 2> ${LOG_FILE}
+	python ${TRIMMER_HOME}/tool/trimmer.py ${GPROF_MANIFEST} ./gprof  exceedLimit 400 $(option) 2> ${LOG_FILE}
 
 test_gprof:
 	@echo "\t\tTest gprof"

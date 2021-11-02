@@ -30,7 +30,7 @@ readelf: ${OUT_DIR}
 	cp ${READELF_BITCODE} ${OUT_DIR}
 	cd ${OUT_DIR} && \
 	echo '{"binary": "readelf_fin", "native_libs": [], "name": "readelf", "args": ["-a", "name"], "modules": [], "ldflags": ["-lz","-ldl"], "main": "readelf.bc", "config_files": []}' > ${READELF_MANIFEST} && \
-	python ${TRIMMER_HOME}/tool/trimmer.py ${READELF_MANIFEST} ./work_dir 2> ${LOG_FILE}
+	python ${TRIMMER_HOME}/tool/trimmer.py ${READELF_MANIFEST} ./work_dir $(option) 2> ${LOG_FILE}
 
 test_readelf:
 	@echo "\t\tTest Readelf"

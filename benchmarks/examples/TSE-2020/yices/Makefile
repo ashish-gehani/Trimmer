@@ -20,7 +20,7 @@ compress: ${OUT_DIR} ${YICES_BITCODE}
 	cp libyices.a ${OUT_DIR} && \
 	cd ${OUT_DIR} && \
 	echo '{"binary": "yices_main_fin", "native_libs":[],"name": "yices_main", "args": ["--logic=QF_AUFBV", "abc.ys"], "modules": [], "ldflags": ["-lgmp","libyices.a"], "main": "yices_main.bc", "config_files": []}' > ${YICES_MANIFEST} && \
-	python ${TRIMMER_HOME}/tool/trimmer.py ${YICES_MANIFEST} work_dir 2> ${LOG_FILE} 
+	python ${TRIMMER_HOME}/tool/trimmer.py ${YICES_MANIFEST} work_dir $(option) 2> ${LOG_FILE} 
 
 ${YICES_BITCODE}: ${YICES_NAME}
 	cp ${YICES_PATCH} ${YICES_NAME} && \

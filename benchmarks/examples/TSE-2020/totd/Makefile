@@ -20,13 +20,13 @@ ipv6: ${OUT_DIR} ${TOTD_BITCODE}
 	cp ${TOTD_BITCODE} ${OUT_DIR} 
 	cp ${TOTD_CONF1} ${OUT_DIR}
 	cd ${OUT_DIR} && \echo '{"binary": "totd_fin", "native_libs": [], "name": "totd", "args": ["-c", "totdipv6.conf", "-d2"],"modules": [], "ldflags": [], "main": "totd.bc","config_files":["totdipv6.conf"]}' > ${TOTD_MANIFEST} && \
-	python ${TRIMMER_HOME}/tool/trimmer.py ${TOTD_MANIFEST} ./workdir 2> ${LOG_FILE}
+	python ${TRIMMER_HOME}/tool/trimmer.py ${TOTD_MANIFEST} ./workdir $(option) 2> ${LOG_FILE}
 
 ipv4: ${OUT_DIR} ${TOTD_BITCODE}
 	cp ${TOTD_BITCODE} ${OUT_DIR} 
 	cp ${TOTD_CONF2} ${OUT_DIR}
 	cd ${OUT_DIR} && \echo '{"binary": "totd_fin", "native_libs": [], "name": "totd", "args": ["-c", "totdipv4.conf", "-d2", "-no6"],"modules": [], "ldflags": [], "main": "totd.bc","config_files":["totdipv4.conf"]}' > ${TOTD_MANIFEST} && \
-	python ${TRIMMER_HOME}/tool/trimmer.py ${TOTD_MANIFEST} ./workdir 2> ${LOG_FILE}
+	python ${TRIMMER_HOME}/tool/trimmer.py ${TOTD_MANIFEST} ./workdir $(option) 2> ${LOG_FILE}
 
 ${TOTD_BITCODE}: ${TOTD_NAME}
 	cd ${TOTD_NAME} && \

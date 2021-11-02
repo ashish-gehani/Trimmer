@@ -30,7 +30,7 @@ objdump: ${OUT_DIR}
 	cp ${OBJDUMP_BITCODE} ${OUT_DIR}
 	cd ${OUT_DIR} && \
 	echo '{"binary": "objdump_fin", "native_libs": [], "name": "objdump", "args": ["-D","--syms","-s","-w","name"], "modules": [], "ldflags": ["-ldl"], "main": "objdump.bc", "config_files": []}' > ${OBJDUMP_MANIFEST} && \
-	python ${TRIMMER_HOME}/tool/trimmer.py ${OBJDUMP_MANIFEST} ./objdump  exceedLimit 200 2> ${LOG_FILE}
+	python ${TRIMMER_HOME}/tool/trimmer.py ${OBJDUMP_MANIFEST} ./objdump  exceedLimit 200 $(option) 2> ${LOG_FILE}
 
 test_objdump:
 	@echo "\t\tTest Objdump"

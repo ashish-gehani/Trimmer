@@ -19,7 +19,7 @@ compress: ${OUT_DIR}
 	cp ${curl_BITCODE} ${OUT_DIR}
 	cd ${OUT_DIR} && \
 	echo '{"binary": "curl_fin", "native_libs": [], "name": "curl", "args": ["--compress", "--http1.1", "--ipv4", "--ssl", "_"], "modules": [], "ldflags": ["-lz", "-lcurl"], "main": "curl.bc"}' > ${curl_MANIFEST} && \
-	python ${TRIMMER_HOME}/tool/trimmer.py ${curl_MANIFEST} ./work_dir 2> ${LOG_FILE}
+	python ${TRIMMER_HOME}/tool/trimmer.py ${curl_MANIFEST} ./work_dir $(option) 2> ${LOG_FILE}
 
 .PHONY: ${curl_BITCODE}
 ${curl_BITCODE}: ${curl_NAME}

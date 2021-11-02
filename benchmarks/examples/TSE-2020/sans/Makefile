@@ -18,21 +18,21 @@ udp: ${OUT_DIR}
 	cp sans.conf ${OUT_DIR} && \
 	cd ${OUT_DIR} && \
 	echo '{"binary": "sans_fin",  "native_libs": [], "name": "sans", "args": ["-c", "sans.conf"], "modules": [], "ldflags": [], "main": "sans.bc", "config_files":["sans.conf"] }' > ${SANS_MANIFEST} && \
-	python ${TRIMMER_HOME}/tool/trimmer.py ${SANS_MANIFEST} ./udp 2> ${LOG_FILE}
+	python ${TRIMMER_HOME}/tool/trimmer.py ${SANS_MANIFEST} ./udp $(option) 2> ${LOG_FILE}
 
 socks5: ${OUT_DIR}
 	cp ${SANS_BITCODE} ${OUT_DIR} && \
 	cp sans2.conf ${OUT_DIR} && \
 	cd ${OUT_DIR} && \
 	echo '{"binary": "sans_fin",  "native_libs": [], "name": "sans", "args": ["-c", "sans2.conf"], "modules": [], "ldflags": [], "main": "sans.bc", "config_files":["sans2.conf"] }' > ${SANS_MANIFEST} && \
-	python ${TRIMMER_HOME}/tool/trimmer.py ${SANS_MANIFEST} ./sock5 2> ${LOG_FILE}
+	python ${TRIMMER_HOME}/tool/trimmer.py ${SANS_MANIFEST} ./sock5 $(option) 2> ${LOG_FILE}
 
 tcp: ${OUT_DIR}
 	cp ${SANS_BITCODE} ${OUT_DIR} && \
 	cp sanss.conf ${OUT_DIR} && \
 	cd ${OUT_DIR} && \
 	echo '{"binary": "sans_fin",  "native_libs": [], "name": "sans", "args": ["-c", "sanss.conf"], "modules": [], "ldflags": [], "main": "sans.bc", "config_files":["sanss.conf"] }' > ${SANS_MANIFEST} && \
-	python ${TRIMMER_HOME}/tool/trimmer.py ${SANS_MANIFEST} ./tcp 2> ${LOG_FILE}
+	python ${TRIMMER_HOME}/tool/trimmer.py ${SANS_MANIFEST} ./tcp $(option) 2> ${LOG_FILE}
 
 
 test_sans_udp:

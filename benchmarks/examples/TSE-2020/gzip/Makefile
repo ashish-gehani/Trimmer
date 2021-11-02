@@ -19,7 +19,7 @@ compress: ${OUT_DIR}
 	cp ${GZIP_BITCODE} ${OUT_DIR}
 	cd ${OUT_DIR} && \
 	echo '{"binary": "gzip_fin", "native_libs": [], "name": "gzip", "args": ["--force",  "--quiet",  "_"], "modules": [], "ldflags": ["-lbz2"], "main": "gzip.bc", "config_files": []}' > ${GZIP_MANIFEST} && \
-	python ${TRIMMER_HOME}/tool/trimmer.py ${GZIP_MANIFEST} ./work_dir 2> ${LOG_FILE}
+	python ${TRIMMER_HOME}/tool/trimmer.py ${GZIP_MANIFEST} ./work_dir $(option) 2> ${LOG_FILE}
 	cp huffman.c ${OUT_DIR}/work_dir
 
 

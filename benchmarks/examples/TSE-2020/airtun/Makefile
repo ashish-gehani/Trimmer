@@ -22,7 +22,7 @@ airtun: ${OUT_DIR}
 	cp ${AIRTUN-NG_BITCODE} ${OUT_DIR} && \
 	cd ${OUT_DIR} && \
 	echo '{"binary": "airtun-ng_fin", "native_libs": [], "name": "airtun-ng", "args": ["-a", "_","-w","_","_"], "modules": [], "ldflags": ["-lssl","-lcrypto"], "main": "airtun-ng.bc", "config_files": []}' > ${AIRTUN-NG_MANIFEST} && \
-	python ${TRIMMER_HOME}/tool/trimmer.py ${AIRTUN-NG_MANIFEST} ./airtun  2> ${LOG_FILE}
+	python ${TRIMMER_HOME}/tool/trimmer.py ${AIRTUN-NG_MANIFEST} ./airtun $(option) 2> ${LOG_FILE}
 
 
 .PHONY: ${AIRCRACK-NG_BITCODE}
