@@ -2,12 +2,9 @@ Running Trimmer on all applications with runbench script
 =======
 
 1) Build Trimmer on your machine along with the dependencies of the benchmark examples. See [build](https://github.com/ashish-gehani/Trimmer/blob/master/README.md) instructuions for more details.
-
 2) Run `./profiler.sh` to compile the profiler pass. This pass is used to generate statistics about the binaries (e.g. number of functions, instructions, memory instructions etc).
-
-3) Run `./runbench.py --sets="TSE-2020.set" --trimmer-opts=""`. Trimmer will specialize the examples provided in the TSE-2020 benchmarks set.
-
-4) Finally, run `bash reset.sh` before running the rubench script again. reset.sh deletes old executables and bitcode of applications to allow runbench script to be used again
+3) Run `bash reset.sh`. reset.sh deletes old executables and bitcode of applications to allow runbench script to be used afresh
+4) Run `./runbench.py --sets="TSE-2020.set" --trimmer-opts=""`. Trimmer will specialize the examples provided in the TSE-2020 benchmarks set using default options.
 
 The runbench.py script will run Trimmer on all applications that are enabled in the provided set and print the statistics (e.g. reductions in file size, instructions, functions, and memory instructions) in a table. To enable or disable (skip) examples in the TSE-2020 set, modify TSE-2020.set to toggle the _enabled_ option (i.e. true or false). Note that the runbench script simply calls `make` followed by `build.sh` in the folder of the application pointed to by the provided set. 
 
