@@ -1,7 +1,7 @@
 Running Trimmer on all applications with runbench script
 =======
 
-1) Build Trimmer on your machine along with the dependencies of the benchmark examples
+1) Build Trimmer on your machine along with the dependencies of the benchmark examples. See [build](https://github.com/ashish-gehani/Trimmer/blob/master/README.md) instructuions for more details.
 
 2) Run `./profiler.sh` to compile the profiler pass. This pass is used to generate statistics about the binaries (e.g. number of functions, instructions, memory instructions etc).
 
