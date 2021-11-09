@@ -1,5 +1,20 @@
-Trimmer
-=======
+Trimmer Test Cases
+==================
+
+**Test Cases Directory Structure**:
+
+The test cases directory, test/src contains following subdirectories:
+
+  * **annotation_tests** contains test cases for annotation pass.
+  * **loop_tests** contains test cases for loop unrolling pass.
+  * **fileio_tests** contains test cases for file I/O specialization pass.
+  * **constprop_tests** contains test cases for constant propagation pass.
+  * **pointer_tests** contains test cases that deal with pointers.
+  * **stress_tests** contains stress tests (e.g., dealing with large loop unroll count).
+  * **bugfix_tests** contains test cases that fixes some bugs.  
+  * **tofix_tests** contains test cases that needs fixing in a better way (for developers only).
+  * **misc_tests** contains various other test cases that do not fit in other categories.
+  * **data** contains text files used by test cases in fileio_tests.
 
 
 
@@ -33,20 +48,6 @@ python test.py ./work_dir constprop 1 10
     
 will run test cases including inter1.c to inter10.c in test/src/constprop_tests (inclusive).
 
-**Test Cases Directory Structure**:
-
-The test cases directory, test/src contains following subdirectories:
-
-  * **annotation_tests** contains test cases to test annotation pass.
-  * **loop_tests** contains test cases to test loop unrolling.
-  * **fileio_tests** contains test cases to test file I/O specialization.
-  * **constprop_tests** contains test cases to test constant propagation.
-  * **pointer_tests** contains test cases that deal with pointers.
-  * **stress_tests** contains large test cases (e.g., dealing with large loop unroll count).
-  * **bugfix_tests** contains test cases that fixes some bugs.  
-  * **tofix_tests** contains test cases that needs fixing in a better way (for developers only).
-  * **misc_tests** contains various other test cases that do not fit in other categories.
-  * **data** contains text files used by test cases in fileio_tests.
       
 **Guidelines for Writing Additional Test Cases**:
 
