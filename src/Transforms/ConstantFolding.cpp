@@ -1092,6 +1092,7 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
       }
       address = address + allocSize;
     }
+  return NOTFOLDED;    
   }
   if(reg->getValue()==999999999)
   {
