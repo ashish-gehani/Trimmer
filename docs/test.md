@@ -11,8 +11,6 @@ The test cases directory, test/src contains following subdirectories:
   * **constprop_tests** contains test cases for constant propagation pass.
   * **pointer_tests** contains test cases that deal with pointers.
   * **stress_tests** contains stress tests (e.g., dealing with large loop unroll count).
-  * **bugfix_tests** contains test cases that fixes some bugs.  
-  * **tofix_tests** contains test cases that needs fixing in a better way (for developers only).
   * **misc_tests** contains various other test cases that do not fit in other categories.
   * **data** contains text files used by test cases in fileio_tests.
 
@@ -71,4 +69,3 @@ int main(int argc, char ** argv) {
 
 In this test case, we are checking whether "temp" is annotated by Trimmer annotation pass or not. If yes, then the test case passes else it fails.
 
-To include additional test cases as part of all the test cases, modify tests.txt in test/scripts. In tests.txt, we mention start number and end number of test cases in each subdirectory in test/src. 
