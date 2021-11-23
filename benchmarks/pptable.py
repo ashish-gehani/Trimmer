@@ -1,4 +1,8 @@
 # From http://ginstrom.com/scribbles/2007/09/04/pretty-printing-a-table-in-python/comment-page-1/
+# Copyright (c) 2020 SRI International All rights reserved.
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file.
+
 import locale
 locale.setlocale(locale.LC_NUMERIC, "")
 

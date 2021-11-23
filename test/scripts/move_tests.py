@@ -11,8 +11,8 @@ hi = int(sys.argv[2])
 diff = int(sys.argv[3])
 
 for i in xrange(lo, hi + 1):
-	src = "inter" + str(i) + ".c"
-	dst = "inter" + str(i + diff) + ".c"
+	src = "test" + str(i) + ".c"
+	dst = "test" + str(i + diff) + ".c"
 	if not os.path.isfile(src):
 		print src, " src file does not exist"
 		continue	

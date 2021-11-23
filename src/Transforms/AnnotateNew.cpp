@@ -27,14 +27,6 @@ so that the ConstantFolding pass knows which loops are to be unrolled.*/
 #include <chrono>
 #include <fstream>
 
-//getLoopIterator -> genericScalarDfsBackward -> isLoad (Memoized)
-//getBranchMemory -> genericScalarDfsBackward -> isLoadOrArgc (Memoized)
-//getSourceAllocas -> backwardDfsLambda -> backwardDfsCondition
-
-//getMemoryFlow ->  forwardDfsLambda -> forwardDfsCondition
-//getLoadsOnSlps -> genericScalarDfs -> isLoadOnSingleLevelPointer
-//getBbsTillJoin -> forwardBBDfs -> lambdaCondition
-
 static cl::opt<std::string> argvName("argvName",
     cl::desc("global to track"));
 static cl::opt<int> argvId("argvId",
@@ -48,10 +40,10 @@ static cl::opt<bool> isLimitedDepth("isLimitedDepth",cl::init(false),
 
 static cl::opt<int> depthLimit("depthLimit", cl::init(1));
 
-static cl::opt<bool> isLoadsLimited("isLoadsLimited",cl::init(false),
+static cl::opt<bool> isTrackedLimited("isTrackedLimited",cl::init(false),
     cl::desc("do we want to consider only a limited \% of the sources sorted on number of loads dependent on them"));
 
-static cl::opt<int> loadPercent("loadPercent", cl::init(100));
+static cl::opt<int> trackedPercent("trackedPercent", cl::init(100));
 
 struct DfsDepthInfo {
   SVFGNode* node;
@@ -260,7 +252,6 @@ void AnnotateNew::checkIfLoop(Value *node) {
 
 
 set<SVFGNode*> *AnnotateNew::dfs_rec(SVFGNode* root, std::function<vector<SVFGNode*> (SVFGNode*)> nextNodes, std::function<bool (SVFGNode*)> condition, set<SVFGNode*> &visited, map<SVFGNode*, set<SVFGNode*>* > *dpData, bool trackLoops) {
-  //static map<T, set<T>* > dpData;
   dpData = NULL;
   if(visited.find(root) != visited.end()) {
     return NULL;
@@ -300,15 +291,7 @@ set<SVFGNode*> *AnnotateNew::dfs_rec(SVFGNode* root, std::function<vector<SVFGNo
 
 
 set<SVFGNode*> *AnnotateNew::dfs_rec_limit(SVFGNode* root, std::function<vector<SVFGNode*> (SVFGNode*,int)> nextNodes, std::function<bool (SVFGNode*)> condition, set<SVFGNode*> &visited,int depth ,map<SVFGNode*, set<SVFGNode*>* > *dpData, bool trackLoops) {
-  //static map<T, set<T>* > dpData;
   dpData = NULL;
-
-  /*
-     if(visited.find(root) != visited.end()) {
-     return NULL;
-     }
-
-     visited.insert(root);*/
 
   debug(Yes)<<"dfs_rec_limit with depth: "<<depth<<"\n";
 
@@ -412,8 +395,8 @@ set<SVFGNode*> *AnnotateNew::dfs_rec_limit(SVFGNode* root, std::function<vector<
 }
 
 set<Value*> *AnnotateNew::dfs_rec(Value* root, std::function<vector<Value*> (Value*)> nextNodes, std::function<bool (Value *)> condition, set<Value *> &visited, map<Value *, set<Value *>* > *dpData, bool trackLoops) {
-  //static map<T, set<T>* > dpData;
-  dpData = NULL; //FIXME
+ 
+  dpData = NULL; 
   if(visited.find(root) != visited.end()) {
     if(dpData) {
       assert(dpData->find(root) != dpData->end());
@@ -791,10 +774,6 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
   static set<const Value *> slps;
   //[Point to add CFG depth condition]
   auto forwardDfsCondition = [&](SVFGNode* node) {
-    /*
-       if(LoadsOnSource.find(node) == LoadsOnSource.end()){
-       LoadsOnSource[node] = new set<const Instruction*>;
-       }*/
     const Value *inst = NULL;
     if(auto temp = dyn_cast<InterPHISVFGNode>(node)) {
       debug(Yes) << *temp->getRes()->getValue() << " phinode\n";
@@ -803,17 +782,12 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
       if(auto* ARG= dyn_cast<Argument>(inst)){
         debug(Yes)<<"ArgParent: "<<ARG->getParent()->getName()<<"\n";
       }
-      //debug(Yes)<<"ParentFunc:"<<inst->getParent()->getParent()->getName()<<"\n";
       auto pagNode = pag->getPAGNode(pag->getValueNode(inst));
       auto svfgNode = svfg->getDefSVFGNode(pagNode);
       //return true;
     } 
     auto casted = dyn_cast<StmtSVFGNode>(node);
     if(casted) {
-      /*
-         if(auto LI = dyn_cast<LoadSVFGNode>(casted)){
-         LoadsOnSource[node]->insert(LI->getInst());
-         }*/
       if(casted->getInst()) {
         debug(Yes) << "Going forward on Instruction: " << *casted->getInst() << " in function " << casted->getInst()->getParent()->getParent()->getName() << "\n";
         inst = casted->getInst(); 
@@ -822,7 +796,6 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
     if(inst) {
       if(auto point = dyn_cast<PointerType>(inst->getType())) {
         if(!point->getElementType()->isPointerTy()) { // Only a single level pointer
-          //debug(Yes) <<*point << " " << *inst<< "  ****************\n";
           if(slps.find(inst) == slps.end()) {
             singleLevelPointers.insert(inst);
             slps.insert(inst);
@@ -830,12 +803,10 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
         }
 
         //check if involved in any strcpy or strncpy
-        //TODO this is a hack, and can be imporved by checking formalin at any callsite
         for(auto &call: calls) {
           bool found = false;
           for(unsigned i = 0; i < call->getNumOperands(); i++) { 
             if(call->getOperand(i) == inst) {
-              //return true;
               debug(Yes) << "call found\n" << " " << *call << "\n";
               found = true;
             }
@@ -869,9 +840,6 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
         if(isMemTransfer(casted->getInst()))
           return true;
 
-      if(casted->getInst() && dyn_cast<BranchInst>(casted->getInst())) {
-        assert(false); //TODO remove?
-      }
     }
     return false;
   };
@@ -879,10 +847,6 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
 
 
   auto forwardLimitedDfsCondition = [&](SVFGNode* node) {
-    /*
-       if(LoadsOnSource.find(node) == LoadsOnSource.end()){
-       LoadsOnSource[node] = new set<const Instruction*>;
-       }*/
     const Value *inst = NULL;
     if(auto temp = dyn_cast<InterPHISVFGNode>(node)) {
       debug(Yes) << *temp->getRes()->getValue() << " phinode\n";
@@ -895,19 +859,12 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
           return false;
         }
       }
-      //debug(Yes)<<"ParentFunc:"<<inst->getParent()->getParent()->getName()<<"\n";
       auto pagNode = pag->getPAGNode(pag->getValueNode(inst));
       auto svfgNode = svfg->getDefSVFGNode(pagNode);
-      //return true;
     } 
     auto casted = dyn_cast<StmtSVFGNode>(node);
     if(casted) {
-      /*
-         if(auto LI = dyn_cast<LoadSVFGNode>(casted)){
-         LoadsOnSource[node]->insert(LI->getInst());
-         }*/
       if(casted->getInst()) {
-        //debug(Yes) << "Going forward on Instruction: " << *casted->getInst() << " in function " << casted->getInst()->getParent()->getParent()->getName() << "\n";
         inst = casted->getInst(); 
       }
     }
@@ -925,7 +882,6 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
 
       if(auto point = dyn_cast<PointerType>(inst->getType())) {
         if(!point->getElementType()->isPointerTy()) { // Only a single level pointer
-          //debug(Yes) <<*point << " " << *inst<< "  ****************\n";
           if(slps.find(inst) == slps.end()) {
             singleLevelPointers.insert(inst);
             slps.insert(inst);
@@ -933,12 +889,10 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
         }
 
         //check if involved in any strcpy or strncpy
-        //TODO this is a hack, and can be imporved by checking formalin at any callsite
         for(auto &call: calls) {
           bool found = false;
           for(unsigned i = 0; i < call->getNumOperands(); i++) { 
             if(call->getOperand(i) == inst) {
-              //return true;
               debug(Yes) << "call found\n" << " " << *call << "\n";
               found = true;
             }
@@ -949,7 +903,7 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
               if(!call->getOperand(i)->getType()->isPointerTy())
                 continue;
               debug(Yes)<<"Adding to storeSet "<<*call->getOperand(i)<<"\n";
-              auto *pagNode = pag->getPAGNode((pag->getValueNode(call->getOperand(i)))); // [Q] Tracking all pointer operands???
+              auto *pagNode = pag->getPAGNode((pag->getValueNode(call->getOperand(i)))); // Tracking all pointer operands
               storeSvfg.insert((SVFGNode*) svfg->getDefSVFGNode(pagNode)); //[Q] InterProceduralFlow limiting? (Within same function. Is it valid?
               //If original flow is considered then this should also?
             }
@@ -972,9 +926,7 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
         if(isMemTransfer(casted->getInst()))
           return true;
 
-      if(casted->getInst() && dyn_cast<BranchInst>(casted->getInst())) {
-        assert(false); //TODO remove?
-      }
+      
     }
     return false;
   };
@@ -1022,7 +974,6 @@ void AnnotateNew::getSourceAllocas(set<SVFGNode*> &svfgNodes, vector<const SVFGN
       auto pagEdge = casted->getPAGEdge();
       if(pagEdge->getInst()) {
 
-        //debug(Yes) << "In backward " << *pagEdge->getInst() << "\n";
         auto I = pagEdge->getInst();
         string fname = "";
 
@@ -1048,11 +999,8 @@ void AnnotateNew::getSourceAllocas(set<SVFGNode*> &svfgNodes, vector<const SVFGN
           }
         }
 
-        //FIXME Use MemObj instead of pointer hack
         if(auto user = dyn_cast<User>(pagEdge->getInst())){
           if(auto global = pointsToGlobal(user)) {
-            //worklistSvfg.push_back(getSvfgNode(global));
-            //trackedAllocas.insert(global); // hackish
             return true; 
           }
         }
@@ -1092,7 +1040,6 @@ void AnnotateNew::getSourceAllocas(set<SVFGNode*> &svfgNodes, vector<const SVFGN
     for(auto val: *data) { 
       Instruction *current = (Instruction*)dyn_cast<StmtSVFGNode>(val)->getPAGEdge()->getInst(); 
       debug(Yes) << *current << " here\n"; 
-      //debug(Yes) << "ALLOCAAA : " << *current << "\n";
       if(auto global = pointsToGlobal(dyn_cast<User>(current))) {
         trackedAllocas.insert(global);
         worklistSvfg.push_back(getSvfgNode(global));
@@ -1101,10 +1048,6 @@ void AnnotateNew::getSourceAllocas(set<SVFGNode*> &svfgNodes, vector<const SVFGN
         trackedAllocas.insert(current);
       }
     }
-
-    //std::copy(allocas.begin(), allocas.end(), std::back_inserter(worklistSvfg));
-    //for(auto it = allocas.begin(), end = allocas.end(); it != end; it++)
-    //trackedAllocas.insert(dyn_cast<StmtSVFGNode>(*it)->getInst()); 
   }
 }
 
@@ -1129,23 +1072,14 @@ void AnnotateNew::getScalarStores(Value *scalar, set<Value*>& stores) {
     if(dyn_cast<Constant>(current)) {
       continue;
     }
-    //debug(Yes) << "Use: " << *current << "\n";
     for(auto &use: current->uses()) {
       auto user = use.getUser();
-      //debug(Yes) << "User: " << *user << "\n";
-      //debug(Yes) << 
       if(isMemTransfer(user)) {
         debug(Yes) << "STOREEEE: " << *user << "\n";
         stores.insert(user);
       }
 
-      //TODO can we skip this? Since if a scalar has a memory value,
-      //there must always be a load in it's chain, making this gep redundant?
-      //Can there be a gep in its chain without a load?
-      //if(dyn_cast<GetElementPtrInst>(user))
-      //stores.insert(user);
-      //assert(false);
-
+      
       worklist.push_back(user);
     }
   }
@@ -1158,9 +1092,6 @@ void trackIfMemory(const SVFGNode* current, set<const Value*> &trackedAllocas) {
   if(auto casted = dyn_cast<StmtSVFGNode>(current)) {
     if(casted->getInst()) {
       auto inst = casted->getInst();
-      //TODO remove this debug statement
-      //debug(Yes) << "Going forward on Instruction : " << *inst << " in function " <<  inst->getParent()->getParent()->getName() << "\n";
-
       if(dyn_cast<AllocaInst>(casted->getInst()) || dyn_cast<GlobalValue>(casted->getInst()))
         trackedAllocas.insert(casted->getInst());
 
@@ -1189,22 +1120,16 @@ void AnnotateNew::getStoreSvfg(set<Value*> &stores, set<SVFGNode*> &storeSvfg) {
   for(auto &value: stores) {
     if(!isMemTransfer(value))
       assert("Must be a memory transfer value" && false);
-    //debug(Yes) << "in store svfg: " << *value << "    - >  "  << *dyn_cast<User>(value)->getOperand(1) << "\n";
-
     Value *val = dyn_cast<User>(value)->getOperand(1);
 
     val = val->stripPointerCasts();
 
-    //debug(Yes) << "stripping : " << *val << "\n";
     storeSvfg.insert(getSvfgNode(val));
-    //debug(Yes) << *dyn_cast<User>(value)->getOperand(1) <<"\n";
   }
 }
 
 void getBbsTillJoin(BasicBlock *join, set<BasicBlock*>& markedBBs, BranchInst *I) {
   for(int i = 0; i < I->getNumSuccessors(); i++) {
-    //debug(Yes) << "In successor " << i << "\n";
-    //debug(Yes) << I->getSuccessor(i) << "\n";
     bool found = false; 
     //do dfs until found the join node, and get all BBs in the path
     auto lambdaCondition = [&](BasicBlock *temp) {
@@ -1255,7 +1180,6 @@ void AnnotateNew::getLoadsOnSlps(Value* pointer, set<Value*> &singleLevelLoads) 
 }
 
 void AnnotateNew::classifyVal(Value *value, set<SVFGNode*>& backwardPtr, set<const Value *> &singleLevelPointers, set<Value*>& scalar) {
-  //debug(Yes) << "Classifying :" << *value << "\n";
   if(value->getType()->isPointerTy() && supportedInst(value)) {
     auto pagNode = pag->getPAGNode(pag->getValueNode(value));
     auto svfgNode = svfg->getDefSVFGNode(pagNode);
@@ -1281,7 +1205,6 @@ void AnnotateNew::getBranchMemory(set<BranchInst *> &allBranches, map<Value *, s
     if(branchInst->isUnconditional())
       continue;
 
-    //TODO ?
     CmpInst *condition = dyn_cast<CmpInst>(branchInst->getCondition());
     if(!condition)
       continue;
@@ -1291,7 +1214,6 @@ void AnnotateNew::getBranchMemory(set<BranchInst *> &allBranches, map<Value *, s
 
     //argc values are marked by specialize arguments before specializing
     //check if branch depends on argc
-    //debug(Yes) << "Processing branch: " << *branchInst << "\n"; 
     debug(Yes) << "Processing branch :" << i << "\n"; 
     i++;
 
@@ -1299,14 +1221,7 @@ void AnnotateNew::getBranchMemory(set<BranchInst *> &allBranches, map<Value *, s
     vector<const SVFGNode*> worklistSvfg;
     for(int i = 0; i < condition->getNumOperands(); i++) {
 
-      //if(found)
-      //break;
-
-      //debug(Yes) << "Condition: " << *condition<< "\n";
       Value *current = condition->getOperand(i);
-
-      //if(!condValue)
-      //continue;
 
       //checkeing separately for condition just because it's easier to do so here :/
       if(dyn_cast<Instruction>(condition)->getMetadata("track_argc")) {
@@ -1329,10 +1244,6 @@ void AnnotateNew::getBranchMemory(set<BranchInst *> &allBranches, map<Value *, s
         return isLoad(value);
       };
 
-      //if scalar, get loads. if pointer and supported by svfg, get allocas
-      //for(unsigned i = 0; i < condValue->getNumOperands(); i++) {
-      //Value *current = condValue->getOperand(i);
-      //debug(Yes) << "Condition operand :" << *current << "\n";
 
       if(!current->getType()->isPointerTy()) {
         set<Value *> visited;
@@ -1355,35 +1266,6 @@ void AnnotateNew::getBranchMemory(set<BranchInst *> &allBranches, map<Value *, s
 
       if(!pointers.size())
         continue;
-      //set<SVFGNode*> poss;
-
-      //condition for when a branch instruction is of our use.
-      //FIXME uses allocs directly
-      /*
-         auto conditionLambda = [&](SVFGNode *node) {
-         if(auto temp = dyn_cast<StmtSVFGNode>(node)) {
-         if(auto inst = temp->getInst()) {
-      //debug(Yes) << "CONDITION LAMBDA: " << *inst << "\n";
-      if(dyn_cast<AllocaInst>(inst))
-      return true;
-
-      if(auto user = dyn_cast<User>(inst))
-      if(auto global = pointsToGlobal(user)) {
-      //poss.insert(getSvfgNode(global));
-      allocs.insert(global);
-      return true;
-      }
-
-      if(auto call = dyn_cast<CallInst>(inst))
-      if(call->getCalledFunction()->getName() == "malloc")
-      return true;
-      //if(trackedAllocas.find(temp->getInst()) != trackedAllocas.end())
-      //return true; 
-      }
-      }
-      return false;
-      };
-      */
 
       set<SVFGNode*> svfgNodes;
       //track back to alloca
@@ -1394,24 +1276,12 @@ void AnnotateNew::getBranchMemory(set<BranchInst *> &allBranches, map<Value *, s
           if(!value->getType()->isPointerTy())
             value = load->getPointerOperand();
 
-        //debug(Yes) << *value << "\n";
         pagNode = pag->getPAGNode(pag->getValueNode(value));
         auto svfgNode = svfg->getDefSVFGNode(pagNode);
         svfgNodes.insert((SVFGNode*)svfgNode);
       }
 
       getSourceAllocas(svfgNodes, worklistSvfg, allocs, false, false);
-
-      //set<SVFGNode*> visited;
-      //set<SVFGNode*> *poss = dfs_rec<SVFGNode*>((SVFGNode*) svfgNode, backwardDfsLambda, conditionLambda, visited);  
-      /*
-         if(poss.size()) {
-         debug(Yes) << "Tracking branch : " << *branchInst << "\n"; 
-         found = true;
-         trackedBranches.insert(branchInst);
-         break;
-         }*/
-
     }
 
     for(auto &a: worklistSvfg)
@@ -1456,15 +1326,6 @@ void printAllAllocsMallocs(Module &M) {
 void AnnotateNew::getTrackedBranchBBs(BranchInst *I, set<BasicBlock *> &markedBBs, set<PHINode*> &phis, map<Function *, PostDominatorTree *> &postDoms) {
 
   PostDominatorTree *tree;
-  /*
-     if(postDoms.find(I->getParent()->getParent()) != postDoms.end()) {
-     tree = postDoms.find(I->getParent()->getParent())->second;
-     } else {
-     tree = &getAnalysis<PostDominatorTreeWrapperPass>(*I->getParent()->getParent()).getPostDomTree();
-     tree->updateDFSNumbers();
-     postDoms[I->getParent()->getParent()] = tree;
-     }
-     */
   tree = &getAnalysis<PostDominatorTreeWrapperPass>(*I->getParent()->getParent()).getPostDomTree();
 
   set<BasicBlock *> dominates;
@@ -1486,7 +1347,7 @@ void AnnotateNew::getTrackedBranchBBs(BranchInst *I, set<BasicBlock *> &markedBB
 
   if(!join) {
     debug(Yes) << "Could not find join for branch " << *I << " in BB : " << *I->getParent() << "\n";
-    //assert(false); //FIXME
+    assert(false); 
     return;
   }
 
@@ -1518,7 +1379,6 @@ void markArgcUsers(Value *argc) {
  */
 void AnnotateNew::run(vector<Value*> sources, Value *argc, set<const Value*> &trackedAllocas) {
 
-  //set<const Value *> singleLevelPointers; //store single level pointers
 
   //forward and backward dfs to get allocas/mallocs
   vector<const SVFGNode*> worklistSvfg;
@@ -1552,7 +1412,6 @@ void AnnotateNew::run(vector<Value*> sources, Value *argc, set<const Value*> &tr
     markArgcUsers(argc);
     set<SVFGNode*> svfgNodes;
     getBranchAndArgcInstructions(allBranches, calls, argcValues);
-    //getSourceAllocas(svfgNodes, worklistSvfg, trackedAllocas);
   }
 
   getLoopBbs(module);
@@ -1577,7 +1436,13 @@ void AnnotateNew::run(vector<Value*> sources, Value *argc, set<const Value*> &tr
 
   set<BranchInst*> argcBranches;
   //getBranchMemory(allBranches, branchDp, argcBranches);
+  set<BranchInst*> trackedBranches; 
 
+    if(argcBranches.size()) {
+      debug(Yes)<<"HACKY argcBranches executes\n";
+      trackedBranches.insert(argcBranches.begin(), argcBranches.end());
+    }  
+    
   //getArgc(trackedAllocas, M); 
 
   while(1) {
@@ -1629,7 +1494,6 @@ void AnnotateNew::run(vector<Value*> sources, Value *argc, set<const Value*> &tr
       singleLevelPointers.clear();
       if(stores.size()) {
         getStoreSvfg(stores, storeSvfg);
-        //continue;
       }
       getSourceAllocas(storeSvfg,worklistSvfg, trackedAllocas);
     }
@@ -1637,15 +1501,8 @@ void AnnotateNew::run(vector<Value*> sources, Value *argc, set<const Value*> &tr
 
 
     //get all branch instructions touching tainted data
-    set<BranchInst*> trackedBranches; 
     getTaintedBranches(trackedBranches, branchDp, trackedAllocas);
 
-    //TODO this runs only for the first iteration really. Hacky. fix this
-    if(argcBranches.size()) {
-      debug(Yes)<<"HACKY argcBranches executes\n";
-      trackedBranches.insert(argcBranches.begin(), argcBranches.end());
-      argcBranches.clear();
-    }
 
     debug(Yes) << "Tracked Branches size: " << trackedBranches.size() << "\n";
     if(!trackedBranches.size())
@@ -1662,7 +1519,6 @@ void AnnotateNew::run(vector<Value*> sources, Value *argc, set<const Value*> &tr
     set<BasicBlock*> markedBBs;
     set<PHINode*> phis;
     for(auto &I: trackedBranches) {
-      //BasicBlock *join = getJoinBb(I->getParent()); 
       getTrackedBranchBBs(I, markedBBs, phis, postDoms); 
     }
 
@@ -1674,6 +1530,8 @@ void AnnotateNew::run(vector<Value*> sources, Value *argc, set<const Value*> &tr
      * 5) handle phi nodes
      * 6) handle scalars
      */
+      
+    trackedBranches.clear();  
     if(markedBBs.size()) {
       set<SVFGNode*> backwardPtr;
       set<Value *> scalars; //scalars
@@ -1704,7 +1562,6 @@ void AnnotateNew::run(vector<Value*> sources, Value *argc, set<const Value*> &tr
           debug(Yes) << "In branch : " << I << "\n";
         }
       }
-      //getSourceAllocas(backwardPtr, worklistSvfg, trackedAllocas);
       set<Value*> stores;
 
       for(auto &slp: slps)
@@ -1732,9 +1589,6 @@ void AnnotateNew::run(vector<Value*> sources, Value *argc, set<const Value*> &tr
       continue;
 
     processedLoops.insert(BB);
-
-    //getLoopIterators(BB, trackedAllocas); 
-    //annotateLoop(BB, loopFunc);
   }
 
   debug(Yes) << "MARKED LOOPS: " << markedLoops.size() << "\n";
@@ -1770,9 +1624,7 @@ Function *createFunction(Type *returnType, vector<Type*> &args, bool isVarArg, c
 double statFormula(Stat *a) {
   return a->stores.size() * 0.0 + a->loads.size() * 1.0;
 }
-/**
- * TODO add preserves information
- */
+
 bool AnnotateNew::runOnModule(Module &M) {
   auto started = std::chrono::high_resolution_clock::now();
   initDebugLevel();
@@ -1791,9 +1643,6 @@ bool AnnotateNew::runOnModule(Module &M) {
 
   globPag = pag;
   globSvfg = svfg;
-
-  //printAllAllocsMallocs(M);
-
 
   set<const Value*> trackedAllocas;
 
@@ -1842,14 +1691,14 @@ bool AnnotateNew::runOnModule(Module &M) {
     Stat *stat = &kv.second;
     debug(Yes)<<"kv.first: "<<*kv.first<<"\n";
 
-    if(isLoadsLimited){
+    if(isTrackedLimited){
       debug(Yes)<<"Performing instrinisc check...\n";
 
-      if(!isa<IntrinsicInst>(kv.first)){   //!isa<MemCpyInst>(kv.first)){
+      if(!isa<IntrinsicInst>(kv.first)){   
         debug(Yes)<<"Not instrinsic inst: "<<*kv.first<<"\n";
 
 
-        const SVFGNode* srcNode = valToNode[kv.first]; //getSvfgNode(kv.first);
+        const SVFGNode* srcNode = valToNode[kv.first];
         if(srcNode){
           set<const Instruction*> Loads;
           set<const SVFGNode*> visited;
@@ -1900,7 +1749,7 @@ bool AnnotateNew::runOnModule(Module &M) {
 
     debug(Yes) << "SIZE" << trackedAllocas.size() << "\n";
     debug(Yes) << "Sorted Values" << "\n";
-    if (!isLoadsLimited) {
+    if (!isTrackedLimited) {
       for(int i = statValues.size() - 1; i >= 0; i--) { 
         debug(Yes) << *statValues[i]->value << " with value: " << (int) statFormula(statValues[i]) << "\n"; 
         Value *I = statValues[i]->value;
@@ -1917,7 +1766,7 @@ bool AnnotateNew::runOnModule(Module &M) {
         }
       } 
     } else {
-      int topNValue = (loadPercent/100.0) * sortedLoads.size();
+      int topNValue = (trackedPercent/100.0) * sortedLoads.size();
       debug(Yes)<<"Considering only top "<<topNValue<<" values + memcpy insts # "<<MemCpy.size() <<"\n";
 
       unsigned remaining = topNValue;
@@ -1992,5 +1841,11 @@ bool AnnotateNew::runOnModule(Module &M) {
     AU.addRequired<TargetLibraryInfoWrapperPass>();
     AU.addRequired<DominatorTreeWrapperPass>();
     AU.addRequired<PostDominatorTreeWrapperPass>();
+    AU.addPreserved<LoopInfoWrapperPass>();
+    AU.addPreserved<ScalarEvolutionWrapperPass>();
+    AU.addPreserved<TargetLibraryInfoWrapperPass>();
+    AU.addPreserved<DominatorTreeWrapperPass>();
+    AU.addPreserved<PostDominatorTreeWrapperPass>();
+
   }
 

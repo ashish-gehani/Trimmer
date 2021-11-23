@@ -66,8 +66,8 @@ def parse_args(args):
         contextType = 1
         isLimitedDepth = False
         depthLimit = 0
-        isLoadsLimited = False
-        loadPercent = 100
+        isTrackedLimited = False
+        trackedPercent = 100
         useGlob = False
         exceedLimit = 0
         disableExit = False
@@ -115,9 +115,9 @@ def parse_args(args):
                 elif(args[i] == 'depthLimit'):
                         isLimitedDepth = True
                         depthLimit = args[i+1]
-                elif(args[i] == "loadPercent"):
-                        isLoadsLimited = True
-                        loadPercent = args[i+1]
+                elif(args[i] == "trackedPercent"):
+                        isTrackedLimited = True
+                        trackedPercent = args[i+1]
                 elif(args[i] == "useGlob"):
                         useGlob = True
                 elif(args[i] == "exceedLimit"):
@@ -127,5 +127,5 @@ def parse_args(args):
                 
 
 
-	return (manifest_file,man_data, work_dir, opt_flag, strip_flag, icp_flag, annot_flag, track_allocas, contextType, isLimitedDepth, depthLimit, isLoadsLimited, loadPercent, useGlob,exceedLimit,disableExit,useRegOffset,opt_level,file_specialize,loop,string_specialize,spec_flag)
+	return (manifest_file,man_data, work_dir, opt_flag, strip_flag, icp_flag, annot_flag, track_allocas, contextType, isLimitedDepth, depthLimit, isTrackedLimited, trackedPercent, useGlob,exceedLimit,disableExit,useRegOffset,opt_level,file_specialize,loop,string_specialize,spec_flag)
 

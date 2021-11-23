@@ -113,13 +113,7 @@ void ConstantFolding::getAnalysisUsage(AnalysisUsage &AU) const {
   AU.addRequiredID(LCSSAID);
   AU.addPreservedID(LCSSAID);
   AU.addRequired<ScalarEvolutionWrapperPass>();
-  // AU.addPreserved<ScalarEvolutionWrapperPass>();
   AU.addRequired<TargetTransformInfoWrapperPass>();
-  // FIXME: Loop unroll requires LCSSA. And LCSSA requires dom info.
-  // If loop unroll does not preserve dom info then LCSSA pass on next
-  // loop will receive invalid dom info.
-  // For now, recreate dom info, if loop is unrolled.
-  AU.addPreserved<DominatorTreeWrapperPass>();
 
 }
 
@@ -331,7 +325,7 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
     if(exit)
       return;
 
-    LoopInfo *LI= &getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo(); //TODO should not recalculate on each iteration
+    LoopInfo *LI= &getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo(); 
     debug(Yes)<<"LoopInfo NULL?: "<<(LI==NULL)<<"\n";
     int size = worklistBB.size() - 1;
     BasicBlock *current = worklistBB[size].back();
@@ -394,7 +388,6 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
         toRun = currfn;
 
         LI = &getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();
-        //TODO hackish way of running on old failed loopHeader
         LoopUnroller::deleteLoop(failedLoop);
         runOnBB(failedLoop);
       }else {
@@ -459,9 +452,6 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
   if(!fi->context) {
     fi->context = bbOps.duplicateMem(currBB);
     debug(Yes) << "Unexpected behavior -> no context returned : possible if cant return from function, or unreachable instruction hit\n";
-    //TODO: Can we hit unreachable and exit, even if there's a return present?
-    //currfn = temp;
-    //return;
   }
   debug(Yes)<<"[Rafae] Copying Context for "<<toRun->getName()<<"\n";
   debug(Yes)<<"CurrBB: "<<*currBB<<"\n";
@@ -627,8 +617,7 @@ set<GlobalVariable *> ConstantFolding::dfs(CallGraphNode *root, map<Function *, 
 
     Cycle *newCycle;
 
-    //FIXME redundant in case of size = 1
-    if(oldCycles.size())
+    if(oldCycles.size() > 1)
       newCycle = mergeCycles(oldCycles);
     else
       newCycle = new Cycle;
@@ -641,9 +630,8 @@ set<GlobalVariable *> ConstantFolding::dfs(CallGraphNode *root, map<Function *, 
       newCycle->values.insert(modSet[func].begin(), modSet[func].end());
     }
 
-    //update mod sets. FIXME can just replace instead of merging here?
     for(auto &func: cycleFunctions)
-      modSet[func].insert(newCycle->values.begin(), newCycle->values.end());
+      modSet[func] = newCycle->values;
 
     //for(auto &cycle: oldCycles)
     //delete cycle;
@@ -1086,10 +1074,25 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
   Register *regOffset = processInstAndGetRegister(offsetVal);
 
   if((/*useRegOffset && */ !isConst  && !regOffset) /*|| (!useRegOffset && !isConst)*/) {
-    //TODO recursively mark memory non constant
     debug(Yes) << "GepInst : offset not constant\n";
-    bbOps.setConstContigous(false, reg->getValue(), currBB);
-    return NOTFOLDED;
+    unsigned contSize = bbOps.getSizeContigous(reg->getValue(), currBB);
+    unsigned allocSize = DL->getTypeAllocSize(reg->getType());
+    unsigned numArray = contSize/allocSize;
+    uint64_t address = reg->getValue();
+    for(unsigned i=0;i<numArray;i++){
+  
+      if(reg->getType()->isPointerTy()){
+          debug(Yes)<<"Marking memory non const! \n";
+          markMemNonConst(dyn_cast<PointerType>(reg->getType())->getElementType(), address, currBB);
+      }
+
+      else{
+          debug(Yes)<<"Marking memory non const! \n";
+          markMemNonConst(reg->getType(), address, currBB);
+      }
+      address = address + allocSize;
+    }
+  return NOTFOLDED;    
   }
   if(reg->getValue()==999999999)
   {
@@ -1345,8 +1348,7 @@ ProcResult ConstantFolding::processReturnInst(ReturnInst * retInst) {
 
    If the callInst is an external call, internal call that we dont visit or
    an indirect function call that we fail to simplify we mark all its input 
-   arguments as non constant
-TODO : we should mark the globals accessed by it as non constant.
+   arguments and all globals as non constant
 
 */
 void ConstantFolding::markGlobAsNonConst(Function *F) {
@@ -1786,7 +1788,7 @@ ProcResult ConstantFolding::handleExtractValue(ExtractValueInst *inst) {
 ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
 
   if(!callInst->getCalledFunction() && !simplifyCallback(callInst)) {
-    //TODO: mark all globals as non constant?
+    //Assumption: Global variables not accessed in dynamic libraries.
     markArgsAsNonConst(callInst);
     return NOTFOLDED;
   }
@@ -2683,8 +2685,7 @@ ProcResult ConstantFolding::processReallocInst(CallInst *ci) {
     debug(Yes) << "realloc: register not found or size not constant\n";
     return NOTFOLDED;
   }
-
-  //@TODO not going to actually realloc. just allocate more memory. Warning, memory leak
+    
   uint64_t addr = bbOps.allocateHeap(size->getZExtValue(), currBB);
   char *oldAddr = (char *) bbOps.getActualAddr(reg->getValue(), currBB);
   uint64_t size_old = bbOps.getSizeContigous(reg->getValue(), currBB);
@@ -2858,7 +2859,6 @@ bool ConstantFolding::handleStrSep(CallInst *callInst) {
     debug(Yes) << "after storing null: " << bbOps.loadMem(reg1->getValue(), DL->getPointerSize(), currBB) << "\n";
     debug(Yes) << "storing null" << "\n";
   }
-  //addSingleVal(arg1, reg1->getValue() + (stringpCopy - stringp), true, true); //@TODO memory leak for register overwriting
   debug(Yes) << "strsep: returned " << result << "\n";
   return true;
 }
@@ -4725,8 +4725,17 @@ bool ConstantFolding::handleGetOpt(CallInst * ci) {
   int result;
   if(name == "getopt_long") { 
     debug(Yes)<<"handleGetOpt: getopt_long\n";
-    option * long_opts = (option *) malloc(sizeof(option) * 350); //@FIXME 350 is arbitrary for long opts length
     int * long_index;
+    Register * longReg = processInstAndGetRegister(ci->getOperand(3));
+    if(!longReg){
+       debug(Yes)<<"long options not found\n";
+       return true;
+     }
+    uint64_t longAddr = longReg->getValue();
+    unsigned size = bbOps.getSizeContigous(longAddr, currBB);
+    debug(Yes)<<"size of long options "<<size<<"\n";
+    option * long_opts = (option *) malloc(size); 
+
     if(!handleLongArgs(ci, long_opts, long_index))
       return true;
     debug(Yes)<<"Calling getopt_long_local\n";
@@ -4919,7 +4928,7 @@ LoopUnroller *ConstantFolding::unrollLoopInClone(Function *currfn, Loop *L, Valu
   addFuncInfo(cloned, fi);
 
   LoopInfo *LI = unroller->getLoopInfo();
-  LI= &getAnalysis<LoopInfoWrapperPass>(*cloned).getLoopInfo(); //TODO should not recalculate on each iteration
+  LI= &getAnalysis<LoopInfoWrapperPass>(*cloned).getLoopInfo(); 
   debug(Yes) << "unrollLoopInClone: recomputing loop info \n";
   bbOps.recomputeLoopInfo(cloned, *LI, header);
 
@@ -5022,10 +5031,10 @@ void ConstantFolding::markMemNonConst(Type *ty, uint64_t address, BasicBlock *BB
     return;
   //if(!ty->isPointerTy())
   //return;
-  if(!bbOps.checkConstMem(address, DL->getTypeAllocSize(ty), BB)) {
+  /*if(!bbOps.checkConstMem(address, DL->getTypeAllocSize(ty), BB)) {
     debug(Yes) << "Address already non constant: " << address << "\n";
     return;
-  }
+  }*/
 
   debug(Yes) << "marking mem non const in loop at address " << address << " to " << address + DL->getTypeAllocSize(ty)  <<"\n";
   bbOps.setConstContigous(false, address, BB);

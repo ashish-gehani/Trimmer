@@ -1,0 +1,104 @@
+{
+    "benchmarks": [
+        {
+            "dirname" : "examples/TSE-2020/curl",
+            "execname": "curl",
+            "enabled" : "true"
+        },
+        {
+            "dirname" : "examples/TSE-2020/knockd",
+            "execname": "knockd",
+            "enabled" : "true"
+        },
+        {
+            "dirname" : "examples/TSE-2020/httping",
+            "execname": "httping",
+            "enabled" : "true"
+        },
+        {
+            "dirname" : "examples/TSE-2020/gprof",
+            "execname": "gprof",
+            "enabled" : "true"
+        },
+                {
+            "dirname" : "examples/TSE-2020/yices",
+            "execname": "yices",
+            "enabled" : "true"
+        },
+        {
+            "dirname" : "examples/TSE-2020/sans",
+            "execname": "sans",
+            "enabled" : "true"
+        },
+        {
+            "dirname" : "examples/TSE-2020/gzip",
+            "execname": "gzip",
+            "enabled" : "true"
+        },
+	    {
+            "dirname" : "examples/TSE-2020/mini_httpd",
+            "execname": "mini_httpd",
+            "enabled" : "true"
+        },
+        {
+            "dirname" : "examples/TSE-2020/aircrack",
+            "execname": "aircrack-ng",
+            "enabled" : "true"
+        },
+	    {
+            "dirname" : "examples/TSE-2020/airtun",
+            "execname": "airtun-ng",
+            "enabled" : "true"
+        },
+        {
+            "dirname" : "examples/TSE-2020/thttpd",
+            "execname": "thttpd",
+            "enabled" : "true"
+        },
+        {
+            "dirname" : "examples/TSE-2020/netperf",
+            "execname": "netperf",
+            "enabled" : "true"
+        },
+        {
+            "dirname" : "examples/TSE-2020/wget",
+            "execname": "wget",
+            "enabled" : "true"
+        },
+        {
+            "dirname" : "examples/TSE-2020/readelf",
+            "execname": "readelf",
+            "enabled" : "true"
+        },
+        {
+            "dirname" : "examples/TSE-2020/objdump",
+            "execname": "objdump",
+            "enabled" : "true"
+        },
+        {
+            "dirname" : "examples/TSE-2020/totd",
+            "execname": "totd",
+            "enabled" : "true"
+        },
+        {
+            "dirname" : "examples/TSE-2020/bzip2",
+            "execname": "bzip2",
+            "enabled" : "true"
+        },
+        {
+            "dirname" : "examples/TSE-2020/memcached",
+            "execname": "memcached",
+            "enabled" : "true"
+        },
+        {
+            "dirname" : "examples/TSE-2020/netstat",
+            "execname": "netstat",
+            "enabled" : "true"
+        },
+        {
+            "dirname" : "examples/TSE-2020/dnsproxy",
+            "execname": "dnsproxy",
+            "enabled" : "true"
+        }
+    ]
+}

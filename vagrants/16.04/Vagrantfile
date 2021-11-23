@@ -1,0 +1,22 @@
+GRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  config.vm.box = "bento/ubuntu-16.04"
+  config.vm.hostname = "xenial-trimmer"
+  config.vm.network "private_network", ip: "192.168.2.2" , netmask: "255.255.255.0"
+  config.ssh.forward_agent = true
+  config.ssh.forward_x11 = true
+
+  config.vm.provider :virtualbox do |v|
+    v.customize ["modifyvm", :id, "--memory", 102768]
+    v.customize ["modifyvm", :id, "--cpus", 16]
+    v.customize ["modifyvm", :id, "--ioapic", "on"]
+    v.customize ["modifyvm", :id, "--uartmode1", "file", File::NULL]
+  end
+
+  config.vm.provision "shell", privileged:false, inline: <<-'SHELL'
+
+  SHELL
+end
+

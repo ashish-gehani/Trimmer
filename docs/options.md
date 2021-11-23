@@ -56,6 +56,17 @@ By default a function clone limit is unlimited. If you want to limit the number 
 ```
 python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory] exceedLimit limit (where limit is the number of clones that a function can not exceed)
 ```
+
+Limiting Tracked Values:
+------------------------
+To control memory usage during constant propagation, we provide an option, _trackedPercent_, to limit the percentage of tracked values. This is done by prioritizing the tainted values by the number of times they are used as a source in load instructions and then selecting the specified percentage of values with the most dependent loads for tracking. This option is useful for programs that require maintenance of large amounts of shadow memory. Reducing the tracked values limits the number of contexts that need to be maintained simultaneously, thus reducing the memory consumed during constant propagation. By default, the value of _trackedPercent_ is set to 100 (i.e. all tainted variables are tracked).
+
+For example, to track 50% of the tainted values, use:
+
+```
+python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory] trackedPercent 50
+```
+
 ContextType
 -----------
 

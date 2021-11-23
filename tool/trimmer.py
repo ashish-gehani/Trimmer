@@ -20,7 +20,7 @@ debugPrint = 1
 
 class Trimmer:
 
-    def __init__(self, (manifest_file,man_data, work_dir, opt_flag, strip_flag, icp_flag, annot_flag, track_allocas, context_type, depth_flag, anot_depth,load_flag, load_percent,use_glob,exceed_limit,disable_exit,use_reg_offset,opt_level,file,loop,string,spec_flag)):
+    def __init__(self, (manifest_file,man_data, work_dir, opt_flag, strip_flag, icp_flag, annot_flag, track_allocas, context_type, depth_flag, anot_depth,tracked_flag, tracked_percent,use_glob,exceed_limit,disable_exit,use_reg_offset,opt_level,file,loop,string,spec_flag)):
 
 	self.manifestFile = manifest_file        
 	self.name = man_data["name"]
@@ -47,8 +47,8 @@ class Trimmer:
         self.loop_unroll = loop
         self.depth_flag = depth_flag
         self.anot_depth = anot_depth
-        self.load_flag = load_flag
-        self.load_percent = load_percent
+        self.tracked_flag = tracked_flag
+        self.tracked_percent = tracked_percent
         self.use_glob = use_glob
         self.exceed_limit = exceed_limit
         self.disable_exit = disable_exit

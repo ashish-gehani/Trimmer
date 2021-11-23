@@ -23,7 +23,7 @@ cd openssl-1.0.2g
 sudo make install
 cd ../..
 
-# Install WLLVM
+# Install WLLVM. Make sure that the installed location of pip is in your PATH
 curl "https://bootstrap.pypa.io/pip/2.7/get-pip.py" -o "get-pip.py"
 python get-pip.py
 pip install wllvm
