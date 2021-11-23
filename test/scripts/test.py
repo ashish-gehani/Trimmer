@@ -45,11 +45,11 @@ def run_test(workdir, typ, lo, hi):
     
        for i in xrange(lo, hi + 1):
         fileName = "../data/configFile" + str(i) + ".txt"
-        if not os.path.isfile(os.path.join(src_dir, 'inter' + str(i) + '.c')):
+        if not os.path.isfile(os.path.join(src_dir, 'test' + str(i) + '.c')):
             continue
         print 'running test ' + str(i)
         numTest = numTest + 1
-        Cmd = ['./' + script_file ,'inter' + str(i) ,'out' + str(i) , workdir, src_dir,fileName]
+        Cmd = ['./' + script_file ,'test' + str(i) ,'out' + str(i) , workdir, src_dir,fileName]
         if os.path.exists("temp.txt"):
           os.remove("temp.txt")
         f = open("temp.txt", "wb")
@@ -71,11 +71,11 @@ def run_test(workdir, typ, lo, hi):
       src_dir = os.path.join(script_dir, '../src', typ + "_tests")  
       for i in xrange(lo, hi + 1):
         fileName = "../data/configFile" + str(i) + ".txt"
-        if not os.path.isfile(os.path.join(src_dir, 'inter' + str(i) + '.c')):
+        if not os.path.isfile(os.path.join(src_dir, 'test' + str(i) + '.c')):
             continue
         print 'running test ' + str(i)
         numTest = numTest + 1
-        Cmd = ['./' + script_file ,'inter' + str(i) ,'out' + str(i) , workdir, src_dir,fileName]
+        Cmd = ['./' + script_file ,'test' + str(i) ,'out' + str(i) , workdir, src_dir,fileName]
         if os.path.exists("temp.txt"):
           os.remove("temp.txt")
         f = open("temp.txt", "wb")
