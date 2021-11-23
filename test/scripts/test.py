@@ -3,8 +3,13 @@
 # license that can be found in the LICENSE file.
 
 import subprocess
-import sys, os
+import sys, os, re
 import argparse
+
+_nsre = re.compile('([0-9]+)')
+def natural_sort_key(s):
+    return [int(text) if text.isdigit() else text.lower()
+            for text in re.split(_nsre, s)]   
 
 def run_test(workdir, typ, lo, hi):
 
@@ -17,39 +22,26 @@ def run_test(workdir, typ, lo, hi):
     numTest = 0;
     numPass = 0;
     numFail = 0;
-    index = 0
-    if typ == 'all':
-      f = open("tests.txt", "rb")
-      text = str(f.read())
-      f.close()
-      lines = text.split('\n')
-      test_type_array = []
-      test_start_array = []
-      test_end_array = []
 
-      for line in lines:
-       split_line = line.split(',')
-       if len(split_line) <=1:
-         continue;
-       test_type_array.append(split_line[0])
-       test_start_array.append(int(split_line[1]))
-       test_end_array.append(int(split_line[2]))
-      
+    if typ == 'all':
+      test_type_array = ['annotation','constprop','fileio','loop','pointer','stress','misc']
+            
       for typ in test_type_array:
        print('\nTest Directory: ' + typ + '_tests')
-       lo = test_start_array[index]
-       hi = test_end_array[index]
        script_file = 'script.sh' if typ != 'annotation' else 'annotate.sh'
        src_dir = os.path.join(script_dir, '../src', typ + "_tests")
-       index = index + 1
+       list_files = os.listdir(src_dir)
+       i = 1
     
-       for i in xrange(lo, hi + 1):
+       for entry in sorted(list_files,key=natural_sort_key):
+        if not(entry.endswith(".c")) or os.path.isdir(src_dir + entry):
+          continue
+          
         fileName = "../data/configFile" + str(i) + ".txt"
-        if not os.path.isfile(os.path.join(src_dir, 'test' + str(i) + '.c')):
-            continue
-        print 'running test ' + str(i)
+        entry = entry[0:entry.find(".c")]
+        print 'running test ' + entry
         numTest = numTest + 1
-        Cmd = ['./' + script_file ,'test' + str(i) ,'out' + str(i) , workdir, src_dir,fileName]
+        Cmd = ['./' + script_file ,entry ,'out' + str(i) , workdir, src_dir,fileName]
         if os.path.exists("temp.txt"):
           os.remove("temp.txt")
         f = open("temp.txt", "wb")
@@ -62,6 +54,7 @@ def run_test(workdir, typ, lo, hi):
         else:
           numFail = numFail + 1
           print("Test failed")
+        i = i + 1;
       print("\nTotal Tests: " + str(numTest))
       print("Passed: " + str(numPass))
       print("Failed: " + str(numFail))
