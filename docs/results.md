@@ -1,7 +1,7 @@
 Trimmer: Impact on Code Size Reductions
 =======================================
 
-The following table shows the percentage reduction in code size for each benchmark.
+The following table shows the percentage reduction in code size for each benchmark in the [TSE-2020 set](/benchmarks/examples/TSE-2020).
 
 |Benchmark  |Baseline(-O3) Size|Debloated Size|Percentage Reduction|
 |:---------:|:----------------:|:-------------:|:------------------:|
