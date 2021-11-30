@@ -1,16 +1,19 @@
-Trimmer Test Cases
+Trimmer Test Suite
 ==================
 
-**Test Cases Directory Structure**:
+We provide a test suite to check the correctness and effectiveness of debloating by Trimmer. This includes tests for individual transformations (e.g. annotation pass, loop-unrolling etc) along with stress tests. 
 
-The test cases directory, test/src contains following subdirectories:
+Test Cases Directory Structure
+------------------
+
+The test cases directory, test/src contains the following subdirectories:
 
   * **annotation_tests** contains test cases for annotation pass.
   * **loop_tests** contains test cases for loop unrolling pass.
   * **fileio_tests** contains test cases for file I/O specialization pass.
   * **constprop_tests** contains test cases for constant propagation pass.
   * **pointer_tests** contains test cases that deal with pointers.
-  * **stress_tests** contains stress tests (e.g., dealing with large loop unroll count).
+  * **stress_tests** contains stress tests (e.g., dealing with large loop unroll counts).
   * **misc_tests** contains various other test cases that do not fit in other categories.
   * **data** contains text files used by test cases in fileio_tests.
 
@@ -19,9 +22,7 @@ The test cases directory, test/src contains following subdirectories:
 Running Test Cases
 ------------------
 
-Test cases directory: /test/src
-      
-* Includes a suite of multiple test cases used to measure the effectiveness of TRIMMER in debloating unused code. 
+The test cases are in the [/test/src](/test/src) directory. We provide scripts to run these tests in the [/test/scripts](/test/scripts) directory
   
  
  **Running Test Examples**:
