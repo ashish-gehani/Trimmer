@@ -1,17 +1,17 @@
 Trimmer Options
 ===============
 
-Trimmer can be run by the following command
+**Trimmer** can be run by the following command
 
 ```
 python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory] [options]
 ```
-Here, the environmental variable ${TRIMMER_HOME} points to the home directory where Trimmer is cloned. This variable is set automatically if Trimmer is built using the provided vagrant file ([bootstrap.sh](/vagrants/16.04/bootstrap.sh)). An example of running Trimmer can be found [here](/benchmarks/examples/TSE-2020/curl/Makefile) in the target _compress_. 
+Here, the environmental variable ${TRIMMER_HOME} points to the home directory where *Trimmer* is cloned. This variable is set automatically if **Trimmer** is built using the provided vagrant file ([bootstrap.sh](/vagrants/16.04/bootstrap.sh)). An example of running **Trimmer** can be found [here](/benchmarks/examples/TSE-2020/curl/Makefile) in the target _compress_. 
 
 Optimization Level 
 ------------------
 
-The optimization level specifies the level of optimization done by clang at the end of the Trimmer pipeline. By default, the optimization level is 3 (i.e. -O3 optimization). If you want to change the optimization level (0,1,2,3,s), run
+The optimization level specifies the level of optimization done by clang at the end of the **Trimmer** pipeline. By default, the optimization level is 3 (i.e. -O3 optimization). If you want to change the optimization level (0,1,2,3,s), run
 
 ```
 python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory] optLevel level (where level can be one of the options 0,1,2,3,s)
@@ -64,7 +64,7 @@ By default a function clone limit is unlimited (i.e. functions will be cloned fo
 python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory] exceedLimit limit (where limit is the number of clones that a function can not exceed)
 ```
 
-This option can often be useful for applications in which unlimited function cloning results in larger binaries or when specialization takes too long to complete because of function clones. In our TSE-2020 benchmarks, we limited function clones for three applications: _wget_, _gprof_ and _objdump_. The optimum values for clone limit can be empirically determined. An example of running Trimmer with clone limiting can be found [here](/benchmarks/examples/TSE-2020/gprof/Makefile) in the target _gprof_.
+This option can often be useful for applications in which unlimited function cloning results in larger binaries or when specialization takes too long to complete because of function clones. In our TSE-2020 benchmarks, we limited function clones for three applications: _wget_, _gprof_ and _objdump_. The optimum values for clone limit can be empirically determined. An example of running **Trimmer** with clone limiting can be found [here](/benchmarks/examples/TSE-2020/gprof/Makefile) in the target _gprof_.
 
 Limiting Tracked Values:
 ------------------------
@@ -75,12 +75,12 @@ For example, to track 50% of the tainted values, use:
 ```
 python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory] trackedPercent 50
 ```
-An example of running Trimmer with limited value tracking can be found [here](/benchmarks/examples/Others/ImageMagick/Makefile) in the target _magick_.
+An example of running **Trimmer** with limited value tracking can be found [here](/benchmarks/examples/Others/ImageMagick/Makefile) in the target _magick_.
 
 ContextType
 -----------
 
-Trimmer supports context-insensitive(CI), sparse context-sensitive(sparse-CS) and full context-sensitive(full-CS) constant propagation. By default, the context is sparse-CS. The context type can be changed using **_contextType_** option. To run other context types, use
+**Trimmer** supports context-insensitive(CI), sparse context-sensitive(sparse-CS) and full context-sensitive(full-CS) constant propagation. By default, the context is sparse-CS. The context type can be changed using **_contextType_** option. To run other context types, use
 
 ```
 python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory] contextType 0,1 or 2 (where 0 stands for CI, 1 stands for sparse-CS and 2 stands for full-CS.)

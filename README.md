@@ -12,7 +12,7 @@ Build
 
 We provide a script [bootstrap.sh](vagrants/16.04/bootstrap.sh) to install the dependencies needed, including [LLVM](https://llvm.org)'s `clang` (version 7) sources and [SVF](https://github.com/SVF-tools/SVF), to build **Trimmer** and run it on the included examples. (**Note**: It replaces `~/.bash_profile`. Adjust as needed.)
 
-At its core, the Trimmer build is effected with:
+At its core, the **Trimmer** build is effected with:
 ```
 mkdir build
 export TRIMMER_HOME=<path to top-level of Trimmer>
@@ -49,7 +49,7 @@ Synopsis
 ```
 python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory] [options]
 ```
-Providing the _manifest file_ and _working-directory_ (i.e. where intermediate and final specialized files will be stored) is required. If options are not explicitly provided, Trimmer uses the default values. A list of options (along with the default values) can be found in [options.md](/docs/options.md). Moreover, a description of executing the specialized binaries after specialization can be found in [usage.md](/docs/usage.md).
+Providing the _manifest file_ and _working-directory_ (i.e. where intermediate and final specialized files will be stored) is required. If options are not explicitly provided, **Trimmer** uses the default values. A list of options (along with the default values) can be found in [options.md](/docs/options.md). Moreover, a description of executing the specialized binaries after specialization can be found in [usage.md](/docs/usage.md).
 
 
 Description of manifest file 

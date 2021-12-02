@@ -1,7 +1,7 @@
 Trimmer Test Suite
 ==================
 
-We provide a test suite to check the correctness and effectiveness of debloating by Trimmer. This includes tests for individual transformations (e.g. annotation pass, loop-unrolling etc) along with stress tests. 
+We provide a test suite to check the correctness and effectiveness of debloating by **Trimmer**. This includes tests for individual transformations (e.g. annotation pass, loop-unrolling etc) along with stress tests. 
 
 Test Cases Directory Structure
 ------------------
@@ -68,5 +68,5 @@ int main(int argc, char ** argv) {
 }
 ```
 
-In this test case, we are checking whether "temp" is annotated by Trimmer annotation pass or not. If yes, then the test case passes else it fails.
+In this test case, we are checking whether "temp" is annotated by **Trimmer** annotation pass or not. If yes, then the test case passes else it fails.
 
