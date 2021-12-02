@@ -1,27 +1,29 @@
 Trimmer Options
 ===============
 
-**Trimmer** can be run by the following command
+**Trimmer** can be run by the following command:
 
 ```
 python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory] [options]
 ```
-Here, the environmental variable ${TRIMMER_HOME} points to the home directory where *Trimmer* is cloned. This variable is set automatically if **Trimmer** is built using the provided vagrant file ([bootstrap.sh](/vagrants/16.04/bootstrap.sh)). An example of running **Trimmer** can be found [here](/benchmarks/examples/TSE-2020/curl/Makefile) in the target _compress_. 
+Here, the environmental variable ${TRIMMER_HOME} points to the home directory where **Trimmer** is cloned. This variable is set automatically if **Trimmer** is built using the provided vagrant file ([bootstrap.sh](/vagrants/16.04/bootstrap.sh)). The _manifest_-file describes the context for specialization of a target application and the working-directory is where the intermediate and final specialized files will be stored. These two parameters are required for running **Trimmmer**. If _options_ are not explicitly provided, **Trimmer** uses the default values. A list of options (along with the default values) are described below. 
+
+An example of running **Trimmer** can be found [here](/benchmarks/examples/TSE-2020/curl/Makefile) in the target _compress_. 
 
 Optimization Level 
 ------------------
 
-The optimization level specifies the level of optimization done by clang at the end of the **Trimmer** pipeline. By default, the optimization level is 3 (i.e. -O3 optimization). If you want to change the optimization level (0,1,2,3,s), run
+The optimization level specifies the level of optimization done by clang at the end of the **Trimmer** pipeline. By default, the optimization level is 3 (i.e. -O3 optimization). If you want to change the optimization level (0,1,2,3,s), run:
 
 ```
-python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory] optLevel level (where level can be one of the options 0,1,2,3,s)
+python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory] optLevel level 
 ```
-
+(where _level_ can be one of the following: 0,1,2,3,s)
 
 Constant Propagation
 --------------------
 
-Constant Propagation consists of loop unrolling, file I/O specialization and string specialization. By default, constant propagation is ON. To turn it OFF, run
+Constant Propagation consists of loop unrolling, file I/O specialization and string specialization. By default, constant propagation is ON. To turn it OFF, run:
 
 ```
 python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory] no-inter-constprop
@@ -32,24 +34,24 @@ Loop Unrolling, File I/O Specialization and String Specialization
 
 By default, loop unrolling, file I/O specialization and string specialization is ON. 
 
-To only turn ON loop unrolling, run
+To only turn ON loop unrolling, run:
 
 ```
 python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory] loop-unroll
 ```
-To only turn ON file I/O specialization, run
+To only turn ON file I/O specialization, run:
 
 ```
 python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory] file-specialize
 ```
 
-To only turn ON string specialization, run
+To only turn ON string specialization, run:
 
 ```
 python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory] string-specialize
 ```
 
-Similarly, different combinations of these specialization transforms can be turned on at the same time. For example, to turn on string and file specialization but not loop-unrolling, run 
+Similarly, different combinations of these specialization transforms can be turned on at the same time. For example, to turn on string and file specialization but not loop-unrolling, run:
 
 ```
 python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory] string-specialize file-specialize
@@ -61,8 +63,9 @@ Clone Limit
 By default a function clone limit is unlimited (i.e. functions will be cloned for specialization as many times as required/possible). The number of function clones can be limited by using the **_exceedLimit_** option as such:
 
 ```
-python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory] exceedLimit limit (where limit is the number of clones that a function can not exceed)
+python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory] exceedLimit limit 
 ```
+(where _limit_ is the number of clones that a function can not exceed)
 
 This option can often be useful for applications in which unlimited function cloning results in larger binaries or when specialization takes too long to complete because of function clones. In our TSE-2020 benchmarks, we limited function clones for three applications: _wget_, _gprof_ and _objdump_. The optimum values for clone limit can be empirically determined. An example of running **Trimmer** with clone limiting can be found [here](/benchmarks/examples/TSE-2020/gprof/Makefile) in the target _gprof_.
 
@@ -80,11 +83,12 @@ An example of running **Trimmer** with limited value tracking can be found [here
 ContextType
 -----------
 
-**Trimmer** supports context-insensitive(CI), sparse context-sensitive(sparse-CS) and full context-sensitive(full-CS) constant propagation. By default, the context is sparse-CS. The context type can be changed using **_contextType_** option. To run other context types, use
+**Trimmer** supports context-insensitive (CI), sparse context-sensitive (sparse-CS) and full context-sensitive (full-CS) constant propagation. By default, the context is sparse-CS. The context type can be changed using **_contextType_** option. To run other context types, use:
 
 ```
-python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory] contextType 0,1 or 2 (where 0 stands for CI, 1 stands for sparse-CS and 2 stands for full-CS.)
+python ${TRIMMER_HOME}/tool/trimmer.py [manifest-file] [working-directory] contextType level
 ```
+(where _level_ could be: _0_, _1_, or _2_. _0_ stands for context-insensitive, _1_ stands for sparse context-sensitive and _2_ stands for full context-sensitive.)
 
 Track Global Variables
 -----------

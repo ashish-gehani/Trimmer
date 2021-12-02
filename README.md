@@ -55,7 +55,7 @@ Providing the _manifest file_ and _working-directory_ (i.e. where intermediate a
 Description of manifest file 
 ----------------------------
 
-**Trimmer** provides a simple but powerful mechanism for specifying the deployment context to be used for program specialization, similar to the approach used by [OCCAM](https://github.com/ashish-gehani/OCCAM/). This consists of a _manifest_ file of key-valeue pairs in JSON format to describe the context for a target application:
+**Trimmer** provides a simple but powerful mechanism for specifying the deployment context to be used for program specialization, similar to the approach used by [OCCAM](https://github.com/ashish-gehani/OCCAM/). This consists of a _manifest_ file of key-value pairs in JSON format to describe the context for a target application:
 
 ```
 { "main" : "prog.bc"
@@ -70,7 +70,7 @@ Description of manifest file
 ```
 
 -   **main** : a path to the bitcode module containing the main entry point
--   **modules** : a list of paths to the other bitcode modules needed. Note that these modules will not be used for specialization since **Trimmer** does not support inter-module specialization
+-   **modules** : a list of paths to the other bitcode modules needed. Note that these modules will not be used for specialization since **Trimmer** does not support inter-module specialization (i.e. it operates only on a single bitcode file)
 -   **binary** : the name of the desired executable
 -   **native libs** : a list of flags (-lm, -lc, -lpthread) or paths to native objects (.o, .a, .so)
 -   **ldflags** : a list of linker flags such as --static, --nostdlib
@@ -95,13 +95,15 @@ The manifest file for `aircrack-ng` (which is one of the examples provided in th
 Examples
 --------
 
-We provide multiple examples of application specialization with **Trimmer** in the [examples folder](/benchmarks/examples). The TSE-2020 directory has 20 applications that were specialized with **Trimmer**. The results for these 20 applications can be found in [results.md](/docs/results.md). We also provide scripts to automatically run **Trimmer** on specified applications and return statistics. Instructions to run these scripts can be found [here](https://github.com/ashish-gehani/Trimmer/blob/master/benchmarks/README.md). 
+We provide multiple examples of application specialization with **Trimmer** in the [examples folder](/benchmarks/examples). The [TSE-2020 directory](/benchmarks/examples/TSE-2020) has 20 applications that were specialized with **Trimmer**. The results for these 20 applications can be found in [results.md](/docs/results.md). We also provide scripts to automatically run **Trimmer** on specified applications and return statistics. Instructions to run these scripts can be found [here](https://github.com/ashish-gehani/Trimmer/blob/master/benchmarks/README.md). 
+
+Note: These applications were tested on Linux 16.04. Some of these applications might not compile on newer versions of Linux.
 
 #### Generating Bitcode Files
 To run **Trimmer** on a new application, the whole-program bitcode must first be generated using `wllvm`/`gllvm`. The [wllvm repository](https://github.com/SRI-CSL/whole-program-llvm) provides examples and tutorials on generating bitcode files. The process of generating bitcode files can also be seen in the Makefiles of all of our examples. The examples in the **Trimmer** benchmarks currently use `wllvm` but can be modified to use `gllvm`. 
 
 #### Linking Bitcode Modules
-**Trimmer** does not provide inter-module specialization. Therefore, if an application has multiple modules, they must be linked together into one module for specialization with **Trimmer**. Bitcode files can be linked into one using the [llvm linker](https://llvm.org/docs/CommandGuide/llvm-link.html). An example of this can be found in one of our examples, [imagemagick](/benchmarks/examples/Others/ImageMagick/Makefile) in the target _link_.
+**Trimmer** does not provide inter-module specialization (i.e. it operates only on a single bitcode file). Therefore, if an application has multiple modules, they must be linked together into one module for specialization with **Trimmer**. Bitcode files can be linked into one using the [llvm linker](https://llvm.org/docs/CommandGuide/llvm-link.html). An example of this can be found in one of our examples, [imagemagick](/benchmarks/examples/Others/ImageMagick/Makefile) in the target _link_.
 
 Debug
 -----
