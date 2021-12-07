@@ -110,7 +110,7 @@ def run_argspec(tool):
 
 
         if(tool.track_allocas):
-                        Cmd = [opt, '-load', build_path + 'AnnotateNew.so', '-isAnnotated=' + str(tool.annot_flag),depth_limit_str,load_percent_str,'-mem2reg', '-loops', '-lcssa', '-loop-simplify', '-loop-rotate', '-indvars', '-svfg', curr_file, '-o', annotated_file]
+                        Cmd = [opt, '-load', build_path + 'AnnotateNew.so', '-isAnnotated=' + str(tool.annot_flag),depth_limit_str,load_percent_str,'-mem2reg', '-loops', '-lcssa', '-loop-simplify', '-loop-rotate', '-indvars', '-annotateNew', curr_file, '-o', annotated_file]
                                              
 
                         printDbgMsg(" ".join(Cmd))

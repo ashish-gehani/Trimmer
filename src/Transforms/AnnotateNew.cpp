@@ -16,9 +16,11 @@
 #include <set>
 #include <map>
 #include "WPA/Andersen.h"
-#include "MemoryModel/PAG.h"
+#include "Graphs/PAG.h"
 #include "MSSA/SVFGBuilder.h"
+#include "SVF-FE/PAGBuilder.h"
 #include "MSSA/MemSSA.h"
+#include "SVF-FE/LLVMModule.h"
 #include "llvm/Analysis/AssumptionCache.h"
 #include "LoopUnroller.h"
 #include <chrono>
@@ -60,7 +62,8 @@ struct DfsDepthInfo {
 
 
 PAG* globPag = NULL;
-SVFGOPT* globSvfg = NULL;
+SVFG* globSvfg = NULL;
+// SVFGOPT* globSvfg = NULL;
 set<SVFGNode*> forwardDp;
 map<SVFGNode* ,DfsDepthInfo*> forwardDepthDp;
 set<Value*> slpLoadDp;
@@ -95,7 +98,7 @@ map<Value *, Stat > statMap;
 Value *currentValue;
 
 using namespace std;
-using namespace analysisUtil;
+// using namespace analysisUtil;
 using namespace llvm;
 
 char AnnotateNew::ID = 0;
@@ -221,7 +224,7 @@ GlobalValue* getArgv(string argvName, Module &M) {
   return NULL;  
 }
 
-static RegisterPass<AnnotateNew> X("svfg", "Constant Folding for strings", false, false);
+static RegisterPass<AnnotateNew> X("annotateNew", "Constant Folding for strings", false, false);
 
 const BasicBlock *AnnotateNew::partOfLoop(const BasicBlock *BB) {
   if(loopHeaders.find(BB) != loopHeaders.end())
@@ -351,7 +354,7 @@ set<SVFGNode*> *AnnotateNew::dfs_rec_limit(SVFGNode* root, std::function<vector<
     debug(Yes)<<"Actual Parm!!!\n";
     depth--;
   } else if(auto in = dyn_cast<FormalINSVFGNode>(root)){
-    auto* F = in->getFun();
+    auto* F = in->getFun()->getLLVMFun();
     if(depthFunctions.find(F) == depthFunctions.end()){
       debug(Yes)<<"In function not in CallGraph depth\n";
       return output;
@@ -519,7 +522,7 @@ vector<SVFGNode*> AnnotateNew::forwardDfsLambdaLimited(SVFGNode *current) {
       debug(Yes)<<"CallGraph Function: "<<ARG->getParent()->getName()<<"\n";
     }
   } else if(auto in = dyn_cast<FormalINSVFGNode>(current)){
-    auto* F = in->getFun();
+    auto* F = in->getFun()->getLLVMFun();
     if(depthFunctions.find(F) == depthFunctions.end()){
       debug(Yes)<<"In function not in CallGraph depth\n";
       return worklist;
@@ -731,7 +734,6 @@ void AnnotateNew::getLoopBbs(Module *M) {
 
 void AnnotateNew::getLoopIterators(const BasicBlock *BB, set<const Value *> &trackedAllocas) {
 
-  TargetLibraryInfo *TLI = &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI();
 
   set<SVFGNode*> backwardPtr;
   set<Value *> scalars; //scalars
@@ -739,6 +741,8 @@ void AnnotateNew::getLoopIterators(const BasicBlock *BB, set<const Value *> &tra
   vector<const SVFGNode *> worklistSvfg;
 
   Function *F = (Function *)BB->getParent();
+  TargetLibraryInfo *TLI = &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI(*F);
+
   AssumptionCache &AC = getAnalysis<AssumptionCacheTracker>(*F).getAssumptionCache(*F);
   DominatorTree * DT = new DominatorTree(*F);
   LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>(*F).getLoopInfo();
@@ -1419,7 +1423,7 @@ void printAllAllocsMallocs(Module &M) {
   }
 
   debug(Yes)<<"asd size allocs "<<asd.size()<<"\n";
-  for(auto it = M.global_object_begin(), end = M.global_object_end(); it != end; it++)
+  for(auto it = M.global_objects().begin(), end = M.global_objects().end(); it != end; it++)
     if(!dyn_cast<Function>(&*it))
       asd.insert(&*it);
 
@@ -1710,7 +1714,7 @@ void AnnotateNew::run(vector<Value*> sources, Value *argc, set<const Value*> &tr
 }
 
 void AnnotateNew::annotateLoop(const BasicBlock *BB, Function *F, unsigned loop_id) {
-  IRBuilder<> builder((BasicBlock *) BB);
+  llvm::IRBuilder<> builder((BasicBlock *) BB);
 
   builder.SetInsertPoint((Instruction *) BB->getFirstNonPHI());
   vector<Value *> args;
@@ -1740,12 +1744,23 @@ double statFormula(Stat *a) {
  */
 bool AnnotateNew::runOnModule(Module &M) {
   initDebugLevel();
-  AndersenWaveDiff* ander = AndersenWaveDiff::createAndersenWaveDiff(M);
+
+  debug(Yes) << "...................................Annotation Pass started.......................................................................\n";
+
+  // TODO: Revisit this. Might be too slow. We are extracting an unoptimized SVF and then optimizing it
+  SVFModule* svfModule = LLVMModuleSet::getLLVMModuleSet()->buildSVFModule(M);  
+  PAGBuilder pag_builder;
+	PAG* svf_pag = pag_builder.build(svfModule);
+
+  AndersenWaveDiff* ander = AndersenWaveDiff::createAndersenWaveDiff(svf_pag);
+  // AndersenWaveDiff* ander = AndersenWaveDiff::createAndersenWaveDiff(svfModule);
   SVFGBuilder builder;
 
   LOOP_ID = 0;
   module = &M;
-  svfg =  builder.buildSVFG(ander);
+  // SVFG* unoptimized_svfg =  builder.buildFullSVFG(ander);
+  svfg =  builder.buildFullSVFG(ander);
+  // svfg =  new SVFGOPT(unoptimized_svfg->getMSSA(), VFG::FULLSVFG_OPT);
   pag = svfg->getPAG();
 
 

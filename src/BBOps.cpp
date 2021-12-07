@@ -205,7 +205,7 @@ void BBOps::freeBB(BasicBlock * BB) {
     return;
   if(ci->imageOf) // Todo : not efficient we should be able to delete it midway
     return;
-  TerminatorInst * ti = BB->getTerminator();
+  Instruction * ti = BB->getTerminator();
   for(unsigned i = 0; i < ti->getNumSuccessors(); i++) {
     if(isnotSingleSucc(BB, ti->getSuccessor(i))) continue;
     if(BasicBlockContexts.find(ti->getSuccessor(i)) == BasicBlockContexts.end()) return;
@@ -267,7 +267,7 @@ void BBOps::checkReadyToVisit(BasicBlock * BB) {
  * on successors that become unreachable. Successors that become reachable
  * are added to readyToVisit vector
  */
-void BBOps::markSuccessorsAsUR(TerminatorInst * termInst, LoopInfo& LI) {
+void BBOps::markSuccessorsAsUR(Instruction * termInst, LoopInfo& LI) {
   for(unsigned int index = 0; index < termInst->getNumSuccessors(); index++) {
     BasicBlock * successor = termInst->getSuccessor(index);
     if(isSingleSucc(termInst->getParent(), successor)) continue;
@@ -286,7 +286,7 @@ void BBOps::markSuccessorsAsUR(TerminatorInst * termInst, LoopInfo& LI) {
     propagateUR(successor, LI);
   }
 }  
-bool BBOps::foldToSingleSucc(TerminatorInst * termInst, vector<BasicBlock *> & readyToVisit,
+bool BBOps::foldToSingleSucc(Instruction * termInst, vector<BasicBlock *> & readyToVisit,
     LoopInfo& LI) {
   BasicBlock * single = NULL;
   if(BranchInst *  BI = dyn_cast<BranchInst>(termInst)) {

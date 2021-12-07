@@ -10,6 +10,8 @@
 #include "llvm/Support/raw_ostream.h"
 #include <string>  
 #include <fstream>
+#include "llvm/Support/CommandLine.h"
+
 
 
 using namespace llvm;

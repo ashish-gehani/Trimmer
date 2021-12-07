@@ -18,14 +18,27 @@
 #ifndef ANNOTATE_NEW
 #define ANNOTATE_NEW
 
-#include "MSSA/SVFGOPT.h"
-#include "MSSA/SVFG.h"
+#include "WPA/Andersen.h"
+#include "MSSA/SVFGBuilder.h"
+#include "SVF-FE/PAGBuilder.h"
 
 #include <map>
 #include <unordered_map>
 
+using namespace SVF;
 using namespace llvm;
 using namespace std;
+// typedef SVF::SVFGNode SVFGNode;
+// typedef SVF::PAG PAG;
+// typedef SVF::SVFG SVFG;
+// typedef SVF::SVFGOPT SVFGOPT;
+// typedef SVF::LoadSVFGNode LoadSVFGNode;
+// typedef SVF::StmtSVFGNode StmtSVFGNode;
+// typedef SVF::InterPHISVFGNode InterPHISVFGNode;
+// typedef SVF::FormalINSVFGNode FormalINSVFGNode;
+// typedef SVF::StorePE StorePE;
+// typedef SVF::PAGNode PAGNode;
+// typedef SVF::MRSVFGNode MRSVFGNode;
 
 Function *createFunction(Type *returnType, vector<Type*> &args, bool isVarArg, const string &name, Module *M);
 struct AnnotateNew: public ModulePass {
@@ -38,7 +51,8 @@ struct AnnotateNew: public ModulePass {
   bool runOnModule(Module &);
   string print(SVFGNode *node, SVFG *graph);
   PAG *pag;
-  SVFGOPT *svfg; 
+  // SVFGOPT *svfg; 
+  SVFG *svfg; 
   map<Value*, set<Value*> *> isLoadOrArgcDp;
   map<Value*, set<Value*> *> isLoadDp;
   map<SVFGNode*, set<SVFGNode*> *> backwardDp;
