@@ -49,8 +49,8 @@ def get_benchmarks(name):
             d = json.load(f)
             benchs = d['benchmarks']
         except ValueError as msg:
-            print "Error: while decoding JSON file " + name 
-            print msg
+            print (("Error: while decoding JSON file " + name)) 
+            print (msg)
     f.close()
     return benchs
 
@@ -215,7 +215,7 @@ def run_trimmer(dirname, execname, workdir, cpu, mem, delete_temps, trimmer_opts
     res_before, res_after = None, None
     #1. Generate bitcode: run `make`
     returncode,_,_,_ = cmd.run_limited_cmd(['make'], outfd, errfd, benchmark_name, dirname)
-    if returncode <> 0:
+    if returncode != 0:
         if (delete_temps):
             cmd.warning("something failed while running \"make\"" + benchmark_name + "\n" + \
                         "Turn on logging to generate logs")
@@ -227,10 +227,10 @@ def run_trimmer(dirname, execname, workdir, cpu, mem, delete_temps, trimmer_opts
         #2. Run Trimmer on it: `build.sh opts`
         trimmer_args = ['./build.sh']
         trimmer_args.extend(trimmer_opts)
-        print "Running trimmer with options " + str(trimmer_args)
+        print (("Running trimmer with options " + str(trimmer_args)))
         returncode,_,_,_ = \
          cmd.run_limited_cmd(trimmer_args, outfd, errfd, benchmark_name, dirname, cpu, mem)
-        if returncode <> 0:
+        if returncode != 0:
             if (delete_temps):
                 cmd.warning("something failed while running \"" + ' '.join(trimmer_args) + \
                             "\"" + benchmark_name + "\n" + \
@@ -261,7 +261,7 @@ def run_ropgadget(dirname, execname, workdir, cpu, mem):
         args = [get_ropgadget(), '--binary', prog_before] + opts
         returncode,_,_,_ = cmd.run_limited_cmd(args, outfd, errfd, bench_name)
         # ROPgadget returns 1 if success
-        if returncode <> 1:
+        if returncode != 1:
             cmd.warning("something failed while running \"" + ' '.join(args) + "\"")
         else:
             res_before = read_ropgadget_output(logfile)
@@ -270,7 +270,7 @@ def run_ropgadget(dirname, execname, workdir, cpu, mem):
             args = [get_ropgadget(), '--binary', prog_after] + opts
             returncode,_,_,_ = cmd.run_limited_cmd(args, outfd, errfd, bench_name)
             # ROPgadget returns 1 if success        
-            if returncode <> 1:
+            if returncode != 1:
                 cmd.warning("something failed while running \"" + ' '.join(args) + "\"")
             else:
                 res_after = read_ropgadget_output(logfile)
@@ -365,15 +365,15 @@ def main (argv):
             sets += [benchmark_set]
 
     if not sets:
-        print "Warning: you need to choose a benchmark set. Use option --sets"
+        print ("Warning: you need to choose a benchmark set. Use option --sets")
         return 0
     
     if args.rop:
-        print "Warning: option --rop is not maintained anymore."
+        print ("Warning: option --rop is not maintained anymore.")
         args.rop = False
         
     dt = datetime.datetime.now ().strftime ('%d/%m/%Y %H:%M:%S')    
-    print "[" + dt + "] " +  "STARTED runbench"    
+    print (("[" + dt + "] " +  "STARTED runbench" ))   
     for s in sets:
         for t in get_benchmarks(s):
             if t['enabled'] == 'false':
@@ -393,19 +393,19 @@ def main (argv):
                 ropgadget_tab.append(res)
 
     dt = datetime.datetime.now ().strftime ('%d/%m/%Y %H:%M:%S')                
-    print "[" + dt + "] " +  "FINISHED runbench\n"
+    print (("[" + dt + "] " +  "FINISHED runbench\n"))
 
     if (len(trimmer_opts) > 0 and trimmer_opts[0] != ''):
-        print "\nProgram Reduction: (B:before and A:after Trimmer with " + \
-            ' '.join(trimmer_opts) + ")\n"
+        print (("\nProgram Reduction: (B:before and A:after Trimmer with " + \
+            ' '.join(trimmer_opts) + ")\n"))
     else:
-        print "\nProgram Reduction: (B:before and A:after Trimmer with default options)\n"
+        print (("\nProgram Reduction: (B:before and A:after Trimmer with default options)\n"))
 
     pretty_printing_trimmer(trimmer_tab)
     
     if args.rop:
-        print "\nGadget Reduction: (B:before and A:after Trimmer with " + \
-            ' '.join(trimmer_opts) + ")\n"
+        print (("\nGadget Reduction: (B:before and A:after Trimmer with " + \
+            ' '.join(trimmer_opts) + ")\n"))
         pretty_printing_ropgadget(ropgadget_tab)
         
     return 0
@@ -415,7 +415,7 @@ if __name__ == '__main__':
     try:
         res = main(sys.argv)
     except Exception as e:
-        print e
+        print (e)
     except KeyboardInterrupt:
         pass
     finally:

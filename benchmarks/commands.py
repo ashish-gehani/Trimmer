@@ -18,11 +18,11 @@ signal_codes = dict((k, v) for v, k in reversed(sorted(signal.__dict__.items()))
                if v.startswith('SIG') and not v.startswith('SIG_'))
 
 def raise_error(msg):
-    print "Error: " + msg
+    print (("Error: " + msg))
     sys.exit(1)
     
 def warning(msg):
-    print "Warning: " + msg
+    print (("Warning: " + msg))
     
 def is_exec (fpath):
     if fpath == None: return False
@@ -84,11 +84,11 @@ def run_limited_cmd(cmd, outfd, errfd, benchmark_name, directory = None, cpu = -
             resource.setrlimit (resource.RLIMIT_AS, [mem_bytes, mem_bytes])
 
     def kill (proc):
-        print "Timeout reached!"
+        print ("Timeout reached!")
         os.killpg(os.getpgid(proc.pid), 15)
 
     dt = datetime.datetime.now ().strftime ('%d/%m/%Y %H:%M:%S')
-    print "[" + dt + "] " + "RUN " + ' '.join(cmd) + " on " + benchmark_name 
+    print (("[" + dt + "] " + "RUN " + ' '.join(cmd) + " on " + benchmark_name)) 
     sys.stdout.flush()
 
     ## WARNING: The use of preexec_fn is unsafe because it can lead to deadlocks
@@ -107,14 +107,14 @@ def run_limited_cmd(cmd, outfd, errfd, benchmark_name, directory = None, cpu = -
         ## assert pid == p.pid
         signal = status & 0xff    ## signal number that killed the process
         returnvalue = status >> 8 ## exit status
-        if signal <> 0 :
+        if signal != 0 :
             if signal > 127:
                 # if the high bit of the low byte is set then a core file was produced
                 segfault = True
             else:
                 signal_name = signal_codes.get(signal)
                 if signal_name is not None:
-                    print "** Killed by signal: " + signal_name
+                    print (("** Killed by signal: " + signal_name))
                     if signal_name == 'SIGTERM' or signal_name == 'SIGALRM' or signal_name == 'SIGKILL':
                         ## kill sends SIGTERM by default.
                         ## The timer set above uses kill to stop the process.
@@ -124,14 +124,14 @@ def run_limited_cmd(cmd, outfd, errfd, benchmark_name, directory = None, cpu = -
                         # but it might be due to other reasons
                         segfault = True
                 else:
-                    print "** Killed by unknown signal code: " + str(signal)
+                    print (("** Killed by unknown signal code: " + str(signal)))
                     # FIXME: we decide to classify it as segfault
                     # but it might be due to other reasons
                     segfault = True
         sys.stdout.flush()                
         #running_process = None
     except OSError as e:
-        print "** OS Error: " + str(e)
+        print (("** OS Error: " + str(e)))
         if os.errno.errorcode[e.errno] == 'ECHILD':
             ## The children has been killed. We assume it has been killed by the timer.
             ## But I think it can be killed by others
@@ -147,13 +147,13 @@ def run_limited_cmd(cmd, outfd, errfd, benchmark_name, directory = None, cpu = -
         
     dt = datetime.datetime.now ().strftime ('%d/%m/%Y %H:%M:%S')
     if timeout:
-        print "[TIMEOUT --- " + dt + "]"
+        print (("[TIMEOUT --- " + dt + "]"))
     elif out_of_memory:
-        print "[MEMORY-OUT --- " + dt + "]"
+        print (("[MEMORY-OUT --- " + dt + "]"))
     elif segfault:
-        print "[SEGFAULT --- " + dt + "]"
-    elif returnvalue <> 0:
-            print "[RETURNVALUE=" + str(returnvalue) + " --- " + dt + "]"
+        print (("[SEGFAULT --- " + dt + "]"))
+    elif returnvalue != 0:
+            print (("[RETURNVALUE=" + str(returnvalue) + " --- " + dt + "]"))
     sys.stdout.flush()
 
     if directory is not None:

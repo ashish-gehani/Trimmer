@@ -35,9 +35,9 @@ def pprint_table(out, table):
 
     for row in table:
         # left col
-        print >> out, row[0].ljust(col_paddings[0] + 1),
+        print(row[0].ljust(col_paddings[0] + 1), end=' ', file=out)
         # rest of the cols
         for i in range(1, len(row)):
             col = format_num(row[i]).rjust(col_paddings[i] + 2)
-            print >> out, col,
-        print >> out
+            print(col, end=' ', file=out)
+        print(file=out)
