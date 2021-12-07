@@ -27,7 +27,7 @@ def run_test(workdir, typ, lo, hi):
       test_type_array = ['annotation','constprop','fileio','loop','pointer','stress','misc']
             
       for typ in test_type_array:
-       print('\nTest Directory: ' + typ + '_tests')
+       print(('\nTest Directory: ' + typ + '_tests'))
        script_file = 'script.sh' if typ != 'annotation' else 'annotate.sh'
        src_dir = os.path.join(script_dir, '../src', typ + "_tests")
        list_files = os.listdir(src_dir)
@@ -39,7 +39,7 @@ def run_test(workdir, typ, lo, hi):
           
         fileName = "../data/configFile" + str(i) + ".txt"
         entry = entry[0:entry.find(".c")]
-        print 'running test ' + entry
+        print('running test ' + entry)
         numTest = numTest + 1
         Cmd = ['./' + script_file ,entry ,'out' + str(i) , workdir, src_dir,fileName]
         if os.path.exists("temp.txt"):
@@ -55,18 +55,18 @@ def run_test(workdir, typ, lo, hi):
           numFail = numFail + 1
           print("Test failed")
         i = i + 1;
-      print("\nTotal Tests: " + str(numTest))
-      print("Passed: " + str(numPass))
-      print("Failed: " + str(numFail))
+      print(("\nTotal Tests: " + str(numTest)))
+      print(("Passed: " + str(numPass)))
+      print(("Failed: " + str(numFail)))
       os.remove("temp.txt")
     else:
       script_file = 'script.sh' if typ != 'annotation' else 'annotate.sh'
       src_dir = os.path.join(script_dir, '../src', typ + "_tests")  
-      for i in xrange(lo, hi + 1):
+      for i in range(lo, hi + 1):
         fileName = "../data/configFile" + str(i) + ".txt"
         if not os.path.isfile(os.path.join(src_dir, 'test' + str(i) + '.c')):
             continue
-        print 'running test ' + str(i)
+        print('running test ' + str(i))
         numTest = numTest + 1
         Cmd = ['./' + script_file ,'test' + str(i) ,'out' + str(i) , workdir, src_dir,fileName]
         if os.path.exists("temp.txt"):
@@ -81,9 +81,9 @@ def run_test(workdir, typ, lo, hi):
         else:
           numFail = numFail + 1
           print("Test failed")
-      print("\nTotal Tests: " + str(numTest))
-      print("Passed: " + str(numPass))
-      print("Failed: " + str(numFail))
+      print(("\nTotal Tests: " + str(numTest)))
+      print(("Passed: " + str(numPass)))
+      print(("Failed: " + str(numFail)))
       os.remove("temp.txt")
 
  

@@ -70,7 +70,7 @@ def makeMemCpy(arrInd, hvar, lvar, index):
 	size = genRand(min(50, 1000 - index))
 	val = ""
 	ls = []
-	for i in xrange(size):
+	for i in range(size):
 		alph = genRand(26) + 96
 		val += chr(alph)
 		ls.append(alph)
@@ -89,7 +89,7 @@ def generateAssigns(obj, num_lines):
 
 	if(obj.isNull):
 		return	
-	for i in xrange(num_lines):
+	for i in range(num_lines):
 		if(setExtern()):
 			obj.Specialize = False
 			obj.assignStr += makeExtern(obj.index)

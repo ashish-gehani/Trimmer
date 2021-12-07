@@ -70,7 +70,7 @@ def makeMemCpy(arrInd, hvar, lvar, index):
 	size = genRand(min(50, 1000 - index))
 	val = ""
 	ls = []
-	for i in xrange(size):
+	for i in range(size):
 		alph = genRand(26) + 96
 		val += chr(alph)
 		ls.append(alph)
@@ -90,18 +90,18 @@ def makeNullCond(arrInd, sign):
 	return tab + 'ht[' + str(arrInd) + '] ' + sign + ' NULL'
 
 def mergeMemCpyInds(memCpyInds):
-	for key, indices in memCpyInds.iteritems():
+	for key, indices in memCpyInds.items():
 		for tup1 in indices:
 			for tup2 in indices:
 				if(tup1 == tup2):
 					continue
 				if(tup1[0] <= tup2[0] and tup1[0] + tup1[1] >= tup2[0]):
-					print tup1, tup2
+					print(tup1, tup2)
 					memCpyInds[key].remove(tup1)
 					memCpyInds[key].remove(tup2)
 					newInd = max(tup1[0] + tup1[1], tup2[0] + tup2[1])
 					tup3 = (tup1[0], newInd - tup1[0])
-					print "replacing " + str(tup1) + " and " + str(tup2) + " with " + str(tup3) 
+					print("replacing " + str(tup1) + " and " + str(tup2) + " with " + str(tup3)) 
 					memCpyInds[key].append(tup3)	
 					break
 	return memCpyInds
@@ -116,7 +116,7 @@ def generateAssigns(obj, num_lines):
 
 	if(obj.isNull):
 		return	
-	for i in xrange(num_lines):
+	for i in range(num_lines):
 		if(setExtern()):
 			obj.Specialize = False
 			obj.assignStr += makeExtern(obj.index)
@@ -140,7 +140,7 @@ def generateConds(obj):
 		obj.Conds.append(makeNullCond(obj.index, '=='))
 		return
 	# obj.Conds.append(makeNullCond(obj.index, '!='))
-	for key, arr in obj.arrays.iteritems():
+	for key, arr in obj.arrays.items():
 		hvar = key[:3]
 		lvar = key[3]
 		for index, val in enumerate(arr):
@@ -150,7 +150,7 @@ def generateConds(obj):
 				obj.Conds.append(makeCondAssign(obj.index, hvar, lvar, index, val))
 
 	obj.memCpyInds = mergeMemCpyInds(obj.memCpyInds)
-	for key, indices in obj.memCpyInds.iteritems():
+	for key, indices in obj.memCpyInds.items():
 		hvar = 'lts'
 		lvar = key
 		arr = obj.arrays[hvar + lvar]
