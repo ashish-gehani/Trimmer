@@ -11,7 +11,7 @@ such a way that it produces final bitcode file with minimum size.
 
 The final set of optimization passes are written to size_config.json file.
 
-opentuner can be installed using pip install opentuner.
+opentuner can be installed using pip3 install opentuner.
 
 
 """
@@ -46,12 +46,12 @@ CLANG_FLAGS = [
 '-strip-dead-prototypes', '-globaldce', '-constmerge', '-verify', '-domtree'
 ]
 
-opt_name = os.environ.get('LLVM_OPT_NAME')
-llc_name = os.environ.get('LLVM_LLC_NAME')
-clang_name = os.environ.get('LLVM_CXX_NAME')
 argparser = argparse.ArgumentParser(parents=opentuner.argparsers())
 argparser.add_argument('path', help='path to working directory')
 argparser.add_argument('manifest', help='name of the manifest file')
+argparser.add_argument('opt', help='name of the opt tool')
+argparser.add_argument('llc', help='name of the llc tool')
+argparser.add_argument('clang', help='name of the clang++ tool')
 
 class ClangFlagsTuner(MeasurementInterface):
 
@@ -73,14 +73,14 @@ class ClangFlagsTuner(MeasurementInterface):
 
     """
     binary_filename = args.path + '/'  + str(self.programname) +  '_linked_intern.bc'
-    opt_cmd = opt_name + ' ' + binary_filename
+    opt_cmd = args.opt + ' ' + binary_filename
     opt_cmd += ' -o ' + args.path + '/final.bc'
     for flag in CLANG_FLAGS:
       if cfg[flag] == 'on':
         opt_cmd += ' {0}'.format(flag)
 
-    llc_cmd = llc_name + ' -filetype=obj ' + args.path + '/final.bc' + ' -o ' + args.path + '/' + str(self.programname) + '.o'
-    clang_cmd = clang_name + ' ' + str(self.ldflags) + ' ' + args.path + '/' + str(self.programname) + '.o ' + str(self.nativelibs) +  ' -O3 -o ' + args.path + '/' +str(self.binaryname)
+    llc_cmd = args.llc + ' -filetype=obj ' + args.path + '/final.bc' + ' -o ' + args.path + '/' + str(self.programname) + '.o'
+    clang_cmd = args.clang + ' ' + str(self.ldflags) + ' ' + args.path + '/' + str(self.programname) + '.o ' + str(self.nativelibs) +  ' -O3 -o ' + args.path + '/' +str(self.binaryname)
     strip_cmd =	'strip ' + args.path + '/' + str(self.binaryname) + ' -o ' + args.path + '/' + str(self.binaryname) +"_stripped"
     self.store_config_list(opt_cmd)
     self.call_program(opt_cmd)
@@ -105,7 +105,7 @@ class ClangFlagsTuner(MeasurementInterface):
     return performance
     """
     with open(args.manifest) as mfile:
-	  man_data = json.load(mfile)
+      man_data = json.load(mfile)
     self.binaryname = man_data["binary"]
     self.programname = man_data["name"]
     self.ldflags = ' '.join(man_data["ldflags"])

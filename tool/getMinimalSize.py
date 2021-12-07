@@ -11,7 +11,7 @@ The final set of options are written to minimumSize.json file.
 
 To learn about options, see doc/options.md in the repository.
 
-opentuner can be installed using pip install opentuner.
+opentuner can be installed using pip3 install opentuner.
 
 
 """
@@ -58,29 +58,28 @@ class TrimmerFlagsTuner(MeasurementInterface):
     
   def run(self, desired_result, input, limit, id,cfg):
     
-    trimmer_cmd = 'python ' + trimmer_path + '/tool/trimmer.py ' + args.source +  ' workdir{0}'.format(id) 
+    trimmer_cmd = 'python3 ' + trimmer_path + '/tool/trimmer.py ' + args.source +  ' workdir{0}'.format(id) 
     if cfg['opt_level'] != 'default':
-    	trimmer_cmd += ' optLevel {0}'.format(cfg['opt_level'])
-    if cfg['exceedLimit'] != 'default':
-    	trimmer_cmd += ' exceedLimit {0}'.format(cfg['exceedLimit'])
-    for flag in TRIMMER_FLAGS:
-      if cfg[flag] == 'on':
-        trimmer_cmd += ' {0}'.format(flag)
-    try:    
-        print(trimmer_cmd)
-        run_result = self.call_program(trimmer_cmd)
-        assert run_result['returncode'] == 0
-        with open(args.source) as mfile:
-	        man_data = json.load(mfile)
-        binaryName = man_data['binary']
-        if os.path.isfile('workdir{0}/'.format(id) + binaryName + '_stripped'):
-		result_size = os.stat('workdir{0}/'.format(id) + binaryName + '_stripped').st_size
-        else
-		result_size = sys.float_info.max
-    finally:
-        self.call_program('rm -r workdir{0}'.format(id))
+      trimmer_cmd += ' optLevel {0}'.format(cfg['opt_level'])
+      if cfg['exceedLimit'] != 'default':
+        trimmer_cmd += ' exceedLimit {0}'.format(cfg['exceedLimit'])
+      for flag in TRIMMER_FLAGS:
+        if cfg[flag] == 'on':
+          trimmer_cmd += ' {0}'.format(flag)
+        try:    
+          print(trimmer_cmd)
+          run_result = self.call_program(trimmer_cmd)
+          assert run_result['returncode'] == 0
+          with open(args.source) as mfile:
+            man_data = json.load(mfile)
+            binaryName = man_data['binary']
+          if os.path.isfile('workdir{0}/'.format(id) + binaryName + '_stripped'):
+            result_size = os.stat('workdir{0}/'.format(id) + binaryName + '_stripped').st_size
+          else:
+            result_size = sys.float_info.max
+        finally:
+            self.call_program('rm -r workdir{0}'.format(id))
    
-
     return Result(time=result_size)
 
   def compile_and_run(self, desired_result, input, limit):

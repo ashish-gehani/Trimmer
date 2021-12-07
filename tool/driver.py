@@ -39,7 +39,7 @@ debugPrint = 1
 # Common routine for printing debug messages
 def printDbgMsg(msg):
     if debugPrint == 1:
-        print msg
+        print(msg)
 
 def disassemble(path):
     os.system(dis + " " + path)
@@ -55,7 +55,7 @@ def run_argspec(tool):
 	fname = tool.name
 	curr_file = tool.curr_file
 	add_file = tool.work_dir + '/' + fname + '_added.bc'
-        annotated_file = tool.work_dir + '/' + fname + '_annotated.bc'
+	annotated_file = tool.work_dir + '/' + fname + '_annotated.bc'
 	libspec_file = tool.work_dir + '/' + fname + '_ls.bc'
 	constprop_file = tool.work_dir + '/' + fname + '_constprop.bc'
 	log_file =  tool.work_dir + '/log.txt'
@@ -65,125 +65,121 @@ def run_argspec(tool):
 	spec_file = tool.work_dir + '/' + fname + '_spec.bc'
 
 
-        depth_limit_str = '-isLimitedDepth=false'
+	use_glob_str = '-useGlob=0'
 
-        trakced_percent_str = '-isTrackedLimited=false'
+	disable_exit_str = '-disableExit=0'
 
-        use_glob_str = '-useGlob=0'
+	use_reg_offset_str = '-useRegOffset=0'
 
-        disable_exit_str = '-disableExit=0'
-
-        use_reg_offset_str = '-useRegOffset=0'
-
-        exceed_limit_str = '-exceedLimit=0'
+	exceed_limit_str = '-exceedLimit=0'
 
 	depth_limit_value = "-depthLimit=100"
 	tracked_percent_value = "-trackedPercent=100"
-        tracked_percent_str = '-isTrackedLimited=0'
+	tracked_percent_str = '-isTrackedLimited=0'
 	depth_limit_str = '-isLimitedDepth=0'
 
-        if tool.depth_flag:
-            depth_limit_str = '-isLimitedDepth=1'
-            depth_limit_value = "-depthLimit="+tool.anot_depth
+	if tool.depth_flag:
+		depth_limit_str = '-isLimitedDepth=1'
+		depth_limit_value = "-depthLimit="+tool.anot_depth
 
-        if tool.tracked_flag:
-            tracked_percent_str = '-isTrackedLimited=1'
-	    tracked_percent_value = "-trackedPercent="+tool.tracked_percent
+	if tool.tracked_flag:
+		tracked_percent_str = '-isTrackedLimited=1'
+		tracked_percent_value = "-trackedPercent="+tool.tracked_percent
 
-        if tool.use_glob:
-            use_glob_str ='-useGlob=1'
+	if tool.use_glob:
+		use_glob_str ='-useGlob=1'
 
-        if tool.disable_exit:
-            disable_exit_str = '-disableExit=1'
+	if tool.disable_exit:
+		disable_exit_str = '-disableExit=1'
 
-        if tool.use_reg_offset:
-            use_reg_offset_str = '-useRegOffset=1'
+	if tool.use_reg_offset:
+		use_reg_offset_str = '-useRegOffset=1'
 
-        if int(tool.exceed_limit) != 0:
-            exceed_limit_str ='-exceedLimit='+tool.exceed_limit
+	if int(tool.exceed_limit) != 0:
+		exceed_limit_str ='-exceedLimit='+tool.exceed_limit
 
 
-        if(tool.track_allocas):
-                        Cmd = [opt, '-load', build_path + 'AnnotateNew.so', depth_limit_str, depth_limit_value, tracked_percent_str, tracked_percent_value,'-mem2reg', '-loops', '-lcssa', '-loop-simplify', '-loop-rotate', '-indvars', '-svfg', curr_file, '-o', annotated_file]
+	if(tool.track_allocas):
+		Cmd = [opt, '-load', build_path + 'AnnotateNew.so', depth_limit_str, depth_limit_value, tracked_percent_str, tracked_percent_value,'-mem2reg', '-loops', '-lcssa', '-loop-simplify', '-loop-rotate', '-indvars', '-svfg', curr_file, '-o', annotated_file]
                                              
                                          
-                        printDbgMsg(" ".join(Cmd))
-  		        f = open(log_file, "wb")
-                        starttime =  datetime.now()
-                        subprocess.call(Cmd,stderr=f)
-                        endtime = datetime.now()
-                        f.close()
-                        delta = endtime-starttime
-                        combined = delta.seconds + delta.microseconds/1E6
-                        print("Annotation Pass takes " + str(combined) + " seconds")
-                        disassemble(annotated_file)
+		printDbgMsg(" ".join(Cmd))
+		f = open(log_file, "wb")
+		starttime =  datetime.now()
+		subprocess.call(Cmd,stderr=f)
+		endtime = datetime.now()
+		f.close()
+		delta = endtime-starttime
+		combined = delta.seconds + delta.microseconds/1E6
+		print(("Annotation Pass takes " + str(combined) + " seconds"))
+		disassemble(annotated_file)
                         
-        else:
-                        annotated_file = curr_file
+	else:
+		annotated_file = curr_file
                         
-        Cmd = [opt,'-load', build_path + 'SpecializeArguments.so', '-args=' + tool.args,'-specialize-args', annotated_file,'-o',add_file]
-        printDbgMsg(' '.join(Cmd))
-        f = open(log_file, "ab")
-        subprocess.call(Cmd, stderr=f)
-        f.close()   
-        disassemble(add_file)
+	Cmd = [opt,'-load', build_path + 'SpecializeArguments.so', '-args=' + tool.args,'-specialize-args', annotated_file,'-o',add_file]
+	printDbgMsg(' '.join(Cmd))
+	f = open(log_file, "ab")
+	subprocess.call(Cmd, stderr=f)
+	f.close()   
+	disassemble(add_file)
                                                     
-        Cmd = opt + ' -mem2reg -mergereturn -simplifycfg -loops -lcssa -loop-simplify -loop-rotate -indvars ' + add_file + ' -o ' + add_file
-        printDbgMsg(Cmd)
-        subprocess.call(Cmd, shell = True)
-        disassemble(add_file)
+	Cmd = opt + ' -mem2reg -mergereturn -simplifycfg -loops -lcssa -loop-simplify -loop-rotate -indvars ' + add_file + ' -o ' + add_file
+	printDbgMsg(Cmd)
+	subprocess.call(Cmd, shell = True)
+	disassemble(add_file)
                 
 
-        if tool.icp_flag:
-		  Cmd = [opt, '-load', build_path + 'ConstantFolding.so', '-isAnnotated=' + str(tool.annot_flag), use_glob_str ,disable_exit_str, use_reg_offset_str,exceed_limit_str,'-trackAllocas=' + str(tool.track_allocas),'-contextType=' + str(tool.context_type), '-fileSpecialize=' + str(tool.file_specialize), '-stringSpecialize=' + str(tool.string_specialize),'-loopUnroll=' + str(tool.loop_unroll),'-fileNames', str(tool.config_files),'-mem2reg','-mergereturn', '-simplifycfg' ,'-loops','-lcssa','-loop-simplify','-scalar-evolution' ,'-licm','-loop-rotate','-indvars' ,'-loop-reduce',"-__progName=ssh",'-inter-constprop',add_file, '-o', constprop_file]
+	if tool.icp_flag:
+		Cmd = [opt, '-load', build_path + 'ConstantFolding.so', '-isAnnotated=' + str(tool.annot_flag), use_glob_str ,disable_exit_str, use_reg_offset_str,exceed_limit_str,'-trackAllocas=' + str(tool.track_allocas),'-contextType=' + str(tool.context_type), '-fileSpecialize=' + str(tool.file_specialize), '-stringSpecialize=' + str(tool.string_specialize),'-loopUnroll=' + str(tool.loop_unroll),'-fileNames', str(tool.config_files),'-mem2reg','-mergereturn', '-simplifycfg' ,'-loops','-lcssa','-loop-simplify','-scalar-evolution' ,'-licm','-loop-rotate','-indvars' ,'-loop-reduce',"-__progName=ssh",'-inter-constprop',add_file, '-o', constprop_file]
 
-		  f = open(log_file, "ab")
-		  printDbgMsg(" ".join(Cmd))
+		f = open(log_file, "ab")
+		printDbgMsg(" ".join(Cmd))
 
-                  ping = subprocess.Popen(Cmd,stderr=f)
-                  msg = "The program has timeout after 6 hours"
+		ping = subprocess.Popen(Cmd,stderr=f)
+		msg = "The program has timeout after 6 hours"
 
-                  my_timer = Timer(21600,kill, [ping,msg])
+		my_timer = Timer(21600,kill, [ping,msg])
 
-                  starttime =  datetime.now()
+		starttime =  datetime.now()
 
-                  try:
-                    my_timer.start()
-                    stdout, stderr = ping.communicate()
-                  finally:
-                    my_timer.cancel()
+		try:
+			my_timer.start()
+			stdout, stderr = ping.communicate()
+		finally:
+			my_timer.cancel()
 
-                  endtime = datetime.now()
-                  delta = endtime-starttime
-                  combined = delta.seconds + delta.microseconds/1E6
-                  print("Constant Folding Pass takes " + str(combined) + " seconds")
+		endtime = datetime.now()
+		delta = endtime-starttime
+		combined = delta.seconds + delta.microseconds/1E6
+		print(("Constant Folding Pass takes " + str(combined) + " seconds"))
 
-                  f.close()
-                  if exit == 1:
-                    return 1
-                  disassemble(constprop_file)
-        else:
-		  constprop_file = add_file
+		f.close()
+		if exit == 1:
+			return 1
+		disassemble(constprop_file)
+	else:
+		constprop_file = add_file
 		# remove pass
 	Cmd = opt + ' -load ' + build_path + 'Remove.so -remove ' + constprop_file\
 		+ ' -o ' + libspec_file
 	printDbgMsg(Cmd)
 	subprocess.call(Cmd, shell = True)
-        disassemble(libspec_file)
+	disassemble(libspec_file)
 	# inline pass
 	Cmd = opt + ' -always-inline ' + libspec_file + ' -o ' + inline_file
-        printDbgMsg(Cmd)
+	printDbgMsg(Cmd)
 	subprocess.call(Cmd, shell = True)
 
 	# Internalize pass
 	Cmd = opt + ' -load ' + build_path + 'Internalize.so -intern ' + inline_file\
 	+ ' -o ' + intern_file
-        printDbgMsg(Cmd)
+	printDbgMsg(Cmd)
 	subprocess.call(Cmd, shell = True)
 
 	# opt -O1
 	Cmd = opt + ' ' + intern_file + ' -O1 -o ' + spec_file
-        printDbgMsg(Cmd)
+	printDbgMsg(Cmd)
 	subprocess.call(Cmd, shell = True)
 	tool.curr_file = spec_file
 
@@ -213,13 +209,13 @@ def link_libs(tool):
 	# strip pass
 	if(tool.strip_flag):
 		Cmd = opt + ' -strip -strip-dead-prototypes ' + curr_file + ' -o ' + curr_file
-                printDbgMsg(Cmd)
+		printDbgMsg(Cmd)
 		subprocess.call(Cmd, shell = True)
 
 	# Internalize pass
 	Cmd = opt + ' -load ' + build_path + 'Internalize.so -intern ' + curr_file\
 	+ ' -o ' + intern_file
-        printDbgMsg(Cmd)
+	printDbgMsg(Cmd)
 	subprocess.call(Cmd, shell = True)
 	tool.curr_file = intern_file
 
@@ -237,32 +233,32 @@ def run_opts(tool):
 
 	#inline for unspecialized
 	Cmd = opt + ' -always-inline ' + curr_file + ' -o ' + inline2_file
-        printDbgMsg(Cmd)
+	printDbgMsg(Cmd)
 	subprocess.call(Cmd, shell = True)
 
 	# dce
 	Cmd = opt + ' ' + inline2_file + ' -dce -globaldce -o ' + dce_file
-        printDbgMsg(Cmd)
+	printDbgMsg(Cmd)
 	subprocess.call(Cmd, shell = True)
 
-    # opt -O1
+	# opt -O0
 	if(tool.opt_level=='0'):
 		Cmd = opt + ' ' + dce_file + ' -O0 -o ' + opt0_file
-        	printDbgMsg(Cmd)
+		printDbgMsg(Cmd)
 		subprocess.call(Cmd, shell = True)
 		tool.curr_file = opt0_file
 
 	# opt -O1
 	elif(tool.opt_level=='1'):
 		Cmd = opt + ' ' + dce_file + ' -O1 -o ' + opt1_file
-        	printDbgMsg(Cmd)
+		printDbgMsg(Cmd)
 		subprocess.call(Cmd, shell = True)
 		tool.curr_file = opt1_file
 
 	# opt -O2
 	elif(tool.opt_level=='2'):
 		Cmd = opt + ' ' + dce_file + ' -O2 -o ' + opt2_file
-        	printDbgMsg(Cmd)
+		printDbgMsg(Cmd)
 		subprocess.call(Cmd, shell = True)
 		tool.curr_file = opt2_file
 
@@ -272,14 +268,16 @@ def run_opts(tool):
 		printDbgMsg(Cmd)
 		subprocess.call(Cmd, shell = True)
 		tool.curr_file = opt3_file
+
 	# opt -Os
 	elif(tool.opt_level=='s'):
 		Cmd = opt + ' ' + dce_file + ' -Os -o ' + opts_file
 		printDbgMsg(Cmd)
 		subprocess.call(Cmd, shell = True)
 		tool.curr_file = opts_file
-        elif(tool.opt_level=='auto'):
-		Cmd = 'python optimizeTrimmerResult.py ' + tool.work_dir + ' ' + tool.manifestFile + ' --test-limit 20000'
+
+	elif(tool.opt_level=='auto'):
+		Cmd = 'python3 optimizeTrimmerResult.py ' + tool.work_dir + ' ' + tool.manifestFile + ' ' + opt + ' ' + llc + ' ' + clang +' --test-limit 20000'
 		printDbgMsg(Cmd)
 		subprocess.call(Cmd, shell = True)
 		tool.curr_file = tool.work_dir + '/final.bc'

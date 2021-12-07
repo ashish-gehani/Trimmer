@@ -18,7 +18,7 @@ to the next iteration and logs which condition failed into a log file.
 
 Example Usage:
 
-python memory.py gzip percent 20 70
+python3 memory.py gzip percent 20 70
 
 """
 import subprocess 
@@ -27,7 +27,7 @@ import json
 import os
 
 
-#python memory.py gzip percent 20 70
+#python3 memory.py gzip percent 20 70
 progName = sys.argv[1]
 MODE = sys.argv[2]
 LOW = sys.argv[3]
@@ -46,13 +46,13 @@ config_files = []
 annotated_file = progName+"_annotated.bc"
 preconstprop_file = progName+"_preconst.bc"
 constprop_file = progName+"_constprop.bc"
-opt = "opt-4.0"
+opt = "opt"
 
 build_path = os.getenv("TRIMMER_HOME")+"/"+"build"+"/"
 
 
 def run_in_dir(cmd, directory):
-    print(directory+"$ " +  cmd)
+    print((directory+"$ " +  cmd))
     subprocess.call(cmd, shell=True, cwd = directory)
 
 

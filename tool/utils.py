@@ -20,17 +20,17 @@ def format_args(fname, args):
 
 def exists(fname):
 	if not os.path.exists(fname):
-                print fname
-		print 'file ' + fname + ' does not exist'
+		print (fname)
+		print (('file ' + fname + ' does not exist'))
 		quit()
 	elif  not os.path.isfile(fname):
-		print 'file ' + fname + ' path is not a file'
+		print (('file ' + fname + ' path is not a file'))
 		quit()
 
 def usage():
-	print 'two arguments are required'
-	print '1. full path to the manifest file'
-	print '2. path to the working directory'
+	print ('two arguments are required')
+	print ('1. full path to the manifest file')
+	print ('2. path to the working directory')
 	quit()
 
 def parse_args(args):
@@ -40,40 +40,40 @@ def parse_args(args):
 	exists(manifest_file)
 
 	with open(manifest_file) as mfile:
-	    man_data = json.load(mfile)
+		man_data = json.load(mfile)
 	work_dir = args[1]
 
 	if not os.path.exists(work_dir):
 		os.makedirs(work_dir)
 
 
-        dir_path = os.path.dirname(os.path.realpath(manifest_file))
-        man_data["main_path"] = os.path.join(dir_path, man_data["main"])
+	dir_path = os.path.dirname(os.path.realpath(manifest_file))
+	man_data["main_path"] = os.path.join(dir_path, man_data["main"])
 
 	opt_flag = True
 	opt_level = '3'
 	spec_flag = True
 	strip_flag = True
 	icp_flag = True
-        annot_flag = 1
-        track_allocas = 1
-        file_specialize = 1
-        string_specialize = 1
-        loop = 1
-        file_flag = False
-        string_flag = False
-        loop_flag= False
-        contextType = 1
-        isLimitedDepth = False
-        depthLimit = 0
-        isTrackedLimited = False
-        trackedPercent = 100
-        useGlob = False
-        exceedLimit = 0
-        disableExit = False
-        useRegOffset = False
+	annot_flag = 1
+	track_allocas = 1
+	file_specialize = 1
+	string_specialize = 1
+	loop = 1
+	file_flag = False
+	string_flag = False
+	loop_flag= False
+	contextType = 1
+	isLimitedDepth = False
+	depthLimit = 0
+	isTrackedLimited = False
+	trackedPercent = 100
+	useGlob = False
+	exceedLimit = 0
+	disableExit = False
+	useRegOffset = False
 
-
+	print(len(args));
 	for i in range(2, len(args)):
 		if(args[i] == 'optLevel'):
 			opt_level = args[i+1]
@@ -86,44 +86,44 @@ def parse_args(args):
 
 		elif(args[i] == 'no-inter-constprop'):
 			icp_flag = False
-                elif(args[i] == 'no-track-allocas'):
-                        track_allocas = 0
-                        annot_flag = 0
-                elif(args[i] == 'file-specialize'):
-                        file_flag = True
-                        file_specialize = 1
-                        if string_flag == False:
-                         string_specialize = 0
-                        if loop_flag == False:
-                         loop=0
-                elif(args[i] == 'string-specialize'):
-                        string_flag = True
-                        string_specialize = 1
-                        if file_flag==False:
-                         file_specialize = 0
-                        if loop_flag == False:
-                         loop = 0              
-                elif(args[i] == 'loop-unroll'):
-                        loop_flag = True
-                        loop = 1
-                        if file_flag==False:
-                         file_specialize = 0
-                        if string_flag == False:
-                         string_specialize = 0                               
-                elif(args[i] == 'contextType'):
-                        contextType = args[i+1]
-                elif(args[i] == 'depthLimit'):
-                        isLimitedDepth = True
-                        depthLimit = args[i+1]
-                elif(args[i] == "trackedPercent"):
-                        isTrackedLimited = True
-                        trackedPercent = args[i+1]
-                elif(args[i] == "useGlob"):
-                        useGlob = True
-                elif(args[i] == "exceedLimit"):
-                        exceedLimit = args[i+1]
-                elif(args[i] == "useRegOffset"):
-                        useRegOffset = True
+		elif(args[i] == 'no-track-allocas'):
+			track_allocas = 0
+			annot_flag = 0
+		elif(args[i] == 'file-specialize'):
+			file_flag = True
+			file_specialize = 1
+			if string_flag == False:
+				string_specialize = 0
+			if loop_flag == False:
+				loop=0
+		elif(args[i] == 'string-specialize'):
+			string_flag = True
+			string_specialize = 1
+			if file_flag==False:
+				file_specialize = 0
+			if loop_flag == False:
+				loop = 0              
+		elif(args[i] == 'loop-unroll'):
+			loop_flag = True
+			loop = 1
+			if file_flag==False:
+				file_specialize = 0
+			if string_flag == False:
+				string_specialize = 0                               
+		elif(args[i] == 'contextType'):
+			contextType = args[i+1]
+		elif(args[i] == 'depthLimit'):
+			isLimitedDepth = True
+			depthLimit = args[i+1]
+		elif(args[i] == "trackedPercent"):
+			isTrackedLimited = True
+			trackedPercent = args[i+1]
+		elif(args[i] == "useGlob"):
+			useGlob = True
+		elif(args[i] == "exceedLimit"):
+			exceedLimit = args[i+1]
+		elif(args[i] == "useRegOffset"):
+			useRegOffset = True
                 
 
 

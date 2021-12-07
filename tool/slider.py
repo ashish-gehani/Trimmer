@@ -35,11 +35,11 @@ def print_and_run(cmd):
     subprocess.call(cmd, shell=True)
 
 def run_in_dir(cmd, directory):
-    print(directory+"$ " +  cmd)
+    print((directory+"$ " +  cmd))
     subprocess.call(cmd, shell=True, cwd = directory)
 
 def getMemoryStats(basename, directory):
-    cmd = "opt-4.0 -load $TRIMMER_HOME/libLLVMMyCount.so -mycount "+basename+"_annotated.bc " 
+    cmd = "opt -load $TRIMMER_HOME/libLLVMMyCount.so -mycount "+basename+"_annotated.bc " 
     run_in_dir(cmd, directory) 
 
     AnnotStats = {}
@@ -51,8 +51,8 @@ def getMemoryStats(basename, directory):
     with open(directory+"/"+"anotStats.JSON","r") as StatFile:
         AnnotStats = json.load(StatFile)
 
-    print("Memory Stats: {}".format(MemoryStats))
-    print("Annotation Stats: {}".format(AnnotStats))
+    print(("Memory Stats: {}".format(MemoryStats)))
+    print(("Annotation Stats: {}".format(AnnotStats)))
 
     tracked_allocas = AnnotStats['trackedAllocas'] - AnnotStats['globals']
     total_allocas = MemoryStats['total']
@@ -65,7 +65,7 @@ def create_plot(name, data,detail):
     x = [(float(point['tracked'])/point['total']*100.0) for point in data]
     y = [point['binary_size'] for point in data]
 
-    print("x: {}, y:{}".format(x,y))
+    print(("x: {}, y:{}".format(x,y)))
 
     with open(name+detail["plot_detail_str"]+".csv", mode='w') as StatFile:
         stat_writer = csv.writer(StatFile, delimiter=',')
@@ -91,9 +91,9 @@ def create_plot(name, data,detail):
 
 if len(sys.argv) != 5:
     print("Incorrect number of arguments passed... \n\
-            python slider.py manifest mode startdept enddept")
+            python3 slider.py manifest mode startdept enddept")
             
-print("="*5 + "Slider" + "="*5)
+print(("="*5 + "Slider" + "="*5))
 MANIFEST = sys.argv[1]
 MODE = sys.argv[2]
 PROGNAME = MANIFEST.split(".")[0]
@@ -123,7 +123,7 @@ def run_standard_trimmer(parentDir):
     dirName = "ANOT_FULL"
     logName = "LOG_FULL"
     try:
-        cmd = "python $TRIMMER_HOME/tool/trimmer.py "+MANIFEST+" "+dirName + " 2>" + logName 
+        cmd = "python3 $TRIMMER_HOME/tool/trimmer.py "+MANIFEST+" "+dirName + " 2>" + logName 
         run_in_dir(cmd,'./' + parentDir)
 
         cmd = "mv "+ logName +" "+dirName
@@ -180,11 +180,11 @@ for limit in range(LOW, HIGH+(2*currentModeLabels["step"]),currentModeLabels["st
             run_standard_trimmer(parentDir)
             continue
 
-        print("Running Trimmer with {} = {}".format(currentModeLabels["detail_str"],limit))
+        print(("Running Trimmer with {} = {}".format(currentModeLabels["detail_str"],limit)))
         dirName = currentModeLabels["dir_name_prefix"]+str(limit)
         logName = currentModeLabels["log_name_prefix"]+str(limit)
 
-        cmd = "python $TRIMMER_HOME/tool/trimmer.py "+MANIFEST+" "+dirName + currentModeLabels["slider_flag"]+ str(limit) + " 2>" + logName 
+        cmd = "python3 $TRIMMER_HOME/tool/trimmer.py "+MANIFEST+" "+dirName + currentModeLabels["slider_flag"]+ str(limit) + " 2>" + logName 
         run_in_dir(cmd,'./' + parentDir)
 
         cmd = "mv "+ logName +" "+dirName
