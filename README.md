@@ -10,7 +10,7 @@ Further details can be found in our journal publication: https://ieeexplore.ieee
 Build
 -----
 
-We provide a script [bootstrap.sh](vagrants/16.04/bootstrap.sh) to install the dependencies needed, including [LLVM](https://llvm.org)'s `clang` (version 7) sources and [SVF](https://github.com/SVF-tools/SVF), to build **Trimmer** and run it on the included examples. (**Note**: It replaces `~/.bash_profile`. Adjust as needed.)
+We provide a script [bootstrap.sh](vagrants/16.04/bootstrap.sh) to install the dependencies needed, including [LLVM](https://llvm.org)'s `clang` (version 7) sources and [SVF](https://github.com/SVF-tools/SVF), to build **Trimmer** and run it on the included examples. (**Note**: It replaces `~/.bash_profile`. Adjust as needed.) The build has been tested on Linux 16.04 with Python 3.5.2
 
 At its core, the **Trimmer** build is effected with:
 ```
@@ -97,7 +97,7 @@ Examples
 
 We provide multiple examples of application specialization with **Trimmer** in the [examples folder](/benchmarks/examples). The [TSE-2020 directory](/benchmarks/examples/TSE-2020) has 20 applications that were specialized with **Trimmer**. The results for these 20 applications can be found in [results.md](/docs/results.md). We also provide scripts to automatically run **Trimmer** on specified applications and return statistics. Instructions to run these scripts can be found [here](https://github.com/ashish-gehani/Trimmer/blob/master/benchmarks/README.md). 
 
-Note: These applications were tested on Linux 16.04. Some of these applications might not compile on newer versions of Linux.
+Note: These applications were tested on Linux 16.04 with Python 3.5.2
 
 #### Generating Bitcode Files
 To run **Trimmer** on a new application, the whole-program bitcode must first be generated using `wllvm`/`gllvm`. The [wllvm repository](https://github.com/SRI-CSL/whole-program-llvm) provides examples and tutorials on generating bitcode files. The process of generating bitcode files can also be seen in the Makefiles of all of our examples. The examples in the **Trimmer** benchmarks currently use `wllvm` but can be modified to use `gllvm`. 

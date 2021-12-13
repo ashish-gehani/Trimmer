@@ -1,7 +1,12 @@
 Running Trimmer on all applications with runbench script
 =======
 
-1) Build **Trimmer** on your machine along with the dependencies of the benchmark examples. See [build](https://github.com/ashish-gehani/Trimmer/blob/master/README.md) instructuions for more details.
+### Environment:
+All applications were tested on Linux 16.04 with Python 3.5.2. The dependencies required for the examples are installed in the [bootstrap.sh](/vagrants/16.04/bootstrap.sh) script.
+
+
+### Steps:
+1) Build **Trimmer** on your machine along with the dependencies of the benchmark examples. See [build](/README.md) instructuions for more details.
 2) Run `./profiler.sh` to compile the profiler pass. This pass is used to generate statistics about the binaries (e.g. number of functions, instructions, memory instructions etc).
 3) Run `bash reset.sh`. reset.sh deletes old executables and bitcode of applications to allow runbench script to be used afresh
 4) Run `./runbench.py --sets="TSE-2020.set" --trimmer-opts=""`. **Trimmer** will specialize the examples provided in the TSE-2020 benchmarks set using default options.
