@@ -50,15 +50,11 @@ RUN cmake .. && \
 WORKDIR ../include
 RUN cp -r * /usr/local/include/
 
-# Setup for SSH agent
-WORKDIR $HOME/.ssh
-RUN chmod 700 . && \
-    ssh-keyscan -H github.com >> ~/.ssh/known_hosts && \
-    ssh -T git@github.com
-
 # Download Trimmer
+ENV USER=
+ENV TOKEN=
 WORKDIR $HOME
-RUN git clone git@github.com:ashish-gehani/Trimmer && \
+RUN git clone https://${USER}:${TOKEN}@github.com/ashish-gehani/Trimmer
 ENV TRIMMER_HOME=$HOME/Trimmer
 
 # Build Trimmer
@@ -68,7 +64,7 @@ RUN cmake .. && \
     make
 
 # Install Pip
-RUN curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py" && \
+RUN curl "https://bootstrap.pypa.io/pip/2.7/get-pip.py" -o "get-pip.py" && \
     python get-pip.py
 
 # Install WLLVM
