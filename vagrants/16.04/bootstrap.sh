@@ -4,26 +4,23 @@
 
 #!/usr/bin/env bash
 
-# Install dependencies
+# Install package dependencies
 sudo apt-get update
 sudo apt-get install -y build-essential cmake git gettext gnutls-dev groff-base libbz2-dev libevent-dev libidn11-dev libmemcached-tools libpcap-dev libpcre3-dev libssl-dev pkg-config python-minimal uuid-dev wget wireless-tools
 
+# Download Trimmer
+export TRIMMER_HOME=$HOME/Trimmer
+export USER=
+export TOKEN=
+cd `dirname $TRIMMER_HOME`
+git clone https://${USER}:${TOKEN}@github.com/ashish-gehani/Trimmer
+
 # Setup environment
-cp `dirname $BASH_SOURCE`/bash_profile $HOME/.bash_profile
-. $HOME/.bash_profile
+cp $TRIMMER_HOME/vagrants/16.04/bash_profile $HOME/.bash_profile
+. .bash_profile
 
-# aircrack-ng dependencies
-mkdir -p build
-cd build
-# needs SSL 1.0.2g
-wget https://www.openssl.org/source/openssl-1.0.2g.tar.gz
-tar xvfz openssl-1.0.2g.tar.gz
-cd openssl-1.0.2g
-./config --prefix=/usr/local shared
-sudo make install
-cd ../..
-
-# Install WLLVM. Make sure that the installed location of pip is in your PATH
+# Install WLLVM
+  # 'pip' location must be in PATH
 curl "https://bootstrap.pypa.io/pip/2.7/get-pip.py" -o "get-pip.py"
 python get-pip.py
 pip install wllvm
@@ -37,7 +34,7 @@ tar xvf llvm-7.0.0.src.tar.xz
 tar xvf cfe-7.0.0.src.tar.xz
 mv cfe-7.0.0.src/ llvm-7.0.0.src/tools/clang
 
-# Build and install LLVM7 / clang
+# Build, install LLVM7 / clang
 mkdir llvm-7.0.0.obj
 cd llvm-7.0.0.obj
 cmake -DCMAKE_BUILD_TYPE=MinSizeRel ../llvm-7.0.0.src
@@ -71,4 +68,8 @@ mkdir build
 cd build
 cmake ..
 make
+
+# Test Trimmer
+cd $TRIMMER_HOME/test/scripts/
+python test.py ./work_dir all 1 1
 

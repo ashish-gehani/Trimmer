@@ -18,8 +18,8 @@ export LLVM_LLC_NAME=llc
 export LLVM_OPT_NAME=opt
 export LLVM_NM_NAME=llvm-nm
 
-# Trimmer
-export TRIMMER_HOME=$HOME/Trimmer
+# pip
+export PATH=/home/vagrant/.local/bin:$PATH
 
 # aircrack-ng
 export CPATH=/usr/local/include:$CPATH
