@@ -99,13 +99,16 @@ We provide multiple examples of application specialization with **Trimmer** in t
 
 Note: These applications were tested on Ubuntu 16.04 with Python 3.5.2
 
-#### Generating Bitcode Files
-To run **Trimmer** on a new application, the whole-program bitcode must first be generated using `wllvm`/`gllvm`. The [wllvm repository](https://github.com/SRI-CSL/whole-program-llvm) provides examples and tutorials on generating bitcode files. The process of generating bitcode files can also be seen in the Makefiles of all of our examples. The examples in the **Trimmer** benchmarks currently use `wllvm` but can be modified to use `gllvm`. 
+### Generating Bitcode Files
+To run **Trimmer** on a new application, the whole-program bitcode must be generated using `wllvm`/`gllvm`. The [wllvm repository](https://github.com/SRI-CSL/whole-program-llvm) provides examples and tutorials on generating bitcode files. The process of generating bitcode files can also be seen in the Makefiles of all of our examples. The examples in the **Trimmer** benchmarks currently use `wllvm` but can be modified to use `gllvm`. 
 
-#### Requirements For Bit Code Files:
+### Compilation Requirements:
+For Trimmer to work, the following requirements must be met for compiling the application:
+1. Optnone attribute should be disabled in clang. This can be done by compiling the application with the `-Xclang -disable-O0-optnone` flags. This is necessary because clang-7 disables optimizations by default, which prevents Trimmer from performing specialization on the generated bitcode.
 
+2. The application should not be compiled with debug flags or any optimizations (e.g. `-O2`, `-O3` etc). This can be ensured by removing these flags, if they exist, from the Makefile of the application 
 
-#### Linking Bitcode Modules
+### Linking Bitcode Modules
 **Trimmer** does not provide inter-module specialization (i.e. it operates only on a single bitcode file). Therefore, if an application has multiple modules, they must be linked together into one module for specialization with **Trimmer**. Bitcode files can be linked into one using the [llvm linker](https://llvm.org/docs/CommandGuide/llvm-link.html). An example of this can be found in one of our examples, [imagemagick](/benchmarks/examples/Others/ImageMagick/Makefile) in the target _link_.
 
 Debug
