@@ -19,8 +19,6 @@ git clone https://${USER}:${TOKEN}@github.com/ashish-gehani/Trimmer
 cp $TRIMMER_HOME/vagrants/18.04/bash_profile $HOME/.bash_profile
 . .bash_profile
 
-exit
-
 # Install WLLVM
 # 'pip' location must be in PATH
 curl "https://bootstrap.pypa.io/pip/2.7/get-pip.py" -o "get-pip.py"
