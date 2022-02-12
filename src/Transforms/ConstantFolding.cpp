@@ -152,6 +152,7 @@ void ConstantFolding::runOnInst(Instruction * I) {
 
   if(bbOps.partOfLoop(I)) {
     debug(Yes)<<"runOnInst: bbOps.partOfLoop("<<*I<<"): true\n";
+    partOfLoop = true;
     markInstMemNonConst(I); 
 
     if(auto CI = dyn_cast<CallInst>(I)) {
@@ -162,12 +163,36 @@ void ConstantFolding::runOnInst(Instruction * I) {
         }
         return;
       }
+
+      if(CI->getCalledFunction()){
+
+      if(CI->getCalledFunction()->getName() == "getopt" || CI->getCalledFunction()->getName() == "getopt_long"){
+        if(module->getNamedGlobal("optind")){
+
+            Register* optindReg = processInstAndGetRegister(module->getNamedGlobal("optind"));     
+            bbOps.setConstContigous(false, optindReg->getValue(), currBB);
+          }
+
+       if(module->getNamedGlobal("optarg")){
+
+            Register* optargReg = processInstAndGetRegister(module->getNamedGlobal("optarg"));     
+            bbOps.setConstContigous(false, optargReg->getValue(), currBB);
+          }
+
+       }
+
+      }
     }
 
     if(!isa<TerminatorInst>(I)) { //need terminator instruction to make BB graphs
       return;
     }
   }
+
+  else if(I->getParent()){
+     partOfLoop = false;
+  }
+
 
   if(AllocaInst * allocaInst = dyn_cast<AllocaInst>(I)) {
     result = processAllocaInst(allocaInst); 
@@ -193,8 +218,8 @@ void ConstantFolding::runOnInst(Instruction * I) {
     result = processMemSetInst(dyn_cast<CallInst>(memsetInst));
   } else if(CallInst * callInst = dyn_cast<CallInst>(I)) {
     result = processCallInst(callInst);
-  } else if(PtrToIntInst * ptrinst = dyn_cast<PtrToIntInst>(I)){
-    result = processPtrToIntInst(ptrinst);
+  //} else if(PtrToIntInst * ptrinst = dyn_cast<PtrToIntInst>(I)){
+    //result = processPtrToIntInst(ptrinst);
   } else if(ExtractValueInst *ev = dyn_cast<ExtractValueInst>(I)) {
     result = handleExtractValue(ev);
     //else if(PtrToIntInst *ptr = dyn_cast<PtrToIntInst>(I)) {
@@ -298,6 +323,42 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
   if(ci) {
     // if func call
     propagateArgs(ci, toRun);
+  Value * addInst;
+  string funcOriginalName = toRun->getName().str().substr(0, toRun->getName().str().find("_clone"));
+  debug(Yes)<<"ci type "<<*ci->getType() << " "<<*ci;
+
+  if(funcRetMap[funcOriginalName])
+ {
+  debug(Yes)<< funcOriginalName <<" "<<*funcRetMap[funcOriginalName] <<"\n";
+  IRBuilder <> Builder(ci->getNextNode());
+  debug(Yes)<<*ci->getType()<<"\n";
+  debug(Yes)<<*funcRetMap[funcOriginalName]<<"\n";
+  debug(Yes)<<ci->getType()->isPointerTy()<<"\n";
+  debug(Yes)<<funcRetMap[funcOriginalName]->isPointerTy()<<"\n";
+
+  if(!(toRun->getReturnType()->isPointerTy()) && funcRetMap[funcOriginalName]->isPointerTy()){
+          debug(Yes)<<"added int to ptr inst\n";
+           //debug(Yes)<<"cloned type "<<*ci->getType() << " "<<*ci<<"\n";
+           addInst = Builder.CreateIntToPtr(ci, funcRetMap[funcOriginalName]);
+         }
+
+  else if(toRun->getReturnType()->isPointerTy() && !(funcRetMap[funcOriginalName]->isPointerTy())){
+           debug(Yes)<<"added ptr to int inst\n";
+           addInst = Builder.CreatePtrToInt(ci, funcRetMap[funcOriginalName]);
+         }
+
+  else{
+           debug(Yes)<<"added bitcast inst\n";
+           addInst = Builder.CreateBitCast(ci, funcRetMap[funcOriginalName]);
+
+         }
+  ci->replaceAllUsesWith(addInst);
+  dyn_cast<User>(addInst)->setOperand(0,ci);
+  debug(Yes)<<"CurrBB: "<<*currBB<<"\n";
+  funcRetMap.erase(funcOriginalName);
+ }
+
+
     copyCallerContext(ci, toRun); //copy context
   }
 
@@ -419,18 +480,22 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
 
         // if not main function
         if(ci) {
-          std::vector<Value*> args(ci->arg_begin(), ci->arg_end());
-          CallInst *clonedCall = createFuncCall(currfn, args);
+          //std::vector<Value*> args(ci->arg_begin(), ci->arg_end());
+          //CallInst *clonedCall = createFuncCall(currfn, args);
+          Instruction *clonedCall = ci->clone();
+          dyn_cast<CallInst>(clonedCall)->setCalledFunction(currfn);
+
+
           //erase any old replacements from toreplace for this function
           string originalName = removeCloneName(ci->getCalledFunction()->getName().str());
-          ReplaceInstWithInst(ci, clonedCall);
+          ReplaceInstWithInst(ci, dyn_cast<CallInst>(clonedCall));
 
           Function *original = module->getFunction(originalName);
           if(funcSpecMap.find(original) != funcSpecMap.end()) {
             debug(Yes) << "replacing call due to loop pass\n";
-            funcSpecMap[original]->call = clonedCall;
+            funcSpecMap[original]->call = dyn_cast<CallInst>(clonedCall);
           }
-          ci = clonedCall;
+          ci = dyn_cast<CallInst>(clonedCall);
         }
         debug(Yes)<<"Renaming Function!\n";
         renameFunctions(currfn, oldFn);
@@ -491,6 +556,7 @@ bool ConstantFolding::runOnModule(Module & M) {
   DL = new DataLayout(module);   
   CG = &getAnalysis<CallGraphWrapperPass>().getCallGraph();  
   PreserveLCSSA = mustPreserveAnalysisID(LCSSAID);
+
 
   useAnnotations = isAnnotated;  
   trackAllocas = trackAlloc;
@@ -814,11 +880,11 @@ ProcResult ConstantFolding::processBitCastInst(BitCastInst * bi) {
   Register * reg = processInstAndGetRegister(ptr);
   if(!reg) {
     //try function
-    /*if(dyn_cast<Function>(ptr)) {
+    if(dyn_cast<Function>(ptr)) {
       addSingleVal(bi, (uint64_t) ptr, false, true);
       debug(Yes)<<"in bitcast inst\n";
       return NOTFOLDED;
-    }*/
+    }
     debug(Yes) << "BitCastInst : Not found in Map\n";
     return NOTFOLDED;
   }
@@ -1028,7 +1094,7 @@ ProcResult ConstantFolding::processLoadInst(LoadInst * li) {
 }
 
 // Process PtrToInst Instructions: map the pointer argument to a different type to be used in further instructions
-ProcResult ConstantFolding::processPtrToIntInst(PtrToIntInst* pi){
+/*ProcResult ConstantFolding::processPtrToIntInst(PtrToIntInst* pi){
   debug(Yes)<<"Invoked processPtrToIntInst\n";
   Value * ptr = pi->getOperand(0);
 
@@ -1050,7 +1116,7 @@ ProcResult ConstantFolding::processPtrToIntInst(PtrToIntInst* pi){
   regOps.addRegister(pi, pi->getType(), reg->getValue(), reg->getTracked());
   stats.incrementInstructionsFolded();
   return UNDECIDED;
-}
+}*/
 
 // Process GetElementbyPtr Instructions: maps the GEP value to the resultant address in memory so that it can be used in further instructions.
 ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
@@ -1064,7 +1130,7 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
   }
 
   
-
+  unsigned contSize = bbOps.getSizeContigous(reg->getValue(), currBB);
   unsigned OffsetBits = DL->getPointerTypeSizeInBits(gi->getType());
   APInt offset(OffsetBits, 0); 
   bool isConst = gi->accumulateConstantOffset(*DL, offset);
@@ -1075,7 +1141,7 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
 
   if((/*useRegOffset && */ !isConst  && !regOffset) /*|| (!useRegOffset && !isConst)*/) {
     debug(Yes) << "GepInst : offset not constant\n";
-    unsigned contSize = bbOps.getSizeContigous(reg->getValue(), currBB);
+
     unsigned allocSize = DL->getTypeAllocSize(reg->getType());
     unsigned numArray = contSize/allocSize;
     uint64_t address = reg->getValue();
@@ -1118,9 +1184,12 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
 
   debug(Yes)<<"Resultant Address: "<<val<<"\n";
   pushFuncStack(gi);
-  regOps.addRegister(gi, gi->getType(), val, reg->getTracked());
-  debug(Yes) << val << " GEP Inst\n";
-  stats.incrementInstructionsFolded();
+  if(val>=reg->getValue() && val< reg->getValue() + contSize)
+  {
+   regOps.addRegister(gi, gi->getType(), val, reg->getTracked());
+   debug(Yes) << val << " GEP Inst\n";
+   stats.incrementInstructionsFolded();
+  }
   return UNDECIDED;
 }
 
@@ -1351,6 +1420,18 @@ ProcResult ConstantFolding::processReturnInst(ReturnInst * retInst) {
    arguments and all globals as non constant
 
 */
+
+void ConstantFolding::markAllGlobsAsNonConst(){
+
+for(auto& global : module->globals()) { 
+     auto reg = regOps.getRegister(&global);
+     if(!reg)
+       continue;
+    debug(Yes) << "marking global non constant: " << global << "\n";
+    bbOps.setConstMem(false, reg->getValue(), DL->getTypeAllocSize(reg->getType()), currBB);
+   }
+}
+
 void ConstantFolding::markGlobAsNonConst(Function *F) {
   if(!F)
     return;
@@ -1788,7 +1869,7 @@ ProcResult ConstantFolding::handleExtractValue(ExtractValueInst *inst) {
 ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
 
   if(!callInst->getCalledFunction() && !simplifyCallback(callInst)) {
-    //Assumption: Global variables not accessed in dynamic libraries.
+    markAllGlobsAsNonConst();
     markArgsAsNonConst(callInst);
     return NOTFOLDED;
   }
@@ -1818,6 +1899,7 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
   else if(handleLibCCall(callInst)) {}
   else if(calledFunction->isDeclaration()) {
     debug(Yes) << "skipping function : declaration\n";
+    //Assumption: Global variables not accessed in extern functions.
     markArgsAsNonConst(callInst);
     return NOTFOLDED;
   } else {
@@ -1999,28 +2081,21 @@ CallInst *ConstantFolding::cloneAndAddFuncCall(CallInst *callInst) {
   Function *cloned = cloneFunc(callInst->getCalledFunction(), vmap);
   stats.incrementFunctionsCloned();
 
-  std::vector<Value*> args(callInst->arg_begin(), callInst->arg_end());
-  CallInst *clonedCall = createFuncCall(cloned, args);
-  return clonedCall;
+  //std::vector<Value*> args(callInst->arg_begin(), callInst->arg_end());
+  //CallInst *clonedCall = createFuncCall(cloned, args);
+  Instruction *clonedCall = callInst->clone();
+  dyn_cast<CallInst>(clonedCall)->setCalledFunction(cloned);
+  return dyn_cast<CallInst>(clonedCall);
 }
 
 void ConstantFolding::propagateArgs(CallInst *ci, Function *toRun) {
   unsigned index = 0;
+
+  
   for(auto arg = toRun->arg_begin(); arg != toRun->arg_end();
       arg++, index++) {
     Value * callerVal = ci->getOperand(index);
     Value * calleeVal = getArg(toRun, index);
-    /*if(callerVal->getType() != calleeVal->getType()){
-       debug(Yes)<< " type mismatched\n";
-       IRBuilder<> Builder(ci);
-       Value* BitcastInst = Builder.CreateBitCast(callerVal, calleeVal->getType());
-       ci->setOperand(index,BitcastInst);
-       Register * reg = processInstAndGetRegister(callerVal);
-       regOps.addRegister(BitcastInst, BitcastInst->getType(), reg->getValue(), reg->getTracked());
-       replaceOrCloneRegister(calleeVal, BitcastInst);
-       continue;
-       
-    }*/
     replaceOrCloneRegister(calleeVal, callerVal);
   }
 }
@@ -2657,8 +2732,34 @@ Function *ConstantFolding::simplifyCallback(CallInst * callInst) {
   Register * reg = processInstAndGetRegister(callInst->getCalledValue());
   if(!reg) return NULL;
   Function * calledFunction = (Function *) reg->getValue();
+
+  if(calledFunction->getReturnType() != dyn_cast<FunctionType>(dyn_cast<PointerType>(reg->getType())->getElementType())->getReturnType())
+  {
+      //return NULL;
+      funcRetMap[calledFunction->getName().str()] = dyn_cast<FunctionType>(dyn_cast<PointerType>(reg->getType())->getElementType())->getReturnType();
+      debug(Yes)<< calledFunction->getName().str() <<" "<<*funcRetMap[calledFunction->getName().str()] <<"\n";
+  }
+  
   //auto CE = dyn_cast<ConstantExpr>(callInst->getCalledValue());
   callInst->setCalledFunction(calledFunction);
+
+  unsigned index = 0;
+  for(auto arg = calledFunction->arg_begin(); arg != calledFunction->arg_end();
+      arg++, index++) {
+    Value * callerVal = callInst->getOperand(index);
+    Value * calleeVal = getArg(calledFunction, index);
+    if(callerVal->getType() != calleeVal->getType()){
+       debug(Yes)<< " type mismatched\n";
+       IRBuilder<> Builder(callInst);
+       Value* BitcastInst = Builder.CreateBitCast(callerVal, calleeVal->getType());
+       callInst->setOperand(index,BitcastInst);
+       Register * reg = processInstAndGetRegister(callerVal);
+       if(reg){
+        regOps.addRegister(BitcastInst, BitcastInst->getType(), reg->getValue(), reg->getTracked());
+        }       
+    }
+  }
+
   debug(Yes) << "set called Function to " << calledFunction->getName() << "\n";
   return calledFunction;
 }
