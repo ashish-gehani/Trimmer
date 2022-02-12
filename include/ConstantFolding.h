@@ -88,7 +88,9 @@ struct ConstantFolding : public ModulePass {
   map<Value*, Value*> ptrMap;
   map<Function *, set<GlobalVariable *> > modSet;
   map<Function *, FuncSpecDetail *> funcSpecMap;
+  map<string, Type *> funcRetMap;
   bool exit;
+  bool partOfLoop;
 
   set<Value *> trackedValues;
 
@@ -307,6 +309,7 @@ struct ConstantFolding : public ModulePass {
 
   set<GlobalVariable *> &getFuncModset(Function *F);
   void markGlobAsNonConst(Function *);
+  void markAllGlobsAsNonConst();
 
   bool hasTrackedMalloc(Function *);
   void getTrackedValues(set<Value *> &);
