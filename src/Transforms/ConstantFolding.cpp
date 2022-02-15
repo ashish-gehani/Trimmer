@@ -1184,12 +1184,12 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
 
   debug(Yes)<<"Resultant Address: "<<val<<"\n";
   pushFuncStack(gi);
-  if(val>=reg->getValue() && val< reg->getValue() + contSize)
-  {
+ // if(val>=reg->getValue() && val< reg->getValue() + contSize)
+  //{
    regOps.addRegister(gi, gi->getType(), val, reg->getTracked());
    debug(Yes) << val << " GEP Inst\n";
    stats.incrementInstructionsFolded();
-  }
+  //}
   return UNDECIDED;
 }
 
