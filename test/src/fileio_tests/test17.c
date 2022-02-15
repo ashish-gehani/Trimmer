@@ -16,7 +16,7 @@ void branchPruned(char * buffer) {
 }
 
 int main(int argc, char ** argv) {
-  char buffer[10];
+  char buffer[11];
   FILE *fptr;
   fptr = fopen("../data/configFile17.txt", "rb");
   if(fptr==NULL) {
@@ -25,7 +25,7 @@ int main(int argc, char ** argv) {
   }
   int i=0;
   while(fread(&buffer[i], 1, 1, fptr))
-  {
+  {  printf("%c\n",buffer[i]);
      i++;
   }
   printf("%i\n",i);
