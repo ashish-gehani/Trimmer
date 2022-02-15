@@ -38,14 +38,14 @@ will run all the test cases placed in test/src.
 python test.py ./work_dir pointer 1 1
 ```
     
-will run test case inter1.c in test/src/pointer_tests.
+will run test case test1.c in test/src/pointer_tests.
 
     
 ```
 python test.py ./work_dir constprop 1 10
 ```
     
-will run test cases including inter1.c to inter10.c in test/src/constprop_tests (inclusive).
+will run test cases including test1.c to test10.c in test/src/constprop_tests (inclusive).
 
       
 **Guidelines for Writing Additional Test Cases**:
