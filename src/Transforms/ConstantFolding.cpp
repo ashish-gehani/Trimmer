@@ -218,8 +218,8 @@ void ConstantFolding::runOnInst(Instruction * I) {
     result = processMemSetInst(dyn_cast<CallInst>(memsetInst));
   } else if(CallInst * callInst = dyn_cast<CallInst>(I)) {
     result = processCallInst(callInst);
-  //} else if(PtrToIntInst * ptrinst = dyn_cast<PtrToIntInst>(I)){
-    //result = processPtrToIntInst(ptrinst);
+  } else if(PtrToIntInst * ptrinst = dyn_cast<PtrToIntInst>(I)){
+     result = processPtrToIntInst(ptrinst);
   } else if(ExtractValueInst *ev = dyn_cast<ExtractValueInst>(I)) {
     result = handleExtractValue(ev);
     //else if(PtrToIntInst *ptr = dyn_cast<PtrToIntInst>(I)) {
@@ -338,7 +338,7 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
 
   if(!(toRun->getReturnType()->isPointerTy()) && funcRetMap[funcOriginalName]->isPointerTy()){
           debug(Yes)<<"added int to ptr inst\n";
-           //debug(Yes)<<"cloned type "<<*ci->getType() << " "<<*ci<<"\n";
+
            addInst = Builder.CreateIntToPtr(ci, funcRetMap[funcOriginalName]);
          }
 
@@ -351,11 +351,15 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
            debug(Yes)<<"added bitcast inst\n";
            addInst = Builder.CreateBitCast(ci, funcRetMap[funcOriginalName]);
 
+
          }
   ci->replaceAllUsesWith(addInst);
+
   dyn_cast<User>(addInst)->setOperand(0,ci);
-  debug(Yes)<<"CurrBB: "<<*currBB<<"\n";
+
+
   funcRetMap.erase(funcOriginalName);
+
  }
 
 
@@ -1094,7 +1098,7 @@ ProcResult ConstantFolding::processLoadInst(LoadInst * li) {
 }
 
 // Process PtrToInst Instructions: map the pointer argument to a different type to be used in further instructions
-/*ProcResult ConstantFolding::processPtrToIntInst(PtrToIntInst* pi){
+ProcResult ConstantFolding::processPtrToIntInst(PtrToIntInst* pi){
   debug(Yes)<<"Invoked processPtrToIntInst\n";
   Value * ptr = pi->getOperand(0);
 
@@ -1116,7 +1120,7 @@ ProcResult ConstantFolding::processLoadInst(LoadInst * li) {
   regOps.addRegister(pi, pi->getType(), reg->getValue(), reg->getTracked());
   stats.incrementInstructionsFolded();
   return UNDECIDED;
-}*/
+}
 
 // Process GetElementbyPtr Instructions: maps the GEP value to the resultant address in memory so that it can be used in further instructions.
 ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
@@ -1184,12 +1188,11 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
 
   debug(Yes)<<"Resultant Address: "<<val<<"\n";
   pushFuncStack(gi);
- // if(val>=reg->getValue() && val< reg->getValue() + contSize)
-  //{
+  
    regOps.addRegister(gi, gi->getType(), val, reg->getTracked());
    debug(Yes) << val << " GEP Inst\n";
    stats.incrementInstructionsFolded();
-  //}
+
   return UNDECIDED;
 }
 
@@ -1874,6 +1877,11 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
     return NOTFOLDED;
   }
 
+  if(!callInst->getCalledFunction()){
+    markArgsAsNonConst(callInst);
+    return NOTFOLDED;
+  }
+
   Function * calledFunction = callInst->getCalledFunction();
   string name = calledFunction->getName().str();
 
@@ -2003,7 +2011,9 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
         debug(Yes)<<"ContextType is 0/NULL...\n";
         funcSpecMap[calledFunction] = detail;
       }
-       debug(Yes)<<"in call inst run on function\n";
+
+      clonedInst->mutateType(clonedInst->getCalledFunction()->getReturnType());
+
       runOnFunction(clonedInst, clonedInst->getCalledFunction());
     }
   }
@@ -2733,6 +2743,13 @@ Function *ConstantFolding::simplifyCallback(CallInst * callInst) {
   if(!reg) return NULL;
   Function * calledFunction = (Function *) reg->getValue();
 
+  if(calledFunction->isDeclaration())
+     return calledFunction;
+
+
+  callInst->setCalledFunction(calledFunction);
+
+  
   if(calledFunction->getReturnType() != dyn_cast<FunctionType>(dyn_cast<PointerType>(reg->getType())->getElementType())->getReturnType())
   {
       //return NULL;
@@ -2741,7 +2758,7 @@ Function *ConstantFolding::simplifyCallback(CallInst * callInst) {
   }
   
   //auto CE = dyn_cast<ConstantExpr>(callInst->getCalledValue());
-  callInst->setCalledFunction(calledFunction);
+
 
   unsigned index = 0;
   for(auto arg = calledFunction->arg_begin(); arg != calledFunction->arg_end();
