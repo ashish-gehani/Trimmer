@@ -218,39 +218,14 @@ void ConstantFolding::runOnInst(Instruction * I) {
     result = processMemSetInst(dyn_cast<CallInst>(memsetInst));
   } else if(CallInst * callInst = dyn_cast<CallInst>(I)) {
     result = processCallInst(callInst);
-  } else if(PtrToIntInst * ptrinst = dyn_cast<PtrToIntInst>(I)){
-     result = processPtrToIntInst(ptrinst);
   } else if(ExtractValueInst *ev = dyn_cast<ExtractValueInst>(I)) {
     result = handleExtractValue(ev);
-    //else if(PtrToIntInst *ptr = dyn_cast<PtrToIntInst>(I)) {
-    //result = processPtrToInt(ptr);  }
-  } else if(IntToPtrInst *inst = dyn_cast<IntToPtrInst>(I)) {
-    result = processIntToPtr(inst);  
   } else {
     result = tryfolding(I);
   }
 
 }
 
-ProcResult ConstantFolding::processIntToPtr(IntToPtrInst *inst) {
-  Value *val = inst->getOperand(0);
-  ConstantInt *cInt = dyn_cast<ConstantInt>(val);
-  Register *reg = processInstAndGetRegister(val);
-  uint64_t value;
-  if(!reg && !cInt) {
-    debug(Yes) << "inttoptr: register not found\n";
-    return NOTFOLDED;
-  }
-
-  if(cInt)
-    value = cInt->getZExtValue();
-  else
-    value = reg->getValue();
-
-  addSingleVal(inst, (uint64_t) value, false, true);
-  stats.incrementInstructionsFolded();
-  return FOLDED;
-}
 /*
    Run analysis on each Instruction of basic block BB
    */
@@ -784,24 +759,6 @@ void ConstantFolding::collectCallGraphGlobals(CallGraph *CG) {
   set<Function *> openNodes_two;
 }
 
-/*
-   ProcResult ConstantFolding::processPtrToInt(PtrToIntInst *pi) {
-   Value *pointer = pi->getPointerOperand();
-   Register *reg = processInstAndGetRegister(pointer);
-
-   if(!reg) {
-   debug(Yes) << "failed to fold pointer inst. Register not found\n";
-   return NOTFOLDED;
-   }
-
-//PtrToIntInst *clone = cast<PtrToIntInst>(pi->clone());
-ConstantInt *constantPtr = cast<ConstantInt>(ConstantInt::get(pi->getType(), reg->getValue()));
-
-debug(Yes) << "trying to fold " << *constantPtr<< "\n";
-addSingleVal(pi, constantPtr->getZExtValue(), true, true);
-return FOLDED;
-}
-*/
 /**
  * Process Alloca Instructions:
  * ty * %a = ty
@@ -1093,31 +1050,6 @@ ProcResult ConstantFolding::processLoadInst(LoadInst * li) {
   addSingleVal(li, val, true , reg->getTracked());
   pushFuncStack(li);
   stats.incrementLoadsFolded();
-  stats.incrementInstructionsFolded();
-  return UNDECIDED;
-}
-
-// Process PtrToInst Instructions: map the pointer argument to a different type to be used in further instructions
-ProcResult ConstantFolding::processPtrToIntInst(PtrToIntInst* pi){
-  debug(Yes)<<"Invoked processPtrToIntInst\n";
-  Value * ptr = pi->getOperand(0);
-
-  Register * reg = processInstAndGetRegister(ptr);
-  if(!reg){
-    debug(Yes)<<"PtrToIntInst: Not found in map\n";
-    return NOTFOLDED;
-  }
-  uint64_t addr = reg->getValue();
-  uint64_t size = DL->getTypeAllocSize(pi->getType());
-
-  debug(Yes)<<"PtrToIntInst => RegValue: "<<addr<<"\n";
-
-  if(!bbOps.checkConstMem(addr, size, currBB)) {
-    debug(Yes) << " PtrToIntInst: skipping non constant\n";
-    return NOTFOLDED;
-  }
-  pushFuncStack(pi);
-  regOps.addRegister(pi, pi->getType(), reg->getValue(), reg->getTracked());
   stats.incrementInstructionsFolded();
   return UNDECIDED;
 }
