@@ -5,7 +5,6 @@ add_library(ConstantFolding MODULE
   ../Debug.cpp
   ConstantFolding.cpp
   ../VecUtils.cpp
-  ../GetOptLocal.cpp
   ../RegOps.cpp
   ../LoopUnroller.cpp
   ../LoopUnrollTest.cpp
