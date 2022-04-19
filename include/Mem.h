@@ -164,12 +164,10 @@ public:
 		uint64_t address = heapIndex;
 		heapIndex += size;
 		heapIndex++; // space of 1 between each allocation
-        //errs() << "allocating" << "\n";
 		while(heapIndex >= heapTotalSize)
 			resize(heap, heapConst, heapTotalSize);
 		heapStartIndices.push_back(address);
 		heapStartToSizeMap[address] = size;
-        //errs() << "returning" <<"\n";
 		return address + MAXSTACKSIZE;
 	}	
 	void store(uint64_t val, uint64_t size, uint64_t address) {
@@ -186,7 +184,6 @@ public:
 	bool checkConstant(uint64_t address, uint64_t size) {
 		bool * constant = stackOrHeapConst(address);
 		for(uint64_t i = address; i < address + size; i++) {
-            //errs() << "address = " << i << " constantness = " << constant[i] << "\n";
 			if(!constant[i])
 				return false;
 		}
@@ -198,8 +195,7 @@ public:
           constMemSize += size;
         else
           constMemSize -= size;
-        //errs() << "filling with " << val << " from address " << address << " to " << address + size <<"\n";
-		fill(&constant[address], &constant[address] + size, val);
+	fill(&constant[address], &constant[address] + size, val);
 	}
 	void * getActualAddr(uint64_t address) {
 		int8_t * memory = stackOrHeap(address);
@@ -337,17 +333,16 @@ private:
 		return checkConstant(address + MAXSTACKSIZE, heapStartToSizeMap[address]);
 	}			
 	void resize(int8_t *& memory, bool *& constant, uint64_t& totalSize) {		 
-        //errs() << "resized" << "\n";
 		int8_t * newMem = new int8_t[totalSize * 2];
-        //errs() << "resized1" << "\n";
+
 		memcpy(newMem, memory, totalSize);
 		memset(newMem + totalSize, 0, totalSize);
 		int8_t * delMem = memory;
 		memory = newMem;
 
-       // errs() << "resized2" << "\n";
+
 		delete [] delMem;
-        //errs() << "resized3" << "\n";
+
 		bool * newConst = new bool[totalSize * 2];
 		memcpy(newConst, constant, totalSize);
 		memset(newConst + totalSize, true, totalSize);

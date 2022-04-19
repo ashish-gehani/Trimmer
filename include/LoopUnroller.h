@@ -14,7 +14,6 @@ src/LoopUnroller.cpp.*/
 #include "llvm/Analysis/ScalarEvolutionExpressions.h"
 #include "llvm/Analysis/TargetTransformInfo.h"
 #include "llvm/IR/Dominators.h"
-//#include "llvm/Analysis/OptimizationDiagnosticInfo.h"
 #include "llvm/Analysis/OptimizationRemarkEmitter.h"
 #include "llvm/Transforms/Utils/UnrollLoop.h"
 #include "RegOps.h"
@@ -30,7 +29,7 @@ using namespace std;
 
 class LoopUnroller {
   public:
-  LoopUnroller(Module *m, bool PreserveLCSSA, bool useAnnotations, Loop *, LoopInfo *);
+  LoopUnroller(Module *m, bool PreserveLCSSA, Loop *, LoopInfo *);
   ~LoopUnroller();
   void checkTermInst(Instruction * I, uint64_t);
   bool testTerminated();
@@ -54,7 +53,6 @@ class LoopUnroller {
   LoopUnrollTest *ti;
   bool PreserveLCSSA;
   Module *module;
-  bool useAnnotations;
   LoopInfo *LI;
   Function *cloneOf;
   int fileTripCount;

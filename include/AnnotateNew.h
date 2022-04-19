@@ -37,7 +37,6 @@ struct AnnotateNew: public ModulePass {
   int LOOP_ID;
   Module *module;
   AnnotateNew(): ModulePass(ID){}
-  //void getAnalysisUsage(AnalysisUsage &AU) const;
   bool runOnModule(Module &);
   string print(SVFGNode *node, SVFG *graph);
   PAG *pag;
@@ -58,16 +57,13 @@ struct AnnotateNew: public ModulePass {
   void getMemoryFlow(const SVFGNode *current, set<const Value *> &singleLevelPointers, set<SVFGNode*> &storeSvfg, set<CallInst*> &calls);
   void getSourceAllocas(set<SVFGNode*> &, vector<const SVFGNode*> &, set<const Value*> &, bool trackLoops = true, bool dpMem = true);
   void getStoreSvfg(set<Value*> &, set<SVFGNode*> &);
-  //SVFGNode *getSvfgNode(Value *);
   SVFGNode *getSvfgNode(const Value *);
 
   void getAnalysisUsage(AnalysisUsage &AU) const; 
   void classifyValAndOperands(Value *value, set<SVFGNode *> &backwardPtr, set<const Value *> &slps, set<Value*> &scalars); 
   void classifyVal(Value *value, set<SVFGNode*>& backwardPtr, set<const Value *> &singleLevelPointers, set<Value*>& scalar);
-  //void getLoopIterators(Module &M, set<const Value *> &trackedAllocas, vector<const SVFGNode *>& worklistSvfg);
   void getLoopIterators(const BasicBlock *, set<const Value *> &trackedAllocas);
   void getLoopBbs(Module *);
-  void getBranchMemory(set<BranchInst *> &allBranches, map<Value *, set<Value *> > &dp, set<BranchInst*>&);
   void getTrackedBranchBBs(BranchInst *, set<BasicBlock *> &, set<PHINode*> &, map<Function *, PostDominatorTree *> &);
 
   static bool isLoad(Value *);

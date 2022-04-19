@@ -74,6 +74,7 @@ struct FuncSpecDetail {
   CallInst *call;
 };
 
+
 struct ConstantFolding : public ModulePass {
 
   static char ID;  
@@ -106,7 +107,6 @@ struct ConstantFolding : public ModulePass {
   bool PreserveLCSSA;
 
   vector<ValSet> funcValStack;
-  bool currContextIsAnnotated;
   bool useAnnotations;
   bool trackAllocas;
   set<Value *> AnnotationList;
@@ -142,9 +142,6 @@ struct ConstantFolding : public ModulePass {
 
   Register *processInstAndGetRegister(Value *);
 
-  void createAnnotationList();
-  void createAnnotationList2();
-  void updateAnnotationContext(Function * F);
   bool isAllocaTracked(Instruction *);
   
   FuncInfo* initializeFuncInfo(Function *);
@@ -242,7 +239,6 @@ struct ConstantFolding : public ModulePass {
   bool getSingleVal(Value *, uint64_t&);
   void addSingleVal(Value *, uint64_t, bool replace64 = false, bool tracked = false);
 
-  // bool getStr(Value * ptr, char *& str);
   bool getStr(Value * ptr, char *& str, uint64_t size);
   bool getStr(uint64_t addr, char *& str);
   uint64_t createConstStr(string str);

@@ -12,6 +12,7 @@ The methods of class Stat are defined in src/Stats.cpp.*/
 #define STAT_H
 
 #include "llvm/IR/Function.h"
+#include "llvm/Analysis/LoopPass.h"
 
 #include <string>
 #include <unordered_map>
@@ -41,12 +42,51 @@ class StatItem {
     }
 };
 
+class newStats {
+  private:
+    unsigned libCallsSimplified;
+    unsigned loadsFolded;
+    unsigned totalLoads;
+    unsigned totalLibCalls;
+    unsigned loopsUnrolled;
+    unsigned instructionsFolded;
+    unsigned totalFunctionCalls;
+    unsigned loopsRerolledBack;
+    unsigned totalLoops;
+  public:
+    newStats();
+    void incrementLibCallsFolded();
+    void incrementTotalLoads();
+    void incrementLoadsFolded();
+    void incrementTotalLibCalls();
+    void incrementFunctionCalls();
+    void incrementLoopsUnrolled();
+    void incrementInstructionsFolded();
+    void incrementLoopsRerolledBack();
+    void incrementTotalLoops();
+    
+
+    unsigned getLibCallsFolded();
+    unsigned getTotalLoads();
+    unsigned getLoadsFolded();
+    unsigned getTotalLibCalls();
+    unsigned getFunctionCalls();
+    unsigned getLoopsUnrolled();
+    unsigned getTotalLoops();
+    unsigned getInstructionsFolded();
+    unsigned getLoopsRerolledBack();
+
+};
+
+
 class LoopStats: public StatItem {
   private:
     BasicBlock *header;
     bool terminated;
     bool passed;
+
   public:
+    newStats *stat;
     LoopStats(BasicBlock *);
     void loopSuccess();
     void loopFail();
@@ -61,7 +101,9 @@ class FunctionStats: public StatNode<FunctionStats*>, public StatItem {
     unsigned id;
     Function *f;
   public:
+    newStats *stat;
     vector<LoopStats *> loops;
+    set<LoopStats *> failedLoops;
     inline LoopStats *getRunningLoop();
     FunctionStats(Function *, unsigned);
     void functionReturn();
@@ -82,17 +124,11 @@ class Stats {
     unsigned count;
     inline FunctionStats *getRunningFunction();
     LoopStats *getRunningLoop();
+    LoopStats *getCurrentFuncRunningLoop();
     vector<FunctionStats *> stack;
     set<FunctionStats *> processed;
-    void printStats(FunctionStats*);
-    unsigned libCallsSimplified;
-    unsigned loadsFolded;
-    unsigned totalLoads;
-    unsigned totalLibCalls;
-    unsigned functionsCloned;
-    unsigned loopsUnrolled;
-    unsigned trackedLoads;
-    unsigned instructionsFolded;
+    set<Function *> functionsToRemove;
+    void printStats(FunctionStats*);   
   public:
     Stats();
     void functionCall(Function *);
@@ -102,20 +138,23 @@ class Stats {
     void loopSuccess();
     void loopFail();
     void printStats(Function *);
+    void removeFunctions(set<Function*>);
     void makeGraph(Function *);
+
+    bool getLoopTime(uint64_t &);
+
     void incrementLibCallsFolded();
     void incrementTotalLoads();
     void incrementLoadsFolded();
-    void incrementTrackedLoads();
     void incrementTotalLibCalls();
-    void incrementFunctionsCloned();
-    void decrementFunctionsCloned();
+    void incrementFunctionCalls();
     void incrementLoopsUnrolled();
     void incrementInstructionsFolded();
-    unsigned getTrackedLoads();
-
-
-    bool getLoopTime(uint64_t &);
+    void incrementLoopsRerolledBack();
+    void incrementTotalLoops();
+     
 };
+
+
 
 #endif
