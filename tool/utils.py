@@ -69,11 +69,10 @@ def parse_args(args):
 	isTrackedLimited = False
 	trackedPercent = 100
 	useGlob = False
-	exceedLimit = 0
+	exceedLimit = 'No'
 	disableExit = False
 	useRegOffset = False
 
-	print(len(args));
 	for i in range(2, len(args)):
 		if(args[i] == 'optLevel'):
 			opt_level = args[i+1]
@@ -86,6 +85,9 @@ def parse_args(args):
 
 		elif(args[i] == 'no-inter-constprop'):
 			icp_flag = False
+			loop = 0
+			file_specialize = 0
+			string_specialize = 0
 		elif(args[i] == 'no-track-allocas'):
 			track_allocas = 0
 			annot_flag = 0
@@ -111,7 +113,10 @@ def parse_args(args):
 			if string_flag == False:
 				string_specialize = 0                               
 		elif(args[i] == 'contextType'):
-			contextType = args[i+1]
+			contextType = int(args[i+1])
+			if(contextType != 1):
+				track_allocas = 0
+				annot_flag = 0
 		elif(args[i] == 'depthLimit'):
 			isLimitedDepth = True
 			depthLimit = args[i+1]

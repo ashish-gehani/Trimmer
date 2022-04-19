@@ -15,9 +15,6 @@ import os, sys
 from shutil import copyfile
 import utils, driver
 
-# Disable debug mesages by default
-debugPrint = 1
-
 class Trimmer:
 
 	def __init__(self,arguments):
@@ -58,30 +55,63 @@ class Trimmer:
 
 	def print_info(self):
 
-		print (('*Program Name = ' + self.name))
-		print (('*Static Arguments = ' + self.args))
-		print (('modules are ' + ' '.join(self.modules)))
-		print (('ldflags are ' + self.ldflags))
-		print (('native_libs are ' + self.native_libs))
-		print (('exe name is ' + self.exe_name))
-		print (('work_dir is ' + self.work_dir))
-		print (('config_files are ' + self.config_files))
-		print (('Use globals ' + str(self.use_glob)))
-		print (('exceedLimit ' + str(self.exceed_limit)))
-		print (('opt_level '+ str(self.opt_level)))
-		print (('loop unroll '+ str(self.loop_unroll)))
-		print (('string specialize '+ str(self.string_specialize)))
-		print (('file specialize '+ str(self.file_specialize)))
-		print (('contextType '+ str(self.context_type)))
+		print ("\n**** Manifest File Information **** \n")
+		print (('Program Name: ' + self.name))
+		print (('Static Arguments: ' + self.args))
+		print (('Bitcode File: ' + self.main))
+		print (('Modules: ' + ' '.join(self.modules)))
+		print (('Ldflags: ' + self.ldflags))
+		print (('Native_libs: ' + self.native_libs))
+		print (('Binary: ' + self.exe_name))
+		print (('Config_files: ' + self.config_files))
+
+
+		print (('\nWorking directory: ' + self.work_dir))
+
+  
+		print ("\n**** Trimmer Options **** \n")
+		print (('Track Global Variables: ' + str(self.use_glob)))
+		print (('Tracked Percent: ' + str(self.tracked_percent)))
+		print (('Clone Limit: ' + str(self.exceed_limit)))
+		print (('Optimization Level: '+ str(self.opt_level)))
+
+	
+		if(self.loop_unroll == 1):
+			print ('Loop Unroll: True')
+		else:
+			print ('Loop Unroll: False')
+
+		if(self.string_specialize == 1):
+			print ('String Specialize: True')
+		else:
+			print ('String Specialize: False')
+
+
+		if(self.file_specialize == 1):
+			print ('File Specialize: True')
+		else:
+			print ('File Specialize: False')
+
+		if(self.context_type == 0):
+			print('ContextType: Context-Insensitive')
+
+		elif(self.context_type == 1):
+			print('ContextType: Sparse Context-Sensitive')
+
+		elif(self.context_type == 2):
+			print('ContextType: Context-Sensitive')
 
 
 	def run(self):
 		self.curr_file = self.work_dir + '/' + self.main
 		utils.exists(self.main_path)
 		copyfile(self.main_path, self.work_dir + '/' + self.main)
+		driver.create_baseline(self)
 		if(self.spec_flag):
 		# The following driver call runs the argument specialization transform
-			driver.run_argspec(self)
+			ret = driver.run_argspec(self)
+			if ret==1:
+				return                      
 		driver.link_libs(self)
 		if(self.opt_flag):
 		# The following driver call runs all the optimization passes
