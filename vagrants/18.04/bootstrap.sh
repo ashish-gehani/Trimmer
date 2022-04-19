@@ -6,14 +6,19 @@
 
 # Install package dependencies
 sudo apt-get update
-sudo apt-get install -y build-essential cmake git gettext gnutls-dev groff-base libbz2-dev libevent-dev libidn11-dev libmemcached-tools libpcap-dev libpcre3-dev libssl-dev pkg-config python-minimal uuid-dev wget wireless-tools
+sudo apt-get install -y build-essential cmake git gettext gnutls-dev groff-base libbz2-dev libevent-dev libidn11-dev libmemcached-tools libpcap-dev libpcre3-dev libssl-dev pkg-config python-minimal uuid-dev wget wireless-tools curl
 
 # Download Trimmer
 export TRIMMER_HOME=$HOME/Trimmer
 export USER=
 export TOKEN=
 cd `dirname $TRIMMER_HOME`
-git clone https://${USER}:${TOKEN}@github.com/ashish-gehani/Trimmer
+
+if  test -n "$IN_VAGRANT"; then
+
+	git clone https://${USER}:${TOKEN}@github.com/ashish-gehani/Trimmer
+fi
+
 
 # Setup environment
 cp $TRIMMER_HOME/vagrants/18.04/bash_profile $HOME/.bash_profile

@@ -15,5 +15,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     v.customize ["modifyvm", :id, "--uartmode1", "file", File::NULL]
   end
 
-  config.vm.provision :shell, path: "bootstrap.sh", privileged: false
+  config.vm.provision :shell, path: "bootstrap.sh", privileged: false, env: {"IN_VAGRANT" => "true"}
 end
+
