@@ -16,17 +16,93 @@ incrementFunctionCloned() is called whenever we clone a function.*/
 
 using namespace std;
 
+
 Stats::Stats() {
   count = 0;
-  libCallsSimplified = 0;
-  loadsFolded = 0;
-  totalLoads = 0;
-  totalLibCalls = 0;
-  functionsCloned = 0;
-  loopsUnrolled = 0;
-  trackedLoads = 0;
-  instructionsFolded = 0;
 }
+
+
+void Stats::removeFunctions(set<Function*> setFuncs)
+{
+  
+  for(auto &func:setFuncs){
+    functionsToRemove.insert(func);
+  }
+}
+
+
+void Stats::incrementLibCallsFolded()
+{
+
+  if(getCurrentFuncRunningLoop()==NULL && stack.size())
+    getRunningFunction()->stat->incrementLibCallsFolded();
+  else if(getCurrentFuncRunningLoop()!=NULL)
+    getCurrentFuncRunningLoop()->stat->incrementLibCallsFolded();
+}
+
+
+void Stats::incrementTotalLoads()
+{
+ if(getCurrentFuncRunningLoop()==NULL && stack.size())
+    getRunningFunction()->stat->incrementTotalLoads();
+  else if(getCurrentFuncRunningLoop()!=NULL)
+    getCurrentFuncRunningLoop()->stat->incrementTotalLoads();
+}
+
+void Stats::incrementLoadsFolded()
+{
+   if(getCurrentFuncRunningLoop()==NULL && stack.size())
+    getRunningFunction()->stat->incrementLoadsFolded();
+  else if(getCurrentFuncRunningLoop()!=NULL)
+    getCurrentFuncRunningLoop()->stat->incrementLoadsFolded();
+}
+
+void Stats::incrementTotalLibCalls()
+{
+ if(getCurrentFuncRunningLoop()==NULL && stack.size())
+    getRunningFunction()->stat->incrementTotalLibCalls();
+  else if(getCurrentFuncRunningLoop()!=NULL)
+    getCurrentFuncRunningLoop()->stat->incrementTotalLibCalls();
+}
+
+void Stats::incrementTotalLoops()
+{
+ if(getCurrentFuncRunningLoop()==NULL && stack.size())
+    getRunningFunction()->stat->incrementTotalLoops();
+  else if(getCurrentFuncRunningLoop()!=NULL)
+    getCurrentFuncRunningLoop()->stat->incrementTotalLoops();
+}
+
+
+void Stats::incrementFunctionCalls(){
+  if(getCurrentFuncRunningLoop()==NULL && stack.size())
+    getRunningFunction()->stat->incrementFunctionCalls();
+  else if(getCurrentFuncRunningLoop()!=NULL)
+    getCurrentFuncRunningLoop()->stat->incrementFunctionCalls();
+}
+    
+void Stats::incrementLoopsUnrolled()
+{
+  if(getCurrentFuncRunningLoop()==NULL && stack.size())
+    getRunningFunction()->stat->incrementLoopsUnrolled();
+  else if(getCurrentFuncRunningLoop()!=NULL)
+    getCurrentFuncRunningLoop()->stat->incrementLoopsUnrolled();
+}
+
+void Stats::incrementInstructionsFolded(){
+  if(getCurrentFuncRunningLoop()==NULL && stack.size())
+    getRunningFunction()->stat->incrementInstructionsFolded();
+  else if(getCurrentFuncRunningLoop()!=NULL)
+    getCurrentFuncRunningLoop()->stat->incrementInstructionsFolded();
+}
+    
+void Stats::incrementLoopsRerolledBack(){
+  if(getCurrentFuncRunningLoop()==NULL && stack.size())
+    getRunningFunction()->stat->incrementLoopsRerolledBack();
+  else if(getCurrentFuncRunningLoop()!=NULL)
+    getCurrentFuncRunningLoop()->stat->incrementLoopsRerolledBack();
+}
+
 
 void Stats::functionCall(Function *child) {
   FunctionStats *stat = new FunctionStats(child, count++);
@@ -51,6 +127,14 @@ LoopStats *Stats::getRunningLoop() {
   }
   debug(Yes) << "getRunningLoop: returned NULL\n";
   return NULL;
+}
+
+LoopStats *Stats::getCurrentFuncRunningLoop() {
+   if(stack.size()){
+     if(stack[stack.size()-1]->loops.size())
+        return stack[stack.size()-1]->loops[stack[stack.size()-1]->loops.size()-1];
+   }
+   return NULL;  
 }
 
 void Stats::functionReturn() {
@@ -98,19 +182,76 @@ void Stats::printStats(Function *main) {
   }
 
   printStats(root);
+
+  unsigned libCallsSimplified=0;
+  unsigned loadsFolded=0;
+  unsigned totalLoads=0;
+  unsigned totalLibCalls=0;
+  unsigned functionsCloned=0;
+  unsigned loopsUnrolled=0;
+  unsigned instructionsFolded=0;
+  unsigned totalFunctionCalls=0;
+  unsigned loopsRerolledBack=0;
+  unsigned totalLoops=0;
+
+  for(int i=0;i<stack.size();i++)
+  {
+   functionReturn();
+  }
+
+  vector<FunctionStats*> eraseFunctions;
+  for(auto &func:processed){
+     Function * function = func->getFunction();
+     if(functionsToRemove.find(function)!=functionsToRemove.end())
+        eraseFunctions.push_back(func);
+  } 
+     
+
+  for(unsigned i=0;i<eraseFunctions.size();i++){
+     processed.erase(eraseFunctions[i]);
+   }
+
+  functionsCloned = processed.size() - 1; 
+
+  for(auto &func: processed) {
+      debug(Yes)<<func->getFunction()->getName()<<"\n";
+      libCallsSimplified = libCallsSimplified + func->stat->getLibCallsFolded();
+      loadsFolded = loadsFolded + func->stat->getLoadsFolded();
+      totalLoads = totalLoads + func->stat->getTotalLoads();
+      totalLibCalls = totalLibCalls + func->stat->getTotalLibCalls();
+      loopsUnrolled = loopsUnrolled + func->stat->getLoopsUnrolled();
+      instructionsFolded = instructionsFolded + func->stat->getInstructionsFolded();
+      totalFunctionCalls = totalFunctionCalls + func->stat->getFunctionCalls();
+      loopsRerolledBack = loopsRerolledBack + func->stat->getLoopsRerolledBack();
+      totalLoops = totalLoops + func->stat->getTotalLoops();
+      for(auto &loop: func->loops){
+         libCallsSimplified = libCallsSimplified + loop->stat->getLibCallsFolded();
+         loadsFolded = loadsFolded + loop->stat->getLoadsFolded();
+         totalLoads = totalLoads + loop->stat->getTotalLoads();
+         totalLibCalls = totalLibCalls + loop->stat->getTotalLibCalls();
+         loopsUnrolled = loopsUnrolled + loop->stat->getLoopsUnrolled();
+         instructionsFolded = instructionsFolded + loop->stat->getInstructionsFolded();
+         totalFunctionCalls = totalFunctionCalls + loop->stat->getFunctionCalls();
+         loopsRerolledBack = loopsRerolledBack + loop->stat->getLoopsRerolledBack();
+         totalLoops = totalLoops + loop->stat->getTotalLoops();
+
+     }
+   }
+  
   debug(Yes)<<"==================|Stats|===================="<<"\n";
   debug(Yes)<<"# LibCalls Simplified: "<<libCallsSimplified<<"\n";
   debug(Yes)<<"# Total LibCalls: "<<totalLibCalls<<"\n";
   debug(Yes)<<"# Loads Folded: "<<loadsFolded<<"\n";
-  debug(Yes)<<"# Tracked Loads Folded: "<<trackedLoads<<"\n";
   debug(Yes)<<"# Total Loads Encountered: "<< totalLoads<<"\n";
   debug(Yes)<<"# Function Calls Analyzed: "<<count<<"\n";
   debug(Yes)<<"# Functions Cloned: "<<functionsCloned<<"\n";
+  debug(Yes)<<"# Total Loops: "<<totalLoops<<"\n";
   debug(Yes)<<"# Loops Unrolled: "<<loopsUnrolled<<"\n";
+  debug(Yes)<<"# Loops RerolledBack: "<<loopsRerolledBack<<"\n";
   debug(Yes)<<"# Instructions Folded: "<<instructionsFolded<<"\n";
   std::ofstream StatFile;
   StatFile.open("constStats.JSON");
-  StatFile<<"{ \"LibCallsSimplified\": "<<libCallsSimplified<<", \"TotalLibCalls\":"<<totalLibCalls<<", \"LoadsFolded\":"<<loadsFolded<<", \"TrackedLoadsFolded\": "<<trackedLoads<<",\"TotalLoadsEncountered\":"<<totalLoads<<", \"FunctionCallsAnalyzed\":"<<count<<",\"FunctionsCloned\":"<<functionsCloned<<".\"LoopsUnrolled\":"<<loopsUnrolled<<",";
+  StatFile<<"{ \"LibCallsSimplified\": "<<libCallsSimplified<<", \"TotalLibCalls\":"<<totalLibCalls<<", \"LoadsFolded\":"<<loadsFolded<<",\"TotalLoadsEncountered\":"<<totalLoads<<", \"FunctionCallsAnalyzed\":"<<count<<",\"FunctionsCloned\":"<<functionsCloned<<",\"TotalLoopsEncountered\":"<<totalLoops<<",\"LoopsUnrolled\":"<<loopsUnrolled<<",\"LoopsRerolledBack\":"<<loopsRerolledBack<<",\"InstructionsFolded\":"<<instructionsFolded<<"}";
   StatFile.close();
 
 
@@ -134,16 +275,37 @@ void Stats::makeGraph(Function *main) {
   debug(Yes) << str << "\n";
 }
 
-void Stats::incrementLibCallsFolded(){ libCallsSimplified++; }
-void Stats::incrementTotalLoads(){ totalLoads++; }
-void Stats::incrementLoadsFolded(){ loadsFolded++; }
-void Stats::incrementTotalLibCalls(){ totalLibCalls++; }
-void Stats::incrementFunctionsCloned() { functionsCloned++; }
-void Stats::decrementFunctionsCloned() { functionsCloned--; }
-void Stats::incrementLoopsUnrolled() { loopsUnrolled++; } 
-void Stats::incrementTrackedLoads() { trackedLoads++;          }
-unsigned Stats::getTrackedLoads() { return trackedLoads; }
-void Stats::incrementInstructionsFolded(){ instructionsFolded++; }
+newStats::newStats() {
+  libCallsSimplified = 0;
+  loadsFolded = 0;
+  totalLoads = 0;
+  totalLibCalls = 0;
+  loopsUnrolled = 0;
+  instructionsFolded = 0;
+  totalFunctionCalls = 0;
+  loopsRerolledBack = 0;
+  totalLoops = 0;
+}
+
+void newStats::incrementLibCallsFolded(){ libCallsSimplified++; }
+void newStats::incrementTotalLoads(){ totalLoads++; }
+void newStats::incrementLoadsFolded(){ loadsFolded++; }
+void newStats::incrementTotalLibCalls(){ totalLibCalls++; }
+void newStats::incrementLoopsUnrolled() { loopsUnrolled++; } 
+void newStats::incrementInstructionsFolded(){ instructionsFolded++; }
+void newStats::incrementFunctionCalls(){totalFunctionCalls++;}
+void newStats::incrementLoopsRerolledBack(){loopsRerolledBack++;}
+void newStats::incrementTotalLoops(){ totalLoops++; }
+
+unsigned newStats::getLibCallsFolded(){ return libCallsSimplified; }
+unsigned newStats::getTotalLoads(){ return totalLoads; }
+unsigned newStats::getLoadsFolded(){ return loadsFolded; }
+unsigned newStats::getTotalLibCalls(){ return totalLibCalls; }
+unsigned newStats::getLoopsUnrolled() { return loopsUnrolled; } 
+unsigned newStats::getInstructionsFolded(){ return instructionsFolded; }
+unsigned newStats::getFunctionCalls(){return totalFunctionCalls;}
+unsigned newStats::getLoopsRerolledBack(){return loopsRerolledBack;}
+unsigned newStats::getTotalLoops(){ return totalLoops; }
 
 bool FunctionStats::getLoopTime(uint64_t &seconds) {
   debug(Yes)<<"getLoopTime(seconds) \n";
@@ -153,11 +315,13 @@ bool FunctionStats::getLoopTime(uint64_t &seconds) {
 FunctionStats::FunctionStats(Function *f, unsigned id) {
   this->f = f;
   this->id = id;
+  this->stat = new newStats(); 
   startTime = chrono::system_clock::now();
 }
 
 void FunctionStats::functionReturn() {
   endTime = chrono::system_clock::now();
+  
 }
 
 void FunctionStats::loopStart(BasicBlock *BB) {
@@ -189,7 +353,11 @@ void FunctionStats::loopSuccess() {
 
 void FunctionStats::loopFail() {
   debug(Yes)<<"loopFail() in stats\n";
-  getRunningLoop()->loopFail();   
+  LoopStats *pop = loops.back();
+  pop->loopFail();
+  loops.pop_back();
+  failedLoops.insert(pop);
+    
 }
 
 Function *FunctionStats::getFunction() {
@@ -256,6 +424,7 @@ LoopStats::LoopStats(BasicBlock *BB) {
   header = BB;
   terminated = false;
   passed = false;
+  stat = new newStats();
   startTime = chrono::system_clock::now();
 }
 
@@ -267,7 +436,7 @@ void LoopStats::loopSuccess() {
 
 void LoopStats::loopFail() {
   terminated = true;
-  passed = true;
+  passed = false;
   endTime = chrono::system_clock::now();
 }
 

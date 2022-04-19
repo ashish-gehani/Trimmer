@@ -7,10 +7,9 @@ and performs loop unrolling using UnrollLoop function in LLVM.*/
 
 #include "LoopUnroller.h"
 
-LoopUnroller::LoopUnroller(Module *m, bool preserveLcssa, bool useAnnot, Loop *L, LoopInfo *li) {
+LoopUnroller::LoopUnroller(Module *m, bool preserveLcssa, Loop *L, LoopInfo *li) {
   module = m;
   PreserveLCSSA = preserveLcssa;
-  useAnnotations = useAnnot;
   loop = L;
   ti = NULL;
   cloneOf = NULL;
