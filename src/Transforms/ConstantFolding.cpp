@@ -92,10 +92,6 @@ static cl::opt<int> exceedLimit("exceedLimit",
         cl::desc("heuristic to limit function cloning to a limitted number"),cl::init(0));
 static cl::opt<int> disableExit("disableExit",
         cl::desc("disable exiting on fork/pthread function"),cl::init(0));
-static cl::opt<int> useRegOffset("useRegOffset",
-        cl::desc("using trimmer's stored registers for offset (in addition to scalarevolution) in GEPs"),cl::init(0));
-
-
 
 
 
@@ -155,7 +151,16 @@ void ConstantFolding::runOnInst(Instruction * I) {
     partOfLoop = true;
     markInstMemNonConst(I); 
 
+    if(auto LI = dyn_cast<LoadInst>(I)){
+      stats.incrementTotalLoads();
+    }
+
     if(auto CI = dyn_cast<CallInst>(I)) {
+      if(CI->getCalledFunction() && CI->getCalledFunction()->isDeclaration())
+        stats.incrementTotalLibCalls();
+      else
+        stats.incrementFunctionCalls();
+
       if(CI->getCalledFunction() && (CI->getCalledFunction()->getName() == "fork" || CI->getCalledFunction()->getName().substr(0, 7) == "pthread")) {
         debug(Yes) <<"XXX fork or pthread invoked ...\n";
         if (!disableExit){
@@ -281,7 +286,7 @@ bool ConstantFolding::isLoopTest() {
    After completing execution of the function, the context before the function call
    will be replaced by the context at the return Instruction of the callee
    */
-//BasicBlock* previousBB;
+
 std::vector<BasicBlock *> callStack;
 void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
   debug(Yes)<<"runOnFunction: "<<toRun->getName()<<"\n";
@@ -292,8 +297,9 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
 
   stats.functionCall(toRun);
 
+
   push_back(funcValStack);
-  bool tempAnnot = currContextIsAnnotated;
+  
 
   if(ci) {
     // if func call
@@ -351,16 +357,14 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
   Function * temp = currfn;
   BasicBlock *tempBB  = currBB; //preserve across recursion of this function
   currfn = toRun; //update to callee
-  //BasicBlock* oldPrevious = previousBB;
-  //previousBB = currBB;
-
+  
   BasicBlock * entry = &toRun->getEntryBlock();
 
   push_back(worklistBB);
   addToWorklistBB(entry);
 
   while(worklistBB[worklistBB.size() - 1].size()) {
-    //debug(Yes)<<"# WorkList: "<<currfn->getName()<<"\n";
+
 
     if(exit)
       return;
@@ -372,8 +376,11 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
     worklistBB[size].pop_back();
     Loop *L = NULL;
 
+    if(L = isLoopHeader(current, *LI))
+      stats.incrementTotalLoops();
+
     assert(current->getParent() == currfn);
-    if((L = isLoopHeader(current, *LI)) && loopUnroll && LoopUnroller::shouldSimplifyLoop(current, *LI, module, useAnnotations && contextType == 1)) {
+    if((L = isLoopHeader(current, *LI)) && loopUnroll && LoopUnroller::shouldSimplifyLoop(current, *LI, module, useAnnotations)) {
       ValueToValueMapTy vmap;
       
       if(auto *unroller= unrollLoopInClone(currfn, L, vmap, funcValStack)) {
@@ -426,12 +433,13 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
         stats.swapFunction(currfn, unroller->getCloneOf());
         currfn = unroller->getCloneOf();
         toRun = currfn;
-
+       	stats.incrementLoopsRerolledBack();
         LI = &getAnalysis<LoopInfoWrapperPass>(*currfn).getLoopInfo();
         LoopUnroller::deleteLoop(failedLoop);
         runOnBB(failedLoop);
       }else {
         //replace old function with new one
+
         stats.loopSuccess();
         Function *oldFn = unroller->getCloneOf();
         addToWorklistBB(current);
@@ -459,13 +467,12 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
 
         // if not main function
         if(ci) {
-          //std::vector<Value*> args(ci->arg_begin(), ci->arg_end());
-          //CallInst *clonedCall = createFuncCall(currfn, args);
+          
           Instruction *clonedCall = ci->clone();
           dyn_cast<CallInst>(clonedCall)->setCalledFunction(currfn);
 
 
-          //erase any old replacements from toreplace for this function
+          //erase any old replacements from to replace for this function
           string originalName = removeCloneName(ci->getCalledFunction()->getName().str());
           ReplaceInstWithInst(ci, dyn_cast<CallInst>(clonedCall));
 
@@ -485,7 +492,8 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
 
   debug(Yes)<<"runOnFunction(): worklist has ended...\n";
   stats.functionReturn();
-  //previousBB = oldPrevious;
+
+
   callStack.pop_back();
 
   currBB = tempBB;
@@ -502,7 +510,7 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
   debug(Yes)<<"fi->context: "<<fi->context<<"\n";
   bbOps.copyContext(fi->context, currBB);
   currfn = temp; //restore to caller
-  currContextIsAnnotated = tempAnnot;
+  
 
   debug(Yes)<<"Cleaning up function BBInfo..\n";
   bbOps.cleanUpFuncBBInfo(toRun);
@@ -570,7 +578,7 @@ bool ConstantFolding::runOnModule(Module & M) {
   bbOps.createNewContext(entry, module);
 
   currBB = entry;
-  currContextIsAnnotated = true;
+ 
   addGlobals();
 
   runOnFunction(NULL, func);
@@ -589,13 +597,11 @@ bool ConstantFolding::runOnModule(Module & M) {
 
   stats.printStats(module->getFunction("main"));
 
-  debug(Yes)<<"ConstantFolding Pass completed!\n";
+
   debug(Yes)<<"Functions Skipped: "<<fSkipped<<"\n";
   debug(Yes)<<"TrackedLoads = "<<trackedLoads<<"\n";
-  std::ofstream StatFile("constStats.JSON",std::ios_base::app);
-  StatFile<<"\"FunctionsSkipped\":"<<fSkipped<<", \"TrackedLoads\":"<<trackedLoads<<"}\n";
-  StatFile.close();
-
+  
+  debug(Yes)<<"ConstantFolding Pass completed!\n";
   debug(Yes) << "...................................ConstantFolding Pass ended.......................................................................\n";
   return true;
 }   
@@ -678,9 +684,7 @@ set<GlobalVariable *> ConstantFolding::dfs(CallGraphNode *root, map<Function *, 
     for(auto &func: cycleFunctions)
       modSet[func] = newCycle->values;
 
-    //for(auto &cycle: oldCycles)
-    //delete cycle;
-
+    
     //update cycle reference
     for(auto &func: cycleFunctions)
       cycles[func] = newCycle;
@@ -707,7 +711,7 @@ set<GlobalVariable *> ConstantFolding::dfs(CallGraphNode *root, map<Function *, 
     set<GlobalVariable *> childData = dfs(called, modSet, openNodes, recStack, cycles);
 
     data.insert(childData.begin(), childData.end());
-    //if(calledNode.second->getFunction())
+
   }
 
   openNodes.erase(F);
@@ -718,7 +722,7 @@ set<GlobalVariable *> ConstantFolding::dfs(CallGraphNode *root, map<Function *, 
 }
 
 set<GlobalVariable *> &ConstantFolding::getFuncModset(Function *F) {
-  //assert(modSet.find(F) != modSet.end());
+
   if(modSet.find(F) != modSet.end())
     return modSet[F];
   else {
@@ -880,100 +884,6 @@ ProcResult ConstantFolding::processStoreInst(StoreInst * si) {
   return UNDECIDED;
 }
 
-
-Value *ConstantFolding::getLoadSource(LoadInst* LI){
-  unsigned iter = 0;
-  Value* processing = &*LI;
-
-  unsigned stackCounter = 0; //How many functions to go back 
-
-  debug(Yes)<<"Invoked getLoadSource ...\n";
-  Function* parentFunction = LI->getParent()->getParent();
-  if(parentFunction){
-    debug(Yes)<<"ParentFunction: "<<parentFunction->getName()<<"\n";
-  } else {
-    debug(Yes)<<"No parent function! \n";
-  }
-  bool foundSource = false;
-  do
-  {
-    debug(Yes)<<"Processing = "<<*processing<<"\n";
-    if(LoadInst* LI = dyn_cast<LoadInst>(processing)){
-      processing = LI->getPointerOperand();
-    } else if(auto GE = dyn_cast<GetElementPtrInst>(processing)){
-      debug(Yes)<<"GEP inst has " << GE->getNumOperands() << " Operands\n"; 
-      for(unsigned cnt = 0; cnt < GE->getNumOperands(); ++cnt){
-        debug(Yes)<<"Operand "<<cnt<<" "<<*GE->getOperand(cnt)<<"\n";
-      }
-      processing = GE->getPointerOperand()->stripPointerCasts();
-    } else if(dyn_cast<GlobalObject>(processing)) {
-      foundSource = true;
-    } else if(auto SI = dyn_cast<SelectInst>(processing)){
-      if(ConstantInt * CI = dyn_cast<ConstantInt>(SI->getCondition())) {
-        processing = CI->getZExtValue() ? SI->getTrueValue() : SI->getFalseValue();
-      }
-    } else if(auto BI = dyn_cast<BitCastInst>(processing)){
-      processing = BI->getOperand(0);
-    } else if(dyn_cast<Instruction>(processing)){
-      foundSource = true;
-    } else if(dyn_cast<PointerType>(processing->getType())){
-      debug(Yes)<<"Pointer type: !\n";
-      Function* CalledFunction = parentFunction;
-      for(auto ai = CalledFunction->arg_begin(); ai != CalledFunction->arg_end(); ++ai){
-        Value* argVal = &*ai;
-        if(argVal == processing){
-          stackCounter++;
-
-          debug(Yes)<<"ArgVal: "<<*argVal<<" equals "<<*processing<<"\n";
-          unsigned argNum = ai->getArgNo();
-          debug(Yes)<<"Match for "<<CalledFunction->getName()<<" at argument number "<<argNum<<"\n";
-
-
-          if(!callStack.size()){
-            return processing;
-          }
-          BasicBlock* previousBB = callStack[callStack.size() -stackCounter];
-          debug(Yes)<<"========================================\nCallInst BB: "<<*previousBB<<"\n";
-
-
-          for(auto bi = previousBB->begin(); bi != previousBB->end(); ++bi){
-            Instruction* BBIns = &*bi;
-            if(auto CI = dyn_cast<CallInst>(BBIns)){
-              Function* CF = CI->getCalledFunction();
-              debug(Yes)<<"Previous BB CallInst: "<<*CI<<"\n";
-
-
-              if(CF && removeCloneName(CF->getName()) == removeCloneName(parentFunction->getName())){
-                debug(Yes)<<"Name matches!!!\n";
-                Value * temp = CI->getArgOperand(argNum);
-                parentFunction = CI->getParent()->getParent(); //Parent Function becomes function with callInst
-
-                unsigned counter = 0;
-                debug(Yes)<<"Shifting to previous function with val: "<<*temp<<"\n";
-                processing = temp;
-                break;
-              } else {
-                debug(Yes)<<"Name doesnt match\n";
-              }
-            }
-          }
-          break;
-        }
-      }
-      debug(Yes)<<"\nMoving to next iteration\n";
-      //foundSource = true;
-    } else {
-      debug(Yes)<<"ELSE CASE\n";
-      debug(Yes)<<*(processing->getType())<<"\n";
-      foundSource = true;
-    }
-    iter++;
-  } while(!foundSource && iter < 100);
-
-
-  return processing;
-}
-
 // Process Load instructions: load memory and map the load value to the memory address loaded
 ProcResult ConstantFolding::processLoadInst(LoadInst * li) { 
   stats.incrementTotalLoads();
@@ -1005,43 +915,7 @@ ProcResult ConstantFolding::processLoadInst(LoadInst * li) {
   }
 
 
-  /*
-     Value * source = getLoadSource(li);
-     debug(Yes)<<"Load Source: "<<*source<<"\n";
-
-     if(auto GO = dyn_cast<GlobalObject>(source)){
-     if(GO->hasMetadata() && GO->getMetadata("track")){
-     debug(Yes)<<"Loading from tracked Global!\n";
-     stats.incrementTrackedLoads();
-     }
-     } else if(auto Ins = dyn_cast<Instruction>(source)){
-     if(Ins->hasMetadata() && Ins->getMetadata("track")){
-     debug(Yes)<<"Loading from instruction which is tracked!\n";
-     stats.incrementTrackedLoads();
-     }
-     }*/
-  debug(Yes)<<"TrackedLoads: "<<stats.getTrackedLoads()<<"\n";
-
-
-  /*
-     if(auto GE =  dyn_cast<GetElementPtrInst>(ptr)){
-     Value * ptrOp = GE->getPointerOperand();
-     if(Instruction* Ins = dyn_cast<Instruction>(ptrOp)){
-     if(Ins->hasMetadata() && Ins->getMetadata("track")){
-     debug(Yes)<<"Operand of GEPInst in load is: "<<*Ins<<" which is tracked!\n";
-     }
-     }
-     } else if(Instruction* Ins = dyn_cast<Instruction>(ptr)){
-     if(Ins->hasMetadata() && Ins->getMetadata("track")){
-     debug(Yes)<<"LoadInst operand from tracked memory: "<<*Ins<<"in function "<<Ins->getParent()->getParent()->getName()<<"\n";;
-     }
-     } else if(GlobalObject* GO = dyn_cast<GlobalObject>(ptr)){
-     if(GO->hasMetadata() && GO->getMetadata("track")){
-     debug(Yes)<<"LoadInst operand GlobalObject is tracked!\n";
-     }
-     } */
-
-
+  
   uint64_t val = bbOps.loadMem(addr, size, currBB);
   debug(Yes)<<"LoadInst currBB: "<<currBB->getParent()->getName()<<"\n";
 
@@ -1075,7 +949,7 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
   Value *offsetVal = gi->getOperand(1);
   Register *regOffset = processInstAndGetRegister(offsetVal);
 
-  if((/*useRegOffset && */ !isConst  && !regOffset) /*|| (!useRegOffset && !isConst)*/) {
+  if((!isConst  && !regOffset)) {
     debug(Yes) << "GepInst : offset not constant\n";
 
     unsigned allocSize = DL->getTypeAllocSize(reg->getType());
@@ -1109,7 +983,7 @@ ProcResult ConstantFolding::processGEPInst(GetElementPtrInst * gi) {
   }
   uint64_t val;
 
-  if(/*useRegOffset &&*/ regOffset && !isConst){
+  if(regOffset && !isConst){
     val = reg->getValue() + regOffset->getValue();
     debug(Yes)<<"Register Offset value: "<<regOffset->getValue()<<"\n";
   } else { 
@@ -1165,7 +1039,7 @@ ProcResult ConstantFolding::processMemMoveInst(CallInst * memMoveInst) {
 // Handle memcpy instructions: copy the string address to the destination address so that it can be used in further instructions.  
 ProcResult ConstantFolding::processMemcpyInst(CallInst * memcpyInst) {
 
-  stats.incrementTotalLibCalls();
+
   Value * toPtr = memcpyInst->getOperand(0);
   Value * fromPtr = memcpyInst->getOperand(1);
   char * fromString;
@@ -1193,7 +1067,6 @@ ProcResult ConstantFolding::processMemcpyInst(CallInst * memcpyInst) {
   debug(Yes) << "memcpy : from " << fromString << "\n";
   memcpy(toString, fromString, size);
   bbOps.setConstMem(true, reg->getValue(), size, currBB);
-  stats.incrementLibCallsFolded();
   stats.incrementInstructionsFolded();
   return NOTFOLDED;
 }
@@ -1201,7 +1074,7 @@ ProcResult ConstantFolding::processMemSetInst(CallInst * memsetInst) {
   Value * ptr = memsetInst->getOperand(0);
   Value * chrctr = memsetInst->getOperand(1);
   Value * sizeVal = memsetInst->getOperand(2);
-  stats.incrementTotalLibCalls();
+
 
   Register * ptrReg = processInstAndGetRegister(ptr);  
   if(!ptrReg) {
@@ -1224,7 +1097,7 @@ ProcResult ConstantFolding::processMemSetInst(CallInst * memsetInst) {
   char * ptrString = (char *) bbOps.getActualAddr(ptrReg->getValue(), currBB);
   memset(ptrString, c, size);
   debug(Yes) << "set string to " << c << " size " << size << "\n";
-  stats.incrementLibCallsFolded();
+
   stats.incrementInstructionsFolded();
   return NOTFOLDED;
 }
@@ -1333,7 +1206,8 @@ ProcResult ConstantFolding::processReturnInst(ReturnInst * retInst) {
     return NOTFOLDED;
   if(cloneRegister(retInst, ptr)){
     fi->retReg = new Register(*processInstAndGetRegister(retInst)); 
-    stats.incrementInstructionsFolded();}
+    stats.incrementInstructionsFolded();
+  }
   return NOTFOLDED;
 }
 /*
@@ -1481,7 +1355,7 @@ bool ConstantFolding::handleGetPwUid(CallInst *callInst) {
     return false;
 
   struct passwd *pwuid = getpwuid(uid);
-  stats.incrementLibCallsFolded();
+
 
   if(!pwuid)
     return false;
@@ -1500,6 +1374,7 @@ bool ConstantFolding::handleGetPwUid(CallInst *callInst) {
   memcpy(memPwUid, pwuid, size);
   copyMemory((char *) pwuid, dyn_cast<PointerType>(callInst->getType())->getElementType(), (char *)addr);
   addSingleVal(callInst, (uint64_t) addr, false, true);
+  stats.incrementLibCallsFolded();
   stats.incrementInstructionsFolded();
   pushFuncStack(callInst);
   return true;
@@ -1559,11 +1434,12 @@ bool ConstantFolding::handleToLower(CallInst *callInst) {
     return false;
   }
 
-  stats.incrementLibCallsFolded();
+
 
   int answer = tolower(argValue);
   debug(Yes) << "tolower returned " << answer << "\n";
   addSingleVal(callInst, answer, true, true);
+  stats.incrementLibCallsFolded();
   stats.incrementInstructionsFolded();
   return true;
 }
@@ -1580,12 +1456,13 @@ bool ConstantFolding::handleBasename(CallInst *ci) {
   }
 
   char *result = basename(path);
-  stats.incrementLibCallsFolded();
+
 
   uint64_t virtAddr = bbOps.allocateHeap(strlen(result) + 1, currBB);
   char *actualAddr = (char *) bbOps.getActualAddr(virtAddr, currBB);
   strcpy(actualAddr, result);
   addSingleVal(ci, virtAddr, true, true);
+  stats.incrementLibCallsFolded();
   stats.incrementInstructionsFolded();
   return true;
 }
@@ -1610,6 +1487,8 @@ bool ConstantFolding::handleLibCCall(CallInst *callInst) {
 }
 
 bool ConstantFolding::handleCBM(CallInst* callInst) {
+
+   stats.incrementTotalLibCalls();
   debug(Yes)<<"COMMAND_BY_NAME INVOKED\n";
 
   Value * op1 = callInst->getOperand(0);
@@ -1623,6 +1502,7 @@ bool ConstantFolding::handleCBM(CallInst* callInst) {
 
   char * buf = (char *) bbOps.getActualAddr(reg->getValue(), currBB);
   debug(Yes)<<"CBM String: "<<buf<<"\n";
+  stats.incrementLibCallsFolded();
   stats.incrementInstructionsFolded();
 
 
@@ -1644,7 +1524,7 @@ bool ConstantFolding::handleGetCwd(CallInst* callInst) {
   size_t size = cast<ConstantInt>(val2)->getZExtValue();
   char *buf = (char *) bbOps.getActualAddr(reg->getValue(), currBB);
   char *result = getcwd(buf, size);
-  stats.incrementLibCallsFolded();
+
 
   if(!buf) {
     debug(Yes) << "getcwd: returned null\n";
@@ -1654,6 +1534,7 @@ bool ConstantFolding::handleGetCwd(CallInst* callInst) {
 
   debug(Yes) << "cwd = " << *buf << "\n";
   addSingleVal(callInst, reg->getValue(), true, true);
+  stats.incrementLibCallsFolded();
   stats.incrementInstructionsFolded();
   return true;
 }
@@ -1677,7 +1558,7 @@ bool ConstantFolding::handleFStat(CallInst *callInst) {
 
   struct stat st;
   int result = fstat(fileno, &st);
-  stats.incrementLibCallsFolded();
+
   if(result!=0){
     debug(Yes)<<"fstat returns error\n";
     return false;
@@ -1686,6 +1567,7 @@ bool ConstantFolding::handleFStat(CallInst *callInst) {
   struct stat* temp = (struct stat *)bbOps.getActualAddr(addr, currBB);
   memcpy(temp,&st,sizeof(struct stat));
   addSingleVal(callInst,result,true,true);
+  stats.incrementLibCallsFolded();
   stats.incrementInstructionsFolded();
   return true;
 
@@ -1707,13 +1589,14 @@ bool ConstantFolding::handleFileNo(CallInst *callInst) {
   }
 
   int result = fileno(fptr);
-  stats.incrementLibCallsFolded();
+
 
   if(result==-1){
     debug(Yes)<<"fileno returns error\n";
     return false;
   }
   addSingleVal(callInst,result,true,true);
+  stats.incrementLibCallsFolded();
   stats.incrementInstructionsFolded();
   return true;   
 }
@@ -1768,7 +1651,7 @@ bool ConstantFolding::handleOverFlowInst(CallInst *callInst) {
     uint64_t val = ((uint64_t)answer << 32);
     debug(Yes) << "adding single value " <<  answer << " shifted " << val << "\n";
     regOps.addRegister(callInst, llvm::IntegerType::getInt64Ty(module->getContext()), val, true);
-    //addSingleVal(callInst, val, false, true);
+
     return true;
   }
   return false;
@@ -1806,11 +1689,13 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
   if(!callInst->getCalledFunction() && !simplifyCallback(callInst)) {
     markAllGlobsAsNonConst();
     markArgsAsNonConst(callInst);
+    stats.incrementFunctionCalls();
     return NOTFOLDED;
   }
 
   if(!callInst->getCalledFunction()){
     markArgsAsNonConst(callInst);
+    stats.incrementFunctionCalls();
     return NOTFOLDED;
   }
 
@@ -1839,6 +1724,7 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
   else if(handleLibCCall(callInst)) {}
   else if(calledFunction->isDeclaration()) {
     debug(Yes) << "skipping function : declaration\n";
+    stats.incrementTotalLibCalls();
     //Assumption: Global variables not accessed in extern functions.
     markArgsAsNonConst(callInst);
     return NOTFOLDED;
@@ -1848,7 +1734,8 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
       addFuncInfo(calledFunction, fi);
     }
 
-    if((useAnnotations && !satisfyConds(calledFunction, callInst)) || calledFunction->getName().str() == "authmethod_is_enabled" || (exceedLimit  && exceedsRecursion(calledFunction, callInst->getParent()->getParent()))) {
+    stats.incrementFunctionCalls();
+    if((!satisfyConds(calledFunction, callInst)) || calledFunction->getName().str() == "authmethod_is_enabled" || (exceedLimit  && exceedsRecursion(calledFunction, callInst->getParent()->getParent()))) {
       fSkipped++;
       debug(Yes) << "skipping function : does not satisfy conds\n";
 
@@ -1858,6 +1745,8 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
       if(funcSpecMap.find(calledFunction) != funcSpecMap.end()) {
         FuncSpecDetail *detail = funcSpecMap[calledFunction];
         Function *cloned = detail->call->getCalledFunction();
+
+
         set<CallInst *> callsToReplace;
         for(auto user: cloned->users()) {
             if(auto CI = dyn_cast<CallInst>(user))
@@ -1866,9 +1755,24 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
             
           }
 
-        if(callsToReplace.size() > 0){
-            stats.decrementFunctionsCloned();
-            }
+          if(callsToReplace.size() > 0){
+            set<Function *> clonedFunctions;
+            clonedFunctions.insert(cloned);
+            debug(Yes)<<cloned->getName()<<" function already cloned\n";
+
+              for (BasicBlock &BB : *cloned){
+                 for(Instruction &I:BB){
+                   if(auto CI = dyn_cast<CallInst>(&I))   {
+                     if(CI->getCalledFunction() && !(CI->getCalledFunction()->isDeclaration())&& CI->getCalledFunction()->getName().str().find("_clone") != std::string::npos){
+                       clonedFunctions.insert(CI->getCalledFunction());
+                     }
+                   }
+                 }
+              }
+           stats.removeFunctions(clonedFunctions);
+          }
+
+
 
         for(auto &CI: callsToReplace) {
           debug(Yes) << "putting in original function for instruction " << *CI << "\n";
@@ -1884,14 +1788,9 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
       debug(Yes) << "function clone exists with same context. Replaced\n";
       Function *called = funcSpecMap[calledFunction]->call->getCalledFunction();
       callInst->setCalledFunction(called);
-    } else { //even if satisfyConds fails, it still goes into this
+    } else { 
 
       CallInst *clonedInst = cloneAndAddFuncCall(callInst); 
-
-
-
-
-
 
       /*
        *
@@ -1902,7 +1801,7 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
         markGlobAsNonConst(calledFunction);
 
 
-        //clonedInst->getCalledFunction()->dropAllReferences();
+
         delete clonedInst;
 
 
@@ -1918,9 +1817,7 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
             
           }
 
-          if(callsToReplace.size() > 0){
-            stats.decrementFunctionsCloned();
-            }
+          
 
           for(auto &CI: callsToReplace) {
             debug(Yes) << "putting in original function for instruction " << *CI << "\n";
@@ -1932,6 +1829,7 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
       }
 
       ReplaceInstWithInst(callInst, clonedInst);
+
 
       Memory *context = new Memory(*bbOps.getMemory(currBB)); //make copy of memory
       FuncSpecDetail *detail = new FuncSpecDetail;
@@ -1961,7 +1859,7 @@ string ConstantFolding::removeCloneName(string name) {
 
 
 bool ConstantFolding::exceedClone(string name, int level){
-  //debug(Yes)<<"exceedClone invoked on: "<<name<<" and level: "<<level<<"\n";
+
   size_t pos = name.find("_clone.");
 
   if(pos == string::npos){
@@ -2021,10 +1919,8 @@ bool ConstantFolding::exceedsRecursion(Function *called, Function *callee) {
 CallInst *ConstantFolding::cloneAndAddFuncCall(CallInst *callInst) {
   ValueToValueMapTy vmap;
   Function *cloned = cloneFunc(callInst->getCalledFunction(), vmap);
-  stats.incrementFunctionsCloned();
 
-  //std::vector<Value*> args(callInst->arg_begin(), callInst->arg_end());
-  //CallInst *clonedCall = createFuncCall(cloned, args);
+
   Instruction *clonedCall = callInst->clone();
   dyn_cast<CallInst>(clonedCall)->setCalledFunction(cloned);
   return dyn_cast<CallInst>(clonedCall);
@@ -2045,7 +1941,6 @@ void ConstantFolding::propagateArgs(CallInst *ci, Function *toRun) {
 void ConstantFolding::copyCallerContext(CallInst * ci, Function * toRun) {
   BasicBlock * entry = &toRun->getEntryBlock();
   duplicateContext(entry, currBB);    
-  updateAnnotationContext(ci->getCalledFunction());
 }
 
 
@@ -2333,66 +2228,6 @@ Instruction * ConstantFolding::simplifyInst(Instruction * I) {
   return NULL;
 }
 
-void ConstantFolding::createAnnotationList() {
-  GlobalVariable * annotVar = module->
-    getGlobalVariable(StringRef("llvm.global.annotations"));
-
-  assert(annotVar && "isAnnotated and annotVar not found");
-
-  Constant * initializer = annotVar->getInitializer();
-  ArrayType * aty = dyn_cast<ConstantArray>(initializer)->getType();
-  unsigned num = aty->getNumElements();
-  for(unsigned i = 0; i < num; i++) {
-    Constant * t1 = initializer->getAggregateElement(i);
-    Constant * t2 = t1->getAggregateElement((unsigned) 0);
-    Value * val;
-    if(isa<GlobalVariable>(t2))
-      val = t2;
-    else if(Instruction * I = dyn_cast<ConstantExpr>(t2)->getAsInstruction()) {
-      val = dyn_cast<User>(I)->getOperand(0);
-      I->dropAllReferences();
-    } else 
-      continue;
-
-    debug(Yes) << val->getName() << " will be tracked\n";
-    AnnotationList.insert(val);
-    StringRef stringRef;
-  }
-}
-
-void ConstantFolding::createAnnotationList2() {
-  vector<string> globs, funcs;
-  GlobalVariable * ggv = module->getNamedGlobal("__tracked_globals__");
-  if(ggv) {
-    ConstantDataArray * CDA = dyn_cast<ConstantDataArray>(ggv->getInitializer());
-    split(CDA->getAsString(), globs, ';');
-  }
-  GlobalVariable * fgv = module->getNamedGlobal("__tracked_funcs__");
-  if(fgv) {
-    ConstantDataArray * CDA = dyn_cast<ConstantDataArray>(fgv->getInitializer());
-    split(CDA->getAsString(), funcs, ';');
-  }
-  for(unsigned i = 0; i < globs.size(); i++) {
-    GlobalValue * gv = module->getNamedValue(StringRef(globs[i]));
-    debug(Yes) << globs[i] << " : glob " << "\n";
-    AnnotationList.insert(gv);
-  }
-  for(unsigned i = 0; i < funcs.size(); i++) {
-    GlobalValue * gv = module->getNamedValue(StringRef(funcs[i]));
-    debug(Yes) << funcs[i] << " : func " << "\n";
-    AnnotationList.insert(gv);    
-  }
-}
-
-void ConstantFolding::updateAnnotationContext(Function * F) {
-  if(!useAnnotations)
-    return;
-  if(AnnotationList.find(F) == AnnotationList.end())
-    currContextIsAnnotated = false;
-  else {
-    currContextIsAnnotated = true;
-  }
-}
 
 bool ConstantFolding::isAllocaTracked(Instruction *I) {
   if(trackAllocas && !I->getMetadata("track"))
@@ -2455,7 +2290,7 @@ bool ConstantFolding::satisfyConds(Function * F, CallInst *ci) {
       FuncSpecDetail *detail = funcSpecMap[F];
       if(detail->fail) {
         debug(Yes) << "(SATISFYCONDS) << test already failed\n";
-        return false; // this is actually false
+        return false; 
       }
 
       if(bbOps.contextMatch(detail->context, currBB)) {
@@ -2504,7 +2339,7 @@ bool ConstantFolding::satisfyConds(Function * F, CallInst *ci) {
     //if any argument is being tracked 
     for(unsigned i = 0; i < ci->getNumArgOperands(); i++) {
       Value *argument = ci->getArgOperand(i);
-      if(Register *reg = processInstAndGetRegister(argument)) { //dyn_cast<Constant>(argument) || 
+      if(Register *reg = processInstAndGetRegister(argument)) { 
         if(reg->getTracked()) {
           debug(Yes) << "(LOG) (SATISFYCONDS) Call " << *ci << " satisfied specializing conditions due to argument " <<  *argument << " at index " << i << "\n";
           return true;
@@ -2666,9 +2501,7 @@ void ConstantFolding::replaceIfNotFD(Value * from, Value * to) {
   if(Register *reg = regOps.getRegister(from))
     if(reg->getTracked()) 
       debug(Yes) << "replaced with " << *to << "\n";
-  //if(Instruction * I = dyn_cast<Instruction>(from))
-  //updateLoopCost(FOLDED, I);
-}
+ }
 
 Function *ConstantFolding::simplifyCallback(CallInst * callInst) {
   Register * reg = processInstAndGetRegister(callInst->getCalledValue());
@@ -2684,12 +2517,10 @@ Function *ConstantFolding::simplifyCallback(CallInst * callInst) {
   
   if(calledFunction->getReturnType() != dyn_cast<FunctionType>(dyn_cast<PointerType>(reg->getType())->getElementType())->getReturnType())
   {
-      //return NULL;
       funcRetMap[calledFunction->getName().str()] = dyn_cast<FunctionType>(dyn_cast<PointerType>(reg->getType())->getElementType())->getReturnType();
       debug(Yes)<< calledFunction->getName().str() <<" "<<*funcRetMap[calledFunction->getName().str()] <<"\n";
   }
   
-  //auto CE = dyn_cast<ConstantExpr>(callInst->getCalledValue());
 
 
   unsigned index = 0;
@@ -2821,6 +2652,7 @@ bool ConstantFolding::visitBB(BasicBlock * succ, BasicBlock *  from) {
 // This function handles string function strstr that returns pointer to first occurrence of the string argument2 in string argument 1.
 
 bool ConstantFolding::handleStrStr(CallInst *callInst) {
+
   Value *val1 = callInst->getOperand(0);
   Value *val2 = callInst->getOperand(1);
 
@@ -2846,6 +2678,7 @@ bool ConstantFolding::handleStrStr(CallInst *callInst) {
   char * buffer2 = (char *) bbOps.getActualAddr(reg2->getValue(), currBB);
   char *result = strstr(buffer1, buffer2);
   stats.incrementLibCallsFolded();
+  stats.incrementInstructionsFolded();
 
   if(!result) {
     addSingleVal(callInst, 0, true, true);
@@ -2861,7 +2694,7 @@ bool ConstantFolding::handleStrStr(CallInst *callInst) {
 
   strcpy(pointer, result);
   addSingleVal(callInst, address, true, true);
-  stats.incrementInstructionsFolded();
+
   return true;
 }
 
@@ -3003,6 +2836,7 @@ void ConstantFolding::handleStrnCpy(CallInst *callInst) {
 
 bool ConstantFolding::handleStringFunc(CallInst * callInst) {
 
+  stats.incrementTotalLibCalls();
   if(!stringSpecialize)
     return false;
   string name = callInst->getCalledFunction()->getName();
@@ -3028,15 +2862,14 @@ bool ConstantFolding::handleStringFunc(CallInst * callInst) {
   else if(name == "c_isdigit") handleCIsDigit(callInst);
   else return false;
 
-  stats.incrementTotalLibCalls();
+
   return true;
 }
 
 
 
 
-// Handle __ctype_b_loc function in ctype.h, which returns a pointer to a 'traits' table containing some flags related with the characteristics 
-//of each single character.
+// Handle __ctype_b_loc function in ctype.h, which returns a pointer to a 'traits' table containing some flags related with the characteristics of each single character.
 
 
 void ConstantFolding::handleCTypeFuncs(CallInst * callInst) {
@@ -3107,7 +2940,7 @@ void ConstantFolding::handleStrCpy(CallInst *callInst) {
     return;
   }
 
-  //get untill NULL
+
   uint64_t upperLimit = 50000;
   uint64_t size = 0;
   char *addr = (char *) bbOps.getActualAddr(srcReg->getValue(), currBB);
@@ -3158,7 +2991,7 @@ void ConstantFolding::simplifyStrFunc(CallInst * callInst) {
       } else if(!bbOps.checkConstStr(addr, currBB))
         continue;
       char * baseStringData = (char *) bbOps.getActualAddr(addr, currBB);
-      stats.incrementInstructionsFolded();
+
       debug(Yes) << "baseStringData : " << baseStringData << "\n";
       ConstantInt * ind0 = ConstantInt::get(IntegerType::get(module->getContext(), 64), 0);
       vector<Value *> indxList;
@@ -3183,6 +3016,8 @@ void ConstantFolding::simplifyStrFunc(CallInst * callInst) {
   LibCallSimplifier Simplifier(*DL,TLI,ORE,InstCombineRAUW);
 
   if (Value *With = Simplifier.optimizeCall(callInst)) {
+    stats.incrementInstructionsFolded();
+    stats.incrementLibCallsFolded();
     replaceIfNotFD(callInst, With);
   }
 }
@@ -3551,7 +3386,7 @@ void ConstantFolding::handleCIsDigit(CallInst* callInst){
     debug(Yes)<<"Result = "<<result<<" in bool: "<<(result != 0)<<"\n";
     addSingleVal(callInst,(uint64_t) (result != 0),true, true); 
     stats.incrementLibCallsFolded();
-  stats.incrementInstructionsFolded();
+    stats.incrementInstructionsFolded();
   }
 }
 
@@ -3771,7 +3606,7 @@ void ConstantFolding::handleOpen(CallInst * ci) {
     int fd = open(fname, flag);
     if(fd < 0) return;
     stats.incrementLibCallsFolded();
-   stats.incrementInstructionsFolded();
+    stats.incrementInstructionsFolded();
     fd = initfdi(fd,fname);
     addSingleVal(ci, fd, true, true);
     FileInsts* insts = new FileInsts();
@@ -3833,7 +3668,7 @@ void ConstantFolding::handleGetLine(CallInst * ci) {
   char * newBuf = NULL;
 
   size_t characters = getline(&newBuf,&size,fptr);
-  stats.incrementLibCallsFolded();
+
 
 
 
@@ -3886,7 +3721,6 @@ void ConstantFolding::handleGetLine(CallInst * ci) {
 
 
     Constant *hookFunc;
-    // Properly break after 80 characters
     hookFunc = module->getOrInsertFunction("fseek", Type::getInt32Ty(module->getContext()),
                                            fptrVal->getType(),Type::getInt64Ty(module->getContext()),Type::getInt32Ty(module->getContext()));    
     Function *hook= cast<Function>(hookFunc);
@@ -3901,6 +3735,7 @@ void ConstantFolding::handleGetLine(CallInst * ci) {
 
     fileIOCalls[sfd]->insts.push_back(ci);
     fileIOCalls[sfd]->insertedSeekCalls.push_back(seek);
+    stats.incrementLibCallsFolded();
     stats.incrementInstructionsFolded();
 
   }
@@ -3964,7 +3799,7 @@ void ConstantFolding::handleRead(CallInst * ci) {
   int fd = 0;
   bool fdConst = getSingleVal(fdVal, sfd) && getfdi(sfd, fd);  
 
-  if (fd <=2) return; //What?
+  if (fd <=2) return; 
 
   Register * reg = processInstAndGetRegister(bufPtr);  
   if(!reg || !fdConst || !getSingleVal(sizeVal, size)) {
@@ -3981,7 +3816,7 @@ void ConstantFolding::handleRead(CallInst * ci) {
   }
   char * buffer = (char *) bbOps.getActualAddr(reg->getValue(), currBB);
   long bytes_read = read(fd, buffer, size);
-  stats.incrementLibCallsFolded();
+
 
   if(bytes_read < 0) {
     debug(Yes) << "handleRead : read returned error\n";
@@ -4019,6 +3854,7 @@ void ConstantFolding::handleRead(CallInst * ci) {
 
   fileIOCalls[sfd]->insts.push_back(ci);
   fileIOCalls[sfd]->insertedSeekCalls.push_back(seek);
+  stats.incrementLibCallsFolded();
   stats.incrementInstructionsFolded();
 }
 
@@ -4053,7 +3889,7 @@ void ConstantFolding::handlePRead(CallInst * ci) {
   }
   char * buffer = (char *) bbOps.getActualAddr(reg->getValue(),currBB);
   long bytes_read = pread(fd, buffer, size,offset);
-  stats.incrementLibCallsFolded();
+
   if(bytes_read < 0) {
     debug(Yes) << "handlePRead : read returned error\n";
     setfdiUntracked(sfd);
@@ -4074,6 +3910,7 @@ void ConstantFolding::handlePRead(CallInst * ci) {
   IRBuilder<> Builder(ci);
   Instruction* MemCpyInst = Builder.CreateMemCpy(bufPtr,1,gv,1,bytes_read);
   fileIOCalls[sfd]->insts.push_back(ci);
+  stats.incrementLibCallsFolded();
   stats.incrementInstructionsFolded();
 }
 
@@ -4120,7 +3957,7 @@ void ConstantFolding::handleMMap(CallInst * ci) {
 
   } 
   char* mmappedData = (char*)mmap(buffer,size,flag1,flag2,fd,offset);
-  stats.incrementLibCallsFolded();
+
   if (mmappedData == MAP_FAILED){
     debug(Yes) << "handleMMap : read returned error\n";
     setfdiUntracked(sfd);
@@ -4147,6 +3984,7 @@ void ConstantFolding::handleMMap(CallInst * ci) {
   mmapInfo->buffer = mmappedData;
   mMapBuffer.push_back(mmapInfo);
   addSingleVal(BitCastInst,addr1, true, true);
+  stats.incrementLibCallsFolded();
   stats.incrementInstructionsFolded();
 
 }
@@ -4192,7 +4030,7 @@ void ConstantFolding::handleMUnmap(CallInst * ci) {
   }
 
   int ret = munmap(mmappedData,size);
-  stats.incrementLibCallsFolded();
+
   if (ret!=0){
     debug(Yes) << "handleMUnmap : read returned error\n";
     if(hasCorrespondingMmap){
@@ -4207,6 +4045,7 @@ void ConstantFolding::handleMUnmap(CallInst * ci) {
 
   addSingleVal(ci, ret, true, true);
   fileIOCalls[sfd]->insts.push_back(ci);
+  stats.incrementLibCallsFolded();
   stats.incrementInstructionsFolded();
 
 }
@@ -4234,7 +4073,7 @@ void ConstantFolding::handleFRead(CallInst * ci) {
     debug(Yes) << "handleFRead : failed to specialize\n";
     if(reg) {
      debug(Yes)<< "memory non-constant" << reg->getValue()<<"\n";
-      bbOps.setConstMem(false, reg->getValue(), DL->getTypeAllocSize(reg->getType()), currBB);  //this might be wrong?
+      bbOps.setConstMem(false, reg->getValue(), DL->getTypeAllocSize(reg->getType()), currBB);  
     }
     if(fdConst) setfdiUntracked(sfd);
     if(getSingleVal(fptrVal, sfd)){
@@ -4248,7 +4087,7 @@ void ConstantFolding::handleFRead(CallInst * ci) {
   }
   char * buffer = (char *) bbOps.getActualAddr(reg->getValue(),currBB);
   uint64_t bytes_read = fread(buffer,size,num,fptr);
-  stats.incrementLibCallsFolded();
+
   if(ferror(fptr)) {
     debug(Yes) << "handleFRead : read returned error\n";
     setfdiUntracked(sfd);
@@ -4283,6 +4122,7 @@ void ConstantFolding::handleFRead(CallInst * ci) {
 
   fileIOCalls[sfd]->insts.push_back(ci);
   fileIOCalls[sfd]->insertedSeekCalls.push_back(seek);
+  stats.incrementLibCallsFolded();
   stats.incrementInstructionsFolded();
 }
 
@@ -4339,13 +4179,15 @@ void ConstantFolding::handleFGets(CallInst * ci) {
   }
 
   char* bytes_read = fgets(buffer,size,fptr);
-  stats.incrementLibCallsFolded();
+
 
 
   if(feof(fptr)){
     debug(Yes) << "handleFGets : read NULL value\n";
     ConstantPointerNull * nullP = ConstantPointerNull::get(dyn_cast<PointerType>(bufPtr->getType()));     
     ci->replaceAllUsesWith(nullP);
+    stats.incrementLibCallsFolded();
+    stats.incrementInstructionsFolded();
     fileIOCalls[sfd]->insts.push_back(ci);
 
   }
@@ -4365,7 +4207,7 @@ void ConstantFolding::handleFGets(CallInst * ci) {
     bbOps.setConstMem(true, reg->getValue(), strlen(buffer),currBB);
     setfptrOffset(sfd, fptr);
     debug(Yes) << "buffer value " << buffer <<" "<<strlen(buffer)<<" address: " <<reg->getValue()<< "\n";
-    Constant * const_array = ConstantDataArray::getString(module->getContext(),StringRef(buffer),true);    GlobalVariable * gv = new GlobalVariable(*module,const_array->getType(),true,GlobalValue::ExternalLinkage,const_array,"");
+    Constant * const_array = ConstantDataArray::getString(module->getContext(),StringRef(buffer),true);    GlobalVariable * gv = new       GlobalVariable(*module,const_array->getType(),true,GlobalValue::ExternalLinkage,const_array,"");
     gv->setAlignment(1);
     IRBuilder<> Builder(ci);
     Instruction* MemCpyInst = Builder.CreateMemCpy(bufPtr,1,gv,1,strlen(buffer)+1);
@@ -4384,6 +4226,7 @@ void ConstantFolding::handleFGets(CallInst * ci) {
 
     fileIOCalls[sfd]->insts.push_back(ci);
     fileIOCalls[sfd]->insertedSeekCalls.push_back(seek);
+    stats.incrementLibCallsFolded();
     stats.incrementInstructionsFolded();
 
   }
@@ -4419,7 +4262,7 @@ void ConstantFolding::handleLSeek(CallInst * ci) {
     return;   
   }	
   long ret = lseek(fd, offset, flag);
-  stats.incrementLibCallsFolded();
+
   if(ret < 0) { 
     setfdiUntracked(sfd);
     debug(Yes) << "handleLSeek : seek returned error\n";
@@ -4433,6 +4276,7 @@ void ConstantFolding::handleLSeek(CallInst * ci) {
   setfdiOffset(sfd, fd);
   addSingleVal(ci, ret, true, true);
   fileIOCalls[sfd]->insts.push_back(ci);
+  stats.incrementLibCallsFolded();
   stats.incrementInstructionsFolded();
 }
 
@@ -4460,7 +4304,7 @@ void ConstantFolding::handleFSeek(CallInst * ci) {
     return;    
   }	
   int ret = fseek(fptr, offset, flag);
-  stats.incrementLibCallsFolded();
+
   if(ret != 0) { 
     setfdiUntracked(sfd);
     debug(Yes) << "handleFSeek : seek returned error\n";
@@ -4473,6 +4317,7 @@ void ConstantFolding::handleFSeek(CallInst * ci) {
   setfptrOffset(sfd, fptr);
   addSingleVal(ci, ret, true, true);
   fileIOCalls[sfd]->insts.push_back(ci);
+  stats.incrementLibCallsFolded();
   stats.incrementInstructionsFolded();
 }
 
@@ -4500,7 +4345,7 @@ void ConstantFolding::handleClose(CallInst * ci) {
     return;   
   }    
   int fileClose = close(fd);
-  stats.incrementLibCallsFolded();
+
   if(fileClose !=0)
   {
     debug(Yes) << "handleClose : close returned error\n";
@@ -4512,6 +4357,7 @@ void ConstantFolding::handleClose(CallInst * ci) {
 
   }
   fileIOCalls[sfd]->insts.push_back(ci);
+  stats.incrementLibCallsFolded();
   stats.incrementInstructionsFolded();
 }
 
@@ -4536,7 +4382,7 @@ void ConstantFolding::handleFClose(CallInst * ci) {
     return;   
   }   
   int fileClose =fclose(fptr); 
-  stats.incrementLibCallsFolded();
+
   if(fileClose !=0)
   {
     debug(Yes) << "handleFClose : fclose returned error\n";
@@ -4548,6 +4394,7 @@ void ConstantFolding::handleFClose(CallInst * ci) {
 
   }
   fileIOCalls[sfd]->insts.push_back(ci);
+  stats.incrementLibCallsFolded();
   stats.incrementInstructionsFolded();
 }
 
@@ -4607,7 +4454,6 @@ bool ConstantFolding::handleLongArgs(CallInst * callInst, option * long_opts,
   debug(Yes)<<"i: "<<i<<"\n";
   Value * indexVal = callInst->getOperand(4);
   debug(Yes) << indexVal << " indexVal printing" << "\n";
-  //debug(Yes) << *indexVal << "\n";
   if(dyn_cast<ConstantPointerNull>(indexVal)) {
     debug(Yes)<<"indexVal is a Constant Pointer Null\n";
     long_index = NULL;
@@ -4646,6 +4492,7 @@ bool ConstantFolding::handleGetEnv(CallInst *ci) {
   char *result = getenv(str);
 
   stats.incrementLibCallsFolded();
+  stats.incrementInstructionsFolded();
   if(!result) {
     debug(Yes) << "handleGetEnv: returned null\n";
     addSingleVal(ci, 0, true, true);
@@ -4657,7 +4504,6 @@ bool ConstantFolding::handleGetEnv(CallInst *ci) {
   strcpy(actualAddr, result);
   addSingleVal(ci, addr, true, true);
   debug(Yes) << "handleGetEnv: returned " << result << "\n";
-  stats.incrementInstructionsFolded();
   return true;
 }
 /**
@@ -4678,9 +4524,8 @@ bool ConstantFolding::handleGetOpt(CallInst * ci) {
     return true;
   }
 
-  //custom getopt implementations
-  //if(!ci->getCalledFunction()->isDeclaration())
-  //return false;
+
+   stats.incrementTotalLibCalls();
 
   uint64_t argc;
   Register * argvReg = processInstAndGetRegister(ci->getOperand(1));
@@ -4843,6 +4688,7 @@ bool ConstantFolding::handleGetOpt(CallInst * ci) {
   }
   debug(Yes)<<"Returning from handleGetOpt\n";
   stats.incrementInstructionsFolded();
+  stats.incrementLibCallsFolded();
   return true;
 }
 
@@ -4869,10 +4715,9 @@ LoopUnroller *ConstantFolding::unrollLoop(BasicBlock * BB, BasicBlock *&entry) {
   LoopInfo *LI = &getAnalysis<LoopInfoWrapperPass>(*cloned).getLoopInfo();;
   AssumptionCache *AC = &getAnalysis<AssumptionCacheTracker>(*cloned).getAssumptionCache(*cloned);
   Loop *L = LI->getLoopFor(dyn_cast<BasicBlock>(BB));
-  LoopUnroller *clonedFnUnroller = new LoopUnroller(module, PreserveLCSSA, useAnnotations, L, LI);
+  LoopUnroller *clonedFnUnroller = new LoopUnroller(module, PreserveLCSSA, L, LI);
 
-  if(clonedFnUnroller->runtest(TLI, *AC, regOps,bbOps,fdInfoMap,currBB)){
-    stats.incrementLoopsUnrolled();
+  if(clonedFnUnroller->runtest(TLI, *AC, regOps,bbOps,fdInfoMap,currBB)){    
     return clonedFnUnroller;
   }
   delete clonedFnUnroller;
@@ -4880,7 +4725,6 @@ LoopUnroller *ConstantFolding::unrollLoop(BasicBlock * BB, BasicBlock *&entry) {
 }
 
 Loop *ConstantFolding::isLoopHeader(BasicBlock *BB, LoopInfo &LI) {
-  //debug(Yes)<<"isLoopHeader invoked for BB:"<<*BB<<"\n";
   if(!bbOps.partOfLoop(BB)) {
     return NULL; 
   }
@@ -4903,7 +4747,6 @@ void ConstantFolding::duplicateContext(BasicBlock * to, BasicBlock *from) {
 
 void ConstantFolding::pushFuncStack(Value *val) {
   assert(val);
-  //assert(funcValStack.size());
   if(funcValStack.size())
     funcValStack[funcValStack.size() - 1].insert(val);
 }
@@ -4942,7 +4785,6 @@ Register *ConstantFolding::processInstAndGetRegister(Value *ptr) {
 
 void ConstantFolding::addToWorklistBB(BasicBlock *BB) {
   assert(BB->getParent() == currfn);
-  //if(BB->getParent() != currfn)
   worklistBB[worklistBB.size()-1].push_back(BB);
 }
 
@@ -4950,7 +4792,7 @@ void ConstantFolding::copyWorklistBB(ValueToValueMapTy& vmap, vector<BBList> &wo
   int oldSize = worklistBB.size() - 2;
   for(auto it = worklistBB[oldSize].begin(), end = worklistBB[oldSize].end(); it != end; it++) {
     addToWorklistBB(dyn_cast<BasicBlock>(vmap[*it]));
-    //worklistBB[worklistBB.size() - 1].push_back(dyn_cast<BasicBlock>(vmap[*it]));
+
   }
 }
 
@@ -4974,6 +4816,7 @@ LoopUnroller *ConstantFolding::unrollLoopInClone(Function *currfn, Loop *L, Valu
     return NULL;
   }
 
+  stats.incrementLoopsUnrolled();
   FuncInfo *fi = initializeFuncInfo(cloned);
   addFuncInfo(cloned, fi);
 
@@ -5079,12 +4922,7 @@ void ConstantFolding::markMemNonConst(Type *ty, uint64_t address, BasicBlock *BB
 
   if(fdInfoMap.find(address) != fdInfoMap.end())
     return;
-  //if(!ty->isPointerTy())
-  //return;
-  /*if(!bbOps.checkConstMem(address, DL->getTypeAllocSize(ty), BB)) {
-    debug(Yes) << "Address already non constant: " << address << "\n";
-    return;
-  }*/
+  
 
   debug(Yes) << "marking mem non const in loop at address " << address << " to " << address + DL->getTypeAllocSize(ty)  <<"\n";
   bbOps.setConstContigous(false, address, BB);
@@ -5149,4 +4987,5 @@ void ConstantFolding::markMemNonConst(Type *ty, uint64_t address, BasicBlock *BB
     }
   }
   }
+
 

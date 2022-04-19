@@ -314,7 +314,7 @@ set<SVFGNode*> *AnnotateNew::dfs_rec_limit(SVFGNode* root, std::function<vector<
     debug(Yes)<<"\nRoot is a StmtSVFGNode!\n";
     auto* inst = rootStmt->getInst();
 
-    if(inst == NULL){//Function argument?
+    if(inst == NULL){
       debug(Yes)<<"Roots value is null\n";
     } else {
       debug(Yes)<<"Root's function is "<<inst->getParent()->getParent()->getName()<<"\n";
@@ -661,7 +661,7 @@ void AnnotateNew::getLoopIterators(const BasicBlock *BB, set<const Value *> &tra
   TargetLibraryInfo *TLI = &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI();
 
   set<SVFGNode*> backwardPtr;
-  set<Value *> scalars; //scalars
+  set<Value *> scalars; 
   set<const Value *> slps;
   vector<const SVFGNode *> worklistSvfg;
 
@@ -772,7 +772,6 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
   //capture single level pointers as well as condition to capture output
 
   static set<const Value *> slps;
-  //[Point to add CFG depth condition]
   auto forwardDfsCondition = [&](SVFGNode* node) {
     const Value *inst = NULL;
     if(auto temp = dyn_cast<InterPHISVFGNode>(node)) {
@@ -784,7 +783,6 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
       }
       auto pagNode = pag->getPAGNode(pag->getValueNode(inst));
       auto svfgNode = svfg->getDefSVFGNode(pagNode);
-      //return true;
     } 
     auto casted = dyn_cast<StmtSVFGNode>(node);
     if(casted) {
@@ -817,9 +815,8 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
               if(!call->getOperand(i)->getType()->isPointerTy())
                 continue;
               debug(Yes)<<"Adding to storeSet "<<*call->getOperand(i)<<"\n";
-              auto *pagNode = pag->getPAGNode((pag->getValueNode(call->getOperand(i)))); // [Q] Tracking all pointer operands???
-              storeSvfg.insert((SVFGNode*) svfg->getDefSVFGNode(pagNode)); //[Q] InterProceduralFlow limiting? (Within same function. Is it valid?
-              //If original flow is considered then this should also?
+              auto *pagNode = pag->getPAGNode((pag->getValueNode(call->getOperand(i)))); 
+              storeSvfg.insert((SVFGNode*) svfg->getDefSVFGNode(pagNode)); 
             }
             if(call->getType()->isPointerTy()) {
               auto *pagNode = pag->getPAGNode((pag->getValueNode(call)));
@@ -903,9 +900,8 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
               if(!call->getOperand(i)->getType()->isPointerTy())
                 continue;
               debug(Yes)<<"Adding to storeSet "<<*call->getOperand(i)<<"\n";
-              auto *pagNode = pag->getPAGNode((pag->getValueNode(call->getOperand(i)))); // Tracking all pointer operands
-              storeSvfg.insert((SVFGNode*) svfg->getDefSVFGNode(pagNode)); //[Q] InterProceduralFlow limiting? (Within same function. Is it valid?
-              //If original flow is considered then this should also?
+              auto *pagNode = pag->getPAGNode((pag->getValueNode(call->getOperand(i)))); 
+              storeSvfg.insert((SVFGNode*) svfg->getDefSVFGNode(pagNode)); 
             }
             if(call->getType()->isPointerTy()) {
               auto *pagNode = pag->getPAGNode((pag->getValueNode(call)));
@@ -932,10 +928,6 @@ void AnnotateNew::getMemoryFlow(const SVFGNode *current, set<const Value *> &sin
   };
 
 
-
-
-
-  //go forward 
   set<SVFGNode *> visited;
   set<SVFGNode *> * data;
   if(isLimitedDepth){
@@ -995,7 +987,7 @@ void AnnotateNew::getSourceAllocas(set<SVFGNode*> &svfgNodes, vector<const SVFGN
           if(global || (global = pointsToGlobal(dyn_cast<User>(I->getOperand(i))))) {
             debug(Yes) << "GLOBAL: " << *global << dyn_cast<StmtSVFGNode>(getSvfgNode(global)) << "\n";
             worklistSvfg.push_back(getSvfgNode(global));
-            trackedAllocas.insert(global); // hackish
+            trackedAllocas.insert(global);
           }
         }
 
@@ -1197,105 +1189,6 @@ void AnnotateNew::classifyVal(Value *value, set<SVFGNode*>& backwardPtr, set<con
   }
 }
 
-void AnnotateNew::getBranchMemory(set<BranchInst *> &allBranches, map<Value *, set<Value *> > &dp, set<BranchInst*>& argcBranches) {
-
-  debug(Yes) << "Total Branches = " << allBranches.size() << "\n";
-  int i = 0;
-  for(auto branchInst: allBranches) {
-    if(branchInst->isUnconditional())
-      continue;
-
-    CmpInst *condition = dyn_cast<CmpInst>(branchInst->getCondition());
-    if(!condition)
-      continue;
-
-    //perform dfs backwards on each value of the branch condition
-    bool found = false;
-
-    //argc values are marked by specialize arguments before specializing
-    //check if branch depends on argc
-    debug(Yes) << "Processing branch :" << i << "\n"; 
-    i++;
-
-    set<const Value *> allocs;
-    vector<const SVFGNode*> worklistSvfg;
-    for(int i = 0; i < condition->getNumOperands(); i++) {
-
-      Value *current = condition->getOperand(i);
-
-      //checkeing separately for condition just because it's easier to do so here :/
-      if(dyn_cast<Instruction>(condition)->getMetadata("track_argc")) {
-        argcBranches.insert(branchInst);
-        break;
-      }
-
-      set<Value *> pointers;
-
-      bool isArgcBranch = false;
-
-      //lambda sets is argc branch
-      auto isLoadOrArgc = [&](Value *value) {
-        if(auto inst = dyn_cast<Instruction>(value)) {
-          if(inst->getMetadata("track_argc")) {
-            isArgcBranch = true;
-            return true;
-          }
-        }
-        return isLoad(value);
-      };
-
-
-      if(!current->getType()->isPointerTy()) {
-        set<Value *> visited;
-        set<Value*> *data = dfs_rec(current, genericScalarDfsBackward, isLoadOrArgc, visited, &isLoadOrArgcDp, false);
-        for(auto d: *data)
-          pointers.insert(d);
-      } else if(supportedInst(current)) {
-        pointers.insert(current);
-      }
-      //}
-
-      if(isArgcBranch) {
-        argcBranches.insert(branchInst);
-        found = true;
-        break;
-      }
-      //go back to tap into any possible SVFG node.
-      //Due to mem2reg, we might have direct register values instead of allocas
-      //e.g. if(a == 1) x = 2; else x = 3; Need to handle that
-
-      if(!pointers.size())
-        continue;
-
-      set<SVFGNode*> svfgNodes;
-      //track back to alloca
-      for(auto value: pointers) {
-        const PAGNode* pagNode;
-        //single level loads
-        if(auto load = dyn_cast<LoadInst>(value))
-          if(!value->getType()->isPointerTy())
-            value = load->getPointerOperand();
-
-        pagNode = pag->getPAGNode(pag->getValueNode(value));
-        auto svfgNode = svfg->getDefSVFGNode(pagNode);
-        svfgNodes.insert((SVFGNode*)svfgNode);
-      }
-
-      getSourceAllocas(svfgNodes, worklistSvfg, allocs, false, false);
-    }
-
-    for(auto &a: worklistSvfg)
-      if(auto temp = dyn_cast<StmtSVFGNode>(a)) {
-        if(temp->getInst()) {
-          debug(Yes) << "Inserting branch: " << *temp->getInst() << "\n";
-          allocs.insert((Value*)dyn_cast<StmtSVFGNode>(a)->getInst());
-        }
-      }
-    for(auto &a: allocs) {
-      dp[branchInst].insert((Value*)a);
-    }
-  }
-}
 
 void printAllAllocsMallocs(Module &M) {
   set<Value *> asd;
@@ -1434,16 +1327,9 @@ void AnnotateNew::run(vector<Value*> sources, Value *argc, set<const Value*> &tr
     }
   }
 
-  set<BranchInst*> argcBranches;
-  //getBranchMemory(allBranches, branchDp, argcBranches);
+
   set<BranchInst*> trackedBranches; 
 
-    if(argcBranches.size()) {
-      debug(Yes)<<"HACKY argcBranches executes\n";
-      trackedBranches.insert(argcBranches.begin(), argcBranches.end());
-    }  
-    
-  //getArgc(trackedAllocas, M); 
 
   while(1) {
     while(worklistSvfg.size()) {
@@ -1745,7 +1631,7 @@ bool AnnotateNew::runOnModule(Module &M) {
 
     unsigned totalTracked = statMap.size();
 
-    unsigned global_count = 0;
+
 
     debug(Yes) << "SIZE" << trackedAllocas.size() << "\n";
     debug(Yes) << "Sorted Values" << "\n";
@@ -1762,7 +1648,7 @@ bool AnnotateNew::runOnModule(Module &M) {
         else {
           ((GlobalObject*)I)->setMetadata("track", N);
           debug(Yes)<< "statGlob: "<< *((GlobalObject*)I)<<"\n";
-          global_count++;
+          
         }
       } 
     } else {
@@ -1816,7 +1702,7 @@ bool AnnotateNew::runOnModule(Module &M) {
 
     
     debug(Yes)<<"\n===== Stats =====\n";
-    debug(Yes)<<"# Number of Config Variables being tracked: "<<statValues.size()<<"\n";
+
     debug(Yes)<<"# Tracked number size: "<<totalTracked<<"\n";
     debug(Yes)<<"# Total Nodes in PAG: "<<pag->getPAGNodeNum()<<"\n";
     debug(Yes)<<"# Total StmtNodes (PAGEdge): "<<pag->getPAGEdgeNum()<<"\n";
@@ -1825,7 +1711,7 @@ bool AnnotateNew::runOnModule(Module &M) {
     std::ofstream StatFile;
     StatFile.open("anotStats.JSON");
 
-    StatFile<<"{ \"trackedAllocas\": "<<totalTracked<<" , \"globals\": "<< global_count <<"}\n"; 
+    StatFile<<"{ \"trackedAllocas\": "<<totalTracked <<"}\n"; 
     StatFile.close();
 
     debug(Yes) << "...................................Annotation Pass ended.......................................................................\n";
