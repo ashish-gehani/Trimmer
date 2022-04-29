@@ -55,7 +55,7 @@ def parse_args(args):
 	spec_flag = True
 	strip_flag = True
 	icp_flag = True
-	annot_flag = 1
+	test_flag = 1
 	track_allocas = 1
 	file_specialize = 1
 	string_specialize = 1
@@ -90,7 +90,6 @@ def parse_args(args):
 			string_specialize = 0
 		elif(args[i] == 'no-track-allocas'):
 			track_allocas = 0
-			annot_flag = 0
 		elif(args[i] == 'file-specialize'):
 			file_flag = True
 			file_specialize = 1
@@ -116,7 +115,6 @@ def parse_args(args):
 			contextType = int(args[i+1])
 			if(contextType != 1):
 				track_allocas = 0
-				annot_flag = 0
 		elif(args[i] == 'depthLimit'):
 			isLimitedDepth = True
 			depthLimit = args[i+1]
