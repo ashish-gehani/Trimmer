@@ -55,7 +55,7 @@ def parse_args(args):
 	spec_flag = True
 	strip_flag = True
 	icp_flag = True
-	test_flag = 1
+	annot_flag = 1
 	track_allocas = 1
 	file_specialize = 1
 	string_specialize = 1
