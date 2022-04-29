@@ -380,7 +380,7 @@ void ConstantFolding::runOnFunction(CallInst * ci, Function * toRun) {
       stats.incrementTotalLoops();
 
     assert(current->getParent() == currfn);
-    if((L = isLoopHeader(current, *LI)) && loopUnroll && LoopUnroller::shouldSimplifyLoop(current, *LI, module, useAnnotations)) {
+    if((L = isLoopHeader(current, *LI)) && loopUnroll && LoopUnroller::shouldSimplifyLoop(current, *LI, module, useAnnotations && contextType == 1)) {
       ValueToValueMapTy vmap;
       
       if(auto *unroller= unrollLoopInClone(currfn, L, vmap, funcValStack)) {
@@ -1735,7 +1735,7 @@ ProcResult ConstantFolding::processCallInst(CallInst * callInst) {
     }
 
     stats.incrementFunctionCalls();
-    if((!satisfyConds(calledFunction, callInst)) || calledFunction->getName().str() == "authmethod_is_enabled" || (exceedLimit  && exceedsRecursion(calledFunction, callInst->getParent()->getParent()))) {
+    if((useAnnotations && !satisfyConds(calledFunction, callInst)) || calledFunction->getName().str() == "authmethod_is_enabled" || (exceedLimit  && exceedsRecursion(calledFunction, callInst->getParent()->getParent()))) {
       fSkipped++;
       debug(Yes) << "skipping function : does not satisfy conds\n";
 
