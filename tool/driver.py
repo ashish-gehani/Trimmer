@@ -7,7 +7,7 @@ This file contains the driver for Trimmer. The main Trimmer class in trimmer.py 
 This file contains 4 main functions: run_argspec, which runs the trimmer passes; link_libs, which links to modules mentioned in manifest file (if any);
 run_opts, which runs the LLVM optimization(-O0, -O1, -O2,-O3,etc.) on the final bitcode file and lastly, create_exe, which creates final binary executable
 from the final bitcode file using llc and clang++.
-It contains 3 minor functions such as printDbgMsg to print messages on screen, disassemble to disassemble intermediate bitcode files using llvm-dis and kill
+It contains 2 minor functions such as disassemble to disassemble intermediate bitcode files using llvm-dis and kill
 to kill the process if it exceeds 6 hours.
 
 
