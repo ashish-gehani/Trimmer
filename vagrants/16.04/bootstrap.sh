@@ -10,8 +10,6 @@ sudo apt-get install -y build-essential cmake git gettext gnutls-dev groff-base 
 
 # Download Trimmer
 export TRIMMER_HOME=$HOME/Trimmer
-export USER=
-export TOKEN=
 cd `dirname $TRIMMER_HOME`
 
 if  test -n "$IN_VAGRANT"; then
