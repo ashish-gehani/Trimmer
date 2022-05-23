@@ -71,7 +71,7 @@ Description of manifest file
 
 -   **main** : a path to the bitcode module containing the main entry point
 -   **modules** : a list of paths to the other bitcode modules needed. Note that these modules will not be used for specialization since **Trimmer** does not support inter-module specialization (i.e. it operates only on a single bitcode file)
--   **binary** : the name of the desired executable
+-   **binary** : the name of the desired executable. This is used as the first argument of argv.
 -   **native libs** : a list of flags (-lm, -lc, -lpthread) or paths to native objects (.o, .a, .so)
 -   **ldflags** : a list of linker flags such as --static, --nostdlib
 -   **args** : the list of arguments you wish to specialize in the main() function. Dynamic arguments are denoted by "_"
