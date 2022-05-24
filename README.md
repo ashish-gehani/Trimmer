@@ -5,7 +5,9 @@ Introduction
 ------------
 **Trimmer** is a software debloating system that automatically specializes programs given only high-level user specifications. **Trimmer** provides (i) a simple mechanism for providing specialization specifications using a manifest file and (ii) effective specialization in reasonable analysis times, achieved by limiting context-sensitive transformations using the specified configuration parameters in the manifest file.
 
-Further details can be found in our journal publication: https://ieeexplore.ieee.org/document/9478582
+Further details can be found in:
+
+* **Trimmer: An Automated System For Configuration-Based Software Debloating**, _IEEE Transactions on Software Engineering (TSE)_, 2021. [[PDF]](http://www.csl.sri.com/users/gehani/papers/TSE-2021.Trimmer.pdf)
 
 Build
 -----
