@@ -79,19 +79,19 @@ Description of manifest file
 -   **args** : the list of arguments you wish to specialize in the main() function. Dynamic arguments are denoted by "_"
 -   **config_files** : the list of application-specific configuration files
 
-The manifest file for `aircrack-ng` (which is one of the examples provided in the [TSE-2020 benchmarks](/benchmarks/examples/TSE-2020)) is shown below:
+The manifest file for `wget` (which is one of the examples provided in the [TSE-2020 benchmarks](/benchmarks/examples/TSE-2020)) is shown below:
  
 ``` 
 {
-   "binary": "aircrack-ng_fin", 
-   "native_libs": [], 
-   "name": "aircrack-ng", 
-   "args": ["-b", "_","-a","wpa","-s","-w","password.lst","_"], 
-   "modules": [], 
-   "ldflags": ["-lssl","-lcrypto","-lpthread","sha1-sse2.S"], 
-   "main": "aircrack-ng.bc", 
-   "config_files": []
- }
+    "main": "wget.bc", 
+    "binary": "wget_fin", 
+    "modules": [], 
+    "native_libs":[],
+    "ldflags": ["-luuid","-lgnutls","-lpcre", "-lnettle", "-lidn", "-lz", "-lpthread"], 
+    "name": "wget", 
+    "args": ["--config=wgetrc","_" ], 
+    "config_files": ["wgetrc"]
+}
  ```
 
 Examples
