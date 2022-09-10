@@ -123,7 +123,7 @@ def parse_args(args):
 			trackedPercent = args[i+1]
 		elif(args[i] == "useGlob"):
 			useGlob = True
-		elif(args[i] == "exceedLimit"):
+		elif(args[i] == "restrictLimit"):
 			exceedLimit = args[i+1]
 		elif(args[i] == "useRegOffset"):
 			useRegOffset = True
