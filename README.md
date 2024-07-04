@@ -7,7 +7,7 @@ Introduction
 
 Further details can be found in:
 
-* **Trimmer: An Automated System For Configuration-Based Software Debloating**, _IEEE Transactions on Software Engineering (TSE)_, 2021. [[PDF]](http://www.csl.sri.com/users/gehani/papers/TSE-2021.Trimmer.pdf)
+* **Trimmer: An Automated System For Configuration-Based Software Debloating**, _IEEE Transactions on Software Engineering (TSE)_, 2022. [[PDF]](http://www.csl.sri.com/users/gehani/papers/TSE-2022.Trimmer.pdf)
 * **Trimmer: Context-Specific Code Reduction**, _37th IEEE/ACM Conference on Automated Software Engineering (ASE)_, 2022. [[PDF]](http://www.csl.sri.com/users/gehani/papers/ASE-2022.Trimmer.pdf)
 
 Build
